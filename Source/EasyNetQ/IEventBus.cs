@@ -1,106 +1,130 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using EasyNetQ.Logging;
 
-namespace EasyNetQ
+namespace EasyNetQ;
+
+/// <inheritdoc />
+public delegate void TEventHandler<TEvent>(in TEvent @event) where TEvent : struct;
+
+/// <summary>
+///     An internal pub-sub bus to distribute events within EasyNetQ
+/// </summary>
+public interface IEventBus
 {
     /// <summary>
-    ///     An internal pub-sub bus to distribute events within EasyNetQ
+    ///     Publishes the event
     /// </summary>
-    public interface IEventBus
-    {
-        /// <summary>
-        ///     Publishes the event
-        /// </summary>
-        /// <param name="event">The event</param>
-        /// <typeparam name="TEvent">The event type</typeparam>
-        void Publish<TEvent>(TEvent @event);
+    /// <param name="event">The event</param>
+    /// <typeparam name="TEvent">The event type</typeparam>
+    void Publish<TEvent>(in TEvent @event) where TEvent : struct;
 
-        /// <summary>
-        ///     Subscribes to the event type
-        /// </summary>
-        /// <param name="handler">The event handler</param>
-        /// <typeparam name="TEvent">The event type</typeparam>
-        /// <returns>Unsubscription disposable</returns>
-        IDisposable Subscribe<TEvent>(Action<TEvent> handler);
+    /// <summary>
+    ///     Subscribes to the event type
+    /// </summary>
+    /// <param name="eventHandler">The event handler</param>
+    /// <typeparam name="TEvent">The event type</typeparam>
+    /// <returns>Disposable to unsubscribe</returns>
+    IDisposable Subscribe<TEvent>(TEventHandler<TEvent> eventHandler) where TEvent : struct;
+}
+
+/// <inheritdoc />
+public sealed class EventBus : IEventBus
+{
+    private readonly ILogger<EventBus> logger;
+    private readonly ConcurrentDictionary<Type, object> subscriptions = new();
+    private readonly object subscriptionLock = new();
+
+    public EventBus(ILogger<EventBus> logger)
+    {
+        this.logger = logger;
     }
 
     /// <inheritdoc />
-    public sealed class EventBus : IEventBus
+    public void Publish<TEvent>(in TEvent @event) where TEvent : struct
     {
-        private readonly ConcurrentDictionary<Type, object> subscriptions = new ConcurrentDictionary<Type, object>();
+        if (!subscriptions.TryGetValue(typeof(TEvent), out var handlers))
+            return;
 
-        /// <inheritdoc />
-        public void Publish<TEvent>(TEvent @event)
+        ((Handlers<TEvent>)handlers).Handle(@event);
+    }
+
+    /// <inheritdoc />
+    public IDisposable Subscribe<TEvent>(TEventHandler<TEvent> eventHandler) where TEvent : struct
+    {
+        if (!subscriptions.TryGetValue(typeof(TEvent), out var handlers))
         {
-            if (!subscriptions.TryGetValue(typeof(TEvent), out var handlers))
-                return;
-
-            ((Handlers<TEvent>) handlers).Handle(@event);
-        }
-
-        /// <inheritdoc />
-        public IDisposable Subscribe<TEvent>(Action<TEvent> handler)
-        {
-            var handlers = (Handlers<TEvent>)subscriptions.GetOrAdd(typeof(TEvent), _ => new Handlers<TEvent>());
-            handlers.Add(handler);
-            return new Subscription<TEvent>(handlers, handler);
-        }
-
-        private sealed class Handlers<TEvent>
-        {
-            private readonly ILog log = LogProvider.For<Handlers<TEvent>>();
-            private readonly object mutex = new object();
-            private volatile List<Action<TEvent>> handlers = new List<Action<TEvent>>();
-
-            public void Add(Action<TEvent> handler)
+            lock (subscriptionLock)
             {
-                lock (mutex)
+                if (!subscriptions.TryGetValue(typeof(TEvent), out handlers))
                 {
-                    var newHandlers = new List<Action<TEvent>>(handlers);
-                    newHandlers.Add(handler);
-                    handlers = newHandlers;
+                    handlers = subscriptions[typeof(TEvent)] = new Handlers<TEvent>(logger);
                 }
             }
-
-            public void Remove(Action<TEvent> handler)
-            {
-                lock (mutex)
-                {
-                    var newHandlers = new List<Action<TEvent>>(handlers);
-                    newHandlers.Remove(handler);
-                    handlers = newHandlers;
-                }
-            }
-
-            public void Handle(TEvent @event)
-            {
-                // ReSharper disable once InconsistentlySynchronizedField
-                foreach (var handler in handlers)
-                    try
-                    {
-                        handler(@event);
-                    }
-                    catch (Exception exception)
-                    {
-                        log.ErrorException("Failed to handle {event}", exception, @event);
-                    }
-            }
         }
+        var typedHandlers = (Handlers<TEvent>)handlers;
+        typedHandlers.Add(eventHandler);
+        return new Subscription<TEvent>(typedHandlers, eventHandler);
+    }
 
-        private sealed class Subscription<TEvent> : IDisposable
+    private sealed class Handlers<TEvent> where TEvent : struct
+    {
+        private readonly ILogger logger;
+        private readonly object mutex = new();
+        private volatile List<TEventHandler<TEvent>> handlers = new();
+
+        public Handlers(ILogger logger)
         {
-            private readonly Handlers<TEvent> handlers;
-            private readonly Action<TEvent> handler;
-
-            public Subscription(Handlers<TEvent> handlers, Action<TEvent> handler)
-            {
-                this.handlers = handlers;
-                this.handler = handler;
-            }
-
-            public void Dispose() => handlers.Remove(handler);
+            this.logger = logger;
         }
+
+        public void Add(TEventHandler<TEvent> eventHandler)
+        {
+            lock (mutex)
+            {
+                var newHandlers = new List<TEventHandler<TEvent>>(handlers);
+                newHandlers.Add(eventHandler);
+                handlers = newHandlers;
+            }
+        }
+
+        public void Remove(TEventHandler<TEvent> eventHandler)
+        {
+            lock (mutex)
+            {
+                var newHandlers = new List<TEventHandler<TEvent>>(handlers);
+                newHandlers.Remove(eventHandler);
+                handlers = newHandlers;
+            }
+        }
+
+        public void Handle(in TEvent @event)
+        {
+            // ReSharper disable once InconsistentlySynchronizedField
+            foreach (var handler in handlers)
+                try
+                {
+                    handler(in @event);
+                }
+                catch (Exception exception)
+                {
+                    logger.ErrorException("Failed to handle {event}", exception, @event);
+                }
+        }
+    }
+
+    private sealed class Subscription<TEvent> : IDisposable where TEvent : struct
+    {
+        private readonly Handlers<TEvent> handlers;
+        private readonly TEventHandler<TEvent> eventHandler;
+
+        public Subscription(Handlers<TEvent> handlers, TEventHandler<TEvent> eventHandler)
+        {
+            this.handlers = handlers;
+            this.eventHandler = eventHandler;
+        }
+
+        public void Dispose() => handlers.Remove(eventHandler);
     }
 }

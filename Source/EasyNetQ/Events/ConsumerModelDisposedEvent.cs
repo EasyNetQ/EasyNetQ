@@ -1,12 +1,13 @@
-﻿namespace EasyNetQ.Events
-{
-    public class ConsumerModelDisposedEvent
-    {
-        public string ConsumerTag { get; }
+using System.Collections.Generic;
 
-        public ConsumerModelDisposedEvent(string consumerTag)
-        {
-            ConsumerTag = consumerTag;
-        }
+namespace EasyNetQ.Events;
+
+public readonly struct ConsumerModelDisposedEvent
+{
+    public IReadOnlyCollection<string> ConsumerTags { get; }
+
+    public ConsumerModelDisposedEvent(string[] consumerTags)
+    {
+        ConsumerTags = consumerTags;
     }
 }

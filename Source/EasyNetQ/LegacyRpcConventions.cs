@@ -1,13 +1,12 @@
-﻿using EasyNetQ.Topology;
+using EasyNetQ.Topology;
 
-namespace EasyNetQ
+namespace EasyNetQ;
+
+public class LegacyRpcConventions : Conventions
 {
-    public class LegacyRpcConventions : Conventions
+    public LegacyRpcConventions(ITypeNameSerializer typeNameSerializer)
+        : base(typeNameSerializer)
     {
-        public LegacyRpcConventions(ITypeNameSerializer typeNameSerializer)
-            : base(typeNameSerializer)
-        {
-            RpcResponseExchangeNamingConvention = type => Exchange.GetDefault().Name;
-        }
+        RpcResponseExchangeNamingConvention = _ => Exchange.Default.Name;
     }
 }

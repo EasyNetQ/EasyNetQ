@@ -1,22 +1,20 @@
-﻿using System;
+using System;
 
-namespace EasyNetQ
+namespace EasyNetQ;
+
+public class MessageReturnedEventArgs : EventArgs
 {
-    public class MessageReturnedEventArgs : EventArgs
+    public ReadOnlyMemory<byte> MessageBody { get; }
+    public MessageProperties MessageProperties { get; }
+    public MessageReturnedInfo MessageReturnedInfo { get; }
+
+    public MessageReturnedEventArgs(in ReadOnlyMemory<byte> messageBody, MessageProperties messageProperties, in MessageReturnedInfo messageReturnedInfo)
     {
-        public byte[] MessageBody { get; }
-        public MessageProperties MessageProperties { get; }
-        public MessageReturnedInfo MessageReturnedInfo { get; }
+        Preconditions.CheckNotNull(messageProperties, nameof(messageProperties));
+        Preconditions.CheckNotNull(messageReturnedInfo, nameof(messageReturnedInfo));
 
-        public MessageReturnedEventArgs(byte[] messageBody, MessageProperties messageProperties, MessageReturnedInfo messageReturnedInfo)
-        {
-            Preconditions.CheckNotNull(messageBody, "messageBody");
-            Preconditions.CheckNotNull(messageProperties, "messageProperties");
-            Preconditions.CheckNotNull(messageReturnedInfo, "messageReturnedInfo");
-
-            MessageBody = messageBody;
-            MessageProperties = messageProperties;
-            MessageReturnedInfo = messageReturnedInfo;
-        }
+        MessageBody = messageBody;
+        MessageProperties = messageProperties;
+        MessageReturnedInfo = messageReturnedInfo;
     }
 }

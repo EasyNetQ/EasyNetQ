@@ -1,59 +1,56 @@
-﻿using System;
+using System;
+using EasyNetQ.Logging;
 
-namespace EasyNetQ.Consumer
+namespace EasyNetQ.Consumer;
+
+/// <inheritdoc />
+public interface IInternalConsumerFactory : IDisposable
 {
-    public interface IInternalConsumerFactory : IDisposable
+    /// <summary>
+    ///     Creates a consumer based on the configuration 
+    /// </summary>
+    /// <param name="configuration"></param>
+    /// <returns></returns>
+    IInternalConsumer CreateConsumer(ConsumerConfiguration configuration);
+}
+
+/// <inheritdoc />
+public class InternalConsumerFactory : IInternalConsumerFactory
+{
+    private readonly ILogger<InternalConsumer> logger;
+    private readonly IConsumerConnection connection;
+    private readonly IEventBus eventBus;
+    private readonly IHandlerRunner handlerRunner;
+
+    /// <summary>
+    ///     Creates InternalConsumerFactory
+    /// </summary>
+    public InternalConsumerFactory(
+        ILogger<InternalConsumer> logger,
+        IConsumerConnection connection,
+        IHandlerRunner handlerRunner,
+        IEventBus eventBus
+    )
     {
-        IInternalConsumer CreateConsumer();
-        void OnDisconnected();
+        Preconditions.CheckNotNull(logger, nameof(logger));
+        Preconditions.CheckNotNull(connection, nameof(connection));
+        Preconditions.CheckNotNull(handlerRunner, nameof(handlerRunner));
+        Preconditions.CheckNotNull(eventBus, nameof(eventBus));
+
+        this.logger = logger;
+        this.connection = connection;
+        this.handlerRunner = handlerRunner;
+        this.eventBus = eventBus;
     }
 
     /// <inheritdoc />
-    public class InternalConsumerFactory : IInternalConsumerFactory
+    public IInternalConsumer CreateConsumer(ConsumerConfiguration configuration)
     {
-        private readonly IPersistentConnection connection;
-        private readonly IConsumerDispatcherFactory consumerDispatcherFactory;
-        private readonly IConventions conventions;
-        private readonly IEventBus eventBus;
-        private readonly IHandlerRunner handlerRunner;
+        return new InternalConsumer(logger, configuration, connection, handlerRunner, eventBus);
+    }
 
-        public InternalConsumerFactory(
-            IPersistentConnection connection,
-            IHandlerRunner handlerRunner,
-            IConventions conventions,
-            IConsumerDispatcherFactory consumerDispatcherFactory,
-            IEventBus eventBus)
-        {
-            Preconditions.CheckNotNull(connection, "connection");
-            Preconditions.CheckNotNull(handlerRunner, "handlerRunner");
-            Preconditions.CheckNotNull(conventions, "conventions");
-            Preconditions.CheckNotNull(consumerDispatcherFactory, "consumerDispatcherFactory");
-
-            this.connection = connection;
-            this.handlerRunner = handlerRunner;
-            this.conventions = conventions;
-            this.consumerDispatcherFactory = consumerDispatcherFactory;
-            this.eventBus = eventBus;
-        }
-
-        /// <inheritdoc />
-        public IInternalConsumer CreateConsumer()
-        {
-            var dispatcher = consumerDispatcherFactory.GetConsumerDispatcher();
-            return new InternalConsumer(connection, handlerRunner, dispatcher, conventions, eventBus);
-        }
-
-        /// <inheritdoc />
-        public void OnDisconnected()
-        {
-            consumerDispatcherFactory.OnDisconnected();
-        }
-
-        /// <inheritdoc />
-        public void Dispose()
-        {
-            consumerDispatcherFactory.Dispose();
-            handlerRunner.Dispose();
-        }
+    /// <inheritdoc />
+    public void Dispose()
+    {
     }
 }

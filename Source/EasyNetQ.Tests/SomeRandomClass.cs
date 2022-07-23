@@ -1,6 +1,5 @@
-namespace EasyNetQ.Tests
+namespace EasyNetQ.Tests;
+
+public class SomeRandomClass
 {
-    public class SomeRandomClass
-    {
-    }
 }

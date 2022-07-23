@@ -1,57 +1,72 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using EasyNetQ.Consumer;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 
-namespace EasyNetQ.Hosepipe
+namespace EasyNetQ.Hosepipe;
+
+public interface IQueueRetrieval
 {
-    public interface IQueueRetrieval
+    IEnumerable<HosepipeMessage> GetMessagesFromQueue(QueueParameters parameters);
+}
+
+public class QueueRetrieval : IQueueRetrieval
+{
+    private readonly IErrorMessageSerializer errorMessageSerializer;
+
+    public QueueRetrieval(IErrorMessageSerializer errorMessageSerializer)
     {
-        IEnumerable<HosepipeMessage> GetMessagesFromQueue(QueueParameters parameters);
+        this.errorMessageSerializer = errorMessageSerializer;
     }
 
-    public class QueueRetrieval : IQueueRetrieval
+    public IEnumerable<HosepipeMessage> GetMessagesFromQueue(QueueParameters parameters)
     {
-        private readonly IErrorMessageSerializer errorMessageSerializer;
+        using var connection = HosepipeConnection.FromParameters(parameters);
+        using var channel = connection.CreateModel();
 
-        public QueueRetrieval(IErrorMessageSerializer errorMessageSerializer)
+        try
         {
-            this.errorMessageSerializer = errorMessageSerializer;
+            channel.QueueDeclarePassive(parameters.QueueName);
+        }
+        catch (OperationInterruptedException exception)
+        {
+            Console.WriteLine(exception.Message);
+            yield break;
         }
 
-        public IEnumerable<HosepipeMessage> GetMessagesFromQueue(QueueParameters parameters)
+        var count = 0;
+        while (count++ < parameters.NumberOfMessagesToRetrieve)
         {
-            using var connection = HosepipeConnection.FromParameters(parameters);
-            using var channel = connection.CreateModel();
-
+            BasicGetResult basicGetResult;
             try
             {
-                channel.QueueDeclarePassive(parameters.QueueName);
-            }
-            catch (OperationInterruptedException exception)
-            {
-                Console.WriteLine(exception.Message);
-                yield break;
-            }
-
-            var count = 0;
-            while (count++ < parameters.NumberOfMessagesToRetrieve)
-            {
-                var basicGetResult = channel.BasicGet(parameters.QueueName, parameters.Purge);
+                basicGetResult = channel.BasicGet(parameters.QueueName, false);
                 if (basicGetResult == null) break; // no more messages on the queue
 
-                var properties = new MessageProperties(basicGetResult.BasicProperties);
-                var info = new MessageReceivedInfo(
-                    "hosepipe",
-                    basicGetResult.DeliveryTag,
-                    basicGetResult.Redelivered,
-                    basicGetResult.Exchange,
-                    basicGetResult.RoutingKey,
-                    parameters.QueueName
-                );
-
-                yield return new HosepipeMessage(errorMessageSerializer.Serialize(basicGetResult.Body.ToArray()), properties, info);
+                if (parameters.Purge)
+                {
+                    channel.BasicAck(basicGetResult.DeliveryTag, false);
+                }
             }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception.Message);
+                throw;
+            }
+
+            var properties = new MessageProperties();
+            properties.CopyFrom(basicGetResult.BasicProperties);
+            var info = new MessageReceivedInfo(
+                "hosepipe",
+                basicGetResult.DeliveryTag,
+                basicGetResult.Redelivered,
+                basicGetResult.Exchange,
+                basicGetResult.RoutingKey,
+                parameters.QueueName
+            );
+
+            yield return new HosepipeMessage(errorMessageSerializer.Serialize(basicGetResult.Body.ToArray()), properties, info);
         }
     }
 }

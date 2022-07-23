@@ -1,224 +1,199 @@
 using System;
 using System.Collections.Generic;
-#if NETFX
-using System.Configuration;
-#endif
 using EasyNetQ.ConnectionString;
 using EasyNetQ.DI;
+using EasyNetQ.LightInject;
 
-namespace EasyNetQ
+namespace EasyNetQ;
+
+/// <summary>
+/// Static methods to create EasyNetQ core APIs.
+/// </summary>
+public static class RabbitHutch
 {
     /// <summary>
-    /// Static methods to create EasyNetQ core APIs.
+    /// Creates a new instance of <see cref="RabbitBus"/>.
     /// </summary>
-    public static class RabbitHutch
+    /// <param name="connectionString">
+    /// The EasyNetQ connection string. Example:
+    /// host=192.168.1.1;port=5672;virtualHost=MyVirtualHost;username=MyUsername;password=MyPassword;requestedHeartbeat=10
+    ///
+    /// The following default values will be used if not specified:
+    /// host=localhost;port=5672;virtualHost=/;username=guest;password=guest;requestedHeartbeat=10
+    /// </param>
+    /// <returns>
+    /// A new <see cref="RabbitBus"/> instance.
+    /// </returns>
+    public static IBus CreateBus(string connectionString)
     {
-#if NETFX
-        /// <summary>
-        /// Creates a new instance of <see cref="RabbitBus"/>.
-        /// The RabbitMQ broker is defined in the connection string named 'rabbit'.
-        /// </summary>
-        /// <param name="registerServices">
-        /// Override default services. For example, to override the default <see cref="ISerializer"/>:
-        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{ISerializer}(mySerializer));
-        /// </param>
-        /// <returns>
-        /// A new <see cref="RabbitBus"/> instance.
-        /// </returns>
-        public static IBus CreateBus(Action<IServiceRegister> registerServices)
+        return CreateBus(connectionString, _ => { });
+    }
+
+    /// <summary>
+    /// Creates a new instance of <see cref="RabbitBus"/>.
+    /// </summary>
+    /// <param name="connectionString">
+    /// The EasyNetQ connection string. Example:
+    /// host=192.168.1.1;port=5672;virtualHost=MyVirtualHost;username=MyUsername;password=MyPassword;requestedHeartbeat=10
+    ///
+    /// The following default values will be used if not specified:
+    /// host=localhost;port=5672;virtualHost=/;username=guest;password=guest;requestedHeartbeat=10
+    /// </param>
+    /// <param name="registerServices">
+    /// Override default services. For example, to override the default <see cref="ISerializer"/>:
+    /// RabbitHutch.CreateBus("host=localhost", x => x.Register{ISerializer}(mySerializer));
+    /// </param>
+    /// <returns>
+    /// A new <see cref="RabbitBus"/> instance.
+    /// </returns>
+    public static IBus CreateBus(string connectionString, Action<IServiceRegister> registerServices)
+    {
+        Preconditions.CheckNotNull(connectionString, nameof(connectionString));
+
+        return CreateBus(x => x.Resolve<IConnectionStringParser>().Parse(connectionString), registerServices);
+    }
+
+    /// <summary>
+    /// Creates a new instance of <see cref="RabbitBus"/>.
+    /// </summary>
+    /// <param name="hostName">
+    /// The RabbitMQ broker.
+    /// </param>
+    /// <param name="hostPort">
+    /// The RabbitMQ broker port.
+    /// </param>
+    /// <param name="virtualHost">
+    /// The RabbitMQ virtualHost.
+    /// </param>
+    /// <param name="username">
+    /// The username to use to connect to the RabbitMQ broker.
+    /// </param>
+    /// <param name="password">
+    /// The password to use to connect to the RabbitMQ broker.
+    /// </param>
+    /// <param name="requestedHeartbeat">
+    /// The initially requested heartbeat interval
+    /// </param>
+    /// <param name="registerServices">
+    /// Override default services. For example, to override the default <see cref="ISerializer"/>:
+    /// RabbitHutch.CreateBus("host=localhost", x => x.Register{ISerializer}(mySerializer));
+    /// </param>
+    /// <returns>
+    /// A new <see cref="RabbitBus"/> instance.
+    /// </returns>
+    public static IBus CreateBus(
+        string hostName,
+        ushort hostPort,
+        string virtualHost,
+        string username,
+        string password,
+        TimeSpan requestedHeartbeat,
+        Action<IServiceRegister> registerServices)
+    {
+        Preconditions.CheckNotNull(hostName, nameof(hostName));
+        Preconditions.CheckNotNull(virtualHost, nameof(virtualHost));
+        Preconditions.CheckNotNull(username, nameof(username));
+        Preconditions.CheckNotNull(password, nameof(password));
+
+        var connectionConfiguration = new ConnectionConfiguration
         {
-            var rabbitConnection = ConfigurationManager.ConnectionStrings["rabbit"];
-            if (rabbitConnection == null)
+            Hosts = new List<HostConfiguration>
             {
-                throw new EasyNetQException(
-                    "Could not find a connection string for RabbitMQ. " +
-                    "Please add a connection string in the <ConnectionStrings> section" +
-                    "of the application's configuration file. For example: " +
-                    "<add name=\"rabbit\" connectionString=\"host=localhost\" />");
-            }
-            var rabbitConnectionString = rabbitConnection.ConnectionString;
-            return CreateBus(rabbitConnectionString, registerServices);
-        }
+                new() { Host = hostName, Port = hostPort }
+            },
+            Port = hostPort,
+            VirtualHost = virtualHost,
+            UserName = username,
+            Password = password,
+            RequestedHeartbeat = requestedHeartbeat
+        };
+        return CreateBus(connectionConfiguration, registerServices);
+    }
 
-        /// <summary>
-        /// Creates a new instance of <see cref="RabbitBus"/>.
-        /// The RabbitMQ broker is defined in the connection string named 'rabbit'.
-        /// </summary>
-        /// <returns>
-        /// A new <see cref="RabbitBus"/> instance.
-        /// </returns>
-        public static IBus CreateBus()
+    /// <summary>
+    /// Creates a new instance of <see cref="RabbitBus"/>.
+    /// </summary>
+    /// <param name="connectionConfiguration">
+    /// An <see cref="ConnectionConfiguration"/> instance.
+    /// </param>
+    /// <param name="registerServices">
+    /// Override default services. For example, to override the default <see cref="ISerializer"/>:
+    /// RabbitHutch.CreateBus("host=localhost", x => x.Register{ISerializer}(mySerializer));
+    /// </param>
+    /// <returns>
+    /// A new <see cref="RabbitBus"/> instance.
+    /// </returns>
+    public static IBus CreateBus(ConnectionConfiguration connectionConfiguration, Action<IServiceRegister> registerServices)
+    {
+        Preconditions.CheckNotNull(connectionConfiguration, nameof(connectionConfiguration));
+
+        return CreateBus(_ => connectionConfiguration, registerServices);
+    }
+
+    /// <summary>
+    /// Creates a new instance of <see cref="RabbitBus"/>.
+    /// </summary>
+    /// <param name="connectionConfigurationFactory">
+    /// A factory of <see cref="ConnectionConfiguration"/> instance.
+    /// </param>
+    /// <param name="registerServices">
+    /// Override default services. For example, to override the default <see cref="ISerializer"/>:
+    /// RabbitHutch.CreateBus("host=localhost", x => x.Register{ISerializer}(mySerializer));
+    /// </param>
+    /// <returns>
+    /// A new <see cref="RabbitBus"/> instance.
+    /// </returns>
+    public static IBus CreateBus(Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices)
+    {
+        var container = new ServiceContainer(c => c.EnablePropertyInjection = false);
+        var adapter = new LightInjectAdapter(container);
+        RegisterBus(adapter, connectionConfigurationFactory, registerServices);
+        return new BusWithCustomDisposer(container.GetInstance<IBus>(), container.Dispose);
+    }
+
+    /// <summary>
+    /// Registers components of a <see cref="RabbitBus"/>.
+    /// </summary>
+    /// <param name="serviceRegister"/>
+    /// <param name="connectionConfigurationFactory">
+    /// A factory of <see cref="ConnectionConfiguration"/> instance.
+    /// </param>
+    /// <param name="registerServices">
+    /// Override default services. For example, to override the default <see cref="ISerializer"/>:
+    /// RabbitHutch.CreateBus("host=localhost", x => x.Register{ISerializer}(mySerializer));
+    /// </param>
+    public static void RegisterBus(IServiceRegister serviceRegister,
+        Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory,
+        Action<IServiceRegister> registerServices)
+    {
+        Preconditions.CheckNotNull(serviceRegister, nameof(serviceRegister));
+        Preconditions.CheckNotNull(connectionConfigurationFactory, nameof(connectionConfigurationFactory));
+        Preconditions.CheckNotNull(registerServices, nameof(registerServices));
+
+        // first call delegate to register user-supplied services
+        registerServices(serviceRegister);
+
+        // then register default services
+        serviceRegister.RegisterDefaultServices(connectionConfigurationFactory);
+    }
+
+    private sealed class BusWithCustomDisposer : IBus
+    {
+        private readonly IBus bus;
+        private readonly Action disposer;
+
+        public BusWithCustomDisposer(IBus bus, Action disposer)
         {
-            return CreateBus(c => { });
-        }
-#endif
-        /// <summary>
-        /// Creates a new instance of <see cref="RabbitBus"/>.
-        /// </summary>
-        /// <param name="connectionString">
-        /// The EasyNetQ connection string. Example:
-        /// host=192.168.1.1;port=5672;virtualHost=MyVirtualHost;username=MyUsername;password=MyPassword;requestedHeartbeat=10
-        ///
-        /// The following default values will be used if not specified:
-        /// host=localhost;port=5672;virtualHost=/;username=guest;password=guest;requestedHeartbeat=10
-        /// </param>
-        /// <returns>
-        /// A new <see cref="RabbitBus"/> instance.
-        /// </returns>
-        public static IBus CreateBus(string connectionString)
-        {
-            return CreateBus(connectionString, x => { });
+            this.bus = bus;
+            this.disposer = disposer;
         }
 
-        /// <summary>
-        /// Creates a new instance of <see cref="RabbitBus"/>.
-        /// </summary>
-        /// <param name="connectionString">
-        /// The EasyNetQ connection string. Example:
-        /// host=192.168.1.1;port=5672;virtualHost=MyVirtualHost;username=MyUsername;password=MyPassword;requestedHeartbeat=10
-        ///
-        /// The following default values will be used if not specified:
-        /// host=localhost;port=5672;virtualHost=/;username=guest;password=guest;requestedHeartbeat=10
-        /// </param>
-        /// <param name="registerServices">
-        /// Override default services. For example, to override the default <see cref="ISerializer"/>:
-        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{ISerializer}(mySerializer));
-        /// </param>
-        /// <returns>
-        /// A new <see cref="RabbitBus"/> instance.
-        /// </returns>
-        public static IBus CreateBus(string connectionString, Action<IServiceRegister> registerServices)
-        {
-            Preconditions.CheckNotNull(connectionString, "connectionString");
+        public void Dispose() => disposer();
 
-            return CreateBus(x => x.Resolve<IConnectionStringParser>().Parse(connectionString), registerServices);
-        }
-
-        /// <summary>
-        /// Creates a new instance of <see cref="RabbitBus"/>.
-        /// </summary>
-        /// <param name="hostName">
-        /// The RabbitMQ broker.
-        /// </param>
-        /// <param name="hostPort">
-        /// The RabbitMQ broker port.
-        /// </param>
-        /// <param name="virtualHost">
-        /// The RabbitMQ virtualHost.
-        /// </param>
-        /// <param name="username">
-        /// The username to use to connect to the RabbitMQ broker.
-        /// </param>
-        /// <param name="password">
-        /// The password to use to connect to the RabbitMQ broker.
-        /// </param>
-        /// <param name="requestedHeartbeat">
-        /// The initially requested heartbeat interval
-        /// </param>
-        /// <param name="registerServices">
-        /// Override default services. For example, to override the default <see cref="ISerializer"/>:
-        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{ISerializer}(mySerializer));
-        /// </param>
-        /// <returns>
-        /// A new <see cref="RabbitBus"/> instance.
-        /// </returns>
-        public static IBus CreateBus(
-            string hostName,
-            ushort hostPort,
-            string virtualHost,
-            string username,
-            string password,
-            TimeSpan requestedHeartbeat,
-            Action<IServiceRegister> registerServices)
-        {
-            Preconditions.CheckNotNull(hostName, "hostName");
-            Preconditions.CheckNotNull(virtualHost, "virtualHost");
-            Preconditions.CheckNotNull(username, "username");
-            Preconditions.CheckNotNull(password, "password");
-
-            var connectionConfiguration = new ConnectionConfiguration
-            {
-                Hosts = new List<HostConfiguration>
-                    {
-                        new HostConfiguration { Host = hostName, Port = hostPort }
-                    },
-                Port = hostPort,
-                VirtualHost = virtualHost,
-                UserName = username,
-                Password = password,
-                RequestedHeartbeat = requestedHeartbeat
-            };
-            return CreateBus(connectionConfiguration, registerServices);
-        }
-
-        /// <summary>
-        /// Creates a new instance of <see cref="RabbitBus"/>.
-        /// </summary>
-        /// <param name="connectionConfiguration">
-        /// An <see cref="ConnectionConfiguration"/> instance.
-        /// </param>
-        /// <param name="registerServices">
-        /// Override default services. For example, to override the default <see cref="ISerializer"/>:
-        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{ISerializer}(mySerializer));
-        /// </param>
-        /// <returns>
-        /// A new <see cref="RabbitBus"/> instance.
-        /// </returns>
-        public static IBus CreateBus(ConnectionConfiguration connectionConfiguration, Action<IServiceRegister> registerServices)
-        {
-            Preconditions.CheckNotNull(connectionConfiguration, "connectionConfiguration");
-
-            return CreateBus(_ => connectionConfiguration, registerServices);
-        }
-
-        /// <summary>
-        /// Creates a new instance of <see cref="RabbitBus"/>.
-        /// </summary>
-        /// <param name="connectionConfigurationFactory">
-        /// A factory of <see cref="ConnectionConfiguration"/> instance.
-        /// </param>
-        /// <param name="registerServices">
-        /// Override default services. For example, to override the default <see cref="ISerializer"/>:
-        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{ISerializer}(mySerializer));
-        /// </param>
-        /// <returns>
-        /// A new <see cref="RabbitBus"/> instance.
-        /// </returns>
-        public static IBus CreateBus(Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices)
-        {
-            var container = new DefaultServiceContainer();
-            RegisterBus(container, connectionConfigurationFactory, registerServices);
-            return container.Resolve<IBus>();
-        }
-
-        /// <summary>
-        /// Registers components of a <see cref="RabbitBus"/>.
-        /// </summary>
-        /// <param name="serviceRegister"/>
-        /// <param name="connectionConfigurationFactory">
-        /// A factory of <see cref="ConnectionConfiguration"/> instance.
-        /// </param>
-        /// <param name="registerServices">
-        /// Override default services. For example, to override the default <see cref="ISerializer"/>:
-        /// RabbitHutch.CreateBus("host=localhost", x => x.Register{ISerializer}(mySerializer));
-        /// </param>
-        public static void RegisterBus(IServiceRegister serviceRegister,
-                                       Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory,
-                                       Action<IServiceRegister> registerServices)
-        {
-            Preconditions.CheckNotNull(serviceRegister, "serviceRegister");
-            Preconditions.CheckNotNull(connectionConfigurationFactory, "connectionConfiguration");
-            Preconditions.CheckNotNull(registerServices, "registerServices");
-
-            serviceRegister.Register(c =>
-            {
-                var configuration = connectionConfigurationFactory(c);
-                configuration.SetDefaultProperties();
-                return configuration;
-            });
-
-            serviceRegister.RegisterDefaultServices();
-            registerServices(serviceRegister);
-        }
+        public IPubSub PubSub => bus.PubSub;
+        public IRpc Rpc => bus.Rpc;
+        public ISendReceive SendReceive => bus.SendReceive;
+        public IScheduler Scheduler => bus.Scheduler;
+        public IAdvancedBus Advanced => bus.Advanced;
     }
 }

@@ -1,101 +1,65 @@
-﻿using EasyNetQ.Events;
-using EasyNetQ.Internals;
-using EasyNetQ.Topology;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Collections.Concurrent;
+using EasyNetQ.Events;
+using EasyNetQ.Internals;
+using EasyNetQ.Logging;
 
-namespace EasyNetQ.Consumer
+namespace EasyNetQ.Consumer;
+
+/// <inheritdoc />
+public interface IConsumerFactory : IDisposable
 {
-    /// <inheritdoc />
-    public class ConsumerFactory : IConsumerFactory
+    /// <summary>
+    ///     Creates a consumer based on the configuration
+    /// </summary>
+    /// <param name="configuration"></param>
+    /// <returns></returns>
+    IConsumer CreateConsumer(ConsumerConfiguration configuration);
+}
+
+/// <inheritdoc />
+public class ConsumerFactory : IConsumerFactory
+{
+    private readonly ConcurrentDictionary<Guid, IConsumer> consumers = new();
+    private readonly IEventBus eventBus;
+    private readonly ILogger<Consumer> logger;
+    private readonly IInternalConsumerFactory internalConsumerFactory;
+    private readonly IDisposable unsubscribeFromStoppedConsumerEvent;
+
+    /// <summary>
+    ///     Creates ConsumerFactory
+    /// </summary>
+    public ConsumerFactory(
+        ILogger<Consumer> logger,
+        IEventBus eventBus,
+        IInternalConsumerFactory internalConsumerFactory
+    )
     {
-        private readonly IPersistentConnection connection;
+        Preconditions.CheckNotNull(logger, nameof(logger));
+        Preconditions.CheckNotNull(internalConsumerFactory, nameof(internalConsumerFactory));
+        Preconditions.CheckNotNull(eventBus, nameof(eventBus));
 
-        private readonly ConcurrentSet<IConsumer> consumers = new ConcurrentSet<IConsumer>();
+        this.logger = logger;
+        this.internalConsumerFactory = internalConsumerFactory;
+        this.eventBus = eventBus;
 
-        private readonly IEventBus eventBus;
-        private readonly IInternalConsumerFactory internalConsumerFactory;
+        unsubscribeFromStoppedConsumerEvent = eventBus.Subscribe(
+            (in StoppedConsumingEvent @event) => consumers.Remove(@event.Consumer.Id)
+        );
+    }
 
-        /// <summary>
-        ///     Creates ConsumerFactory
-        /// </summary>
-        /// <param name="connection">The connection</param>
-        /// <param name="internalConsumerFactory">The internal consumer factory</param>
-        /// <param name="eventBus">The event bus</param>
-        public ConsumerFactory(
-            IPersistentConnection connection,
-            IInternalConsumerFactory internalConsumerFactory,
-            IEventBus eventBus
-        )
-        {
-            Preconditions.CheckNotNull(internalConsumerFactory, "internalConsumerFactory");
-            Preconditions.CheckNotNull(eventBus, "eventBus");
+    /// <inheritdoc />
+    public IConsumer CreateConsumer(ConsumerConfiguration configuration)
+    {
+        var consumer = new Consumer(logger, configuration, internalConsumerFactory, eventBus);
+        consumers.TryAdd(consumer.Id, consumer);
+        return consumer;
+    }
 
-            this.connection = connection;
-            this.internalConsumerFactory = internalConsumerFactory;
-            this.eventBus = eventBus;
-
-            eventBus.Subscribe<StoppedConsumingEvent>(@event => consumers.Remove(@event.Consumer));
-        }
-
-        /// <inheritdoc />
-        public IConsumer CreateConsumer(
-            IQueue queue,
-            MessageHandler onMessage,
-            ConsumerConfiguration configuration
-        )
-        {
-            Preconditions.CheckNotNull(queue, "queue");
-            Preconditions.CheckNotNull(onMessage, "onMessage");
-            Preconditions.CheckNotNull(connection, "connection");
-
-            var consumer = CreateConsumerInstance(queue, onMessage, configuration);
-            consumers.Add(consumer);
-            return consumer;
-        }
-
-        /// <inheritdoc />
-        public IConsumer CreateConsumer(
-            IReadOnlyCollection<Tuple<IQueue, MessageHandler>> queueConsumerPairs,
-            ConsumerConfiguration configuration
-        )
-        {
-            if (configuration.IsExclusive || queueConsumerPairs.Any(x => x.Item1.IsExclusive))
-                throw new NotSupportedException("Exclusive multiple consuming is not supported.");
-
-            return new PersistentMultipleConsumer(queueConsumerPairs, connection, configuration, internalConsumerFactory, eventBus);
-        }
-
-        /// <inheritdoc />
-        public void Dispose()
-        {
-            foreach (var consumer in consumers)
-                consumer.Dispose();
-
-            internalConsumerFactory.Dispose();
-        }
-
-        /// <summary>
-        ///     Create the correct implementation of IConsumer based on queue properties
-        /// </summary>
-        /// <param name="queue"></param>
-        /// <param name="onMessage"></param>
-        /// <param name="configuration"></param>
-        /// <returns></returns>
-        private IConsumer CreateConsumerInstance(
-            IQueue queue,
-            MessageHandler onMessage,
-            ConsumerConfiguration configuration
-        )
-        {
-            if (queue.IsExclusive)
-                return new TransientConsumer(queue, onMessage, configuration, internalConsumerFactory, eventBus);
-            if (configuration.IsExclusive)
-                return new ExclusiveConsumer(queue, onMessage, configuration, internalConsumerFactory, eventBus);
-            return new PersistentConsumer(queue, onMessage, configuration, internalConsumerFactory, eventBus);
-        }
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        unsubscribeFromStoppedConsumerEvent.Dispose();
+        consumers.ClearAndDispose();
     }
 }

@@ -1,39 +1,38 @@
 // ReSharper disable InconsistentNaming
 
 using System;
-using EasyNetQ.Producer;
+using System.Threading.Tasks;
 using EasyNetQ.Tests.Mocking;
 using NSubstitute;
 using RabbitMQ.Client;
 using Xunit;
 
-namespace EasyNetQ.Tests.ProducerTests
+namespace EasyNetQ.Tests.ProducerTests;
+
+public class When_a_request_is_sent_but_the_connection_closes_before_a_reply_is_received : IDisposable
 {
-    public class When_a_request_is_sent_but_the_connection_closes_before_a_reply_is_received : IDisposable
+    public When_a_request_is_sent_but_the_connection_closes_before_a_reply_is_received()
     {
-        public When_a_request_is_sent_but_the_connection_closes_before_a_reply_is_received()
-        {
-            mockBuilder = new MockBuilder();
-        }
+        mockBuilder = new MockBuilder();
+    }
 
-        public void Dispose()
-        {
-            mockBuilder.Bus.Dispose();
-        }
+    public void Dispose()
+    {
+        mockBuilder.Dispose();
+    }
 
-        private MockBuilder mockBuilder;
+    private readonly MockBuilder mockBuilder;
 
-        [Fact]
-        public void Should_throw_an_EasyNetQException()
+    [Fact]
+    public Task Should_throw_an_EasyNetQException()
+    {
+        return Assert.ThrowsAsync<EasyNetQException>(() =>
         {
-            Assert.Throws<EasyNetQException>(() =>
-            {
-                var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
-                mockBuilder.Connection.ConnectionShutdown += Raise.EventWith(null, new ShutdownEventArgs(ShutdownInitiator.Application, 0, null));
-                (mockBuilder.Connection as IAutorecoveringConnection).RecoverySucceeded += Raise.EventWith(null, new EventArgs());
-                task.GetAwaiter().GetResult();
-            });
-        }
+            var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
+            mockBuilder.Connection.ConnectionShutdown += Raise.EventWith(null, new ShutdownEventArgs(ShutdownInitiator.Application, 0, null));
+            (mockBuilder.Connection as IAutorecoveringConnection).RecoverySucceeded += Raise.EventWith(null, new EventArgs());
+            return task;
+        });
     }
 }
 

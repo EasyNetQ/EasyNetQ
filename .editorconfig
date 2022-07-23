@@ -190,3 +190,6 @@ csharp_space_between_square_brackets = false
 # https://docs.microsoft.com/en-us/visualstudio/ide/editorconfig-formatting-conventions?view=vs-2019#wrap-options
 csharp_preserve_single_line_blocks = true
 csharp_preserve_single_line_statements = false
+
+# C# formatting settings - Namespace options
+csharp_style_namespace_declarations = file_scoped:warning

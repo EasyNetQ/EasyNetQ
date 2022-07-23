@@ -1,4 +1,5 @@
-﻿// ReSharper disable InconsistentNaming
+// ReSharper disable InconsistentNaming
+
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,41 +9,44 @@ using EasyNetQ.Topology;
 using NSubstitute;
 using Xunit;
 
-namespace EasyNetQ.Tests.ConsumeTests
+namespace EasyNetQ.Tests.ConsumeTests;
+
+public class When_a_consumer_is_cancelled_by_the_broker : IDisposable
 {
-    public class When_a_consumer_is_cancelled_by_the_broker : IDisposable
+    private readonly MockBuilder mockBuilder;
+
+    public When_a_consumer_is_cancelled_by_the_broker()
     {
-        private readonly MockBuilder mockBuilder;
+        mockBuilder = new MockBuilder();
 
-        public When_a_consumer_is_cancelled_by_the_broker()
+        var queue = new Queue("my_queue", false);
+
+        mockBuilder.Bus.Advanced.Consume(
+            queue,
+            (_, _, _) => Task.Run(() => { }),
+            c => c.WithConsumerTag("consumer_tag")
+        );
+
+        var are = new AutoResetEvent(false);
+        mockBuilder.EventBus.Subscribe((in ConsumerModelDisposedEvent _) => are.Set());
+
+        mockBuilder.Consumers[0].HandleBasicCancel("consumer_tag").GetAwaiter().GetResult();
+
+        if (!are.WaitOne(5000))
         {
-            mockBuilder = new MockBuilder();
-
-            var queue = new Queue("my_queue", false);
-
-            mockBuilder.Bus.Advanced.Consume(queue, (bytes, properties, arg3) => Task.Run(() => { }));
-
-            var are = new AutoResetEvent(false);
-            mockBuilder.EventBus.Subscribe<ConsumerModelDisposedEvent>(x => are.Set());
-
-            mockBuilder.Consumers[0].HandleBasicCancel("consumer_tag");
-
-            if (!are.WaitOne(5000))
-            {
-                throw new TimeoutException();
-            }
+            throw new TimeoutException();
         }
+    }
 
-        public void Dispose()
-        {
-            mockBuilder.Bus.Dispose();
-        }
+    public void Dispose()
+    {
+        mockBuilder.Dispose();
+    }
 
-        [Fact]
-        public void Should_dispose_of_the_model()
-        {
-            mockBuilder.Consumers[0].Model.Received().Dispose();
-        }
+    [Fact]
+    public void Should_dispose_of_the_model()
+    {
+        mockBuilder.Consumers[0].Model.Received().Dispose();
     }
 }
 

@@ -1,33 +1,35 @@
-﻿using RabbitMQ.Client;
+using RabbitMQ.Client;
 
-namespace EasyNetQ.DI
+namespace EasyNetQ.DI;
+
+internal static class ConnectionFactoryFactory
 {
-    internal static class ConnectionFactoryFactory
+    public static IConnectionFactory CreateConnectionFactory(ConnectionConfiguration configuration)
     {
-        public static IConnectionFactory CreateConnectionFactory(ConnectionConfiguration configuration)
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+
+        var connectionFactory = new ConnectionFactory
         {
-            Preconditions.CheckNotNull(configuration, "configuration");
+            AutomaticRecoveryEnabled = true,
+            TopologyRecoveryEnabled = false,
+            VirtualHost = configuration.VirtualHost,
+            UserName = configuration.UserName,
+            Password = configuration.Password,
+            Port = configuration.Port,
+            RequestedHeartbeat = configuration.RequestedHeartbeat,
+            ClientProperties = configuration.ClientProperties,
+            AuthMechanisms = configuration.AuthMechanisms,
+            ClientProvidedName = configuration.Name,
+            NetworkRecoveryInterval = configuration.ConnectIntervalAttempt,
+            ContinuationTimeout = configuration.Timeout,
+            DispatchConsumersAsync = true,
+            ConsumerDispatchConcurrency = configuration.PrefetchCount,
+            RequestedChannelMax = configuration.RequestedChannelMax
+        };
 
-            var connectionFactory = new ConnectionFactory
-            {
-                AutomaticRecoveryEnabled = true,
-                TopologyRecoveryEnabled = false,
-                VirtualHost = configuration.VirtualHost,
-                UserName = configuration.UserName,
-                Password = configuration.Password,
-                Port = configuration.Port,
-                RequestedHeartbeat = configuration.RequestedHeartbeat,
-                ClientProperties = configuration.ClientProperties,
-                AuthMechanisms = configuration.AuthMechanisms,
-                ClientProvidedName = configuration.Name,
-                NetworkRecoveryInterval = configuration.ConnectIntervalAttempt,
-                ContinuationTimeout = configuration.Timeout
-            };
+        if (configuration.Hosts.Count > 0)
+            connectionFactory.HostName = configuration.Hosts[0].Host;
 
-            if (configuration.AmqpConnectionString != null)
-                connectionFactory.Uri = configuration.AmqpConnectionString;
-
-            return connectionFactory;
-        }
+        return connectionFactory;
     }
 }

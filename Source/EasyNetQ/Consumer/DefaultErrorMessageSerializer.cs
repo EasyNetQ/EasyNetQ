@@ -1,19 +1,18 @@
-﻿using System.Text;
+using System.Text;
 
-namespace EasyNetQ.Consumer
+namespace EasyNetQ.Consumer;
+
+public class DefaultErrorMessageSerializer : IErrorMessageSerializer
 {
-    public class DefaultErrorMessageSerializer : IErrorMessageSerializer
+    /// <inheritdoc />
+    public string Serialize(byte[] messageBody)
     {
-        /// <inheritdoc />
-        public string Serialize(byte[] messageBody)
-        {
-            return Encoding.UTF8.GetString(messageBody);
-        }
+        return Encoding.UTF8.GetString(messageBody);
+    }
 
-        /// <inheritdoc />
-        public byte[] Deserialize(string messageBody)
-        {
-            return Encoding.UTF8.GetBytes(messageBody);
-        }
+    /// <inheritdoc />
+    public byte[] Deserialize(string messageBody)
+    {
+        return Encoding.UTF8.GetBytes(messageBody);
     }
 }

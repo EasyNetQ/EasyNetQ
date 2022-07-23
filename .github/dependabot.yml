@@ -1,0 +1,49 @@
+version: 2
+updates:
+- package-ecosystem: nuget
+  directory: "/Source"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: Autofac
+    versions:
+    - ">= 6.a"
+    - "< 7"
+  - dependency-name: Castle.Windsor
+    versions:
+    - "> 5.0.0"
+    - "< 6"
+  - dependency-name: Castle.Core
+    versions:
+    - "> 4.5.1"
+    - "< 6"
+  - dependency-name: LightInject
+    versions:
+    - ">= 6.a"
+    - "< 7"
+  - dependency-name: Ninject
+    versions:
+    - ">= 3.3.5"
+    - "< 4"
+  - dependency-name: Microsoft.Extensions.Configuration
+    versions:
+    - ">= 5.a"
+    - "< 7"
+  - dependency-name: Microsoft.Extensions.DependencyInjection
+    versions:
+    - ">= 5.a"
+    - "< 7"
+  - dependency-name: Microsoft.Extensions.Logging.Abstractions
+    versions:
+    - ">= 5.a"
+    - "< 7"
+  - dependency-name: Serilog
+    versions:
+    - ">= 2.8"
+    - "< 3"
+- package-ecosystem: "github-actions"
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10

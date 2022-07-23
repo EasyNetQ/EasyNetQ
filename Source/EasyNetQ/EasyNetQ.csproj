@@ -1,51 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.props))\build.props" />
   <PropertyGroup>
-    <Title>EasyNetQ</Title>
     <Description>A nice .NET API for RabbitMQ</Description>
-    <PackageTags>RabbitMQ;Messaging;AMQP;C#</PackageTags>
-    <PackageIconUrl>https://raw.githubusercontent.com/EasyNetQ/EasyNetQ/gh-pages/design/logo_design.png</PackageIconUrl>
-    <LangVersion>latest</LangVersion>
-    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
-    <DefineConstants>$(DefineConstants);LIBLOG_PUBLIC;LIBLOG_PORTABLE</DefineConstants>
-    <LangVersion>latest</LangVersion>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(MSBuildProjectName).xml</DocumentationFile>
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-    <AssemblyOriginatorKeyFile>../../Assets/EasyNetQ.snk</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
-    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="LightInject.Source" Version="6.4.0">
+    <PackageReference Include="LightInject.Source" Version="6.4.1">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
+    <PackageReference Include="MinVer" Version="4.1.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="RabbitMQ.Client" Version="[6.2.1,6.5.0)" />
-    <PackageReference Include="LibLog" Version="5.0.8">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="GitVersionTask" Version="5.0.1">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
+    <InternalsVisibleTo Include="EasyNetQ.DI.Tests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100B9880ED386BC2576BA1C405A35E05E57629D54CAAF50FE9ADA301BA3BD504BDD897D1EC2F9C328B66EBE72F57463DDC7BCB074D72F633FE4F21F6E9F3F79160AF30A11CA7A107B0568C3489A61C7E1EC31652497A7E553DE113DF7FB105E115F217A4F8E84D7162D57046BE1D1DEE9F04C3FFBA31BEA7DE4B809DC82DF736890" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
-    <Reference Include="System" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <DefineConstants>$(DefineConstants);NET_STANDARD</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net461' ">
-    <DefineConstants>$(DefineConstants);NETFX</DefineConstants>
-  </PropertyGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.targets))\build.targets" />
 </Project>

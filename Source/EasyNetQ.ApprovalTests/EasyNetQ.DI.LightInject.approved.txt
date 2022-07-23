@@ -1,0 +1,24 @@
+namespace EasyNetQ.DI.LightInject
+{
+    public class LightInjectAdapter : EasyNetQ.DI.IServiceRegister
+    {
+        public LightInjectAdapter(LightInject.IServiceRegistry serviceRegistry) { }
+        public LightInject.IServiceRegistry ServiceRegistry { get; }
+        public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, object implementationInstance) { }
+        public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Func<EasyNetQ.DI.IServiceResolver, object> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1) { }
+        public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Type implementationType, EasyNetQ.DI.Lifetime lifetime = 1) { }
+        public EasyNetQ.DI.IServiceRegister TryRegister(System.Type serviceType, object implementationInstance) { }
+        public EasyNetQ.DI.IServiceRegister TryRegister(System.Type serviceType, System.Func<EasyNetQ.DI.IServiceResolver, object> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1) { }
+        public EasyNetQ.DI.IServiceRegister TryRegister(System.Type serviceType, System.Type implementationType, EasyNetQ.DI.Lifetime lifetime = 1) { }
+    }
+}
+namespace LightInject
+{
+    public static class EasyNetQServiceContainerExtensions
+    {
+        public static LightInject.IServiceContainer RegisterEasyNetQ(this LightInject.IServiceContainer serviceContainer, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory) { }
+        public static LightInject.IServiceContainer RegisterEasyNetQ(this LightInject.IServiceContainer serviceContainer, string connectionString) { }
+        public static LightInject.IServiceContainer RegisterEasyNetQ(this LightInject.IServiceContainer serviceContainer, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+        public static LightInject.IServiceContainer RegisterEasyNetQ(this LightInject.IServiceContainer serviceContainer, string connectionString, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+    }
+}

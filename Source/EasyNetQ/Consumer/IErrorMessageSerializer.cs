@@ -1,9 +1,8 @@
-﻿namespace EasyNetQ.Consumer
-{
-    public interface IErrorMessageSerializer
-    {
-        string Serialize(byte[] messageBody);
+namespace EasyNetQ.Consumer;
 
-        byte[] Deserialize(string messageBody);
-    }
+public interface IErrorMessageSerializer
+{
+    string Serialize(byte[] messageBody);
+
+    byte[] Deserialize(string messageBody);
 }

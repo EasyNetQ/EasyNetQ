@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
-namespace EasyNetQ.Hosepipe
+namespace EasyNetQ.Hosepipe;
+
+public interface IMessageWriter
 {
-    public interface IMessageWriter
-    {
-        void Write(IEnumerable<HosepipeMessage> messages, QueueParameters parameters);
-    }
+    void Write(IEnumerable<HosepipeMessage> messages, QueueParameters parameters);
 }

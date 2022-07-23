@@ -1,14 +1,13 @@
-﻿using System;
+using System;
 
-namespace EasyNetQ
+namespace EasyNetQ;
+
+/// <inheritdoc />
+public class DefaultCorrelationIdGenerationStrategy : ICorrelationIdGenerationStrategy
 {
     /// <inheritdoc />
-    public class DefaultCorrelationIdGenerationStrategy : ICorrelationIdGenerationStrategy
+    public string GetCorrelationId()
     {
-        /// <inheritdoc />
-        public string GetCorrelationId()
-        {
-            return Guid.NewGuid().ToString();
-        }
+        return Guid.NewGuid().ToString();
     }
 }

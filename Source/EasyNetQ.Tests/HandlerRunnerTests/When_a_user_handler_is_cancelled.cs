@@ -1,70 +1,70 @@
-﻿// ReSharper disable InconsistentNaming
+// ReSharper disable InconsistentNaming
 
 using EasyNetQ.Consumer;
 using NSubstitute;
 using RabbitMQ.Client;
 using System;
 using System.Threading.Tasks;
+using EasyNetQ.Logging;
 using Xunit;
 
-namespace EasyNetQ.Tests.HandlerRunnerTests
+namespace EasyNetQ.Tests.HandlerRunnerTests;
+
+public class When_a_user_handler_is_cancelled
 {
-    public class When_a_user_handler_is_cancelled
+    private readonly MessageProperties messageProperties = new()
     {
-        private readonly MessageProperties messageProperties = new MessageProperties
+        CorrelationId = "correlation_id"
+    };
+    private readonly MessageReceivedInfo messageInfo = new("consumer_tag", 42, false, "exchange", "routingKey", "queue");
+    private readonly byte[] messageBody = Array.Empty<byte>();
+
+    private readonly IConsumerErrorStrategy consumerErrorStrategy;
+    private readonly ConsumerExecutionContext context;
+    private readonly IModel channel;
+
+    public When_a_user_handler_is_cancelled()
+    {
+        consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
+        consumerErrorStrategy.HandleConsumerCancelledAsync(default).ReturnsForAnyArgs(Task.FromResult(AckStrategies.Ack));
+
+        var handlerRunner = new HandlerRunner(Substitute.For<ILogger<IHandlerRunner>>(), consumerErrorStrategy);
+
+        var consumer = Substitute.For<IBasicConsumer>();
+        channel = Substitute.For<IModel>();
+        consumer.Model.Returns(channel);
+
+        context = new ConsumerExecutionContext(
+            (_, _, _, _) => Task.FromException<AckStrategy>(new OperationCanceledException()),
+            messageInfo,
+            messageProperties,
+            messageBody
+        );
+
+        var handlerTask = handlerRunner.InvokeUserMessageHandlerAsync(context, default)
+            .ContinueWith(async x =>
             {
-                CorrelationId = "correlation_id"
-            };
-        private readonly MessageReceivedInfo messageInfo = new MessageReceivedInfo("consumer_tag", 42, false, "exchange", "routingKey", "queue");
-        private readonly byte[] messageBody = new byte[0];
+                var ackStrategy = await x;
+                return ackStrategy(channel, 42);
+            }, TaskContinuationOptions.ExecuteSynchronously)
+            .Unwrap();
 
-        private readonly IConsumerErrorStrategy consumerErrorStrategy;
-        private readonly ConsumerExecutionContext context;
-        private readonly IModel channel;
-
-        public When_a_user_handler_is_cancelled()
+        if (!handlerTask.Wait(5000))
         {
-            consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
-            consumerErrorStrategy.HandleConsumerCancelled(default).ReturnsForAnyArgs(AckStrategies.Ack);
-
-            var handlerRunner = new HandlerRunner(consumerErrorStrategy);
-
-            var consumer = Substitute.For<IBasicConsumer>();
-            channel = Substitute.For<IModel>();
-            consumer.Model.Returns(channel);
-
-            context = new ConsumerExecutionContext(
-                async (body, properties, info, cancellation) => throw new OperationCanceledException(),
-                messageInfo,
-                messageProperties,
-                messageBody
-            );
-
-            var handlerTask = handlerRunner.InvokeUserMessageHandlerAsync(context, default)
-                .ContinueWith(async x =>
-                {
-                    var ackStrategy = await x;
-                    return ackStrategy(channel, 42);
-                }, TaskContinuationOptions.ExecuteSynchronously)
-                .Unwrap();
-
-            if (!handlerTask.Wait(5000))
-            {
-                throw new TimeoutException();
-            }
+            throw new TimeoutException();
         }
+    }
 
-        [Fact]
-        public void Should_handle_consumer_cancelled()
-        {
-            consumerErrorStrategy.Received().HandleConsumerCancelled(context);
-        }
+    [Fact]
+    public async Task Should_handle_consumer_cancelled()
+    {
+        await consumerErrorStrategy.Received().HandleConsumerCancelledAsync(context);
+    }
 
-        [Fact]
-        public void Should_Ack()
-        {
-            channel.Received().BasicAck(42, false);
-        }
+    [Fact]
+    public void Should_Ack()
+    {
+        channel.Received().BasicAck(42, false);
     }
 }
 

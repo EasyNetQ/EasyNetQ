@@ -1,24 +1,42 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
-namespace EasyNetQ.Topology
+namespace EasyNetQ.Topology;
+
+/// <summary>
+///     Binding between exchange and bindable entity
+/// </summary>
+public readonly struct Binding<TBindable> where TBindable : struct, IBindable
 {
-    public sealed class Binding : IBinding
+    /// <summary>
+    ///     Creates Binding
+    /// </summary>
+    public Binding(in Exchange source, in TBindable destination, string routingKey, IDictionary<string, object> arguments = null)
     {
-        public Binding(IBindable bindable, IExchange exchange, string routingKey, IDictionary<string, object> arguments)
-        {
-            Preconditions.CheckNotNull(bindable, "bindable");
-            Preconditions.CheckNotNull(exchange, "exchange");
-            Preconditions.CheckNotNull(routingKey, "routingKey");
+        Preconditions.CheckNotNull(routingKey, nameof(routingKey));
 
-            Bindable = bindable;
-            Exchange = exchange;
-            RoutingKey = routingKey;
-            Arguments = arguments;
-        }
-
-        public IBindable Bindable { get; }
-        public IExchange Exchange { get; }
-        public string RoutingKey { get; }
-        public IDictionary<string, object> Arguments { get; }
+        Source = source;
+        Destination = destination;
+        RoutingKey = routingKey;
+        Arguments = arguments;
     }
+
+    /// <summary>
+    ///     Source exchange
+    /// </summary>
+    public Exchange Source { get; }
+
+    /// <summary>
+    ///     Destination bindable instance
+    /// </summary>
+    public TBindable Destination { get; }
+
+    /// <summary>
+    ///     The binding routing key
+    /// </summary>
+    public string RoutingKey { get; }
+
+    /// <summary>
+    ///     The binging arguments
+    /// </summary>
+    public IDictionary<string, object> Arguments { get; }
 }

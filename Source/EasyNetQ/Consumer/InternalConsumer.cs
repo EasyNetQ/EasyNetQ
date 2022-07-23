@@ -1,391 +1,338 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using EasyNetQ.Events;
+using EasyNetQ.Internals;
 using EasyNetQ.Logging;
+using EasyNetQ.Persistent;
 using EasyNetQ.Topology;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Exceptions;
 
-namespace EasyNetQ.Consumer
+namespace EasyNetQ.Consumer;
+
+/// <summary>
+///     Represents an internal consumer's status: which queues are consuming and which are not
+/// </summary>
+public readonly struct InternalConsumerStatus
 {
-    public interface IInternalConsumer : IDisposable
+    /// <summary>
+    ///     Creates InternalConsumerStatus
+    /// </summary>
+    public InternalConsumerStatus(IReadOnlyCollection<Queue> started, IReadOnlyCollection<Queue> active, IReadOnlyCollection<Queue> failed)
     {
-        StartConsumingStatus StartConsuming(
-            IQueue queue,
-            MessageHandler onMessage,
-            ConsumerConfiguration configuration
-        );
-
-        StartConsumingStatus StartConsuming(
-            IReadOnlyCollection<Tuple<IQueue, MessageHandler>> queueConsumerPairs,
-            ConsumerConfiguration configuration
-        );
-
-        event Action<IInternalConsumer> Cancelled;
+        Started = started;
+        Active = active;
+        Failed = failed;
     }
 
-    public class BasicConsumer : IBasicConsumer, IDisposable
+    /// <summary>
+    ///     Queues with active consumers
+    /// </summary>
+    public IReadOnlyCollection<Queue> Active { get; }
+
+    /// <summary>
+    ///     Queues with newly started consumers
+    /// </summary>
+    public IReadOnlyCollection<Queue> Started { get; }
+
+    /// <summary>
+    ///     Queues with failed consumers
+    /// </summary>
+    public IReadOnlyCollection<Queue> Failed { get; }
+}
+
+/// <summary>
+///     Represents an internal consumer's cancelled event
+/// </summary>
+public class InternalConsumerCancelledEventArgs : EventArgs
+{
+    /// <inheritdoc />
+    public InternalConsumerCancelledEventArgs(in Queue cancelled, IReadOnlyCollection<Queue> active)
     {
-        private readonly Action<BasicConsumer> cancelled;
-        private readonly IConsumerDispatcher consumerDispatcher;
-        private readonly IEventBus eventBus;
-        private readonly IHandlerRunner handlerRunner;
-        private readonly ILog logger = LogProvider.For<BasicConsumer>();
-
-        private bool disposed;
-
-        public BasicConsumer(
-            Action<BasicConsumer> cancelled,
-            IConsumerDispatcher consumerDispatcher,
-            IQueue queue,
-            IEventBus eventBus,
-            IHandlerRunner handlerRunner,
-            MessageHandler onMessage,
-            IModel model
-        )
-        {
-            Preconditions.CheckNotNull(onMessage, "onMessage");
-
-            Queue = queue;
-            OnMessage = onMessage;
-            this.cancelled = cancelled;
-            this.consumerDispatcher = consumerDispatcher;
-            this.eventBus = eventBus;
-            this.handlerRunner = handlerRunner;
-            Model = model;
-        }
-
-        public MessageHandler OnMessage { get; }
-        public IQueue Queue { get; }
-        public string ConsumerTag { get; private set; }
-
-        /// <inheritdoc />
-        public void HandleBasicConsumeOk(string consumerTag)
-        {
-            ConsumerTag = consumerTag;
-        }
-
-        /// <inheritdoc />
-        public void HandleBasicDeliver(
-            string consumerTag,
-            ulong deliveryTag,
-            bool redelivered,
-            string exchange,
-            string routingKey,
-            IBasicProperties properties,
-            ReadOnlyMemory<byte> body
-        )
-        {
-            if (logger.IsDebugEnabled())
-            {
-                logger.DebugFormat("Message delivered to consumer {consumerTag} with deliveryTag {deliveryTag}", consumerTag, deliveryTag);
-            }
-
-            if (disposed)
-            {
-                // this message's consumer has stopped, so just return
-                logger.InfoFormat(
-                    "Consumer with consumerTag {consumerTag} on queue {queue} has stopped running. Ignoring message",
-                    ConsumerTag,
-                    Queue.Name
-                );
-
-                return;
-            }
-
-            var bodyBytes = body.ToArray();
-            var messageReceivedInfo = new MessageReceivedInfo(consumerTag, deliveryTag, redelivered, exchange, routingKey, Queue.Name);
-            var messageProperties = new MessageProperties(properties);
-            var context = new ConsumerExecutionContext(OnMessage, messageReceivedInfo, messageProperties, bodyBytes);
-
-            eventBus.Publish(new DeliveredMessageEvent(messageReceivedInfo, messageProperties, bodyBytes));
-            handlerRunner.InvokeUserMessageHandlerAsync(context)
-                .ContinueWith(async x =>
-                    {
-                        var ackStrategy = await x.ConfigureAwait(false);
-                        consumerDispatcher.QueueAction(() =>
-                        {
-                            var ackResult = ackStrategy(Model, deliveryTag);
-                            eventBus.Publish(new AckEvent(messageReceivedInfo, messageProperties, bodyBytes, ackResult));
-                        });
-                    },
-                    TaskContinuationOptions.ExecuteSynchronously
-                );
-        }
-
-        /// <summary>
-        /// Cancel means that an external signal has requested that this consumer should
-        /// be cancelled. This is _not_ the same as when an internal consumer stops consuming
-        /// because it has lost its channel/connection.
-        /// </summary>
-        private void Cancel()
-        {
-            cancelled?.Invoke(this);
-            ConsumerCancelled?.Invoke(this, new ConsumerEventArgs(new [] {ConsumerTag}));
-        }
-
-        /// <inheritdoc />
-        public void HandleBasicCancelOk(string consumerTag)
-        {
-            Cancel();
-        }
-
-        /// <inheritdoc />
-        public void HandleBasicCancel(string consumerTag)
-        {
-            Cancel();
-            logger.InfoFormat(
-                "Consumer with consumerTag {consumerTag} has cancelled",
-                consumerTag
-            );
-        }
-
-        /// <inheritdoc />
-        public void HandleModelShutdown(object model, ShutdownEventArgs reason)
-        {
-            logger.InfoFormat(
-                "Consumer with consumerTag {consumerTag} on queue {queue} has shutdown with reason {reason}",
-                ConsumerTag,
-                Queue.Name,
-                reason
-            );
-        }
-
-        /// <inheritdoc />
-        public IModel Model { get; }
-
-        /// <inheritdoc />
-        public event EventHandler<ConsumerEventArgs> ConsumerCancelled;
-
-        /// <inheritdoc />
-        public void Dispose()
-        {
-            if (disposed) return;
-            disposed = true;
-
-            eventBus.Publish(new ConsumerModelDisposedEvent(ConsumerTag));
-        }
+        Cancelled = cancelled;
+        Active = active;
     }
 
-    public class InternalConsumer : IInternalConsumer
+    /// <summary>
+    ///     Queue for which consume is cancelled
+    /// </summary>
+    public Queue Cancelled { get; }
+
+    /// <summary>
+    ///     Queues for which consume is active
+    /// </summary>
+    public IReadOnlyCollection<Queue> Active { get; }
+}
+
+/// <summary>
+///     Consumer which starts/stops raw consumers
+/// </summary>
+public interface IInternalConsumer : IDisposable
+{
+    /// <summary>
+    ///     Starts consuming
+    /// </summary>
+    InternalConsumerStatus StartConsuming(bool firstStart = true);
+
+    /// <summary>
+    ///     Stops consuming
+    /// </summary>
+    void StopConsuming();
+
+    /// <summary>
+    ///     Raised when consumer is cancelled
+    /// </summary>
+    event EventHandler<InternalConsumerCancelledEventArgs> Cancelled;
+}
+
+/// <inheritdoc />
+public class InternalConsumer : IInternalConsumer
+{
+    private readonly Dictionary<string, AsyncBasicConsumer> consumers = new();
+    private readonly AsyncLock mutex = new();
+
+    private readonly ConsumerConfiguration configuration;
+    private readonly IConsumerConnection connection;
+    private readonly IEventBus eventBus;
+    private readonly IHandlerRunner handlerRunner;
+    private readonly ILogger logger;
+
+    private volatile bool disposed;
+    private IModel model;
+
+    /// <summary>
+    ///     Creates InternalConsumer
+    /// </summary>
+    public InternalConsumer(
+        ILogger<InternalConsumer> logger,
+        ConsumerConfiguration configuration,
+        IConsumerConnection connection,
+        IHandlerRunner handlerRunner,
+        IEventBus eventBus
+    )
     {
-        private readonly IPersistentConnection connection;
-        private readonly IConsumerDispatcher consumerDispatcher;
-        private readonly IConventions conventions;
-        private readonly IEventBus eventBus;
-        private readonly IHandlerRunner handlerRunner;
-        private readonly ILog logger = LogProvider.For<InternalConsumer>();
-        private ICollection<BasicConsumer> basicConsumers;
+        Preconditions.CheckNotNull(logger, nameof(logger));
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+        Preconditions.CheckNotNull(connection, nameof(connection));
+        Preconditions.CheckNotNull(handlerRunner, nameof(handlerRunner));
+        Preconditions.CheckNotNull(eventBus, nameof(eventBus));
 
-        private HashSet<BasicConsumer> cancelledConsumer;
+        this.logger = logger;
+        this.configuration = configuration;
+        this.connection = connection;
+        this.handlerRunner = handlerRunner;
+        this.eventBus = eventBus;
+    }
 
-        private bool disposed;
 
-        private readonly object modelLock = new object();
+    /// <inheritdoc />
+    public InternalConsumerStatus StartConsuming(bool firstStart)
+    {
+        if (disposed) throw new ObjectDisposedException(nameof(InternalConsumer));
 
-        public InternalConsumer(
-            IPersistentConnection connection,
-            IHandlerRunner handlerRunner,
-            IConsumerDispatcher consumerDispatcher,
-            IConventions conventions,
-            IEventBus eventBus
-        )
+        using var _ = mutex.Acquire();
+
+        if (IsModelClosedWithSoftError(model))
         {
-            Preconditions.CheckNotNull(connection, "connection");
-            Preconditions.CheckNotNull(handlerRunner, "handlerRunner");
-            Preconditions.CheckNotNull(consumerDispatcher, "consumerDispatcher");
-            Preconditions.CheckNotNull(conventions, "conventions");
-            Preconditions.CheckNotNull(eventBus, "eventBus");
+            logger.Info("Model has shutdown with soft error and will be recreated");
 
-            this.connection = connection;
-            this.handlerRunner = handlerRunner;
-            this.consumerDispatcher = consumerDispatcher;
-            this.conventions = conventions;
-            this.eventBus = eventBus;
+            foreach (var consumer in consumers.Values)
+            {
+                consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
+                consumer.Dispose();
+            }
+
+            consumers.Clear();
+
+            model.Dispose();
+            model = null;
         }
 
-        public IModel Model { get; private set; }
-
-        /// <inheritdoc />
-        public event Action<IInternalConsumer> Cancelled;
-
-        /// <inheritdoc />
-        public StartConsumingStatus StartConsuming(
-            IReadOnlyCollection<Tuple<IQueue, MessageHandler>> queueConsumerPairs,
-            ConsumerConfiguration configuration
-        )
+        if (model == null)
         {
-            Preconditions.CheckNotNull(queueConsumerPairs, nameof(queueConsumerPairs));
-            Preconditions.CheckNotNull(configuration, nameof(configuration));
-
             try
             {
-                InitModel(configuration.PrefetchCount, true);
-
-                basicConsumers = new List<BasicConsumer>();
-
-                foreach (var p in queueConsumerPairs)
-                {
-                    var queue = p.Item1;
-                    var onMessage = p.Item2;
-                    var consumerTag = conventions.ConsumerTagConvention();
-                    try
-                    {
-                        var basicConsumer = new BasicConsumer(SingleBasicConsumerCancelled, consumerDispatcher, queue, eventBus, handlerRunner, onMessage, Model);
-
-                        Model.BasicConsume(
-                            queue.Name, // queue
-                            false, // noAck
-                            consumerTag, // consumerTag
-                            true,
-                            configuration.IsExclusive,
-                            configuration.Arguments, // arguments
-                            basicConsumer // consumer
-                        );
-
-                        basicConsumers.Add(basicConsumer);
-
-                        logger.InfoFormat(
-                            "Declared consumer with consumerTag {consumerTag} on queue={queue} and configuration {configuration}",
-                            queue.Name,
-                            consumerTag,
-                            configuration
-                        );
-                    }
-                    catch (Exception exception)
-                    {
-                        logger.Error(
-                            exception,
-                            "Consume with consumerTag {consumerTag} on queue {queue} failed",
-                            queue.Name,
-                            consumerTag
-                        );
-                        return StartConsumingStatus.Failed;
-                    }
-                }
-
-                return StartConsumingStatus.Succeed;
+                model = connection.CreateModel();
+                model.BasicQos(0, configuration.PrefetchCount, false);
             }
             catch (Exception exception)
             {
-                logger.Error(
-                    exception,
-                    "Consume on queue {queue} failed",
-                    string.Join(";", queueConsumerPairs.Select(x => x.Item1.Name))
-                );
-                return StartConsumingStatus.Failed;
+                logger.Error(exception, "Failed to create model");
+                return new InternalConsumerStatus(Array.Empty<Queue>(), Array.Empty<Queue>(), Array.Empty<Queue>());
             }
         }
 
-        /// <inheritdoc />
-        public StartConsumingStatus StartConsuming(
-            IQueue queue,
-            MessageHandler onMessage,
-            ConsumerConfiguration configuration
-        )
-        {
-            Preconditions.CheckNotNull(queue, "queue");
-            Preconditions.CheckNotNull(onMessage, "onMessage");
-            Preconditions.CheckNotNull(configuration, "configuration");
+        var startedQueues = new HashSet<Queue>();
+        var activeQueues = new HashSet<Queue>();
+        var failedQueues = new HashSet<Queue>();
 
-            var consumerTag = conventions.ConsumerTagConvention();
+        foreach (var kvp in configuration.PerQueueConfigurations)
+        {
+            var queue = kvp.Key;
+            var perQueueConfiguration = kvp.Value;
+
+            if (
+                consumers.TryGetValue(queue.Name, out var alreadyStartedConsumer)
+                && (!queue.IsExclusive || alreadyStartedConsumer.IsRunning)
+            )
+            {
+                activeQueues.Add(queue);
+                continue;
+            }
+
+            if (queue.IsExclusive && !firstStart)
+            {
+                failedQueues.Add(queue);
+                continue;
+            }
+
             try
             {
-                InitModel(configuration.PrefetchCount, false);
-
-                var basicConsumer = new BasicConsumer(SingleBasicConsumerCancelled, consumerDispatcher, queue, eventBus, handlerRunner, onMessage, Model);
-
-                basicConsumers = new[] { basicConsumer };
-
-                Model.BasicConsume(
-                    queue.Name, // queue
-                    false, // noAck
-                    consumerTag, // consumerTag
-                    true,
-                    configuration.IsExclusive,
-                    configuration.Arguments, // arguments
-                    basicConsumer // consumer
+                var consumer = new AsyncBasicConsumer(
+                    logger,
+                    model,
+                    queue,
+                    perQueueConfiguration.AutoAck,
+                    eventBus,
+                    handlerRunner,
+                    perQueueConfiguration.Handler
                 );
+                consumer.ConsumerCancelled += AsyncBasicConsumerOnConsumerCancelled;
+                model.BasicConsume(
+                    queue.Name, // queue
+                    perQueueConfiguration.AutoAck, // noAck
+                    perQueueConfiguration.ConsumerTag, // consumerTag
+                    true, // noLocal
+                    perQueueConfiguration.IsExclusive, // exclusive
+                    perQueueConfiguration.Arguments, // arguments
+                    consumer // consumer
+                );
+                consumers.Add(queue.Name, consumer);
 
                 logger.InfoFormat(
                     "Declared consumer with consumerTag {consumerTag} on queue {queue} and configuration {configuration}",
-                    consumerTag,
                     queue.Name,
+                    perQueueConfiguration.ConsumerTag,
                     configuration
                 );
 
-                return StartConsumingStatus.Succeed;
+                startedQueues.Add(queue);
+                activeQueues.Add(queue);
             }
             catch (Exception exception)
             {
                 logger.Error(
                     exception,
-                    "Consume with consumerTag {consumerTag} from queue {queue} has failed",
-                    consumerTag,
-                    queue.Name
+                    "Consume with consumerTag {consumerTag} on queue {queue} failed",
+                    queue.Name,
+                    perQueueConfiguration.ConsumerTag
                 );
-                return StartConsumingStatus.Failed;
+
+                failedQueues.Add(queue);
             }
         }
 
-        /// <inheritdoc />
-        public void Dispose()
+        return new InternalConsumerStatus(startedQueues, activeQueues, failedQueues);
+    }
+
+    /// <inheritdoc />
+    public void StopConsuming()
+    {
+        if (disposed) throw new ObjectDisposedException(nameof(InternalConsumer));
+
+        using var _ = mutex.Acquire();
+
+        foreach (var consumer in consumers.Values)
         {
-            if (disposed) return;
-
-            disposed = true;
-
-            var model = Model;
-            if (model == null) return;
-
-            // Queued because we may be on the RabbitMQ.Client dispatch thread.
-            var disposedEvent = new AutoResetEvent(false);
-            consumerDispatcher.QueueAction(() =>
+            consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
+            foreach (var consumerTag in consumer.ConsumerTags)
             {
                 try
                 {
-                    foreach (var c in basicConsumers)
-                        c.Dispose();
-                    model.Dispose();
+                    model?.BasicCancelNoWait(consumerTag);
                 }
-                finally
+                catch (AlreadyClosedException)
                 {
-                    disposedEvent.Set();
                 }
-            }, true);
+            }
 
-            disposedEvent.WaitOne();
+            consumer.Dispose();
         }
 
-        private void InitModel(ushort prefetchCount, bool globalQos)
+        consumers.Clear();
+    }
+
+    /// <inheritdoc />
+    public event EventHandler<InternalConsumerCancelledEventArgs> Cancelled;
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        if (disposed) return;
+
+        disposed = true;
+
+        using var _ = mutex.Acquire();
+
+        foreach (var consumer in consumers.Values)
         {
-            if (Model == null)
+            consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
+            foreach (var consumerTag in consumer.ConsumerTags)
             {
-                lock (modelLock)
+                try
                 {
-                    if (Model == null)
-                    {
-                        Model = connection.CreateModel();
-                        Model.BasicQos(0, prefetchCount, globalQos);
-                    }
+                    model?.BasicCancelNoWait(consumerTag);
                 }
+                catch (AlreadyClosedException)
+                {
+                }
+            }
+
+            consumer.Dispose();
+        }
+
+        consumers.Clear();
+        model?.Dispose();
+    }
+
+    private async Task AsyncBasicConsumerOnConsumerCancelled(object sender, ConsumerEventArgs @event)
+    {
+        Queue cancelled;
+        IReadOnlyCollection<Queue> active;
+        using (await mutex.AcquireAsync().ConfigureAwait(false))
+        {
+            if (sender is AsyncBasicConsumer consumer && consumers.Remove(consumer.Queue.Name))
+            {
+                consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
+                consumer.Dispose();
+                cancelled = consumer.Queue;
+                active = consumers.Select(x => x.Value.Queue).ToList();
+
+                if (IsModelClosedWithSoftError(model)) return;
+            }
+            else
+            {
+                return;
             }
         }
 
-        private void SingleBasicConsumerCancelled(BasicConsumer consumer)
-        {
-            if (cancelledConsumer == null)
-                cancelledConsumer = new HashSet<BasicConsumer>();
-            cancelledConsumer.Add(consumer);
+        Cancelled?.Invoke(this, new InternalConsumerCancelledEventArgs(cancelled, active));
+    }
 
-            if (cancelledConsumer.Count == basicConsumers.Count)
-            {
-                cancelledConsumer = null;
-                Cancelled?.Invoke(this);
-            }
-        }
+    private static bool IsModelClosedWithSoftError(IModel model)
+    {
+        var closeReason = model?.CloseReason;
+        if (closeReason == null) return false;
+
+        return closeReason.ReplyCode switch
+        {
+            AmqpErrorCodes.PreconditionFailed => true,
+            AmqpErrorCodes.ResourceLocked => true,
+            AmqpErrorCodes.AccessRefused => true,
+            AmqpErrorCodes.NotFound => true,
+            _ => false
+        };
     }
 }

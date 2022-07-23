@@ -1,27 +1,43 @@
-namespace EasyNetQ
+using System.Collections.Generic;
+
+namespace EasyNetQ;
+
+/// <summary>
+///     Allows send configuration to be fluently extended without adding overloads
+///     e.g.
+///     x => x.WithPriority(2)
+/// </summary>
+public interface ISendConfiguration
 {
     /// <summary>
-    ///     Allows send configuration to be fluently extended without adding overloads
-    ///     e.g.
-    ///     x => x.WithPriority(2)
+    ///     Sets a priority of the message
     /// </summary>
-    public interface ISendConfiguration
+    /// <param name="priority">The priority to set</param>
+    /// <returns>Returns a reference to itself</returns>
+    ISendConfiguration WithPriority(byte priority);
+
+    /// <summary>
+    /// Sets headers
+    /// </summary>
+    /// <param name="headers">Headers to set</param>
+    /// <returns>Returns a reference to itself</returns>
+    ISendConfiguration WithHeaders(IDictionary<string, object> headers);
+}
+
+internal class SendConfiguration : ISendConfiguration
+{
+    public byte? Priority { get; private set; }
+    public IDictionary<string, object> Headers { get; private set; }
+
+    public ISendConfiguration WithPriority(byte priority)
     {
-        /// <summary>
-        ///     Sets a priority of the message
-        /// </summary>
-        /// <param name="priority">The priority to set</param>
-        ISendConfiguration WithPriority(byte priority);
+        Priority = priority;
+        return this;
     }
 
-    internal class SendConfiguration : ISendConfiguration
+    public ISendConfiguration WithHeaders(IDictionary<string, object> headers)
     {
-        public byte? Priority { get; private set; }
-
-        public ISendConfiguration WithPriority(byte priority)
-        {
-            Priority = priority;
-            return this;
-        }
+        Headers = headers;
+        return this;
     }
 }

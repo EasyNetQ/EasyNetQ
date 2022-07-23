@@ -1,127 +1,128 @@
-﻿// ReSharper disable InconsistentNaming
+// ReSharper disable InconsistentNaming
 
 using System;
 using System.Collections.Generic;
+using EasyNetQ.Logging;
 using FluentAssertions;
+using NSubstitute;
 using Xunit;
 
-namespace EasyNetQ.Tests
+namespace EasyNetQ.Tests;
+
+public class EventBusTests
 {
-    public class EventBusTests
+    private readonly IEventBus eventBus;
+
+    public EventBusTests()
     {
-        private IEventBus eventBus;
+        eventBus = new EventBus(Substitute.For<ILogger<EventBus>>());
+    }
 
-        public EventBusTests()
+    [Fact]
+    public void Should_be_able_to_get_subscribed_to_events()
+    {
+        Event1? capturedEvent = null;
+
+        eventBus.Subscribe((in Event1 @event) => capturedEvent = @event);
+
+        var publishedEvent = new Event1
         {
-            eventBus = new EventBus();
-        }
+            Text = "Hello World"
+        };
 
-        [Fact]
-        public void Should_be_able_to_get_subscribed_to_events()
+        eventBus.Publish(publishedEvent);
+
+        capturedEvent.Should().Be(publishedEvent);
+    }
+
+    [Fact]
+    public void Should_not_get_events_not_subscribed_to()
+    {
+        Event1? capturedEvent = null;
+
+        eventBus.Subscribe((in Event1 @event) => capturedEvent = @event);
+
+        var publishedEvent = new Event2
         {
-            Event1 capturedEvent = null;
+            Text = "Hello World"
+        };
 
-            eventBus.Subscribe<Event1>(@event => capturedEvent = @event);
+        eventBus.Publish(publishedEvent);
 
-            var publishedEvent = new Event1
-                {
-                    Text = "Hello World"
-                };
+        capturedEvent.Should().BeNull();
+    }
 
-            eventBus.Publish(publishedEvent);
+    [Fact]
+    public void Should_be_able_to_cancel_an_event()
+    {
+        var published = new List<Event1>();
 
-            capturedEvent.Should().NotBeNull();
-            capturedEvent.Should().BeSameAs(publishedEvent);
-        }
+        var subscription = eventBus.Subscribe((in Event1 s) => published.Add(s));
+        subscription.Should().NotBeNull();
 
-        [Fact]
-        public void Should_not_get_events_not_subscribed_to()
+        var publishedEvent = new Event1 { Text = "Before cancellation" };
+        eventBus.Publish(publishedEvent);
+
+        subscription.Dispose();
+
+        eventBus.Publish(new Event1 { Text = "Hello World" });
+
+        published.Count.Should().Be(1);
+        published[0].Should().Be(publishedEvent);
+    }
+
+    [Fact]
+    public void Should_handle_resubscription_from_handler()
+    {
+        Event1? eventFromSubscription = null;
+
+        eventBus.Subscribe((in Event1 @event) =>
         {
-            Event1 capturedEvent = null;
+            eventFromSubscription = @event;
+            eventBus.Subscribe((in Event1 _) => { });
+        });
 
-            eventBus.Subscribe<Event1>(@event => capturedEvent = @event);
-
-            var publishedEvent = new Event2
-            {
-                Text = "Hello World"
-            };
-
-            eventBus.Publish(publishedEvent);
-
-            capturedEvent.Should().BeNull();
-        }
-
-        [Fact]
-        public void Should_be_able_to_cancel_an_event()
+        var publishedEvent1 = new Event1
         {
-            var stringsPublished = new List<string>();
+            Text = "Hello World"
+        };
 
-            var subscription = eventBus.Subscribe<string>(stringsPublished.Add);
-            subscription.Should().NotBeNull();
+        eventBus.Publish(publishedEvent1);
 
-            eventBus.Publish("Before cancellation");
+        eventFromSubscription.Should().NotBeNull();
+    }
 
+    [Fact]
+    public void Should_handle_cancelation_from_handler()
+    {
+        Event1? eventFromSubscription = null;
+
+        IDisposable subscription = null;
+
+        subscription = eventBus.Subscribe((in Event1 @event) =>
+        {
             subscription.Dispose();
+            eventFromSubscription = @event;
+        });
 
-            eventBus.Publish("Hello World");
-
-            stringsPublished.Count.Should().Be(1);
-            stringsPublished[0].Should().Be("Before cancellation");
-        }
-
-        [Fact]
-        public void Should_handle_resubscription_from_handler()
+        var publishedEvent1 = new Event1
         {
-            Event1 eventFromSubscription = null;
+            Text = "Hello World"
+        };
 
-            eventBus.Subscribe<Event1>(@event =>
-                {
-                    eventFromSubscription = @event;
-                    eventBus.Subscribe<Event1>(x => { });
-                });
+        eventBus.Publish(publishedEvent1);
 
-            var publishedEvent1 = new Event1
-            {
-                Text = "Hello World"
-            };
+        eventFromSubscription.Should().NotBeNull();
+    }
 
-            eventBus.Publish(publishedEvent1);
+    private struct Event1
+    {
+        public string Text { get; set; }
+    }
 
-            eventFromSubscription.Should().NotBeNull();
-        }
-
-        [Fact]
-        public void Should_handle_cancelation_from_handler()
-        {
-            Event1 eventFromSubscription = null;
-
-            IDisposable subscription = null;
-
-            subscription = eventBus.Subscribe<Event1>(@event =>
-            {
-                subscription.Dispose();
-                eventFromSubscription = @event;
-            });
-
-            var publishedEvent1 = new Event1
-            {
-                Text = "Hello World"
-            };
-
-            eventBus.Publish(publishedEvent1);
-
-            eventFromSubscription.Should().NotBeNull();
-        }
-
-        private class Event1
-        {
-            public string Text { get; set; }
-        }
-
-        private class Event2
-        {
-            public string Text { get; set; }
-        }
+    private struct Event2
+    {
+        public string Text { get; set; }
     }
 }
 

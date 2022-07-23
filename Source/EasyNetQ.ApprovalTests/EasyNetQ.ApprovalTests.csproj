@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6</TargetFramework>
+    <RootNamespace>EasyNetQ.Approval.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PublicApiGenerator" Version="10.3.0" />
+    <PackageReference Include="Shouldly" Version="4.0.3" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
+    <PackageReference Include="xunit" Version="2.4.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EasyNetQ.DI.Autofac\EasyNetQ.DI.Autofac.csproj" />
+    <ProjectReference Include="..\EasyNetQ.DI.LightInject\EasyNetQ.DI.LightInject.csproj" />
+    <ProjectReference Include="..\EasyNetQ.DI.Microsoft\EasyNetQ.DI.Microsoft.csproj" />
+    <ProjectReference Include="..\EasyNetQ.DI.Ninject\EasyNetQ.DI.Ninject.csproj" />
+    <ProjectReference Include="..\EasyNetQ.DI.Windsor\EasyNetQ.DI.Windsor.csproj" />
+    <ProjectReference Include="..\EasyNetQ.Logging.Microsoft\EasyNetQ.Logging.Microsoft.csproj" />
+    <ProjectReference Include="..\EasyNetQ.Logging.Serilog\EasyNetQ.Logging.Serilog.csproj" />
+    <ProjectReference Include="..\EasyNetQ.Serialization.NewtonsoftJson\EasyNetQ.Serialization.NewtonsoftJson.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,31 +1,39 @@
-﻿using RabbitMQ.Client;
+using EasyNetQ.Persistent;
+using RabbitMQ.Client;
 
-namespace EasyNetQ.Events
+namespace EasyNetQ.Events;
+
+/// <summary>
+///     This event is raised after a successful connection to the endpoint
+/// </summary>
+public readonly struct ConnectionDisconnectedEvent
 {
     /// <summary>
-    ///     This event is raised after a successful connection to the endpoint
+    ///     The type of the associated connection
     /// </summary>
-    public class ConnectionDisconnectedEvent
+    public PersistentConnectionType Type { get; }
+
+    /// <summary>
+    ///     The endpoint a connection is disconnected from
+    /// </summary>
+    public AmqpTcpEndpoint Endpoint { get; }
+
+    /// <summary>
+    ///     The reason of a disconnection
+    /// </summary>
+    public string Reason { get; }
+
+    /// <summary>
+    ///     Creates ConnectionDisconnectedEvent
+    /// </summary>
+    public ConnectionDisconnectedEvent(
+        PersistentConnectionType type,
+        AmqpTcpEndpoint endpoint,
+        string reason
+    )
     {
-        /// <summary>
-        ///     The endpoint a connection is disconnected from
-        /// </summary>
-        public AmqpTcpEndpoint Endpoint { get; }
-
-        /// <summary>
-        ///     The reason of a disconnection
-        /// </summary>
-        public string Reason { get; }
-
-        /// <summary>
-        ///     Creates ConnectionDisconnectedEvent
-        /// </summary>
-        /// <param name="endpoint">The endpoint</param>
-        /// <param name="reason">The reason</param>
-        public ConnectionDisconnectedEvent(AmqpTcpEndpoint endpoint, string reason)
-        {
-            Endpoint = endpoint;
-            Reason = reason;
-        }
+        Type = type;
+        Endpoint = endpoint;
+        Reason = reason;
     }
 }

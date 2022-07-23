@@ -1,35 +1,51 @@
-﻿using System.IO;
+using System.Buffers;
+using System.IO;
 using System.IO.Compression;
 
-namespace EasyNetQ.Interception
+namespace EasyNetQ.Interception;
+
+/// <summary>
+///     An interceptor which compresses and decompressed messages
+/// </summary>
+public class GZipInterceptor : IProduceConsumeInterceptor
 {
-    /// <summary>
-    ///     An interceptor which compresses and decompressed messages
-    /// </summary>
-    public class GZipInterceptor : IProduceConsumeInterceptor
+    /// <inheritdoc />
+    public ProducedMessage OnProduce(in ProducedMessage message)
     {
-        /// <inheritdoc />
-        public ProducedMessage OnProduce(ProducedMessage message)
+        var body = ArrayPool<byte>.Shared.Rent(message.Body.Length); // most likely rented array is larger than message.Body
+
+        try
         {
-            var properties = message.Properties;
-            var body = message.Body;
+            message.Body.CopyTo(body);
             using var output = new MemoryStream();
             using (var compressingStream = new GZipStream(output, CompressionMode.Compress))
-                compressingStream.Write(body, 0, body.Length);
-            return new ProducedMessage(properties, output.ToArray());
+                compressingStream.Write(body, 0, message.Body.Length);
+            return new ProducedMessage(message.Properties, output.ToArray()); // TODO: think of a better memory management for interceptors
         }
-
-        /// <inheritdoc />
-        public ConsumedMessage OnConsume(ConsumedMessage message)
+        finally
         {
-            var receivedInfo = message.ReceivedInfo;
-            var properties = message.Properties;
-            var body = message.Body;
+            ArrayPool<byte>.Shared.Return(body);
+        }
+    }
+
+    /// <inheritdoc />
+    public ConsumedMessage OnConsume(in ConsumedMessage message)
+    {
+        var body = ArrayPool<byte>.Shared.Rent(message.Body.Length); // most likely rented array is larger than message.Body
+
+        try
+        {
+            message.Body.CopyTo(body);
+
             using var output = new MemoryStream();
-            using (var compressedStream = new MemoryStream(body))
+            using (var compressedStream = new MemoryStream(body, 0, message.Body.Length))
             using (var decompressingStream = new GZipStream(compressedStream, CompressionMode.Decompress))
                 decompressingStream.CopyTo(output);
-            return new ConsumedMessage(receivedInfo, properties, output.ToArray());
+            return new ConsumedMessage(message.ReceivedInfo, message.Properties, output.ToArray()); // TODO: think of better memory management for interceptors
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(body);
         }
     }
 }

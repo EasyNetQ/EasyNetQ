@@ -1,28 +1,42 @@
-﻿using System;
+using System;
+using EasyNetQ.Consumer;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ
+namespace EasyNetQ;
+
+/// <summary>
+/// The result of an <see cref="IBus"/> Subscribe or SubscribeAsync operation.
+/// In order to cancel the subscription, call dispose on this object or on ConsumerCancellation.
+/// </summary>
+public readonly struct SubscriptionResult : IDisposable
 {
-    public sealed class SubscriptionResult : ISubscriptionResult
+    /// <summary>
+    /// The <see cref="IConsumer"/> cancellation, which can be disposed to cancel the subscription.
+    /// </summary>
+    public SubscriptionResult(in Exchange exchange, in Queue queue, IDisposable consumerCancellation)
     {
-        public IExchange Exchange { get; }
-        public IQueue Queue { get; }
-        public IDisposable ConsumerCancellation { get; }
+        Preconditions.CheckNotNull(consumerCancellation, nameof(consumerCancellation));
 
-        public SubscriptionResult(IExchange exchange, IQueue queue, IDisposable consumerCancellation)
-        {
-            Preconditions.CheckNotNull(exchange, "exchange");
-            Preconditions.CheckNotNull(queue, "queue");
-            Preconditions.CheckNotNull(consumerCancellation, "consumerCancellation");
-
-            Exchange = exchange;
-            Queue = queue;
-            ConsumerCancellation = consumerCancellation;
-        }
-
-        public void Dispose()
-        {
-            ConsumerCancellation.Dispose();
-        }
+        Exchange = exchange;
+        Queue = queue;
+        ConsumerCancellation = consumerCancellation;
     }
+
+    /// <summary>
+    /// The <see cref="Exchange"/> to which <see cref="Queue"/> is bound.
+    /// </summary>
+    public Exchange Exchange { get; }
+
+    /// <summary>
+    /// The <see cref="Queue"/> that the underlying <see cref="IConsumer"/> is consuming.
+    /// </summary>
+    public Queue Queue { get; }
+
+    /// <summary>
+    /// The <see cref="IConsumer"/> cancellation, which can be disposed to cancel the subscription.
+    /// </summary>
+    private IDisposable ConsumerCancellation { get; }
+
+    /// <inheritdoc />
+    public void Dispose() => ConsumerCancellation.Dispose();
 }

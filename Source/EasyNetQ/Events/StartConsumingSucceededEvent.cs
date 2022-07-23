@@ -1,21 +1,20 @@
-﻿using EasyNetQ.Consumer;
+using EasyNetQ.Consumer;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.Events
+namespace EasyNetQ.Events;
+
+/// <summary>
+/// This event is fired when the consumer starts consuming successfully.
+/// </summary>
+public readonly struct StartConsumingSucceededEvent
 {
-    /// <summary>
-    /// This event is fired when the consumer starts consuming successfully.
-    /// </summary>
-    public class StartConsumingSucceededEvent
+    public IConsumer Consumer { get; }
+
+    public Queue Queue { get; }
+
+    public StartConsumingSucceededEvent(IConsumer consumer, in Queue queue)
     {
-        public IConsumer Consumer { get; }
-
-        public IQueue Queue { get; }
-
-        public StartConsumingSucceededEvent(IConsumer consumer, IQueue queue)
-        {
-            Consumer = consumer;
-            Queue = queue;
-        }
+        Consumer = consumer;
+        Queue = queue;
     }
 }

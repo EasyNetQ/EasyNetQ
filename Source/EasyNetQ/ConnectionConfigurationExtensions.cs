@@ -1,100 +1,91 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
-namespace EasyNetQ
+namespace EasyNetQ;
+
+internal static class ConnectionConfigurationExtensions
 {
-    internal static class ConnectionConfigurationExtensions
+    public static void SetDefaultProperties(this ConnectionConfiguration configuration)
     {
-        public static void SetDefaultProperties(this ConnectionConfiguration configuration)
-        {
-            Preconditions.CheckNotNull(configuration, "configuration");
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
 
-            if (
-                configuration.AmqpConnectionString != null &&
-                configuration.Hosts.All(h => h.Host != configuration.AmqpConnectionString.Host)
-            )
+        if (configuration.Hosts.Count == 0)
+            throw new EasyNetQException(
+                "Invalid connection string. 'host' value must be supplied. e.g: \"host=myserver\""
+            );
+
+        foreach (var hostConfiguration in configuration.Hosts)
+            if (hostConfiguration.Port == 0)
+                hostConfiguration.Port = configuration.Port;
+
+        var applicationNameAndPath = Environment.GetCommandLineArgs()[0];
+
+        var applicationName = "unknown";
+        var applicationPath = "unknown";
+        if (!string.IsNullOrWhiteSpace(applicationNameAndPath))
+            try
             {
-                if (configuration.Port == ConnectionConfiguration.DefaultPort)
-                {
-                    if (configuration.AmqpConnectionString.Port > 0)
-                        configuration.Port = (ushort) configuration.AmqpConnectionString.Port;
-                    else if (
-                        configuration.AmqpConnectionString.Scheme.Equals("amqps", StringComparison.OrdinalIgnoreCase)
-                    )
-                        configuration.Port = ConnectionConfiguration.DefaultAmqpsPort;
-                }
-
-                if (configuration.AmqpConnectionString.Segments.Length > 1)
-                    configuration.VirtualHost = configuration.AmqpConnectionString.Segments.Last();
-
-                configuration.Hosts.Add(new HostConfiguration {Host = configuration.AmqpConnectionString.Host});
+                // Will only throw an exception if the applicationName contains invalid characters, is empty, or too long
+                // Silently catch the exception, as we will just leave the application name and path to "unknown"
+                applicationName = Path.GetFileName(applicationNameAndPath);
+                applicationPath = Path.GetDirectoryName(applicationNameAndPath);
+            }
+            catch (ArgumentException)
+            {
+            }
+            catch (PathTooLongException)
+            {
             }
 
-            if (configuration.Hosts.Count == 0)
-                throw new EasyNetQException(
-                    "Invalid connection string. 'host' value must be supplied. e.g: \"host=myserver\""
-                );
+        AddValueIfNotExists(configuration.ClientProperties, "client_api", "EasyNetQ");
+        AddValueIfNotExists(configuration.ClientProperties, "product", configuration.Product ?? applicationName);
+        AddValueIfNotExists(configuration.ClientProperties, "platform", configuration.Platform ?? GetPlatform());
+        AddValueIfNotExists(configuration.ClientProperties, "os", Environment.OSVersion.ToString());
+        AddValueIfNotExists(configuration.ClientProperties, "version", GetApplicationVersion());
+        AddValueIfNotExists(configuration.ClientProperties, "connection_name", configuration.Name ?? applicationName);
+        AddValueIfNotExists(configuration.ClientProperties, "easynetq_version", typeof(ConnectionConfigurationExtensions).Assembly.GetName().Version.ToString());
+        AddValueIfNotExists(configuration.ClientProperties, "application", applicationName);
+        AddValueIfNotExists(configuration.ClientProperties, "application_location", applicationPath);
+        AddValueIfNotExists(configuration.ClientProperties, "machine_name", Environment.MachineName);
+        AddValueIfNotExists(configuration.ClientProperties, "user", configuration.UserName);
+        AddValueIfNotExists(configuration.ClientProperties, "connected", DateTime.UtcNow.ToString("u")); // UniversalSortableDateTimePattern: yyyy'-'MM'-'dd HH':'mm':'ss'Z'
+        AddValueIfNotExists(configuration.ClientProperties, "requested_heartbeat", configuration.RequestedHeartbeat.ToString());
+        AddValueIfNotExists(configuration.ClientProperties, "timeout", configuration.Timeout.ToString());
+        AddValueIfNotExists(configuration.ClientProperties, "publisher_confirms", configuration.PublisherConfirms.ToString());
+        AddValueIfNotExists(configuration.ClientProperties, "persistent_messages", configuration.PersistentMessages.ToString());
+    }
 
-            foreach (var hostConfiguration in configuration.Hosts)
-                if (hostConfiguration.Port == 0)
-                    hostConfiguration.Port = configuration.Port;
+    private static void AddValueIfNotExists(IDictionary<string, object> clientProperties, string name, string value)
+    {
+        // allows to set nulls, null values will be displayed in RabbitMQ Management Plugin UI as 'undefined'
+        if (!clientProperties.ContainsKey(name))
+            clientProperties.Add(name, value);
+    }
 
-#if !NETFX
-            var version = typeof(ConnectionConfigurationExtensions).GetTypeInfo().Assembly.GetName().Version.ToString();
-#else
-            var version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-#endif
-            var applicationNameAndPath = Environment.GetCommandLineArgs()[0];
-
-            var applicationName = "unknown";
-            var applicationPath = "unknown";
-            if (!string.IsNullOrWhiteSpace(applicationNameAndPath))
-                try
-                {
-                    // Will only throw an exception if the applicationName contains invalid characters, is empty, or too long
-                    // Silently catch the exception, as we will just leave the application name and path to "unknown"
-                    applicationName = Path.GetFileName(applicationNameAndPath);
-                    applicationPath = Path.GetDirectoryName(applicationNameAndPath);
-                }
-                catch (ArgumentException)
-                {
-                }
-                catch (PathTooLongException)
-                {
-                }
-
-            var hostname = Environment.MachineName;
-
-            var netVersion = Environment.Version.ToString();
-            configuration.Product ??= applicationName;
-            configuration.Platform ??= hostname;
-            configuration.Name ??= applicationName;
-
-            AddValueIfNotExists(configuration.ClientProperties, "client_api", "EasyNetQ");
-            AddValueIfNotExists(configuration.ClientProperties, "product", configuration.Product);
-            AddValueIfNotExists(configuration.ClientProperties, "platform", configuration.Platform);
-            AddValueIfNotExists(configuration.ClientProperties, "net_version", netVersion);
-            AddValueIfNotExists(configuration.ClientProperties, "version", version);
-            AddValueIfNotExists(configuration.ClientProperties, "easynetq_version", version);
-            AddValueIfNotExists(configuration.ClientProperties, "application", applicationName);
-            AddValueIfNotExists(configuration.ClientProperties, "application_location", applicationPath);
-            AddValueIfNotExists(configuration.ClientProperties, "machine_name", hostname);
-            AddValueIfNotExists(configuration.ClientProperties, "timeout", configuration.Timeout.ToString());
-            AddValueIfNotExists(
-                configuration.ClientProperties, "publisher_confirms", configuration.PublisherConfirms.ToString()
-            );
-            AddValueIfNotExists(
-                configuration.ClientProperties, "persistent_messages", configuration.PersistentMessages.ToString()
-            );
-        }
-
-        private static void AddValueIfNotExists(IDictionary<string, object> clientProperties, string name, string value)
+    private static string GetApplicationVersion()
+    {
+        try
         {
-            if (!clientProperties.ContainsKey(name))
-                clientProperties.Add(name, value);
+            return Assembly.GetEntryAssembly()?.GetName().Version.ToString();
         }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static string GetPlatform()
+    {
+        string platform = RuntimeInformation.FrameworkDescription;
+        string frameworkName = Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName;
+        if (frameworkName != null)
+            platform = platform + " [" + frameworkName + "]";
+
+        // example: .NET Core 4.6.27317.07 [.NETCoreApp,Version=v2.0]
+        return platform;
     }
 }

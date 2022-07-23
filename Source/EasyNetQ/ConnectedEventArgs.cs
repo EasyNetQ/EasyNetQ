@@ -1,31 +1,35 @@
 using System;
+using EasyNetQ.Persistent;
 
-namespace EasyNetQ
+namespace EasyNetQ;
+
+/// <summary>
+///     Arguments of Connected event
+/// </summary>
+public class ConnectedEventArgs : EventArgs
 {
     /// <summary>
-    ///     Arguments of Connected event
+    ///     Creates ConnectedEventArgs
     /// </summary>
-    public class ConnectedEventArgs : EventArgs
+    public ConnectedEventArgs(PersistentConnectionType type, string hostname, int port)
     {
-        /// <summary>
-        ///     Creates ConnectedEventArgs
-        /// </summary>
-        /// <param name="hostname">The hostname</param>
-        /// <param name="port">The port</param>
-        public ConnectedEventArgs(string hostname, int port)
-        {
-            Hostname = hostname;
-            Port = port;
-        }
-
-        /// <summary>
-        ///     The hostname of the connected endpoint
-        /// </summary>
-        public string Hostname { get; }
-
-        /// <summary>
-        ///     The port of the connected endpoint
-        /// </summary>
-        public int Port { get; }
+        Type = type;
+        Hostname = hostname;
+        Port = port;
     }
+
+    /// <summary>
+    ///     The type of associated connection
+    /// </summary>
+    public PersistentConnectionType Type { get; }
+
+    /// <summary>
+    ///     The hostname of the connected endpoint
+    /// </summary>
+    public string Hostname { get; }
+
+    /// <summary>
+    ///     The port of the connected endpoint
+    /// </summary>
+    public int Port { get; }
 }

@@ -1,46 +1,55 @@
-﻿namespace EasyNetQ.Tests
+namespace EasyNetQ.Tests;
+
+public class TestMessage
 {
-    public class TestMessage
-    {
-    }
+}
 
-    [Queue("MyQueue", ExchangeName = "MyExchange")]
-    public class AnnotatedTestMessage
-    {
-    }
+[Queue("MyQueue", QueueType = QueueType.Quorum)]
+public class QuorumQueueTestMessage
+{
+}
 
-    [Queue("MyQueue", ExchangeName = "MyExchange")]
-    public interface IAnnotatedTestMessage
-    {
-    }
+[Queue("MyQueue", QueueType = QueueType.Quorum)]
+public interface IQuorumQueueTestMessage
+{
+}
 
-    [Queue("MyQueue")]
-    public class QueueNameOnlyAnnotatedTestMessage
-    {
-    }
+[Queue("MyQueue", ExchangeName = "MyExchange")]
+public class AnnotatedTestMessage
+{
+}
 
-    [Queue("MyQueue")]
-    public interface IQueueNameOnlyAnnotatedTestMessage
-    {
-    }
+[Queue("MyQueue", ExchangeName = "MyExchange")]
+public interface IAnnotatedTestMessage
+{
+}
 
-    [Queue("")]
-    public class EmptyQueueNameAnnotatedTestMessage
-    {
-    }
+[Queue("MyQueue")]
+public class QueueNameOnlyAnnotatedTestMessage
+{
+}
 
-    [Queue("")]
-    public interface IEmptyQueueNameAnnotatedTestMessage
-    {
-    }
+[Queue("MyQueue")]
+public interface IQueueNameOnlyAnnotatedTestMessage
+{
+}
 
-    public class MyMessage
-    {
-        public string Text { get; set; }
-    }
+[Queue("")]
+public class EmptyQueueNameAnnotatedTestMessage
+{
+}
 
-    public class MyOtherMessage
-    {
-        public string Text { get; set; }
-    }
+[Queue("")]
+public interface IEmptyQueueNameAnnotatedTestMessage
+{
+}
+
+public class MyMessage
+{
+    public string Text { get; set; }
+}
+
+public class MyOtherMessage
+{
+    public string Text { get; set; }
 }

@@ -1,24 +1,29 @@
-﻿using RabbitMQ.Client;
+using EasyNetQ.Persistent;
+using RabbitMQ.Client;
 
-namespace EasyNetQ.Events
+namespace EasyNetQ.Events;
+
+/// <summary>
+///     This event is raised after a recovery of the connection to the endpoint
+/// </summary>
+public readonly struct ConnectionRecoveredEvent
 {
     /// <summary>
-    ///     This event is raised after a recovery of the connection to the endpoint
+    ///     The type of a connection
     /// </summary>
-    public class ConnectionRecoveredEvent
-    {
-        /// <summary>
-        ///     The endpoint a connection is connected to
-        /// </summary>
-        public AmqpTcpEndpoint Endpoint { get; }
+    public PersistentConnectionType Type { get; }
 
-        /// <summary>
-        ///     Creates ConnectionRecoveredEvent
-        /// </summary>
-        /// <param name="endpoint">The endpoint</param>
-        public ConnectionRecoveredEvent(AmqpTcpEndpoint endpoint)
-        {
-            Endpoint = endpoint;
-        }
+    /// <summary>
+    ///     The endpoint a connection is connected to
+    /// </summary>
+    public AmqpTcpEndpoint Endpoint { get; }
+
+    /// <summary>
+    ///     Creates ConnectionRecoveredEvent
+    /// </summary>
+    public ConnectionRecoveredEvent(PersistentConnectionType type, AmqpTcpEndpoint endpoint)
+    {
+        Type = type;
+        Endpoint = endpoint;
     }
 }

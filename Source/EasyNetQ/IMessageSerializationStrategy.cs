@@ -1,50 +1,56 @@
-namespace EasyNetQ
+using System;
+using System.Buffers;
+
+namespace EasyNetQ;
+
+/// <summary>
+///     The message serialization strategy
+/// </summary>
+public interface IMessageSerializationStrategy
 {
     /// <summary>
-    ///     The message serialization strategy
+    ///     Serializes the message
     /// </summary>
-    public interface IMessageSerializationStrategy
-    {
-        /// <summary>
-        ///     Serializes the message
-        /// </summary>
-        /// <param name="message">The message</param>
-        /// <returns></returns>
-        SerializedMessage SerializeMessage(IMessage message);
+    /// <param name="message">The message</param>
+    /// <returns></returns>
+    SerializedMessage SerializeMessage(IMessage message);
 
-        /// <summary>
-        ///     Deserializes the message
-        /// </summary>
-        /// <param name="properties">The properties</param>
-        /// <param name="body">The body</param>
-        /// <returns></returns>
-        IMessage DeserializeMessage(MessageProperties properties, byte[] body);
+    /// <summary>
+    ///     Deserializes the message
+    /// </summary>
+    /// <param name="properties">The properties</param>
+    /// <param name="body">The body</param>
+    /// <returns></returns>
+    IMessage DeserializeMessage(MessageProperties properties, in ReadOnlyMemory<byte> body);
+}
+
+/// <summary>
+///     Represents a serialized message
+/// </summary>
+public readonly struct SerializedMessage : IDisposable
+{
+    private readonly IDisposable owner;
+
+    /// <summary>
+    ///     Creates SerializedMessage
+    /// </summary>s
+    public SerializedMessage(MessageProperties properties, IMemoryOwner<byte> body)
+    {
+        Properties = properties;
+        Body = body?.Memory ?? ReadOnlyMemory<byte>.Empty;
+        owner = body;
     }
 
     /// <summary>
-    ///     Represents a serialized message
+    ///     Message properties
     /// </summary>
-    public readonly struct SerializedMessage
-    {
-        /// <summary>
-        ///     Creates SerializedMessage
-        /// </summary>
-        /// <param name="properties">The properties</param>
-        /// <param name="body">The body</param>
-        public SerializedMessage(MessageProperties properties, byte[] body)
-        {
-            Properties = properties;
-            Body = body;
-        }
+    public MessageProperties Properties { get; }
 
-        /// <summary>
-        ///     Message properties
-        /// </summary>
-        public MessageProperties Properties { get; }
+    /// <summary>
+    ///     Message body
+    /// </summary>
+    public ReadOnlyMemory<byte> Body { get; }
 
-        /// <summary>
-        ///     Message body
-        /// </summary>
-        public byte[] Body { get; }
-    }
+    /// <inheritdoc />
+    public void Dispose() => owner?.Dispose();
 }

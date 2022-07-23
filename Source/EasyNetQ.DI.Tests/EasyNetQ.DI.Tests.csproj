@@ -1,55 +1,34 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.props))\build.props" />
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;net461</TargetFrameworks>
-    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-    <LangVersion>latest</LangVersion>
+    <TargetFramework>net6</TargetFramework>
   </PropertyGroup>
+
   <ItemGroup>
+    <ProjectReference Include="..\EasyNetQ.DI.Microsoft\EasyNetQ.DI.Microsoft.csproj" />
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
     <ProjectReference Include="..\EasyNetQ.DI.Autofac\EasyNetQ.DI.Autofac.csproj" />
     <ProjectReference Include="..\EasyNetQ.DI.LightInject\EasyNetQ.DI.LightInject.csproj" />
-    <ProjectReference Include="..\EasyNetQ.DI.SimpleInjector\EasyNetQ.DI.SimpleInjector.csproj" />
-    <ProjectReference Include="..\EasyNetQ.DI.StructureMap\EasyNetQ.DI.StructureMap.csproj" />
     <ProjectReference Include="..\EasyNetQ.DI.Windsor\EasyNetQ.DI.Windsor.csproj" />
     <ProjectReference Include="..\EasyNetQ.DI.Ninject\EasyNetQ.DI.Ninject.csproj" />
-    <ProjectReference Include="..\EasyNetQ.Tests.Common\EasyNetQ.Tests.Common.csproj" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
-    <ProjectReference Include="..\EasyNetQ.DI.Microsoft\EasyNetQ.DI.Microsoft.csproj" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
+
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
-    <PackageReference Include="xunit" Version="2.4.1" />
-    <PackageReference Include="LightInject" Version="5.5.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="NSubstitute" Version="4.2.2" />
+    <PackageReference Include="FluentAssertions" Version="6.7.0" />
+    <PackageReference Include="LightInject" Version="6.4.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="NSubstitute" Version="4.3.0" />
     <PackageReference Include="RabbitMQ.Client" Version="[6.2.1,6.5.0)" />
-    <PackageReference Include="SimpleInjector" Version="4.6.2" />
     <PackageReference Include="Autofac" Version="4.9.3" />
-    <PackageReference Include="Castle.Core" Version="4.4.0" />
+    <PackageReference Include="Castle.Core" Version="4.4.1" />
     <PackageReference Include="Castle.Windsor" Version="5.0.0" />
-    <PackageReference Include="Ninject" Version="3.3.4" />
-    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
+    <PackageReference Include="Ninject" Version="3.3.5" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
+    <PackageReference Include="xunit" Version="2.4.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
-  </ItemGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net461' ">
-    <DefineConstants>$(DefineConstants);NETFX</DefineConstants>
-  </PropertyGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), build.targets))\build.targets" />
+
 </Project>
