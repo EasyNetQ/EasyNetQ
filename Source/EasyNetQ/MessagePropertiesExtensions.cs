@@ -9,7 +9,7 @@ namespace EasyNetQ;
 /// <summary>
 ///     Represents various properties of a message
 /// </summary>
-internal static class MessagePropertiesExtensions
+public static class MessagePropertiesExtensions
 {
     public const string ConfirmationIdHeader = "EasyNetQ.Confirmation.Id";
 
