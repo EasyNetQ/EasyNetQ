@@ -1,0 +1,17 @@
+namespace EasyNetQ.Serialization.SystemTextJson
+{
+    public class SystemTextJsonSerializer : EasyNetQ.ISerializer
+    {
+        public SystemTextJsonSerializer() { }
+        public SystemTextJsonSerializer(System.Text.Json.JsonSerializerOptions options) { }
+        public object BytesToMessage(System.Type messageType, in System.ReadOnlyMemory<byte> bytes) { }
+        public System.Buffers.IMemoryOwner<byte> MessageToBytes(System.Type messageType, object message) { }
+    }
+}
+namespace EasyNetQ
+{
+    public static class ServiceRegisterExtensions
+    {
+        public static EasyNetQ.DI.IServiceRegister EnableSystemTextJson(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
+    }
+}

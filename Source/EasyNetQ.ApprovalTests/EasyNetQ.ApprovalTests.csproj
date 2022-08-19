@@ -24,6 +24,7 @@
     <ProjectReference Include="..\EasyNetQ.Logging.Microsoft\EasyNetQ.Logging.Microsoft.csproj" />
     <ProjectReference Include="..\EasyNetQ.Logging.Serilog\EasyNetQ.Logging.Serilog.csproj" />
     <ProjectReference Include="..\EasyNetQ.Serialization.NewtonsoftJson\EasyNetQ.Serialization.NewtonsoftJson.csproj" />
+    <ProjectReference Include="..\EasyNetQ.Serialization.SystemTextJson\EasyNetQ.Serialization.SystemTextJson.csproj" />
   </ItemGroup>
 
 </Project>
