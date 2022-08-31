@@ -20,7 +20,8 @@ Initial development was sponsored by travel industry experts [15below](http://15
 * **[Homepage](http://easynetq.com)**
 * **[Documentation](https://github.com/EasyNetQ/EasyNetQ/wiki/Introduction)**
 * **[NuGet](http://www.nuget.org/packages/EasyNetQ)**
-* **[Discussion Group](https://groups.google.com/group/easynetq)**
+* **[Discussions](https://github.com/EasyNetQ/EasyNetQ/discussions)**
+* **[~Old Discussion Group~](https://groups.google.com/group/easynetq)**
 
 Goals:
 
