@@ -8,12 +8,12 @@ internal sealed class Success<T> : ISuccess<T>
         Remainder = remainder;
     }
 
-    public T Result { get; private set; }
+    public T Result { get; }
 
-    public Input Remainder { get; private set; }
+    public Input Remainder { get; }
 
     public override string ToString()
     {
-        return string.Format("Successful parsing of {0}.", Result);
+        return $"Successful parsing of {Result}.";
     }
 }

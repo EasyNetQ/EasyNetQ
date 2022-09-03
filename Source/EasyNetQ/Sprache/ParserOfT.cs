@@ -21,12 +21,11 @@ internal static class ParserExtensions
 
         if (result is ISuccess<T> success)
         {
-            if (!success.Remainder.AtEnd)
-            {
-                throw new ParseException(string.Format("Parsing failure: Couldn't parse the whole input; unparsable remainder is: \"{0}\".", success.Remainder.Source.Substring(success.Remainder.Position)));
-            }
+            if (success.Remainder.AtEnd)
+                return success.Result;
 
-            return success.Result;
+            var unparsableReminder = success.Remainder.Source.Substring(success.Remainder.Position);
+            throw new ParseException($"Parsing failure: Couldn't parse the whole input; unparsable remainder is: \"{unparsableReminder}\".");
         }
 
         throw new ParseException(result.ToString());
