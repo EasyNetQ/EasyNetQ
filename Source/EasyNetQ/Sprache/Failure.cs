@@ -6,21 +6,21 @@ namespace EasyNetQ.Sprache;
 
 internal sealed class Failure<T> : IFailure<T>
 {
-    private readonly Func<IEnumerable<string>> _expectations;
-    private readonly Func<string> _message;
+    private readonly Func<IEnumerable<string>> expectations;
+    private readonly Func<string> message;
 
     public Failure(Input input, Func<string> message, Func<IEnumerable<string>> expectations)
     {
         FailedInput = input;
-        _message = message;
-        _expectations = expectations;
+        this.message = message;
+        this.expectations = expectations;
     }
 
-    public string Message => _message();
+    public string Message => message();
 
-    public IEnumerable<string> Expectations => _expectations();
+    public IEnumerable<string> Expectations => expectations();
 
-    public Input FailedInput { get; private set; }
+    public Input FailedInput { get; }
 
     public override string ToString()
     {
@@ -29,6 +29,6 @@ internal sealed class Failure<T> : IFailure<T>
         if (Expectations.Any())
             expMsg = " expected " + Expectations.Aggregate((e1, e2) => e1 + " or " + e2);
 
-        return string.Format("Parsing failure: {0};{1} ({2}).", Message, expMsg, FailedInput);
+        return $"Parsing failure: {Message};{expMsg} ({FailedInput}).";
     }
 }

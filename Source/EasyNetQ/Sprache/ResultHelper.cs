@@ -17,6 +17,7 @@ internal static class ResultHelper
     {
         if (result is ISuccess<T> s)
             return s;
+
         var f = (IFailure<T>)result;
         return next(f);
     }
