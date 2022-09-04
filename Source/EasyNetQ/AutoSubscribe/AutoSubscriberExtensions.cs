@@ -19,8 +19,6 @@ public static class AutoSubscriberExtensions
     /// <param name="cancellationToken">The cancellation token.</param>
     public static Task<IDisposable> SubscribeAsync(this AutoSubscriber autoSubscriber, Assembly[] assemblies, CancellationToken cancellationToken = default)
     {
-        Preconditions.CheckAny(assemblies, nameof(assemblies), "No assemblies specified.");
-
         return autoSubscriber.SubscribeAsync(assemblies.SelectMany(a => a.GetTypes()).ToArray(), cancellationToken);
     }
 
