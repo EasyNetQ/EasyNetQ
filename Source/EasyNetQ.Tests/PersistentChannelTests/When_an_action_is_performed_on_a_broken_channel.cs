@@ -110,6 +110,27 @@ public class When_an_action_is_performed_and_channel_reopens
         brokenChannel.Received().Close();
         brokenChannel.Received().Dispose();
     }
+
+    [Fact]
+    public void Should_succeed_when_broker_reachable()
+    {
+        var persistentConnection = Substitute.For<IPersistentConnection>();
+
+        var channel = Substitute.For<IModel, IRecoverable>();
+        persistentConnection.CreateModel()
+            .Returns(
+                _ => throw new BrokerUnreachableException(new Exception("Oops")),
+                _ => channel
+            );
+
+        using var persistentChannel = new PersistentChannel(
+            new PersistentChannelOptions(), persistentConnection, Substitute.For<IEventBus>()
+        );
+
+        persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));
+
+        channel.Received().ExchangeDeclare("MyExchange", "direct");
+    }
 }
 
 // ReSharper restore InconsistentNaming
