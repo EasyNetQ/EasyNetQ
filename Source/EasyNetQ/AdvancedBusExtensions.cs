@@ -695,7 +695,7 @@ public static class AdvancedBusExtensions
         Exchange source,
         Queue queue,
         string routingKey,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken = default
     )
     {
         Preconditions.CheckNotNull(bus, nameof(bus));
@@ -717,7 +717,7 @@ public static class AdvancedBusExtensions
         Exchange source,
         Exchange destination,
         string routingKey,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken = default
     )
     {
         Preconditions.CheckNotNull(bus, nameof(bus));
@@ -734,8 +734,13 @@ public static class AdvancedBusExtensions
     /// <param name="routingKey">The routing key</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>A binding</returns>
-    public static Binding<Exchange> Bind(this IAdvancedBus bus, Exchange source, Exchange destination, string routingKey,
-        CancellationToken cancellationToken = default)
+    public static Binding<Exchange> Bind(
+        this IAdvancedBus bus,
+        Exchange source,
+        Exchange destination,
+        string routingKey,
+        CancellationToken cancellationToken = default
+    )
     {
         Preconditions.CheckNotNull(bus, nameof(bus));
 
@@ -1007,8 +1012,13 @@ public static class AdvancedBusExtensions
     /// <param name="ifUnused">Only delete if unused</param>
     /// <param name="ifEmpty">Only delete if empty</param>
     /// <param name="cancellationToken">The cancellation token</param>
-    public static void QueueDelete(this IAdvancedBus bus, string name, bool ifUnused = false, bool ifEmpty = false,
-        CancellationToken cancellationToken = default)
+    public static void QueueDelete(
+        this IAdvancedBus bus,
+        string name,
+        bool ifUnused = false,
+        bool ifEmpty = false,
+        CancellationToken cancellationToken = default
+    )
     {
         Preconditions.CheckNotNull(bus, nameof(bus));
 

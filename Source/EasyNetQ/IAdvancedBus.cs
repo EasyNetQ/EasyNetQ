@@ -242,7 +242,7 @@ public interface IAdvancedBus : IDisposable
         string exchange,
         string routingKey,
         IDictionary<string, object> arguments,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken = default
     );
 
     /// <summary>
@@ -253,7 +253,7 @@ public interface IAdvancedBus : IDisposable
         string sourceExchange,
         string routingKey,
         IDictionary<string, object> arguments,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken = default
     );
 
     /// <summary>
