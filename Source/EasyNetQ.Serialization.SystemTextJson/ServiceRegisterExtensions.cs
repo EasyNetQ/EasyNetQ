@@ -17,4 +17,9 @@ public static class ServiceRegisterExtensions
     {
         return serviceRegister.Register<ISerializer, SystemTextJsonSerializer>();
     }
+
+    public static IServiceRegister EnableSystemTextJson(this IServiceRegister serviceRegister, System.Text.Json.JsonSerializerOptions options)
+    {
+        return serviceRegister.Register<ISerializer>(_ => new SystemTextJsonSerializer(options));
+    }
 }
