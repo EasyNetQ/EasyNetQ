@@ -1,6 +1,6 @@
 namespace EasyNetQ.Serialization.SystemTextJson
 {
-    public class SystemTextJsonSerializer : EasyNetQ.ISerializer
+    public sealed class SystemTextJsonSerializer : EasyNetQ.ISerializer
     {
         public SystemTextJsonSerializer() { }
         public SystemTextJsonSerializer(System.Text.Json.JsonSerializerOptions options) { }
@@ -13,5 +13,6 @@ namespace EasyNetQ
     public static class ServiceRegisterExtensions
     {
         public static EasyNetQ.DI.IServiceRegister EnableSystemTextJson(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
+        public static EasyNetQ.DI.IServiceRegister EnableSystemTextJson(this EasyNetQ.DI.IServiceRegister serviceRegister, System.Text.Json.JsonSerializerOptions options) { }
     }
 }
