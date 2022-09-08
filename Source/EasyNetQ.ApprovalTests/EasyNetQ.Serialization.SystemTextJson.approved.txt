@@ -1,5 +1,11 @@
 namespace EasyNetQ.Serialization.SystemTextJson
 {
+    public class SystemObjectNewtonsoftCompatibleConverter : System.Text.Json.Serialization.JsonConverter<object>
+    {
+        public SystemObjectNewtonsoftCompatibleConverter() { }
+        public override object Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options) { }
+        public override void Write(System.Text.Json.Utf8JsonWriter writer, object value, System.Text.Json.JsonSerializerOptions options) { }
+    }
     public sealed class SystemTextJsonSerializer : EasyNetQ.ISerializer
     {
         public SystemTextJsonSerializer() { }
