@@ -17,10 +17,10 @@ public class SystemObjectNewtonsoftCompatibleConverter : System.Text.Json.Serial
             case System.Text.Json.JsonTokenType.String:
                 return reader.TryGetDateTime(out var datetimeValue) ? datetimeValue : reader.GetString();
             default:
-            {
-                using var document = System.Text.Json.JsonDocument.ParseValue(ref reader);
-                return document.RootElement.Clone();
-            }
+                {
+                    using var document = System.Text.Json.JsonDocument.ParseValue(ref reader);
+                    return document.RootElement.Clone();
+                }
         }
     }
 
