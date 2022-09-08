@@ -116,7 +116,7 @@ public class AmqpConnectionStringParser : IConnectionStringParser
         var property = memberEx.Member as PropertyInfo;
 
         Preconditions.CheckNotNull(property, nameof(getter), "Member is not a property.");
-        Preconditions.CheckTrue(property.CanWrite, nameof(getter), "Member is not a writeable property.");
+        if (!property.CanWrite) throw new ArgumentOutOfRangeException(nameof(getter), null, "Member is not a writeable property.");
 
         return (Action<TContaining, TProperty>)property.GetSetMethod().CreateDelegate(typeof(Action<TContaining, TProperty>));
     }

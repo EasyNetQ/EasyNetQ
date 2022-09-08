@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace EasyNetQ;
 
@@ -130,35 +128,6 @@ internal static class Preconditions
         if (string.IsNullOrWhiteSpace(value))
         {
             throw new ArgumentException(string.Format("{0} must not be blank", name), name);
-        }
-    }
-
-    /// <summary>
-    /// Ensures that <paramref name="value"/> is <c>true</c>.
-    /// </summary>
-    /// <param name="value">
-    /// The value to check, must be <c>true</c>.
-    /// </param>
-    /// <param name="name">
-    /// The name of the parameter the value is taken from, must not be
-    /// blank.
-    /// </param>
-    /// <param name="message">
-    /// The message to provide to the exception if <paramref name="value"/>
-    /// is <c>false</c>, must not be blank.
-    /// </param>
-    /// <exception cref="ArgumentException">
-    /// Thrown if <paramref name="value"/> is <c>false</c>, or if <paramref name="name"/>
-    /// or <paramref name="message"/> are blank.
-    /// </exception>
-    public static void CheckTrue(bool value, string name, string message)
-    {
-        if (!value)
-        {
-            CheckNotBlank(name, nameof(name), "name must not be blank");
-            CheckNotBlank(message, nameof(message), "message must not be blank");
-
-            throw new ArgumentException(message, name);
         }
     }
 
