@@ -49,13 +49,10 @@ public class DelayedExchangeScheduler : IScheduler
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(message, nameof(message));
-        Preconditions.CheckNotNull(configure, nameof(configure));
-
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         var publishConfiguration = new FuturePublishConfiguration(conventions.TopicNamingConvention(typeof(T)));
-        configure(publishConfiguration);
+        configure?.Invoke(publishConfiguration);
 
         var topic = publishConfiguration.Topic;
         var exchangeName = conventions.ExchangeNamingConvention(typeof(T));

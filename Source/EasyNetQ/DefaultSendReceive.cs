@@ -48,7 +48,6 @@ public class DefaultSendReceive : ISendReceive
     )
     {
         Preconditions.CheckNotNull(queue, nameof(queue));
-        Preconditions.CheckNotNull(message, nameof(message));
 
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 

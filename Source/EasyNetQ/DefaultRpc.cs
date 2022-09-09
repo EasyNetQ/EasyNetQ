@@ -78,14 +78,12 @@ public class DefaultRpc : IRpc
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(request, nameof(request));
-
         var requestType = typeof(TRequest);
         var requestConfiguration = new RequestConfiguration(
             conventions.RpcRoutingKeyNamingConvention(requestType),
             configuration.Timeout
         );
-        configure(requestConfiguration);
+        configure?.Invoke(requestConfiguration);
 
         using var cts = cancellationToken.WithTimeout(requestConfiguration.Expiration);
 
