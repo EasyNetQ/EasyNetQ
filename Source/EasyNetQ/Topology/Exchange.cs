@@ -20,11 +20,9 @@ public readonly struct Exchange : IBindable
         string type = ExchangeType.Direct,
         bool durable = true,
         bool autoDelete = false,
-        IDictionary<string, object> arguments = null
+        IDictionary<string, object>? arguments = null
     )
     {
-        Preconditions.CheckNotNull(name, nameof(name));
-
         Name = name;
         Type = type;
         IsDurable = durable;
@@ -55,5 +53,5 @@ public readonly struct Exchange : IBindable
     /// <summary>
     /// The exchange arguments.
     /// </summary>
-    public IDictionary<string, object> Arguments { get; }
+    public IDictionary<string, object>? Arguments { get; }
 }

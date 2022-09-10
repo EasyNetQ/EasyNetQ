@@ -26,7 +26,7 @@ public class JsonSerializer : ISerializer
     /// <summary>
     ///     Creates JsonSerializer
     /// </summary>
-    public JsonSerializer(object serializerSettings = null)
+    public JsonSerializer(object? serializerSettings = null)
     {
         var jsonSerializerType = TryGetType("Newtonsoft.Json.JsonSerializer", "Newtonsoft.Json");
         if (jsonSerializerType == null)
@@ -145,8 +145,6 @@ public class JsonSerializer : ISerializer
     /// <inheritdoc />
     public IMemoryOwner<byte> MessageToBytes(Type messageType, object message)
     {
-        Preconditions.CheckNotNull(messageType, nameof(messageType));
-
         var stream = new ArrayPooledMemoryStream();
 
         using var streamWriter = new StreamWriter(stream, Encoding, DefaultBufferSize, true);
@@ -158,8 +156,6 @@ public class JsonSerializer : ISerializer
     /// <inheritdoc />
     public object BytesToMessage(Type messageType, in ReadOnlyMemory<byte> bytes)
     {
-        Preconditions.CheckNotNull(messageType, nameof(messageType));
-
         using var memoryStream = new ReadOnlyMemoryStream(bytes);
         using var streamReader = new StreamReader(memoryStream, Encoding, false, DefaultBufferSize, true);
         using var reader = createJsonReader(streamReader);

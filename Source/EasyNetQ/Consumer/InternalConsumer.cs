@@ -84,7 +84,7 @@ public interface IInternalConsumer : IDisposable
     /// <summary>
     ///     Raised when consumer is cancelled
     /// </summary>
-    event EventHandler<InternalConsumerCancelledEventArgs> Cancelled;
+    event EventHandler<InternalConsumerCancelledEventArgs>? Cancelled;
 }
 
 /// <inheritdoc />
@@ -100,7 +100,7 @@ public class InternalConsumer : IInternalConsumer
     private readonly ILogger logger;
 
     private volatile bool disposed;
-    private IModel model;
+    private IModel? model;
 
     /// <summary>
     ///     Creates InternalConsumer
@@ -113,12 +113,6 @@ public class InternalConsumer : IInternalConsumer
         IEventBus eventBus
     )
     {
-        Preconditions.CheckNotNull(logger, nameof(logger));
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
-        Preconditions.CheckNotNull(connection, nameof(connection));
-        Preconditions.CheckNotNull(handlerRunner, nameof(handlerRunner));
-        Preconditions.CheckNotNull(eventBus, nameof(eventBus));
-
         this.logger = logger;
         this.configuration = configuration;
         this.connection = connection;
@@ -146,7 +140,7 @@ public class InternalConsumer : IInternalConsumer
 
             consumers.Clear();
 
-            model.Dispose();
+            model?.Dispose();
             model = null;
         }
 
@@ -265,7 +259,7 @@ public class InternalConsumer : IInternalConsumer
     }
 
     /// <inheritdoc />
-    public event EventHandler<InternalConsumerCancelledEventArgs> Cancelled;
+    public event EventHandler<InternalConsumerCancelledEventArgs>? Cancelled;
 
     /// <inheritdoc />
     public void Dispose()
@@ -321,7 +315,7 @@ public class InternalConsumer : IInternalConsumer
         Cancelled?.Invoke(this, new InternalConsumerCancelledEventArgs(cancelled, active));
     }
 
-    private static bool IsModelClosedWithSoftError(IModel model)
+    private static bool IsModelClosedWithSoftError(IModel? model)
     {
         var closeReason = model?.CloseReason;
         if (closeReason == null) return false;

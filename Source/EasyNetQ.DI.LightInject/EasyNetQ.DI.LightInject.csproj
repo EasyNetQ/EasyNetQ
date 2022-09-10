@@ -4,6 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageTags>LightInject;$(PackageTags)</PackageTags>
     <DefineConstants>$(DefineConstants);LIGHT_INJECT_PACKAGE</DefineConstants>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\EasyNetQ\DI\LightInjectAdapter.cs" Link="LightInjectAdapter.cs" />

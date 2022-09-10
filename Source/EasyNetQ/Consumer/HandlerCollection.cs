@@ -21,8 +21,6 @@ public class HandlerCollection : IHandlerCollection
     /// <inheritdoc />
     public IHandlerRegistration Add<T>(IMessageHandler<T> handler)
     {
-        Preconditions.CheckNotNull(handler, nameof(handler));
-
         if (handlers.ContainsKey(typeof(T)))
         {
             throw new EasyNetQException("There is already a handler for message type '{0}'", typeof(T).Name);

@@ -25,7 +25,7 @@ internal
     /// </summary>
     public LightInjectAdapter(IServiceRegistry serviceRegistry)
     {
-        ServiceRegistry = serviceRegistry ?? throw new ArgumentNullException(nameof(serviceRegistry));
+        ServiceRegistry = serviceRegistry;
 
         ServiceRegistry.Register<IServiceResolver>(x => new LightInjectResolver(x), new PerRequestLifeTime());
     }

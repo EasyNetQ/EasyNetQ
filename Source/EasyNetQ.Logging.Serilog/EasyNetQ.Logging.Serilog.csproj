@@ -4,6 +4,7 @@
       <Description>An adaptor to allow EasyNetQ to use Serilog</Description>
       <TargetFramework>netstandard2.0</TargetFramework>
       <PackageTags>Serilog;Logging;$(PackageTags)</PackageTags>
+      <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>

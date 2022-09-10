@@ -26,10 +26,6 @@ public sealed class SinglePersistentChannelDispatcher : IPersistentChannelDispat
         IPersistentChannelFactory channelFactory
     )
     {
-        Preconditions.CheckNotNull(producerConnection, nameof(producerConnection));
-        Preconditions.CheckNotNull(consumerConnection, nameof(consumerConnection));
-        Preconditions.CheckNotNull(channelFactory, nameof(channelFactory));
-
         channelPerOptions = new ConcurrentDictionary<PersistentChannelDispatchOptions, IPersistentChannel>();
         createChannelFactory = o =>
         {

@@ -21,9 +21,6 @@ internal static class Parse
     /// <returns></returns>
     public static Parser<char> Char(Predicate<char> predicate, string description)
     {
-        Preconditions.CheckNotNull(predicate, nameof(predicate));
-        Preconditions.CheckNotNull(description, nameof(description));
-
         return i =>
         {
             if (i.AtEnd)
@@ -73,8 +70,6 @@ internal static class Parse
     /// <returns></returns>
     public static Parser<IEnumerable<char>> String(string s)
     {
-        Preconditions.CheckNotNull(s, nameof(s));
-
         return s
             .Select(Char)
             .Aggregate(Return(Enumerable.Empty<char>()), (a, p) => a.Concat(p.Once()))
@@ -88,8 +83,6 @@ internal static class Parse
     /// <returns></returns>
     public static Parser<IEnumerable<char>> CaseInsensitiveString(string s)
     {
-        Preconditions.CheckNotNull(s, nameof(s));
-
         return s
             .Select(CharCaseInsensitive)
             .Aggregate(Return(Enumerable.Empty<char>()), (a, p) => a.Concat(p.Once()))
@@ -106,9 +99,6 @@ internal static class Parse
     /// <returns></returns>
     public static Parser<U> Then<T, U>(this Parser<T> first, Func<T, Parser<U>> second)
     {
-        Preconditions.CheckNotNull(first, nameof(first));
-        Preconditions.CheckNotNull(second, nameof(second));
-
         return i => first(i).IfSuccess(s => second(s.Result)(s.Remainder));
     }
 
@@ -121,8 +111,6 @@ internal static class Parse
     /// <remarks>Implemented imperatively to decrease stack usage.</remarks>
     public static Parser<IEnumerable<T>> Many<T>(this Parser<T> parser)
     {
-        Preconditions.CheckNotNull(parser, nameof(parser));
-
         return i =>
         {
             var remainder = i;
@@ -151,8 +139,6 @@ internal static class Parse
     /// <returns></returns>
     public static Parser<IEnumerable<T>> AtLeastOnce<T>(this Parser<T> parser)
     {
-        Preconditions.CheckNotNull(parser, nameof(parser));
-
         return parser.Once().Then(t1 => parser.Many().Select(t1.Concat));
     }
 
@@ -166,9 +152,6 @@ internal static class Parse
     /// <returns></returns>
     public static Parser<U> Select<T, U>(this Parser<T> parser, Func<T, U> convert)
     {
-        Preconditions.CheckNotNull(parser, nameof(parser));
-        Preconditions.CheckNotNull(convert, nameof(convert));
-
         return parser.Then(t => Return(convert(t)));
     }
 
@@ -180,8 +163,6 @@ internal static class Parse
     /// <returns></returns>
     public static Parser<T> Token<T>(this Parser<T> parser)
     {
-        Preconditions.CheckNotNull(parser, nameof(parser));
-
         return from leading in WhiteSpace.Many()
                from item in parser
                from trailing in WhiteSpace.Many()
@@ -207,9 +188,6 @@ internal static class Parse
     /// <returns></returns>
     public static Parser<T> Or<T>(this Parser<T> first, Parser<T> second)
     {
-        Preconditions.CheckNotNull(first, nameof(first));
-        Preconditions.CheckNotNull(second, nameof(second));
-
         return i =>
         {
             var fr = first(i);
@@ -230,9 +208,6 @@ internal static class Parse
     /// <returns></returns>
     public static Parser<T> Named<T>(this Parser<T> parser, string name)
     {
-        Preconditions.CheckNotNull(parser, nameof(parser));
-        Preconditions.CheckNotNull(name, nameof(name));
-
         return i => parser(i).IfFailure(f => f.FailedInput == i ? new Failure<T>(f.FailedInput, () => f.Message, () => new[] { name }) : f);
     }
 
@@ -244,8 +219,6 @@ internal static class Parse
     /// <returns></returns>
     public static Parser<IEnumerable<T>> Once<T>(this Parser<T> parser)
     {
-        Preconditions.CheckNotNull(parser, nameof(parser));
-
         return parser.Select(r => (IEnumerable<T>)new[] { r });
     }
 
@@ -258,9 +231,6 @@ internal static class Parse
     /// <returns></returns>
     public static Parser<IEnumerable<T>> Concat<T>(this Parser<IEnumerable<T>> first, Parser<IEnumerable<T>> second)
     {
-        Preconditions.CheckNotNull(first, nameof(first));
-        Preconditions.CheckNotNull(second, nameof(second));
-
         return first.Then(f => second.Select(f.Concat));
     }
 
@@ -284,10 +254,6 @@ internal static class Parse
     /// <returns></returns>
     public static Parser<V> SelectMany<T, U, V>(this Parser<T> parser, Func<T, Parser<U>> selector, Func<T, U, V> projector)
     {
-        Preconditions.CheckNotNull(parser, nameof(parser));
-        Preconditions.CheckNotNull(selector, nameof(selector));
-        Preconditions.CheckNotNull(projector, nameof(projector));
-
         return parser.Then(t => selector(t).Select(u => projector(t, u)));
     }
 }

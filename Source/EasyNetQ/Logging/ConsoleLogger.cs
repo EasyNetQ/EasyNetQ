@@ -21,9 +21,9 @@ public class ConsoleLogger : ILogger
     /// <inheritdoc />
     public bool Log(
         LogLevel logLevel,
-        Func<string> messageFunc,
-        Exception exception = null,
-        params object[] formatParameters
+        Func<string>? messageFunc,
+        Exception? exception = null,
+        params object?[] formatParameters
     )
     {
         if (messageFunc == null)

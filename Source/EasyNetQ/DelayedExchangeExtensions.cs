@@ -17,10 +17,7 @@ public static class DelayedExchangeExtensions
         this IExchangeDeclareConfiguration configuration, string exchangeType = ExchangeType.Fanout
     )
     {
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
-
-        return configuration.WithType("x-delayed-message")
-            .WithArgument("x-delayed-type", exchangeType);
+        return configuration.WithType("x-delayed-message").WithArgument("x-delayed-type", exchangeType);
     }
 
     /// <summary>
@@ -30,8 +27,6 @@ public static class DelayedExchangeExtensions
     /// <param name="delay">The delay</param>
     public static IMessage<T> WithDelay<T>(this IMessage<T> message, TimeSpan delay)
     {
-        Preconditions.CheckNotNull(message, nameof(message));
-
         message.Properties.Headers["x-delay"] = (int)delay.TotalMilliseconds;
         return message;
     }

@@ -100,7 +100,7 @@ public class ServiceCollectionAdapter : IServiceRegister
 
         public ServiceProviderAdapter(IServiceProvider serviceProvider) => this.serviceProvider = serviceProvider;
 
-        public TService Resolve<TService>() where TService : class => serviceProvider.GetService<TService>();
+        public TService Resolve<TService>() where TService : class => serviceProvider.GetService<TService>()!;
 
         public IServiceResolverScope CreateScope() => new MicrosoftServiceResolverScope(serviceProvider);
     }
@@ -115,7 +115,7 @@ public class ServiceCollectionAdapter : IServiceRegister
 
         public void Dispose() => serviceScope?.Dispose();
 
-        public TService Resolve<TService>() where TService : class => serviceScope.ServiceProvider.GetService<TService>();
+        public TService Resolve<TService>() where TService : class => serviceScope.ServiceProvider.GetService<TService>()!;
     }
 
     private class ImplementationFactoryAdapter<T>
@@ -125,6 +125,6 @@ public class ServiceCollectionAdapter : IServiceRegister
         public ImplementationFactoryAdapter(Func<IServiceResolver, object> implementationFactory) => this.implementationFactory = implementationFactory;
 
         // ReSharper disable once UnusedMember.Local
-        public T Resolve(IServiceProvider provider) => (T)implementationFactory(provider.GetService<IServiceResolver>());
+        public T Resolve(IServiceProvider provider) => (T)implementationFactory(provider.GetService<IServiceResolver>()!);
     }
 }

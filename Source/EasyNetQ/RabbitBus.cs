@@ -19,12 +19,6 @@ public class RabbitBus : IBus
         IScheduler scheduler
     )
     {
-        Preconditions.CheckNotNull(advanced, nameof(advanced));
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
-        Preconditions.CheckNotNull(rpc, nameof(rpc));
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
-        Preconditions.CheckNotNull(scheduler, nameof(scheduler));
-
         Advanced = advanced;
         PubSub = pubSub;
         Rpc = rpc;

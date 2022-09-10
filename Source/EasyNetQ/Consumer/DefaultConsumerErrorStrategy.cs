@@ -50,13 +50,6 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
         ConnectionConfiguration configuration
     )
     {
-        Preconditions.CheckNotNull(connection, nameof(connection));
-        Preconditions.CheckNotNull(serializer, nameof(serializer));
-        Preconditions.CheckNotNull(conventions, nameof(conventions));
-        Preconditions.CheckNotNull(typeNameSerializer, nameof(typeNameSerializer));
-        Preconditions.CheckNotNull(errorMessageSerializer, nameof(errorMessageSerializer));
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
-
         this.logger = logger;
         this.connection = connection;
         this.serializer = serializer;
@@ -69,9 +62,6 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
     /// <inheritdoc />
     public virtual Task<AckStrategy> HandleConsumerErrorAsync(ConsumerExecutionContext context, Exception exception, CancellationToken cancellationToken)
     {
-        Preconditions.CheckNotNull(context, nameof(context));
-        Preconditions.CheckNotNull(exception, nameof(exception));
-
         if (disposed)
             throw new ObjectDisposedException(nameof(DefaultConsumerErrorStrategy));
 

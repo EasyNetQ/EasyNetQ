@@ -39,7 +39,7 @@ public class PerQueueConsumerConfiguration
         bool autoAck,
         string consumerTag,
         bool isExclusive,
-        IDictionary<string, object> arguments,
+        IDictionary<string, object>? arguments,
         MessageHandler handler
     )
     {
@@ -68,7 +68,7 @@ public class PerQueueConsumerConfiguration
     /// <summary>
     ///     Custom arguments
     /// </summary>
-    public IDictionary<string, object> Arguments { get; }
+    public IDictionary<string, object>? Arguments { get; }
 
     /// <summary>
     ///     Handler for messages which are received by consumer
@@ -115,7 +115,7 @@ public class Consumer : IConsumer
     private readonly IDisposable[] disposables;
     private readonly object mutex = new();
 
-    private volatile IInternalConsumer consumer;
+    private volatile IInternalConsumer? consumer;
     private volatile bool disposed;
 
     /// <summary>
@@ -128,11 +128,6 @@ public class Consumer : IConsumer
         IEventBus eventBus
     )
     {
-        Preconditions.CheckNotNull(logger, nameof(logger));
-        Preconditions.CheckNotNull(internalConsumerFactory, nameof(internalConsumerFactory));
-        Preconditions.CheckNotNull(eventBus, nameof(eventBus));
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
-
         this.configuration = configuration;
         this.internalConsumerFactory = internalConsumerFactory;
         this.eventBus = eventBus;

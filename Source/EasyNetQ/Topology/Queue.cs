@@ -15,7 +15,7 @@ public readonly struct Queue : IBindable
         bool isDurable = true,
         bool isExclusive = false,
         bool isAutoDelete = false,
-        IDictionary<string, object> arguments = null
+        IDictionary<string, object>? arguments = null
     )
     {
         Preconditions.CheckNotBlank(name, nameof(name));
@@ -50,5 +50,5 @@ public readonly struct Queue : IBindable
     /// <summary>
     ///     The queue arguments
     /// </summary>
-    public IDictionary<string, object> Arguments { get; }
+    public IDictionary<string, object>? Arguments { get; }
 }

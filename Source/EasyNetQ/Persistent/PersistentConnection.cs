@@ -17,7 +17,7 @@ public class PersistentConnection : IPersistentConnection
     private readonly ConnectionConfiguration configuration;
     private readonly IConnectionFactory connectionFactory;
     private readonly IEventBus eventBus;
-    private volatile IAutorecoveringConnection initializedConnection;
+    private volatile IAutorecoveringConnection? initializedConnection;
     private volatile bool disposed;
 
     /// <summary>
@@ -31,11 +31,6 @@ public class PersistentConnection : IPersistentConnection
         IEventBus eventBus
     )
     {
-        Preconditions.CheckNotNull(logger, nameof(logger));
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
-        Preconditions.CheckNotNull(connectionFactory, nameof(connectionFactory));
-        Preconditions.CheckNotNull(eventBus, nameof(eventBus));
-
         this.type = type;
         this.logger = logger;
         this.configuration = configuration;

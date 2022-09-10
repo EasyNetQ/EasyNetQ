@@ -14,11 +14,9 @@ public static class ExchangeDeclareConfigurationExtensions
     /// <param name="alternateExchange">The alternate exchange to set</param>
     /// <returns>The same <paramref name="configuration"/></returns>
     public static IExchangeDeclareConfiguration WithAlternateExchange(
-        this IExchangeDeclareConfiguration configuration, Exchange alternateExchange
+        this IExchangeDeclareConfiguration configuration, in Exchange alternateExchange
     )
     {
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
-
         return configuration.WithArgument("alternate-exchange", alternateExchange.Name);
     }
 }

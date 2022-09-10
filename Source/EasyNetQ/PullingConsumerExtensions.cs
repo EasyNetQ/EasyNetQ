@@ -65,7 +65,6 @@ public static class PullingConsumerExtensions
         CancellationToken cancellationToken = default
     ) where TPullResult : IPullResult
     {
-        Preconditions.CheckNotNull(consumer, nameof(consumer));
 
         return consumer.AckAsync(deliveryTag, false, cancellationToken);
     }
@@ -84,7 +83,6 @@ public static class PullingConsumerExtensions
         CancellationToken cancellationToken = default
     ) where TPullResult : IPullResult
     {
-        Preconditions.CheckNotNull(consumer, nameof(consumer));
 
         return consumer.RejectAsync(deliveryTag, false, requeue, cancellationToken);
     }
@@ -100,7 +98,6 @@ public static class PullingConsumerExtensions
         this IPullingConsumer<TPullResult> consumer, int batchSize, CancellationToken cancellationToken = default
     ) where TPullResult : IPullResult
     {
-        Preconditions.CheckNotNull(consumer, nameof(consumer));
 
         var messages = new List<TPullResult>(batchSize);
         for (var i = 0; i < batchSize; ++i)
@@ -127,7 +124,6 @@ public static class PullingConsumerExtensions
         CancellationToken cancellationToken = default
     ) where TPullResult : IPullResult
     {
-        Preconditions.CheckNotNull(consumer, nameof(consumer));
 
         return consumer.AckAsync(deliveryTag, true, cancellationToken);
     }
@@ -146,7 +142,6 @@ public static class PullingConsumerExtensions
         CancellationToken cancellationToken = default
     ) where TPullResult : IPullResult
     {
-        Preconditions.CheckNotNull(consumer, nameof(consumer));
 
         return consumer.RejectAsync(deliveryTag, true, requeue, cancellationToken);
     }

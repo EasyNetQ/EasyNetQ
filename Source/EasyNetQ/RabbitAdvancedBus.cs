@@ -60,19 +60,6 @@ public class RabbitAdvancedBus : IAdvancedBus
         IConsumeScopeProvider consumeScopeProvider
     )
     {
-        Preconditions.CheckNotNull(producerConnection, nameof(producerConnection));
-        Preconditions.CheckNotNull(consumerConnection, nameof(consumerConnection));
-        Preconditions.CheckNotNull(consumerFactory, nameof(consumerFactory));
-        Preconditions.CheckNotNull(eventBus, nameof(eventBus));
-        Preconditions.CheckNotNull(handlerCollectionFactory, nameof(handlerCollectionFactory));
-        Preconditions.CheckNotNull(container, nameof(container));
-        Preconditions.CheckNotNull(produceConsumeInterceptors, nameof(produceConsumeInterceptors));
-        Preconditions.CheckNotNull(messageSerializationStrategy, nameof(messageSerializationStrategy));
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
-        Preconditions.CheckNotNull(conventions, nameof(conventions));
-        Preconditions.CheckNotNull(pullingConsumerFactory, nameof(pullingConsumerFactory));
-        Preconditions.CheckNotNull(advancedBusEventHandlers, nameof(advancedBusEventHandlers));
-
         this.logger = logger;
         this.producerConnection = producerConnection;
         this.consumerConnection = consumerConnection;
@@ -124,8 +111,6 @@ public class RabbitAdvancedBus : IAdvancedBus
     /// <inheritdoc />
     public IDisposable Consume(Action<IConsumeConfiguration> configure)
     {
-        Preconditions.CheckNotNull(configure, nameof(configure));
-
         var consumeConfiguration = new ConsumeConfiguration(
             configuration.PrefetchCount, handlerCollectionFactory
         );
@@ -222,19 +207,19 @@ public class RabbitAdvancedBus : IAdvancedBus
     }
 
     /// <inheritdoc />
-    public event EventHandler<ConnectedEventArgs> Connected;
+    public event EventHandler<ConnectedEventArgs>? Connected;
 
     /// <inheritdoc />
-    public event EventHandler<DisconnectedEventArgs> Disconnected;
+    public event EventHandler<DisconnectedEventArgs>? Disconnected;
 
     /// <inheritdoc />
-    public event EventHandler<BlockedEventArgs> Blocked;
+    public event EventHandler<BlockedEventArgs>? Blocked;
 
     /// <inheritdoc />
-    public event EventHandler<UnblockedEventArgs> Unblocked;
+    public event EventHandler<UnblockedEventArgs>? Unblocked;
 
     /// <inheritdoc />
-    public event EventHandler<MessageReturnedEventArgs> MessageReturned;
+    public event EventHandler<MessageReturnedEventArgs>? MessageReturned;
 
     /// <inheritdoc />
     public IServiceResolver Container { get; }
@@ -270,9 +255,7 @@ public class RabbitAdvancedBus : IAdvancedBus
         CancellationToken cancellationToken
     )
     {
-        Preconditions.CheckNotNull(exchange, nameof(exchange));
         Preconditions.CheckShortString(routingKey, nameof(routingKey));
-        Preconditions.CheckNotNull(message, nameof(message));
 
         using var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
         await PublishAsync(
@@ -290,7 +273,6 @@ public class RabbitAdvancedBus : IAdvancedBus
     )
     {
         Preconditions.CheckShortString(routingKey, "routingKey");
-        Preconditions.CheckNotNull(message, nameof(message));
 
         using var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
         await PublishAsync(
@@ -309,7 +291,6 @@ public class RabbitAdvancedBus : IAdvancedBus
     )
     {
         Preconditions.CheckShortString(routingKey, nameof(routingKey));
-        Preconditions.CheckNotNull(properties, nameof(properties));
 
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
@@ -376,8 +357,6 @@ public class RabbitAdvancedBus : IAdvancedBus
     /// <inheritdoc />
     public async Task QueueDeclarePassiveAsync(string name, CancellationToken cancellationToken = default)
     {
-        Preconditions.CheckNotNull(name, nameof(name));
-
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         await persistentChannelDispatcher.InvokeAsync(
@@ -397,9 +376,6 @@ public class RabbitAdvancedBus : IAdvancedBus
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(name, nameof(name));
-        Preconditions.CheckNotNull(configure, nameof(configure));
-
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         var queueDeclareConfiguration = new QueueDeclareConfiguration();
@@ -434,8 +410,6 @@ public class RabbitAdvancedBus : IAdvancedBus
     public virtual async Task QueueDeleteAsync(
         string name, bool ifUnused = false, bool ifEmpty = false, CancellationToken cancellationToken = default)
     {
-        Preconditions.CheckNotBlank(name, nameof(name));
-
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         await persistentChannelDispatcher.InvokeAsync(
@@ -453,8 +427,6 @@ public class RabbitAdvancedBus : IAdvancedBus
     /// <inheritdoc />
     public virtual async Task QueuePurgeAsync(string name, CancellationToken cancellationToken)
     {
-        Preconditions.CheckNotBlank(name, nameof(name));
-
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         await persistentChannelDispatcher.InvokeAsync(
@@ -472,8 +444,6 @@ public class RabbitAdvancedBus : IAdvancedBus
     /// <inheritdoc />
     public async Task ExchangeDeclarePassiveAsync(string name, CancellationToken cancellationToken = default)
     {
-        Preconditions.CheckShortString(name, "name");
-
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         await persistentChannelDispatcher.InvokeAsync(
@@ -493,8 +463,6 @@ public class RabbitAdvancedBus : IAdvancedBus
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckShortString(name, "name");
-
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         var exchangeDeclareConfiguration = new ExchangeDeclareConfiguration();
@@ -547,7 +515,7 @@ public class RabbitAdvancedBus : IAdvancedBus
         Exchange exchange,
         Queue queue,
         string routingKey,
-        IDictionary<string, object> arguments,
+        IDictionary<string, object>? arguments,
         CancellationToken cancellationToken
     )
     {
@@ -580,7 +548,7 @@ public class RabbitAdvancedBus : IAdvancedBus
         Exchange source,
         Exchange destination,
         string routingKey,
-        IDictionary<string, object> arguments,
+        IDictionary<string, object>? arguments,
         CancellationToken cancellationToken
     )
     {
@@ -613,7 +581,7 @@ public class RabbitAdvancedBus : IAdvancedBus
         string queue,
         string exchange,
         string routingKey,
-        IDictionary<string, object> arguments,
+        IDictionary<string, object>? arguments,
         CancellationToken cancellationToken
     )
     {
@@ -642,7 +610,7 @@ public class RabbitAdvancedBus : IAdvancedBus
         string destinationExchange,
         string sourceExchange,
         string routingKey,
-        IDictionary<string, object> arguments,
+        IDictionary<string, object>? arguments,
         CancellationToken cancellationToken
     )
     {

@@ -7,7 +7,7 @@ namespace EasyNetQ.Consumer;
 public interface IInternalConsumerFactory : IDisposable
 {
     /// <summary>
-    ///     Creates a consumer based on the configuration 
+    ///     Creates a consumer based on the configuration
     /// </summary>
     /// <param name="configuration"></param>
     /// <returns></returns>
@@ -32,11 +32,6 @@ public class InternalConsumerFactory : IInternalConsumerFactory
         IEventBus eventBus
     )
     {
-        Preconditions.CheckNotNull(logger, nameof(logger));
-        Preconditions.CheckNotNull(connection, nameof(connection));
-        Preconditions.CheckNotNull(handlerRunner, nameof(handlerRunner));
-        Preconditions.CheckNotNull(eventBus, nameof(eventBus));
-
         this.logger = logger;
         this.connection = connection;
         this.handlerRunner = handlerRunner;

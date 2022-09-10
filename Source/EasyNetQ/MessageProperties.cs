@@ -49,29 +49,29 @@ public class MessageProperties : ICloneable
     private bool userIdPresent;
     private bool appIdPresent;
     private bool clusterIdPresent;
-    private string contentType;
+    private string? contentType;
 
     /// <summary>
     ///     MIME Content type
     /// </summary>
-    public string ContentType
+    public string? ContentType
     {
         get => contentType;
         set { contentType = CheckShortString(value, nameof(ContentType)); contentTypePresent = true; }
     }
 
-    private string contentEncoding;
+    private string? contentEncoding;
 
     /// <summary>
     ///     MIME content encoding
     /// </summary>
-    public string ContentEncoding
+    public string? ContentEncoding
     {
         get => contentEncoding;
         set { contentEncoding = CheckShortString(value, nameof(ContentEncoding)); contentEncodingPresent = true; }
     }
 
-    private IDictionary<string, object> headers;
+    private IDictionary<string, object>? headers;
 
     /// <summary>
     ///     Various headers
@@ -104,23 +104,23 @@ public class MessageProperties : ICloneable
         set { priority = value; priorityPresent = true; }
     }
 
-    private string correlationId;
+    private string? correlationId;
 
     /// <summary>
     ///     Application correlation identifier
     /// </summary>
-    public string CorrelationId
+    public string? CorrelationId
     {
         get => correlationId;
         set { correlationId = CheckShortString(value, nameof(CorrelationId)); correlationIdPresent = true; }
     }
 
-    private string replyTo;
+    private string? replyTo;
 
     /// <summary>
     ///     Destination to reply to
     /// </summary>
-    public string ReplyTo
+    public string? ReplyTo
     {
         get => replyTo;
         set { replyTo = CheckShortString(value, nameof(ReplyTo)); replyToPresent = true; }
@@ -137,12 +137,12 @@ public class MessageProperties : ICloneable
         set { expiration = value; expirationPresent = true; }
     }
 
-    private string messageId;
+    private string? messageId;
 
     /// <summary>
     ///     Application message identifier
     /// </summary>
-    public string MessageId
+    public string? MessageId
     {
         get => messageId;
         set { messageId = CheckShortString(value, nameof(MessageId)); messageIdPresent = true; }
@@ -159,45 +159,45 @@ public class MessageProperties : ICloneable
         set { timestamp = value; timestampPresent = true; }
     }
 
-    private string type;
+    private string? type;
 
     /// <summary>
     ///     Message type name
     /// </summary>
-    public string Type
+    public string? Type
     {
         get => type;
         set { type = CheckShortString(value, nameof(Type)); typePresent = true; }
     }
 
-    private string userId;
+    private string? userId;
 
     /// <summary>
     ///     Creating user id
     /// </summary>
-    public string UserId
+    public string? UserId
     {
         get => userId;
         set { userId = CheckShortString(value, nameof(UserId)); userIdPresent = true; }
     }
 
-    private string appId;
+    private string? appId;
 
     /// <summary>
     ///     Application id
     /// </summary>
-    public string AppId
+    public string? AppId
     {
         get => appId;
         set { appId = CheckShortString(value, nameof(AppId)); appIdPresent = true; }
     }
 
-    private string clusterId;
+    private string? clusterId;
 
     /// <summary>
     ///     Intra-cluster routing identifier
     /// </summary>
-    public string ClusterId
+    public string? ClusterId
     {
         get => clusterId;
         set { clusterId = CheckShortString(value, nameof(ClusterId)); clusterIdPresent = true; }
@@ -285,7 +285,7 @@ public class MessageProperties : ICloneable
             .ToString();
     }
 
-    private static string GetValueString(object value)
+    private static string GetValueString(object? value)
     {
         if (value == null) return "NULL";
 
@@ -299,7 +299,7 @@ public class MessageProperties : ICloneable
             : value.ToString();
     }
 
-    private static string CheckShortString(string input, string name)
+    private static string? CheckShortString(string? input, string name)
     {
         if (input == null) return null;
 

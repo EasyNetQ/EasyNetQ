@@ -16,8 +16,6 @@ public class DefaultTypeNameSerializer : ITypeNameSerializer
     /// <inheritdoc />
     public string Serialize(Type type)
     {
-        Preconditions.CheckNotNull(type, nameof(type));
-
         return serializedTypes.GetOrAdd(type, t =>
         {
             var typeName = RemoveAssemblyDetails(t.AssemblyQualifiedName);
@@ -32,8 +30,6 @@ public class DefaultTypeNameSerializer : ITypeNameSerializer
     /// <inheritdoc />
     public Type DeSerialize(string typeName)
     {
-        Preconditions.CheckNotBlank(typeName, nameof(typeName));
-
         return deSerializedTypes.GetOrAdd(typeName, t =>
         {
             var typeNameKey = SplitFullyQualifiedTypeName(t);

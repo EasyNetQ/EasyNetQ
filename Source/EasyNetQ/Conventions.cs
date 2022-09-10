@@ -122,8 +122,6 @@ public class Conventions : IConventions
     /// </summary>
     public Conventions(ITypeNameSerializer typeNameSerializer)
     {
-        Preconditions.CheckNotNull(typeNameSerializer, nameof(typeNameSerializer));
-
         ExchangeNamingConvention = type =>
         {
             var attr = GetQueueAttribute(type);

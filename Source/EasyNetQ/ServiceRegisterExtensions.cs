@@ -24,8 +24,6 @@ public static class ServiceRegisterExtensions
         Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory
     )
     {
-        Preconditions.CheckNotNull(serviceRegister, nameof(serviceRegister));
-
         serviceRegister
             .TryRegister(resolver =>
             {

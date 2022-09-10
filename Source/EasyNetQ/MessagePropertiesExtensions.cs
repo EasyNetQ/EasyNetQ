@@ -28,8 +28,6 @@ internal static class MessagePropertiesExtensions
 
     public static void CopyFrom(this MessageProperties source, IBasicProperties basicProperties)
     {
-        Preconditions.CheckNotNull(basicProperties, nameof(basicProperties));
-
         if (basicProperties.IsContentTypePresent()) source.ContentType = basicProperties.ContentType;
         if (basicProperties.IsContentEncodingPresent()) source.ContentEncoding = basicProperties.ContentEncoding;
         if (basicProperties.IsDeliveryModePresent()) source.DeliveryMode = basicProperties.DeliveryMode;
@@ -47,16 +45,12 @@ internal static class MessagePropertiesExtensions
         if (basicProperties.IsAppIdPresent()) source.AppId = basicProperties.AppId;
         if (basicProperties.IsClusterIdPresent()) source.ClusterId = basicProperties.ClusterId;
 
-        if (basicProperties.IsHeadersPresent())
-            source.Headers = basicProperties.Headers?.Count > 0
-                ? new Dictionary<string, object>(basicProperties.Headers)
-                : null;
+        if (basicProperties.IsHeadersPresent() && basicProperties.Headers?.Count > 0)
+            source.Headers = new Dictionary<string, object>(basicProperties.Headers);
     }
 
     public static void CopyTo(this MessageProperties source, IBasicProperties basicProperties)
     {
-        Preconditions.CheckNotNull(basicProperties, nameof(basicProperties));
-
         if (source.ContentTypePresent) basicProperties.ContentType = source.ContentType;
         if (source.ContentEncodingPresent) basicProperties.ContentEncoding = source.ContentEncoding;
         if (source.DeliveryModePresent) basicProperties.DeliveryMode = source.DeliveryMode;

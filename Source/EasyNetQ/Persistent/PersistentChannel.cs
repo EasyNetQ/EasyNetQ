@@ -23,7 +23,7 @@ public class PersistentChannel : IPersistentChannel
     private readonly AsyncLock mutex = new();
     private readonly PersistentChannelOptions options;
 
-    private volatile IModel initializedChannel;
+    private volatile IModel? initializedChannel;
     private volatile bool disposed;
 
     /// <summary>
@@ -34,9 +34,6 @@ public class PersistentChannel : IPersistentChannel
     /// <param name="eventBus">The event bus</param>
     public PersistentChannel(in PersistentChannelOptions options, IPersistentConnection connection, IEventBus eventBus)
     {
-        Preconditions.CheckNotNull(connection, nameof(connection));
-        Preconditions.CheckNotNull(eventBus, nameof(eventBus));
-
         this.connection = connection;
         this.eventBus = eventBus;
         this.options = options;

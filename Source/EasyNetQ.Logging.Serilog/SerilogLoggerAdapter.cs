@@ -12,17 +12,14 @@ public class SerilogLoggerAdapter : ILogger
     ///     Creates an adapter on top of Serilog.ILogger
     /// </summary>
     /// <param name="logger"></param>
-    public SerilogLoggerAdapter(S.ILogger logger)
-    {
-        this.logger = logger;
-    }
+    public SerilogLoggerAdapter(S.ILogger logger) => this.logger = logger;
 
     /// <inheritdoc />
     public bool Log(
         LogLevel logLevel,
-        Func<string> messageFunc,
-        Exception exception = null,
-        params object[] formatParameters
+        Func<string>? messageFunc,
+        Exception? exception = null,
+        params object?[] formatParameters
     )
     {
         var serilogLogLevel = logLevel switch
@@ -36,10 +33,7 @@ public class SerilogLoggerAdapter : ILogger
             _ => throw new ArgumentOutOfRangeException()
         };
 
-        if (messageFunc == null)
-        {
-            return logger.IsEnabled(serilogLogLevel);
-        }
+        if (messageFunc == null) return logger.IsEnabled(serilogLogLevel);
 
         logger.Write(serilogLogLevel, exception, messageFunc(), formatParameters);
         return true;

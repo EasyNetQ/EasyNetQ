@@ -28,7 +28,7 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
+
 
         return sendReceive.ReceiveAsync(queue, c => c.Add(onMessage), configure, cancellationToken);
     }
@@ -48,7 +48,7 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
+
 
         return sendReceive.SendAsync(queue, message, _ => { }, cancellationToken);
     }
@@ -68,7 +68,7 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
+
 
         sendReceive.Send(queue, message, _ => { }, cancellationToken);
     }
@@ -92,7 +92,7 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
+
 
         sendReceive.SendAsync(queue, message, configure, cancellationToken)
             .GetAwaiter()
@@ -115,7 +115,7 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
+
 
         return sendReceive.ReceiveAsync(
             queue,
@@ -143,7 +143,7 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
+
 
         var onMessageAsync = TaskHelpers.FromAction<T>((m, _) => onMessage(m));
 
@@ -171,7 +171,7 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
+
 
         return sendReceive.ReceiveAsync<T>(
             queue,
@@ -196,7 +196,7 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
+
 
         return sendReceive.ReceiveAsync(
             queue,
@@ -222,7 +222,7 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
+
 
         return sendReceive.Receive(queue, onMessage, _ => { }, cancellationToken);
     }
@@ -245,7 +245,7 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
+
 
         var onMessageAsync = TaskHelpers.FromAction<T>((m, _) => onMessage(m));
 
@@ -273,7 +273,7 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
+
 
         return sendReceive.Receive<T>(
             queue,
@@ -301,7 +301,7 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
+
 
         return sendReceive.ReceiveAsync(
             queue,
@@ -326,7 +326,7 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
+
 
         return sendReceive.Receive(
             queue,
@@ -353,7 +353,7 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
+
 
         return sendReceive.ReceiveAsync(
             queue,

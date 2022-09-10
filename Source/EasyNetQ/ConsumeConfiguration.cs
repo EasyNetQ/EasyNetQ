@@ -13,12 +13,11 @@ internal class PerQueueConsumeConfiguration : IPerQueueConsumeConfiguration
 
     public bool IsExclusive { get; private set; }
 
-    public IDictionary<string, object> Arguments { get; private set; }
+    public IDictionary<string, object>? Arguments { get; private set; }
 
 
     public IPerQueueConsumeConfiguration WithConsumerTag(string consumerTag)
     {
-        Preconditions.CheckNotNull(consumerTag, nameof(consumerTag));
         ConsumerTag = consumerTag;
         return this;
     }
@@ -103,7 +102,7 @@ internal class ConsumeConfiguration : IConsumeConfiguration
 public interface IPerQueueConsumeConfiguration
 {
     /// <summary>
-    ///     Automatically acknowledge a message  
+    ///     Automatically acknowledge a message
     /// </summary>
     /// <returns></returns>
     IPerQueueConsumeConfiguration WithAutoAck();
@@ -171,7 +170,7 @@ public interface IConsumeConfiguration
 public interface ISimpleConsumeConfiguration
 {
     /// <summary>
-    ///     Automatically acknowledge a message  
+    ///     Automatically acknowledge a message
     /// </summary>
     /// <returns></returns>
     ISimpleConsumeConfiguration WithAutoAck();

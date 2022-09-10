@@ -49,16 +49,6 @@ public class DefaultRpc : IRpc
         ICorrelationIdGenerationStrategy correlationIdGenerationStrategy
     )
     {
-        Preconditions.CheckNotNull(logger, nameof(logger));
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
-        Preconditions.CheckNotNull(advancedBus, nameof(advancedBus));
-        Preconditions.CheckNotNull(eventBus, nameof(eventBus));
-        Preconditions.CheckNotNull(conventions, nameof(conventions));
-        Preconditions.CheckNotNull(exchangeDeclareStrategy, nameof(exchangeDeclareStrategy));
-        Preconditions.CheckNotNull(messageDeliveryModeStrategy, nameof(messageDeliveryModeStrategy));
-        Preconditions.CheckNotNull(typeNameSerializer, nameof(typeNameSerializer));
-        Preconditions.CheckNotNull(correlationIdGenerationStrategy, nameof(correlationIdGenerationStrategy));
-
         this.logger = logger;
         this.configuration = configuration;
         this.advancedBus = advancedBus;
@@ -78,8 +68,6 @@ public class DefaultRpc : IRpc
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(request, nameof(request));
-
         var requestType = typeof(TRequest);
         var requestConfiguration = new RequestConfiguration(
             conventions.RpcRoutingKeyNamingConvention(requestType),
@@ -121,8 +109,6 @@ public class DefaultRpc : IRpc
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(responder, nameof(responder));
-        Preconditions.CheckNotNull(configure, nameof(configure));
         // We're explicitly validating TResponse here because the type won't be used directly.
         // It'll only be used when executing a successful responder, which will silently fail if TResponse serialized length exceeds the limit.
         Preconditions.CheckShortString(typeNameSerializer.Serialize(typeof(TResponse)), "TResponse");
@@ -228,7 +214,7 @@ public class DefaultRpc : IRpc
             queue,
             (message, _) =>
             {
-                if (responseActions.TryRemove(message.Properties.CorrelationId, out var responseAction))
+                if (message.Properties.CorrelationId != null && responseActions.TryRemove(message.Properties.CorrelationId, out var responseAction))
                     responseAction.OnSuccess(message);
             }
         );

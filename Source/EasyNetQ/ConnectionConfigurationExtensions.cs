@@ -11,8 +11,6 @@ internal static class ConnectionConfigurationExtensions
 {
     public static void SetDefaultProperties(this ConnectionConfiguration configuration)
     {
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
-
         if (configuration.Hosts.Count == 0)
             throw new EasyNetQException(
                 "Invalid connection string. 'host' value must be supplied. e.g: \"host=myserver\""

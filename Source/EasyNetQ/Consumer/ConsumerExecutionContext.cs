@@ -37,10 +37,6 @@ public readonly struct ConsumerExecutionContext
         in ReadOnlyMemory<byte> body
     )
     {
-        Preconditions.CheckNotNull(handler, nameof(handler));
-        Preconditions.CheckNotNull(receivedInfo, nameof(receivedInfo));
-        Preconditions.CheckNotNull(properties, nameof(properties));
-
         Handler = handler;
         ReceivedInfo = receivedInfo;
         Properties = properties;

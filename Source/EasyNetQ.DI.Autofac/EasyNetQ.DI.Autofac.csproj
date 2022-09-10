@@ -3,6 +3,7 @@
     <Description>An adaptor to allow EasyNetQ to use Autofac as its internal IoC container</Description>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageTags>Autofac;$(PackageTags)</PackageTags>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />

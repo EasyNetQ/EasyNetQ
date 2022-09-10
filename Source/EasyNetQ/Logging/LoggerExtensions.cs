@@ -95,7 +95,7 @@ public static class LoggerExtensions
     /// <param name="logger">The <see cref="ILogger"/> to use.</param>
     /// <param name="message">The message.</param>
     /// <param name="args">Optional format parameters for the message.</param>
-    public static void Debug(this ILogger logger, string message, params object[] args)
+    public static void Debug(this ILogger logger, string message, params object?[] args)
     {
         logger.DebugFormat(message, args);
     }
@@ -107,7 +107,7 @@ public static class LoggerExtensions
     /// <param name="exception">The exception.</param>
     /// <param name="message">The message.</param>
     /// <param name="args">Optional format parameters for the message.</param>
-    public static void Debug(this ILogger logger, Exception exception, string message, params object[] args)
+    public static void Debug(this ILogger logger, Exception? exception, string message, params object?[] args)
     {
         logger.DebugException(message, exception, args);
     }
@@ -118,7 +118,7 @@ public static class LoggerExtensions
     /// <param name="logger">The <see cref="ILogger"/> to use.</param>
     /// <param name="message">The message.</param>
     /// <param name="args">Optional format parameters for the message.</param>
-    public static void DebugFormat(this ILogger logger, string message, params object[] args)
+    public static void DebugFormat(this ILogger logger, string message, params object?[] args)
     {
         if (logger.IsDebugEnabled()) logger.LogFormat(LogLevel.Debug, message, args);
     }
@@ -129,7 +129,7 @@ public static class LoggerExtensions
     /// <param name="logger">The <see cref="ILogger"/> to use.</param>
     /// <param name="message">The message.</param>
     /// <param name="exception">The exception.</param>
-    public static void DebugException(this ILogger logger, string message, Exception exception)
+    public static void DebugException(this ILogger logger, string message, Exception? exception)
     {
         if (logger.IsDebugEnabled()) logger.Log(LogLevel.Debug, message.AsFunc(), exception, EmptyParams);
     }
@@ -142,7 +142,7 @@ public static class LoggerExtensions
     /// <param name="exception">The exception.</param>
     /// <param name="args">Optional format parameters for the message.</param>
     public static void DebugException(
-        this ILogger logger, string message, Exception exception, params object[] args
+        this ILogger logger, string message, Exception? exception, params object?[] args
     )
     {
         if (logger.IsDebugEnabled()) logger.Log(LogLevel.Debug, message.AsFunc(), exception, args);
@@ -174,7 +174,7 @@ public static class LoggerExtensions
     /// <param name="logger">The <see cref="ILogger"/> to use.</param>
     /// <param name="message">The message.</param>
     /// <param name="args">Optional format parameters for the message.</param>
-    public static void Error(this ILogger logger, string message, params object[] args)
+    public static void Error(this ILogger logger, string message, params object?[] args)
     {
         logger.ErrorFormat(message, args);
     }
@@ -186,7 +186,7 @@ public static class LoggerExtensions
     /// <param name="exception">The exception.</param>
     /// <param name="message">The message.</param>
     /// <param name="args">Optional format parameters for the message.</param>
-    public static void Error(this ILogger logger, Exception exception, string message, params object[] args)
+    public static void Error(this ILogger logger, Exception? exception, string message, params object?[] args)
     {
         logger.ErrorException(message, exception, args);
     }
@@ -197,7 +197,7 @@ public static class LoggerExtensions
     /// <param name="logger">The <see cref="ILogger"/> to use.</param>
     /// <param name="message">The message.</param>
     /// <param name="args">Optional format parameters for the message.</param>
-    public static void ErrorFormat(this ILogger logger, string message, params object[] args)
+    public static void ErrorFormat(this ILogger logger, string message, params object?[] args)
     {
         if (logger.IsErrorEnabled()) logger.LogFormat(LogLevel.Error, message, args);
     }
@@ -210,7 +210,7 @@ public static class LoggerExtensions
     /// <param name="exception">The exception.</param>
     /// <param name="args">Optional format parameters for the message.</param>
     public static void ErrorException(
-        this ILogger logger, string message, Exception exception, params object[] args
+        this ILogger logger, string message, Exception? exception, params object?[] args
     )
     {
         if (logger.IsErrorEnabled()) logger.Log(LogLevel.Error, message.AsFunc(), exception, args);
@@ -242,7 +242,7 @@ public static class LoggerExtensions
     /// <param name="logger">The <see cref="ILogger"/> to use.</param>
     /// <param name="message">The message.</param>
     /// <param name="args">Optional format parameters for the message.</param>
-    public static void Fatal(this ILogger logger, string message, params object[] args)
+    public static void Fatal(this ILogger logger, string message, params object?[] args)
     {
         logger.FatalFormat(message, args);
     }
@@ -254,7 +254,7 @@ public static class LoggerExtensions
     /// <param name="exception">The exception.</param>
     /// <param name="message">The message.</param>
     /// <param name="args">Optional format parameters for the message.</param>
-    public static void Fatal(this ILogger logger, Exception exception, string message, params object[] args)
+    public static void Fatal(this ILogger logger, Exception? exception, string message, params object?[] args)
     {
         logger.FatalException(message, exception, args);
     }
@@ -265,7 +265,7 @@ public static class LoggerExtensions
     /// <param name="logger">The <see cref="ILogger"/> to use.</param>
     /// <param name="message">The message.</param>
     /// <param name="args">Optional format parameters for the message.</param>
-    public static void FatalFormat(this ILogger logger, string message, params object[] args)
+    public static void FatalFormat(this ILogger logger, string message, params object?[] args)
     {
         if (logger.IsFatalEnabled()) logger.LogFormat(LogLevel.Fatal, message, args);
     }
@@ -278,7 +278,7 @@ public static class LoggerExtensions
     /// <param name="exception">The exception.</param>
     /// <param name="args">Optional format parameters for the message.</param>
     public static void FatalException(
-        this ILogger logger, string message, Exception exception, params object[] args
+        this ILogger logger, string message, Exception? exception, params object?[] args
     )
     {
         if (logger.IsFatalEnabled()) logger.Log(LogLevel.Fatal, message.AsFunc(), exception, args);
@@ -310,7 +310,7 @@ public static class LoggerExtensions
     /// <param name="logger">The <see cref="ILogger"/> to use.</param>
     /// <param name="message">The message.</param>
     /// <param name="args">Optional format parameters for the message.</param>
-    public static void Info(this ILogger logger, string message, params object[] args)
+    public static void Info(this ILogger logger, string message, params object?[] args)
     {
         logger.InfoFormat(message, args);
     }
@@ -322,7 +322,7 @@ public static class LoggerExtensions
     /// <param name="exception">The exception.</param>
     /// <param name="message">The message.</param>
     /// <param name="args">Optional format parameters for the message.</param>
-    public static void Info(this ILogger logger, Exception exception, string message, params object[] args)
+    public static void Info(this ILogger logger, Exception? exception, string message, params object?[] args)
     {
         logger.InfoException(message, exception, args);
     }
@@ -333,7 +333,7 @@ public static class LoggerExtensions
     /// <param name="logger">The <see cref="ILogger"/> to use.</param>
     /// <param name="message">The message.</param>
     /// <param name="args">Optional format parameters for the message.</param>
-    public static void InfoFormat(this ILogger logger, string message, params object[] args)
+    public static void InfoFormat(this ILogger logger, string message, params object?[] args)
     {
         if (logger.IsInfoEnabled()) logger.LogFormat(LogLevel.Info, message, args);
     }
@@ -346,7 +346,7 @@ public static class LoggerExtensions
     /// <param name="exception">The exception.</param>
     /// <param name="args">Optional format parameters for the message.</param>
     public static void InfoException(
-        this ILogger logger, string message, Exception exception, params object[] args
+        this ILogger logger, string message, Exception? exception, params object?[] args
     )
     {
         if (logger.IsInfoEnabled()) logger.Log(LogLevel.Info, message.AsFunc(), exception, args);
@@ -378,7 +378,7 @@ public static class LoggerExtensions
     /// <param name="logger">The <see cref="ILogger"/> to use.</param>
     /// <param name="message">The message.</param>
     /// <param name="args">Optional format parameters for the message.</param>
-    public static void Trace(this ILogger logger, string message, params object[] args)
+    public static void Trace(this ILogger logger, string message, params object?[] args)
     {
         logger.TraceFormat(message, args);
     }
@@ -390,7 +390,7 @@ public static class LoggerExtensions
     /// <param name="exception">The exception.</param>
     /// <param name="message">The message.</param>
     /// <param name="args">Optional format parameters for the message.</param>
-    public static void Trace(this ILogger logger, Exception exception, string message, params object[] args)
+    public static void Trace(this ILogger logger, Exception? exception, string message, params object?[] args)
     {
         logger.TraceException(message, exception, args);
     }
@@ -401,7 +401,7 @@ public static class LoggerExtensions
     /// <param name="logger">The <see cref="ILogger"/> to use.</param>
     /// <param name="message">The message.</param>
     /// <param name="args">Optional format parameters for the message.</param>
-    public static void TraceFormat(this ILogger logger, string message, params object[] args)
+    public static void TraceFormat(this ILogger logger, string message, params object?[] args)
     {
         if (logger.IsTraceEnabled()) logger.LogFormat(LogLevel.Trace, message, args);
     }
@@ -414,7 +414,7 @@ public static class LoggerExtensions
     /// <param name="exception">The exception.</param>
     /// <param name="args">Optional format parameters for the message.</param>
     public static void TraceException(
-        this ILogger logger, string message, Exception exception, params object[] args
+        this ILogger logger, string message, Exception? exception, params object?[] args
     )
     {
         if (logger.IsTraceEnabled()) logger.Log(LogLevel.Trace, message.AsFunc(), exception, args);
@@ -446,7 +446,7 @@ public static class LoggerExtensions
     /// <param name="logger">The <see cref="ILogger"/> to use.</param>
     /// <param name="message">The message.</param>
     /// <param name="args">Optional format parameters for the message.</param>
-    public static void Warn(this ILogger logger, string message, params object[] args)
+    public static void Warn(this ILogger logger, string message, params object?[] args)
     {
         logger.WarnFormat(message, args);
     }
@@ -458,7 +458,7 @@ public static class LoggerExtensions
     /// <param name="exception">The exception.</param>
     /// <param name="message">The message.</param>
     /// <param name="args">Optional format parameters for the message.</param>
-    public static void Warn(this ILogger logger, Exception exception, string message, params object[] args)
+    public static void Warn(this ILogger logger, Exception? exception, string message, params object?[] args)
     {
         logger.WarnException(message, exception, args);
     }
@@ -469,7 +469,7 @@ public static class LoggerExtensions
     /// <param name="logger">The <see cref="ILogger"/> to use.</param>
     /// <param name="message">The message.</param>
     /// <param name="args">Optional format parameters for the message.</param>
-    public static void WarnFormat(this ILogger logger, string message, params object[] args)
+    public static void WarnFormat(this ILogger logger, string message, params object?[] args)
     {
         if (logger.IsWarnEnabled()) logger.LogFormat(LogLevel.Warn, message, args);
     }
@@ -482,13 +482,13 @@ public static class LoggerExtensions
     /// <param name="exception">The exception.</param>
     /// <param name="args">Optional format parameters for the message.</param>
     public static void WarnException(
-        this ILogger logger, string message, Exception exception, params object[] args
+        this ILogger logger, string message, Exception? exception, params object?[] args
     )
     {
         if (logger.IsWarnEnabled()) logger.Log(LogLevel.Warn, message.AsFunc(), exception, args);
     }
 
-    private static void LogFormat(this ILogger logger, LogLevel logLevel, string message, params object[] args)
+    private static void LogFormat(this ILogger logger, LogLevel logLevel, string message, params object?[] args)
     {
         logger.Log(logLevel, message.AsFunc(), null, args);
     }

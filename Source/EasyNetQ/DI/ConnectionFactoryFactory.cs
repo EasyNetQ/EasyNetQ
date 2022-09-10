@@ -6,8 +6,6 @@ internal static class ConnectionFactoryFactory
 {
     public static IConnectionFactory CreateConnectionFactory(ConnectionConfiguration configuration)
     {
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
-
         var connectionFactory = new ConnectionFactory
         {
             AutomaticRecoveryEnabled = true,

@@ -13,17 +13,14 @@ public class MicrosoftLoggerAdapter : ILogger
     ///     Creates an adapter on top of Microsoft.Extensions.Logging.ILogger
     /// </summary>
     /// <param name="logger"></param>
-    public MicrosoftLoggerAdapter(MS.ILogger logger)
-    {
-        this.logger = logger;
-    }
+    public MicrosoftLoggerAdapter(MS.ILogger logger) => this.logger = logger;
 
     /// <inheritdoc />
     public bool Log(
         LogLevel logLevel,
-        Func<string> messageFunc,
-        Exception exception = null,
-        params object[] formatParameters
+        Func<string>? messageFunc,
+        Exception? exception = null,
+        params object?[] formatParameters
     )
     {
         var microsoftLogLevel = logLevel switch
@@ -37,10 +34,7 @@ public class MicrosoftLoggerAdapter : ILogger
             _ => MS.LogLevel.None
         };
 
-        if (messageFunc == null)
-        {
-            return logger.IsEnabled(microsoftLogLevel);
-        }
+        if (messageFunc == null) return logger.IsEnabled(microsoftLogLevel);
 
         var message = messageFunc();
 

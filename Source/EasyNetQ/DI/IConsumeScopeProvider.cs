@@ -18,18 +18,15 @@ public interface IConsumeScopeProvider
 /// </summary>
 public class DefaultConsumeScopeProvider : IConsumeScopeProvider
 {
-    private readonly IServiceResolver _resolver;
+    private readonly IServiceResolver resolver;
 
     /// <summary>
     /// Creates default provider
     /// </summary>
-    public DefaultConsumeScopeProvider(IServiceResolver resolver)
-    {
-        _resolver = resolver;
-    }
+    public DefaultConsumeScopeProvider(IServiceResolver resolver) => this.resolver = resolver;
 
     /// <inheritdoc />
-    public IServiceResolverScope CreateScope() => _resolver.CreateScope();
+    public IServiceResolverScope CreateScope() => resolver.CreateScope();
 }
 
 /// <summary>
@@ -37,7 +34,7 @@ public class DefaultConsumeScopeProvider : IConsumeScopeProvider
 /// </summary>
 public class NoopConsumeScopeProvider : IConsumeScopeProvider
 {
-    private static readonly IServiceResolverScope scope = new NoopDisposable();
+    private static readonly IServiceResolverScope Scope = new NoopDisposable();
 
     private sealed class NoopDisposable : IServiceResolverScope
     {
@@ -52,5 +49,5 @@ public class NoopConsumeScopeProvider : IConsumeScopeProvider
     }
 
     /// <inheritdoc />
-    public IServiceResolverScope CreateScope() => scope;
+    public IServiceResolverScope CreateScope() => Scope;
 }

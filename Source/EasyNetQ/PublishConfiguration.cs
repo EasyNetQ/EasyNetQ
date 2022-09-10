@@ -44,8 +44,6 @@ internal class PublishConfiguration : IPublishConfiguration
 {
     public PublishConfiguration(string defaultTopic)
     {
-        Preconditions.CheckNotNull(defaultTopic, nameof(defaultTopic));
-
         Topic = defaultTopic;
     }
 
@@ -57,8 +55,6 @@ internal class PublishConfiguration : IPublishConfiguration
 
     public IPublishConfiguration WithTopic(string topic)
     {
-        Preconditions.CheckNotNull(topic, nameof(topic));
-
         Topic = topic;
         return this;
     }
@@ -78,5 +74,5 @@ internal class PublishConfiguration : IPublishConfiguration
     public byte? Priority { get; private set; }
     public string Topic { get; private set; }
     public TimeSpan? Expires { get; private set; }
-    public IDictionary<string, object> Headers { get; private set; }
+    public IDictionary<string, object>? Headers { get; private set; }
 }

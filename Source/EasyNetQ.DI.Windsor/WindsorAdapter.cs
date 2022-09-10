@@ -14,7 +14,7 @@ public class WindsorAdapter : IServiceRegister
     /// </summary>
     public WindsorAdapter(IWindsorContainer container)
     {
-        Container = container ?? throw new ArgumentNullException(nameof(container));
+        Container = container;
 
         ConfigureContainer(Container);
 

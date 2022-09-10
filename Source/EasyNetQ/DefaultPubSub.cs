@@ -33,12 +33,6 @@ public class DefaultPubSub : IPubSub
         IAdvancedBus advancedBus
     )
     {
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
-        Preconditions.CheckNotNull(conventions, nameof(conventions));
-        Preconditions.CheckNotNull(exchangeDeclareStrategy, nameof(exchangeDeclareStrategy));
-        Preconditions.CheckNotNull(messageDeliveryModeStrategy, nameof(messageDeliveryModeStrategy));
-        Preconditions.CheckNotNull(advancedBus, nameof(advancedBus));
-
         this.configuration = configuration;
         this.conventions = conventions;
         this.exchangeDeclareStrategy = exchangeDeclareStrategy;
@@ -49,9 +43,6 @@ public class DefaultPubSub : IPubSub
     /// <inheritdoc />
     public virtual async Task PublishAsync<T>(T message, Action<IPublishConfiguration> configure, CancellationToken cancellationToken)
     {
-        Preconditions.CheckNotNull(message, nameof(message));
-        Preconditions.CheckNotNull(configure, nameof(configure));
-
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         var publishConfiguration = new PublishConfiguration(conventions.TopicNamingConvention(typeof(T)));
@@ -84,10 +75,6 @@ public class DefaultPubSub : IPubSub
         CancellationToken cancellationToken
     )
     {
-        Preconditions.CheckNotNull(subscriptionId, nameof(subscriptionId));
-        Preconditions.CheckNotNull(onMessage, nameof(onMessage));
-        Preconditions.CheckNotNull(configure, nameof(configure));
-
         return SubscribeAsyncInternal(subscriptionId, onMessage, configure, cancellationToken).ToAwaitableDisposable();
     }
 
@@ -109,7 +96,7 @@ public class DefaultPubSub : IPubSub
             c =>
             {
                 c.WithType(subscriptionConfiguration.ExchangeType);
-                if (!string.IsNullOrEmpty(subscriptionConfiguration.AlternateExchange))
+                if (subscriptionConfiguration.AlternateExchange != null)
                     c.WithAlternateExchange(new Exchange(subscriptionConfiguration.AlternateExchange));
             },
             cts.Token
@@ -134,9 +121,9 @@ public class DefaultPubSub : IPubSub
                     c.WithMaxLength(subscriptionConfiguration.MaxLength.Value);
                 if (subscriptionConfiguration.MaxLengthBytes.HasValue)
                     c.WithMaxLengthBytes(subscriptionConfiguration.MaxLengthBytes.Value);
-                if (!string.IsNullOrEmpty(subscriptionConfiguration.QueueMode))
+                if (subscriptionConfiguration.QueueMode != null)
                     c.WithQueueMode(subscriptionConfiguration.QueueMode);
-                if (!string.IsNullOrEmpty(subscriptionConfiguration.QueueType))
+                if (subscriptionConfiguration.QueueType != null)
                     c.WithQueueType(subscriptionConfiguration.QueueType);
                 if (subscriptionConfiguration.SingleActiveConsumer)
                     c.WithSingleActiveConsumer();
