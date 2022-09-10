@@ -106,17 +106,10 @@ public class AmqpConnectionStringParser : IConnectionStringParser
     /// <returns></returns>
     private static Action<TContaining, TProperty> CreateSetter<TContaining, TProperty>(Expression<Func<TContaining, TProperty>> getter)
     {
-        Preconditions.CheckNotNull(getter, nameof(getter));
+        if (getter.Body is not MemberExpression memberEx) throw new ArgumentOutOfRangeException(nameof(getter), "Body is not a member-expression.");
+        if (memberEx.Member is not PropertyInfo propertyInfo) throw new ArgumentOutOfRangeException(nameof(getter), "Member is not a property.");
+        if (!propertyInfo.CanWrite) throw new ArgumentOutOfRangeException(nameof(getter), "Member is not a writeable property.");
 
-        var memberEx = getter.Body as MemberExpression;
-
-        Preconditions.CheckNotNull(memberEx, nameof(getter), "Body is not a member-expression.");
-
-        var property = memberEx.Member as PropertyInfo;
-
-        Preconditions.CheckNotNull(property, nameof(getter), "Member is not a property.");
-        if (!property.CanWrite) throw new ArgumentOutOfRangeException(nameof(getter), null, "Member is not a writeable property.");
-
-        return (Action<TContaining, TProperty>)property.GetSetMethod().CreateDelegate(typeof(Action<TContaining, TProperty>));
+        return (Action<TContaining, TProperty>)propertyInfo.GetSetMethod().CreateDelegate(typeof(Action<TContaining, TProperty>));
     }
 }
