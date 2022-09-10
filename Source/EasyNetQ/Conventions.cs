@@ -124,15 +124,14 @@ public class Conventions : IConventions
     {
         ExchangeNamingConvention = type =>
         {
-            var attr = GetQueueAttribute(type);
-
-            return attr.ExchangeName ?? typeNameSerializer.Serialize(type);
+            var attr = GetExchangeAttribute(type);
+            return attr.Name ?? typeNameSerializer.Serialize(type);
         };
 
         QueueTypeConvention = type =>
         {
             var attr = GetQueueAttribute(type);
-            return attr.QueueType;
+            return attr.Type;
         };
 
         TopicNamingConvention = _ => "";
@@ -141,7 +140,7 @@ public class Conventions : IConventions
         {
             var attr = GetQueueAttribute(type);
 
-            if (attr.QueueName == null)
+            if (attr.Name == null)
             {
                 var typeName = typeNameSerializer.Serialize(type);
 
@@ -151,8 +150,8 @@ public class Conventions : IConventions
             }
 
             return string.IsNullOrEmpty(subscriptionId)
-                ? attr.QueueName
-                : $"{attr.QueueName}_{subscriptionId}";
+                ? attr.Name
+                : $"{attr.Name}_{subscriptionId}";
         };
         RpcRoutingKeyNamingConvention = typeNameSerializer.Serialize;
 
@@ -168,6 +167,11 @@ public class Conventions : IConventions
     private static QueueAttribute GetQueueAttribute(Type messageType)
     {
         return messageType.GetAttribute<QueueAttribute>() ?? QueueAttribute.Default;
+    }
+
+    private static ExchangeAttribute GetExchangeAttribute(Type messageType)
+    {
+        return messageType.GetAttribute<ExchangeAttribute>() ?? ExchangeAttribute.Default;
     }
 
     /// <inheritdoc />

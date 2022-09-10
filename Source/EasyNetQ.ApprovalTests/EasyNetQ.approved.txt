@@ -256,6 +256,12 @@ namespace EasyNetQ
         public System.IDisposable Subscribe<TEvent>(EasyNetQ.TEventHandler<TEvent> eventHandler)
             where TEvent :  struct { }
     }
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Interface)]
+    public sealed class ExchangeAttribute : System.Attribute
+    {
+        public ExchangeAttribute() { }
+        public string? Name { get; set; }
+    }
     public static class ExchangeDeclareConfigurationExtensions
     {
         public static EasyNetQ.IExchangeDeclareConfiguration WithAlternateExchange(this EasyNetQ.IExchangeDeclareConfiguration configuration, in EasyNetQ.Topology.Exchange alternateExchange) { }
@@ -740,12 +746,11 @@ namespace EasyNetQ
         public System.Threading.Tasks.Task RejectAsync(ulong deliveryTag, bool multiple, bool requeue, System.Threading.CancellationToken cancellationToken = default) { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Interface)]
-    public class QueueAttribute : System.Attribute
+    public sealed class QueueAttribute : System.Attribute
     {
-        public QueueAttribute(string? queueName = null) { }
-        public string? ExchangeName { get; set; }
-        public string? QueueName { get; }
-        public string? QueueType { get; set; }
+        public QueueAttribute() { }
+        public string? Name { get; set; }
+        public string? Type { get; set; }
     }
     public static class QueueDeclareConfigurationExtensions
     {

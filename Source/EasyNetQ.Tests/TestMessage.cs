@@ -4,42 +4,44 @@ public class TestMessage
 {
 }
 
-[Queue("MyQueue", QueueType = QueueType.Quorum)]
+[Queue(Name="MyQueue", Type = QueueType.Quorum)]
 public class QuorumQueueTestMessage
 {
 }
 
-[Queue("MyQueue", QueueType = QueueType.Quorum)]
+[Queue(Name="MyQueue", Type = QueueType.Quorum)]
 public interface IQuorumQueueTestMessage
 {
 }
 
-[Queue("MyQueue", ExchangeName = "MyExchange")]
+[Queue(Name="MyQueue")]
+[Exchange(Name="MyExchange")]
 public class AnnotatedTestMessage
 {
 }
 
-[Queue("MyQueue", ExchangeName = "MyExchange")]
+[Exchange(Name="MyExchange")]
+[Queue(Name="MyQueue")]
 public interface IAnnotatedTestMessage
 {
 }
 
-[Queue("MyQueue")]
+[Queue(Name="MyQueue")]
 public class QueueNameOnlyAnnotatedTestMessage
 {
 }
 
-[Queue("MyQueue")]
+[Queue(Name="MyQueue")]
 public interface IQueueNameOnlyAnnotatedTestMessage
 {
 }
 
-[Queue("")]
+[Queue]
 public class EmptyQueueNameAnnotatedTestMessage
 {
 }
 
-[Queue("")]
+[Queue]
 public interface IEmptyQueueNameAnnotatedTestMessage
 {
 }
