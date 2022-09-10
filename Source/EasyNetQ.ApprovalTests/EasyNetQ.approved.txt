@@ -170,7 +170,7 @@ namespace EasyNetQ
         public void Dispose() { }
         protected void RegisterResponseActions<TResponse>(string correlationId, System.Threading.Tasks.TaskCompletionSource<TResponse> tcs) { }
         public virtual System.Threading.Tasks.Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, System.Action<EasyNetQ.IRequestConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
-        protected virtual System.Threading.Tasks.Task RequestPublishAsync<TRequest>(TRequest request, string routingKey, string returnQueueName, string correlationId, System.TimeSpan expiration, byte? priority, bool mandatory, System.Collections.Generic.IDictionary<string, object> headers, System.Threading.CancellationToken cancellationToken) { }
+        protected virtual System.Threading.Tasks.Task RequestPublishAsync<TRequest>(TRequest request, string routingKey, string returnQueueName, string correlationId, System.TimeSpan expiration, byte? priority, bool mandatory, System.Collections.Generic.IDictionary<string, object>? headers, System.Threading.CancellationToken cancellationToken) { }
         public virtual EasyNetQ.Internals.AwaitableDisposable<System.IDisposable> RespondAsync<TRequest, TResponse>(System.Func<TRequest, System.Threading.CancellationToken, System.Threading.Tasks.Task<TResponse>> responder, System.Action<EasyNetQ.IResponderConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
         protected virtual System.Threading.Tasks.Task<string> SubscribeToResponseAsync<TRequest, TResponse>(System.Threading.CancellationToken cancellationToken) { }
         protected readonly struct ResponseAction
@@ -786,7 +786,7 @@ namespace EasyNetQ
         public const string Classic = "classic";
         public const string Quorum = "quorum";
     }
-    public delegate string QueueTypeConvention(System.Type messageType);
+    public delegate string? QueueTypeConvention(System.Type messageType);
     public class RabbitAdvancedBus : EasyNetQ.IAdvancedBus, System.IDisposable
     {
         public RabbitAdvancedBus(
@@ -952,14 +952,14 @@ namespace EasyNetQ.AutoSubscribe
         public static string DefaultTopicName { get; set; }
         protected virtual string DefaultSubscriptionIdGenerator(EasyNetQ.AutoSubscribe.AutoSubscriberConsumerInfo c) { }
         protected virtual System.Collections.Generic.IEnumerable<EasyNetQ.AutoSubscribe.AutoSubscriberConsumerInfo> GetSubscriberConsumerInfos(System.Collections.Generic.IEnumerable<System.Type> types, System.Type interfaceType) { }
-        protected virtual EasyNetQ.AutoSubscribe.AutoSubscriberConsumerAttribute GetSubscriptionAttribute(EasyNetQ.AutoSubscribe.AutoSubscriberConsumerInfo consumerInfo) { }
+        protected virtual EasyNetQ.AutoSubscribe.AutoSubscriberConsumerAttribute? GetSubscriptionAttribute(EasyNetQ.AutoSubscribe.AutoSubscriberConsumerInfo consumerInfo) { }
         public virtual System.Threading.Tasks.Task<System.IDisposable> SubscribeAsync(System.Type[] consumerTypes, System.Threading.CancellationToken cancellationToken = default) { }
     }
     [System.AttributeUsage(System.AttributeTargets.Method)]
     public class AutoSubscriberConsumerAttribute : System.Attribute
     {
         public AutoSubscriberConsumerAttribute() { }
-        public string SubscriptionId { get; set; }
+        public string? SubscriptionId { get; set; }
     }
     public class AutoSubscriberConsumerInfo
     {
@@ -1865,7 +1865,7 @@ namespace EasyNetQ.SystemMessages
 {
     public class Error
     {
-        public Error() { }
+        public Error(string routingKey, string exchange, string queue, string exception, string message, System.DateTime dateTime, EasyNetQ.MessageProperties basicProperties) { }
         public EasyNetQ.MessageProperties BasicProperties { get; set; }
         public System.DateTime DateTime { get; set; }
         public string Exception { get; set; }
