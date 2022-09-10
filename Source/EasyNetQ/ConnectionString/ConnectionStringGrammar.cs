@@ -26,7 +26,7 @@ internal static class ConnectionStringGrammar
     internal static readonly Parser<HostConfiguration> Host =
         from host in Parse.Char(c => c != ':' && c != ';' && c != ',', "host").Many().Text()
         from port in Parse.Char(':').Then(_ => UShortNumber).Or(Parse.Return((ushort)0))
-        select new HostConfiguration { Host = host, Port = port };
+        select new HostConfiguration(host, port);
 
     internal static readonly Parser<IList<HostConfiguration>> Hosts = Host.ListDelimitedBy(',').Select(hosts => hosts.ToList());
 

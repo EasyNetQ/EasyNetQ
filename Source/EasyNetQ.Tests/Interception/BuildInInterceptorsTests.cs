@@ -15,7 +15,7 @@ public class BuildInInterceptorsTests
         var body = Encoding.UTF8.GetBytes("haha");
         var outgoingMessage = new ProducedMessage(new MessageProperties(), body);
         var message = interceptor.OnProduce(outgoingMessage);
-        var incomingMessage = new ConsumedMessage(null, message.Properties, message.Body);
+        var incomingMessage = new ConsumedMessage(new MessageReceivedInfo("", 0, false, "exchange", "routingKey", "queue"), message.Properties, message.Body);
         Assert.Equal(body, interceptor.OnConsume(incomingMessage).Body.ToArray());
     }
 
@@ -26,7 +26,7 @@ public class BuildInInterceptorsTests
         var body = Encoding.UTF8.GetBytes("haha");
         var outgoingMessage = new ProducedMessage(new MessageProperties(), body);
         var message = interceptor.OnProduce(outgoingMessage);
-        var incomingMessage = new ConsumedMessage(null, message.Properties, message.Body);
+        var incomingMessage = new ConsumedMessage(new MessageReceivedInfo("", 0, false, "exchange", "routingKey", "queue"), message.Properties, message.Body);
         Assert.Equal(body, interceptor.OnConsume(incomingMessage).Body.ToArray());
     }
 
@@ -48,9 +48,9 @@ public class BuildInInterceptorsTests
     [Fact]
     public void ShouldCallAddedInterceptorsOnConsume()
     {
-        var sourceMessage = new ConsumedMessage(null, new MessageProperties(), Array.Empty<byte>());
-        var firstMessage = new ConsumedMessage(null, new MessageProperties(), Array.Empty<byte>());
-        var secondMessage = new ConsumedMessage(null, new MessageProperties(), Array.Empty<byte>());
+        var sourceMessage = new ConsumedMessage(new MessageReceivedInfo("", 0, false, "exchange", "routingKey", "queue"), new MessageProperties(), Array.Empty<byte>());
+        var firstMessage = new ConsumedMessage(new MessageReceivedInfo("", 0, false, "exchange", "routingKey", "queue"), new MessageProperties(), Array.Empty<byte>());
+        var secondMessage = new ConsumedMessage(new MessageReceivedInfo("", 0, false, "exchange", "routingKey", "queue"), new MessageProperties(), Array.Empty<byte>());
 
         var first = Substitute.For<IProduceConsumeInterceptor>();
         var second = Substitute.For<IProduceConsumeInterceptor>();

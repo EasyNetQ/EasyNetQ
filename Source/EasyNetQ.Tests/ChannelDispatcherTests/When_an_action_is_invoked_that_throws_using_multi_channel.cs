@@ -8,6 +8,7 @@ using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 using FluentAssertions;
 using NSubstitute;
+using RabbitMQ.Client;
 using Xunit;
 
 namespace EasyNetQ.Tests.ChannelDispatcherTests;
@@ -22,10 +23,11 @@ public class When_an_action_is_invoked_that_throws_using_multi_channel : IDispos
         var producerConnection = Substitute.For<IProducerConnection>();
         var consumerConnection = Substitute.For<IConsumerConnection>();
         var channel = Substitute.For<IPersistentChannel>();
+        var model = Substitute.For<IModel>();
 
         channelFactory.CreatePersistentChannel(producerConnection, new PersistentChannelOptions()).Returns(channel);
         channel.InvokeChannelActionAsync<int, FuncBasedPersistentChannelAction<int>>(default)
-            .ReturnsForAnyArgs(x => ((FuncBasedPersistentChannelAction<int>)x[0]).Invoke(null));
+            .ReturnsForAnyArgs(x => ((FuncBasedPersistentChannelAction<int>)x[0]).Invoke(model));
 
         dispatcher = new MultiPersistentChannelDispatcher(1, producerConnection, consumerConnection, channelFactory);
     }

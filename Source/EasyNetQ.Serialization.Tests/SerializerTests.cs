@@ -11,15 +11,6 @@ public class SerializerTests
 {
     [Theory]
     [MemberData(nameof(GetSerializers))]
-    public void Should_be_able_to_serialize_and_deserialize_a_default_message(ISerializer serializer)
-    {
-        using var serializedMessage = serializer.MessageToBytes(typeof(Message), default(Message));
-        var deserializedMessage = (Message)serializer.BytesToMessage(typeof(Message), serializedMessage.Memory);
-        deserializedMessage.Should().BeNull();
-    }
-
-    [Theory]
-    [MemberData(nameof(GetSerializers))]
     public void Should_be_able_to_serialize_and_deserialize_a_message(ISerializer serializer)
     {
         var message = new Message { Text = "Hello World" };

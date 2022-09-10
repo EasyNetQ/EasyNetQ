@@ -165,7 +165,7 @@ public class PersistentConnection : IPersistentConnection
     private void OnConnectionBlocked(object sender, ConnectionBlockedEventArgs e)
     {
         logger.InfoFormat("Connection {type} blocked with reason {reason}", type, e.Reason);
-        eventBus.Publish(new ConnectionBlockedEvent(type, e.Reason));
+        eventBus.Publish(new ConnectionBlockedEvent(type, e.Reason ?? "Unknown reason"));
     }
 
     private void OnConnectionUnblocked(object sender, EventArgs e)

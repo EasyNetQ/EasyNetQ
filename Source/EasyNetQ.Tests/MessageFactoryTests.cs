@@ -30,13 +30,6 @@ public class MessageFactoryTests
     }
 
     [Fact]
-    public void Should_fail_to_create_generic_message_with_null_argument()
-    {
-        Assert.Throws<ArgumentNullException>(() => MessageFactory.CreateInstance(typeof(MyMessage), null));
-        Assert.Throws<ArgumentNullException>(() => MessageFactory.CreateInstance(typeof(MyMessage), new MyMessage(), null));
-    }
-
-    [Fact]
     public void Should_support_struct_message_body()
     {
         MessageFactory.CreateInstance(typeof(Guid), Guid.NewGuid());

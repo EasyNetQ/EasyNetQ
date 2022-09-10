@@ -11,13 +11,13 @@ public static class MessageFactory
 {
     private static readonly ConcurrentDictionary<Type, Type> GenericMessageTypesMap = new();
 
-    public static IMessage CreateInstance(Type messageType, object body)
+    public static IMessage CreateInstance(Type messageType, object? body)
     {
         var genericType = GenericMessageTypesMap.GetOrAdd(messageType, t => typeof(Message<>).MakeGenericType(t));
         return (IMessage)Activator.CreateInstance(genericType, body);
     }
 
-    public static IMessage CreateInstance(Type messageType, object body, MessageProperties properties)
+    public static IMessage CreateInstance(Type messageType, object? body, MessageProperties properties)
     {
         var genericType = GenericMessageTypesMap.GetOrAdd(messageType, t => typeof(Message<>).MakeGenericType(t));
         return (IMessage)Activator.CreateInstance(genericType, body, properties);

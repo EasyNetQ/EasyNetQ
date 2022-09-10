@@ -37,13 +37,12 @@ public class AmqpConnectionStringParser : IConnectionStringParser
             throw new ArgumentException($"Wrong scheme in AMQP URI: {uri.Scheme}");
 
         var secured = uri.Scheme == "amqps";
-        var host = new HostConfiguration
-        {
-            Host = string.IsNullOrEmpty(uri.Host) ? "localhost" : uri.Host,
-            Port = uri.Port == -1
+        var host = new HostConfiguration(
+            string.IsNullOrEmpty(uri.Host) ? "localhost" : uri.Host,
+            uri.Port == -1
                 ? (ushort)(secured ? ConnectionConfiguration.DefaultAmqpsPort : ConnectionConfiguration.DefaultPort)
-                : (ushort)uri.Port,
-        };
+                : (ushort)uri.Port
+        );
         if (secured)
         {
             host.Ssl.Enabled = true;

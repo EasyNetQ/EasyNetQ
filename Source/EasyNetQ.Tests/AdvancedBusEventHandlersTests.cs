@@ -129,7 +129,7 @@ public class AdvancedBusEventHandlersTests : IDisposable
     public void AdvancedBusEventHandlers_MessageReturned_handler_is_called()
     {
         var @event = new ReturnedMessageEvent(
-            null,
+            Substitute.For<IModel>(),
             Array.Empty<byte>(),
             new MessageProperties(),
             new MessageReturnedInfo("my.exchange", "routing.key", "reason")

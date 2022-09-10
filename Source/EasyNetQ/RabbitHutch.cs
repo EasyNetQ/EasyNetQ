@@ -86,20 +86,19 @@ public static class RabbitHutch
         string username,
         string password,
         TimeSpan requestedHeartbeat,
-        Action<IServiceRegister> registerServices)
+        Action<IServiceRegister> registerServices
+    )
     {
         var connectionConfiguration = new ConnectionConfiguration
         {
-            Hosts = new List<HostConfiguration>
-            {
-                new() { Host = hostName, Port = hostPort }
-            },
+            Hosts = new List<HostConfiguration>(),
             Port = hostPort,
             VirtualHost = virtualHost,
             UserName = username,
             Password = password,
             RequestedHeartbeat = requestedHeartbeat
         };
+        connectionConfiguration.Hosts.Add(new HostConfiguration(hostName, hostPort));
         return CreateBus(connectionConfiguration, registerServices);
     }
 

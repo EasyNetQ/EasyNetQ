@@ -170,7 +170,7 @@ public class Conventions : IConventions
         ConsumerTagConvention = () => Guid.NewGuid().ToString();
     }
 
-    private QueueAttribute GetQueueAttribute(Type messageType)
+    private static QueueAttribute GetQueueAttribute(Type messageType)
     {
         return messageType.GetAttribute<QueueAttribute>() ?? QueueAttribute.Default;
     }
