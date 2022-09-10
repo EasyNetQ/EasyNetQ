@@ -82,7 +82,7 @@ public class RabbitMQFixture : IAsyncLifetime, IDisposable
     {
         var portMappings = new Dictionary<string, ISet<string>>
         {
-            {"4369", new HashSet<string> {"4369"}},
+            //{"4369", new HashSet<string> {"4369"}},
             {"5671", new HashSet<string> {"5671"}},
             {"5672", new HashSet<string> {"5672"}},
             {"15671", new HashSet<string> {"15671"}},
