@@ -104,7 +104,7 @@ public class DefaultPubSub : IPubSub
 
         var queueName = subscriptionConfiguration.QueueName ?? conventions.QueueNamingConvention(typeof(T), subscriptionId);
         var queueType = conventions.QueueTypeConvention(typeof(T));
-        if (!string.IsNullOrEmpty(queueType))
+        if (queueType != null)
             subscriptionConfiguration.WithQueueType(queueType);
         var queue = await advancedBus.QueueDeclareAsync(
             queueName,

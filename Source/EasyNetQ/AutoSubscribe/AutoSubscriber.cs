@@ -136,7 +136,7 @@ public class AutoSubscriber
         where TConsumerAsync : class, IConsumeAsync<TMessage>
     {
         var subscriptionAttribute = GetSubscriptionAttribute(subscriptionInfo);
-        var subscriptionId = subscriptionAttribute != null ? subscriptionAttribute.SubscriptionId : GenerateSubscriptionId(subscriptionInfo);
+        var subscriptionId = subscriptionAttribute?.SubscriptionId ?? GenerateSubscriptionId(subscriptionInfo);
         var configureSubscriptionAction = GenerateConfigurationAction(subscriptionInfo);
 
         return Bus.PubSub.SubscribeAsync<TMessage>(
@@ -152,7 +152,7 @@ public class AutoSubscriber
         where TConsumer : class, IConsume<TMessage>
     {
         var subscriptionAttribute = GetSubscriptionAttribute(subscriptionInfo);
-        var subscriptionId = subscriptionAttribute != null ? subscriptionAttribute.SubscriptionId : GenerateSubscriptionId(subscriptionInfo);
+        var subscriptionId = subscriptionAttribute?.SubscriptionId ?? GenerateSubscriptionId(subscriptionInfo);
         var configureSubscriptionAction = GenerateConfigurationAction(subscriptionInfo);
 
         var asyncDispatcher = TaskHelpers.FromAction<TMessage>((m, c) => AutoSubscriberMessageDispatcher.Dispatch<TMessage, TConsumer>(m, c));

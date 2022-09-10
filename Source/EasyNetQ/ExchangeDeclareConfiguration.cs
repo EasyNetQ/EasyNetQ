@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using EasyNetQ.Topology;
 
 namespace EasyNetQ;
 
@@ -46,7 +47,7 @@ internal class ExchangeDeclareConfiguration : IExchangeDeclareConfiguration
 
     public bool IsAutoDelete { get; private set; }
 
-    public string? Type { get; private set; }
+    public string Type { get; private set; } = ExchangeType.Topic;
 
     public IDictionary<string, object>? Arguments { get; private set; }
 

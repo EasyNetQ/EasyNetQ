@@ -21,7 +21,7 @@ public delegate string QueueNameConvention(Type messageType, string subscriberId
 /// <summary>
 ///     Convention for queue type
 /// </summary>
-public delegate string QueueTypeConvention(Type messageType);
+public delegate string? QueueTypeConvention(Type messageType);
 
 /// <summary>
 ///     Convention for error queue routing key naming
@@ -126,18 +126,13 @@ public class Conventions : IConventions
         {
             var attr = GetQueueAttribute(type);
 
-            return string.IsNullOrEmpty(attr.ExchangeName)
-                ? typeNameSerializer.Serialize(type)
-                : attr.ExchangeName;
+            return attr.ExchangeName ?? typeNameSerializer.Serialize(type);
         };
 
         QueueTypeConvention = type =>
         {
             var attr = GetQueueAttribute(type);
-
-            return string.IsNullOrEmpty(attr.QueueType)
-                ? null
-                : attr.QueueType;
+            return attr.QueueType;
         };
 
         TopicNamingConvention = _ => "";
@@ -146,7 +141,7 @@ public class Conventions : IConventions
         {
             var attr = GetQueueAttribute(type);
 
-            if (string.IsNullOrEmpty(attr.QueueName))
+            if (attr.QueueName == null)
             {
                 var typeName = typeNameSerializer.Serialize(type);
 

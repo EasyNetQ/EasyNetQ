@@ -332,7 +332,7 @@ public class DefaultRpc : IRpc
             };
             await advancedBus.PublishAsync(
                 exchange,
-                requestMessage.Properties.ReplyTo,
+                requestMessage.Properties.ReplyTo!,
                 false,
                 responseMessage,
                 cancellationToken
@@ -348,7 +348,7 @@ public class DefaultRpc : IRpc
 
             await advancedBus.PublishAsync(
                 exchange,
-                requestMessage.Properties.ReplyTo,
+                requestMessage.Properties.ReplyTo!,
                 false,
                 responseMessage,
                 cancellationToken
