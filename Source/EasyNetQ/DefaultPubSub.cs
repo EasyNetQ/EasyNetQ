@@ -136,7 +136,7 @@ public class DefaultPubSub : IPubSub
 
         var consumerCancellation = advancedBus.Consume<T>(
             queue,
-            (message, _, cancellation) => onMessage(message.Body, cancellation),
+            (message, _, cancellation) => onMessage(message.Body!, cancellation),
             c => c.WithPrefetchCount(subscriptionConfiguration.PrefetchCount)
                 .WithPriority(subscriptionConfiguration.Priority)
                 .WithExclusive(subscriptionConfiguration.IsExclusive)

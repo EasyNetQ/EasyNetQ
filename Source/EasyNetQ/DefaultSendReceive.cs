@@ -127,7 +127,7 @@ public class DefaultSendReceive : ISendReceive
 
         public IReceiveRegistration Add<T>(Func<T, CancellationToken, Task> onMessage)
         {
-            handlerRegistration.Add<T>((message, _, c) => onMessage(message.Body, c));
+            handlerRegistration.Add<T>((message, _, c) => onMessage(message.Body!, c));
             return this;
         }
     }

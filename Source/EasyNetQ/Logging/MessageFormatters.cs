@@ -39,7 +39,7 @@ internal static class MessageFormatter
             return targetMessage;
         }
 
-        List<string> processedArguments = null;
+        List<string>? processedArguments = null;
 
         foreach (Match match in Pattern.Matches(targetMessage))
         {

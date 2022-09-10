@@ -33,7 +33,7 @@ public class DefaultMessageSerializationStrategy : IMessageSerializationStrategy
         var typeName = typeNameSerializer.Serialize(message.MessageType);
         var messageBody = message.GetBody() is null
             ? new ArrayPooledMemoryStream()
-            : serializer.MessageToBytes(message.MessageType, message.GetBody());
+            : serializer.MessageToBytes(message.MessageType, message.GetBody()!);
         var messageProperties = message.Properties;
 
         messageProperties.Type = typeName;

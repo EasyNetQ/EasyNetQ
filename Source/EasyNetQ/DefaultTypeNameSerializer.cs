@@ -16,9 +16,11 @@ public class DefaultTypeNameSerializer : ITypeNameSerializer
     /// <inheritdoc />
     public string Serialize(Type type)
     {
+        if (type.AssemblyQualifiedName == null) throw new ArgumentOutOfRangeException(nameof(type), type, null);
+
         return serializedTypes.GetOrAdd(type, t =>
         {
-            var typeName = RemoveAssemblyDetails(t.AssemblyQualifiedName);
+            var typeName = RemoveAssemblyDetails(t.AssemblyQualifiedName!);
             if (typeName.Length > 255)
             {
                 throw new EasyNetQException($"The serialized name of type '{t.Name}' exceeds the AMQP maximum short string length of 255 characters");
@@ -86,7 +88,7 @@ public class DefaultTypeNameSerializer : ITypeNameSerializer
         var assemblyDelimiterIndex = GetAssemblyDelimiterIndex(fullyQualifiedTypeName);
 
         string typeName;
-        string assemblyName;
+        string? assemblyName;
 
         if (assemblyDelimiterIndex != null)
         {
@@ -141,12 +143,12 @@ public class DefaultTypeNameSerializer : ITypeNameSerializer
             return type;
         }
 
-        return Type.GetType(typeName);
+        return Type.GetType(typeName) ?? throw new EasyNetQException($"Could not find type '{typeName}'");
     }
 
-    private static Type GetGenericTypeFromTypeName(string typeName, Assembly assembly)
+    private static Type? GetGenericTypeFromTypeName(string typeName, Assembly assembly)
     {
-        Type type = null;
+        Type? type = null;
         var openBracketIndex = typeName.IndexOf('[');
         if (openBracketIndex >= 0)
         {

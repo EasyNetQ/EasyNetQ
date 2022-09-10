@@ -51,11 +51,11 @@ public class MessageTypeProperty
     public Type GetMessageType()
     {
         if (TryGetType(messageType, out var foundMessageType))
-            return foundMessageType;
+            return foundMessageType!;
 
         foreach (var alternativeType in alternativeTypes)
             if (TryGetType(alternativeType, out foundMessageType))
-                return foundMessageType;
+                return foundMessageType!;
 
         throw new EasyNetQException(
             "Cannot find declared message type {0} or any of the specified alternative types {1}", this.messageType,
