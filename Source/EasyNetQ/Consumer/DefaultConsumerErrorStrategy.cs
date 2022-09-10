@@ -1,6 +1,7 @@
 using System;
 using System.Buffers;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using EasyNetQ.Logging;
@@ -9,6 +10,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Internals;
 
 namespace EasyNetQ.Consumer;
 
@@ -30,7 +32,7 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
     private readonly IConsumerConnection connection;
     private readonly IConventions conventions;
     private readonly IErrorMessageSerializer errorMessageSerializer;
-    private readonly ConcurrentDictionary<string, object> existingErrorExchangesWithQueues = new();
+    private readonly ConcurrentDictionary<string, NoResult> existingErrorExchangesWithQueues = new();
     private readonly ISerializer serializer;
     private readonly ITypeNameSerializer typeNameSerializer;
     private readonly ConnectionConfiguration configuration;
@@ -152,7 +154,7 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
         existingErrorExchangesWithQueues.GetOrAdd(errorTopologyIdentifier, _ =>
         {
             DeclareAndBindErrorExchangeWithErrorQueue(model, errorExchangeName, errorQueueName, routingKey);
-            return null;
+            return NoResult.Instance;
         });
 
         return errorExchangeName;
@@ -163,37 +165,27 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
     )
     {
         var messageAsString = errorMessageSerializer.Serialize(body);
-        var error = new Error
-        {
-            RoutingKey = receivedInfo.RoutingKey,
-            Exchange = receivedInfo.Exchange,
-            Queue = receivedInfo.Queue,
-            Exception = exception.ToString(),
-            Message = messageAsString,
-            DateTime = DateTime.UtcNow
-        };
+        var patchedProperties = (MessageProperties)properties.Clone();
+        patchedProperties.Headers = PatchHeaders(patchedProperties.Headers);
 
-        if (properties.Headers == null)
-        {
-            error.BasicProperties = properties;
-        }
-        else
-        {
-            // we'll need to clone context.Properties as we are mutating the headers dictionary
-            error.BasicProperties = (MessageProperties)properties.Clone();
+        var error = new Error(
+            receivedInfo.RoutingKey,
+            receivedInfo.Exchange,
+            receivedInfo.Queue,
+            exception.ToString(),
+            messageAsString,
+            DateTime.UtcNow,
+            patchedProperties
+        );
 
-            // the RabbitMQClient implicitly converts strings to byte[] on sending, but reads them back as byte[]
-            // we're making the assumption here that any byte[] values in the headers are strings
-            // and all others are basic types. RabbitMq client generally throws a nasty exception if you try
-            // to store anything other than basic types in headers anyway.
-
-            //see http://hg.rabbitmq.com/rabbitmq-dotnet-client/file/tip/projects/client/RabbitMQ.Client/src/client/impl/WireFormatting.cs
-
-            error.BasicProperties.Headers = properties.Headers.ToDictionary(
-                kvp => kvp.Key,
-                kvp => kvp.Value is byte[] bytes ? Encoding.UTF8.GetString(bytes) : kvp.Value
-            );
-        }
         return serializer.MessageToBytes(typeof(Error), error);
+    }
+
+    private static IDictionary<string, object> PatchHeaders(IDictionary<string, object> headers)
+    {
+        return headers.ToDictionary(
+            kvp => kvp.Key,
+            kvp => kvp.Value is byte[] bytes ? Encoding.UTF8.GetString(bytes) : kvp.Value
+        );
     }
 }

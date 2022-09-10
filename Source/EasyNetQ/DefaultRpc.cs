@@ -166,7 +166,7 @@ public class DefaultRpc : IRpc
                 if (isFaulted)
                     tcs.TrySetException(new EasyNetQResponderException(exceptionMessage));
                 else
-                    tcs.TrySetResult(msg.Body);
+                    tcs.TrySetResult(msg.Body!);
             },
             () => tcs.TrySetException(
                 new EasyNetQException(
@@ -233,7 +233,7 @@ public class DefaultRpc : IRpc
         TimeSpan expiration,
         byte? priority,
         bool mandatory,
-        IDictionary<string, object> headers,
+        IDictionary<string, object>? headers,
         CancellationToken cancellationToken
     )
     {
@@ -320,7 +320,7 @@ public class DefaultRpc : IRpc
 
         try
         {
-            var request = requestMessage.Body;
+            var request = requestMessage.Body!;
             var response = await responder(request, cancellationToken).ConfigureAwait(false);
             var responseMessage = new Message<TResponse>(response)
             {

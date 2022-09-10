@@ -223,7 +223,7 @@ public class AutoSubscriber
         };
     }
 
-    private static SubscriptionConfigurationAttribute GetSubscriptionConfigurationAttributeValue(AutoSubscriberConsumerInfo subscriptionInfo)
+    private static SubscriptionConfigurationAttribute? GetSubscriptionConfigurationAttributeValue(AutoSubscriberConsumerInfo subscriptionInfo)
     {
         var customAttributes = subscriptionInfo.ConsumeMethod.GetCustomAttributes(typeof(SubscriptionConfigurationAttribute), true);
         return customAttributes
@@ -231,7 +231,7 @@ public class AutoSubscriber
             .FirstOrDefault();
     }
 
-    protected virtual AutoSubscriberConsumerAttribute GetSubscriptionAttribute(AutoSubscriberConsumerInfo consumerInfo)
+    protected virtual AutoSubscriberConsumerAttribute? GetSubscriptionAttribute(AutoSubscriberConsumerInfo consumerInfo)
     {
         return consumerInfo.ConsumeMethod
             .GetCustomAttributes(typeof(AutoSubscriberConsumerAttribute), true)

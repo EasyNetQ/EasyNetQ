@@ -70,7 +70,7 @@ public class AmqpConnectionStringParser : IConnectionStringParser
         if (uri.Segments.Length == 2) configuration.VirtualHost = Uri.UnescapeDataString(uri.Segments[1]);
 
         var query = uri.ParseQuery();
-        return Parsers.Aggregate(configuration, (current, parser) => parser(current, query));
+        return query == null ? configuration : Parsers.Aggregate(configuration, (current, parser) => parser(current, query));
     }
 
     private static UpdateConfiguration BuildKeyValueParser<T>(

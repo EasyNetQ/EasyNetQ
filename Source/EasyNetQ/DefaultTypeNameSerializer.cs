@@ -219,10 +219,10 @@ public class DefaultTypeNameSerializer : ITypeNameSerializer
 
     private readonly struct TypeNameKey
     {
-        public string AssemblyName { get; }
+        public string? AssemblyName { get; }
         public string TypeName { get; }
 
-        public TypeNameKey(string assemblyName, string typeName)
+        public TypeNameKey(string? assemblyName, string typeName)
         {
             AssemblyName = assemblyName;
             TypeName = typeName;
