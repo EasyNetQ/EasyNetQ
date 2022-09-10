@@ -29,14 +29,6 @@ public class ErrorMessageRepublishSpike
     }
 
     [Fact]
-    public void Should_fail_to_deserialize_some_other_random_message()
-    {
-        const string randomMessage = "{\"Text\":\"Hello World\"}";
-        var error = (Error)serializer.BytesToMessage(typeof(Error), Encoding.UTF8.GetBytes(randomMessage));
-        error.Message.ShouldBeNull();
-    }
-
-    [Fact]
     [Traits.Explicit("Requires a localhost instance of RabbitMQ to run")]
     public void Should_be_able_to_republish_message()
     {
@@ -72,6 +64,7 @@ public class ErrorMessageRepublishSpike
         @"{
     ""RoutingKey"":""originalRoutingKey"",
     ""Exchange"":""orginalExchange"",
+    ""Queue"":""originalQueue"",
     ""Exception"":""System.Exception: I just threw!"",
     ""Message"":""{ Text:\""Hello World\""}"",
     ""DateTime"":""\/Date(1312196313848+0100)\/"",
