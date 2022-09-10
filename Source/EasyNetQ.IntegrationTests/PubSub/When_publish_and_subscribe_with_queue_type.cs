@@ -52,7 +52,7 @@ public class When_publish_and_subscribe_with_queue_type : IDisposable
     }
 }
 
-[Queue(Name="QuorumQueue", Type = QueueType.Quorum)]
+[Queue(Name = "QuorumQueue", Type = QueueType.Quorum)]
 public class QuorumQueueMessage : Message
 {
     public QuorumQueueMessage(int id) : base(id)
