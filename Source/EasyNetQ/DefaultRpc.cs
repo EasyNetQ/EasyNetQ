@@ -111,7 +111,9 @@ public class DefaultRpc : IRpc
     {
         // We're explicitly validating TResponse here because the type won't be used directly.
         // It'll only be used when executing a successful responder, which will silently fail if TResponse serialized length exceeds the limit.
-        Preconditions.CheckShortString(typeNameSerializer.Serialize(typeof(TResponse)), "TResponse");
+        var serializedResponse = typeNameSerializer.Serialize(typeof(TResponse));
+        if (serializedResponse.Length > 255)
+            throw new ArgumentOutOfRangeException(nameof(TResponse), typeof(TResponse), "Must be less than or equal to 255 characters when serialized.");
 
         return RespondAsyncInternal(responder, configure, cancellationToken).ToAwaitableDisposable();
     }
