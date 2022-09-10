@@ -339,7 +339,7 @@ public class PullingConsumer : IPullingConsumer<PullResult>
     {
         using var cts = cancellationToken.WithTimeout(options.Timeout);
 
-        var basicGetResult = await channel.InvokeChannelActionAsync<BasicGetResult, BasicGetAction>(
+        var basicGetResult = await channel.InvokeChannelActionAsync<BasicGetResult?, BasicGetAction>(
             new BasicGetAction(queue, options.AutoAck), cts.Token
         ).ConfigureAwait(false);
 
@@ -402,7 +402,7 @@ public class PullingConsumer : IPullingConsumer<PullResult>
         channel.Dispose();
     }
 
-    private readonly struct BasicGetAction : IPersistentChannelAction<BasicGetResult>
+    private readonly struct BasicGetAction : IPersistentChannelAction<BasicGetResult?>
     {
         private readonly Queue queue;
         private readonly bool autoAck;
@@ -413,7 +413,7 @@ public class PullingConsumer : IPullingConsumer<PullResult>
             this.autoAck = autoAck;
         }
 
-        public BasicGetResult Invoke(IModel model) => model.BasicGet(queue.Name, autoAck);
+        public BasicGetResult? Invoke(IModel model) => model.BasicGet(queue.Name, autoAck);
     }
 
     private readonly struct BasicAckAction : IPersistentChannelAction<NoResult>
