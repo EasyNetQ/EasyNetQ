@@ -58,13 +58,19 @@ public sealed class AsyncQueue<T> : IDisposable
     /// </summary>
     /// <param name="element">Dequeued element</param>
     /// <returns>True if an element was dequeued</returns>
-    public bool TryDequeue(out T element)
+    public bool TryDequeue(out T? element)
     {
         lock (mutex)
         {
             var hasElements = elements.Count > 0;
-            element = hasElements ? elements.Dequeue() : default;
-            return hasElements;
+            if (hasElements)
+            {
+                element = elements.Dequeue();
+                return true;
+            }
+
+            element = default;
+            return false;
         }
     }
 

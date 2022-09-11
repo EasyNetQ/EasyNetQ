@@ -62,7 +62,7 @@ public sealed class AsyncCountdownEvent : IDisposable
     /// </summary>
     public void Wait()
     {
-        TaskCompletionSource<bool> waiter = null;
+        TaskCompletionSource<bool>? waiter = null;
         lock (mutex)
         {
             if (count > 0)

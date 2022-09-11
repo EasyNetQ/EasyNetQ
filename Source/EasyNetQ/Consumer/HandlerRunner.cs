@@ -19,9 +19,6 @@ public class HandlerRunner : IHandlerRunner
 
     public HandlerRunner(ILogger<IHandlerRunner> logger, IConsumerErrorStrategy consumerErrorStrategy)
     {
-        Preconditions.CheckNotNull(logger, nameof(logger));
-        Preconditions.CheckNotNull(consumerErrorStrategy, nameof(consumerErrorStrategy));
-
         this.logger = logger;
         this.consumerErrorStrategy = consumerErrorStrategy;
     }

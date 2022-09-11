@@ -48,8 +48,6 @@ public static class RabbitHutch
     /// </returns>
     public static IBus CreateBus(string connectionString, Action<IServiceRegister> registerServices)
     {
-        Preconditions.CheckNotNull(connectionString, nameof(connectionString));
-
         return CreateBus(x => x.Resolve<IConnectionStringParser>().Parse(connectionString), registerServices);
     }
 
@@ -88,25 +86,19 @@ public static class RabbitHutch
         string username,
         string password,
         TimeSpan requestedHeartbeat,
-        Action<IServiceRegister> registerServices)
+        Action<IServiceRegister> registerServices
+    )
     {
-        Preconditions.CheckNotNull(hostName, nameof(hostName));
-        Preconditions.CheckNotNull(virtualHost, nameof(virtualHost));
-        Preconditions.CheckNotNull(username, nameof(username));
-        Preconditions.CheckNotNull(password, nameof(password));
-
         var connectionConfiguration = new ConnectionConfiguration
         {
-            Hosts = new List<HostConfiguration>
-            {
-                new() { Host = hostName, Port = hostPort }
-            },
+            Hosts = new List<HostConfiguration>(),
             Port = hostPort,
             VirtualHost = virtualHost,
             UserName = username,
             Password = password,
             RequestedHeartbeat = requestedHeartbeat
         };
+        connectionConfiguration.Hosts.Add(new HostConfiguration(hostName, hostPort));
         return CreateBus(connectionConfiguration, registerServices);
     }
 
@@ -125,8 +117,6 @@ public static class RabbitHutch
     /// </returns>
     public static IBus CreateBus(ConnectionConfiguration connectionConfiguration, Action<IServiceRegister> registerServices)
     {
-        Preconditions.CheckNotNull(connectionConfiguration, nameof(connectionConfiguration));
-
         return CreateBus(_ => connectionConfiguration, registerServices);
     }
 
@@ -162,14 +152,12 @@ public static class RabbitHutch
     /// Override default services. For example, to override the default <see cref="ISerializer"/>:
     /// RabbitHutch.CreateBus("host=localhost", x => x.Register{ISerializer}(mySerializer));
     /// </param>
-    public static void RegisterBus(IServiceRegister serviceRegister,
+    public static void RegisterBus(
+        IServiceRegister serviceRegister,
         Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory,
-        Action<IServiceRegister> registerServices)
+        Action<IServiceRegister> registerServices
+    )
     {
-        Preconditions.CheckNotNull(serviceRegister, nameof(serviceRegister));
-        Preconditions.CheckNotNull(connectionConfigurationFactory, nameof(connectionConfigurationFactory));
-        Preconditions.CheckNotNull(registerServices, nameof(registerServices));
-
         // first call delegate to register user-supplied services
         registerServices(serviceRegister);
 

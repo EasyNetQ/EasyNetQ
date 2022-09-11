@@ -21,8 +21,6 @@ public static class HandlerRegistrationExtensions
         this IHandlerRegistration handlerRegistration, Action<IMessage<T>, MessageReceivedInfo> handler
     )
     {
-        Preconditions.CheckNotNull(handlerRegistration, nameof(handlerRegistration));
-
         var asyncHandler = TaskHelpers.FromAction<IMessage<T>, MessageReceivedInfo>((m, i, _) => handler(m, i));
         return handlerRegistration.Add(asyncHandler);
     }
@@ -38,8 +36,6 @@ public static class HandlerRegistrationExtensions
         this IHandlerRegistration handlerRegistration, Func<IMessage<T>, MessageReceivedInfo, Task> handler
     )
     {
-        Preconditions.CheckNotNull(handlerRegistration, nameof(handlerRegistration));
-
         return handlerRegistration.Add<T>((m, i, _) => handler(m, i));
     }
 
@@ -55,8 +51,6 @@ public static class HandlerRegistrationExtensions
         Func<IMessage<T>, MessageReceivedInfo, Task<AckStrategy>> handler
     )
     {
-        Preconditions.CheckNotNull(handlerRegistration, nameof(handlerRegistration));
-
         return handlerRegistration.Add<T>((m, i, _) => handler(m, i));
     }
 
@@ -72,8 +66,6 @@ public static class HandlerRegistrationExtensions
         Func<IMessage<T>, MessageReceivedInfo, CancellationToken, Task> handler
     )
     {
-        Preconditions.CheckNotNull(handlerRegistration, nameof(handlerRegistration));
-
         return handlerRegistration.Add<T>(async (m, i, c) =>
         {
             await handler(m, i, c).ConfigureAwait(false);

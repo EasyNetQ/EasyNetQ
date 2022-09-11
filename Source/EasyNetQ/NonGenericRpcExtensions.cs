@@ -33,8 +33,6 @@ public static class NonGenericRpcExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(rpc, nameof(rpc));
-
         return rpc.RequestAsync(request, requestType, responseType, _ => { }, cancellationToken);
     }
 
@@ -59,8 +57,6 @@ public static class NonGenericRpcExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(rpc, nameof(rpc));
-
         var requestDelegate = RequestDelegates.GetOrAdd(Tuple.Create(requestType, responseType), t =>
         {
             var requestMethodInfo = typeof(IRpc).GetMethod("RequestAsync");
@@ -117,8 +113,6 @@ public static class NonGenericRpcExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(rpc, nameof(rpc));
-
         return rpc.RequestAsync(request, requestType, responseType, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -145,12 +139,10 @@ public static class NonGenericRpcExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(rpc, nameof(rpc));
-
         return rpc.RequestAsync(request, requestType, responseType, configure, cancellationToken)
             .GetAwaiter()
             .GetResult();
     }
 
-    private static async Task<object> ToTaskOfObject<T>(Task<T> task) => await task.ConfigureAwait(false);
+    private static async Task<object> ToTaskOfObject<T>(Task<T> task) => (await task.ConfigureAwait(false))!;
 }

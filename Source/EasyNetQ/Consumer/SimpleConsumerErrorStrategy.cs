@@ -26,10 +26,7 @@ public class SimpleConsumerErrorStrategy : IConsumerErrorStrategy
 
     private readonly AckStrategy errorStrategy;
 
-    private SimpleConsumerErrorStrategy(AckStrategy errorStrategy)
-    {
-        this.errorStrategy = errorStrategy;
-    }
+    private SimpleConsumerErrorStrategy(AckStrategy errorStrategy) => this.errorStrategy = errorStrategy;
 
     /// <inheritdoc />
     public void Dispose()

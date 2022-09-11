@@ -31,11 +31,6 @@ public class DefaultSendReceive : ISendReceive
         IMessageDeliveryModeStrategy messageDeliveryModeStrategy
     )
     {
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
-        Preconditions.CheckNotNull(conventions, nameof(conventions));
-        Preconditions.CheckNotNull(advancedBus, nameof(advancedBus));
-        Preconditions.CheckNotNull(messageDeliveryModeStrategy, nameof(messageDeliveryModeStrategy));
-
         this.configuration = configuration;
         this.conventions = conventions;
         this.advancedBus = advancedBus;
@@ -47,9 +42,6 @@ public class DefaultSendReceive : ISendReceive
         string queue, T message, Action<ISendConfiguration> configure, CancellationToken cancellationToken
     )
     {
-        Preconditions.CheckNotNull(queue, nameof(queue));
-        Preconditions.CheckNotNull(message, nameof(message));
-
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         var sendConfiguration = new SendConfiguration();
@@ -75,10 +67,6 @@ public class DefaultSendReceive : ISendReceive
         CancellationToken cancellationToken
     )
     {
-        Preconditions.CheckNotNull(queue, nameof(queue));
-        Preconditions.CheckNotNull(addHandlers, nameof(addHandlers));
-        Preconditions.CheckNotNull(configure, nameof(configure));
-
         return ReceiveInternalAsync(queue, addHandlers, configure, cancellationToken).ToAwaitableDisposable();
     }
 
@@ -108,9 +96,9 @@ public class DefaultSendReceive : ISendReceive
                     c.WithMaxLength(receiveConfiguration.MaxLength.Value);
                 if (receiveConfiguration.MaxLengthBytes.HasValue)
                     c.WithMaxLengthBytes(receiveConfiguration.MaxLengthBytes.Value);
-                if (!string.IsNullOrEmpty(receiveConfiguration.QueueMode))
+                if (receiveConfiguration.QueueMode != null)
                     c.WithQueueMode(receiveConfiguration.QueueMode);
-                if (!string.IsNullOrEmpty(receiveConfiguration.QueueType))
+                if (receiveConfiguration.QueueType != null)
                     c.WithQueueType(receiveConfiguration.QueueType);
                 if (receiveConfiguration.SingleActiveConsumer)
                     c.WithSingleActiveConsumer();
@@ -139,7 +127,7 @@ public class DefaultSendReceive : ISendReceive
 
         public IReceiveRegistration Add<T>(Func<T, CancellationToken, Task> onMessage)
         {
-            handlerRegistration.Add<T>((message, _, c) => onMessage(message.Body, c));
+            handlerRegistration.Add<T>((message, _, c) => onMessage(message.Body!, c));
             return this;
         }
     }

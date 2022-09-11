@@ -22,8 +22,6 @@ public static class PubSubExtensions
     /// <returns></returns>
     public static Task PublishAsync<T>(this IPubSub pubSub, T message, CancellationToken cancellationToken = default)
     {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
-
         return pubSub.PublishAsync(message, _ => { }, cancellationToken);
     }
 
@@ -40,9 +38,6 @@ public static class PubSubExtensions
     /// <returns></returns>
     public static Task PublishAsync<T>(this IPubSub pubSub, T message, string topic, CancellationToken cancellationToken = default)
     {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
-        Preconditions.CheckNotNull(topic, nameof(topic));
-
         return pubSub.PublishAsync(message, c => c.WithTopic(topic), cancellationToken);
     }
 
@@ -55,7 +50,7 @@ public static class PubSubExtensions
     /// <param name="cancellationToken">The cancellation token</param>
     public static void Publish<T>(this IPubSub pubSub, T message, CancellationToken cancellationToken = default)
     {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
+
 
         pubSub.Publish(message, _ => { }, cancellationToken);
     }
@@ -72,7 +67,7 @@ public static class PubSubExtensions
     /// <param name="cancellationToken">The cancellation token</param>
     public static void Publish<T>(this IPubSub pubSub, T message, Action<IPublishConfiguration> configure, CancellationToken cancellationToken = default)
     {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
+
 
         pubSub.PublishAsync(message, configure, cancellationToken)
             .GetAwaiter()
@@ -89,7 +84,7 @@ public static class PubSubExtensions
     /// <param name="cancellationToken">The cancellation token</param>
     public static void Publish<T>(this IPubSub pubSub, T message, string topic, CancellationToken cancellationToken = default)
     {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
+
 
         pubSub.Publish(message, c => c.WithTopic(topic), cancellationToken);
     }
@@ -121,7 +116,7 @@ public static class PubSubExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
+
 
         return pubSub.SubscribeAsync(
             subscriptionId,
@@ -162,7 +157,7 @@ public static class PubSubExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
+
 
         var onMessageAsync = TaskHelpers.FromAction<T>((m, _) => onMessage(m));
 
@@ -202,7 +197,7 @@ public static class PubSubExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
+
 
         return pubSub.SubscribeAsync<T>(
             subscriptionId,
@@ -239,7 +234,7 @@ public static class PubSubExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
+
 
         return pubSub.Subscribe(
             subscriptionId,
@@ -280,7 +275,7 @@ public static class PubSubExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
+
 
         var onMessageAsync = TaskHelpers.FromAction<T>((m, _) => onMessage(m));
 
@@ -320,7 +315,7 @@ public static class PubSubExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
+
 
         return pubSub.Subscribe<T>(
             subscriptionId,
@@ -362,7 +357,7 @@ public static class PubSubExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
+
 
         return pubSub.SubscribeAsync(subscriptionId, onMessage, configure, cancellationToken)
             .GetAwaiter()

@@ -17,9 +17,9 @@ public interface ILogger
     /// <returns>A boolean value indicating if the provided level is enabled when used with messageFunc=null; otherwise the return value does not matter.</returns>
     bool Log(
         LogLevel logLevel,
-        Func<string> messageFunc,
-        Exception exception = null,
-        params object[] formatParameters
+        Func<string>? messageFunc,
+        Exception? exception = null,
+        params object?[] formatParameters
     );
 }
 

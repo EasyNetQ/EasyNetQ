@@ -8,12 +8,7 @@ public class PersistentChannelFactory : IPersistentChannelFactory
     /// <summary>
     ///    Creates PersistentChannelFactory
     /// </summary>
-    public PersistentChannelFactory(IEventBus eventBus)
-    {
-        Preconditions.CheckNotNull(eventBus, nameof(eventBus));
-
-        this.eventBus = eventBus;
-    }
+    public PersistentChannelFactory(IEventBus eventBus) => this.eventBus = eventBus;
 
     /// <inheritdoc />
     public IPersistentChannel CreatePersistentChannel(

@@ -141,13 +141,13 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
     public bool IsExclusive { get; private set; }
     public byte? MaxPriority { get; private set; }
     public bool Durable { get; private set; }
-    public string QueueName { get; private set; }
+    public string? QueueName { get; private set; }
     public int? MaxLength { get; private set; }
     public int? MaxLengthBytes { get; private set; }
-    public string QueueMode { get; private set; }
-    public string QueueType { get; private set; }
+    public string? QueueMode { get; private set; }
+    public string? QueueType { get; private set; }
     public string ExchangeType { get; private set; } = Topology.ExchangeType.Topic;
-    public string AlternateExchange { get; private set; }
+    public string? AlternateExchange { get; private set; }
     public bool SingleActiveConsumer { get; private set; }
 
     public SubscriptionConfiguration(ushort defaultPrefetchCount)

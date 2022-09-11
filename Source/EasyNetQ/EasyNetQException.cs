@@ -10,13 +10,13 @@ public class EasyNetQException : Exception
     public EasyNetQException() { }
 
     /// <inheritdoc />
-    public EasyNetQException(string message) : base(message) { }
+    public EasyNetQException(string? message) : base(message) { }
 
     /// <inheritdoc />
-    public EasyNetQException(string format, params object[] args) : base(string.Format(format, args)) { }
+    public EasyNetQException(string format, params object?[] args) : base(string.Format(format, args)) { }
 
     /// <inheritdoc />
-    public EasyNetQException(string message, Exception inner) : base(message, inner) { }
+    public EasyNetQException(string? message, Exception? inner) : base(message, inner) { }
 
     /// <inheritdoc />
     protected EasyNetQException(SerializationInfo info, StreamingContext context) : base(info, context) { }
@@ -29,13 +29,13 @@ public class EasyNetQResponderException : EasyNetQException
     public EasyNetQResponderException() { }
 
     /// <inheritdoc />
-    public EasyNetQResponderException(string message) : base(message) { }
+    public EasyNetQResponderException(string? message) : base(message) { }
 
     /// <inheritdoc />
-    public EasyNetQResponderException(string format, params object[] args) : base(format, args) { }
+    public EasyNetQResponderException(string format, params object?[] args) : base(format, args) { }
 
     /// <inheritdoc />
-    public EasyNetQResponderException(string message, Exception inner) : base(message, inner) { }
+    public EasyNetQResponderException(string? message, Exception? inner) : base(message, inner) { }
 
     /// <inheritdoc />
     protected EasyNetQResponderException(SerializationInfo info, StreamingContext context) : base(info, context) { }

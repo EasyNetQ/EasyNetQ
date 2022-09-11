@@ -1,4 +1,5 @@
 using System;
+using EasyNetQ.Internals;
 
 namespace EasyNetQ;
 
@@ -30,7 +31,9 @@ public class DefaultMessageSerializationStrategy : IMessageSerializationStrategy
     public SerializedMessage SerializeMessage(IMessage message)
     {
         var typeName = typeNameSerializer.Serialize(message.MessageType);
-        var messageBody = serializer.MessageToBytes(message.MessageType, message.GetBody());
+        var messageBody = message.GetBody() is null
+            ? new ArrayPooledMemoryStream()
+            : serializer.MessageToBytes(message.MessageType, message.GetBody()!);
         var messageProperties = message.Properties;
 
         messageProperties.Type = typeName;
@@ -43,8 +46,8 @@ public class DefaultMessageSerializationStrategy : IMessageSerializationStrategy
     /// <inheritdoc />
     public IMessage DeserializeMessage(MessageProperties properties, in ReadOnlyMemory<byte> body)
     {
-        var messageType = typeNameSerializer.DeSerialize(properties.Type);
-        var messageBody = serializer.BytesToMessage(messageType, body);
+        var messageType = typeNameSerializer.DeSerialize(properties.Type!);
+        var messageBody = body.IsEmpty ? null : serializer.BytesToMessage(messageType, body);
         return MessageFactory.CreateInstance(messageType, messageBody, properties);
     }
 }

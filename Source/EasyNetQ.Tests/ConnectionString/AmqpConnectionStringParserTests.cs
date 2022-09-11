@@ -25,11 +25,12 @@ public class AmqpConnectionStringParserTests
         {
             return new[] { new AmqpSpecification(uri, configuration) };
         }
+
         yield return Spec(
             "amqp://user%2f:P%40ssword@host:10000/v%2fhost?name=unit%2ftest",
             new ConnectionConfiguration
             {
-                Hosts = new[] { new HostConfiguration { Host = "host", Port = 10000 } },
+                Hosts = new[] { new HostConfiguration("host", 10000) },
                 VirtualHost = "v/host",
                 UserName = "user/",
                 Password = "P@ssword",
@@ -40,7 +41,7 @@ public class AmqpConnectionStringParserTests
             "amqp://user:pass@host:10000/vhost",
             new ConnectionConfiguration
             {
-                Hosts = new[] { new HostConfiguration { Host = "host", Port = 10000 } },
+                Hosts = new[] { new HostConfiguration("host", 10000) },
                 VirtualHost = "vhost",
                 UserName = "user",
                 Password = "pass"
@@ -50,14 +51,14 @@ public class AmqpConnectionStringParserTests
             "amqp://",
             new ConnectionConfiguration
             {
-                Hosts = new[] { new HostConfiguration { Host = "localhost", Port = 5672 } },
+                Hosts = new[] { new HostConfiguration("localhost", 5672) },
             }
         );
         yield return Spec(
             "amqp://host",
             new ConnectionConfiguration
             {
-                Hosts = new[] { new HostConfiguration { Host = "host", Port = 5672 } },
+                Hosts = new[] { new HostConfiguration("host", 5672) },
             }
         );
         yield return Spec(
@@ -66,7 +67,7 @@ public class AmqpConnectionStringParserTests
             {
                 Hosts = new[]
                 {
-                    new HostConfiguration {Host = "host", Port = 5671, Ssl = {Enabled = true, ServerName = "host"}}
+                    new HostConfiguration("host", 5671) { Ssl = { Enabled = true, ServerName = "host" } }
                 },
             }
         );
@@ -85,7 +86,7 @@ public class AmqpConnectionStringParserTests
             ),
             new ConnectionConfiguration
             {
-                Hosts = new[] { new HostConfiguration { Host = "localhost", Port = 5672 } },
+                Hosts = new[] { new HostConfiguration("localhost", 5672) },
                 PersistentMessages = false,
                 PrefetchCount = 2,
                 Timeout = TimeSpan.FromSeconds(1),

@@ -3,9 +3,15 @@
     <Description>An adaptor to allow EasyNetQ to use Microsoft.Extensions.DependencyInjection as its internal IoC container</Description>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageTags>DependencyInjection;$(PackageTags)</PackageTags>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Fody" Version="6.6.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
+    <PackageReference Include="NullGuard.Fody" Version="3.1.0" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />

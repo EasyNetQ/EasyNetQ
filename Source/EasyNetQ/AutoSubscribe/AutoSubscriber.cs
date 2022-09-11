@@ -57,9 +57,6 @@ public class AutoSubscriber
 
     public AutoSubscriber(IBus bus, string subscriptionIdPrefix)
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-        Preconditions.CheckNotBlank(subscriptionIdPrefix, nameof(subscriptionIdPrefix), "You need to specify a SubscriptionId prefix, which will be used as part of the checksum of all generated subscription ids.");
-
         Bus = bus;
         SubscriptionIdPrefix = subscriptionIdPrefix;
         AutoSubscriberMessageDispatcher = new DefaultAutoSubscriberMessageDispatcher();
@@ -137,7 +134,7 @@ public class AutoSubscriber
         where TConsumerAsync : class, IConsumeAsync<TMessage>
     {
         var subscriptionAttribute = GetSubscriptionAttribute(subscriptionInfo);
-        var subscriptionId = subscriptionAttribute != null ? subscriptionAttribute.SubscriptionId : GenerateSubscriptionId(subscriptionInfo);
+        var subscriptionId = subscriptionAttribute?.SubscriptionId ?? GenerateSubscriptionId(subscriptionInfo);
         var configureSubscriptionAction = GenerateConfigurationAction(subscriptionInfo);
 
         return Bus.PubSub.SubscribeAsync<TMessage>(
@@ -153,7 +150,7 @@ public class AutoSubscriber
         where TConsumer : class, IConsume<TMessage>
     {
         var subscriptionAttribute = GetSubscriptionAttribute(subscriptionInfo);
-        var subscriptionId = subscriptionAttribute != null ? subscriptionAttribute.SubscriptionId : GenerateSubscriptionId(subscriptionInfo);
+        var subscriptionId = subscriptionAttribute?.SubscriptionId ?? GenerateSubscriptionId(subscriptionInfo);
         var configureSubscriptionAction = GenerateConfigurationAction(subscriptionInfo);
 
         var asyncDispatcher = TaskHelpers.FromAction<TMessage>((m, c) => AutoSubscriberMessageDispatcher.Dispatch<TMessage, TConsumer>(m, c));
@@ -224,7 +221,7 @@ public class AutoSubscriber
         };
     }
 
-    private static SubscriptionConfigurationAttribute GetSubscriptionConfigurationAttributeValue(AutoSubscriberConsumerInfo subscriptionInfo)
+    private static SubscriptionConfigurationAttribute? GetSubscriptionConfigurationAttributeValue(AutoSubscriberConsumerInfo subscriptionInfo)
     {
         var customAttributes = subscriptionInfo.ConsumeMethod.GetCustomAttributes(typeof(SubscriptionConfigurationAttribute), true);
         return customAttributes
@@ -232,7 +229,7 @@ public class AutoSubscriber
             .FirstOrDefault();
     }
 
-    protected virtual AutoSubscriberConsumerAttribute GetSubscriptionAttribute(AutoSubscriberConsumerInfo consumerInfo)
+    protected virtual AutoSubscriberConsumerAttribute? GetSubscriptionAttribute(AutoSubscriberConsumerInfo consumerInfo)
     {
         return consumerInfo.ConsumeMethod
             .GetCustomAttributes(typeof(AutoSubscriberConsumerAttribute), true)

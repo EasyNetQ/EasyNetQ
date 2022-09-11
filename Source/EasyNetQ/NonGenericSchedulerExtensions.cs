@@ -31,8 +31,6 @@ public static class NonGenericSchedulerExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(scheduler, nameof(scheduler));
-
         return scheduler.FuturePublishAsync(message, messageType, delay, _ => { }, cancellationToken);
     }
 
@@ -54,8 +52,6 @@ public static class NonGenericSchedulerExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(scheduler, nameof(scheduler));
-
         scheduler.FuturePublishAsync(message, messageType, delay, c => c.WithTopic(topic), cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -77,8 +73,6 @@ public static class NonGenericSchedulerExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(scheduler, nameof(scheduler));
-
         scheduler.FuturePublishAsync(message, messageType, delay, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -104,8 +98,6 @@ public static class NonGenericSchedulerExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(scheduler, nameof(scheduler));
-
         scheduler.FuturePublishAsync(message, messageType, delay, configure, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -131,8 +123,6 @@ public static class NonGenericSchedulerExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(scheduler, nameof(scheduler));
-
         var futurePublishDelegate = FuturePublishDelegates.GetOrAdd(messageType, t =>
         {
             var futurePublishMethodInfo = typeof(IScheduler).GetMethod("FuturePublishAsync");

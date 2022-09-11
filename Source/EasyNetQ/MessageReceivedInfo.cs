@@ -47,11 +47,6 @@ public class MessageReceivedInfo
         string queue
     )
     {
-        Preconditions.CheckNotNull(consumerTag, nameof(consumerTag));
-        Preconditions.CheckNotNull(exchange, nameof(exchange));
-        Preconditions.CheckNotNull(routingKey, nameof(routingKey));
-        Preconditions.CheckNotNull(queue, nameof(queue));
-
         ConsumerTag = consumerTag;
         DeliveryTag = deliveryTag;
         Redelivered = redelivered;

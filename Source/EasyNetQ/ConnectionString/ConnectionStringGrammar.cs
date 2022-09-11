@@ -15,18 +15,20 @@ internal static class ConnectionStringGrammar
     internal static readonly Parser<string> Text = Parse.CharExcept(';').Many().Text();
     internal static readonly Parser<ushort> UShortNumber = Parse.Number.Select(ushort.Parse);
     internal static readonly Parser<string> MinusOne = Parse.String("-1").Text();
+
     internal static readonly Parser<TimeSpan> TimeSpanSeconds = Parse.Number.Or(MinusOne)
         .Select(int.Parse)
         .Select(
             x => x == 0 || x == -1 ? Timeout.InfiniteTimeSpan : TimeSpan.FromSeconds(x)
         );
 
-    internal static readonly Parser<bool> Bool = Parse.CaseInsensitiveString("true").Or(Parse.CaseInsensitiveString("false")).Text().Select(x => x.ToLower() == "true");
+    internal static readonly Parser<bool> Bool = Parse.CaseInsensitiveString("true").Or(Parse.CaseInsensitiveString("false")).Text()
+        .Select(x => x.ToLower() == "true");
 
     internal static readonly Parser<HostConfiguration> Host =
         from host in Parse.Char(c => c != ':' && c != ';' && c != ',', "host").Many().Text()
         from port in Parse.Char(':').Then(_ => UShortNumber).Or(Parse.Return((ushort)0))
-        select new HostConfiguration { Host = host, Port = port };
+        select new HostConfiguration(host, port);
 
     internal static readonly Parser<IList<HostConfiguration>> Hosts = Host.ListDelimitedBy(',').Select(hosts => hosts.ToList());
 
@@ -88,19 +90,11 @@ internal static class ConnectionStringGrammar
     /// <returns></returns>
     private static Action<TContaining, TProperty> CreateSetter<TContaining, TProperty>(Expression<Func<TContaining, TProperty>> getter)
     {
-        Preconditions.CheckNotNull(getter, nameof(getter));
+        if (getter.Body is not MemberExpression memberEx) throw new ArgumentOutOfRangeException(nameof(getter), "Body is not a member-expression.");
+        if (memberEx.Member is not PropertyInfo propertyInfo) throw new ArgumentOutOfRangeException(nameof(getter), "Member is not a property.");
+        if (!propertyInfo.CanWrite) throw new ArgumentOutOfRangeException(nameof(getter), "Member is not a writeable property.");
 
-        var memberEx = getter.Body as MemberExpression;
-
-        Preconditions.CheckNotNull(memberEx, nameof(getter), "Body is not a member-expression.");
-
-        var property = memberEx.Member as PropertyInfo;
-
-        Preconditions.CheckNotNull(property, nameof(getter), "Member is not a property.");
-
-        if (!property.CanWrite) throw new ArgumentOutOfRangeException(nameof(getter), null, "Member is not a writeable property.");
-
-        return (Action<TContaining, TProperty>)property.GetSetMethod().CreateDelegate(typeof(Action<TContaining, TProperty>));
+        return (Action<TContaining, TProperty>)propertyInfo.GetSetMethod().CreateDelegate(typeof(Action<TContaining, TProperty>));
     }
 
     private static IEnumerable<T> Cons<T>(this T head, IEnumerable<T> rest)

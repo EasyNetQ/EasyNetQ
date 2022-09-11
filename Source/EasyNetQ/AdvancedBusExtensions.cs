@@ -25,8 +25,6 @@ public static class AdvancedBusExtensions
         this IAdvancedBus bus, Queue queue, Action<IMessage<T>, MessageReceivedInfo> handler
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
         return bus.Consume(queue, handler, _ => { });
     }
 
@@ -47,8 +45,6 @@ public static class AdvancedBusExtensions
         Action<ISimpleConsumeConfiguration> configure
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
         var handlerAsync = TaskHelpers.FromAction<IMessage<T>, MessageReceivedInfo>((m, i, _) => handler(m, i));
         return bus.Consume(queue, handlerAsync, configure);
     }
@@ -65,8 +61,6 @@ public static class AdvancedBusExtensions
         this IAdvancedBus bus, Queue queue, Func<IMessage<T>, MessageReceivedInfo, Task> handler
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
         return bus.Consume(queue, handler, _ => { });
     }
 
@@ -88,8 +82,6 @@ public static class AdvancedBusExtensions
         Action<ISimpleConsumeConfiguration> configure
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
         return bus.Consume<T>(queue, (m, i, _) => handler(m, i), configure);
     }
 
@@ -111,7 +103,7 @@ public static class AdvancedBusExtensions
         Action<ISimpleConsumeConfiguration> configure
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
+
 
         return bus.Consume<T>(queue, async (m, i, c) =>
         {
@@ -138,8 +130,6 @@ public static class AdvancedBusExtensions
         Action<ISimpleConsumeConfiguration> configure
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
         var consumeConfiguration = new SimpleConsumeConfiguration();
         configure(consumeConfiguration);
 
@@ -172,8 +162,6 @@ public static class AdvancedBusExtensions
     /// <returns>A disposable to cancel the consumer</returns>
     public static IDisposable Consume(this IAdvancedBus bus, Queue queue, Action<IHandlerRegistration> addHandlers)
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
         return bus.Consume(queue, addHandlers, _ => { });
     }
 
@@ -194,8 +182,6 @@ public static class AdvancedBusExtensions
         Action<ISimpleConsumeConfiguration> configure
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
         var consumeConfiguration = new SimpleConsumeConfiguration();
         configure(consumeConfiguration);
 
@@ -233,7 +219,7 @@ public static class AdvancedBusExtensions
         this IAdvancedBus bus, Queue queue, Action<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo> handler
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
+
 
         return bus.Consume(queue, handler, _ => { });
     }
@@ -258,7 +244,7 @@ public static class AdvancedBusExtensions
         Action<ISimpleConsumeConfiguration> configure
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
+
 
         var handlerAsync = TaskHelpers.FromAction<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo>((m, p, i, _) => handler(m, p, i));
 
@@ -281,7 +267,7 @@ public static class AdvancedBusExtensions
         Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, Task> handler
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
+
 
         return bus.Consume(queue, handler, _ => { });
     }
@@ -302,7 +288,7 @@ public static class AdvancedBusExtensions
         Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, Task<AckStrategy>> handler
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
+
 
         return bus.Consume(queue, handler, _ => { });
     }
@@ -327,7 +313,7 @@ public static class AdvancedBusExtensions
         Action<ISimpleConsumeConfiguration> configure
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
+
 
         return bus.Consume(queue, (m, p, i, _) => handler(m, p, i), configure);
     }
@@ -352,7 +338,7 @@ public static class AdvancedBusExtensions
         Action<ISimpleConsumeConfiguration> configure
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
+
 
         return bus.Consume(queue, (m, p, i, _) => handler(m, p, i), configure);
     }
@@ -377,7 +363,7 @@ public static class AdvancedBusExtensions
         Action<ISimpleConsumeConfiguration> configure
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
+
 
         return bus.Consume(queue, async (m, p, i, c) =>
         {
@@ -407,7 +393,7 @@ public static class AdvancedBusExtensions
         Action<ISimpleConsumeConfiguration> configure
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
+
 
         var consumeConfiguration = new SimpleConsumeConfiguration();
         configure(consumeConfiguration);
@@ -461,7 +447,7 @@ public static class AdvancedBusExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
+
 
         bus.PublishAsync(exchange, routingKey, mandatory, messageProperties, body, cancellationToken)
             .GetAwaiter()
@@ -494,7 +480,7 @@ public static class AdvancedBusExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
+
 
         bus.PublishAsync(exchange, routingKey, mandatory, message, cancellationToken)
             .GetAwaiter()
@@ -512,7 +498,7 @@ public static class AdvancedBusExtensions
         this IAdvancedBus bus, string name, CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
+
 
         return bus.GetQueueStatsAsync(name, cancellationToken)
             .GetAwaiter()
@@ -529,7 +515,7 @@ public static class AdvancedBusExtensions
     /// <returns>The queue</returns>
     public static Queue QueueDeclare(this IAdvancedBus bus, CancellationToken cancellationToken = default)
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
+
 
         return bus.QueueDeclareAsync(cancellationToken)
             .GetAwaiter()
@@ -553,7 +539,7 @@ public static class AdvancedBusExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
+
 
         return bus.QueueDeclareAsync(name, configure, cancellationToken)
             .GetAwaiter()
@@ -575,7 +561,7 @@ public static class AdvancedBusExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
+
 
         return bus.QueueDeclareAsync(name, _ => { }, cancellationToken);
     }
@@ -601,7 +587,7 @@ public static class AdvancedBusExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
+
 
         return bus.QueueDeclareAsync(
             name,
@@ -633,8 +619,6 @@ public static class AdvancedBusExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
         return bus.QueueDeclareAsync(name, durable, exclusive, autoDelete, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -655,7 +639,7 @@ public static class AdvancedBusExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
+
 
         return bus.QueueDeclareAsync(name, cancellationToken)
             .GetAwaiter()
@@ -674,7 +658,7 @@ public static class AdvancedBusExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
+
 
         bus.QueueDeclarePassiveAsync(name, cancellationToken)
             .GetAwaiter()
@@ -698,8 +682,6 @@ public static class AdvancedBusExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
         return bus.BindAsync(source, queue, routingKey, null, cancellationToken);
     }
 
@@ -720,8 +702,6 @@ public static class AdvancedBusExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
         return bus.BindAsync(source, destination, routingKey, null, cancellationToken);
     }
 
@@ -742,8 +722,6 @@ public static class AdvancedBusExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
         return bus.BindAsync(source, destination, routingKey, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -764,12 +742,10 @@ public static class AdvancedBusExtensions
         Exchange source,
         Exchange destination,
         string routingKey,
-        IDictionary<string, object> arguments,
+        IDictionary<string, object>? arguments,
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
         return bus.BindAsync(source, destination, routingKey, arguments, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -786,8 +762,6 @@ public static class AdvancedBusExtensions
     /// <returns>A binding</returns>
     public static Binding<Queue> Bind(this IAdvancedBus bus, Exchange exchange, Queue queue, string routingKey, CancellationToken cancellationToken = default)
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
         return bus.BindAsync(exchange, queue, routingKey, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -808,12 +782,10 @@ public static class AdvancedBusExtensions
         Exchange exchange,
         Queue queue,
         string routingKey,
-        IDictionary<string, object> arguments,
+        IDictionary<string, object>? arguments,
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
         return bus.BindAsync(exchange, queue, routingKey, arguments, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -838,8 +810,6 @@ public static class AdvancedBusExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
         return bus.ExchangeDeclareAsync(name, c => c.AsDurable(durable).AsAutoDelete(autoDelete).WithType(type), cancellationToken);
     }
 
@@ -855,8 +825,6 @@ public static class AdvancedBusExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
         bus.ExchangeDeclarePassiveAsync(name, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -881,8 +849,6 @@ public static class AdvancedBusExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
         return bus.ExchangeDeclareAsync(name, type, durable, autoDelete, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -903,8 +869,6 @@ public static class AdvancedBusExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
         return bus.ExchangeDeclareAsync(name, configure, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -918,8 +882,6 @@ public static class AdvancedBusExtensions
     /// <param name="cancellationToken">The cancellation token</param>
     public static Task UnbindAsync(this IAdvancedBus bus, Binding<Queue> binding, CancellationToken cancellationToken = default)
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
         return bus.QueueUnbindAsync(binding.Destination.Name, binding.Source.Name, binding.RoutingKey, binding.Arguments, cancellationToken);
     }
 
@@ -931,8 +893,6 @@ public static class AdvancedBusExtensions
     /// <param name="cancellationToken">The cancellation token</param>
     public static Task UnbindAsync(this IAdvancedBus bus, Binding<Exchange> binding, CancellationToken cancellationToken = default)
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
         return bus.ExchangeUnbindAsync(binding.Destination.Name, binding.Source.Name, binding.RoutingKey, binding.Arguments, cancellationToken);
     }
 
@@ -948,8 +908,6 @@ public static class AdvancedBusExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
         bus.QueueUnbindAsync(queue, exchange, routingKey, arguments, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -967,8 +925,6 @@ public static class AdvancedBusExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
         bus.ExchangeUnbindAsync(destinationExchange, sourceExchange, routingKey, arguments, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -982,8 +938,6 @@ public static class AdvancedBusExtensions
     /// <param name="cancellationToken">The cancellation token</param>
     public static void Unbind(this IAdvancedBus bus, Binding<Queue> binding, CancellationToken cancellationToken = default)
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
         bus.UnbindAsync(binding, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -997,8 +951,6 @@ public static class AdvancedBusExtensions
     /// <param name="cancellationToken">The cancellation token</param>
     public static void Unbind(this IAdvancedBus bus, Binding<Exchange> binding, CancellationToken cancellationToken = default)
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
         bus.UnbindAsync(binding, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -1020,8 +972,6 @@ public static class AdvancedBusExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
         bus.QueueDeleteAsync(name, ifUnused, ifEmpty, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -1035,8 +985,6 @@ public static class AdvancedBusExtensions
     /// <param name="cancellationToken">The cancellation token</param>
     public static void QueuePurge(this IAdvancedBus bus, string name, CancellationToken cancellationToken = default)
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
         bus.QueuePurgeAsync(name, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -1051,8 +999,6 @@ public static class AdvancedBusExtensions
     /// <param name="cancellationToken">The cancellation token</param>
     public static void ExchangeDelete(this IAdvancedBus bus, Exchange exchange, bool ifUnused = false, CancellationToken cancellationToken = default)
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-
         bus.ExchangeDeleteAsync(exchange, ifUnused, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -1061,10 +1007,10 @@ public static class AdvancedBusExtensions
     private class SimpleConsumeConfiguration : ISimpleConsumeConfiguration
     {
         public bool AutoAck { get; private set; }
-        public string ConsumerTag { get; private set; }
+        public string? ConsumerTag { get; private set; }
         public bool? IsExclusive { get; private set; }
         public ushort? PrefetchCount { get; private set; }
-        public IDictionary<string, object> Arguments { get; private set; }
+        public IDictionary<string, object>? Arguments { get; private set; }
 
         public ISimpleConsumeConfiguration WithAutoAck()
         {

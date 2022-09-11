@@ -21,7 +21,7 @@ public delegate string QueueNameConvention(Type messageType, string subscriberId
 /// <summary>
 ///     Convention for queue type
 /// </summary>
-public delegate string QueueTypeConvention(Type messageType);
+public delegate string? QueueTypeConvention(Type messageType);
 
 /// <summary>
 ///     Convention for error queue routing key naming
@@ -122,24 +122,16 @@ public class Conventions : IConventions
     /// </summary>
     public Conventions(ITypeNameSerializer typeNameSerializer)
     {
-        Preconditions.CheckNotNull(typeNameSerializer, nameof(typeNameSerializer));
-
         ExchangeNamingConvention = type =>
         {
-            var attr = GetQueueAttribute(type);
-
-            return string.IsNullOrEmpty(attr.ExchangeName)
-                ? typeNameSerializer.Serialize(type)
-                : attr.ExchangeName;
+            var attr = GetExchangeAttribute(type);
+            return attr.Name ?? typeNameSerializer.Serialize(type);
         };
 
         QueueTypeConvention = type =>
         {
             var attr = GetQueueAttribute(type);
-
-            return string.IsNullOrEmpty(attr.QueueType)
-                ? null
-                : attr.QueueType;
+            return attr.Type;
         };
 
         TopicNamingConvention = _ => "";
@@ -148,7 +140,7 @@ public class Conventions : IConventions
         {
             var attr = GetQueueAttribute(type);
 
-            if (string.IsNullOrEmpty(attr.QueueName))
+            if (attr.Name == null)
             {
                 var typeName = typeNameSerializer.Serialize(type);
 
@@ -158,8 +150,8 @@ public class Conventions : IConventions
             }
 
             return string.IsNullOrEmpty(subscriptionId)
-                ? attr.QueueName
-                : $"{attr.QueueName}_{subscriptionId}";
+                ? attr.Name
+                : $"{attr.Name}_{subscriptionId}";
         };
         RpcRoutingKeyNamingConvention = typeNameSerializer.Serialize;
 
@@ -172,9 +164,14 @@ public class Conventions : IConventions
         ConsumerTagConvention = () => Guid.NewGuid().ToString();
     }
 
-    private QueueAttribute GetQueueAttribute(Type messageType)
+    private static QueueAttribute GetQueueAttribute(Type messageType)
     {
         return messageType.GetAttribute<QueueAttribute>() ?? QueueAttribute.Default;
+    }
+
+    private static ExchangeAttribute GetExchangeAttribute(Type messageType)
+    {
+        return messageType.GetAttribute<ExchangeAttribute>() ?? ExchangeAttribute.Default;
     }
 
     /// <inheritdoc />

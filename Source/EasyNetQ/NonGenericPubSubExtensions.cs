@@ -30,8 +30,6 @@ public static class NonGenericPubSubExtensions
     /// <returns></returns>
     public static Task PublishAsync(this IPubSub pubSub, object message, Type messageType, CancellationToken cancellationToken = default)
     {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
-
         return pubSub.PublishAsync(message, messageType, _ => { }, cancellationToken);
     }
 
@@ -54,9 +52,6 @@ public static class NonGenericPubSubExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
-        Preconditions.CheckNotNull(topic, nameof(topic));
-
         return pubSub.PublishAsync(message, messageType, c => c.WithTopic(topic), cancellationToken);
     }
 
@@ -78,8 +73,6 @@ public static class NonGenericPubSubExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
-
         var publishDelegate = PublishDelegates.GetOrAdd(messageType, t =>
         {
             var publishMethodInfo = typeof(IPubSub).GetMethod("PublishAsync");
@@ -121,8 +114,6 @@ public static class NonGenericPubSubExtensions
     /// <param name="cancellationToken">The cancellation token</param>
     public static void Publish(this IPubSub pubSub, object message, Type messageType, CancellationToken cancellationToken = default)
     {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
-
         pubSub.Publish(message, messageType, _ => { }, cancellationToken);
     }
 
@@ -144,8 +135,6 @@ public static class NonGenericPubSubExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
-
         pubSub.PublishAsync(message, messageType, configure, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -167,8 +156,6 @@ public static class NonGenericPubSubExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
-
         pubSub.Publish(message, messageType, c => c.WithTopic(topic), cancellationToken);
     }
 
@@ -206,8 +193,6 @@ public static class NonGenericPubSubExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
-
         var subscribeDelegate = SubscribeDelegates.GetOrAdd(messageType, t =>
         {
             var subscribeMethodInfo = typeof(IPubSub).GetMethod("SubscribeAsync");
@@ -291,8 +276,6 @@ public static class NonGenericPubSubExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
-
         return pubSub.SubscribeAsync(subscriptionId, messageType, onMessage, configure, cancellationToken)
             .GetAwaiter()
             .GetResult();

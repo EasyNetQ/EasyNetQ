@@ -15,8 +15,6 @@ public readonly struct SubscriptionResult : IDisposable
     /// </summary>
     public SubscriptionResult(in Exchange exchange, in Queue queue, IDisposable consumerCancellation)
     {
-        Preconditions.CheckNotNull(consumerCancellation, nameof(consumerCancellation));
-
         Exchange = exchange;
         Queue = queue;
         ConsumerCancellation = consumerCancellation;

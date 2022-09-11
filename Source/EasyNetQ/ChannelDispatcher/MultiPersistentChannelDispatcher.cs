@@ -56,7 +56,7 @@ public sealed class MultiPersistentChannelDispatcher : IPersistentChannelDispatc
         channelsPoolPerOptions.ClearAndDispose(x =>
         {
             while (x.TryDequeue(out var channel))
-                channel.Dispose();
+                channel!.Dispose();
             x.Dispose();
         });
     }

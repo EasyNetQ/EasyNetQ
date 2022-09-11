@@ -14,9 +14,6 @@ public class DefaultExchangeDeclareStrategy : IExchangeDeclareStrategy
 
     public DefaultExchangeDeclareStrategy(IConventions conventions, IAdvancedBus advancedBus)
     {
-        Preconditions.CheckNotNull(conventions, nameof(conventions));
-        Preconditions.CheckNotNull(advancedBus, nameof(advancedBus));
-
         this.conventions = conventions;
         declaredExchanges = new AsyncCache<ExchangeKey, Exchange>((k, c) => advancedBus.ExchangeDeclareAsync(k.Name, k.Type, cancellationToken: c));
     }

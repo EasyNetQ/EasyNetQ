@@ -13,12 +13,11 @@ internal class PerQueueConsumeConfiguration : IPerQueueConsumeConfiguration
 
     public bool IsExclusive { get; private set; }
 
-    public IDictionary<string, object> Arguments { get; private set; }
+    public IDictionary<string, object>? Arguments { get; private set; }
 
 
     public IPerQueueConsumeConfiguration WithConsumerTag(string consumerTag)
     {
-        Preconditions.CheckNotNull(consumerTag, nameof(consumerTag));
         ConsumerTag = consumerTag;
         return this;
     }
@@ -52,18 +51,14 @@ internal class ConsumeConfiguration : IConsumeConfiguration
     {
         this.handlerCollectionFactory = handlerCollectionFactory;
         PrefetchCount = defaultPrefetchCount;
-        PerQueueConsumeConfigurations = new List<Tuple<Queue, MessageHandler, PerQueueConsumeConfiguration>>();
-        PerQueueTypedConsumeConfigurations =
-            new List<Tuple<Queue, IHandlerCollection, PerQueueConsumeConfiguration>>();
+        PerQueueConsumeConfigurations = new();
+        PerQueueTypedConsumeConfigurations = new();
     }
 
     public ushort PrefetchCount { get; private set; }
     public List<Tuple<Queue, MessageHandler, PerQueueConsumeConfiguration>> PerQueueConsumeConfigurations { get; }
 
-    public List<Tuple<Queue, IHandlerCollection, PerQueueConsumeConfiguration>> PerQueueTypedConsumeConfigurations
-    {
-        get;
-    }
+    public List<Tuple<Queue, IHandlerCollection, PerQueueConsumeConfiguration>> PerQueueTypedConsumeConfigurations { get; }
 
     public IConsumeConfiguration WithPrefetchCount(ushort prefetchCount)
     {
@@ -103,7 +98,7 @@ internal class ConsumeConfiguration : IConsumeConfiguration
 public interface IPerQueueConsumeConfiguration
 {
     /// <summary>
-    ///     Automatically acknowledge a message  
+    ///     Automatically acknowledge a message
     /// </summary>
     /// <returns></returns>
     IPerQueueConsumeConfiguration WithAutoAck();
@@ -171,7 +166,7 @@ public interface IConsumeConfiguration
 public interface ISimpleConsumeConfiguration
 {
     /// <summary>
-    ///     Automatically acknowledge a message  
+    ///     Automatically acknowledge a message
     /// </summary>
     /// <returns></returns>
     ISimpleConsumeConfiguration WithAutoAck();

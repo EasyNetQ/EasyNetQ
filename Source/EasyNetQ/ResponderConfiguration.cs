@@ -59,7 +59,7 @@ internal class ResponderConfiguration : IResponderConfiguration
     }
 
     public ushort PrefetchCount { get; private set; }
-    public string QueueName { get; private set; }
+    public string? QueueName { get; private set; }
     public bool Durable { get; private set; } = true;
     public TimeSpan? Expires { get; private set; }
     public byte? MaxPriority { get; private set; }

@@ -11,8 +11,6 @@ internal static class ConnectionConfigurationExtensions
 {
     public static void SetDefaultProperties(this ConnectionConfiguration configuration)
     {
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
-
         if (configuration.Hosts.Count == 0)
             throw new EasyNetQException(
                 "Invalid connection string. 'host' value must be supplied. e.g: \"host=myserver\""
@@ -32,7 +30,7 @@ internal static class ConnectionConfigurationExtensions
                 // Will only throw an exception if the applicationName contains invalid characters, is empty, or too long
                 // Silently catch the exception, as we will just leave the application name and path to "unknown"
                 applicationName = Path.GetFileName(applicationNameAndPath);
-                applicationPath = Path.GetDirectoryName(applicationNameAndPath);
+                applicationPath = Path.GetDirectoryName(applicationNameAndPath) ?? "unknown";
             }
             catch (ArgumentException)
             {
@@ -70,18 +68,18 @@ internal static class ConnectionConfigurationExtensions
     {
         try
         {
-            return Assembly.GetEntryAssembly()?.GetName().Version.ToString();
+            return Assembly.GetEntryAssembly()?.GetName().Version.ToString() ?? "unknown";
         }
         catch
         {
-            return null;
+            return "unknown";
         }
     }
 
     private static string GetPlatform()
     {
-        string platform = RuntimeInformation.FrameworkDescription;
-        string frameworkName = Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName;
+        var platform = RuntimeInformation.FrameworkDescription;
+        var frameworkName = Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName;
         if (frameworkName != null)
             platform = platform + " [" + frameworkName + "]";
 

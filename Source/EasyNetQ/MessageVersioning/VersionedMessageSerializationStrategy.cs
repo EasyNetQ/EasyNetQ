@@ -1,4 +1,5 @@
 using System;
+using EasyNetQ.Internals;
 
 namespace EasyNetQ.MessageVersioning;
 
@@ -24,7 +25,9 @@ public class VersionedMessageSerializationStrategy : IMessageSerializationStrate
     /// <inheritdoc />
     public SerializedMessage SerializeMessage(IMessage message)
     {
-        var messageBody = serializer.MessageToBytes(message.MessageType, message.GetBody());
+        var messageBody = message.GetBody() is null
+            ? new ArrayPooledMemoryStream()
+            : serializer.MessageToBytes(message.MessageType, message.GetBody()!);
         var messageTypeProperties = MessageTypeProperty.CreateForMessageType(message.MessageType, typeNameSerializer);
         var messageProperties = message.Properties;
         messageTypeProperties.AppendTo(messageProperties);
@@ -38,7 +41,7 @@ public class VersionedMessageSerializationStrategy : IMessageSerializationStrate
     {
         var messageTypeProperty = MessageTypeProperty.ExtractFromProperties(properties, typeNameSerializer);
         var messageType = messageTypeProperty.GetMessageType();
-        var messageBody = serializer.BytesToMessage(messageType, body);
+        var messageBody = body.IsEmpty ? null : serializer.BytesToMessage(messageType, body);
         messageTypeProperty.AppendTo(properties);
         return MessageFactory.CreateInstance(messageType, messageBody, properties);
     }

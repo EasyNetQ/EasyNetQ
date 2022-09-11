@@ -8,22 +8,13 @@ public class ServiceResolverScope : IServiceResolverScope
     /// <summary>
     ///     Create ServiceResolverScope
     /// </summary>
-    public ServiceResolverScope(IServiceResolver resolver)
-    {
-        this.resolver = resolver;
-    }
+    public ServiceResolverScope(IServiceResolver resolver) => this.resolver = resolver;
 
     /// <inheritdoc />
-    public TService Resolve<TService>() where TService : class
-    {
-        return resolver.Resolve<TService>();
-    }
+    public TService Resolve<TService>() where TService : class => resolver.Resolve<TService>();
 
     /// <inheritdoc />
-    public IServiceResolverScope CreateScope()
-    {
-        return new ServiceResolverScope(this);
-    }
+    public IServiceResolverScope CreateScope() => new ServiceResolverScope(this);
 
     /// <inheritdoc />
     public void Dispose()

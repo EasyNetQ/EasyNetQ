@@ -30,7 +30,7 @@ internal static class MessageFormatter
     }
 
     public static string FormatStructuredMessage(
-        string targetMessage, object[] formatParameters, out IEnumerable<string> patternMatches
+        string targetMessage, object?[]? formatParameters, out IEnumerable<string> patternMatches
     )
     {
         if (formatParameters == null || formatParameters.Length == 0)
@@ -39,7 +39,7 @@ internal static class MessageFormatter
             return targetMessage;
         }
 
-        List<string> processedArguments = null;
+        List<string>? processedArguments = null;
 
         foreach (Match match in Pattern.Matches(targetMessage))
         {

@@ -35,14 +35,12 @@ internal class FuturePublishConfiguration : IFuturePublishConfiguration
 {
     public FuturePublishConfiguration(string defaultTopic)
     {
-        Preconditions.CheckNotNull(defaultTopic, nameof(defaultTopic));
-
         Topic = defaultTopic;
     }
 
     public byte? Priority { get; private set; }
     public string Topic { get; private set; }
-    public IDictionary<string, object> Headers { get; private set; }
+    public IDictionary<string, object>? Headers { get; private set; }
 
     public IFuturePublishConfiguration WithPriority(byte priority)
     {
@@ -52,8 +50,6 @@ internal class FuturePublishConfiguration : IFuturePublishConfiguration
 
     public IFuturePublishConfiguration WithTopic(string topic)
     {
-        Preconditions.CheckNotNull(topic, nameof(topic));
-
         Topic = topic;
         return this;
     }

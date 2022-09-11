@@ -8,7 +8,7 @@ public interface IMessage<out T> : IMessage
     /// The message body as a .NET type.
     /// This will return the same underlying object than <see cref="IMessage.GetBody"/> but will be strongly typed.
     /// </summary>
-    T Body { get; }
+    T? Body { get; }
 }
 
 public interface IMessage
@@ -21,7 +21,7 @@ public interface IMessage
     /// <summary>
     /// The message body return as an object when we only have runtime types and can't use generics.
     /// </summary>
-    object GetBody();
+    object? GetBody();
 
     /// <summary>
     /// The message <see cref="Type"/>. This is a shortcut to GetBody().GetType().
@@ -33,11 +33,11 @@ public class Message<T> : IMessage<T>
 {
     public MessageProperties Properties { get; }
     public Type MessageType { get; }
-    public T Body { get; }
+    public T? Body { get; }
 
-    public object GetBody() { return Body; }
+    public object? GetBody() { return Body; }
 
-    public Message(T body)
+    public Message(T? body)
     {
         Body = body;
         Properties = new MessageProperties();
@@ -51,7 +51,7 @@ public class Message<T> : IMessage<T>
         MessageType = typeof(T);
     }
 
-    public Message(T body, MessageProperties properties)
+    public Message(T? body, MessageProperties properties)
     {
         Body = body;
         Properties = properties;

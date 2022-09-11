@@ -32,8 +32,6 @@ public static class NonGenericSendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
-
         return sendReceive.SendAsync(queue, message, messageType, _ => { }, cancellationToken);
     }
 
@@ -57,8 +55,6 @@ public static class NonGenericSendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
-
         var sendDelegate = SendDelegates.GetOrAdd(messageType, t =>
         {
             var sendMethodInfo = typeof(ISendReceive).GetMethod("SendAsync");
@@ -110,8 +106,6 @@ public static class NonGenericSendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
-
         sendReceive.Send(queue, message, messageType, _ => { }, cancellationToken);
     }
 
@@ -135,8 +129,6 @@ public static class NonGenericSendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
-
         sendReceive.SendAsync(queue, message, messageType, configure, cancellationToken)
             .GetAwaiter()
             .GetResult();

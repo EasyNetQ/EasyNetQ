@@ -14,7 +14,7 @@ public class AutofacAdapter : IServiceRegister
     /// </summary>
     public AutofacAdapter(ContainerBuilder containerBuilder)
     {
-        ContainerBuilder = containerBuilder ?? throw new ArgumentNullException(nameof(containerBuilder));
+        ContainerBuilder = containerBuilder;
 
         ContainerBuilder.RegisterType<AutofacResolver>()
             .As<IServiceResolver>()

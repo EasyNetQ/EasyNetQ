@@ -25,7 +25,7 @@ public static class SchedulerExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(scheduler, nameof(scheduler));
+
 
         return scheduler.FuturePublishAsync(message, delay, _ => { }, cancellationToken);
     }
@@ -48,7 +48,7 @@ public static class SchedulerExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(scheduler, nameof(scheduler));
+
 
         scheduler.FuturePublishAsync(message, delay, c => c.WithTopic(topic), cancellationToken)
             .GetAwaiter()
@@ -71,7 +71,7 @@ public static class SchedulerExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(scheduler, nameof(scheduler));
+
 
         scheduler.FuturePublishAsync(message, delay, cancellationToken)
             .GetAwaiter()

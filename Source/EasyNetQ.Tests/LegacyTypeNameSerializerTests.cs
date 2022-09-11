@@ -1,5 +1,5 @@
 // ReSharper disable InconsistentNaming
-using System;
+
 using System.Collections.Generic;
 using EasyNetQ.Tests.ProducerTests.Very.Long.Namespace.Certainly.Longer.Than.The255.Char.Length.That.RabbitMQ.Likes.That.Will.Certainly.Cause.An.AMQP.Exception.If.We.Dont.Do.Something.About.It.And.Stop.It.From.Happening;
 using FluentAssertions;
@@ -83,15 +83,6 @@ public class LegacyTypeNameSerializerTests
                 typeof(
                     MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes
                 ));
-        });
-    }
-
-    [Fact]
-    public void Should_throw_exception_if_type_name_is_null()
-    {
-        Assert.Throws<ArgumentException>(() =>
-        {
-            typeNameSerializer.DeSerialize(null);
         });
     }
 }

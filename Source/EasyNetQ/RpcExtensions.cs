@@ -25,7 +25,7 @@ public static class RpcExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(rpc, nameof(rpc));
+
 
         return rpc.RequestAsync<TRequest, TResponse>(request, cancellationToken)
             .GetAwaiter()
@@ -47,7 +47,7 @@ public static class RpcExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(rpc, nameof(rpc));
+
 
         return rpc.RequestAsync<TRequest, TResponse>(request, _ => { }, cancellationToken);
     }
@@ -71,7 +71,7 @@ public static class RpcExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(rpc, nameof(rpc));
+
 
         return rpc.RequestAsync<TRequest, TResponse>(request, configure, cancellationToken)
             .GetAwaiter()
@@ -92,7 +92,7 @@ public static class RpcExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(rpc, nameof(rpc));
+
 
         var asyncResponder = TaskHelpers.FromFunc<TRequest, TResponse>((m, _) => responder(m));
         return rpc.RespondAsync(asyncResponder, _ => { }, cancellationToken);
@@ -112,7 +112,7 @@ public static class RpcExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(rpc, nameof(rpc));
+
 
         return rpc.RespondAsync<TRequest, TResponse>((r, _) => responder(r), _ => { }, cancellationToken);
     }
@@ -131,7 +131,7 @@ public static class RpcExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(rpc, nameof(rpc));
+
 
         return rpc.Respond(responder, _ => { }, cancellationToken);
     }
@@ -150,7 +150,7 @@ public static class RpcExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(rpc, nameof(rpc));
+
 
         var asyncResponder = TaskHelpers.FromFunc<TRequest, TResponse>((m, _) => responder(m));
 
@@ -173,7 +173,7 @@ public static class RpcExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(rpc, nameof(rpc));
+
 
         return rpc.Respond<TRequest, TResponse>((r, _) => responder(r), configure, cancellationToken);
     }
@@ -194,7 +194,7 @@ public static class RpcExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(rpc, nameof(rpc));
+
 
         return rpc.RespondAsync(responder, configure, cancellationToken)
             .GetAwaiter()

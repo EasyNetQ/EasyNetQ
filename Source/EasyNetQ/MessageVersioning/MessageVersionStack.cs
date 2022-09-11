@@ -54,7 +54,7 @@ public class MessageVersionStack : IEnumerable<Type>
         return messageVersions;
     }
 
-    private static Type GetSupersededType(Type type)
+    private static Type? GetSupersededType(Type type)
     {
         if (type.BaseType == null)
             return null;

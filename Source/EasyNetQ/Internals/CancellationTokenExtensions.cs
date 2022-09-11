@@ -31,7 +31,7 @@ public static class CancellationTokenExtensions
     /// </summary>
     public readonly struct ValueCancellationTokenSource : IDisposable
     {
-        private readonly CancellationTokenSource cts = null;
+        private readonly CancellationTokenSource? cts = null;
         private readonly CancellationToken cancellationToken;
 
         /// <summary>

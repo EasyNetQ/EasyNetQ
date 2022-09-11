@@ -112,8 +112,8 @@ internal class ReceiveConfiguration : IReceiveConfiguration
     public bool Durable { get; private set; }
     public int? MaxLength { get; private set; }
     public int? MaxLengthBytes { get; private set; }
-    public string QueueMode { get; private set; }
-    public string QueueType { get; private set; }
+    public string? QueueMode { get; private set; }
+    public string? QueueType { get; private set; }
     public bool SingleActiveConsumer { get; private set; }
 
     public ReceiveConfiguration(ushort defaultPrefetchCount)

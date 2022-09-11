@@ -21,9 +21,7 @@ public static class PerQueueConsumeConfigurationExtensions
     /// <returns>IPerQueueConsumeConfiguration</returns>
     public static IPerQueueConsumeConfiguration WithPriority(this IPerQueueConsumeConfiguration configuration, int priority)
     {
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
-        configuration.WithArgument("x-priority", priority);
-        return configuration;
+        return configuration.WithArgument("x-priority", priority);
     }
 
     /// <summary>
@@ -36,9 +34,6 @@ public static class PerQueueConsumeConfigurationExtensions
         this IPerQueueConsumeConfiguration configuration, IDictionary<string, object> arguments
     )
     {
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
-        Preconditions.CheckNotNull(arguments, nameof(arguments));
-
         return arguments.Aggregate(configuration, (c, kvp) => c.WithArgument(kvp.Key, kvp.Value));
     }
 
@@ -55,7 +50,6 @@ public static class ConsumeConfigurationExtensions
         MessageHandler handler
     )
     {
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
         return configuration.ForQueue(queue, handler, _ => { });
     }
 
@@ -65,7 +59,6 @@ public static class ConsumeConfigurationExtensions
         Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, CancellationToken, Task> handler
     )
     {
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
         return configuration.ForQueue(queue, handler, _ => { });
     }
 
@@ -76,7 +69,6 @@ public static class ConsumeConfigurationExtensions
         Action<IPerQueueConsumeConfiguration> configure
     )
     {
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
         return configuration.ForQueue(
             queue,
             async (body, properties, receivedInfo, cancellationToken) =>
@@ -94,8 +86,6 @@ public static class ConsumeConfigurationExtensions
         IMessageHandler<T> handler
     )
     {
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
-
         return configuration.ForQueue(queue, handler, _ => { });
     }
 
@@ -106,8 +96,6 @@ public static class ConsumeConfigurationExtensions
         Action<IPerQueueConsumeConfiguration> configure
     )
     {
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
-
         return configuration.ForQueue(queue, x => x.Add(handler), configure);
     }
 
@@ -117,8 +105,6 @@ public static class ConsumeConfigurationExtensions
         Func<IMessage<T>, MessageReceivedInfo, CancellationToken, Task> handler
     )
     {
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
-
         return configuration.ForQueue(queue, handler, _ => { });
     }
 
@@ -129,8 +115,6 @@ public static class ConsumeConfigurationExtensions
         Action<IPerQueueConsumeConfiguration> configure
     )
     {
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
-
         return configuration.ForQueue(queue, x => x.Add(handler), configure);
     }
 
@@ -140,8 +124,6 @@ public static class ConsumeConfigurationExtensions
         Action<IMessage<T>, MessageReceivedInfo> handler
     )
     {
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
-
         return configuration.ForQueue(queue, handler, _ => { });
     }
 
@@ -152,8 +134,6 @@ public static class ConsumeConfigurationExtensions
         Action<IPerQueueConsumeConfiguration> configure
     )
     {
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
-
         return configuration.ForQueue(queue, x => x.Add(handler), configure);
     }
 }
@@ -169,11 +149,8 @@ public static class SimpleConsumeConfigurationExtensions
     /// <param name="configuration">The configuration instance</param>
     /// <param name="priority">The priority to set</param>
     /// <returns>The same <paramref name="configuration"/></returns>
-    public static ISimpleConsumeConfiguration WithPriority(
-        this ISimpleConsumeConfiguration configuration, int priority
-    )
+    public static ISimpleConsumeConfiguration WithPriority(this ISimpleConsumeConfiguration configuration, int priority)
     {
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
         configuration.WithArgument("x-priority", priority);
         return configuration;
     }
