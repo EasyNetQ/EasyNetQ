@@ -15,8 +15,8 @@ public class RabbitMQFixture : IAsyncLifetime, IDisposable
     private static readonly Vhost VirtualHost = new() { Name = "/", Tracing = false };
 
     private const string ContainerName = "easynetq.tests";
-    private const string Image = "rabbitmq";
-    private const string Tag = "3.10-management-alpine";
+    private const string Image = "heidiks/rabbitmq-delayed-message-exchange";
+    private const string Tag = "latest";
     private const string User = "guest";
     private const string Password = "guest";
 
