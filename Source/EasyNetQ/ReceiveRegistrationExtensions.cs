@@ -18,8 +18,6 @@ public static class ReceiveRegistrationExtensions
     /// <returns>The same <paramref name="receiveRegistration"/> for fluent configuration</returns>
     public static IReceiveRegistration Add<T>(this IReceiveRegistration receiveRegistration, Func<T, Task> onMessage)
     {
-
-
         return receiveRegistration.Add<T>((m, _) => onMessage(m));
     }
 
@@ -32,8 +30,6 @@ public static class ReceiveRegistrationExtensions
     /// <returns>The same <paramref name="receiveRegistration"/> for fluent configuration</returns>
     public static IReceiveRegistration Add<T>(this IReceiveRegistration receiveRegistration, Action<T> onMessage)
     {
-
-
         var onMessageAsync = TaskHelpers.FromAction<T>((m, _) => onMessage(m));
         return receiveRegistration.Add(onMessageAsync);
     }

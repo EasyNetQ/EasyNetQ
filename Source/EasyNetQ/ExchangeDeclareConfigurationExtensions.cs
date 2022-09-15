@@ -15,8 +15,5 @@ public static class ExchangeDeclareConfigurationExtensions
     /// <returns>The same <paramref name="configuration"/></returns>
     public static IExchangeDeclareConfiguration WithAlternateExchange(
         this IExchangeDeclareConfiguration configuration, in Exchange alternateExchange
-    )
-    {
-        return configuration.WithArgument("alternate-exchange", alternateExchange.Name);
-    }
+    ) => configuration.WithArgument("alternate-exchange", alternateExchange.Name);
 }

@@ -34,10 +34,7 @@ public static class HandlerRegistrationExtensions
     /// <returns></returns>
     public static IHandlerRegistration Add<T>(
         this IHandlerRegistration handlerRegistration, Func<IMessage<T>, MessageReceivedInfo, Task> handler
-    )
-    {
-        return handlerRegistration.Add<T>((m, i, _) => handler(m, i));
-    }
+    ) => handlerRegistration.Add<T>((m, i, _) => handler(m, i));
 
     /// <summary>
     /// Add an asynchronous handler
@@ -49,10 +46,7 @@ public static class HandlerRegistrationExtensions
     public static IHandlerRegistration Add<T>(
         this IHandlerRegistration handlerRegistration,
         Func<IMessage<T>, MessageReceivedInfo, Task<AckStrategy>> handler
-    )
-    {
-        return handlerRegistration.Add<T>((m, i, _) => handler(m, i));
-    }
+    ) => handlerRegistration.Add<T>((m, i, _) => handler(m, i));
 
     /// <summary>
     /// Add an asynchronous handler

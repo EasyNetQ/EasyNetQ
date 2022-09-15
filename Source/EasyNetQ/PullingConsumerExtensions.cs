@@ -64,10 +64,7 @@ public static class PullingConsumerExtensions
         ulong deliveryTag,
         CancellationToken cancellationToken = default
     ) where TPullResult : IPullResult
-    {
-
-        return consumer.AckAsync(deliveryTag, false, cancellationToken);
-    }
+        => consumer.AckAsync(deliveryTag, false, cancellationToken);
 
     /// <summary>
     ///     Rejects single message
@@ -82,10 +79,7 @@ public static class PullingConsumerExtensions
         bool requeue = false,
         CancellationToken cancellationToken = default
     ) where TPullResult : IPullResult
-    {
-
-        return consumer.RejectAsync(deliveryTag, false, requeue, cancellationToken);
-    }
+        => consumer.RejectAsync(deliveryTag, false, requeue, cancellationToken);
 
     /// <summary>
     ///     Pulls a batch of messages
@@ -98,7 +92,6 @@ public static class PullingConsumerExtensions
         this IPullingConsumer<TPullResult> consumer, int batchSize, CancellationToken cancellationToken = default
     ) where TPullResult : IPullResult
     {
-
         var messages = new List<TPullResult>(batchSize);
         for (var i = 0; i < batchSize; ++i)
         {
@@ -123,10 +116,7 @@ public static class PullingConsumerExtensions
         ulong deliveryTag,
         CancellationToken cancellationToken = default
     ) where TPullResult : IPullResult
-    {
-
-        return consumer.AckAsync(deliveryTag, true, cancellationToken);
-    }
+        => consumer.AckAsync(deliveryTag, true, cancellationToken);
 
     /// <summary>
     ///     Rejects all messages of the batch
@@ -141,8 +131,5 @@ public static class PullingConsumerExtensions
         bool requeue = false,
         CancellationToken cancellationToken = default
     ) where TPullResult : IPullResult
-    {
-
-        return consumer.RejectAsync(deliveryTag, true, requeue, cancellationToken);
-    }
+        => consumer.RejectAsync(deliveryTag, true, requeue, cancellationToken);
 }

@@ -31,10 +31,7 @@ public static class NonGenericRpcExtensions
         Type requestType,
         Type responseType,
         CancellationToken cancellationToken = default
-    )
-    {
-        return rpc.RequestAsync(request, requestType, responseType, _ => { }, cancellationToken);
-    }
+    ) => rpc.RequestAsync(request, requestType, responseType, _ => { }, cancellationToken);
 
     /// <summary>
     ///     Makes an RPC style request

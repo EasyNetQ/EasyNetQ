@@ -26,12 +26,7 @@ public static class SendReceiveExtensions
         Func<T, CancellationToken, Task> onMessage,
         Action<IReceiveConfiguration> configure,
         CancellationToken cancellationToken
-    )
-    {
-
-
-        return sendReceive.ReceiveAsync(queue, c => c.Add(onMessage), configure, cancellationToken);
-    }
+    ) => sendReceive.ReceiveAsync(queue, c => c.Add(onMessage), configure, cancellationToken);
 
     /// <summary>
     /// Send a message directly to a queue
@@ -46,12 +41,7 @@ public static class SendReceiveExtensions
         string queue,
         T message,
         CancellationToken cancellationToken = default
-    )
-    {
-
-
-        return sendReceive.SendAsync(queue, message, _ => { }, cancellationToken);
-    }
+    ) => sendReceive.SendAsync(queue, message, _ => { }, cancellationToken);
 
     /// <summary>
     /// Send a message directly to a queue
@@ -66,12 +56,7 @@ public static class SendReceiveExtensions
         string queue,
         T message,
         CancellationToken cancellationToken = default
-    )
-    {
-
-
-        sendReceive.Send(queue, message, _ => { }, cancellationToken);
-    }
+    ) => sendReceive.Send(queue, message, _ => { }, cancellationToken);
 
     /// <summary>
     /// Send a message directly to a queue
@@ -92,8 +77,6 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-
-
         sendReceive.SendAsync(queue, message, configure, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -115,8 +98,6 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-
-
         return sendReceive.ReceiveAsync(
             queue,
             onMessage,
@@ -143,8 +124,6 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-
-
         var onMessageAsync = TaskHelpers.FromAction<T>((m, _) => onMessage(m));
 
         return sendReceive.ReceiveAsync(
@@ -171,8 +150,6 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-
-
         return sendReceive.ReceiveAsync<T>(
             queue,
             (m, _) => onMessage(m),
@@ -196,8 +173,6 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-
-
         return sendReceive.ReceiveAsync(
             queue,
             addHandlers,
@@ -222,8 +197,6 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-
-
         return sendReceive.Receive(queue, onMessage, _ => { }, cancellationToken);
     }
 
@@ -245,8 +218,6 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-
-
         var onMessageAsync = TaskHelpers.FromAction<T>((m, _) => onMessage(m));
 
         return sendReceive.Receive(
@@ -273,8 +244,6 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-
-
         return sendReceive.Receive<T>(
             queue,
             (m, _) => onMessage(m),
@@ -301,8 +270,6 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-
-
         return sendReceive.ReceiveAsync(
             queue,
             onMessage,
@@ -326,8 +293,6 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-
-
         return sendReceive.Receive(
             queue,
             addHandlers,
@@ -353,8 +318,6 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-
-
         return sendReceive.ReceiveAsync(
             queue,
             addHandlers,

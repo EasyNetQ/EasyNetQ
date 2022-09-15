@@ -23,12 +23,7 @@ public static class SchedulerExtensions
         T message,
         TimeSpan delay,
         CancellationToken cancellationToken = default
-    )
-    {
-
-
-        return scheduler.FuturePublishAsync(message, delay, _ => { }, cancellationToken);
-    }
+    ) => scheduler.FuturePublishAsync(message, delay, _ => { }, cancellationToken);
 
     /// <summary>
     /// Schedule a message to be published at some time in the future.
@@ -48,8 +43,6 @@ public static class SchedulerExtensions
         CancellationToken cancellationToken = default
     )
     {
-
-
         scheduler.FuturePublishAsync(message, delay, c => c.WithTopic(topic), cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -71,8 +64,6 @@ public static class SchedulerExtensions
         CancellationToken cancellationToken = default
     )
     {
-
-
         scheduler.FuturePublishAsync(message, delay, cancellationToken)
             .GetAwaiter()
             .GetResult();

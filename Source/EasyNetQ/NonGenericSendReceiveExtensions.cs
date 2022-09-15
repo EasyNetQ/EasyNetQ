@@ -30,10 +30,7 @@ public static class NonGenericSendReceiveExtensions
         object message,
         Type messageType,
         CancellationToken cancellationToken = default
-    )
-    {
-        return sendReceive.SendAsync(queue, message, messageType, _ => { }, cancellationToken);
-    }
+    ) => sendReceive.SendAsync(queue, message, messageType, _ => { }, cancellationToken);
 
     /// <summary>
     /// Send a message directly to a queue
@@ -104,10 +101,7 @@ public static class NonGenericSendReceiveExtensions
         object message,
         Type messageType,
         CancellationToken cancellationToken = default
-    )
-    {
-        sendReceive.Send(queue, message, messageType, _ => { }, cancellationToken);
-    }
+    ) => sendReceive.Send(queue, message, messageType, _ => { }, cancellationToken);
 
     /// <summary>
     /// Send a message directly to a queue

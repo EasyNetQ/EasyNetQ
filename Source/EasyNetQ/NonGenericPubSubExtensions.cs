@@ -29,9 +29,7 @@ public static class NonGenericPubSubExtensions
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns></returns>
     public static Task PublishAsync(this IPubSub pubSub, object message, Type messageType, CancellationToken cancellationToken = default)
-    {
-        return pubSub.PublishAsync(message, messageType, _ => { }, cancellationToken);
-    }
+        => pubSub.PublishAsync(message, messageType, _ => { }, cancellationToken);
 
     /// <summary>
     /// Publishes a message with a topic.
@@ -50,10 +48,7 @@ public static class NonGenericPubSubExtensions
         Type messageType,
         string topic,
         CancellationToken cancellationToken = default
-    )
-    {
-        return pubSub.PublishAsync(message, messageType, c => c.WithTopic(topic), cancellationToken);
-    }
+    ) => pubSub.PublishAsync(message, messageType, c => c.WithTopic(topic), cancellationToken);
 
     /// <summary>
     /// Publishes a message.
@@ -113,9 +108,7 @@ public static class NonGenericPubSubExtensions
     /// <param name="messageType">The message type</param>
     /// <param name="cancellationToken">The cancellation token</param>
     public static void Publish(this IPubSub pubSub, object message, Type messageType, CancellationToken cancellationToken = default)
-    {
-        pubSub.Publish(message, messageType, _ => { }, cancellationToken);
-    }
+        => pubSub.Publish(message, messageType, _ => { }, cancellationToken);
 
     /// <summary>
     /// Publishes a message.
@@ -154,10 +147,7 @@ public static class NonGenericPubSubExtensions
         Type messageType,
         string topic,
         CancellationToken cancellationToken = default
-    )
-    {
-        pubSub.Publish(message, messageType, c => c.WithTopic(topic), cancellationToken);
-    }
+    ) => pubSub.Publish(message, messageType, c => c.WithTopic(topic), cancellationToken);
 
     /// <summary>
     /// Subscribes to a stream of messages that match a .NET type.

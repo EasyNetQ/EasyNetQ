@@ -29,10 +29,7 @@ public static class NonGenericSchedulerExtensions
         Type messageType,
         TimeSpan delay,
         CancellationToken cancellationToken = default
-    )
-    {
-        return scheduler.FuturePublishAsync(message, messageType, delay, _ => { }, cancellationToken);
-    }
+    ) => scheduler.FuturePublishAsync(message, messageType, delay, _ => { }, cancellationToken);
 
     /// <summary>
     /// Schedule a message to be published at some time in the future

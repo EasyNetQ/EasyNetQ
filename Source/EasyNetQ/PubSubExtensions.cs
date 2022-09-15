@@ -21,9 +21,7 @@ public static class PubSubExtensions
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns></returns>
     public static Task PublishAsync<T>(this IPubSub pubSub, T message, CancellationToken cancellationToken = default)
-    {
-        return pubSub.PublishAsync(message, _ => { }, cancellationToken);
-    }
+        => pubSub.PublishAsync(message, _ => { }, cancellationToken);
 
     /// <summary>
     /// Publishes a message with a topic.
@@ -37,9 +35,7 @@ public static class PubSubExtensions
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns></returns>
     public static Task PublishAsync<T>(this IPubSub pubSub, T message, string topic, CancellationToken cancellationToken = default)
-    {
-        return pubSub.PublishAsync(message, c => c.WithTopic(topic), cancellationToken);
-    }
+        => pubSub.PublishAsync(message, c => c.WithTopic(topic), cancellationToken);
 
     /// <summary>
     /// Publishes a message.
@@ -49,11 +45,7 @@ public static class PubSubExtensions
     /// <param name="message">The message to publish</param>
     /// <param name="cancellationToken">The cancellation token</param>
     public static void Publish<T>(this IPubSub pubSub, T message, CancellationToken cancellationToken = default)
-    {
-
-
-        pubSub.Publish(message, _ => { }, cancellationToken);
-    }
+        => pubSub.Publish(message, _ => { }, cancellationToken);
 
     /// <summary>
     /// Publishes a message.
@@ -67,8 +59,6 @@ public static class PubSubExtensions
     /// <param name="cancellationToken">The cancellation token</param>
     public static void Publish<T>(this IPubSub pubSub, T message, Action<IPublishConfiguration> configure, CancellationToken cancellationToken = default)
     {
-
-
         pubSub.PublishAsync(message, configure, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -83,11 +73,7 @@ public static class PubSubExtensions
     /// <param name="topic">The topic string</param>
     /// <param name="cancellationToken">The cancellation token</param>
     public static void Publish<T>(this IPubSub pubSub, T message, string topic, CancellationToken cancellationToken = default)
-    {
-
-
-        pubSub.Publish(message, c => c.WithTopic(topic), cancellationToken);
-    }
+        => pubSub.Publish(message, c => c.WithTopic(topic), cancellationToken);
 
     /// <summary>
     /// Subscribes to a stream of messages that match a .NET type.
@@ -116,8 +102,6 @@ public static class PubSubExtensions
         CancellationToken cancellationToken = default
     )
     {
-
-
         return pubSub.SubscribeAsync(
             subscriptionId,
             onMessage,
@@ -234,8 +218,6 @@ public static class PubSubExtensions
         CancellationToken cancellationToken = default
     )
     {
-
-
         return pubSub.Subscribe(
             subscriptionId,
             onMessage,
@@ -275,8 +257,6 @@ public static class PubSubExtensions
         CancellationToken cancellationToken = default
     )
     {
-
-
         var onMessageAsync = TaskHelpers.FromAction<T>((m, _) => onMessage(m));
 
         return pubSub.Subscribe(
@@ -315,8 +295,6 @@ public static class PubSubExtensions
         CancellationToken cancellationToken = default
     )
     {
-
-
         return pubSub.Subscribe<T>(
             subscriptionId,
             (m, _) => onMessage(m),
@@ -357,8 +335,6 @@ public static class PubSubExtensions
         CancellationToken cancellationToken = default
     )
     {
-
-
         return pubSub.SubscribeAsync(subscriptionId, onMessage, configure, cancellationToken)
             .GetAwaiter()
             .GetResult();

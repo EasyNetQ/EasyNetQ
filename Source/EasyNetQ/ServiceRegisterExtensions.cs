@@ -91,18 +91,14 @@ public static class ServiceRegisterExtensions
     /// </summary>
     /// <param name="serviceRegister">The register</param>
     public static IServiceRegister EnableLegacyTypeNaming(this IServiceRegister serviceRegister)
-    {
-        return serviceRegister.Register<ITypeNameSerializer, LegacyTypeNameSerializer>();
-    }
+        => serviceRegister.Register<ITypeNameSerializer, LegacyTypeNameSerializer>();
 
     /// <summary>
     ///     Enables legacy rpc conventions. See <see cref="LegacyRpcConventions"/> for more details
     /// </summary>
     /// <param name="serviceRegister">The register</param>
     public static IServiceRegister EnableLegacyRpcConventions(this IServiceRegister serviceRegister)
-    {
-        return serviceRegister.Register<IConventions, LegacyRpcConventions>();
-    }
+        => serviceRegister.Register<IConventions, LegacyRpcConventions>();
 
     /// <summary>
     ///     Enables all legacy conventions
@@ -121,18 +117,14 @@ public static class ServiceRegisterExtensions
     /// </summary>
     /// <param name="serviceRegister">The register</param>
     public static IServiceRegister EnableDelayedExchangeScheduler(this IServiceRegister serviceRegister)
-    {
-        return serviceRegister.Register<IScheduler, DelayedExchangeScheduler>();
-    }
+        => serviceRegister.Register<IScheduler, DelayedExchangeScheduler>();
 
     /// <summary>
     ///     Enables AdvancedMessagePolymorphism. See <see cref="MultipleExchangeDeclareStrategy"/> for more details
     /// </summary>
     /// <param name="serviceRegister">The register</param>
     public static IServiceRegister EnableAdvancedMessagePolymorphism(this IServiceRegister serviceRegister)
-    {
-        return serviceRegister.Register<IExchangeDeclareStrategy, MultipleExchangeDeclareStrategy>();
-    }
+        => serviceRegister.Register<IExchangeDeclareStrategy, MultipleExchangeDeclareStrategy>();
 
     /// <summary>
     ///     Enables versioning of messages.
@@ -152,34 +144,26 @@ public static class ServiceRegisterExtensions
     /// </summary>
     /// <param name="serviceRegister">The register</param>
     public static IServiceRegister EnableConsoleLogger(this IServiceRegister serviceRegister)
-    {
-        return serviceRegister.Register(typeof(ILogger<>), typeof(ConsoleLogger<>));
-    }
+        => serviceRegister.Register(typeof(ILogger<>), typeof(ConsoleLogger<>));
 
     /// <summary>
     ///     Enables a consumer error strategy which acks failed messages
     /// </summary>
     /// <param name="serviceRegister">The register</param>
     public static IServiceRegister EnableAlwaysAckConsumerErrorStrategy(this IServiceRegister serviceRegister)
-    {
-        return serviceRegister.Register<IConsumerErrorStrategy>(SimpleConsumerErrorStrategy.Ack);
-    }
+        => serviceRegister.Register<IConsumerErrorStrategy>(SimpleConsumerErrorStrategy.Ack);
 
     /// <summary>
     ///     Enables a consumer error strategy which nacks failed messages with requeue
     /// </summary>
     /// <param name="serviceRegister">The register</param>
     public static IServiceRegister EnableAlwaysNackWithRequeueConsumerErrorStrategy(this IServiceRegister serviceRegister)
-    {
-        return serviceRegister.Register<IConsumerErrorStrategy>(SimpleConsumerErrorStrategy.NackWithRequeue);
-    }
+        => serviceRegister.Register<IConsumerErrorStrategy>(SimpleConsumerErrorStrategy.NackWithRequeue);
 
     /// <summary>
     ///     Enables a consumer error strategy which nacks failed messages without requeue
     /// </summary>
     /// <param name="serviceRegister">The register</param>
     public static IServiceRegister EnableAlwaysNackWithoutRequeueConsumerErrorStrategy(this IServiceRegister serviceRegister)
-    {
-        return serviceRegister.Register<IConsumerErrorStrategy>(SimpleConsumerErrorStrategy.NackWithoutRequeue);
-    }
+        => serviceRegister.Register<IConsumerErrorStrategy>(SimpleConsumerErrorStrategy.NackWithoutRequeue);
 }

@@ -23,10 +23,7 @@ public static class AdvancedBusExtensions
     /// <returns>A disposable to cancel the consumer</returns>
     public static IDisposable Consume<T>(
         this IAdvancedBus bus, Queue queue, Action<IMessage<T>, MessageReceivedInfo> handler
-    )
-    {
-        return bus.Consume(queue, handler, _ => { });
-    }
+    ) => bus.Consume(queue, handler, _ => { });
 
     /// <summary>
     /// Consume a stream of messages
@@ -59,10 +56,7 @@ public static class AdvancedBusExtensions
     /// <returns>A disposable to cancel the consumer</returns>
     public static IDisposable Consume<T>(
         this IAdvancedBus bus, Queue queue, Func<IMessage<T>, MessageReceivedInfo, Task> handler
-    )
-    {
-        return bus.Consume(queue, handler, _ => { });
-    }
+    ) => bus.Consume(queue, handler, _ => { });
 
     /// <summary>
     /// Consume a stream of messages asynchronously
@@ -80,10 +74,7 @@ public static class AdvancedBusExtensions
         Queue queue,
         Func<IMessage<T>, MessageReceivedInfo, Task> handler,
         Action<ISimpleConsumeConfiguration> configure
-    )
-    {
-        return bus.Consume<T>(queue, (m, i, _) => handler(m, i), configure);
-    }
+    ) => bus.Consume<T>(queue, (m, i, _) => handler(m, i), configure);
 
     /// <summary>
     /// Consume a stream of messages asynchronously
@@ -103,8 +94,6 @@ public static class AdvancedBusExtensions
         Action<ISimpleConsumeConfiguration> configure
     )
     {
-
-
         return bus.Consume<T>(queue, async (m, i, c) =>
         {
             await handler(m, i, c).ConfigureAwait(false);
@@ -161,9 +150,7 @@ public static class AdvancedBusExtensions
     /// <param name="addHandlers">A function to add handlers to the consumer</param>
     /// <returns>A disposable to cancel the consumer</returns>
     public static IDisposable Consume(this IAdvancedBus bus, Queue queue, Action<IHandlerRegistration> addHandlers)
-    {
-        return bus.Consume(queue, addHandlers, _ => { });
-    }
+        => bus.Consume(queue, addHandlers, _ => { });
 
     /// <summary>
     /// Consume a stream of messages. Dispatch them to the given handlers
@@ -217,12 +204,7 @@ public static class AdvancedBusExtensions
     /// <returns>A disposable to cancel the consumer</returns>
     public static IDisposable Consume(
         this IAdvancedBus bus, Queue queue, Action<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo> handler
-    )
-    {
-
-
-        return bus.Consume(queue, handler, _ => { });
-    }
+    ) => bus.Consume(queue, handler, _ => { });
 
     /// <summary>
     /// Consume raw bytes from the queue.
@@ -244,8 +226,6 @@ public static class AdvancedBusExtensions
         Action<ISimpleConsumeConfiguration> configure
     )
     {
-
-
         var handlerAsync = TaskHelpers.FromAction<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo>((m, p, i, _) => handler(m, p, i));
 
         return bus.Consume(queue, handlerAsync, configure);
@@ -265,12 +245,7 @@ public static class AdvancedBusExtensions
         this IAdvancedBus bus,
         Queue queue,
         Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, Task> handler
-    )
-    {
-
-
-        return bus.Consume(queue, handler, _ => { });
-    }
+    ) => bus.Consume(queue, handler, _ => { });
 
     /// <summary>
     /// Consume raw bytes from the queue.
@@ -286,12 +261,7 @@ public static class AdvancedBusExtensions
         this IAdvancedBus bus,
         Queue queue,
         Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, Task<AckStrategy>> handler
-    )
-    {
-
-
-        return bus.Consume(queue, handler, _ => { });
-    }
+    ) => bus.Consume(queue, handler, _ => { });
 
     /// <summary>
     /// Consume raw bytes from the queue.
@@ -311,12 +281,7 @@ public static class AdvancedBusExtensions
         Queue queue,
         Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, Task> handler,
         Action<ISimpleConsumeConfiguration> configure
-    )
-    {
-
-
-        return bus.Consume(queue, (m, p, i, _) => handler(m, p, i), configure);
-    }
+    ) => bus.Consume(queue, (m, p, i, _) => handler(m, p, i), configure);
 
     /// <summary>
     /// Consume raw bytes from the queue.
@@ -336,12 +301,7 @@ public static class AdvancedBusExtensions
         Queue queue,
         Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, Task<AckStrategy>> handler,
         Action<ISimpleConsumeConfiguration> configure
-    )
-    {
-
-
-        return bus.Consume(queue, (m, p, i, _) => handler(m, p, i), configure);
-    }
+    ) => bus.Consume(queue, (m, p, i, _) => handler(m, p, i), configure);
 
     /// <summary>
     /// Consume raw bytes from the queue.
@@ -363,8 +323,6 @@ public static class AdvancedBusExtensions
         Action<ISimpleConsumeConfiguration> configure
     )
     {
-
-
         return bus.Consume(queue, async (m, p, i, c) =>
         {
             await handler(m, p, i, c).ConfigureAwait(false);
@@ -393,8 +351,6 @@ public static class AdvancedBusExtensions
         Action<ISimpleConsumeConfiguration> configure
     )
     {
-
-
         var consumeConfiguration = new SimpleConsumeConfiguration();
         configure(consumeConfiguration);
 
@@ -447,8 +403,6 @@ public static class AdvancedBusExtensions
         CancellationToken cancellationToken = default
     )
     {
-
-
         bus.PublishAsync(exchange, routingKey, mandatory, messageProperties, body, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -480,8 +434,6 @@ public static class AdvancedBusExtensions
         CancellationToken cancellationToken = default
     )
     {
-
-
         bus.PublishAsync(exchange, routingKey, mandatory, message, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -498,8 +450,6 @@ public static class AdvancedBusExtensions
         this IAdvancedBus bus, string name, CancellationToken cancellationToken = default
     )
     {
-
-
         return bus.GetQueueStatsAsync(name, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -515,8 +465,6 @@ public static class AdvancedBusExtensions
     /// <returns>The queue</returns>
     public static Queue QueueDeclare(this IAdvancedBus bus, CancellationToken cancellationToken = default)
     {
-
-
         return bus.QueueDeclareAsync(cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -539,8 +487,6 @@ public static class AdvancedBusExtensions
         CancellationToken cancellationToken = default
     )
     {
-
-
         return bus.QueueDeclareAsync(name, configure, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -561,8 +507,6 @@ public static class AdvancedBusExtensions
         CancellationToken cancellationToken = default
     )
     {
-
-
         return bus.QueueDeclareAsync(name, _ => { }, cancellationToken);
     }
 
@@ -587,8 +531,6 @@ public static class AdvancedBusExtensions
         CancellationToken cancellationToken = default
     )
     {
-
-
         return bus.QueueDeclareAsync(
             name,
             c => c.AsDurable(durable)
@@ -639,8 +581,6 @@ public static class AdvancedBusExtensions
         CancellationToken cancellationToken = default
     )
     {
-
-
         return bus.QueueDeclareAsync(name, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -658,8 +598,6 @@ public static class AdvancedBusExtensions
         CancellationToken cancellationToken = default
     )
     {
-
-
         bus.QueueDeclarePassiveAsync(name, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -680,10 +618,7 @@ public static class AdvancedBusExtensions
         Queue queue,
         string routingKey,
         CancellationToken cancellationToken = default
-    )
-    {
-        return bus.BindAsync(source, queue, routingKey, null, cancellationToken);
-    }
+    ) => bus.BindAsync(source, queue, routingKey, null, cancellationToken);
 
     /// <summary>
     /// Bind two exchanges. Does nothing if the binding already exists.
@@ -700,10 +635,7 @@ public static class AdvancedBusExtensions
         Exchange destination,
         string routingKey,
         CancellationToken cancellationToken = default
-    )
-    {
-        return bus.BindAsync(source, destination, routingKey, null, cancellationToken);
-    }
+    ) => bus.BindAsync(source, destination, routingKey, null, cancellationToken);
 
     /// <summary>
     /// Bind two exchanges. Does nothing if the binding already exists.
@@ -808,10 +740,7 @@ public static class AdvancedBusExtensions
         bool durable = true,
         bool autoDelete = false,
         CancellationToken cancellationToken = default
-    )
-    {
-        return bus.ExchangeDeclareAsync(name, c => c.AsDurable(durable).AsAutoDelete(autoDelete).WithType(type), cancellationToken);
-    }
+    ) => bus.ExchangeDeclareAsync(name, c => c.AsDurable(durable).AsAutoDelete(autoDelete).WithType(type), cancellationToken);
 
     /// <summary>
     /// Declare a exchange passively. Throw an exception rather than create the exchange if it doesn't exist
@@ -881,9 +810,7 @@ public static class AdvancedBusExtensions
     /// <param name="binding">the binding to delete</param>
     /// <param name="cancellationToken">The cancellation token</param>
     public static Task UnbindAsync(this IAdvancedBus bus, Binding<Queue> binding, CancellationToken cancellationToken = default)
-    {
-        return bus.QueueUnbindAsync(binding.Destination.Name, binding.Source.Name, binding.RoutingKey, binding.Arguments, cancellationToken);
-    }
+        => bus.QueueUnbindAsync(binding.Destination.Name, binding.Source.Name, binding.RoutingKey, binding.Arguments, cancellationToken);
 
     /// <summary>
     /// Delete a binding
@@ -892,9 +819,7 @@ public static class AdvancedBusExtensions
     /// <param name="binding">the binding to delete</param>
     /// <param name="cancellationToken">The cancellation token</param>
     public static Task UnbindAsync(this IAdvancedBus bus, Binding<Exchange> binding, CancellationToken cancellationToken = default)
-    {
-        return bus.ExchangeUnbindAsync(binding.Destination.Name, binding.Source.Name, binding.RoutingKey, binding.Arguments, cancellationToken);
-    }
+        => bus.ExchangeUnbindAsync(binding.Destination.Name, binding.Source.Name, binding.RoutingKey, binding.Arguments, cancellationToken);
 
     /// <summary>
     /// Unbind a queue from an exchange.
