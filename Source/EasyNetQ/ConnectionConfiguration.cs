@@ -144,6 +144,11 @@ public class ConnectionConfiguration
     ///     Maximum channel number per connection (default is 2047)
     /// </summary>
     public ushort RequestedChannelMax { get; set; }
+
+    /// <summary>
+    ///     Per model concurrency level
+    /// </summary>
+    public int? PerModelConcurrencyLevel { get; set; } = null;
 }
 
 /// <summary>

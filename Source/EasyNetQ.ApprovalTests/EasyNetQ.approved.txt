@@ -82,6 +82,7 @@ namespace EasyNetQ
         public bool MandatoryPublish { get; set; }
         public string? Name { get; set; }
         public string Password { get; set; }
+        public int? PerModelConcurrencyLevel { get; set; }
         public bool PersistentMessages { get; set; }
         public string? Platform { get; set; }
         public ushort Port { get; set; }
