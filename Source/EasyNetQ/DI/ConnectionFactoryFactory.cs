@@ -21,7 +21,7 @@ internal static class ConnectionFactoryFactory
             NetworkRecoveryInterval = configuration.ConnectIntervalAttempt,
             ContinuationTimeout = configuration.Timeout,
             DispatchConsumersAsync = true,
-            ConsumerDispatchConcurrency = configuration.PerModelConcurrencyLevel ?? configuration.PrefetchCount,
+            ConsumerDispatchConcurrency = configuration.ConsumerDispatcherConcurrency ?? configuration.PrefetchCount,
             RequestedChannelMax = configuration.RequestedChannelMax
         };
 
