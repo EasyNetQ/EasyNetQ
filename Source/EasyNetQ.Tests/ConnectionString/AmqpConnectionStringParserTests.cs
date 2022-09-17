@@ -82,7 +82,8 @@ public class AmqpConnectionStringParserTests
                 "mandatoryPublish=true",
                 "connectIntervalAttempt=2",
                 "product=product",
-                "platform=platform"
+                "platform=platform",
+                "consumerDispatcherConcurrency=1"
             ),
             new ConnectionConfiguration
             {
@@ -95,7 +96,8 @@ public class AmqpConnectionStringParserTests
                 Name = "unit-test",
                 MandatoryPublish = true,
                 Product = "product",
-                Platform = "platform"
+                Platform = "platform",
+                ConsumerDispatcherConcurrency = 1,
             }
         );
     }
