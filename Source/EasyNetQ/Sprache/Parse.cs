@@ -11,7 +11,7 @@ internal static class Parse
 {
     public static readonly Parser<char> WhiteSpace = Char(char.IsWhiteSpace, "whitespace");
     public static readonly Parser<char> Numeric = Char(char.IsNumber, "numeric character");
-    public static readonly Parser<string> Number = Numeric.AtLeastOnce().Text();
+    public static readonly Parser<string> NonNegativeNumber = Numeric.AtLeastOnce().Text();
 
     /// <summary>
     /// TryParse a single character matching 'predicate'

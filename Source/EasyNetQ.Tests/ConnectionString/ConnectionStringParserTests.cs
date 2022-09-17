@@ -20,7 +20,7 @@ public class ConnectionStringParserTests
     private const string connectionString =
         "virtualHost=Copa;username=Copa;host=192.168.1.1;password=abc_xyz;port=12345;" +
         "requestedHeartbeat=3;prefetchcount=2;timeout=12;publisherConfirms=true;" +
-        "name=unit-test;mandatoryPublish=true";
+        "name=unit-test;mandatoryPublish=true;consumerDispatcherConcurrency=1";
 
     [Fact]
     public void Should_correctly_parse_connection_string()
@@ -38,24 +38,7 @@ public class ConnectionStringParserTests
         configuration.PublisherConfirms.Should().BeTrue();
         configuration.Name.Should().Be("unit-test");
         configuration.MandatoryPublish.Should().BeTrue();
-    }
-
-    [Fact]
-    public void Should_parse_global_persistentMessages()
-    {
-        const string connectionStringWithPersistentMessages = "host=localhost;persistentMessages=false";
-        var connectionConfiguration = connectionStringParser.Parse(connectionStringWithPersistentMessages);
-
-        connectionConfiguration.PersistentMessages.Should().BeFalse();
-    }
-
-    [Fact]
-    public void Should_parse_global_mandatoryPublish()
-    {
-        const string connectionStringWithMandatoryPublish = "host=localhost;mandatoryPublish=true";
-        var connectionConfiguration = connectionStringParser.Parse(connectionStringWithMandatoryPublish);
-
-        connectionConfiguration.PersistentMessages.Should().BeTrue();
+        configuration.ConsumerDispatcherConcurrency.Should().Be(1);
     }
 
     [Fact]
