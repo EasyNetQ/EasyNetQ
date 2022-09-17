@@ -78,6 +78,7 @@ namespace EasyNetQ
         public System.Collections.Generic.IList<RabbitMQ.Client.IAuthMechanismFactory> AuthMechanisms { get; set; }
         public System.Collections.Generic.IDictionary<string, object> ClientProperties { get; }
         public System.TimeSpan ConnectIntervalAttempt { get; set; }
+        public int? ConsumerDispatcherConcurrency { get; set; }
         public System.Collections.Generic.IList<EasyNetQ.HostConfiguration> Hosts { get; set; }
         public bool MandatoryPublish { get; set; }
         public string Name { get; set; }

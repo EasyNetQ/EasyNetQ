@@ -144,6 +144,13 @@ public class ConnectionConfiguration
     ///     Maximum channel number per connection (default is 2047)
     /// </summary>
     public ushort RequestedChannelMax { get; set; }
+
+    /// <summary>
+    ///     Value greater than one enables concurrent processing for consumers.
+    /// If it is not set, a value of <seealso cref="PrefetchCount"/> is used due to backward compatibility
+    /// </summary>
+    /// <remarks>For concurrency greater than one, the consumers could process messages in any order, not in the order they receive them</remarks>
+    public int? ConsumerDispatcherConcurrency { get; set; } = null;
 }
 
 /// <summary>
