@@ -13,12 +13,14 @@ using UpdateConfiguration = Func<ConnectionConfiguration, ConnectionConfiguratio
 internal static class ConnectionStringGrammar
 {
     internal static readonly Parser<string> Text = Parse.CharExcept(';').Many().Text();
-    internal static readonly Parser<ushort> UShortNumber = Parse.Number.Select(ushort.Parse);
+    internal static readonly Parser<ushort> UShortNumber = Parse.NonNegativeNumber.Select(ushort.Parse);
+    internal static readonly Parser<int?> NullableIntNumber = Parse.NonNegativeNumber.Select(x => (int?)int.Parse(x));
     internal static readonly Parser<string> MinusOne = Parse.String("-1").Text();
-    internal static readonly Parser<TimeSpan> TimeSpanSeconds = Parse.Number.Or(MinusOne)
+
+    internal static readonly Parser<TimeSpan> TimeSpanSeconds = Parse.NonNegativeNumber.Or(MinusOne)
         .Select(int.Parse)
         .Select(
-            x => x == 0 || x == -1 ? Timeout.InfiniteTimeSpan : TimeSpan.FromSeconds(x)
+            x => x is 0 or -1 ? Timeout.InfiniteTimeSpan : TimeSpan.FromSeconds(x)
         );
 
     internal static readonly Parser<bool> Bool = Parse.CaseInsensitiveString("true").Or(Parse.CaseInsensitiveString("false")).Text().Select(x => x.ToLower() == "true");
@@ -40,6 +42,7 @@ internal static class ConnectionStringGrammar
         BuildKeyValueParser("username", Text, c => c.UserName),
         BuildKeyValueParser("password", Text, c => c.Password),
         BuildKeyValueParser("prefetchCount", UShortNumber, c => c.PrefetchCount),
+        BuildKeyValueParser("consumerDispatcherConcurrency", NullableIntNumber, c => c.ConsumerDispatcherConcurrency),
         BuildKeyValueParser("timeout", TimeSpanSeconds, c => c.Timeout),
         BuildKeyValueParser("connectIntervalAttempt", TimeSpanSeconds, c => c.ConnectIntervalAttempt),
         BuildKeyValueParser("publisherConfirms", Bool, c => c.PublisherConfirms),
@@ -73,10 +76,9 @@ internal static class ConnectionStringGrammar
                });
     }
 
-    private static Action<ConnectionConfiguration, T> CreateSetter<T>(Expression<Func<ConnectionConfiguration, T>> getter)
-    {
-        return CreateSetter<ConnectionConfiguration, T>(getter);
-    }
+    private static Action<ConnectionConfiguration, T> CreateSetter<T>(
+        Expression<Func<ConnectionConfiguration, T>> getter
+    ) => CreateSetter<ConnectionConfiguration, T>(getter);
 
     /// <summary>
     /// Stolen from SO:
@@ -110,7 +112,7 @@ internal static class ConnectionStringGrammar
             yield return item;
     }
 
-    internal static Parser<IEnumerable<T>> ListDelimitedBy<T>(this Parser<T> parser, char delimiter)
+    private static Parser<IEnumerable<T>> ListDelimitedBy<T>(this Parser<T> parser, char delimiter)
     {
         return
             from head in parser

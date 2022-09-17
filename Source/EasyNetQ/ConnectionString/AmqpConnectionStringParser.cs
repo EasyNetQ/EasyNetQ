@@ -19,6 +19,7 @@ public class AmqpConnectionStringParser : IConnectionStringParser
     {
         BuildKeyValueParser("requestedHeartbeat", c => TimeSpan.FromSeconds(int.Parse(c)), c => c.RequestedHeartbeat),
         BuildKeyValueParser("prefetchCount", ushort.Parse, c => c.PrefetchCount),
+        BuildKeyValueParser("consumerDispatcherConcurrency", x => int.Parse(x), c => c.ConsumerDispatcherConcurrency),
         BuildKeyValueParser("timeout", c => TimeSpan.FromSeconds(int.Parse(c)), c => c.Timeout),
         BuildKeyValueParser("connectIntervalAttempt", c => TimeSpan.FromSeconds(int.Parse(c)), c => c.ConnectIntervalAttempt),
         BuildKeyValueParser("publisherConfirms", bool.Parse, c => c.PublisherConfirms),
