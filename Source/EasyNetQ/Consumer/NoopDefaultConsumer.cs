@@ -9,6 +9,10 @@ namespace EasyNetQ.Consumer;
 
 internal sealed class NoopDefaultConsumer : IBasicConsumer, IAsyncBasicConsumer
 {
+    internal static readonly NoopDefaultConsumer Instance = new();
+
+    private NoopDefaultConsumer() { }
+
     public IModel Model => null;
 
     event AsyncEventHandler<ConsumerEventArgs> IAsyncBasicConsumer.ConsumerCancelled
