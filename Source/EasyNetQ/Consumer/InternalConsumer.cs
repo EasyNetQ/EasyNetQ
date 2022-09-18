@@ -149,7 +149,7 @@ public class InternalConsumer : IInternalConsumer
             try
             {
                 model = connection.CreateModel();
-                model.DefaultConsumer = new NoopDefaultConsumer();
+                model.DefaultConsumer = NoopDefaultConsumer.Instance;
                 model.BasicQos(0, configuration.PrefetchCount, false);
             }
             catch (Exception exception)
