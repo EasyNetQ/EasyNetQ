@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30002.166
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32804.467
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".Solution Items", ".Solution Items", "{6301F5B7-5B36-4EDA-8E37-6C970155F8B4}"
 	ProjectSection(SolutionItems) = preProject
@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".Solution Items", ".Solutio
 		..\.github\workflows\ci.yml = ..\.github\workflows\ci.yml
 		..\.github\dependabot.yml = ..\.github\dependabot.yml
 		Directory.Build.props = Directory.Build.props
+		FodyWeavers.xml = FodyWeavers.xml
+		FodyWeavers.xsd = FodyWeavers.xsd
 		..\hall_of_fame.md = ..\hall_of_fame.md
 		..\licence.txt = ..\licence.txt
 		..\README.md = ..\README.md
@@ -52,17 +54,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{01EFEA5D
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Logging", "Logging", "{83745BDD-49A0-4247-A5AC-89428D7D0B7D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Logging.Microsoft", "EasyNetQ.Logging.Microsoft\EasyNetQ.Logging.Microsoft.csproj", "{1CAE3C49-52AB-45D4-B0DD-784E7C870118}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Logging.Microsoft", "EasyNetQ.Logging.Microsoft\EasyNetQ.Logging.Microsoft.csproj", "{1CAE3C49-52AB-45D4-B0DD-784E7C870118}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Logging.Serilog", "EasyNetQ.Logging.Serilog\EasyNetQ.Logging.Serilog.csproj", "{8A743708-92DE-4199-B3C9-A52D7F521C8D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Logging.Serilog", "EasyNetQ.Logging.Serilog\EasyNetQ.Logging.Serilog.csproj", "{8A743708-92DE-4199-B3C9-A52D7F521C8D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Examples.DlxRetry", "EasyNetQ.Examples.DlxRetry\EasyNetQ.Examples.DlxRetry.csproj", "{334FC79A-41F7-4506-B887-8FD4ADCC28E4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Examples.DlxRetry", "EasyNetQ.Examples.DlxRetry\EasyNetQ.Examples.DlxRetry.csproj", "{334FC79A-41F7-4506-B887-8FD4ADCC28E4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{C24EB2CE-59ED-4348-903F-2DF7E868E7BD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Examples.PubSubWithAdvancedApi", "EasyNetQ.Examples.PubSubWithAdvancedApi\EasyNetQ.Examples.PubSubWithAdvancedApi.csproj", "{3033D84D-F003-4993-95E0-6898E487EF38}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Examples.PubSubWithAdvancedApi", "EasyNetQ.Examples.PubSubWithAdvancedApi\EasyNetQ.Examples.PubSubWithAdvancedApi.csproj", "{3033D84D-F003-4993-95E0-6898E487EF38}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Examples.Rpc", "EasyNetQ.Examples.Rpc\EasyNetQ.Examples.Rpc.csproj", "{34907240-61E8-425B-8444-3F5676F8F865}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Examples.Rpc", "EasyNetQ.Examples.Rpc\EasyNetQ.Examples.Rpc.csproj", "{34907240-61E8-425B-8444-3F5676F8F865}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

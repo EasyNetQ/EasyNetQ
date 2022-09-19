@@ -17,6 +17,8 @@
     <SignAssembly>true</SignAssembly>
     <PublicSign>false</PublicSign>
     <NoWarn>$(NoWarn);1591</NoWarn>
+    <ProjectWeaverXml>..\FodyWeavers.xml</ProjectWeaverXml>
+    <FodyGenerateXsd>false</FodyGenerateXsd>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(IsPackable)' == 'true'">
