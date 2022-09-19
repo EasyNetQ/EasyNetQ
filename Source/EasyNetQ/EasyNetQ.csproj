@@ -9,7 +9,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="LightInject.Source" Version="6.5.2">
+    <PackageReference Include="LightInject.Source" Version="6.6.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
@@ -20,5 +20,8 @@
     <PackageReference Include="NullGuard.Fody" Version="3.1.0" PrivateAssets="All" />
     <PackageReference Include="RabbitMQ.Client" Version="6.4.*" />
     <InternalsVisibleTo Include="EasyNetQ.DI.Tests, PublicKey=0024000004800000940000000602000000240000525341310004000001000100B9880ED386BC2576BA1C405A35E05E57629D54CAAF50FE9ADA301BA3BD504BDD897D1EC2F9C328B66EBE72F57463DDC7BCB074D72F633FE4F21F6E9F3F79160AF30A11CA7A107B0568C3489A61C7E1EC31652497A7E553DE113DF7FB105E115F217A4F8E84D7162D57046BE1D1DEE9F04C3FFBA31BEA7DE4B809DC82DF736890" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
   </ItemGroup>
 </Project>
