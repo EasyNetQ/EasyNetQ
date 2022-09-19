@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>An adaptor to allow EasyNetQ to use Castle.Windsor as its internal IoC container</Description>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
     <PackageTags>Windsor;$(PackageTags)</PackageTags>
     <Nullable>enable</Nullable>
   </PropertyGroup>

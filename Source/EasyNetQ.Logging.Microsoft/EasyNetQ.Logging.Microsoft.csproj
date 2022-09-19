@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <Description>An adaptor to allow EasyNetQ to use Microsoft.Extensions.Logging</Description>
-        <TargetFramework>netstandard2.0</TargetFramework>
+        <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
         <PackageTags>Microsoft;Logging;$(PackageTags)</PackageTags>
         <Nullable>enable</Nullable>
     </PropertyGroup>
