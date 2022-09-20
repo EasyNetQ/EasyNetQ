@@ -16,7 +16,6 @@ public class Program
     private readonly IMessageReader messageReader;
     private readonly IQueueInsertion queueInsertion;
     private readonly IErrorRetry errorRetry;
-    private readonly IConventions conventions;
 
     private static readonly StringBuilder Results = new();
     private static bool succeeded = true;
@@ -32,8 +31,8 @@ public class Program
         IMessageWriter messageWriter,
         IMessageReader messageReader,
         IQueueInsertion queueInsertion,
-        IErrorRetry errorRetry,
-        IConventions conventions)
+        IErrorRetry errorRetry
+    )
     {
         this.argParser = argParser;
         this.queueRetrieval = queueRetrieval;
@@ -41,12 +40,10 @@ public class Program
         this.messageReader = messageReader;
         this.queueInsertion = queueInsertion;
         this.errorRetry = errorRetry;
-        this.conventions = conventions;
     }
 
     public static void Main(string[] args)
     {
-        var typeNameSerializer = new LegacyTypeNameSerializer();
         var argParser = new ArgParser();
         var arguments = argParser.Parse(args);
 
@@ -71,8 +68,7 @@ public class Program
             new FileMessageWriter(),
             new MessageReader(),
             new QueueInsertion(errorMessageSerializer),
-            new ErrorRetry(new JsonSerializer(), errorMessageSerializer),
-            new Conventions(typeNameSerializer)
+            new ErrorRetry(new JsonSerializer(), errorMessageSerializer)
         );
         program.Start(args);
     }
@@ -104,7 +100,7 @@ public class Program
 
             arguments.At(0, "insert", () => Insert(parameters));
 
-            arguments.At(0, "err", () => ErrorDump(parameters));
+            arguments.At(0, "err", () => Dump(parameters));
 
             arguments.At(0, "retry", () => Retry(parameters));
 
@@ -152,20 +148,12 @@ public class Program
         );
     }
 
-    private void ErrorDump(QueueParameters parameters)
-    {
-        if (parameters.QueueName == null)
-            parameters.QueueName = conventions.ErrorQueueNamingConvention(null);
-        Dump(parameters);
-    }
-
     private void Retry(QueueParameters parameters)
     {
         var count = 0;
-        var queueName = parameters.QueueName ?? conventions.ErrorQueueNamingConvention(null);
 
         errorRetry.RetryErrors(
-            WithEach(messageReader.ReadMessages(parameters, queueName), () => count++), parameters
+            WithEach(messageReader.ReadMessages(parameters, parameters.QueueName), () => count++), parameters
         );
 
         Console.WriteLine(

@@ -8,11 +8,9 @@ namespace EasyNetQ.Hosepipe.Tests;
 public class MessageReaderTests
 {
     private readonly IMessageReader messageReader;
-    private readonly IConventions conventions;
 
     public MessageReaderTests()
     {
-        conventions = new Conventions(new LegacyTypeNameSerializer());
         messageReader = new MessageReader();
     }
 
@@ -49,7 +47,7 @@ public class MessageReaderTests
             MessagesOutputDirectory = @"C:\temp\MessageOutput"
         };
 
-        var messages = messageReader.ReadMessages(parameters, conventions.ErrorQueueNamingConvention(null));
+        var messages = messageReader.ReadMessages(parameters, "EasyNetQ_Default_Error_Queue");
         foreach (var message in messages)
         {
             Console.WriteLine(message.Body);

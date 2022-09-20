@@ -15,7 +15,6 @@ public class ProgramTests
     private readonly MockMessageReader messageReader;
     private readonly MockQueueInsertion queueInsertion;
     private readonly MockErrorRetry errorRetry;
-    private readonly Conventions conventions;
 
     public ProgramTests()
     {
@@ -24,7 +23,6 @@ public class ProgramTests
         messageReader = new MockMessageReader();
         queueInsertion = new MockQueueInsertion();
         errorRetry = new MockErrorRetry();
-        conventions = new Conventions(new LegacyTypeNameSerializer());
 
         program = new Program(
             new ArgParser(),
@@ -32,8 +30,7 @@ public class ProgramTests
             messageWriter,
             messageReader,
             queueInsertion,
-            errorRetry,
-            conventions
+            errorRetry
         );
     }
 

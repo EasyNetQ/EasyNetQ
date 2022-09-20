@@ -8,12 +8,9 @@ namespace EasyNetQ.Hosepipe.Tests;
 public class ErrorRetryTests
 {
     private readonly ErrorRetry errorRetry;
-    private readonly IConventions conventions;
 
     public ErrorRetryTests()
     {
-        var typeNameSerializer = new LegacyTypeNameSerializer();
-        conventions = new Conventions(typeNameSerializer);
         errorRetry = new ErrorRetry(new JsonSerializer(), new DefaultErrorMessageSerializer());
     }
 
@@ -30,7 +27,7 @@ public class ErrorRetryTests
         };
 
         var rawErrorMessages = new MessageReader()
-            .ReadMessages(parameters, conventions.ErrorQueueNamingConvention(null));
+            .ReadMessages(parameters, "EasyNetQ_Default_Error_Queue");
 
         errorRetry.RetryErrors(rawErrorMessages, parameters);
     }
