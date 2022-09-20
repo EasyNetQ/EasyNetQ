@@ -1,6 +1,7 @@
 // ReSharper disable InconsistentNaming;
 
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
@@ -16,12 +17,6 @@ public class When_using_default_consumer_error_strategy
 {
     public When_using_default_consumer_error_strategy()
     {
-        var customConventions = new Conventions(new DefaultTypeNameSerializer())
-        {
-            ErrorQueueNamingConvention = _ => "CustomEasyNetQErrorQueueName",
-            ErrorExchangeNamingConvention = info => "CustomErrorExchangePrefixName." + info.RoutingKey
-        };
-
         mockBuilder = new MockBuilder();
 
         var connectionConfiguration = new ConnectionConfiguration();
@@ -32,11 +27,15 @@ public class When_using_default_consumer_error_strategy
             new EventBus(Substitute.For<ILogger<EventBus>>())
         );
 
-        errorStrategy = new DefaultConsumerErrorStrategy(
-            Substitute.For<ILogger<DefaultConsumerErrorStrategy>>(),
+        errorStrategy = new ErrorQueueConsumerErrorStrategy(
+            Substitute.For<ILogger<ErrorQueueConsumerErrorStrategy>>(),
             connection,
             new JsonSerializer(),
-            customConventions,
+            new ErrorQueueConsumerErrorStrategyConventions
+            {
+                ErrorQueueNamingConvention = _ => "CustomEasyNetQErrorQueueName",
+                ErrorExchangeNamingConvention = info => "CustomErrorExchangePrefixName." + info.RoutingKey
+            },
             new DefaultTypeNameSerializer(),
             new DefaultErrorMessageSerializer(),
             connectionConfiguration
@@ -57,9 +56,9 @@ public class When_using_default_consumer_error_strategy
         );
     }
 
-    private DefaultConsumerErrorStrategy errorStrategy;
-    private MockBuilder mockBuilder;
-    private ConsumerExecutionContext consumerExecutionContext;
+    private readonly ErrorQueueConsumerErrorStrategy errorStrategy;
+    private readonly MockBuilder mockBuilder;
+    private readonly ConsumerExecutionContext consumerExecutionContext;
 
     [Fact]
     public async Task Should_Ack_canceled_message()
@@ -72,7 +71,7 @@ public class When_using_default_consumer_error_strategy
     [Fact]
     public async Task Should_Ack_failed_message()
     {
-        var errorAckStrategy = await errorStrategy.HandleConsumerErrorAsync(consumerExecutionContext, new Exception(), default);
+        var errorAckStrategy = await errorStrategy.HandleConsumerErrorAsync(consumerExecutionContext, new Exception());
 
         Assert.Same(AckStrategies.Ack, errorAckStrategy);
     }
@@ -80,7 +79,7 @@ public class When_using_default_consumer_error_strategy
     [Fact]
     public async Task Should_use_exchange_name_from_custom_names_provider()
     {
-        await errorStrategy.HandleConsumerErrorAsync(consumerExecutionContext, new Exception(), default);
+        await errorStrategy.HandleConsumerErrorAsync(consumerExecutionContext, new Exception());
 
         mockBuilder.Channels[0].Received().ExchangeDeclare("CustomErrorExchangePrefixName.originalRoutingKey", "direct", true);
     }
@@ -88,8 +87,8 @@ public class When_using_default_consumer_error_strategy
     [Fact]
     public async Task Should_use_queue_name_from_custom_names_provider()
     {
-        await errorStrategy.HandleConsumerErrorAsync(consumerExecutionContext, new Exception(), default);
+        await errorStrategy.HandleConsumerErrorAsync(consumerExecutionContext, new Exception());
 
-        mockBuilder.Channels[0].Received().QueueDeclare("CustomEasyNetQErrorQueueName", true, false, false, null);
+        mockBuilder.Channels[0].Received().QueueDeclare("CustomEasyNetQErrorQueueName", true, false, false, new Dictionary<string, object>());
     }
 }

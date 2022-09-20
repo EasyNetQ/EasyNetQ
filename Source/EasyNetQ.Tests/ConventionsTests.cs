@@ -23,22 +23,6 @@ public class When_using_default_conventions
     private ITypeNameSerializer typeNameSerializer;
 
     [Fact]
-    public void The_default_error_exchange_name_should_be()
-    {
-        var info = new MessageReceivedInfo("consumer_tag", 0, false, "exchange", "routingKey", "queue");
-
-        var result = conventions.ErrorExchangeNamingConvention(info);
-        result.Should().Be("ErrorExchange_routingKey");
-    }
-
-    [Fact]
-    public void The_default_error_queue_name_should_be()
-    {
-        var result = conventions.ErrorQueueNamingConvention(null);
-        result.Should().Be("EasyNetQ_Default_Error_Queue");
-    }
-
-    [Fact]
     public void The_default_exchange_naming_convention_should_use_the_TypeNameSerializers_Serialize_method()
     {
         var result = conventions.ExchangeNamingConvention(typeof(TestMessage));

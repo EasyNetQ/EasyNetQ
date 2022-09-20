@@ -24,16 +24,6 @@ public delegate string QueueNameConvention(Type messageType, string subscriberId
 public delegate string? QueueTypeConvention(Type messageType);
 
 /// <summary>
-///     Convention for error queue routing key naming
-/// </summary>
-public delegate string ErrorQueueNameConvention(MessageReceivedInfo receivedInfo);
-
-/// <summary>
-///     Convention for error exchange naming
-/// </summary>
-public delegate string ErrorExchangeNameConvention(MessageReceivedInfo receivedInfo);
-
-/// <summary>
 ///     Convention for rpc routing key naming
 /// </summary>
 public delegate string RpcRoutingKeyNamingConvention(Type messageType);
@@ -102,16 +92,6 @@ public interface IConventions
     ///     Convention for consumer tag naming
     /// </summary>
     ConsumerTagConvention ConsumerTagConvention { get; }
-
-    /// <summary>
-    ///     Convention for error queue naming
-    /// </summary>
-    ErrorQueueNameConvention ErrorQueueNamingConvention { get; }
-
-    /// <summary>
-    ///     Convention for error exchange naming
-    /// </summary>
-    ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; }
 }
 
 /// <inheritdoc />
@@ -155,8 +135,6 @@ public class Conventions : IConventions
         };
         RpcRoutingKeyNamingConvention = typeNameSerializer.Serialize;
 
-        ErrorQueueNamingConvention = _ => "EasyNetQ_Default_Error_Queue";
-        ErrorExchangeNamingConvention = receivedInfo => "ErrorExchange_" + receivedInfo.RoutingKey;
         RpcRequestExchangeNamingConvention = _ => "easy_net_q_rpc";
         RpcResponseExchangeNamingConvention = _ => "easy_net_q_rpc";
         RpcReturnQueueNamingConvention = _ => "easynetq.response." + Guid.NewGuid();
@@ -188,12 +166,6 @@ public class Conventions : IConventions
 
     /// <inheritdoc />
     public RpcRoutingKeyNamingConvention RpcRoutingKeyNamingConvention { get; set; }
-
-    /// <inheritdoc />
-    public ErrorQueueNameConvention ErrorQueueNamingConvention { get; set; }
-
-    /// <inheritdoc />
-    public ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; set; }
 
     /// <inheritdoc />
     public RpcExchangeNameConvention RpcRequestExchangeNamingConvention { get; set; }
