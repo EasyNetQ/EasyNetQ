@@ -1050,7 +1050,7 @@ namespace EasyNetQ.ChannelDispatcher
         public string Name { get; }
         public bool PublisherConfirms { get; }
         protected bool Equals(EasyNetQ.ChannelDispatcher.PersistentChannelDispatchOptions other) { }
-        public override bool Equals(object obj) { }
+        public override bool Equals(object? obj) { }
         public override int GetHashCode() { }
     }
     public sealed class SinglePersistentChannelDispatcher : EasyNetQ.ChannelDispatcher.IPersistentChannelDispatcher, System.IDisposable
@@ -1491,6 +1491,7 @@ namespace EasyNetQ.Internals
         public override void Write(byte[] buffer, int offset, int count) { }
     }
     public sealed class AsyncCache<TKey, TValue> : System.IDisposable
+        where TKey :  notnull
     {
         public AsyncCache(System.Func<TKey, System.Threading.CancellationToken, System.Threading.Tasks.Task<TValue>> valueFactory) { }
         public void Dispose() { }
@@ -1553,9 +1554,12 @@ namespace EasyNetQ.Internals
     public static class ConcurrentDictionaryExtensions
     {
         public static void ClearAndDispose<TKey, TValue>(this System.Collections.Concurrent.ConcurrentDictionary<TKey, TValue> source)
+            where TKey :  notnull
             where TValue : System.IDisposable { }
-        public static void ClearAndDispose<TKey, TValue>(this System.Collections.Concurrent.ConcurrentDictionary<TKey, TValue> source, System.Action<TValue> dispose) { }
-        public static void Remove<TKey, TValue>(this System.Collections.Concurrent.ConcurrentDictionary<TKey, TValue> source, TKey key) { }
+        public static void ClearAndDispose<TKey, TValue>(this System.Collections.Concurrent.ConcurrentDictionary<TKey, TValue> source, System.Action<TValue> dispose)
+            where TKey :  notnull { }
+        public static void Remove<TKey, TValue>(this System.Collections.Concurrent.ConcurrentDictionary<TKey, TValue> source, TKey key)
+            where TKey :  notnull { }
     }
     public static class DictionaryExtensions
     {
