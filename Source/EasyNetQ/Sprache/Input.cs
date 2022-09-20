@@ -45,7 +45,7 @@ internal class Input
         return $"Line {Line}, Column {Column}";
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return obj is Input i && i.source == source && i.Position == Position;
     }

@@ -136,9 +136,9 @@ public class PersistentConnection : IPersistentConnection
         connection.RecoverySucceeded -= OnConnectionRecovered;
     }
 
-    private void OnConnectionRecovered(object sender, EventArgs e)
+    private void OnConnectionRecovered(object? sender, EventArgs e)
     {
-        var connection = (IConnection)sender;
+        var connection = (IConnection)sender!;
         logger.InfoFormat(
             "Connection {type} recovered to broker {host}:{port}",
             type,
@@ -148,9 +148,9 @@ public class PersistentConnection : IPersistentConnection
         eventBus.Publish(new ConnectionRecoveredEvent(type, connection.Endpoint));
     }
 
-    private void OnConnectionShutdown(object sender, ShutdownEventArgs e)
+    private void OnConnectionShutdown(object? sender, ShutdownEventArgs e)
     {
-        var connection = (IConnection)sender;
+        var connection = (IConnection)sender!;
         logger.InfoException(
             "Connection {type} disconnected from broker {host}:{port} because of {reason}",
             e.Cause as Exception,
@@ -162,13 +162,13 @@ public class PersistentConnection : IPersistentConnection
         eventBus.Publish(new ConnectionDisconnectedEvent(type, connection.Endpoint, e.ReplyText));
     }
 
-    private void OnConnectionBlocked(object sender, ConnectionBlockedEventArgs e)
+    private void OnConnectionBlocked(object? sender, ConnectionBlockedEventArgs e)
     {
         logger.InfoFormat("Connection {type} blocked with reason {reason}", type, e.Reason);
         eventBus.Publish(new ConnectionBlockedEvent(type, e.Reason ?? "Unknown reason"));
     }
 
-    private void OnConnectionUnblocked(object sender, EventArgs e)
+    private void OnConnectionUnblocked(object? sender, EventArgs e)
     {
         logger.InfoFormat("Connection {type} unblocked", type);
         eventBus.Publish(new ConnectionUnblockedEvent(type));

@@ -20,7 +20,7 @@ public static class ConcurrentDictionaryExtensions
     ///     doing so can result in application failures when updating to a new EasyNetQ release.
     /// </summary>
     public static void ClearAndDispose<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> source)
-        where TValue : IDisposable
+        where TValue : IDisposable where TKey : notnull
     {
         source.ClearAndDispose(x => x.Dispose());
     }
@@ -33,7 +33,7 @@ public static class ConcurrentDictionaryExtensions
     /// </summary>
     public static void ClearAndDispose<TKey, TValue>(
         this ConcurrentDictionary<TKey, TValue> source, Action<TValue> dispose
-    )
+    ) where TKey : notnull
     {
         do
         {
@@ -49,7 +49,7 @@ public static class ConcurrentDictionaryExtensions
     ///     any release. You should only use it directly in your code with extreme caution and knowing that
     ///     doing so can result in application failures when updating to a new EasyNetQ release.
     /// </summary>
-    public static void Remove<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> source, TKey key)
+    public static void Remove<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> source, TKey key) where TKey : notnull
     {
         ((IDictionary<TKey, TValue>)source).Remove(key);
     }

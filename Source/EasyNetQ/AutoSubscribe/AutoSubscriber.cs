@@ -16,8 +16,8 @@ namespace EasyNetQ.AutoSubscribe;
 /// </summary>
 public class AutoSubscriber
 {
-    private static readonly MethodInfo AutoSubscribeAsyncConsumerMethodInfo = typeof(AutoSubscriber).GetMethod(nameof(AutoSubscribeAsyncConsumerAsync), BindingFlags.Instance | BindingFlags.NonPublic);
-    private static readonly MethodInfo AutoSubscribeConsumerMethodInfo = typeof(AutoSubscriber).GetMethod(nameof(AutoSubscribeConsumerAsync), BindingFlags.Instance | BindingFlags.NonPublic);
+    private static readonly MethodInfo AutoSubscribeAsyncConsumerMethodInfo = typeof(AutoSubscriber).GetMethod(nameof(AutoSubscribeAsyncConsumerAsync), BindingFlags.Instance | BindingFlags.NonPublic)!;
+    private static readonly MethodInfo AutoSubscribeConsumerMethodInfo = typeof(AutoSubscriber).GetMethod(nameof(AutoSubscribeConsumerAsync), BindingFlags.Instance | BindingFlags.NonPublic)!;
 
     protected readonly IBus Bus;
 
@@ -80,7 +80,7 @@ public class AutoSubscriber
         {
             var awaitableSubscriptionResult = (AwaitableDisposable<SubscriptionResult>)AutoSubscribeAsyncConsumerMethodInfo
                 .MakeGenericMethod(subscriberConsumerInfo.MessageType, subscriberConsumerInfo.ConcreteType)
-                .Invoke(this, new object[] { subscriberConsumerInfo, cancellationToken });
+                .Invoke(this, new object[] { subscriberConsumerInfo, cancellationToken })!;
 
             subscriptions.Add(await awaitableSubscriptionResult.ConfigureAwait(false));
         }
@@ -89,7 +89,7 @@ public class AutoSubscriber
         {
             var awaitableSubscriptionResult = (AwaitableDisposable<SubscriptionResult>)AutoSubscribeConsumerMethodInfo
                 .MakeGenericMethod(subscriberConsumerInfo.MessageType, subscriberConsumerInfo.ConcreteType)
-                .Invoke(this, new object[] { subscriberConsumerInfo, cancellationToken });
+                .Invoke(this, new object[] { subscriberConsumerInfo, cancellationToken })!;
 
             subscriptions.Add(await awaitableSubscriptionResult.ConfigureAwait(false));
         }
@@ -102,10 +102,7 @@ public class AutoSubscriber
     {
         private readonly List<IDisposable> subscriptions;
 
-        public AutoSubscribeDisposable(List<IDisposable> subscriptions)
-        {
-            this.subscriptions = subscriptions;
-        }
+        public AutoSubscribeDisposable(List<IDisposable> subscriptions) => this.subscriptions = subscriptions;
 
         public void Dispose()
         {
