@@ -141,23 +141,23 @@ public class PersistentChannel : IPersistentChannel
         channel.BasicAcks -= OnAck;
     }
 
-    private void OnChannelRecovered(object sender, EventArgs e)
+    private void OnChannelRecovered(object? sender, EventArgs e)
     {
-        eventBus.Publish(new ChannelRecoveredEvent((IModel)sender));
+        eventBus.Publish(new ChannelRecoveredEvent((IModel)sender!));
     }
 
-    private void OnChannelShutdown(object sender, ShutdownEventArgs e)
+    private void OnChannelShutdown(object? sender, ShutdownEventArgs e)
     {
-        eventBus.Publish(new ChannelShutdownEvent((IModel)sender));
+        eventBus.Publish(new ChannelShutdownEvent((IModel)sender!));
     }
 
-    private void OnReturn(object sender, BasicReturnEventArgs args)
+    private void OnReturn(object? sender, BasicReturnEventArgs args)
     {
         var messageProperties = new MessageProperties();
         messageProperties.CopyFrom(args.BasicProperties);
         var messageReturnedInfo = new MessageReturnedInfo(args.Exchange, args.RoutingKey, args.ReplyText);
         var @event = new ReturnedMessageEvent(
-            (IModel)sender,
+            (IModel)sender!,
             args.Body,
             messageProperties,
             messageReturnedInfo
@@ -165,14 +165,14 @@ public class PersistentChannel : IPersistentChannel
         eventBus.Publish(@event);
     }
 
-    private void OnAck(object sender, BasicAckEventArgs args)
+    private void OnAck(object? sender, BasicAckEventArgs args)
     {
-        eventBus.Publish(MessageConfirmationEvent.Ack((IModel)sender, args.DeliveryTag, args.Multiple));
+        eventBus.Publish(MessageConfirmationEvent.Ack((IModel)sender!, args.DeliveryTag, args.Multiple));
     }
 
-    private void OnNack(object sender, BasicNackEventArgs args)
+    private void OnNack(object? sender, BasicNackEventArgs args)
     {
-        eventBus.Publish(MessageConfirmationEvent.Nack((IModel)sender, args.DeliveryTag, args.Multiple));
+        eventBus.Publish(MessageConfirmationEvent.Nack((IModel)sender!, args.DeliveryTag, args.Multiple));
     }
 
     private static ExceptionVerdict GetExceptionVerdict(Exception exception)

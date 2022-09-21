@@ -95,7 +95,8 @@ internal static class ConnectionStringGrammar
         if (memberEx.Member is not PropertyInfo propertyInfo) throw new ArgumentOutOfRangeException(nameof(getter), "Member is not a property.");
         if (!propertyInfo.CanWrite) throw new ArgumentOutOfRangeException(nameof(getter), "Member is not a writeable property.");
 
-        return (Action<TContaining, TProperty>)propertyInfo.GetSetMethod().CreateDelegate(typeof(Action<TContaining, TProperty>));
+        var setMethodInfo = propertyInfo.GetSetMethod() ?? throw new ArgumentOutOfRangeException(nameof(getter), "No set method.");
+        return (Action<TContaining, TProperty>)setMethodInfo.CreateDelegate(typeof(Action<TContaining, TProperty>));
     }
 
     private static IEnumerable<T> Cons<T>(this T head, IEnumerable<T> rest)

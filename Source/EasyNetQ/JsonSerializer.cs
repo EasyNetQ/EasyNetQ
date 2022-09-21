@@ -53,7 +53,7 @@ public class JsonSerializer : ISerializer
         }
 
         jsonSerializer = GetMethod(jsonSerializerType, "Create", new[] { serializerSettingsType })
-            .Invoke(null, new[] { serializerSettings });
+            .Invoke(null, new[] { serializerSettings })!;
 
         {
             var streamWriterParameter = Expression.Parameter(typeof(StreamWriter), "streamWriter");
@@ -168,7 +168,7 @@ public class JsonSerializer : ISerializer
                ?? throw new InvalidOperationException($"Type {typeName} has not been found in {assemblyName}");
     }
 
-    private static Type TryGetType(string typeName, string assemblyName)
+    private static Type? TryGetType(string typeName, string assemblyName)
     {
         return Type.GetType($"{typeName}, {assemblyName}") ?? Type.GetType(typeName);
     }

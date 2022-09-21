@@ -17,10 +17,7 @@ public static class DisposableAction
     /// <param name="state">The state</param>
     /// <typeparam name="TState">The type of state</typeparam>
     /// <returns>Returns <see cref="DisposableAction{TState}"/></returns>
-    public static DisposableAction<TState> Create<TState>(Action<TState> action, TState state)
-    {
-        return new DisposableAction<TState>(action, state);
-    }
+    public static DisposableAction<TState> Create<TState>(Action<TState> action, TState state) => new(action, state);
 }
 
 /// <summary>

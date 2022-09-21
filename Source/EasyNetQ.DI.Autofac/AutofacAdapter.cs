@@ -147,7 +147,7 @@ public class AutofacAdapter : IServiceRegister
         // containerBuilder.RegisterInstance<TService>(implementationInstance).IfNotRegistered();
         var registerInstanceMethodInfo = typeof(RegistrationExtensions).GetMethod("RegisterInstance") ?? throw new MissingMethodException("RegisterInstance is not found");
         var ifNotRegisteredMethodInfo = typeof(RegistrationExtensions).GetMethod("IfNotRegistered") ?? throw new MissingMethodException("IfNotRegistered is not found");
-        var registration = registerInstanceMethodInfo.MakeGenericMethod(serviceType).Invoke(null, new[] { ContainerBuilder, implementationInstance });
+        var registration = registerInstanceMethodInfo.MakeGenericMethod(serviceType).Invoke(null, new[] { ContainerBuilder, implementationInstance })!;
         var genericTypeArguments = registration.GetType().GenericTypeArguments;
         ifNotRegisteredMethodInfo.MakeGenericMethod(genericTypeArguments).Invoke(null, new[] { registration, serviceType });
         return this;

@@ -182,7 +182,7 @@ public class Consumer : IConsumer
         eventBus.Publish(new StoppedConsumingEvent(this));
     }
 
-    private void InternalConsumerOnCancelled(object sender, InternalConsumerCancelledEventArgs e)
+    private void InternalConsumerOnCancelled(object? sender, InternalConsumerCancelledEventArgs e)
     {
         if (e.Active.Count == 0)
             Dispose();

@@ -140,7 +140,7 @@ public static class TaskHelpers
         state.CancellationTokenRegistration = cancellationToken.Register(
             s =>
             {
-                var t = (TcsWithCancellationToken<T>)s;
+                var t = (TcsWithCancellationToken<T>)s!;
                 t.Tcs.TrySetCanceled(t.CancellationToken);
             },
             state,
@@ -149,7 +149,7 @@ public static class TaskHelpers
         taskCompletionSource.Task.ContinueWith(
             (_, s) =>
             {
-                var r = (TcsWithCancellationToken<T>)s;
+                var r = (TcsWithCancellationToken<T>)s!;
                 r.CancellationTokenRegistration.Dispose();
             },
             state,

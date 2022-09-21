@@ -296,7 +296,7 @@ public class MessageProperties : ICloneable
                 .SurroundWith("[", "]")
                 .Aggregate(new StringBuilder(), (builder, element) => builder.Append(element))
                 .ToString()
-            : value.ToString();
+            : value.ToString() ?? "NULL";
     }
 
     private static string? CheckShortString(string? input, string name)

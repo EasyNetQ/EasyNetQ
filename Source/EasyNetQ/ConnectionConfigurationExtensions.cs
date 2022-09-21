@@ -45,7 +45,7 @@ internal static class ConnectionConfigurationExtensions
         AddValueIfNotExists(configuration.ClientProperties, "os", Environment.OSVersion.ToString());
         AddValueIfNotExists(configuration.ClientProperties, "version", GetApplicationVersion());
         AddValueIfNotExists(configuration.ClientProperties, "connection_name", configuration.Name ?? applicationName);
-        AddValueIfNotExists(configuration.ClientProperties, "easynetq_version", typeof(ConnectionConfigurationExtensions).Assembly.GetName().Version.ToString());
+        AddValueIfNotExists(configuration.ClientProperties, "easynetq_version", typeof(ConnectionConfigurationExtensions).Assembly.GetName().Version?.ToString() ?? "unknown");
         AddValueIfNotExists(configuration.ClientProperties, "application", applicationName);
         AddValueIfNotExists(configuration.ClientProperties, "application_location", applicationPath);
         AddValueIfNotExists(configuration.ClientProperties, "machine_name", Environment.MachineName);
@@ -68,7 +68,7 @@ internal static class ConnectionConfigurationExtensions
     {
         try
         {
-            return Assembly.GetEntryAssembly()?.GetName().Version.ToString() ?? "unknown";
+            return Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "unknown";
         }
         catch
         {

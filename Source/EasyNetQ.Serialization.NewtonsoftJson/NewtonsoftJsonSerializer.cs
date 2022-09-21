@@ -12,6 +12,7 @@ namespace EasyNetQ.Serialization.NewtonsoftJson;
 public sealed class NewtonsoftJsonSerializer : ISerializer
 {
     private static readonly Encoding Encoding = new UTF8Encoding(false);
+
     private static readonly Newtonsoft.Json.JsonSerializerSettings DefaultSerializerSettings =
         new()
         {
@@ -67,6 +68,11 @@ public sealed class NewtonsoftJsonSerializer : ISerializer
 
         public T[] Rent(int minimumLength) => ArrayPool<T>.Shared.Rent(minimumLength);
 
-        public void Return(T[]? array) => ArrayPool<T>.Shared.Return(array);
+        public void Return(T[]? array)
+        {
+            if (array == null) return;
+
+            ArrayPool<T>.Shared.Return(array);
+        }
     }
 }

@@ -11,7 +11,7 @@ namespace EasyNetQ.Internals;
 ///     any release. You should only use it directly in your code with extreme caution and knowing that
 ///     doing so can result in application failures when updating to a new EasyNetQ release.
 /// </summary>
-public sealed class AsyncCache<TKey, TValue> : IDisposable
+public sealed class AsyncCache<TKey, TValue> : IDisposable where TKey : notnull
 {
     private readonly AsyncLock mutex = new();
     private readonly ConcurrentDictionary<TKey, Task<TValue>> storage = new();
