@@ -16,7 +16,8 @@
     <AssemblyOriginatorKeyFile>..\..\Assets\EasyNetQ.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <PublicSign>false</PublicSign>
-    <NoWarn>$(NoWarn);1591</NoWarn>
+    <NoWarn>$(NoWarn);1591;8002</NoWarn>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <ProjectWeaverXml>..\FodyWeavers.xml</ProjectWeaverXml>
     <FodyGenerateXsd>false</FodyGenerateXsd>
   </PropertyGroup>
