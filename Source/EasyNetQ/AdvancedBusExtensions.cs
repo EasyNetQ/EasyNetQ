@@ -330,6 +330,22 @@ public static class AdvancedBusExtensions
         }, configure);
     }
 
+    /// <summary>
+    /// Consume raw bytes from the queue.
+    /// </summary>
+    /// <param name="bus">The bus instance</param>
+    /// <param name="queue">The queue to subscribe to</param>
+    /// <param name="handler">
+    /// The message handler. Takes the message body, message properties and some information about the
+    /// receive context. Returns a Task.
+    /// </param>
+    /// <returns>A disposable to cancel the consumer</returns>
+    public static IDisposable Consume(
+        this IAdvancedBus bus,
+        Queue queue,
+        Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, CancellationToken, Task> handler
+    ) => bus.Consume(queue, handler, _ => { });
+
 
     /// <summary>
     /// Consume raw bytes from the queue.
