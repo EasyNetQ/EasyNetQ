@@ -17,6 +17,7 @@ namespace EasyNetQ
         public static EasyNetQ.Topology.Binding<EasyNetQ.Topology.Exchange> Bind(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Exchange source, EasyNetQ.Topology.Exchange destination, string routingKey, System.Collections.Generic.IDictionary<string, object>? arguments, System.Threading.CancellationToken cancellationToken = default) { }
         public static System.Threading.Tasks.Task<EasyNetQ.Topology.Binding<EasyNetQ.Topology.Exchange>> BindAsync(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Exchange source, EasyNetQ.Topology.Exchange destination, string routingKey, System.Threading.CancellationToken cancellationToken = default) { }
         public static System.Threading.Tasks.Task<EasyNetQ.Topology.Binding<EasyNetQ.Topology.Queue>> BindAsync(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Exchange source, EasyNetQ.Topology.Queue queue, string routingKey, System.Threading.CancellationToken cancellationToken = default) { }
+        public static System.IDisposable Consume(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue queue, EasyNetQ.Consumer.MessageHandler handler) { }
         public static System.IDisposable Consume(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue queue, System.Action<EasyNetQ.Consumer.IHandlerRegistration> addHandlers) { }
         public static System.IDisposable Consume(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue queue, System.Action<System.ReadOnlyMemory<byte>, EasyNetQ.MessageProperties, EasyNetQ.MessageReceivedInfo> handler) { }
         public static System.IDisposable Consume(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue queue, System.Func<System.ReadOnlyMemory<byte>, EasyNetQ.MessageProperties, EasyNetQ.MessageReceivedInfo, System.Threading.Tasks.Task> handler) { }
@@ -1584,7 +1585,6 @@ namespace EasyNetQ.Internals
     public class NoResult : System.IEquatable<EasyNetQ.Internals.NoResult>
     {
         public static readonly EasyNetQ.Internals.NoResult Instance;
-        protected virtual System.Type EqualityContract { get; }
     }
     public sealed class ReadOnlyMemoryStream : System.IO.Stream
     {
