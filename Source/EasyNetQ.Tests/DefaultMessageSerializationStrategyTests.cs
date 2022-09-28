@@ -135,7 +135,7 @@ public class DefaultMessageSerializationStrategyTests
     private static DefaultMessageSerializationStrategy CreateDeserializationStrategy(IMessage<MyMessage> message, byte[] messageBody, string correlationId)
     {
         var typeNameSerializer = Substitute.For<ITypeNameSerializer>();
-        typeNameSerializer.DeSerialize(message.Properties.Type).Returns(message.Body.GetType());
+        typeNameSerializer.Deserialize(message.Properties.Type).Returns(message.Body.GetType());
 
         var serializer = Substitute.For<ISerializer>();
         serializer.BytesToMessage(message.Body.GetType(), messageBody).Returns(message.Body);

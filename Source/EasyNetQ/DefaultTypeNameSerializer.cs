@@ -30,7 +30,7 @@ public class DefaultTypeNameSerializer : ITypeNameSerializer
     }
 
     /// <inheritdoc />
-    public Type DeSerialize(string typeName)
+    public Type Deserialize(string typeName)
     {
         return deSerializedTypes.GetOrAdd(typeName, t =>
         {

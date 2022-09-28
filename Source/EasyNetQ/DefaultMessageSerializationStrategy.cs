@@ -46,7 +46,7 @@ public class DefaultMessageSerializationStrategy : IMessageSerializationStrategy
     /// <inheritdoc />
     public IMessage DeserializeMessage(MessageProperties properties, in ReadOnlyMemory<byte> body)
     {
-        var messageType = typeNameSerializer.DeSerialize(properties.Type!);
+        var messageType = typeNameSerializer.Deserialize(properties.Type!);
         var messageBody = body.IsEmpty ? null : serializer.BytesToMessage(messageType, body);
         return MessageFactory.CreateInstance(messageType, messageBody, properties);
     }

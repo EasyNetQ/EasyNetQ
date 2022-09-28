@@ -40,21 +40,21 @@ public class DefaultTypeNameSerializerTests
     [Fact]
     public void Should_deserialize_string_type_name()
     {
-        var type = typeNameSerializer.DeSerialize("System.String, mscorlib");
+        var type = typeNameSerializer.Deserialize("System.String, mscorlib");
         type.Should().Be(typeof(string));
     }
 
     [Fact]
     public void Should_deserialize_hashset_of_string_type()
     {
-        var type = typeNameSerializer.DeSerialize("System.Collections.Generic.HashSet`1[[System.String, System.Private.CoreLib]], System.Private.CoreLib");
+        var type = typeNameSerializer.Deserialize("System.Collections.Generic.HashSet`1[[System.String, System.Private.CoreLib]], System.Private.CoreLib");
         type.Should().Be(typeof(HashSet<string>));
     }
 
     [Fact]
     public void Should_deserialize_some_random_class_type_name()
     {
-        var type = typeNameSerializer.DeSerialize("EasyNetQ.Tests.SomeRandomClass, EasyNetQ.Tests");
+        var type = typeNameSerializer.Deserialize("EasyNetQ.Tests.SomeRandomClass, EasyNetQ.Tests");
         type.Should().Be(typeof(SomeRandomClass));
     }
 
@@ -63,7 +63,7 @@ public class DefaultTypeNameSerializerTests
     {
         Assert.Throws<EasyNetQException>(() =>
         {
-            typeNameSerializer.DeSerialize("EasyNetQ.TypeNameSerializer.None, EasyNetQ");
+            typeNameSerializer.Deserialize("EasyNetQ.TypeNameSerializer.None, EasyNetQ");
         });
     }
 

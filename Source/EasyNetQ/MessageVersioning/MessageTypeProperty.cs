@@ -85,7 +85,7 @@ public class MessageTypeProperty
     {
         try
         {
-            messageType = typeNameSerializer.DeSerialize(typeString);
+            messageType = typeNameSerializer.Deserialize(typeString);
             return true;
         }
         catch

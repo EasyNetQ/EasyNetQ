@@ -10,7 +10,7 @@ public class LegacyTypeNameSerializer : ITypeNameSerializer
     private readonly ConcurrentDictionary<string, Type> deserializedTypes = new();
 
     /// <inheritdoc />
-    public Type DeSerialize(string typeName)
+    public Type Deserialize(string typeName)
     {
         return deserializedTypes.GetOrAdd(typeName, t =>
         {

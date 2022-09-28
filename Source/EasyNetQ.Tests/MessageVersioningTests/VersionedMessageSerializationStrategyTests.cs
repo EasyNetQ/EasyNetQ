@@ -270,7 +270,7 @@ public class VersionedMessageSerializationStrategyTests
         foreach (var messageType in messageTypes)
         {
             var localMessageType = messageType;
-            typeNameSerializer.DeSerialize(localMessageType.Key).Returns(localMessageType.Value);
+            typeNameSerializer.Deserialize(localMessageType.Key).Returns(localMessageType.Value);
         }
 
         var serializer = Substitute.For<ISerializer>();

@@ -204,7 +204,7 @@ namespace EasyNetQ
     public class DefaultTypeNameSerializer : EasyNetQ.ITypeNameSerializer
     {
         public DefaultTypeNameSerializer() { }
-        public System.Type DeSerialize(string typeName) { }
+        public System.Type Deserialize(string typeName) { }
         public string Serialize(System.Type type) { }
     }
     public static class DelayedExchangeExtensions
@@ -510,7 +510,7 @@ namespace EasyNetQ
     }
     public interface ITypeNameSerializer
     {
-        System.Type DeSerialize(string typeName);
+        System.Type Deserialize(string typeName);
         string Serialize(System.Type type);
     }
     public class JsonSerializer : EasyNetQ.ISerializer
@@ -526,7 +526,7 @@ namespace EasyNetQ
     public class LegacyTypeNameSerializer : EasyNetQ.ITypeNameSerializer
     {
         public LegacyTypeNameSerializer() { }
-        public System.Type DeSerialize(string typeName) { }
+        public System.Type Deserialize(string typeName) { }
         public string Serialize(System.Type type) { }
     }
     public static class MessageDeliveryMode
