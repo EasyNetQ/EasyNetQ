@@ -25,7 +25,7 @@ public static class DictionaryExtensions
     ///     any release. You should only use it directly in your code with extreme caution and knowing that
     ///     doing so can result in application failures when updating to a new EasyNetQ release.
     /// </summary>
-    public static void UnionWith(this IDictionary<string, object> source, IDictionary<string, object>? addendum)
+    public static void UnionWith(this IDictionary<string, object?> source, IDictionary<string, object?>? addendum)
     {
         if (addendum == null) return;
 

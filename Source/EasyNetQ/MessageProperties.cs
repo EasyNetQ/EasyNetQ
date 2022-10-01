@@ -31,7 +31,7 @@ public class MessageProperties : ICloneable
         if (clusterIdPresent) copy.ClusterId = clusterId;
 
         if (headers?.Count > 0)
-            copy.headers = new Dictionary<string, object>(headers);
+            copy.headers = new Dictionary<string, object?>(headers);
 
         return copy;
     }
@@ -71,14 +71,14 @@ public class MessageProperties : ICloneable
         set { contentEncoding = CheckShortString(value, nameof(ContentEncoding)); contentEncodingPresent = true; }
     }
 
-    private IDictionary<string, object>? headers;
+    private IDictionary<string, object?>? headers;
 
     /// <summary>
     ///     Various headers
     /// </summary>
-    public IDictionary<string, object> Headers
+    public IDictionary<string, object?> Headers
     {
-        get => headers ??= new Dictionary<string, object>();
+        get => headers ??= new Dictionary<string, object?>();
         set => headers = value;
     }
 

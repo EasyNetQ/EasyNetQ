@@ -21,13 +21,13 @@ public interface ISendConfiguration
     /// </summary>
     /// <param name="headers">Headers to set</param>
     /// <returns>Returns a reference to itself</returns>
-    ISendConfiguration WithHeaders(IDictionary<string, object> headers);
+    ISendConfiguration WithHeaders(IDictionary<string, object?> headers);
 }
 
 internal class SendConfiguration : ISendConfiguration
 {
     public byte? Priority { get; private set; }
-    public IDictionary<string, object>? Headers { get; private set; }
+    public IDictionary<string, object?>? Headers { get; private set; }
 
     public ISendConfiguration WithPriority(byte priority)
     {
@@ -35,7 +35,7 @@ internal class SendConfiguration : ISendConfiguration
         return this;
     }
 
-    public ISendConfiguration WithHeaders(IDictionary<string, object> headers)
+    public ISendConfiguration WithHeaders(IDictionary<string, object?> headers)
     {
         Headers = headers;
         return this;

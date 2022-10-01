@@ -181,7 +181,7 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
         return serializer.MessageToBytes(typeof(Error), error);
     }
 
-    private static IDictionary<string, object> PatchHeaders(IDictionary<string, object> headers)
+    private static IDictionary<string, object?> PatchHeaders(IDictionary<string, object?> headers)
     {
         return headers.ToDictionary(
             kvp => kvp.Key,

@@ -37,7 +37,7 @@ public interface IPublishConfiguration
     /// </summary>
     /// <param name="headers">Headers to set</param>
     /// <returns>Returns a reference to itself</returns>
-    IPublishConfiguration WithHeaders(IDictionary<string, object> headers);
+    IPublishConfiguration WithHeaders(IDictionary<string, object?> headers);
 }
 
 internal class PublishConfiguration : IPublishConfiguration
@@ -65,7 +65,7 @@ internal class PublishConfiguration : IPublishConfiguration
         return this;
     }
 
-    public IPublishConfiguration WithHeaders(IDictionary<string, object> headers)
+    public IPublishConfiguration WithHeaders(IDictionary<string, object?> headers)
     {
         Headers = headers;
         return this;
@@ -74,5 +74,5 @@ internal class PublishConfiguration : IPublishConfiguration
     public byte? Priority { get; private set; }
     public string Topic { get; private set; }
     public TimeSpan? Expires { get; private set; }
-    public IDictionary<string, object>? Headers { get; private set; }
+    public IDictionary<string, object?>? Headers { get; private set; }
 }

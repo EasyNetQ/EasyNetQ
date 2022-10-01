@@ -37,7 +37,7 @@ public interface IRequestConfiguration
     /// </summary>
     /// <param name="headers">Headers to set</param>
     /// <returns>Returns a reference to itself</returns>
-    IRequestConfiguration WithHeaders(IDictionary<string, object> headers);
+    IRequestConfiguration WithHeaders(IDictionary<string, object?> headers);
 }
 
 internal class RequestConfiguration : IRequestConfiguration
@@ -51,7 +51,7 @@ internal class RequestConfiguration : IRequestConfiguration
     public string QueueName { get; private set; }
     public TimeSpan Expiration { get; private set; }
     public byte? Priority { get; private set; }
-    public IDictionary<string, object>? Headers { get; private set; }
+    public IDictionary<string, object?>? Headers { get; private set; }
 
     public IRequestConfiguration WithPriority(byte priority)
     {
@@ -71,7 +71,7 @@ internal class RequestConfiguration : IRequestConfiguration
         return this;
     }
 
-    public IRequestConfiguration WithHeaders(IDictionary<string, object> headers)
+    public IRequestConfiguration WithHeaders(IDictionary<string, object?> headers)
     {
         Headers = headers;
         return this;

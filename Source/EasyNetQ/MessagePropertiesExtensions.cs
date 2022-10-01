@@ -46,7 +46,7 @@ internal static class MessagePropertiesExtensions
         if (basicProperties.IsClusterIdPresent()) source.ClusterId = basicProperties.ClusterId;
 
         if (basicProperties.IsHeadersPresent() && basicProperties.Headers?.Count > 0)
-            source.Headers = new Dictionary<string, object>(basicProperties.Headers);
+            source.Headers = new Dictionary<string, object?>(basicProperties.Headers);
     }
 
     public static void CopyTo(this MessageProperties source, IBasicProperties basicProperties)
@@ -69,6 +69,6 @@ internal static class MessagePropertiesExtensions
         if (source.ClusterIdPresent) basicProperties.ClusterId = source.ClusterId;
 
         if (source.HeadersPresent)
-            basicProperties.Headers = new Dictionary<string, object>(source.Headers);
+            basicProperties.Headers = new Dictionary<string, object?>(source.Headers);
     }
 }
