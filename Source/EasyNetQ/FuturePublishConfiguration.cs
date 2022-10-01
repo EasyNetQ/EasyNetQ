@@ -28,7 +28,7 @@ public interface IFuturePublishConfiguration
     /// </summary>
     /// <param name="headers">Headers to set</param>
     /// <returns>Returns a reference to itself</returns>
-    IFuturePublishConfiguration WithHeaders(IDictionary<string, object> headers);
+    IFuturePublishConfiguration WithHeaders(IDictionary<string, object?> headers);
 }
 
 internal class FuturePublishConfiguration : IFuturePublishConfiguration
@@ -40,7 +40,7 @@ internal class FuturePublishConfiguration : IFuturePublishConfiguration
 
     public byte? Priority { get; private set; }
     public string Topic { get; private set; }
-    public IDictionary<string, object>? Headers { get; private set; }
+    public IDictionary<string, object?>? Headers { get; private set; }
 
     public IFuturePublishConfiguration WithPriority(byte priority)
     {
@@ -54,7 +54,7 @@ internal class FuturePublishConfiguration : IFuturePublishConfiguration
         return this;
     }
 
-    public IFuturePublishConfiguration WithHeaders(IDictionary<string, object> headers)
+    public IFuturePublishConfiguration WithHeaders(IDictionary<string, object?> headers)
     {
         Headers = headers;
         return this;

@@ -161,7 +161,7 @@ public class DefaultRpc : IRpc
                         isFaulted = Convert.ToBoolean(msg.Properties.Headers[IsFaultedKey]);
                     if (msg.Properties.Headers.ContainsKey(ExceptionMessageKey))
                         exceptionMessage = Encoding.UTF8.GetString(
-                            (byte[])msg.Properties.Headers[ExceptionMessageKey]
+                            (byte[])msg.Properties.Headers[ExceptionMessageKey]!
                         );
                 }
 
@@ -235,7 +235,7 @@ public class DefaultRpc : IRpc
         TimeSpan expiration,
         byte? priority,
         bool mandatory,
-        IDictionary<string, object>? headers,
+        IDictionary<string, object?>? headers,
         CancellationToken cancellationToken
     )
     {
