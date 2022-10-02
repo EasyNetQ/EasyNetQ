@@ -503,9 +503,9 @@ public class RabbitAdvancedBus : IAdvancedBus
     }
 
     /// <inheritdoc />
-    public async Task<Binding<Queue>> BindAsync(
-        Exchange exchange,
-        Queue queue,
+    public virtual async Task QueueBindAsync(
+        string queue,
+        string exchange,
         string routingKey,
         IDictionary<string, object>? arguments,
         CancellationToken cancellationToken
@@ -514,7 +514,7 @@ public class RabbitAdvancedBus : IAdvancedBus
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         await persistentChannelDispatcher.InvokeAsync(
-            x => x.QueueBind(queue.Name, exchange.Name, routingKey, arguments),
+            x => x.QueueBind(queue, exchange, routingKey, arguments),
             PersistentChannelDispatchOptions.ConsumerTopology,
             cts.Token
         ).ConfigureAwait(false);
@@ -522,46 +522,13 @@ public class RabbitAdvancedBus : IAdvancedBus
         if (logger.IsDebugEnabled())
         {
             logger.DebugFormat(
-                "Bound queue {queue} to exchange {exchange} with routingKey={routingKey} and arguments={arguments}",
-                queue.Name,
-                exchange.Name,
+                "Bound queue {queue} from exchange {exchange} with routing key {routingKey} and arguments {arguments}",
+                queue,
+                exchange,
                 routingKey,
                 arguments?.Stringify()
             );
         }
-
-        return new Binding<Queue>(exchange, queue, routingKey, arguments);
-    }
-
-    /// <inheritdoc />
-    public async Task<Binding<Exchange>> BindAsync(
-        Exchange source,
-        Exchange destination,
-        string routingKey,
-        IDictionary<string, object>? arguments,
-        CancellationToken cancellationToken
-    )
-    {
-        using var cts = cancellationToken.WithTimeout(configuration.Timeout);
-
-        await persistentChannelDispatcher.InvokeAsync(
-            x => x.ExchangeBind(destination.Name, source.Name, routingKey, arguments),
-            PersistentChannelDispatchOptions.ProducerTopology,
-            cts.Token
-        ).ConfigureAwait(false);
-
-        if (logger.IsDebugEnabled())
-        {
-            logger.DebugFormat(
-                "Bound destination exchange {destinationExchange} to source exchange {sourceExchange} with routingKey={routingKey} and arguments={arguments}",
-                destination.Name,
-                source.Name,
-                routingKey,
-                arguments?.Stringify()
-            );
-        }
-
-        return new Binding<Exchange>(source, destination, routingKey, arguments);
     }
 
     /// <inheritdoc />
@@ -587,6 +554,35 @@ public class RabbitAdvancedBus : IAdvancedBus
                 "Unbound queue {queue} from exchange {exchange} with routing key {routingKey} and arguments {arguments}",
                 queue,
                 exchange,
+                routingKey,
+                arguments?.Stringify()
+            );
+        }
+    }
+
+    /// <inheritdoc />
+    public virtual async Task ExchangeBindAsync(
+        string destinationExchange,
+        string sourceExchange,
+        string routingKey,
+        IDictionary<string, object>? arguments,
+        CancellationToken cancellationToken
+    )
+    {
+        using var cts = cancellationToken.WithTimeout(configuration.Timeout);
+
+        await persistentChannelDispatcher.InvokeAsync(
+            x => x.ExchangeBind(destinationExchange, sourceExchange, routingKey, arguments),
+            PersistentChannelDispatchOptions.ProducerTopology,
+            cts.Token
+        ).ConfigureAwait(false);
+
+        if (logger.IsDebugEnabled())
+        {
+            logger.DebugFormat(
+                $"Unbound destination exchange {{destinationExchange}} from source exchange {{sourceExchange}} with routing key {{routingKey}} and arguments {arguments}",
+                destinationExchange,
+                sourceExchange,
                 routingKey,
                 arguments?.Stringify()
             );

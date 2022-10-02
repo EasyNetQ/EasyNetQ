@@ -201,34 +201,11 @@ public interface IAdvancedBus : IDisposable
     );
 
     /// <summary>
-    /// Bind an exchange to a queue. Does nothing if the binding already exists.
+    /// Bind a queue to an exchange.
     /// </summary>
-    /// <param name="exchange">The exchange to bind</param>
-    /// <param name="queue">The queue to bind</param>
-    /// <param name="routingKey">The routing key</param>
-    /// <param name="arguments">The arguments</param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    /// <returns>A binding</returns>
-    Task<Binding<Queue>> BindAsync(
-        Exchange exchange,
-        Queue queue,
-        string routingKey,
-        IDictionary<string, object>? arguments,
-        CancellationToken cancellationToken = default
-    );
-
-    /// <summary>
-    /// Bind two exchanges. Does nothing if the binding already exists.
-    /// </summary>
-    /// <param name="source">The source exchange</param>
-    /// <param name="destination">The destination exchange</param>
-    /// <param name="routingKey">The routing key</param>
-    /// <param name="arguments">The arguments</param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    /// <returns>A binding</returns>
-    Task<Binding<Exchange>> BindAsync(
-        Exchange source,
-        Exchange destination,
+    Task QueueBindAsync(
+        string queue,
+        string exchange,
         string routingKey,
         IDictionary<string, object>? arguments,
         CancellationToken cancellationToken = default
@@ -240,6 +217,17 @@ public interface IAdvancedBus : IDisposable
     Task QueueUnbindAsync(
         string queue,
         string exchange,
+        string routingKey,
+        IDictionary<string, object>? arguments,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
+    /// Bind an exchange to an exchange.
+    /// </summary>
+    Task ExchangeBindAsync(
+        string destinationExchange,
+        string sourceExchange,
         string routingKey,
         IDictionary<string, object>? arguments,
         CancellationToken cancellationToken = default

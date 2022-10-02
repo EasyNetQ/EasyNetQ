@@ -632,6 +632,53 @@ public static class AdvancedBusExtensions
             .GetResult();
     }
 
+
+    /// <summary>
+    /// Bind an exchange to a queue. Does nothing if the binding already exists.
+    /// </summary>
+    /// <param name="bus">The bus instance</param>
+    /// <param name="exchange">The exchange to bind</param>
+    /// <param name="queue">The queue to bind</param>
+    /// <param name="routingKey">The routing key</param>
+    /// <param name="arguments">The arguments</param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    /// <returns>A binding</returns>
+    public static async Task<Binding<Queue>> BindAsync(
+        this IAdvancedBus bus,
+        Exchange exchange,
+        Queue queue,
+        string routingKey,
+        IDictionary<string, object>? arguments,
+        CancellationToken cancellationToken = default
+    )
+    {
+        await bus.QueueBindAsync(queue.Name, exchange.Name, routingKey, arguments, cancellationToken).ConfigureAwait(false);
+        return new Binding<Queue>(exchange, queue, routingKey, arguments);
+    }
+
+    /// <summary>
+    /// Bind two exchanges. Does nothing if the binding already exists.
+    /// </summary>
+    /// <param name="bus">The bus instance</param>
+    /// <param name="source">The source exchange</param>
+    /// <param name="destination">The destination exchange</param>
+    /// <param name="routingKey">The routing key</param>
+    /// <param name="arguments">The arguments</param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    /// <returns>A binding</returns>
+    public static async Task<Binding<Exchange>> BindAsync(
+        this IAdvancedBus bus,
+        Exchange source,
+        Exchange destination,
+        string routingKey,
+        IDictionary<string, object>? arguments,
+        CancellationToken cancellationToken = default
+    )
+    {
+        await bus.ExchangeBindAsync(destination.Name, source.Name, routingKey, arguments, cancellationToken).ConfigureAwait(false);
+        return new Binding<Exchange>(source, destination, routingKey, arguments);
+    }
+
     /// <summary>
     /// Bind two exchanges. Does nothing if the binding already exists.
     /// </summary>
