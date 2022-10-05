@@ -128,7 +128,7 @@ public class DefaultRpc : IRpc
 
     private void OnConnectionRecovered(in ConnectionRecoveredEvent @event)
     {
-        if (@event.Type != PersistentConnectionType.Producer)
+        if (@event.Type != PersistentConnectionType.Consumer)
             return;
 
         var responseActionsValues = responseActions.Values;
