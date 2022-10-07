@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 using NSubstitute;
 using RabbitMQ.Client;
@@ -74,7 +75,10 @@ public class When_an_action_is_performed_and_channel_reopens
         persistentConnection.CreateModel().Returns(_ => brokenChannel, _ => channel);
 
         using var persistentChannel = new PersistentChannel(
-            new PersistentChannelOptions(), persistentConnection, Substitute.For<IEventBus>()
+            new PersistentChannelOptions(),
+            persistentConnection,
+            Substitute.For<IEventBus>(),
+            Substitute.For<ILogger<PersistentChannel>>()
         );
 
         persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));
@@ -98,7 +102,10 @@ public class When_an_action_is_performed_and_channel_reopens
         persistentConnection.CreateModel().Returns(_ => brokenChannel);
 
         using var persistentChannel = new PersistentChannel(
-            new PersistentChannelOptions(), persistentConnection, Substitute.For<IEventBus>()
+            new PersistentChannelOptions(),
+            persistentConnection,
+            Substitute.For<IEventBus>(),
+            Substitute.For<ILogger<PersistentChannel>>()
         );
 
         Assert.Throws(
@@ -124,7 +131,10 @@ public class When_an_action_is_performed_and_channel_reopens
             );
 
         using var persistentChannel = new PersistentChannel(
-            new PersistentChannelOptions(), persistentConnection, Substitute.For<IEventBus>()
+            new PersistentChannelOptions(),
+            persistentConnection,
+            Substitute.For<IEventBus>(),
+            Substitute.For<ILogger<PersistentChannel>>()
         );
 
         persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));

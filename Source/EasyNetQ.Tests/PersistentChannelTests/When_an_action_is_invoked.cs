@@ -1,6 +1,7 @@
 // ReSharper disable InconsistentNaming
 
 using System;
+using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 using NSubstitute;
 using RabbitMQ.Client;
@@ -18,7 +19,10 @@ public class When_an_action_is_invoked : IDisposable
         persistentConnection.CreateModel().Returns(channel);
 
         persistentChannel = new PersistentChannel(
-            new PersistentChannelOptions(), persistentConnection, Substitute.For<IEventBus>()
+            new PersistentChannelOptions(),
+            persistentConnection,
+            Substitute.For<IEventBus>(),
+            Substitute.For<ILogger<PersistentChannel>>()
         );
 
         persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));
