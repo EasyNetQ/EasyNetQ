@@ -543,7 +543,6 @@ namespace EasyNetQ
     }
     public static class MessageFactory
     {
-        public static EasyNetQ.IMessage CreateInstance(System.Type messageType, object? body) { }
         public static EasyNetQ.IMessage CreateInstance(System.Type messageType, object? body, EasyNetQ.MessageProperties properties) { }
     }
     public class MessageProperties : System.ICloneable
