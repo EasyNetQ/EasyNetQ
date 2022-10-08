@@ -324,10 +324,10 @@ public class RabbitAdvancedBus : IAdvancedBus
         if (logger.IsDebugEnabled())
         {
             logger.DebugFormat(
-                "Published to exchange {exchange} with routingKey={routingKey} and correlationId={correlationId}",
+                "Message with properties {@properties} published to exchange '{exchange}' with routingKey '{routingKey}'",
+                properties,
                 exchange.Name,
-                routingKey,
-                properties.CorrelationId
+                routingKey
             );
         }
     }
@@ -386,12 +386,9 @@ public class RabbitAdvancedBus : IAdvancedBus
         if (logger.IsDebugEnabled())
         {
             logger.DebugFormat(
-                "Declared queue {queue}: durable={durable}, exclusive={exclusive}, autoDelete={autoDelete}, arguments={arguments}",
-                queueDeclareOk.QueueName,
-                isDurable,
-                isExclusive,
-                isAutoDelete,
-                arguments?.Stringify()
+                "Declared queue '{queue}' with configuration {@queueConfiguration}",
+                name,
+                queueDeclareConfiguration
             );
         }
 
@@ -473,12 +470,9 @@ public class RabbitAdvancedBus : IAdvancedBus
         if (logger.IsDebugEnabled())
         {
             logger.DebugFormat(
-                "Declared exchange {exchange}: type={type}, durable={durable}, autoDelete={autoDelete}, arguments={arguments}",
+                "Declared exchange '{exchange}' with configuration {@exchangeConfiguration}",
                 name,
-                type,
-                isDurable,
-                isAutoDelete,
-                arguments?.Stringify()
+                exchangeDeclareConfiguration
             );
         }
 
@@ -522,11 +516,11 @@ public class RabbitAdvancedBus : IAdvancedBus
         if (logger.IsDebugEnabled())
         {
             logger.DebugFormat(
-                "Bound queue {queue} from exchange {exchange} with routing key {routingKey} and arguments {arguments}",
+                "Bound queue '{queue}' to exchange '{exchange}' with routing key '{routingKey}' and arguments {@arguments}",
                 queue,
                 exchange,
                 routingKey,
-                arguments?.Stringify()
+                arguments
             );
         }
     }
@@ -580,7 +574,7 @@ public class RabbitAdvancedBus : IAdvancedBus
         if (logger.IsDebugEnabled())
         {
             logger.DebugFormat(
-                "Unbound destination exchange {destinationExchange} from source exchange {sourceExchange} with routing key {routingKey} and arguments {arguments}",
+                "Unbound destination exchange '{destinationExchange}' from source exchange '{sourceExchange}' with routing key '{routingKey}' and arguments {@arguments}",
                 destinationExchange,
                 sourceExchange,
                 routingKey,
@@ -609,7 +603,7 @@ public class RabbitAdvancedBus : IAdvancedBus
         if (logger.IsDebugEnabled())
         {
             logger.DebugFormat(
-                $"Unbound destination exchange {{destinationExchange}} from source exchange {{sourceExchange}} with routing key {{routingKey}} and arguments {arguments}",
+                "Unbound destination exchange '{destinationExchange}' from source exchange '{sourceExchange}' with routing key '{routingKey}' and arguments {@arguments}",
                 destinationExchange,
                 sourceExchange,
                 routingKey,
@@ -722,6 +716,7 @@ public class RabbitAdvancedBus : IAdvancedBus
                 confirmation.Cancel();
                 throw;
             }
+
             return confirmation;
         }
     }

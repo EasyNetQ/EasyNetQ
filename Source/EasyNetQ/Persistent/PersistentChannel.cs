@@ -79,7 +79,7 @@ public class PersistentChannel : IPersistentChannel
                 if (exceptionVerdict.Rethrow)
                     throw;
 
-                logger.ErrorException("Failed to invoke channel action", exception);
+                logger.WarnException("Failed to invoke channel action", exception);
             }
 
             await Task.Delay(retryTimeoutMs, cts.Token).ConfigureAwait(false);

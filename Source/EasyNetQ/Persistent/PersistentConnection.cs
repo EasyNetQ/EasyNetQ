@@ -91,7 +91,7 @@ public class PersistentConnection : IPersistentConnection
         }
 
         logger.InfoFormat(
-            "Connection {type} established to broker {broker}, port {port}",
+            "Connection {connectionType} established to broker {host}:{port}",
             type,
             connection.Endpoint.HostName,
             connection.Endpoint.Port
@@ -140,7 +140,7 @@ public class PersistentConnection : IPersistentConnection
     {
         var connection = (IConnection)sender!;
         logger.InfoFormat(
-            "Connection {type} recovered to broker {host}:{port}",
+            "Connection {connectionType} recovered to broker {host}:{port}",
             type,
             connection.Endpoint.HostName,
             connection.Endpoint.Port
@@ -151,9 +151,9 @@ public class PersistentConnection : IPersistentConnection
     private void OnConnectionShutdown(object? sender, ShutdownEventArgs e)
     {
         var connection = (IConnection)sender!;
-        logger.InfoException(
-            "Connection {type} disconnected from broker {host}:{port} because of {reason}",
+        logger.Info(
             e.Cause as Exception,
+            "Connection {connectionType} disconnected from broker {host}:{port} because of {connectionShutdownReason}",
             type,
             connection.Endpoint.HostName,
             connection.Endpoint.Port,
@@ -164,13 +164,13 @@ public class PersistentConnection : IPersistentConnection
 
     private void OnConnectionBlocked(object? sender, ConnectionBlockedEventArgs e)
     {
-        logger.InfoFormat("Connection {type} blocked with reason {reason}", type, e.Reason);
+        logger.InfoFormat("Connection {connectionType} blocked with reason {connectionBlockedReason}", type, e.Reason);
         eventBus.Publish(new ConnectionBlockedEvent(type, e.Reason ?? "Unknown reason"));
     }
 
     private void OnConnectionUnblocked(object? sender, EventArgs e)
     {
-        logger.InfoFormat("Connection {type} unblocked", type);
+        logger.InfoFormat("Connection {connectionType} unblocked", type);
         eventBus.Publish(new ConnectionUnblockedEvent(type));
     }
 }

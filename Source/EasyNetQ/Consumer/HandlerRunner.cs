@@ -24,14 +24,8 @@ public class HandlerRunner : IHandlerRunner
     }
 
     /// <inheritdoc />
-    public virtual async Task<AckStrategy> InvokeUserMessageHandlerAsync(
-        ConsumerExecutionContext context, CancellationToken cancellationToken
-    )
+    public virtual async Task<AckStrategy> InvokeUserMessageHandlerAsync(ConsumerExecutionContext context, CancellationToken cancellationToken)
     {
-        if (logger.IsDebugEnabled())
-        {
-            logger.DebugFormat("Received message with receivedInfo={receivedInfo}", context.ReceivedInfo);
-        }
 
         try
         {

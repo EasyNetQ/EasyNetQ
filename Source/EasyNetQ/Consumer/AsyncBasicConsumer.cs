@@ -19,6 +19,7 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
     private readonly IEventBus eventBus;
     private readonly IHandlerRunner handlerRunner;
     private readonly MessageHandler messageHandler;
+    private readonly long consumerId;
     private readonly ILogger logger;
     private readonly Queue queue;
     private readonly bool autoAck;
@@ -26,6 +27,7 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
     private volatile bool disposed;
 
     public AsyncBasicConsumer(
+        long consumerId,
         ILogger logger,
         IModel model,
         Queue queue,
@@ -35,6 +37,7 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
         MessageHandler messageHandler
     ) : base(model)
     {
+        this.consumerId = consumerId;
         this.logger = logger;
         this.queue = queue;
         this.autoAck = autoAck;
@@ -53,12 +56,14 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
         if (logger.IsInfoEnabled())
         {
             logger.InfoFormat(
-                "Consumer with consumerTags {consumerTags} has cancelled",
-                string.Join(", ", consumerTags)
+                "Consumer {consumerId} cancelled for consumerTags {@consumerTags}",
+                consumerId,
+                consumerTags
             );
         }
     }
 
+    /// <inheritdoc />
     public override async Task HandleBasicDeliver(
         string consumerTag,
         ulong deliveryTag,
@@ -72,24 +77,26 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
         if (cts.IsCancellationRequested)
             return;
 
+        var messageReceivedInfo = new MessageReceivedInfo(
+            consumerTag, deliveryTag, redelivered, exchange, routingKey, queue.Name
+        );
+        var messageBody = body;
+        var messageProperties = new MessageProperties();
+        messageProperties.CopyFrom(properties);
+
         if (logger.IsDebugEnabled())
         {
             logger.DebugFormat(
-                "Message delivered to consumer {consumerTag} with deliveryTag {deliveryTag}",
-                consumerTag,
-                deliveryTag
+                "Message with properties {@properties} delivered to consumer {consumerId} with receivedInfo {@receivedInfo}",
+                messageProperties,
+                consumerId,
+                messageReceivedInfo
             );
         }
 
         onTheFlyMessages.Increment();
         try
         {
-            var messageBody = body;
-            var messageReceivedInfo = new MessageReceivedInfo(
-                consumerTag, deliveryTag, redelivered, exchange, routingKey, queue.Name
-            );
-            var messageProperties = new MessageProperties();
-            messageProperties.CopyFrom(properties);
             eventBus.Publish(new DeliveredMessageEvent(messageReceivedInfo, messageProperties, messageBody));
             var context = new ConsumerExecutionContext(
                 messageHandler, messageReceivedInfo, messageProperties, messageBody
@@ -100,7 +107,7 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
 
             if (!autoAck)
             {
-                var ackResult = Ack(ackStrategy, messageReceivedInfo);
+                var ackResult = Ack(ackStrategy, messageReceivedInfo, messageProperties);
                 eventBus.Publish(new AckEvent(messageReceivedInfo, messageProperties, messageBody, ackResult));
             }
         }
@@ -124,7 +131,7 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
         eventBus.Publish(new ConsumerModelDisposedEvent(ConsumerTags));
     }
 
-    private AckResult Ack(AckStrategy ackStrategy, MessageReceivedInfo receivedInfo)
+    private AckResult Ack(AckStrategy ackStrategy, MessageReceivedInfo receivedInfo, MessageProperties properties)
     {
         try
         {
@@ -134,7 +141,9 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
         {
             logger.Info(
                 alreadyClosedException,
-                "Failed to ACK or NACK, message will be retried, receivedInfo={receivedInfo}",
+                "Consumer {consumerId} failed to ACK/NACK a message with properties {@properties} and receivedInfo {@receivedInfo}",
+                consumerId,
+                properties,
                 receivedInfo
             );
         }
@@ -142,7 +151,9 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
         {
             logger.Info(
                 ioException,
-                "Failed to ACK or NACK, message will be retried, receivedInfo={receivedInfo}",
+                "Consumer {consumerId} failed to ACK/NACK a message with properties {@properties} and receivedInfo {@receivedInfo}",
+                properties,
+                consumerId,
                 receivedInfo
             );
         }
@@ -150,7 +161,9 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
         {
             logger.Error(
                 exception,
-                "Unexpected exception when attempting to ACK or NACK, receivedInfo={receivedInfo}",
+                "Consumer {consumerId} unexpectedly failed to ACK/NACK a message with properties {@properties} and receivedInfo {@receivedInfo}",
+                properties,
+                consumerId,
                 receivedInfo
             );
         }

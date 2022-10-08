@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Internals;
 using EasyNetQ.Logging;
@@ -90,6 +91,9 @@ public interface IInternalConsumer : IDisposable
 /// <inheritdoc />
 public class InternalConsumer : IInternalConsumer
 {
+    private static long consumerIdSequence;
+
+    private readonly long consumerId = Interlocked.Increment(ref consumerIdSequence);
     private readonly Dictionary<string, AsyncBasicConsumer> consumers = new();
     private readonly AsyncLock mutex = new();
 
@@ -126,11 +130,11 @@ public class InternalConsumer : IInternalConsumer
     {
         if (disposed) throw new ObjectDisposedException(nameof(InternalConsumer));
 
-        using var _ = mutex.Acquire();
-
         if (IsModelClosedWithSoftError(model))
         {
-            logger.Info("Model has shutdown with soft error and will be recreated");
+            logger.Info(
+                "Model of consumer {consumerId} has shutdown with soft error and will be recreated", consumerId
+            );
 
             foreach (var consumer in consumers.Values)
             {
@@ -154,7 +158,7 @@ public class InternalConsumer : IInternalConsumer
             }
             catch (Exception exception)
             {
-                logger.Error(exception, "Failed to create model");
+                logger.Error(exception, "Failed to create model for consumer {consumerId}", consumerId);
                 return new InternalConsumerStatus(Array.Empty<Queue>(), Array.Empty<Queue>(), Array.Empty<Queue>());
             }
         }
@@ -186,6 +190,7 @@ public class InternalConsumer : IInternalConsumer
             try
             {
                 var consumer = new AsyncBasicConsumer(
+                    consumerId,
                     logger,
                     model,
                     queue,
@@ -195,7 +200,7 @@ public class InternalConsumer : IInternalConsumer
                     perQueueConfiguration.Handler
                 );
                 consumer.ConsumerCancelled += AsyncBasicConsumerOnConsumerCancelled;
-                model.BasicConsume(
+                var consumerTag = model.BasicConsume(
                     queue.Name, // queue
                     perQueueConfiguration.AutoAck, // noAck
                     perQueueConfiguration.ConsumerTag, // consumerTag
@@ -207,22 +212,37 @@ public class InternalConsumer : IInternalConsumer
                 consumers.Add(queue.Name, consumer);
 
                 logger.InfoFormat(
-                    "Declared consumer with consumerTag {consumerTag} on queue {queue} and configuration {configuration}",
+                    "Consumer {consumerId} started on queue '{queue}' with configuration {@configuration}",
+                    consumerId,
                     queue.Name,
-                    perQueueConfiguration.ConsumerTag,
-                    configuration
+                    new
+                    {
+                        perQueueConfiguration.AutoAck,
+                        consumerTag,
+                        perQueueConfiguration.IsExclusive,
+                        perQueueConfiguration.Arguments
+                    }
                 );
 
                 startedQueues.Add(queue);
                 activeQueues.Add(queue);
             }
+            catch (AlreadyClosedException exception) when (exception.ShutdownReason.ReplyCode == AmqpErrorCodes.ConnectionClosed)
+            {
+                logger.Warn(
+                    exception,
+                    "Failed to declare consumer {consumerId} on queue '{queue}' because disconnected",
+                    consumerId,
+                    queue.Name
+                );
+            }
             catch (Exception exception)
             {
                 logger.Error(
                     exception,
-                    "Consume with consumerTag {consumerTag} on queue {queue} failed",
-                    queue.Name,
-                    perQueueConfiguration.ConsumerTag
+                    "Failed to declare consumer {consumerId} on queue '{queue}'",
+                    consumerId,
+                    queue.Name
                 );
 
                 failedQueues.Add(queue);
