@@ -68,13 +68,13 @@ public class RabbitAdvancedBus : IAdvancedBus
         this.confirmationListener = confirmationListener;
         this.eventBus = eventBus;
         this.handlerCollectionFactory = handlerCollectionFactory;
-        this.Container = container;
+        Container = container;
         this.configuration = configuration;
         this.produceConsumeInterceptors = produceConsumeInterceptors.ToArray();
         this.messageSerializationStrategy = messageSerializationStrategy;
         this.pullingConsumerFactory = pullingConsumerFactory;
         this.advancedBusEventHandlers = advancedBusEventHandlers;
-        this.Conventions = conventions;
+        Conventions = conventions;
         this.consumeScopeProvider = consumeScopeProvider;
 
         Connected += advancedBusEventHandlers.Connected;

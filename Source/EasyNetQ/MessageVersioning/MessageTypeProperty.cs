@@ -55,7 +55,7 @@ public class MessageTypeProperty
                 return messageType!;
 
         throw new EasyNetQException(
-            "Cannot find declared message type {0} or any of the specified alternative types {1}", this.firstAlternativeMessageType,
+            "Cannot find declared message type {0} or any of the specified alternative types {1}", firstAlternativeMessageType,
             string.Join(AlternativeMessageTypeSeparator, alternativeTypes)
         );
     }
