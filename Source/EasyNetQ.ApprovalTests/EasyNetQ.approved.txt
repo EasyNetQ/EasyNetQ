@@ -1633,14 +1633,10 @@ namespace EasyNetQ.Internals
 }
 namespace EasyNetQ.Logging
 {
-    public class ConsoleLogger : EasyNetQ.Logging.ILogger
+    public sealed class ConsoleLogger<TCategoryName> : EasyNetQ.Logging.ILogger, EasyNetQ.Logging.ILogger<TCategoryName>
     {
         public ConsoleLogger() { }
         public bool Log(EasyNetQ.Logging.LogLevel logLevel, System.Func<string>? messageFunc, System.Exception? exception = null, params object?[] formatParameters) { }
-    }
-    public class ConsoleLogger<TCategoryName> : EasyNetQ.Logging.ConsoleLogger, EasyNetQ.Logging.ILogger, EasyNetQ.Logging.ILogger<TCategoryName>
-    {
-        public ConsoleLogger() { }
     }
     public interface ILogger
     {
@@ -1702,12 +1698,7 @@ namespace EasyNetQ.Logging
         public static void WarnException(this EasyNetQ.Logging.ILogger logger, string message, System.Exception? exception, params object?[] args) { }
         public static void WarnFormat(this EasyNetQ.Logging.ILogger logger, string message, params object?[] args) { }
     }
-    public class NoopLogger : EasyNetQ.Logging.ILogger
-    {
-        public NoopLogger() { }
-        public bool Log(EasyNetQ.Logging.LogLevel logLevel, System.Func<string>? messageFunc, System.Exception? exception = null, params object?[] formatParameters) { }
-    }
-    public class NoopLogger<TCategoryName> : EasyNetQ.Logging.ILogger, EasyNetQ.Logging.ILogger<TCategoryName>
+    public sealed class NoopLogger<TCategoryName> : EasyNetQ.Logging.ILogger, EasyNetQ.Logging.ILogger<TCategoryName>
     {
         public NoopLogger() { }
         public bool Log(EasyNetQ.Logging.LogLevel logLevel, System.Func<string>? messageFunc, System.Exception? exception = null, params object?[] formatParameters) { }

@@ -1,23 +1,10 @@
 using System;
-using System.Collections.Generic;
 
 namespace EasyNetQ.Logging;
 
 /// <inheritdoc />
-public class ConsoleLogger : ILogger
+public sealed class ConsoleLogger<TCategoryName> : ILogger<TCategoryName>
 {
-    private static readonly object SyncRoot = new();
-
-    private static readonly Dictionary<LogLevel, ConsoleColor> Colors = new()
-    {
-        { LogLevel.Fatal, ConsoleColor.Red },
-        { LogLevel.Error, ConsoleColor.Yellow },
-        { LogLevel.Warn, ConsoleColor.Magenta },
-        { LogLevel.Info, ConsoleColor.White },
-        { LogLevel.Debug, ConsoleColor.Gray },
-        { LogLevel.Trace, ConsoleColor.DarkGray }
-    };
-
     /// <inheritdoc />
     public bool Log(
         LogLevel logLevel,
@@ -26,41 +13,24 @@ public class ConsoleLogger : ILogger
         params object?[] formatParameters
     )
     {
-        if (messageFunc == null)
+        if (messageFunc == null) return true;
+
+        var consoleColor = logLevel switch
         {
-            return true;
-        }
+            LogLevel.Trace => ConsoleColor.DarkGray,
+            LogLevel.Debug => ConsoleColor.Gray,
+            LogLevel.Info => ConsoleColor.White,
+            LogLevel.Warn => ConsoleColor.Magenta,
+            LogLevel.Error => ConsoleColor.Yellow,
+            LogLevel.Fatal => ConsoleColor.Red,
+            _ => throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, null)
+        };
 
-        lock (SyncRoot)
-        {
-            var consoleColor = Colors[logLevel];
-            var originalForeground = Console.ForegroundColor;
-            try
-            {
-                Console.ForegroundColor = consoleColor;
+        var message = MessageFormatter.FormatStructuredMessage(messageFunc(), formatParameters, out _);
+        if (exception != null) message += " -> " + exception;
 
-                var formattedMessage = MessageFormatter.FormatStructuredMessage(
-                    messageFunc(), formatParameters, out _
-                );
-
-                if (exception != null)
-                {
-                    formattedMessage = formattedMessage + " -> " + exception;
-                }
-
-                Console.WriteLine("[{0:HH:mm:ss} {1}] {2}", DateTime.UtcNow, logLevel, formattedMessage);
-            }
-            finally
-            {
-                Console.ForegroundColor = originalForeground;
-            }
-        }
+        ConcurrentColoredConsole.WriteLine(consoleColor, $"[{DateTime.UtcNow:HH:mm:ss} {logLevel}] {message}");
 
         return true;
     }
-}
-
-/// <inheritdoc cref="EasyNetQ.Logging.ConsoleLogger" />
-public class ConsoleLogger<TCategoryName> : ConsoleLogger, ILogger<TCategoryName>
-{
 }

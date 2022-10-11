@@ -31,7 +31,6 @@ public static class ServiceRegisterExtensions
                 configuration.SetDefaultProperties();
                 return configuration;
             })
-            .TryRegister<ILogger, NoopLogger>()
             .TryRegister(typeof(ILogger<>), typeof(NoopLogger<>))
             .TryRegister<IConnectionStringParser>(
                 _ => new CompositeConnectionStringParser(new AmqpConnectionStringParser(), new ConnectionStringParser())
