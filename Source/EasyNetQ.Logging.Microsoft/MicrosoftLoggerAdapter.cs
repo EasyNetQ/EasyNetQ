@@ -5,15 +5,16 @@ using MSExtensions = Microsoft.Extensions.Logging.LoggerExtensions;
 namespace EasyNetQ.Logging.Microsoft;
 
 /// <inheritdoc />
-public class MicrosoftLoggerAdapter : ILogger
+public sealed class MicrosoftLoggerAdapter<TCategory> : ILogger<TCategory>
 {
-    private readonly MS.ILogger logger;
+    private readonly MS.ILogger<TCategory> logger;
 
     /// <summary>
     ///     Creates an adapter on top of Microsoft.Extensions.Logging.ILogger
     /// </summary>
     /// <param name="logger"></param>
-    public MicrosoftLoggerAdapter(MS.ILogger logger) => this.logger = logger;
+    // ReSharper disable once ContextualLoggerProblem
+    public MicrosoftLoggerAdapter(MS.ILogger<TCategory> logger) => this.logger = logger;
 
     /// <inheritdoc />
     public bool Log(
@@ -48,17 +49,5 @@ public class MicrosoftLoggerAdapter : ILogger
         }
 
         return true;
-    }
-}
-
-/// <inheritdoc cref="EasyNetQ.Logging.Microsoft.MicrosoftLoggerAdapter" />
-public class MicrosoftLoggerAdapter<TCategory> : MicrosoftLoggerAdapter, ILogger<TCategory>
-{
-    /// <summary>
-    ///     Creates an adapter on top of Microsoft.Extensions.Logging.ILogger
-    /// </summary>
-    /// <param name="logger"></param>
-    public MicrosoftLoggerAdapter(MS.ILogger<TCategory> logger) : base(logger)
-    {
     }
 }
