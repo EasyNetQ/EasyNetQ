@@ -16,13 +16,13 @@ public class When_auto_subscribing_with_explicit_implementation : IDisposable
     private readonly MockBuilder mockBuilder;
 
     private const string expectedQueueName1 =
-        "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing_with_explicit_implementation+MessageA, EasyNetQ.Tests_my_app:fe528c6fdb14f1b5a2216b78ab508ca9";
+        "EasyNetQ.Tests.AutoSubscriberTests.When_auto_subscribing_with_explicit_implementation+MessageA, EasyNetQ.Tests_my_app:552bba04667af93e428cfdc296acb6d4";
 
     private const string expectedQueueName2 =
-        "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing_with_explicit_implementation+MessageB, EasyNetQ.Tests_MyExplicitId";
+        "EasyNetQ.Tests.AutoSubscriberTests.When_auto_subscribing_with_explicit_implementation+MessageB, EasyNetQ.Tests_MyExplicitId";
 
     private const string expectedQueueName3 =
-        "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing_with_explicit_implementation+MessageC, EasyNetQ.Tests_my_app:34db9400fe90bb9dc2cf2743a21dadbf";
+        "EasyNetQ.Tests.AutoSubscriberTests.When_auto_subscribing_with_explicit_implementation+MessageC, EasyNetQ.Tests_my_app:21bdba7506b28154ea638ccc10bcea2d";
 
     public When_auto_subscribing_with_explicit_implementation()
     {

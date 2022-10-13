@@ -10,22 +10,21 @@ using Xunit;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests;
 
-public class When_autosubscribing_async : IDisposable
+public class When_auto_subscribing_async : IDisposable
 {
     private readonly MockBuilder mockBuilder;
 
     private const string expectedQueueName1 =
-        "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing_async+MessageA, EasyNetQ.Tests_my_app:9a0467719db423b16b7e5c35d25b877c";
+        "EasyNetQ.Tests.AutoSubscriberTests.When_auto_subscribing_async+MessageA, EasyNetQ.Tests_my_app:a0ebdb4503cc0df2295d8d8d99c1faf8";
 
     private const string expectedQueueName2 =
-        "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing_async+MessageB, EasyNetQ.Tests_MyExplicitId";
+        "EasyNetQ.Tests.AutoSubscriberTests.When_auto_subscribing_async+MessageB, EasyNetQ.Tests_MyExplicitId";
 
     private const string expectedQueueName3 =
-        "EasyNetQ.Tests.AutoSubscriberTests.When_autosubscribing_async+MessageC, EasyNetQ.Tests_my_app:63691066ce7a3fb38d685ce30873d12e";
+        "EasyNetQ.Tests.AutoSubscriberTests.When_auto_subscribing_async+MessageC, EasyNetQ.Tests_my_app:930ab443eb64f3ebffd65c9e494933d9";
 
-    public When_autosubscribing_async()
+    public When_auto_subscribing_async()
     {
-        //mockBuilder = new MockBuilder();
         mockBuilder = new MockBuilder();
 
         var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, "my_app");
