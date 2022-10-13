@@ -19,8 +19,8 @@ public class When_using_default_conventions
         conventions = new Conventions(typeNameSerializer);
     }
 
-    private Conventions conventions;
-    private ITypeNameSerializer typeNameSerializer;
+    private readonly Conventions conventions;
+    private readonly ITypeNameSerializer typeNameSerializer;
 
     [Fact]
     public void The_default_error_exchange_name_should_be()
@@ -84,8 +84,8 @@ public class When_using_default_conventions
 
 public class When_using_QueueAttribute
 {
-    private Conventions conventions;
-    private ITypeNameSerializer typeNameSerializer;
+    private readonly Conventions conventions;
+    private readonly ITypeNameSerializer typeNameSerializer;
 
     public When_using_QueueAttribute()
     {

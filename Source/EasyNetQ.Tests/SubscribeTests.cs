@@ -398,7 +398,7 @@ public class When_a_subscription_is_cancelled_by_the_user : IDisposable
 {
     private const string subscriptionId = "the_subscription_id";
     private const string consumerTag = "the_consumer_tag";
-    private MockBuilder mockBuilder;
+    private readonly MockBuilder mockBuilder;
 
     public When_a_subscription_is_cancelled_by_the_user()
     {

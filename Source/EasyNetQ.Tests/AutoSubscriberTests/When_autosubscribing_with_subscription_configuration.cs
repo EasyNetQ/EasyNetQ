@@ -10,13 +10,13 @@ using Xunit;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests;
 
-public class When_autosubscribing_with_subscription_configuration_attribute : IDisposable
+public class When_auto_subscribing_with_subscription_configuration_attribute : IDisposable
 {
-    private IBus bus;
+    private readonly IBus bus;
     private Action<ISubscriptionConfiguration> capturedAction;
-    private IPubSub pubSub;
+    private readonly IPubSub pubSub;
 
-    public When_autosubscribing_with_subscription_configuration_attribute()
+    public When_auto_subscribing_with_subscription_configuration_attribute()
     {
         pubSub = Substitute.For<IPubSub>();
         bus = Substitute.For<IBus>();

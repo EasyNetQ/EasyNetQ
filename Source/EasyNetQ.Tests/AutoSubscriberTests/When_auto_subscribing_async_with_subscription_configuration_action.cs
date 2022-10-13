@@ -10,13 +10,13 @@ using Xunit;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests;
 
-public class When_autosubscribing_with_subscription_configuration_action : IDisposable
+public class When_auto_subscribing_async_with_subscription_configuration_action : IDisposable
 {
-    private IBus bus;
+    private readonly IBus bus;
     private Action<ISubscriptionConfiguration> capturedAction;
-    private IPubSub pubSub;
+    private readonly IPubSub pubSub;
 
-    public When_autosubscribing_with_subscription_configuration_action()
+    public When_auto_subscribing_async_with_subscription_configuration_action()
     {
         pubSub = Substitute.For<IPubSub>();
         bus = Substitute.For<IBus>();
@@ -48,7 +48,7 @@ public class When_autosubscribing_with_subscription_configuration_action : IDisp
     }
 
     [Fact]
-    public void Should_have_called_subscribe()
+    public void Should_have_called_subscribe_async()
     {
         pubSub.Received().SubscribeAsync(
             Arg.Any<string>(),
@@ -62,6 +62,8 @@ public class When_autosubscribing_with_subscription_configuration_action : IDisp
     {
         var subscriptionConfiguration = new SubscriptionConfiguration(1);
 
+        capturedAction.Should().NotBeNull("SubscribeAsync should have been invoked");
+
         capturedAction(subscriptionConfiguration);
 
         subscriptionConfiguration.AutoDelete.Should().BeTrue();
@@ -71,11 +73,13 @@ public class When_autosubscribing_with_subscription_configuration_action : IDisp
     }
 
     // Discovered by reflection over test assembly, do not remove.
-    private class MyConsumerWithAction : IConsume<MessageA>
+    // ReSharper disable once UnusedMember.Local
+    private class MyConsumerWithAction : IConsumeAsync<MessageA>
     {
         [AutoSubscriberConsumer(SubscriptionId = "MyActionTest")]
-        public void Consume(MessageA message, CancellationToken cancellationToken)
+        public Task ConsumeAsync(MessageA message, CancellationToken cancellationToken)
         {
+            return Task.CompletedTask;
         }
     }
 

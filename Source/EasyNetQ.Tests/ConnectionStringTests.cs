@@ -13,9 +13,9 @@ public class ConnectionStringTests
     private const string connectionStringValue =
         "host=192.168.1.1:1001,my.little.host:1002;virtualHost=Copa;username=Copa;" +
         "password=abc_xyz;port=12345;requestedHeartbeat=3";
-    private ConnectionConfiguration connectionString;
+    private readonly ConnectionConfiguration connectionString;
 
-    private ConnectionConfiguration defaults;
+    private readonly ConnectionConfiguration defaults;
 
     public ConnectionStringTests()
     {

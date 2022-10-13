@@ -86,7 +86,7 @@ public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange : IDisposa
     }
 
     private readonly MockBuilder mockBuilder;
-    private Queue queue;
+    private readonly Queue queue;
 
     [Fact]
     public void Should_declare_the_queue()
@@ -329,7 +329,7 @@ public class When_a_queue_is_bound_to_an_exchange : IDisposable
     }
 
     private readonly MockBuilder mockBuilder;
-    private IAdvancedBus advancedBus;
+    private readonly IAdvancedBus advancedBus;
     private readonly Binding<Queue> binding;
 
     [Fact]
@@ -373,7 +373,7 @@ public class When_a_queue_is_bound_to_an_exchange_with_headers : IDisposable
     }
 
     private readonly MockBuilder mockBuilder;
-    private IAdvancedBus advancedBus;
+    private readonly IAdvancedBus advancedBus;
     private readonly Binding<Queue> binding;
 
     [Fact]
@@ -419,7 +419,7 @@ public class When_a_queue_is_unbound_from_an_exchange : IDisposable
     }
 
     private readonly MockBuilder mockBuilder;
-    private IAdvancedBus advancedBus;
+    private readonly IAdvancedBus advancedBus;
     private readonly Binding<Queue> binding;
 
     [Fact]

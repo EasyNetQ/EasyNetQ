@@ -57,9 +57,9 @@ public class When_using_default_consumer_error_strategy
         );
     }
 
-    private DefaultConsumerErrorStrategy errorStrategy;
-    private MockBuilder mockBuilder;
-    private ConsumerExecutionContext consumerExecutionContext;
+    private readonly DefaultConsumerErrorStrategy errorStrategy;
+    private readonly MockBuilder mockBuilder;
+    private readonly ConsumerExecutionContext consumerExecutionContext;
 
     [Fact]
     public async Task Should_Ack_canceled_message()
