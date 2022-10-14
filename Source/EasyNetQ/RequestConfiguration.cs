@@ -33,6 +33,13 @@ public interface IRequestConfiguration
     IRequestConfiguration WithQueueName(string queueName);
 
     /// <summary>
+    /// Sets the queue type. Valid types are "classic" and "quorum". Works with RabbitMQ version 3.8+.
+    /// </summary>
+    /// <param name="queueType">Desired queue type.</param>
+    /// <returns>Returns a reference to itself</returns>
+    IRequestConfiguration WithQueueType(string queueType);
+
+    /// <summary>
     /// Sets headers
     /// </summary>
     /// <param name="headers">Headers to set</param>
@@ -42,13 +49,15 @@ public interface IRequestConfiguration
 
 internal class RequestConfiguration : IRequestConfiguration
 {
-    public RequestConfiguration(string queueName, TimeSpan expiration)
+    public RequestConfiguration(string queueName, TimeSpan expiration, string queueType = EasyNetQ.QueueType.Classic)
     {
         QueueName = queueName;
         Expiration = expiration;
+        QueueType = queueType;
     }
 
     public string QueueName { get; private set; }
+    public string QueueType { get; private set; }
     public TimeSpan Expiration { get; private set; }
     public byte? Priority { get; private set; }
     public IDictionary<string, object?>? Headers { get; private set; }
@@ -68,6 +77,12 @@ internal class RequestConfiguration : IRequestConfiguration
     public IRequestConfiguration WithQueueName(string queueName)
     {
         QueueName = queueName;
+        return this;
+    }
+
+    public IRequestConfiguration WithQueueType(string queueType)
+    {
+        QueueType = queueType;
         return this;
     }
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -79,10 +80,11 @@ public class DefaultRpc : IRpc
 
         var correlationId = correlationIdGenerationStrategy.GetCorrelationId();
         var tcs = new TaskCompletionSource<TResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
-        RegisterResponseActions(correlationId, tcs);
+        RegisterResponseActions(correlationId, tcs, requestConfiguration.QueueType == QueueType.Quorum);
         using var callback = DisposableAction.Create(DeRegisterResponseActions, correlationId);
 
-        var queueName = await SubscribeToResponseAsync<TRequest, TResponse>(cts.Token).ConfigureAwait(false);
+        var queueName = await SubscribeToResponseAsync<TRequest, TResponse>(cts.Token, requestConfiguration.QueueType)
+            .ConfigureAwait(false);
         var routingKey = requestConfiguration.QueueName;
         var expiration = requestConfiguration.Expiration;
         var priority = requestConfiguration.Priority;
@@ -131,14 +133,26 @@ public class DefaultRpc : IRpc
         if (@event.Type != PersistentConnectionType.Consumer)
             return;
 
-        var responseActionsValues = responseActions.Values;
-        var responseSubscriptionsValues = responseSubscriptions.Values;
+        List<KeyValuePair<RpcKey, ResponseSubscription>> subEntries = responseSubscriptions.ToList();
+        List<KeyValuePair<string, ResponseAction>> actionEntries = responseActions.ToList();
 
-        responseActions.Clear();
-        responseSubscriptions.Clear();
+        foreach (KeyValuePair<RpcKey, ResponseSubscription> subEntry in subEntries)
+        {
+            if (!subEntry.Value.QueueIsDurable)
+            {
+                responseSubscriptions.Remove(subEntry.Key);
+                subEntry.Value.Unsubscribe();
+            }
+        }
 
-        foreach (var responseAction in responseActionsValues) responseAction.OnFailure();
-        foreach (var responseSubscription in responseSubscriptionsValues) responseSubscription.Unsubscribe();
+        foreach (KeyValuePair<string, ResponseAction> actionEntry in actionEntries)
+        {
+            if (!actionEntry.Value.QueueIsDurable)
+            {
+                responseActions.Remove(actionEntry.Key);
+                actionEntry.Value.OnFailure();
+            }
+        }
     }
 
     protected void DeRegisterResponseActions(string correlationId)
@@ -146,7 +160,8 @@ public class DefaultRpc : IRpc
         responseActions.Remove(correlationId);
     }
 
-    protected void RegisterResponseActions<TResponse>(string correlationId, TaskCompletionSource<TResponse> tcs)
+    protected void RegisterResponseActions<TResponse>(
+        string correlationId, TaskCompletionSource<TResponse> tcs, bool queueIsDurable)
     {
         var responseAction = new ResponseAction(
             message =>
@@ -174,14 +189,16 @@ public class DefaultRpc : IRpc
                 new EasyNetQException(
                     $"Connection lost while request was in-flight. CorrelationId: {correlationId}"
                 )
-            )
+            ),
+            queueIsDurable
         );
 
         responseActions.TryAdd(correlationId, responseAction);
     }
 
     protected virtual async Task<string> SubscribeToResponseAsync<TRequest, TResponse>(
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken,
+        string queueType
     )
     {
         var responseType = typeof(TResponse);
@@ -190,16 +207,21 @@ public class DefaultRpc : IRpc
         if (responseSubscriptions.TryGetValue(rpcKey, out var responseSubscription))
             return responseSubscription.QueueName;
 
-        logger.Debug("Subscribing for {requestType}/{responseType}", requestType, responseType);
+        logger.Debug($"Subscribing for {requestType}/{responseType}", requestType, responseType);
 
         using var _ = await responseSubscriptionsLock.AcquireAsync(cancellationToken).ConfigureAwait(false);
 
         if (responseSubscriptions.TryGetValue(rpcKey, out responseSubscription))
             return responseSubscription.QueueName;
 
+        bool queueIsQuorum = queueType == QueueType.Quorum;
+
         var queue = await advancedBus.QueueDeclareAsync(
             conventions.RpcReturnQueueNamingConvention(responseType),
-            c => c.AsDurable(false).AsExclusive(true).AsAutoDelete(true),
+            c => c.AsDurable(queueIsQuorum)
+                .AsExclusive(!queueIsQuorum)
+                .AsAutoDelete(!queueIsQuorum)
+                .WithQueueType(queueType),
             cancellationToken
         ).ConfigureAwait(false);
 
@@ -220,7 +242,7 @@ public class DefaultRpc : IRpc
                     responseAction.OnSuccess(message);
             }
         );
-        responseSubscriptions.TryAdd(rpcKey, new ResponseSubscription(queue.Name, subscription));
+        responseSubscriptions.TryAdd(rpcKey, new ResponseSubscription(queue.Name, subscription, queueIsQuorum));
 
         logger.Debug("Subscription for {requestType}/{responseType} is created", requestType, responseType);
 
@@ -292,6 +314,14 @@ public class DefaultRpc : IRpc
                     c.WithExpires(responderConfiguration.Expires.Value);
                 if (responderConfiguration.MaxPriority.HasValue)
                     c.WithMaxPriority(responderConfiguration.MaxPriority.Value);
+                if (responderConfiguration.QueueType != null)
+                {
+                    c.WithQueueType(responderConfiguration.QueueType);
+                    if (responderConfiguration.QueueType == QueueType.Quorum)
+                    {
+                        c.AsAutoDelete(false);
+                    }
+                }
             },
             cancellationToken
         ).ConfigureAwait(false);
@@ -374,24 +404,28 @@ public class DefaultRpc : IRpc
 
     protected readonly struct ResponseAction
     {
-        public ResponseAction(Action<object> onSuccess, Action onFailure)
+        public ResponseAction(Action<object> onSuccess, Action onFailure, bool queueIsDurable)
         {
             OnSuccess = onSuccess;
             OnFailure = onFailure;
+            QueueIsDurable = queueIsDurable;
         }
 
+        public bool QueueIsDurable { get; }
         public Action<object> OnSuccess { get; }
         public Action OnFailure { get; }
     }
 
     protected readonly struct ResponseSubscription
     {
-        public ResponseSubscription(string queueName, IDisposable subscription)
+        public ResponseSubscription(string queueName, IDisposable subscription, bool queueIsDurable)
         {
+            QueueIsDurable = queueIsDurable;
             QueueName = queueName;
             Unsubscribe = subscription.Dispose;
         }
 
+        public bool QueueIsDurable { get; }
         public string QueueName { get; }
         public Action Unsubscribe { get; }
     }
