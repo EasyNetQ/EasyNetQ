@@ -31,6 +31,6 @@ public sealed class SystemTextJsonSerializer : ISerializer
 
     public object BytesToMessage(Type messageType, in ReadOnlyMemory<byte> bytes)
     {
-        return System.Text.Json.JsonSerializer.Deserialize(bytes.Span, messageType, deserializeOptions);
+        return System.Text.Json.JsonSerializer.Deserialize(bytes.Span, messageType, deserializeOptions)!;
     }
 }

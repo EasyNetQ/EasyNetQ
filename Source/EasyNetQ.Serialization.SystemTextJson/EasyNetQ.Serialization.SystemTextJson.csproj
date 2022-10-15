@@ -1,17 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
       <Description>An adaptor to allow EasyNetQ to use System.Text.Json serializer</Description>
-      <TargetFramework>netstandard2.0</TargetFramework>
+      <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+      <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
       <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
     </ItemGroup>
     <ItemGroup>
+      <PackageReference Include="Fody" Version="6.6.4">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
       <PackageReference Include="System.Text.Json" Version="[6.0.0,)" />
       <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
       <PackageReference Include="MinVer" Version="4.0.0">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
+      <PackageReference Include="NullGuard.Fody" Version="3.1.0" PrivateAssets="All" />
     </ItemGroup>
 </Project>
