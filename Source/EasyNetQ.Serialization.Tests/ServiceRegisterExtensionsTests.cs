@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using EasyNetQ.DI;
 using EasyNetQ.Serialization.NewtonsoftJson;
+using EasyNetQ.Serialization.SystemTextJson;
 using NSubstitute;
 using Xunit;
 
@@ -21,6 +22,7 @@ public class ServiceRegisterExtensionsTests
     public static IEnumerable<object[]> GetSerializerRegisterActions()
     {
         yield return new object[] { GetRegisterAction(x => x.EnableNewtonsoftJson()), typeof(NewtonsoftJsonSerializer) };
+        yield return new object[] { GetRegisterAction(x => x.EnableSystemTextJson()), typeof(SystemTextJsonSerializer) };
     }
 
     private static Action<IServiceRegister> GetRegisterAction(Action<IServiceRegister> action) => action;

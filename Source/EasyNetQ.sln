@@ -63,6 +63,7 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Examples.DlxRetry", "EasyNetQ.Examples.DlxRetry\EasyNetQ.Examples.DlxRetry.csproj", "{334FC79A-41F7-4506-B887-8FD4ADCC28E4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{C24EB2CE-59ED-4348-903F-2DF7E868E7BD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasyNetQ.Serialization.SystemTextJson", "EasyNetQ.Serialization.SystemTextJson\EasyNetQ.Serialization.SystemTextJson.csproj", "{5C190112-DD9E-451B-8BD8-C6F5BF88D4B1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Examples.PubSubWithAdvancedApi", "EasyNetQ.Examples.PubSubWithAdvancedApi\EasyNetQ.Examples.PubSubWithAdvancedApi.csproj", "{3033D84D-F003-4993-95E0-6898E487EF38}"
 EndProject
@@ -150,6 +151,10 @@ Global
 		{34907240-61E8-425B-8444-3F5676F8F865}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{34907240-61E8-425B-8444-3F5676F8F865}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{34907240-61E8-425B-8444-3F5676F8F865}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C190112-DD9E-451B-8BD8-C6F5BF88D4B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C190112-DD9E-451B-8BD8-C6F5BF88D4B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C190112-DD9E-451B-8BD8-C6F5BF88D4B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C190112-DD9E-451B-8BD8-C6F5BF88D4B1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -172,6 +177,7 @@ Global
 		{334FC79A-41F7-4506-B887-8FD4ADCC28E4} = {C24EB2CE-59ED-4348-903F-2DF7E868E7BD}
 		{3033D84D-F003-4993-95E0-6898E487EF38} = {C24EB2CE-59ED-4348-903F-2DF7E868E7BD}
 		{34907240-61E8-425B-8444-3F5676F8F865} = {C24EB2CE-59ED-4348-903F-2DF7E868E7BD}
+		{5C190112-DD9E-451B-8BD8-C6F5BF88D4B1} = {0BF00E29-CFEB-43C0-B8A7-98425AD7C303}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A3DE3E7F-B61C-4398-AA54-A0DDE3BD850E}
