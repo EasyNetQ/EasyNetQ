@@ -3,9 +3,15 @@
       <Description>An adaptor to allow EasyNetQ to use System.Text.Json serializer</Description>
       <TargetFramework>netstandard2.0</TargetFramework>
     </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Include="..\EasyNetQ\Preconditions.cs" Link="Preconditions.cs" />
+    </ItemGroup>
+
     <ItemGroup>
       <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
     </ItemGroup>
+
     <ItemGroup>
       <PackageReference Include="System.Text.Json" Version="[6.0.0,)" />
       <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
