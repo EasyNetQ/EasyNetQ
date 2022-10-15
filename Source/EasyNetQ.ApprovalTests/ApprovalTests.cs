@@ -17,6 +17,7 @@ public class ApprovalTests
     [InlineData(typeof(Logging.Microsoft.MicrosoftLoggerAdapter))]
     [InlineData(typeof(Logging.Serilog.SerilogLoggerAdapter))]
     [InlineData(typeof(Serialization.NewtonsoftJson.NewtonsoftJsonSerializer))]
+    [InlineData(typeof(Serialization.SystemTextJson.SystemTextJsonSerializer))]
     public void Public_api_should_not_be_changed_unintentionally(Type type)
     {
         var publicApi = type?.Assembly.GeneratePublicApi(new ApiGeneratorOptions
