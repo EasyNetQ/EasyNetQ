@@ -169,12 +169,12 @@ public class RabbitAdvancedBus : IAdvancedBus
     #endregion
 
     /// <inheritdoc />
-    public async Task<QueueStats> GetQueueStatsAsync(string name, CancellationToken cancellationToken)
+    public async Task<QueueStats> GetQueueStatsAsync(string queue, CancellationToken cancellationToken)
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         var declareResult = await persistentChannelDispatcher.InvokeAsync(
-            x => x.QueueDeclarePassive(name), PersistentChannelDispatchOptions.ConsumerTopology, cts.Token
+            x => x.QueueDeclarePassive(queue), PersistentChannelDispatchOptions.ConsumerTopology, cts.Token
         ).ConfigureAwait(false);
 
         if (logger.IsDebugEnabled())
@@ -183,7 +183,7 @@ public class RabbitAdvancedBus : IAdvancedBus
                 "{messagesCount} messages, {consumersCount} consumers in queue {queue}",
                 declareResult.MessageCount,
                 declareResult.ConsumerCount,
-                name
+                queue
             );
         }
 
@@ -347,23 +347,23 @@ public class RabbitAdvancedBus : IAdvancedBus
     }
 
     /// <inheritdoc />
-    public async Task QueueDeclarePassiveAsync(string name, CancellationToken cancellationToken = default)
+    public async Task QueueDeclarePassiveAsync(string queue, CancellationToken cancellationToken = default)
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         await persistentChannelDispatcher.InvokeAsync(
-            x => x.QueueDeclarePassive(name), PersistentChannelDispatchOptions.ConsumerTopology, cts.Token
+            x => x.QueueDeclarePassive(queue), PersistentChannelDispatchOptions.ConsumerTopology, cts.Token
         ).ConfigureAwait(false);
 
         if (logger.IsDebugEnabled())
         {
-            logger.DebugFormat("Passive declared queue {queue}", name);
+            logger.DebugFormat("Passive declared queue {queue}", queue);
         }
     }
 
     /// <inheritdoc />
     public async Task<Queue> QueueDeclareAsync(
-        string name,
+        string queue,
         Action<IQueueDeclareConfiguration> configure,
         CancellationToken cancellationToken = default
     )
@@ -378,7 +378,7 @@ public class RabbitAdvancedBus : IAdvancedBus
         var arguments = queueDeclareConfiguration.Arguments;
 
         var queueDeclareOk = await persistentChannelDispatcher.InvokeAsync(
-            x => x.QueueDeclare(name, isDurable, isExclusive, isAutoDelete, arguments),
+            x => x.QueueDeclare(queue, isDurable, isExclusive, isAutoDelete, arguments),
             PersistentChannelDispatchOptions.ConsumerTopology,
             cts.Token
         ).ConfigureAwait(false);
@@ -400,57 +400,58 @@ public class RabbitAdvancedBus : IAdvancedBus
 
     /// <inheritdoc />
     public virtual async Task QueueDeleteAsync(
-        string name, bool ifUnused = false, bool ifEmpty = false, CancellationToken cancellationToken = default)
+        string queue, bool ifUnused = false, bool ifEmpty = false, CancellationToken cancellationToken = default
+    )
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         await persistentChannelDispatcher.InvokeAsync(
-            x => x.QueueDelete(name, ifUnused, ifEmpty),
+            x => x.QueueDelete(queue, ifUnused, ifEmpty),
             PersistentChannelDispatchOptions.ConsumerTopology,
             cts.Token
         ).ConfigureAwait(false);
 
         if (logger.IsDebugEnabled())
         {
-            logger.DebugFormat("Deleted queue {queue}", name);
+            logger.DebugFormat("Deleted queue {queue}", queue);
         }
     }
 
     /// <inheritdoc />
-    public virtual async Task QueuePurgeAsync(string name, CancellationToken cancellationToken)
+    public virtual async Task QueuePurgeAsync(string queue, CancellationToken cancellationToken)
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         await persistentChannelDispatcher.InvokeAsync(
-            x => x.QueuePurge(name),
+            x => x.QueuePurge(queue),
             PersistentChannelDispatchOptions.ConsumerTopology,
             cts.Token
         ).ConfigureAwait(false);
 
         if (logger.IsDebugEnabled())
         {
-            logger.DebugFormat("Purged queue {queue}", name);
+            logger.DebugFormat("Purged queue {queue}", queue);
         }
     }
 
     /// <inheritdoc />
-    public async Task ExchangeDeclarePassiveAsync(string name, CancellationToken cancellationToken = default)
+    public async Task ExchangeDeclarePassiveAsync(string exchange, CancellationToken cancellationToken = default)
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         await persistentChannelDispatcher.InvokeAsync(
-            x => x.ExchangeDeclarePassive(name), PersistentChannelDispatchOptions.ProducerTopology, cts.Token
+            x => x.ExchangeDeclarePassive(exchange), PersistentChannelDispatchOptions.ProducerTopology, cts.Token
         ).ConfigureAwait(false);
 
         if (logger.IsDebugEnabled())
         {
-            logger.DebugFormat("Passive declared exchange {exchange}", name);
+            logger.DebugFormat("Passive declared exchange {exchange}", exchange);
         }
     }
 
     /// <inheritdoc />
     public async Task<Exchange> ExchangeDeclareAsync(
-        string name,
+        string exchange,
         Action<IExchangeDeclareConfiguration> configure,
         CancellationToken cancellationToken = default
     )
@@ -465,7 +466,7 @@ public class RabbitAdvancedBus : IAdvancedBus
         var arguments = exchangeDeclareConfiguration.Arguments;
 
         await persistentChannelDispatcher.InvokeAsync(
-            x => x.ExchangeDeclare(name, type, isDurable, isAutoDelete, arguments),
+            x => x.ExchangeDeclare(exchange, type, isDurable, isAutoDelete, arguments),
             PersistentChannelDispatchOptions.ProducerTopology,
             cts.Token
         ).ConfigureAwait(false);
@@ -474,7 +475,7 @@ public class RabbitAdvancedBus : IAdvancedBus
         {
             logger.DebugFormat(
                 "Declared exchange {exchange}: type={type}, durable={durable}, autoDelete={autoDelete}, arguments={arguments}",
-                name,
+                exchange,
                 type,
                 isDurable,
                 isAutoDelete,
@@ -482,23 +483,23 @@ public class RabbitAdvancedBus : IAdvancedBus
             );
         }
 
-        return new Exchange(name, type, isDurable, isAutoDelete, arguments);
+        return new Exchange(exchange, type, isDurable, isAutoDelete, arguments);
     }
 
     /// <inheritdoc />
     public virtual async Task ExchangeDeleteAsync(
-        Exchange exchange, bool ifUnused = false, CancellationToken cancellationToken = default
+        string exchange, bool ifUnused = false, CancellationToken cancellationToken = default
     )
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         await persistentChannelDispatcher.InvokeAsync(
-            x => x.ExchangeDelete(exchange.Name, ifUnused), PersistentChannelDispatchOptions.ProducerTopology, cts.Token
+            x => x.ExchangeDelete(exchange, ifUnused), PersistentChannelDispatchOptions.ProducerTopology, cts.Token
         ).ConfigureAwait(false);
 
         if (logger.IsDebugEnabled())
         {
-            logger.DebugFormat("Deleted exchange {exchange}", exchange.Name);
+            logger.DebugFormat("Deleted exchange {exchange}", exchange);
         }
     }
 

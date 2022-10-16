@@ -472,14 +472,14 @@ public static class AdvancedBusExtensions
     /// Gets stats for the given queue
     /// </summary>
     /// <param name="bus">The bus instance</param>
-    /// <param name="name">The name of the queue</param>
+    /// <param name="queue">The name of the queue</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>The stats of the queue</returns>
     public static QueueStats GetQueueStats(
-        this IAdvancedBus bus, string name, CancellationToken cancellationToken = default
+        this IAdvancedBus bus, string queue, CancellationToken cancellationToken = default
     )
     {
-        return bus.GetQueueStatsAsync(name, cancellationToken)
+        return bus.GetQueueStatsAsync(queue, cancellationToken)
             .GetAwaiter()
             .GetResult();
     }
@@ -503,7 +503,7 @@ public static class AdvancedBusExtensions
     /// Declare a queue. If the queue already exists this method does nothing
     /// </summary>
     /// <param name="bus">The bus instance</param>
-    /// <param name="name">The name of the queue</param>
+    /// <param name="queue">The name of the queue</param>
     /// <param name="configure">Delegate to configure the queue</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>
@@ -511,12 +511,12 @@ public static class AdvancedBusExtensions
     /// </returns>
     public static Queue QueueDeclare(
         this IAdvancedBus bus,
-        string name,
+        string queue,
         Action<IQueueDeclareConfiguration> configure,
         CancellationToken cancellationToken = default
     )
     {
-        return bus.QueueDeclareAsync(name, configure, cancellationToken)
+        return bus.QueueDeclareAsync(queue, configure, cancellationToken)
             .GetAwaiter()
             .GetResult();
     }
@@ -525,25 +525,22 @@ public static class AdvancedBusExtensions
     /// Declare a queue. If the queue already exists this method does nothing
     /// </summary>
     /// <param name="bus">The bus instance</param>
-    /// <param name="name">The name of the queue</param>
+    /// <param name="queue">The name of the queue</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>
     /// The queue
     /// </returns>
     public static Task<Queue> QueueDeclareAsync(
         this IAdvancedBus bus,
-        string name,
+        string queue,
         CancellationToken cancellationToken = default
-    )
-    {
-        return bus.QueueDeclareAsync(name, _ => { }, cancellationToken);
-    }
+    ) => bus.QueueDeclareAsync(queue, _ => { }, cancellationToken);
 
     /// <summary>
     /// Declare a queue. If the queue already exists this method does nothing
     /// </summary>
     /// <param name="bus">The bus instance</param>
-    /// <param name="name">The name of the queue</param>
+    /// <param name="queue">The name of the queue</param>
     /// <param name="durable">Durable queues remain active when a server restarts.</param>
     /// <param name="exclusive">Exclusive queues may only be accessed by the current connection, and are deleted when that connection closes.</param>
     /// <param name="autoDelete">If set, the queue is deleted when all consumers have finished using it.</param>
@@ -553,7 +550,7 @@ public static class AdvancedBusExtensions
     /// </returns>
     public static Task<Queue> QueueDeclareAsync(
         this IAdvancedBus bus,
-        string name,
+        string queue,
         bool durable,
         bool exclusive,
         bool autoDelete,
@@ -561,7 +558,7 @@ public static class AdvancedBusExtensions
     )
     {
         return bus.QueueDeclareAsync(
-            name,
+            queue,
             c => c.AsDurable(durable)
                 .AsExclusive(exclusive)
                 .AsAutoDelete(autoDelete),
@@ -573,7 +570,7 @@ public static class AdvancedBusExtensions
     /// Declare a queue. If the queue already exists this method does nothing
     /// </summary>
     /// <param name="bus">The bus instance</param>
-    /// <param name="name">The name of the queue</param>
+    /// <param name="queue">The name of the queue</param>
     /// <param name="durable">Durable queues remain active when a server restarts.</param>
     /// <param name="exclusive">Exclusive queues may only be accessed by the current connection, and are deleted when that connection closes.</param>
     /// <param name="autoDelete">If set, the queue is deleted when all consumers have finished using it.</param>
@@ -583,14 +580,14 @@ public static class AdvancedBusExtensions
     /// </returns>
     public static Queue QueueDeclare(
         this IAdvancedBus bus,
-        string name,
+        string queue,
         bool durable,
         bool exclusive,
         bool autoDelete,
         CancellationToken cancellationToken = default
     )
     {
-        return bus.QueueDeclareAsync(name, durable, exclusive, autoDelete, cancellationToken)
+        return bus.QueueDeclareAsync(queue, durable, exclusive, autoDelete, cancellationToken)
             .GetAwaiter()
             .GetResult();
     }
@@ -599,18 +596,18 @@ public static class AdvancedBusExtensions
     /// Declare a queue. If the queue already exists this method does nothing
     /// </summary>
     /// <param name="bus">The bus instance</param>
-    /// <param name="name">The name of the queue</param>
+    /// <param name="queue">The name of the queue</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>
     /// The queue
     /// </returns>
     public static Queue QueueDeclare(
         this IAdvancedBus bus,
-        string name,
+        string queue,
         CancellationToken cancellationToken = default
     )
     {
-        return bus.QueueDeclareAsync(name, cancellationToken)
+        return bus.QueueDeclareAsync(queue, cancellationToken)
             .GetAwaiter()
             .GetResult();
     }
@@ -619,15 +616,15 @@ public static class AdvancedBusExtensions
     /// Declare a queue passively. Throw an exception rather than create the queue if it doesn't exist
     /// </summary>
     /// <param name="bus">The bus instance</param>
-    /// <param name="name">The queue to declare</param>
+    /// <param name="queue">The queue to declare</param>
     /// <param name="cancellationToken">The cancellation token</param>
     public static void QueueDeclarePassive(
         this IAdvancedBus bus,
-        string name,
+        string queue,
         CancellationToken cancellationToken = default
     )
     {
-        bus.QueueDeclarePassiveAsync(name, cancellationToken)
+        bus.QueueDeclarePassiveAsync(queue, cancellationToken)
             .GetAwaiter()
             .GetResult();
     }
@@ -803,7 +800,7 @@ public static class AdvancedBusExtensions
     /// Declare an exchange
     /// </summary>
     /// <param name="bus">The bus instance</param>
-    /// <param name="name">The exchange name</param>
+    /// <param name="exchange">The exchange name</param>
     /// <param name="type">The type of exchange</param>
     /// <param name="durable">Durable exchanges remain active when a server restarts.</param>
     /// <param name="autoDelete">If set, the exchange is deleted when all queues have finished using it.</param>
@@ -811,26 +808,26 @@ public static class AdvancedBusExtensions
     /// <returns>The exchange</returns>
     public static Task<Exchange> ExchangeDeclareAsync(
         this IAdvancedBus bus,
-        string name,
+        string exchange,
         string type,
         bool durable = true,
         bool autoDelete = false,
         CancellationToken cancellationToken = default
-    ) => bus.ExchangeDeclareAsync(name, c => c.AsDurable(durable).AsAutoDelete(autoDelete).WithType(type), cancellationToken);
+    ) => bus.ExchangeDeclareAsync(exchange, c => c.AsDurable(durable).AsAutoDelete(autoDelete).WithType(type), cancellationToken);
 
     /// <summary>
     /// Declare a exchange passively. Throw an exception rather than create the exchange if it doesn't exist
     /// </summary>
     /// <param name="bus">The bus instance</param>
-    /// <param name="name">The exchange to declare</param>
+    /// <param name="exchange">The exchange to declare</param>
     /// <param name="cancellationToken">The cancellation token</param>
     public static void ExchangeDeclarePassive(
         this IAdvancedBus bus,
-        string name,
+        string exchange,
         CancellationToken cancellationToken = default
     )
     {
-        bus.ExchangeDeclarePassiveAsync(name, cancellationToken)
+        bus.ExchangeDeclarePassiveAsync(exchange, cancellationToken)
             .GetAwaiter()
             .GetResult();
     }
@@ -839,7 +836,7 @@ public static class AdvancedBusExtensions
     /// Declare an exchange
     /// </summary>
     /// <param name="bus">The bus instance</param>
-    /// <param name="name">The exchange name</param>
+    /// <param name="exchange">The exchange name</param>
     /// <param name="type">The type of exchange</param>
     /// <param name="durable">Durable exchanges remain active when a server restarts.</param>
     /// <param name="autoDelete">If set, the exchange is deleted when all queues have finished using it.</param>
@@ -847,14 +844,14 @@ public static class AdvancedBusExtensions
     /// <returns>The exchange</returns>
     public static Exchange ExchangeDeclare(
         this IAdvancedBus bus,
-        string name,
+        string exchange,
         string type,
         bool durable = true,
         bool autoDelete = false,
         CancellationToken cancellationToken = default
     )
     {
-        return bus.ExchangeDeclareAsync(name, type, durable, autoDelete, cancellationToken)
+        return bus.ExchangeDeclareAsync(exchange, type, durable, autoDelete, cancellationToken)
             .GetAwaiter()
             .GetResult();
     }
@@ -863,18 +860,18 @@ public static class AdvancedBusExtensions
     /// Declare an exchange
     /// </summary>
     /// <param name="bus">The bus instance</param>
-    /// <param name="name">The exchange name</param>
+    /// <param name="exchange">The exchange name</param>
     /// <param name="configure">The configuration of exchange</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>The exchange</returns>
     public static Exchange ExchangeDeclare(
         this IAdvancedBus bus,
-        string name,
+        string exchange,
         Action<IExchangeDeclareConfiguration> configure,
         CancellationToken cancellationToken = default
     )
     {
-        return bus.ExchangeDeclareAsync(name, configure, cancellationToken)
+        return bus.ExchangeDeclareAsync(exchange, configure, cancellationToken)
             .GetAwaiter()
             .GetResult();
     }
@@ -961,19 +958,19 @@ public static class AdvancedBusExtensions
     /// Delete a queue
     /// </summary>
     /// <param name="bus">The bus instance</param>
-    /// <param name="name">The name of the queue to delete</param>
+    /// <param name="queue">The name of the queue to delete</param>
     /// <param name="ifUnused">Only delete if unused</param>
     /// <param name="ifEmpty">Only delete if empty</param>
     /// <param name="cancellationToken">The cancellation token</param>
     public static void QueueDelete(
         this IAdvancedBus bus,
-        string name,
+        string queue,
         bool ifUnused = false,
         bool ifEmpty = false,
         CancellationToken cancellationToken = default
     )
     {
-        bus.QueueDeleteAsync(name, ifUnused, ifEmpty, cancellationToken)
+        bus.QueueDeleteAsync(queue, ifUnused, ifEmpty, cancellationToken)
             .GetAwaiter()
             .GetResult();
     }
@@ -1004,6 +1001,16 @@ public static class AdvancedBusExtensions
             .GetAwaiter()
             .GetResult();
     }
+
+    /// <summary>
+    /// Delete an exchange
+    /// </summary>
+    /// <param name="bus">The bus instance</param>
+    /// <param name="exchange">The exchange to delete</param>
+    /// <param name="ifUnused">If set, the server will only delete the exchange if it has no queue bindings.</param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    public static Task ExchangeDeleteAsync(this IAdvancedBus bus, Exchange exchange, bool ifUnused = false, CancellationToken cancellationToken = default)
+        => bus.ExchangeDeleteAsync(exchange.Name, ifUnused, cancellationToken);
 
     private class SimpleConsumeConfiguration : ISimpleConsumeConfiguration
     {
