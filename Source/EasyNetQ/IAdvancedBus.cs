@@ -179,12 +179,18 @@ public interface IAdvancedBus : IDisposable
     /// Declare an exchange
     /// </summary>
     /// <param name="exchange">The exchange name</param>
-    /// <param name="configure">Delegate to configure exchange declaration</param>
+    /// <param name="type">The type of exchange</param>
+    /// <param name="isDurable">Durable exchanges remain active when a server restarts.</param>
+    /// <param name="isAutoDelete">If set, the exchange is deleted when all queues have finished using it.</param>
+    /// <param name="arguments">The argument for exchange to declare.</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>The exchange</returns>
     Task<Exchange> ExchangeDeclareAsync(
         string exchange,
-        Action<IExchangeDeclareConfiguration> configure,
+        string type = ExchangeType.Topic,
+        bool isDurable = true,
+        bool isAutoDelete = false,
+        IDictionary<string, object?>? arguments = null,
         CancellationToken cancellationToken = default
     );
 
@@ -207,7 +213,7 @@ public interface IAdvancedBus : IDisposable
         string queue,
         string exchange,
         string routingKey,
-        IDictionary<string, object>? arguments,
+        IDictionary<string, object?>? arguments,
         CancellationToken cancellationToken = default
     );
 
@@ -218,7 +224,7 @@ public interface IAdvancedBus : IDisposable
         string queue,
         string exchange,
         string routingKey,
-        IDictionary<string, object>? arguments,
+        IDictionary<string, object?>? arguments,
         CancellationToken cancellationToken = default
     );
 
@@ -229,7 +235,7 @@ public interface IAdvancedBus : IDisposable
         string destinationExchange,
         string sourceExchange,
         string routingKey,
-        IDictionary<string, object>? arguments,
+        IDictionary<string, object?>? arguments = null,
         CancellationToken cancellationToken = default
     );
 
@@ -240,7 +246,7 @@ public interface IAdvancedBus : IDisposable
         string destinationExchange,
         string sourceExchange,
         string routingKey,
-        IDictionary<string, object>? arguments,
+        IDictionary<string, object?>? arguments = null,
         CancellationToken cancellationToken = default
     );
 

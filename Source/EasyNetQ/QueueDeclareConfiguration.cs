@@ -46,7 +46,7 @@ internal class QueueDeclareConfiguration : IQueueDeclareConfiguration
     public bool IsExclusive { get; private set; }
     public bool IsAutoDelete { get; private set; }
 
-    public IDictionary<string, object>? Arguments { get; private set; }
+    public IDictionary<string, object?>? Arguments { get; private set; }
 
     public IQueueDeclareConfiguration AsDurable(bool isDurable)
     {
@@ -68,7 +68,7 @@ internal class QueueDeclareConfiguration : IQueueDeclareConfiguration
 
     public IQueueDeclareConfiguration WithArgument(string name, object value)
     {
-        (Arguments ??= new Dictionary<string, object>())[name] = value;
+        (Arguments ??= new Dictionary<string, object?>())[name] = value;
         return this;
     }
 }

@@ -14,6 +14,7 @@ using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 using RabbitMQ.Client;
+using ExchangeType = EasyNetQ.Topology.ExchangeType;
 
 namespace EasyNetQ;
 
@@ -449,21 +450,16 @@ public class RabbitAdvancedBus : IAdvancedBus
         }
     }
 
-    /// <inheritdoc />
     public async Task<Exchange> ExchangeDeclareAsync(
         string exchange,
-        Action<IExchangeDeclareConfiguration> configure,
+        string type = ExchangeType.Topic,
+        bool isDurable = true,
+        bool isAutoDelete = false,
+        IDictionary<string, object?>? arguments = null,
         CancellationToken cancellationToken = default
     )
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
-
-        var exchangeDeclareConfiguration = new ExchangeDeclareConfiguration();
-        configure(exchangeDeclareConfiguration);
-        var type = exchangeDeclareConfiguration.Type;
-        var isDurable = exchangeDeclareConfiguration.IsDurable;
-        var isAutoDelete = exchangeDeclareConfiguration.IsAutoDelete;
-        var arguments = exchangeDeclareConfiguration.Arguments;
 
         await persistentChannelDispatcher.InvokeAsync(
             x => x.ExchangeDeclare(exchange, type, isDurable, isAutoDelete, arguments),
@@ -508,7 +504,7 @@ public class RabbitAdvancedBus : IAdvancedBus
         string queue,
         string exchange,
         string routingKey,
-        IDictionary<string, object>? arguments,
+        IDictionary<string, object?>? arguments,
         CancellationToken cancellationToken
     )
     {
@@ -537,7 +533,7 @@ public class RabbitAdvancedBus : IAdvancedBus
         string queue,
         string exchange,
         string routingKey,
-        IDictionary<string, object>? arguments,
+        IDictionary<string, object?>? arguments,
         CancellationToken cancellationToken
     )
     {
@@ -566,7 +562,7 @@ public class RabbitAdvancedBus : IAdvancedBus
         string destinationExchange,
         string sourceExchange,
         string routingKey,
-        IDictionary<string, object>? arguments,
+        IDictionary<string, object?>? arguments,
         CancellationToken cancellationToken
     )
     {
@@ -595,7 +591,7 @@ public class RabbitAdvancedBus : IAdvancedBus
         string destinationExchange,
         string sourceExchange,
         string routingKey,
-        IDictionary<string, object>? arguments,
+        IDictionary<string, object?>? arguments,
         CancellationToken cancellationToken
     )
     {

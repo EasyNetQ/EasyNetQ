@@ -484,6 +484,24 @@ public static class AdvancedBusExtensions
             .GetResult();
     }
 
+
+    public static async Task<Exchange> ExchangeDeclareAsync(
+        this IAdvancedBus bus,
+        string exchange,
+        Action<IExchangeDeclareConfiguration> configure,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var exchangeDeclareConfiguration = new ExchangeDeclareConfiguration();
+        configure(exchangeDeclareConfiguration);
+        var type = exchangeDeclareConfiguration.Type;
+        var isDurable = exchangeDeclareConfiguration.IsDurable;
+        var isAutoDelete = exchangeDeclareConfiguration.IsAutoDelete;
+        var arguments = exchangeDeclareConfiguration.Arguments;
+
+        return await bus.ExchangeDeclareAsync(exchange, type, isDurable, isAutoDelete, arguments, cancellationToken).ConfigureAwait(false);
+    }
+
     /// <summary>
     /// Declare a transient server named queue. Note, this queue will only last for duration of the
     /// connection. If there is a connection outage, EasyNetQ will not attempt to recreate
@@ -645,7 +663,7 @@ public static class AdvancedBusExtensions
         Exchange exchange,
         Queue queue,
         string routingKey,
-        IDictionary<string, object>? arguments,
+        IDictionary<string, object?>? arguments = null,
         CancellationToken cancellationToken = default
     )
     {
@@ -668,7 +686,7 @@ public static class AdvancedBusExtensions
         Exchange source,
         Exchange destination,
         string routingKey,
-        IDictionary<string, object>? arguments,
+        IDictionary<string, object?>? arguments = null,
         CancellationToken cancellationToken = default
     )
     {
@@ -747,7 +765,7 @@ public static class AdvancedBusExtensions
         Exchange source,
         Exchange destination,
         string routingKey,
-        IDictionary<string, object>? arguments,
+        IDictionary<string, object?>? arguments = null,
         CancellationToken cancellationToken = default
     )
     {
@@ -787,7 +805,7 @@ public static class AdvancedBusExtensions
         Exchange exchange,
         Queue queue,
         string routingKey,
-        IDictionary<string, object>? arguments,
+        IDictionary<string, object?>? arguments,
         CancellationToken cancellationToken = default
     )
     {
@@ -795,25 +813,6 @@ public static class AdvancedBusExtensions
             .GetAwaiter()
             .GetResult();
     }
-
-    /// <summary>
-    /// Declare an exchange
-    /// </summary>
-    /// <param name="bus">The bus instance</param>
-    /// <param name="exchange">The exchange name</param>
-    /// <param name="type">The type of exchange</param>
-    /// <param name="durable">Durable exchanges remain active when a server restarts.</param>
-    /// <param name="autoDelete">If set, the exchange is deleted when all queues have finished using it.</param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    /// <returns>The exchange</returns>
-    public static Task<Exchange> ExchangeDeclareAsync(
-        this IAdvancedBus bus,
-        string exchange,
-        string type,
-        bool durable = true,
-        bool autoDelete = false,
-        CancellationToken cancellationToken = default
-    ) => bus.ExchangeDeclareAsync(exchange, c => c.AsDurable(durable).AsAutoDelete(autoDelete).WithType(type), cancellationToken);
 
     /// <summary>
     /// Declare a exchange passively. Throw an exception rather than create the exchange if it doesn't exist
@@ -840,6 +839,7 @@ public static class AdvancedBusExtensions
     /// <param name="type">The type of exchange</param>
     /// <param name="durable">Durable exchanges remain active when a server restarts.</param>
     /// <param name="autoDelete">If set, the exchange is deleted when all queues have finished using it.</param>
+    /// <param name="arguments">The argument for exchange to declare</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>The exchange</returns>
     public static Exchange ExchangeDeclare(
@@ -848,10 +848,11 @@ public static class AdvancedBusExtensions
         string type,
         bool durable = true,
         bool autoDelete = false,
+        IDictionary<string, object?>? arguments = null,
         CancellationToken cancellationToken = default
     )
     {
-        return bus.ExchangeDeclareAsync(exchange, type, durable, autoDelete, cancellationToken)
+        return bus.ExchangeDeclareAsync(exchange, type, durable, autoDelete, arguments, cancellationToken)
             .GetAwaiter()
             .GetResult();
     }
@@ -902,7 +903,7 @@ public static class AdvancedBusExtensions
         string queue,
         string exchange,
         string routingKey,
-        IDictionary<string, object> arguments,
+        IDictionary<string, object?>? arguments = null,
         CancellationToken cancellationToken = default
     )
     {
@@ -919,7 +920,7 @@ public static class AdvancedBusExtensions
         string destinationExchange,
         string sourceExchange,
         string routingKey,
-        IDictionary<string, object> arguments,
+        IDictionary<string, object?>? arguments = null,
         CancellationToken cancellationToken = default
     )
     {
