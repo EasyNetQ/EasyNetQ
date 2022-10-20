@@ -523,7 +523,7 @@ public class RabbitAdvancedBus : IAdvancedBus
         if (logger.IsDebugEnabled())
         {
             logger.DebugFormat(
-                "Bound queue {queue} from exchange {exchange} with routing key {routingKey} and arguments {arguments}",
+                "Bound queue {queue} to exchange {exchange} with routing key {routingKey} and arguments {arguments}",
                 queue,
                 exchange,
                 routingKey,
