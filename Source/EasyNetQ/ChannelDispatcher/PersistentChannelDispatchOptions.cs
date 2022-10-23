@@ -58,7 +58,7 @@ public class PersistentChannelDispatchOptions
     public PersistentConnectionType ConnectionType { get; }
 
     /// <summary>
-    ///     True if publisher confirms are enabled
+    ///     <see langword="true"/> if publisher confirms are enabled
     /// </summary>
     public bool PublisherConfirms { get; }
 

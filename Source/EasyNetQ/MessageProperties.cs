@@ -204,72 +204,72 @@ public class MessageProperties : ICloneable
     }
 
     /// <summary>
-    ///     True if <see cref="ContentType"/> is present
+    ///     <see langword="true"/> if <see cref="ContentType"/> is present
     /// </summary>
     public bool ContentTypePresent => contentTypePresent;
 
     /// <summary>
-    ///     True if <see cref="ContentEncoding"/> is present
+    ///     <see langword="true"/> if <see cref="ContentEncoding"/> is present
     /// </summary>
     public bool ContentEncodingPresent => contentEncodingPresent;
 
     /// <summary>
-    ///     True if <see cref="Headers"/> is present
+    ///     <see langword="true"/> if <see cref="Headers"/> is present
     /// </summary>
     public bool HeadersPresent => headers?.Count > 0;
 
     /// <summary>
-    ///     True if <see cref="DeliveryMode"/> is present
+    ///     <see langword="true"/> if <see cref="DeliveryMode"/> is present
     /// </summary>
     public bool DeliveryModePresent => deliveryModePresent;
 
     /// <summary>
-    ///     True if <see cref="Priority"/> is present
+    ///     <see langword="true"/> if <see cref="Priority"/> is present
     /// </summary>
     public bool PriorityPresent => priorityPresent;
 
     /// <summary>
-    ///     True if <see cref="CorrelationId"/> is present
+    ///     <see langword="true"/> if <see cref="CorrelationId"/> is present
     /// </summary>
     public bool CorrelationIdPresent => correlationIdPresent;
 
     /// <summary>
-    ///     True if <see cref="ReplyTo"/> is present
+    ///     <see langword="true"/> if <see cref="ReplyTo"/> is present
     /// </summary>
     public bool ReplyToPresent => replyToPresent;
 
     /// <summary>
-    ///     True if <see cref="Expiration"/> is present
+    ///     <see langword="true"/> if <see cref="Expiration"/> is present
     /// </summary>
     public bool ExpirationPresent => expirationPresent;
 
     /// <summary>
-    ///     True if <see cref="MessageId"/> is present
+    ///     <see langword="true"/> if <see cref="MessageId"/> is present
     /// </summary>
     public bool MessageIdPresent => messageIdPresent;
 
     /// <summary>
-    ///     True if <see cref="Timestamp"/> is present
+    ///     <see langword="true"/> if <see cref="Timestamp"/> is present
     /// </summary>
     public bool TimestampPresent => timestampPresent;
 
     /// <summary>
-    ///     True if <see cref="Type"/> is present
+    ///     <see langword="true"/> if <see cref="Type"/> is present
     /// </summary>
     public bool TypePresent => typePresent;
 
     /// <summary>
-    ///     True if <see cref="UserId"/> is present
+    ///     <see langword="true"/> if <see cref="UserId"/> is present
     /// </summary>
     public bool UserIdPresent => userIdPresent;
 
     /// <summary>
-    ///     True if <see cref="AppId"/> is present
+    ///     <see langword="true"/> if <see cref="AppId"/> is present
     /// </summary>
     public bool AppIdPresent => appIdPresent;
 
     /// <summary>
-    ///     True if <see cref="ClusterId"/> is present
+    ///     <see langword="true"/> if <see cref="ClusterId"/> is present
     /// </summary>
     public bool ClusterIdPresent => clusterIdPresent;
 

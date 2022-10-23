@@ -4,7 +4,7 @@ using S = Serilog;
 namespace EasyNetQ.Logging.Serilog;
 
 /// <inheritdoc />
-public sealed class SerilogLoggerAdapter<TCategory> : ILogger<TCategory>
+public class SerilogLoggerAdapter<TCategory> : ILogger<TCategory>
 {
     private readonly S.ILogger logger;
 
@@ -16,7 +16,7 @@ public sealed class SerilogLoggerAdapter<TCategory> : ILogger<TCategory>
     public SerilogLoggerAdapter(S.ILogger logger) => this.logger = logger.ForContext<TCategory>();
 
     /// <inheritdoc />
-    public bool Log(
+    public virtual bool Log(
         LogLevel logLevel,
         Func<string>? messageFunc,
         Exception? exception = null,

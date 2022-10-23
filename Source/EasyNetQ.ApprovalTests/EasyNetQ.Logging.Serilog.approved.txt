@@ -1,9 +1,9 @@
 namespace EasyNetQ.Logging.Serilog
 {
-    public sealed class SerilogLoggerAdapter<TCategory> : EasyNetQ.Logging.ILogger, EasyNetQ.Logging.ILogger<TCategory>
+    public class SerilogLoggerAdapter<TCategory> : EasyNetQ.Logging.ILogger, EasyNetQ.Logging.ILogger<TCategory>
     {
         public SerilogLoggerAdapter(Serilog.ILogger logger) { }
-        public bool Log(EasyNetQ.Logging.LogLevel logLevel, System.Func<string>? messageFunc, System.Exception? exception = null, params object?[] formatParameters) { }
+        public virtual bool Log(EasyNetQ.Logging.LogLevel logLevel, System.Func<string>? messageFunc, System.Exception? exception = null, params object?[] formatParameters) { }
     }
 }
 namespace EasyNetQ

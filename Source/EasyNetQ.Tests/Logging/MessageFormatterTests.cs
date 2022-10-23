@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using EasyNetQ.Logging;
 using FluentAssertions;
@@ -8,6 +9,18 @@ namespace EasyNetQ.Tests.Logging;
 
 public class MessageFormatterTests
 {
+    private static Func<string> SimulateStructuredLogging(Func<string> messageBuilder, object[] formatParameters)
+    {
+        if (formatParameters == null || formatParameters.Length == 0) return messageBuilder;
+
+        return () =>
+        {
+            var targetMessage = messageBuilder();
+            IEnumerable<string> _;
+            return MessageFormatter.FormatStructuredMessage(targetMessage, formatParameters, out _);
+        };
+    }
+
     [Fact]
     public void When_arguments_are_unique_and_not_escaped_Then_should_replace_them()
     {
