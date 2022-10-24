@@ -1587,7 +1587,6 @@ namespace EasyNetQ.Internals
     public class NoResult : System.IEquatable<EasyNetQ.Internals.NoResult>
     {
         public static readonly EasyNetQ.Internals.NoResult Instance;
-        protected virtual System.Type EqualityContract { get; }
     }
     public sealed class ReadOnlyMemoryStream : System.IO.Stream
     {
