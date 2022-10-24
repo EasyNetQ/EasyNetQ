@@ -116,7 +116,7 @@ public static class QueueDeclareConfigurationExtensions
     ///     over to another registered consumer in case the active one is cancelled or dies.
     /// </summary>
     /// <param name="configuration">The configuration instance</param>
-    /// <param name="singleActiveConsumer">True if a queue has a single active consumer</param>
+    /// <param name="singleActiveConsumer"><see langword="true"/> if a queue has a single active consumer</param>
     /// <returns>The same <paramref name="configuration"/></returns>
     public static IQueueDeclareConfiguration WithSingleActiveConsumer(
         this IQueueDeclareConfiguration configuration, bool singleActiveConsumer = true

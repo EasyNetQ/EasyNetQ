@@ -15,7 +15,7 @@ namespace EasyNetQ;
 public interface IPullResult : IDisposable
 {
     /// <summary>
-    ///     True if a message is available
+    ///     <see langword="true"/> if a message is available
     /// </summary>
     public bool IsAvailable { get; }
 
@@ -81,7 +81,7 @@ public readonly struct PullResult : IPullResult
     }
 
     /// <summary>
-    ///     True if a message is available
+    ///     <see langword="true"/> if a message is available
     /// </summary>
     public bool IsAvailable { get; }
 
@@ -191,7 +191,7 @@ public readonly struct PullResult<T> : IPullResult
     }
 
     /// <summary>
-    ///     True if a message is available
+    ///     <see langword="true"/> if a message is available
     /// </summary>
     public bool IsAvailable { get; }
 
@@ -285,7 +285,7 @@ public interface IPullingConsumer<TPullResult> : IDisposable where TPullResult :
 public readonly struct PullingConsumerOptions
 {
     /// <summary>
-    ///     True if auto ack is enabled for the consumer
+    ///     <see langword="true"/> if auto ack is enabled for the consumer
     /// </summary>
     public bool AutoAck { get; }
 

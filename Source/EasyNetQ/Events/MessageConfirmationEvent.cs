@@ -18,12 +18,12 @@ public readonly struct MessageConfirmationEvent
     public ulong DeliveryTag { get; }
 
     /// <summary>
-    ///     True if a confirmation affects all previous messages
+    ///     <see langword="true"/> if a confirmation affects all previous messages
     /// </summary>
     public bool Multiple { get; }
 
     /// <summary>
-    ///     True if a message is rejected
+    ///     <see langword="true"/> if a message is rejected
     /// </summary>
     public bool IsNack { get; }
 

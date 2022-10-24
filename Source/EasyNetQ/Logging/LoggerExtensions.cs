@@ -13,7 +13,7 @@ public static class LoggerExtensions
     ///     Check if the <see cref="LogLevel.Debug"/> log level is enabled.
     /// </summary>
     /// <param name="logger">The <see cref="ILogger"/> to check with.</param>
-    /// <returns>True if the log level is enabled; false otherwise.</returns>
+    /// <returns><see langword="true"/> if the log level is enabled; <see langword="false"/> otherwise.</returns>
     public static bool IsDebugEnabled(this ILogger logger)
     {
         return logger.Log(LogLevel.Debug, null, null, EmptyParams);
@@ -23,7 +23,7 @@ public static class LoggerExtensions
     ///     Check if the <see cref="LogLevel.Error"/> log level is enabled.
     /// </summary>
     /// <param name="logger">The <see cref="ILogger"/> to check with.</param>
-    /// <returns>True if the log level is enabled; false otherwise.</returns>
+    /// <returns><see langword="true"/> if the log level is enabled; <see langword="false"/> otherwise.</returns>
     public static bool IsErrorEnabled(this ILogger logger)
     {
         return logger.Log(LogLevel.Error, null, null, EmptyParams);
@@ -33,7 +33,7 @@ public static class LoggerExtensions
     ///     Check if the <see cref="LogLevel.Fatal"/> log level is enabled.
     /// </summary>
     /// <param name="logger">The <see cref="ILogger"/> to check with.</param>
-    /// <returns>True if the log level is enabled; false otherwise.</returns>
+    /// <returns><see langword="true"/> if the log level is enabled; <see langword="false"/> otherwise.</returns>
     public static bool IsFatalEnabled(this ILogger logger)
     {
         return logger.Log(LogLevel.Fatal, null, null, EmptyParams);
@@ -43,7 +43,7 @@ public static class LoggerExtensions
     ///     Check if the <see cref="LogLevel.Info"/> log level is enabled.
     /// </summary>
     /// <param name="logger">The <see cref="ILogger"/> to check with.</param>
-    /// <returns>True if the log level is enabled; false otherwise.</returns>
+    /// <returns><see langword="true"/> if the log level is enabled; <see langword="false"/> otherwise.</returns>
     public static bool IsInfoEnabled(this ILogger logger)
     {
         return logger.Log(LogLevel.Info, null, null, EmptyParams);
@@ -53,7 +53,7 @@ public static class LoggerExtensions
     ///     Check if the <see cref="LogLevel.Trace"/> log level is enabled.
     /// </summary>
     /// <param name="logger">The <see cref="ILogger"/> to check with.</param>
-    /// <returns>True if the log level is enabled; false otherwise.</returns>
+    /// <returns><see langword="true"/> if the log level is enabled; <see langword="false"/> otherwise.</returns>
     public static bool IsTraceEnabled(this ILogger logger)
     {
         return logger.Log(LogLevel.Trace, null, null, EmptyParams);
@@ -63,7 +63,7 @@ public static class LoggerExtensions
     ///     Check if the <see cref="LogLevel.Warn"/> log level is enabled.
     /// </summary>
     /// <param name="logger">The <see cref="ILogger"/> to check with.</param>
-    /// <returns>True if the log level is enabled; false otherwise.</returns>
+    /// <returns><see langword="true"/> if the log level is enabled; <see langword="false"/> otherwise.</returns>
     public static bool IsWarnEnabled(this ILogger logger)
     {
         return logger.Log(LogLevel.Warn, null, null, EmptyParams);

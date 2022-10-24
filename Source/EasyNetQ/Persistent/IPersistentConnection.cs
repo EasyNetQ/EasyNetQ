@@ -9,7 +9,7 @@ namespace EasyNetQ.Persistent;
 public interface IPersistentConnection : IDisposable
 {
     /// <summary>
-    ///     True if a connection is connected
+    ///     <see langword="true"/> if a connection is connected
     /// </summary>
     bool IsConnected { get; }
 

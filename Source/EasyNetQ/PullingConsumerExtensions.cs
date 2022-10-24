@@ -71,7 +71,7 @@ public static class PullingConsumerExtensions
     /// </summary>
     /// <param name="consumer">The consumer</param>
     /// <param name="deliveryTag">The delivery tag</param>
-    /// <param name="requeue">True if the message should be returned to the queue</param>
+    /// <param name="requeue"><see langword="true"/> if the message should be returned to the queue</param>
     /// <param name="cancellationToken">The cancellation token</param>
     public static Task RejectAsync<TPullResult>(
         this IPullingConsumer<TPullResult> consumer,
@@ -123,7 +123,7 @@ public static class PullingConsumerExtensions
     /// </summary>
     /// <param name="consumer">The consumer</param>
     /// <param name="deliveryTag">The delivery tag of the batch</param>
-    /// <param name="requeue">True if all messages of batch should be returned to the queue</param>
+    /// <param name="requeue"><see langword="true"/> if all messages of batch should be returned to the queue</param>
     /// <param name="cancellationToken">The cancellation token</param>
     public static Task RejectBatchAsync<TPullResult>(
         this IPullingConsumer<TPullResult> consumer,
