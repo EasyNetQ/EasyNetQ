@@ -3,7 +3,8 @@ using System;
 namespace EasyNetQ.Logging;
 
 /// <summary>
-/// Logger that does nothing. It is used by default.
+/// Logger that does nothing. It is used/registered by default in the
+/// EasyNetQ components if custom logger has not yet been registered.
 /// </summary>
 public sealed class NoopLogger<TCategoryName> : ILogger<TCategoryName>
 {

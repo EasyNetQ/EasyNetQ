@@ -16,7 +16,7 @@ public class MessageReceivedInfo
     public ulong DeliveryTag { get; }
 
     /// <summary>
-    ///     True if a message is redelivered
+    ///     <see langword="true"/> if a message is redelivered
     /// </summary>
     public bool Redelivered { get; }
 

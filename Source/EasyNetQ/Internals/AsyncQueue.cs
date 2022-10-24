@@ -57,7 +57,7 @@ public sealed class AsyncQueue<T> : IDisposable
     ///     Tries to take the element from queue
     /// </summary>
     /// <param name="element">Dequeued element</param>
-    /// <returns>True if an element was dequeued</returns>
+    /// <returns><see langword="true"/> if an element was dequeued</returns>
     public bool TryDequeue(out T? element)
     {
         lock (mutex)

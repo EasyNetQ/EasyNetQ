@@ -15,7 +15,7 @@ namespace EasyNetQ;
 public interface IAdvancedBus : IDisposable
 {
     /// <summary>
-    /// True if a connection of the given type is established.
+    /// <see langword="true"/> if a connection of the given type is established.
     /// </summary>
     bool IsConnected { get; }
 
