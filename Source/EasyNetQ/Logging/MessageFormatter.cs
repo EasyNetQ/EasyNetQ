@@ -6,21 +6,14 @@ using System.Text.RegularExpressions;
 
 namespace EasyNetQ.Logging;
 
+/// <summary>
+/// Formatter to convert the named format items like {NamedformatItem} to format
+/// applicable for calling <see cref="string.Format(IFormatProvider, string, object)"/>.
+/// Used by built-in <see cref="ConsoleLogger{TCategoryName}"/>.
+/// </summary>
 internal static class MessageFormatter
 {
     private static readonly Regex Pattern = new(@"(?<!{){@?(?<arg>[^ :{}]+)(?<format>:[^}]+)?}", RegexOptions.Compiled);
-
-    public static Func<string> SimulateStructuredLogging(Func<string> messageBuilder, object[] formatParameters)
-    {
-        if (formatParameters == null || formatParameters.Length == 0) return messageBuilder;
-
-        return () =>
-        {
-            var targetMessage = messageBuilder();
-            IEnumerable<string> _;
-            return FormatStructuredMessage(targetMessage, formatParameters, out _);
-        };
-    }
 
     private static string ReplaceFirst(string text, string search, string replace)
     {
