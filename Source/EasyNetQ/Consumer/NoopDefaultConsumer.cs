@@ -1,5 +1,3 @@
-#nullable disable
-
 using System;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
@@ -13,7 +11,7 @@ internal sealed class NoopDefaultConsumer : IBasicConsumer, IAsyncBasicConsumer
 
     private NoopDefaultConsumer() { }
 
-    public IModel Model => null;
+    public IModel Model => throw new NotSupportedException();
 
     event AsyncEventHandler<ConsumerEventArgs> IAsyncBasicConsumer.ConsumerCancelled
     {
