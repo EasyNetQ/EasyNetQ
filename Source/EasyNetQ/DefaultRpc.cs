@@ -16,7 +16,7 @@ namespace EasyNetQ;
 /// <summary>
 ///     Default implementation of EasyNetQ's request-response pattern
 /// </summary>
-public class DefaultRpc : IRpc
+public class DefaultRpc : IRpc, IDisposable
 {
     protected const string IsFaultedKey = "IsFaulted";
     protected const string ExceptionMessageKey = "ExceptionMessage";

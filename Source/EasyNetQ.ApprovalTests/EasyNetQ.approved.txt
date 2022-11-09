@@ -163,7 +163,7 @@ namespace EasyNetQ
         public virtual System.Threading.Tasks.Task PublishAsync<T>(T message, System.Action<EasyNetQ.IPublishConfiguration> configure, System.Threading.CancellationToken cancellationToken) { }
         public virtual EasyNetQ.Internals.AwaitableDisposable<EasyNetQ.SubscriptionResult> SubscribeAsync<T>(string subscriptionId, System.Func<T, System.Threading.CancellationToken, System.Threading.Tasks.Task> onMessage, System.Action<EasyNetQ.ISubscriptionConfiguration> configure, System.Threading.CancellationToken cancellationToken) { }
     }
-    public class DefaultRpc : EasyNetQ.IRpc
+    public class DefaultRpc : EasyNetQ.IRpc, System.IDisposable
     {
         protected const string ExceptionMessageKey = "ExceptionMessage";
         protected const string IsFaultedKey = "IsFaulted";
@@ -795,7 +795,7 @@ namespace EasyNetQ
         public const string Quorum = "quorum";
     }
     public delegate string? QueueTypeConvention(System.Type messageType);
-    public class RabbitAdvancedBus : EasyNetQ.IAdvancedBus
+    public class RabbitAdvancedBus : EasyNetQ.IAdvancedBus, System.IDisposable
     {
         public RabbitAdvancedBus(
                     EasyNetQ.Logging.ILogger<EasyNetQ.RabbitAdvancedBus> logger,
