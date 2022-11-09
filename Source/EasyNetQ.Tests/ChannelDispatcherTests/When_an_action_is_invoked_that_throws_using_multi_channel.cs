@@ -15,7 +15,7 @@ namespace EasyNetQ.Tests.ChannelDispatcherTests;
 
 public class When_an_action_is_invoked_that_throws_using_multi_channel : IDisposable
 {
-    private readonly IPersistentChannelDispatcher dispatcher;
+    private readonly MultiPersistentChannelDispatcher dispatcher;
 
     public When_an_action_is_invoked_that_throws_using_multi_channel()
     {

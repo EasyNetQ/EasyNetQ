@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace EasyNetQ.Consumer;
 
 /// <inheritdoc />
-public interface IHandlerRunner : IDisposable
+public interface IHandlerRunner
 {
     Task<AckStrategy> InvokeUserMessageHandlerAsync(ConsumerExecutionContext context, CancellationToken cancellationToken = default);
 }

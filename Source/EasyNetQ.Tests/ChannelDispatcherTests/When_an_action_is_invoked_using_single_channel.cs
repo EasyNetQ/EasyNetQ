@@ -14,7 +14,7 @@ namespace EasyNetQ.Tests.ChannelDispatcherTests;
 
 public class When_an_action_is_invoked_using_single_channel : IDisposable
 {
-    private readonly IPersistentChannelDispatcher dispatcher;
+    private readonly SinglePersistentChannelDispatcher dispatcher;
     private readonly IPersistentChannelFactory channelFactory;
     private readonly int actionResult;
 

@@ -48,7 +48,7 @@ public class When_an_error_occurs_in_the_message_handler : ConsumerTestBase
     {
         MockBuilder.Dispose();
 
-        ConsumerErrorStrategy.Received().Dispose();
+        ((IDisposable)ConsumerErrorStrategy.Received()).Dispose();
     }
 }
 
