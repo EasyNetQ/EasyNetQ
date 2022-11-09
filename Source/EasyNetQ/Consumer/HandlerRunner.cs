@@ -12,7 +12,7 @@ public interface IHandlerRunner
 }
 
 /// <inheritdoc />
-public class HandlerRunner : IHandlerRunner
+public class HandlerRunner : IHandlerRunner, IDisposable
 {
     private readonly IConsumerErrorStrategy consumerErrorStrategy;
     private readonly ILogger logger;

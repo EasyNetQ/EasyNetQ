@@ -7,7 +7,7 @@ namespace EasyNetQ.Consumer;
 /// <summary>
 ///     A simple strategy which does nothing, only applies AckStrategies
 /// </summary>
-public class SimpleConsumerErrorStrategy : IConsumerErrorStrategy
+public class SimpleConsumerErrorStrategy : IConsumerErrorStrategy, IDisposable
 {
     /// <summary>
     ///     Acks a message in case of an error
