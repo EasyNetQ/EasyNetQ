@@ -25,16 +25,6 @@ public interface IAdvancedBus : IDisposable
     Task ConnectAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// The IoC container that EasyNetQ uses to resolve its services.
-    /// </summary>
-    IServiceResolver Container { get; }
-
-    /// <summary>
-    /// The conventions used by EasyNetQ to name its routing topology elements.
-    /// </summary>
-    IConventions Conventions { get; }
-
-    /// <summary>
     /// Consume a stream of messages. Dispatch them to the given handlers
     /// </summary>
     /// <param name="configure">

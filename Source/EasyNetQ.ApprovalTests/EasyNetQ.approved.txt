@@ -282,8 +282,6 @@ namespace EasyNetQ
     }
     public interface IAdvancedBus : System.IDisposable
     {
-        EasyNetQ.DI.IServiceResolver Container { get; }
-        EasyNetQ.IConventions Conventions { get; }
         bool IsConnected { get; }
         event System.EventHandler<EasyNetQ.BlockedEventArgs> Blocked;
         event System.EventHandler<EasyNetQ.ConnectedEventArgs> Connected;
