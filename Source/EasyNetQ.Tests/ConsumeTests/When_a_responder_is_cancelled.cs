@@ -22,9 +22,9 @@ public class When_a_responder_is_cancelled : IDisposable
     {
         mockBuilder = new MockBuilder();
 
-        conventions = mockBuilder.Bus.Advanced.Conventions;
-        typeNameSerializer = mockBuilder.Bus.Advanced.Container.Resolve<ITypeNameSerializer>();
-        serializer = mockBuilder.Bus.Advanced.Container.Resolve<ISerializer>();
+        conventions = mockBuilder.Conventions;
+        typeNameSerializer = mockBuilder.TypeNameSerializer;
+        serializer = mockBuilder.Serializer;
 
         mockBuilder.Rpc.Respond<RpcRequest, RpcResponse>(_ =>
         {

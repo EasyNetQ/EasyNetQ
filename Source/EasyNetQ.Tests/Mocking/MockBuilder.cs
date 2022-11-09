@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using EasyNetQ.ConnectionString;
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;
+using EasyNetQ.LightInject;
 using EasyNetQ.Producer;
 using NSubstitute;
 using RabbitMQ.Client;
@@ -10,8 +13,10 @@ namespace EasyNetQ.Tests.Mocking;
 
 public class MockBuilder : IDisposable
 {
-    private readonly IBasicProperties basicProperties = new BasicProperties();
+    private readonly ServiceContainer container;
     private readonly IBus bus;
+
+    private readonly IBasicProperties basicProperties = new BasicProperties();
     private readonly Stack<IModel> channelPool = new();
     private readonly List<IModel> channels = new();
     private readonly IConnection connection = Substitute.For<IAutorecoveringConnection>();
@@ -68,20 +73,19 @@ public class MockBuilder : IDisposable
             return channel;
         });
 
-        bus = RabbitHutch.CreateBus(connectionString, x =>
-        {
-            registerServices(x);
-            x.Register(connectionFactory);
-        });
+        container = new ServiceContainer(c => c.EnablePropertyInjection = false);
+        var adapter = new LightInjectAdapter(container);
+        adapter.Register(connectionFactory);
+
+        RabbitHutch.RegisterBus(
+            adapter,
+            x => x.Resolve<IConnectionStringParser>().Parse(connectionString),
+            registerServices);
+
+        bus = container.GetInstance<IBus>();
     }
 
-    public IPubSub PubSub => bus.PubSub;
-
-    public IRpc Rpc => bus.Rpc;
-
-    public ISendReceive SendReceive => bus.SendReceive;
-
-    public IScheduler Scheduler => bus.Scheduler;
+    public IBus Bus => bus;
 
     public IConnectionFactory ConnectionFactory => connectionFactory;
 
@@ -91,18 +95,28 @@ public class MockBuilder : IDisposable
 
     public List<AsyncDefaultBasicConsumer> Consumers => consumers;
 
-    public IBus Bus => bus;
-
-    public IServiceResolver ServiceProvider => bus.Advanced.Container;
-
     public IModel NextModel => channelPool.Peek();
 
-    public IEventBus EventBus => ServiceProvider.Resolve<IEventBus>();
+    public IPubSub PubSub => container.GetInstance<IPubSub>();
 
-    public IProducerConnection ProducerConnection => ServiceProvider.Resolve<IProducerConnection>();
-    public IConsumerConnection ConsumerConnection => ServiceProvider.Resolve<IConsumerConnection>();
+    public IRpc Rpc => container.GetInstance<IRpc>();
+
+    public ISendReceive SendReceive => container.GetInstance<ISendReceive>();
+
+    public IScheduler Scheduler => container.GetInstance<IScheduler>();
+
+    public IEventBus EventBus => container.GetInstance<IEventBus>();
+
+    public IConventions Conventions => container.GetInstance<IConventions>();
+
+    public ITypeNameSerializer TypeNameSerializer => container.GetInstance<ITypeNameSerializer>();
+
+    public ISerializer Serializer => container.GetInstance<ISerializer>();
+
+    public IProducerConnection ProducerConnection => container.GetInstance<IProducerConnection>();
+    public IConsumerConnection ConsumerConnection => container.GetInstance<IConsumerConnection>();
 
     public List<string> ConsumerQueueNames => consumerQueueNames;
 
-    public void Dispose() => bus.Dispose();
+    public void Dispose() => container.Dispose();
 }
