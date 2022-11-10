@@ -214,8 +214,8 @@ public class InternalConsumer : IInternalConsumer
 
                 logger.InfoFormat(
                     "Declared consumer with consumerTag {consumerTag} on queue {queue} and configuration {configuration}",
-                    queue.Name,
                     perQueueConfiguration.ConsumerTag,
+                    queue.Name,
                     configuration
                 );
 
@@ -227,8 +227,8 @@ public class InternalConsumer : IInternalConsumer
                 logger.Error(
                     exception,
                     "Consume with consumerTag {consumerTag} on queue {queue} failed",
-                    queue.Name,
-                    perQueueConfiguration.ConsumerTag
+                    perQueueConfiguration.ConsumerTag,
+                    queue.Name
                 );
 
                 failedQueues.Add(queue);
