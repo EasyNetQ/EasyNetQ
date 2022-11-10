@@ -138,7 +138,7 @@ public static class RabbitHutch
         var container = new ServiceContainer(c => c.EnablePropertyInjection = false);
         var adapter = new LightInjectAdapter(container);
         RegisterBus(adapter, connectionConfigurationFactory, registerServices);
-        return new SelfHostedBus(container.GetInstance<IBus>(), container.Dispose);
+        return new SelfHostedBus(container);
     }
 
     /// <summary>
