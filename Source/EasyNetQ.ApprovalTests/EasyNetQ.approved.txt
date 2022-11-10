@@ -280,7 +280,7 @@ namespace EasyNetQ
         public ushort Port { get; set; }
         public RabbitMQ.Client.SslOption Ssl { get; }
     }
-    public interface IAdvancedBus : System.IDisposable
+    public interface IAdvancedBus
     {
         bool IsConnected { get; }
         event System.EventHandler<EasyNetQ.BlockedEventArgs> Blocked;
@@ -458,7 +458,7 @@ namespace EasyNetQ
         EasyNetQ.IResponderConfiguration WithPrefetchCount(ushort prefetchCount);
         EasyNetQ.IResponderConfiguration WithQueueName(string queueName);
     }
-    public interface IRpc : System.IDisposable
+    public interface IRpc
     {
         System.Threading.Tasks.Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, System.Action<EasyNetQ.IRequestConfiguration> configure, System.Threading.CancellationToken cancellationToken = default);
         EasyNetQ.Internals.AwaitableDisposable<System.IDisposable> RespondAsync<TRequest, TResponse>(System.Func<TRequest, System.Threading.CancellationToken, System.Threading.Tasks.Task<TResponse>> responder, System.Action<EasyNetQ.IResponderConfiguration> configure, System.Threading.CancellationToken cancellationToken = default);
@@ -1030,7 +1030,7 @@ namespace EasyNetQ.AutoSubscribe
 }
 namespace EasyNetQ.ChannelDispatcher
 {
-    public interface IPersistentChannelDispatcher : System.IDisposable
+    public interface IPersistentChannelDispatcher
     {
         System.Threading.Tasks.Task<TResult> InvokeAsync<TResult, TChannelAction>(TChannelAction channelAction, EasyNetQ.ChannelDispatcher.PersistentChannelDispatchOptions options, System.Threading.CancellationToken cancellationToken = default)
             where TChannelAction :  struct, EasyNetQ.Persistent.IPersistentChannelAction<TResult>;
@@ -1176,7 +1176,7 @@ namespace EasyNetQ.Consumer
         void StartConsuming();
     }
     public interface IConsumerConnection : EasyNetQ.Persistent.IPersistentConnection, System.IDisposable { }
-    public interface IConsumerErrorStrategy : System.IDisposable
+    public interface IConsumerErrorStrategy
     {
         System.Threading.Tasks.Task<EasyNetQ.Consumer.AckStrategy> HandleConsumerCancelledAsync(EasyNetQ.Consumer.ConsumerExecutionContext context, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task<EasyNetQ.Consumer.AckStrategy> HandleConsumerErrorAsync(EasyNetQ.Consumer.ConsumerExecutionContext context, System.Exception exception, System.Threading.CancellationToken cancellationToken = default);
@@ -1204,7 +1204,7 @@ namespace EasyNetQ.Consumer
         bool ThrowOnNoMatchingHandler { set; }
         EasyNetQ.Consumer.IHandlerRegistration Add<T>(EasyNetQ.Consumer.IMessageHandler<T> handler);
     }
-    public interface IHandlerRunner : System.IDisposable
+    public interface IHandlerRunner
     {
         System.Threading.Tasks.Task<EasyNetQ.Consumer.AckStrategy> InvokeUserMessageHandlerAsync(EasyNetQ.Consumer.ConsumerExecutionContext context, System.Threading.CancellationToken cancellationToken = default);
     }

@@ -26,7 +26,7 @@ namespace EasyNetQ.Consumer;
 ///
 /// Each exchange is bound to the central EasyNetQ error queue.
 /// </summary>
-public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
+public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy, IDisposable
 {
     private readonly ILogger<DefaultConsumerErrorStrategy> logger;
     private readonly IConsumerConnection connection;

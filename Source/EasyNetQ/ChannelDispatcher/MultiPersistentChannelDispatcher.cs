@@ -13,7 +13,7 @@ namespace EasyNetQ.ChannelDispatcher;
 /// <summary>
 ///     Invokes client commands using multiple channels
 /// </summary>
-public sealed class MultiPersistentChannelDispatcher : IPersistentChannelDispatcher
+public sealed class MultiPersistentChannelDispatcher : IPersistentChannelDispatcher, IDisposable
 {
     private readonly ConcurrentDictionary<PersistentChannelDispatchOptions, AsyncQueue<IPersistentChannel>> channelsPoolPerOptions;
     private readonly Func<PersistentChannelDispatchOptions, AsyncQueue<IPersistentChannel>> channelsPoolFactory;

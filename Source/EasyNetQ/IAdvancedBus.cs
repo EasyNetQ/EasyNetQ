@@ -12,7 +12,7 @@ namespace EasyNetQ;
 /// of routing topology, but keeping the EasyNetQ serialization, persistent connection,
 /// error handling and subscription thread.
 /// </summary>
-public interface IAdvancedBus : IDisposable
+public interface IAdvancedBus
 {
     /// <summary>
     /// <see langword="true"/> if a connection of the given type is established.

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace EasyNetQ.Consumer;
 
 /// <inheritdoc />
-public interface IConsumerErrorStrategy : IDisposable
+public interface IConsumerErrorStrategy
 {
     /// <summary>
     /// This method is fired when an exception is thrown. Implement a strategy for

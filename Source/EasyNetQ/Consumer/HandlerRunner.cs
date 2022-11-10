@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 namespace EasyNetQ.Consumer;
 
 /// <inheritdoc />
-public interface IHandlerRunner : IDisposable
+public interface IHandlerRunner
 {
     Task<AckStrategy> InvokeUserMessageHandlerAsync(ConsumerExecutionContext context, CancellationToken cancellationToken = default);
 }
 
 /// <inheritdoc />
-public class HandlerRunner : IHandlerRunner
+public class HandlerRunner : IHandlerRunner, IDisposable
 {
     private readonly IConsumerErrorStrategy consumerErrorStrategy;
     private readonly ILogger logger;

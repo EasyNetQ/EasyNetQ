@@ -2,6 +2,7 @@
 
 using EasyNetQ.Consumer;
 using NSubstitute;
+using System;
 using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests;
@@ -25,7 +26,7 @@ public class When_a_nack_received_from_the_message_handler : ConsumerTestBase
     {
         MockBuilder.Dispose();
 
-        ConsumerErrorStrategy.Received().Dispose();
+        ((IDisposable)ConsumerErrorStrategy.Received()).Dispose();
     }
 }
 

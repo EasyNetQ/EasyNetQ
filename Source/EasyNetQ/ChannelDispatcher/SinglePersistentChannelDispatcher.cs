@@ -12,7 +12,7 @@ namespace EasyNetQ.ChannelDispatcher;
 /// <summary>
 ///     Invokes client commands using single channel
 /// </summary>
-public sealed class SinglePersistentChannelDispatcher : IPersistentChannelDispatcher
+public sealed class SinglePersistentChannelDispatcher : IPersistentChannelDispatcher, IDisposable
 {
     private readonly ConcurrentDictionary<PersistentChannelDispatchOptions, IPersistentChannel> channelPerOptions;
     private readonly Func<PersistentChannelDispatchOptions, IPersistentChannel> createChannelFactory;

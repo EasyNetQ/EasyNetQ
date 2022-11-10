@@ -78,7 +78,7 @@ public class AdvancedBusEventHandlersTests : IDisposable
     private bool unBlockedCalled;
     private bool messageReturnedCalled;
     private MessageReturnedEventArgs messageReturnedEventArgs;
-    private readonly IAdvancedBus advancedBus;
+    private readonly RabbitAdvancedBus advancedBus;
     private ConnectedEventArgs connectedEventArgs;
     private DisconnectedEventArgs disconnectedEventArgs;
 

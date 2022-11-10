@@ -2,6 +2,7 @@
 
 using EasyNetQ.Consumer;
 using NSubstitute;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -47,7 +48,7 @@ public class When_cancellation_of_message_handler_occurs : ConsumerTestBase
     {
         MockBuilder.Dispose();
 
-        ConsumerErrorStrategy.Received().Dispose();
+        ((IDisposable)ConsumerErrorStrategy.Received()).Dispose();
     }
 }
 

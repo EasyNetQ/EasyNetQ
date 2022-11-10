@@ -8,7 +8,7 @@ namespace EasyNetQ;
 /// <summary>
 ///     An RPC style request-response pattern
 /// </summary>
-public interface IRpc : IDisposable
+public interface IRpc
 {
     /// <summary>
     ///     Make a request to an RPC service
