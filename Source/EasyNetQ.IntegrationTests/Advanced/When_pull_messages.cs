@@ -20,7 +20,7 @@ public class When_pull_messages : IDisposable
         bus.Dispose();
     }
 
-    private readonly IBus bus;
+    private readonly SelfHostedBus bus;
 
     [Fact]
     public async Task Should_be_able_ack()

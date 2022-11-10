@@ -42,14 +42,6 @@ public class When_cancellation_of_message_handler_occurs : ConsumerTestBase
     {
         MockBuilder.Channels[0].Received().BasicAck(DeliverTag, false);
     }
-
-    [Fact]
-    public void Should_dispose_of_the_consumer_error_strategy_when_the_bus_is_disposed()
-    {
-        MockBuilder.Dispose();
-
-        ((IDisposable)ConsumerErrorStrategy.Received()).Dispose();
-    }
 }
 
 // ReSharper restore InconsistentNaming

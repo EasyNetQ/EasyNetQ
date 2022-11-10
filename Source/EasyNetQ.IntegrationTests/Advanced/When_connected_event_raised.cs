@@ -16,7 +16,7 @@ public class When_connected_event_raised : IDisposable
 
     public void Dispose() => bus.Dispose();
 
-    private readonly IBus bus;
+    private readonly SelfHostedBus bus;
 
     [Fact]
     public async Task Test()

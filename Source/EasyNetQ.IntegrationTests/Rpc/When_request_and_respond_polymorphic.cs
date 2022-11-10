@@ -19,7 +19,7 @@ public class When_request_and_respond_polymorphic : IDisposable
         bus.Dispose();
     }
 
-    private readonly IBus bus;
+    private readonly SelfHostedBus bus;
 
     [Fact]
     public async Task Should_receive_response()

@@ -22,7 +22,7 @@ public class When_request_and_respond_with_legacy_options : IDisposable
         bus.Dispose();
     }
 
-    private readonly IBus bus;
+    private readonly SelfHostedBus bus;
 
     [Fact]
     public async Task Should_receive_exception()

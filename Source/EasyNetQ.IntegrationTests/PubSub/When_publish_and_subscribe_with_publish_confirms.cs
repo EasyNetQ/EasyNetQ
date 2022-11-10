@@ -22,7 +22,7 @@ public class When_publish_and_subscribe_with_publish_confirms : IDisposable
 
     private const int MessagesCount = 10;
 
-    private readonly IBus bus;
+    private readonly SelfHostedBus bus;
 
     [Fact]
     public async Task Test()

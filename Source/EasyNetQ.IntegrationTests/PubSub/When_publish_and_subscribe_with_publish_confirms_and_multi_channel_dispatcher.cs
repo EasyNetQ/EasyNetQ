@@ -25,7 +25,7 @@ public class When_publish_and_subscribe_with_publish_confirms_and_multi_channel_
 
     private const int MessagesCount = 20;
 
-    private readonly IBus bus;
+    private readonly SelfHostedBus bus;
 
     [Fact]
     public async Task Test()

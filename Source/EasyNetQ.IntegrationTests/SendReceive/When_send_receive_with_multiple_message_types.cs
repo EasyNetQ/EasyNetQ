@@ -22,7 +22,7 @@ public class When_send_receive_multiple_message_types : IDisposable
 
     private const int MessagesCount = 10;
 
-    private readonly IBus bus;
+    private readonly SelfHostedBus bus;
 
     [Fact]
     public async Task Test()

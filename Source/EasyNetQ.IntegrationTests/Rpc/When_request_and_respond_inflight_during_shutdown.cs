@@ -9,7 +9,7 @@ namespace EasyNetQ.IntegrationTests.Rpc;
 [Collection("RabbitMQ")]
 public class When_request_and_respond_in_flight_during_shutdown : IDisposable
 {
-    private readonly IBus bus;
+    private readonly SelfHostedBus bus;
 
     public When_request_and_respond_in_flight_during_shutdown(RabbitMQFixture fixture)
     {

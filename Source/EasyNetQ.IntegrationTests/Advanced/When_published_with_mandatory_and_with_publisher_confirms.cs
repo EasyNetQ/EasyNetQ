@@ -10,7 +10,7 @@ namespace EasyNetQ.IntegrationTests.Advanced;
 [Collection("RabbitMQ")]
 public class When_published_with_mandatory_and_with_publisher_confirms : IDisposable
 {
-    private readonly IBus bus;
+    private readonly SelfHostedBus bus;
 
     public When_published_with_mandatory_and_with_publisher_confirms(RabbitMQFixture rmqFixture)
     {

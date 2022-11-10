@@ -40,9 +40,4 @@ public class RabbitBus : IBus
 
     /// <inheritdoc />
     public IAdvancedBus Advanced { get; }
-
-    /// <inheritdoc />
-    public virtual void Dispose()
-    {
-    }
 }

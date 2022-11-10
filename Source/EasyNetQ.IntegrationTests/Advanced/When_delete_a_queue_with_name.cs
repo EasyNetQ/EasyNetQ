@@ -9,7 +9,7 @@ namespace EasyNetQ.IntegrationTests.Advanced;
 [Collection("RabbitMQ")]
 public class When_delete_a_queue_with_name : IDisposable
 {
-    private readonly IBus bus;
+    private readonly SelfHostedBus bus;
 
     public When_delete_a_queue_with_name(RabbitMQFixture rmqFixture)
     {

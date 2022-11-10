@@ -309,7 +309,7 @@ namespace EasyNetQ
         System.Threading.Tasks.Task QueuePurgeAsync(string queue, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task QueueUnbindAsync(string queue, string exchange, string routingKey, System.Collections.Generic.IDictionary<string, object>? arguments, System.Threading.CancellationToken cancellationToken = default);
     }
-    public interface IBus : System.IDisposable
+    public interface IBus
     {
         EasyNetQ.IAdvancedBus Advanced { get; }
         EasyNetQ.IPubSub PubSub { get; }
@@ -844,7 +844,7 @@ namespace EasyNetQ
         public virtual System.Threading.Tasks.Task QueuePurgeAsync(string queue, System.Threading.CancellationToken cancellationToken) { }
         public virtual System.Threading.Tasks.Task QueueUnbindAsync(string queue, string exchange, string routingKey, System.Collections.Generic.IDictionary<string, object>? arguments, System.Threading.CancellationToken cancellationToken) { }
     }
-    public class RabbitBus : EasyNetQ.IBus, System.IDisposable
+    public class RabbitBus : EasyNetQ.IBus
     {
         public RabbitBus(EasyNetQ.IAdvancedBus advanced, EasyNetQ.IPubSub pubSub, EasyNetQ.IRpc rpc, EasyNetQ.ISendReceive sendReceive, EasyNetQ.IScheduler scheduler) { }
         public EasyNetQ.IAdvancedBus Advanced { get; }
@@ -852,15 +852,14 @@ namespace EasyNetQ
         public EasyNetQ.IRpc Rpc { get; }
         public EasyNetQ.IScheduler Scheduler { get; }
         public EasyNetQ.ISendReceive SendReceive { get; }
-        public virtual void Dispose() { }
     }
     public static class RabbitHutch
     {
-        public static EasyNetQ.IBus CreateBus(string connectionString) { }
-        public static EasyNetQ.IBus CreateBus(EasyNetQ.ConnectionConfiguration connectionConfiguration, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
-        public static EasyNetQ.IBus CreateBus(System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
-        public static EasyNetQ.IBus CreateBus(string connectionString, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
-        public static EasyNetQ.IBus CreateBus(string hostName, ushort hostPort, string virtualHost, string username, string password, System.TimeSpan requestedHeartbeat, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+        public static EasyNetQ.SelfHostedBus CreateBus(string connectionString) { }
+        public static EasyNetQ.SelfHostedBus CreateBus(EasyNetQ.ConnectionConfiguration connectionConfiguration, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+        public static EasyNetQ.SelfHostedBus CreateBus(System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+        public static EasyNetQ.SelfHostedBus CreateBus(string connectionString, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+        public static EasyNetQ.SelfHostedBus CreateBus(string hostName, ushort hostPort, string virtualHost, string username, string password, System.TimeSpan requestedHeartbeat, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
         public static void RegisterBus(EasyNetQ.DI.IServiceRegister serviceRegister, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
     }
     public static class ReceiveRegistrationExtensions
@@ -888,6 +887,15 @@ namespace EasyNetQ
         public static void FuturePublish<T>(this EasyNetQ.IScheduler scheduler, T message, System.TimeSpan delay, System.Threading.CancellationToken cancellationToken = default) { }
         public static void FuturePublish<T>(this EasyNetQ.IScheduler scheduler, T message, System.TimeSpan delay, string topic, System.Threading.CancellationToken cancellationToken = default) { }
         public static System.Threading.Tasks.Task FuturePublishAsync<T>(this EasyNetQ.IScheduler scheduler, T message, System.TimeSpan delay, System.Threading.CancellationToken cancellationToken = default) { }
+    }
+    public sealed class SelfHostedBus : EasyNetQ.IBus, System.IDisposable
+    {
+        public EasyNetQ.IAdvancedBus Advanced { get; }
+        public EasyNetQ.IPubSub PubSub { get; }
+        public EasyNetQ.IRpc Rpc { get; }
+        public EasyNetQ.IScheduler Scheduler { get; }
+        public EasyNetQ.ISendReceive SendReceive { get; }
+        public void Dispose() { }
     }
     public static class SendReceiveExtensions
     {
