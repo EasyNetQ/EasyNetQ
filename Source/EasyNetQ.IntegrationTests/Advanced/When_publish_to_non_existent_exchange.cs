@@ -18,7 +18,7 @@ public class When_publish_to_non_existent_exchange : IDisposable
 
     public void Dispose() => bus.Dispose();
 
-    private readonly IBus bus;
+    private readonly SelfHostedBus bus;
 
     [Fact]
     public async Task Should_not_affect_publish_to_existent_exchange()

@@ -15,7 +15,7 @@ public class When_declare_a_queue : IDisposable
 
     public void Dispose() => bus.Dispose();
 
-    private readonly IBus bus;
+    private readonly SelfHostedBus bus;
 
     [Fact]
     public async Task Should_declare_queue_with_different_modes_and_types()

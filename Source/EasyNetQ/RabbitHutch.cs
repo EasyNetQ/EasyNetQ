@@ -12,7 +12,7 @@ namespace EasyNetQ;
 public static class RabbitHutch
 {
     /// <summary>
-    /// Creates a new instance of <see cref="RabbitBus"/>.
+    /// Creates a new instance of <see cref="SelfHostedBus"/>.
     /// </summary>
     /// <param name="connectionString">
     /// The EasyNetQ connection string. Example:
@@ -24,13 +24,13 @@ public static class RabbitHutch
     /// <returns>
     /// A new <see cref="RabbitBus"/> instance.
     /// </returns>
-    public static IBus CreateBus(string connectionString)
+    public static SelfHostedBus CreateBus(string connectionString)
     {
         return CreateBus(connectionString, _ => { });
     }
 
     /// <summary>
-    /// Creates a new instance of <see cref="RabbitBus"/>.
+    /// Creates a new instance of <see cref="SelfHostedBus"/>.
     /// </summary>
     /// <param name="connectionString">
     /// The EasyNetQ connection string. Example:
@@ -46,13 +46,13 @@ public static class RabbitHutch
     /// <returns>
     /// A new <see cref="RabbitBus"/> instance.
     /// </returns>
-    public static IBus CreateBus(string connectionString, Action<IServiceRegister> registerServices)
+    public static SelfHostedBus CreateBus(string connectionString, Action<IServiceRegister> registerServices)
     {
         return CreateBus(x => x.Resolve<IConnectionStringParser>().Parse(connectionString), registerServices);
     }
 
     /// <summary>
-    /// Creates a new instance of <see cref="RabbitBus"/>.
+    /// Creates a new instance of <see cref="SelfHostedBus"/>.
     /// </summary>
     /// <param name="hostName">
     /// The RabbitMQ broker.
@@ -79,7 +79,7 @@ public static class RabbitHutch
     /// <returns>
     /// A new <see cref="RabbitBus"/> instance.
     /// </returns>
-    public static IBus CreateBus(
+    public static SelfHostedBus CreateBus(
         string hostName,
         ushort hostPort,
         string virtualHost,
@@ -103,7 +103,7 @@ public static class RabbitHutch
     }
 
     /// <summary>
-    /// Creates a new instance of <see cref="RabbitBus"/>.
+    /// Creates a new instance of <see cref="SelfHostedBus"/>.
     /// </summary>
     /// <param name="connectionConfiguration">
     /// An <see cref="ConnectionConfiguration"/> instance.
@@ -115,13 +115,13 @@ public static class RabbitHutch
     /// <returns>
     /// A new <see cref="RabbitBus"/> instance.
     /// </returns>
-    public static IBus CreateBus(ConnectionConfiguration connectionConfiguration, Action<IServiceRegister> registerServices)
+    public static SelfHostedBus CreateBus(ConnectionConfiguration connectionConfiguration, Action<IServiceRegister> registerServices)
     {
         return CreateBus(_ => connectionConfiguration, registerServices);
     }
 
     /// <summary>
-    /// Creates a new instance of <see cref="RabbitBus"/>.
+    /// Creates a new instance of <see cref="SelfHostedBus"/>.
     /// </summary>
     /// <param name="connectionConfigurationFactory">
     /// A factory of <see cref="ConnectionConfiguration"/> instance.
@@ -133,12 +133,12 @@ public static class RabbitHutch
     /// <returns>
     /// A new <see cref="RabbitBus"/> instance.
     /// </returns>
-    public static IBus CreateBus(Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices)
+    public static SelfHostedBus CreateBus(Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices)
     {
         var container = new ServiceContainer(c => c.EnablePropertyInjection = false);
         var adapter = new LightInjectAdapter(container);
         RegisterBus(adapter, connectionConfigurationFactory, registerServices);
-        return new BusWithCustomDisposer(container.GetInstance<IBus>(), container.Dispose);
+        return new SelfHostedBus(container);
     }
 
     /// <summary>
@@ -163,25 +163,5 @@ public static class RabbitHutch
 
         // then register default services
         serviceRegister.RegisterDefaultServices(connectionConfigurationFactory);
-    }
-
-    private sealed class BusWithCustomDisposer : IBus
-    {
-        private readonly IBus bus;
-        private readonly Action disposer;
-
-        public BusWithCustomDisposer(IBus bus, Action disposer)
-        {
-            this.bus = bus;
-            this.disposer = disposer;
-        }
-
-        public void Dispose() => disposer();
-
-        public IPubSub PubSub => bus.PubSub;
-        public IRpc Rpc => bus.Rpc;
-        public ISendReceive SendReceive => bus.SendReceive;
-        public IScheduler Scheduler => bus.Scheduler;
-        public IAdvancedBus Advanced => bus.Advanced;
     }
 }

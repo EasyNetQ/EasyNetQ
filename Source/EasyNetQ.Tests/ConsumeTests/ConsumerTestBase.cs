@@ -32,7 +32,7 @@ public abstract class ConsumerTestBase : IDisposable
     {
         Cancellation = new CancellationTokenSource();
 
-        ConsumerErrorStrategy = Substitute.For<IConsumerErrorStrategy, IDisposable>();
+        ConsumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
         MockBuilder = new MockBuilder(x => x.Register(ConsumerErrorStrategy));
         AdditionalSetUp();
     }

@@ -10,7 +10,7 @@ using Xunit;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests;
 
-public class When_auto_subscribing_async_with_subscription_configuration_action : IDisposable
+public class When_auto_subscribing_async_with_subscription_configuration_action
 {
     private readonly IBus bus;
     private Action<ISubscriptionConfiguration> capturedAction;
@@ -40,11 +40,6 @@ public class When_auto_subscribing_async_with_subscription_configuration_action 
             .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
 
         autoSubscriber.Subscribe(new[] { typeof(MyConsumerWithAction) });
-    }
-
-    public void Dispose()
-    {
-        bus.Dispose();
     }
 
     [Fact]

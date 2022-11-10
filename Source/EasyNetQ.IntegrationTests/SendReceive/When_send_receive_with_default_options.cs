@@ -13,7 +13,7 @@ public class When_send_receive_with_default_options : IDisposable
     private readonly RabbitMQFixture rmqFixture;
     private const int MessagesCount = 10;
 
-    private readonly IBus bus;
+    private readonly SelfHostedBus bus;
 
     public When_send_receive_with_default_options(RabbitMQFixture rmqFixture)
     {

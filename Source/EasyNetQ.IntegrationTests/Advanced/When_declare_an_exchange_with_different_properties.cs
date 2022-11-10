@@ -17,7 +17,7 @@ public class When_declare_an_exchange_with_different_properties : IDisposable
 
     public void Dispose() => bus.Dispose();
 
-    private readonly IBus bus;
+    private readonly SelfHostedBus bus;
 
     [Fact]
     public async Task Should_not_affect_correct_declares()

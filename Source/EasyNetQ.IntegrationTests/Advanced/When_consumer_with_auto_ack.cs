@@ -11,7 +11,7 @@ namespace EasyNetQ.IntegrationTests.Advanced;
 [Collection("RabbitMQ")]
 public class When_consumer_with_auto_ack : IDisposable
 {
-    private readonly IBus bus;
+    private readonly SelfHostedBus bus;
 
     public When_consumer_with_auto_ack(RabbitMQFixture rmqFixture)
     {

@@ -141,48 +141,45 @@ public class When_subscribe_with_configuration_is_called
         int? maxLengthBytes)
     {
         var mockBuilder = new MockBuilder();
-        using (mockBuilder.Bus)
-        {
-            // Configure subscription
-            mockBuilder.PubSub.Subscribe<MyMessage>(
-                "x",
-                _ => { },
-                c =>
+        // Configure subscription
+        mockBuilder.PubSub.Subscribe<MyMessage>(
+            "x",
+            _ => { },
+            c =>
+            {
+                c.WithAutoDelete(autoDelete)
+                    .WithPriority(priority)
+                    .WithPrefetchCount(prefetchCount)
+                    .AsExclusive(isExclusive)
+                    .WithDurable(durable)
+                    .WithQueueName(queueName);
+
+                if (topic != null)
                 {
-                    c.WithAutoDelete(autoDelete)
-                        .WithPriority(priority)
-                        .WithPrefetchCount(prefetchCount)
-                        .AsExclusive(isExclusive)
-                        .WithDurable(durable)
-                        .WithQueueName(queueName);
-
-                    if (topic != null)
-                    {
-                        c.WithTopic(topic);
-                    }
-
-                    if (maxPriority.HasValue)
-                    {
-                        c.WithMaxPriority(maxPriority.Value);
-                    }
-
-                    if (expires.HasValue)
-                    {
-                        c.WithExpires(expires.Value);
-                    }
-
-                    if (maxLength.HasValue)
-                    {
-                        c.WithMaxLength(maxLength.Value);
-                    }
-
-                    if (maxLengthBytes.HasValue)
-                    {
-                        c.WithMaxLengthBytes(maxLengthBytes.Value);
-                    }
+                    c.WithTopic(topic);
                 }
-            );
-        }
+
+                if (maxPriority.HasValue)
+                {
+                    c.WithMaxPriority(maxPriority.Value);
+                }
+
+                if (expires.HasValue)
+                {
+                    c.WithExpires(expires.Value);
+                }
+
+                if (maxLength.HasValue)
+                {
+                    c.WithMaxLength(maxLength.Value);
+                }
+
+                if (maxLengthBytes.HasValue)
+                {
+                    c.WithMaxLengthBytes(maxLengthBytes.Value);
+                }
+            }
+        );
 
         // Assert that queue got declared correctly
         mockBuilder.Channels[1].Received().QueueDeclare(
