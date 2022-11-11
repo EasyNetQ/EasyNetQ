@@ -29,15 +29,15 @@ updates:
   - dependency-name: Microsoft.Extensions.Configuration
     versions:
     - ">= 5.a"
-    - "< 7"
+    - "< 8"
   - dependency-name: Microsoft.Extensions.DependencyInjection
     versions:
     - ">= 5.a"
-    - "< 7"
+    - "< 8"
   - dependency-name: Microsoft.Extensions.Logging.Abstractions
     versions:
     - ">= 5.a"
-    - "< 7"
+    - "< 8"
   - dependency-name: Serilog
     versions:
     - ">= 2.8"
