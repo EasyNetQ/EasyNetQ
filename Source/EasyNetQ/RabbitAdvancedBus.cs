@@ -657,7 +657,7 @@ public class RabbitAdvancedBus : IAdvancedBus
         if (logger.IsDebugEnabled())
         {
             logger.DebugFormat(
-                $"Unbound destination exchange {{destinationExchange}} from source exchange {{sourceExchange}} with routing key {{routingKey}} and arguments {arguments}",
+                "Unbound destination exchange {destinationExchange} from source exchange {sourceExchange} with routing key {routingKey} and arguments {arguments}",
                 destinationExchange,
                 sourceExchange,
                 routingKey,
