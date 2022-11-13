@@ -797,25 +797,7 @@ namespace EasyNetQ
     public delegate string? QueueTypeConvention(System.Type messageType);
     public class RabbitAdvancedBus : EasyNetQ.IAdvancedBus, System.IDisposable
     {
-        public RabbitAdvancedBus(
-                    EasyNetQ.Logging.ILogger<EasyNetQ.RabbitAdvancedBus> logger,
-                    EasyNetQ.Producer.IProducerConnection producerConnection,
-                    EasyNetQ.Consumer.IConsumerConnection consumerConnection,
-                    EasyNetQ.Consumer.IConsumerFactory consumerFactory,
-                    EasyNetQ.ChannelDispatcher.IPersistentChannelDispatcher persistentChannelDispatcher,
-                    EasyNetQ.Producer.IPublishConfirmationListener confirmationListener,
-                    EasyNetQ.IEventBus eventBus,
-                    EasyNetQ.Consumer.IHandlerCollectionFactory handlerCollectionFactory,
-                    EasyNetQ.DI.IServiceResolver container,
-                    EasyNetQ.ConnectionConfiguration configuration,
-                    System.Collections.Generic.IEnumerable<EasyNetQ.Interception.IProduceConsumeInterceptor> produceConsumeInterceptors,
-                    EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy,
-                    EasyNetQ.IConventions conventions,
-                    EasyNetQ.IPullingConsumerFactory pullingConsumerFactory,
-                    EasyNetQ.AdvancedBusEventHandlers advancedBusEventHandlers,
-                    EasyNetQ.DI.IConsumeScopeProvider consumeScopeProvider) { }
-        public EasyNetQ.DI.IServiceResolver Container { get; }
-        public EasyNetQ.IConventions Conventions { get; }
+        public RabbitAdvancedBus(EasyNetQ.Logging.ILogger<EasyNetQ.RabbitAdvancedBus> logger, EasyNetQ.Producer.IProducerConnection producerConnection, EasyNetQ.Consumer.IConsumerConnection consumerConnection, EasyNetQ.Consumer.IConsumerFactory consumerFactory, EasyNetQ.ChannelDispatcher.IPersistentChannelDispatcher persistentChannelDispatcher, EasyNetQ.Producer.IPublishConfirmationListener confirmationListener, EasyNetQ.IEventBus eventBus, EasyNetQ.Consumer.IHandlerCollectionFactory handlerCollectionFactory, EasyNetQ.ConnectionConfiguration configuration, System.Collections.Generic.IEnumerable<EasyNetQ.Interception.IProduceConsumeInterceptor> produceConsumeInterceptors, EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy, EasyNetQ.IPullingConsumerFactory pullingConsumerFactory, EasyNetQ.AdvancedBusEventHandlers advancedBusEventHandlers, EasyNetQ.DI.IConsumeScopeProvider consumeScopeProvider) { }
         public bool IsConnected { get; }
         public event System.EventHandler<EasyNetQ.BlockedEventArgs>? Blocked;
         public event System.EventHandler<EasyNetQ.ConnectedEventArgs>? Connected;

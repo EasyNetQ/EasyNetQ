@@ -50,11 +50,9 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         IPublishConfirmationListener confirmationListener,
         IEventBus eventBus,
         IHandlerCollectionFactory handlerCollectionFactory,
-        IServiceResolver container,
         ConnectionConfiguration configuration,
         IEnumerable<IProduceConsumeInterceptor> produceConsumeInterceptors,
         IMessageSerializationStrategy messageSerializationStrategy,
-        IConventions conventions,
         IPullingConsumerFactory pullingConsumerFactory,
         AdvancedBusEventHandlers advancedBusEventHandlers,
         IConsumeScopeProvider consumeScopeProvider
@@ -68,13 +66,11 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         this.confirmationListener = confirmationListener;
         this.eventBus = eventBus;
         this.handlerCollectionFactory = handlerCollectionFactory;
-        Container = container;
         this.configuration = configuration;
         this.produceConsumeInterceptors = produceConsumeInterceptors.ToArray();
         this.messageSerializationStrategy = messageSerializationStrategy;
         this.pullingConsumerFactory = pullingConsumerFactory;
         this.advancedBusEventHandlers = advancedBusEventHandlers;
-        Conventions = conventions;
         this.consumeScopeProvider = consumeScopeProvider;
 
         Connected += advancedBusEventHandlers.Connected;
@@ -218,12 +214,6 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 
     /// <inheritdoc />
     public event EventHandler<MessageReturnedEventArgs>? MessageReturned;
-
-    /// <inheritdoc />
-    public IServiceResolver Container { get; }
-
-    /// <inheritdoc />
-    public IConventions Conventions { get; }
 
     /// <inheritdoc />
     public virtual void Dispose()
