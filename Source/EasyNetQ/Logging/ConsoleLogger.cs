@@ -2,7 +2,10 @@ using System;
 
 namespace EasyNetQ.Logging;
 
-/// <inheritdoc />
+/// <summary>
+/// Simple built-in implementation to log messages into console. It is assumed for use for debugging
+/// purposes and shouldn't be used in the production environment.
+/// </summary>
 public sealed class ConsoleLogger<TCategoryName> : ILogger<TCategoryName>
 {
     /// <inheritdoc />
@@ -26,6 +29,7 @@ public sealed class ConsoleLogger<TCategoryName> : ILogger<TCategoryName>
             _ => throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, null)
         };
 
+        // no cache here so performance hit (+one more below building output string)
         var message = MessageFormatter.FormatStructuredMessage(messageFunc(), formatParameters, out _);
         if (exception != null) message += " -> " + exception;
 
