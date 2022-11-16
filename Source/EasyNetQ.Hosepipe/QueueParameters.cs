@@ -15,6 +15,7 @@ public class QueueParameters
     public int NumberOfMessagesToRetrieve { get; set; }
     public string MessagesOutputDirectory { get; set; }
     public TimeSpan ConfirmsTimeout { get; }
+    public bool Ssl { get; set; }
 
     public QueueParameters()
     {
@@ -28,5 +29,6 @@ public class QueueParameters
         NumberOfMessagesToRetrieve = 1000;
         MessagesOutputDirectory = Directory.GetCurrentDirectory();
         ConfirmsTimeout = TimeSpan.FromSeconds(30);
+        Ssl = false;
     }
 }

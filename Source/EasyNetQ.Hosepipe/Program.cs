@@ -93,6 +93,8 @@ public class Program
             .FailWith(Message("Invalid number of messages to retrieve"));
         arguments.WithTypedKeyOptional<bool>("x", a => parameters.Purge = bool.Parse(a.Value))
             .FailWith(Message("Invalid purge (x) parameter"));
+        arguments.WithTypedKeyOptional<bool>("ssl", a => parameters.Ssl = bool.Parse(a.Value))
+            .FailWith(Message("Invalid Ssl (ssl) parameter"));
 
         try
         {
