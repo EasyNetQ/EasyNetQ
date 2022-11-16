@@ -43,6 +43,7 @@ Options
 	o	the directory to output messages to. Default is current directory.
 	n	the maximum number of messages to retrieve. Default is 1000.
 	x	to get (noack) and remove the message from the queue. Default is false.
+	ssl to use SSL/TLS to connect. Default is false
 
 Examples
 	
