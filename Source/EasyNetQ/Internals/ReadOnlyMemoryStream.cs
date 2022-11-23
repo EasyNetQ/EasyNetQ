@@ -74,19 +74,19 @@ public sealed class ReadOnlyMemoryStream : Stream
         ValidateReadArrayArguments(buffer, offset, count);
 
         var remaining = content.Length - position;
-        if (remaining <= 0 || buffer.Length == 0)
+        if (remaining <= 0 || count == 0)
             return 0;
 
-        if (remaining <= buffer.Length)
+        if (remaining <= count)
         {
             content.Span.Slice(position).CopyTo(buffer);
             position = content.Length;
             return remaining;
         }
 
-        content.Span.Slice(position, buffer.Length).CopyTo(buffer);
-        position += buffer.Length;
-        return buffer.Length;
+        content.Span.Slice(position, count).CopyTo(buffer);
+        position += count;
+        return count;
     }
 
     /// <inheritdoc />
