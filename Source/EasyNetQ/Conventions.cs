@@ -114,7 +114,7 @@ public interface IConventions
     ErrorQueueNameConvention ErrorQueueNamingConvention { get; }
 
     /// <summary>
-    ///     Convention for error queue convention
+    ///     Convention for error queue type
     /// </summary>
     ErrorQueueTypeConvention ErrorQueueTypeConvention { get; }
 
