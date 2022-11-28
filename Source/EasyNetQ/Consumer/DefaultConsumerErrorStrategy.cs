@@ -136,9 +136,12 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy, IDisposable
         disposed = true;
     }
 
-    private static void DeclareAndBindErrorExchangeWithErrorQueue(IModel model, string exchangeName, string queueName, string routingKey)
+    private static void DeclareAndBindErrorExchangeWithErrorQueue(IModel model, string exchangeName, string queueName, string? queueType, string routingKey)
     {
-        model.QueueDeclare(queueName, true, false, false, null);
+        var queueArgs = new Dictionary<string, object>();
+        if (queueType != null)
+            queueArgs.Add("x-queue-type", queueType);
+        model.QueueDeclare(queueName, true, false, false, queueArgs);
         model.ExchangeDeclare(exchangeName, ExchangeType.Direct, true);
         model.QueueBind(queueName, exchangeName, routingKey);
     }
@@ -147,13 +150,14 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy, IDisposable
     {
         var errorExchangeName = conventions.ErrorExchangeNamingConvention(receivedInfo);
         var errorQueueName = conventions.ErrorQueueNamingConvention(receivedInfo);
+        var errorQueueType = conventions.ErrorQueueTypeConvention();
         var routingKey = receivedInfo.RoutingKey;
 
         var errorTopologyIdentifier = $"{errorExchangeName}-{errorQueueName}-{routingKey}";
 
         existingErrorExchangesWithQueues.GetOrAdd(errorTopologyIdentifier, _ =>
         {
-            DeclareAndBindErrorExchangeWithErrorQueue(model, errorExchangeName, errorQueueName, routingKey);
+            DeclareAndBindErrorExchangeWithErrorQueue(model, errorExchangeName, errorQueueName, errorQueueType, routingKey);
             return NoResult.Instance;
         });
 

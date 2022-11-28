@@ -29,6 +29,11 @@ public delegate string? QueueTypeConvention(Type messageType);
 public delegate string ErrorQueueNameConvention(MessageReceivedInfo receivedInfo);
 
 /// <summary>
+///     Convention for error queue type
+/// </summary>
+public delegate string? ErrorQueueTypeConvention();
+
+/// <summary>
 ///     Convention for error exchange naming
 /// </summary>
 public delegate string ErrorExchangeNameConvention(MessageReceivedInfo receivedInfo);
@@ -109,6 +114,11 @@ public interface IConventions
     ErrorQueueNameConvention ErrorQueueNamingConvention { get; }
 
     /// <summary>
+    ///     Convention for error queue convention
+    /// </summary>
+    ErrorQueueTypeConvention ErrorQueueTypeConvention { get; }
+
+    /// <summary>
     ///     Convention for error exchange naming
     /// </summary>
     ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; }
@@ -157,6 +167,8 @@ public class Conventions : IConventions
 
         ErrorQueueNamingConvention = _ => "EasyNetQ_Default_Error_Queue";
         ErrorExchangeNamingConvention = receivedInfo => "ErrorExchange_" + receivedInfo.RoutingKey;
+        ErrorQueueTypeConvention = () => null;
+
         RpcRequestExchangeNamingConvention = _ => "easy_net_q_rpc";
         RpcResponseExchangeNamingConvention = _ => "easy_net_q_rpc";
         RpcReturnQueueNamingConvention = _ => "easynetq.response." + Guid.NewGuid();
@@ -191,6 +203,9 @@ public class Conventions : IConventions
 
     /// <inheritdoc />
     public ErrorQueueNameConvention ErrorQueueNamingConvention { get; set; }
+
+    /// <inheritdoc />
+    public ErrorQueueTypeConvention ErrorQueueTypeConvention { get; set; }
 
     /// <inheritdoc />
     public ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; set; }
