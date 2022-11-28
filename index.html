@@ -79,7 +79,7 @@
         <div class="span6">
           <h2>Easy</h2>
           <p>
-            EasyNetQ is the leading client API for RabbitMQ on .NET, with over 4 million downloads on <a href="https://www.nuget.org/packages/EasyNetQ/">NuGet.org</a>. It is an open source project originally sponsored by <a href="http://15below.com/">15below</a> 
+            EasyNetQ is the leading client API for RabbitMQ on .NET, with over 16 million downloads on <a href="https://www.nuget.org/packages/EasyNetQ/">NuGet.org</a>. It is an open source project originally sponsored by <a href="http://15below.com/">15below</a> 
             the travel industry experts. 
           </p>
         
@@ -110,14 +110,13 @@ var bus = RabbitHutch.CreateBus("host=localhost");
           <p>To publish...</p>
 
           <pre><code>
-bus.Publish(message);
+await bus.PubSub.PublishAsync(message);
           </code></pre>
 
           <p>To subscribe...</p>
 
           <pre><code>
-bus.Subscribe&lt;MyMessage&gt;("my_subscription_id", msg =&gt; 
-      Console.WriteLine(msg.Text));
+await bus.PubSub.SubscribeAsync&lt;MyMessage&gt;("my_subscription_id", msg =&gt; Console.WriteLine(msg.Text));
           </code></pre> 
 
           <p>For more information, read the documentation:</a>
