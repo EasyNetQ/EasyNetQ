@@ -138,9 +138,11 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy, IDisposable
 
     private static void DeclareAndBindErrorExchangeWithErrorQueue(IModel model, string exchangeName, string queueName, string? queueType, string routingKey)
     {
-        var queueArgs = new Dictionary<string, object>();
+        Dictionary<string, object>? queueArgs = null;
         if (queueType != null)
-            queueArgs.Add("x-queue-type", queueType);
+        {
+            queueArgs = new Dictionary<string, object> { { "x-queue-type", queueType } };
+        }
         model.QueueDeclare(queueName, true, false, false, queueArgs);
         model.ExchangeDeclare(exchangeName, ExchangeType.Direct, true);
         model.QueueBind(queueName, exchangeName, routingKey);
