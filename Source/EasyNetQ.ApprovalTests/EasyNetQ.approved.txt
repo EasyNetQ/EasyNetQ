@@ -570,6 +570,12 @@ namespace EasyNetQ
         public object Clone() { }
         public override string ToString() { }
     }
+    public static class MessagePropertiesExtensions
+    {
+        public const string ConfirmationIdHeader = "EasyNetQ.Confirmation.Id";
+        public static void CopyFrom(this EasyNetQ.MessageProperties source, RabbitMQ.Client.IBasicProperties basicProperties) { }
+        public static void CopyTo(this EasyNetQ.MessageProperties source, RabbitMQ.Client.IBasicProperties basicProperties) { }
+    }
     public class MessageReceivedInfo
     {
         public MessageReceivedInfo(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey, string queue) { }
