@@ -583,7 +583,6 @@ namespace EasyNetQ
     }
     public static class MessagePropertiesExtensions
     {
-        public const string ConfirmationIdHeader = "EasyNetQ.Confirmation.Id";
         public static void CopyFrom(this EasyNetQ.MessageProperties source, RabbitMQ.Client.IBasicProperties basicProperties) { }
         public static void CopyTo(this EasyNetQ.MessageProperties source, RabbitMQ.Client.IBasicProperties basicProperties) { }
     }
