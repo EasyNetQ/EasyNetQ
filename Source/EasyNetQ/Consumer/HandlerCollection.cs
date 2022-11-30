@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,7 +9,7 @@ namespace EasyNetQ.Consumer;
 /// <inheritdoc />
 public class HandlerCollection : IHandlerCollection
 {
-    private readonly IDictionary<Type, IMessageHandler> handlers = new Dictionary<Type, IMessageHandler>();
+    private readonly IDictionary<Type, IMessageHandler> handlers = new ConcurrentDictionary<Type, IMessageHandler>();
 
     /// <summary>
     ///     Creates HandlerCollection
