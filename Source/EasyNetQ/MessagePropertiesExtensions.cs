@@ -9,17 +9,17 @@ namespace EasyNetQ;
 /// <summary>
 ///     Represents various properties of a message
 /// </summary>
-internal static class MessagePropertiesExtensions
+public static class MessagePropertiesExtensions
 {
     public const string ConfirmationIdHeader = "EasyNetQ.Confirmation.Id";
 
-    public static MessageProperties SetConfirmationId(this MessageProperties properties, ulong confirmationId)
+    internal static MessageProperties SetConfirmationId(this MessageProperties properties, ulong confirmationId)
     {
         properties.Headers[ConfirmationIdHeader] = confirmationId.ToString();
         return properties;
     }
 
-    public static bool TryGetConfirmationId(this MessageProperties properties, out ulong confirmationId)
+    internal static bool TryGetConfirmationId(this MessageProperties properties, out ulong confirmationId)
     {
         confirmationId = 0;
         return properties.Headers.TryGetValue(ConfirmationIdHeader, out var value) &&
