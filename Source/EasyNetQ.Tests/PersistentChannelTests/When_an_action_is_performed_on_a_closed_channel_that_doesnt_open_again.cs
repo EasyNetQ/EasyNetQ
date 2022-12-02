@@ -3,6 +3,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 using NSubstitute;
 using RabbitMQ.Client;
@@ -25,7 +26,7 @@ public class When_an_action_is_performed_on_a_closed_channel_that_doesnt_open_ag
         var exception = new OperationInterruptedException(shutdownArgs);
 
         persistentConnection.When(x => x.CreateModel()).Do(_ => throw exception);
-        persistentChannel = new PersistentChannel(new PersistentChannelOptions(), persistentConnection, eventBus);
+        persistentChannel = new PersistentChannel(new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, eventBus);
     }
 
     private readonly IPersistentChannel persistentChannel;
