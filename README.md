@@ -7,8 +7,6 @@
 ![Activity](https://img.shields.io/github/commit-activity/w/EasyNetQ/easynetq)
 ![Activity](https://img.shields.io/github/commit-activity/m/EasyNetQ/easynetq)
 ![Activity](https://img.shields.io/github/commit-activity/y/EasyNetQ/easynetq)
-
-![Size](https://img.shields.io/github/repo-size/graphql-dotnet/graphql-dotnet)
 --
 
 ![EasyNetQ Logo](https://github.com/EasyNetQ/EasyNetQ/wiki/images/logo_design_150.png)
