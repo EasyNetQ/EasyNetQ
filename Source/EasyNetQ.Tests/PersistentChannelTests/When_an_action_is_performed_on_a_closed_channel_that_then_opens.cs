@@ -29,7 +29,7 @@ public class When_an_action_is_performed_on_a_closed_channel_that_then_opens
         );
 
         var persistentChannel = new PersistentChannel(
-            new PersistentChannelOptions(), persistentConnection, eventBus
+            new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, eventBus
         );
         persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));
     }
