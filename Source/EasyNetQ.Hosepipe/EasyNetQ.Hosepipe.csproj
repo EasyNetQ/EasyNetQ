@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>EasyNetQ.Hosepipe</Description>
-    <TargetFramework>net6</TargetFramework>
+    <TargetFramework>net7</TargetFramework>
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
