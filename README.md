@@ -57,7 +57,4 @@ RPC server...
 
 ## Getting started
 
-Just open EasyNetQ.sln in VisualStudio and build.
-
-All the required dependencies for the solution file to build the software are included. To run the explicit tests that send messages you will have to be running the EasyNetQ.Tests.SimpleService application and have a working local RabbitMQ server (see http://www.rabbitmq.com/ for more details).
-
+Just open EasyNetQ.sln in VisualStudio or Rider and build. All the required dependencies for the solution file to build the software are included.
