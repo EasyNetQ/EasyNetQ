@@ -23,6 +23,8 @@ public interface IHandlerRegistration
 /// <inheritdoc />
 public interface IHandlerCollection : IHandlerRegistration
 {
+    Type? FallbackMessageType { get; }
+
     /// <summary>
     /// Retrieve a handler from the collection.
     /// If a matching handler cannot be found, the handler collection will either throw
@@ -31,5 +33,5 @@ public interface IHandlerCollection : IHandlerRegistration
     /// </summary>
     /// <param name="messageType">The type of handler to return</param>
     /// <returns>The handler</returns>
-    IMessageHandler GetHandler(Type messageType);
+    IMessageHandler Get(Type messageType);
 }

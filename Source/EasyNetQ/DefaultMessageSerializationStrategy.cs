@@ -44,9 +44,13 @@ public class DefaultMessageSerializationStrategy : IMessageSerializationStrategy
     }
 
     /// <inheritdoc />
-    public IMessage DeserializeMessage(MessageProperties properties, in ReadOnlyMemory<byte> body)
+    public IMessage DeserializeMessage(
+        MessageProperties properties, in ReadOnlyMemory<byte> body, Type? fallbackMessageType = null
+    )
     {
-        var messageType = typeNameSerializer.Deserialize(properties.Type!);
+        var messageType = properties.Type != null
+            ? typeNameSerializer.Deserialize(properties.Type)
+            : fallbackMessageType ?? throw new InvalidOperationException("No type is provided");
         var messageBody = body.IsEmpty ? null : serializer.BytesToMessage(messageType, body);
         return MessageFactory.CreateInstance(messageType, messageBody, properties);
     }
@@ -62,4 +66,3 @@ public class DefaultMessageSerializationStrategy : IMessageSerializationStrategy
         public Memory<byte> Memory => Memory<byte>.Empty;
     }
 }
-

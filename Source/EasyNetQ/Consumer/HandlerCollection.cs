@@ -8,17 +8,22 @@ namespace EasyNetQ.Consumer;
 public class HandlerCollection : IHandlerCollection
 {
     private readonly ConcurrentDictionary<Type, IMessageHandler> handlers = new();
+    private readonly ConcurrentQueue<Type> messageTypes = new();
 
     /// <inheritdoc />
     public IHandlerRegistration Add<T>(IMessageHandler<T> handler)
     {
-        if (!handlers.TryAdd(typeof(T), (m, i, c) => handler((IMessage<T>)m, i, c)))
-            throw new EasyNetQException("There is already a handler for message type '{0}'", typeof(T).Name);
+        var messageType = typeof(T);
+        if (!handlers.TryAdd(messageType, (m, i, c) => handler((IMessage<T>)m, i, c)))
+            throw new EasyNetQException("There is already a handler for message type '{0}'", messageType.Name);
+        messageTypes.Enqueue(messageType);
         return this;
     }
 
+    public Type? FallbackMessageType => messageTypes.TryPeek(out var messageType) ? messageType : null;
+
     /// <inheritdoc />
-    public IMessageHandler GetHandler(Type messageType)
+    public IMessageHandler Get(Type messageType)
     {
         if (handlers.TryGetValue(messageType, out var handler)) return handler;
 

@@ -20,8 +20,13 @@ public interface IMessageSerializationStrategy
     /// </summary>
     /// <param name="properties">The properties</param>
     /// <param name="body">The body</param>
+    /// <param name="fallbackMessageType"></param>
     /// <returns></returns>
-    IMessage DeserializeMessage(MessageProperties properties, in ReadOnlyMemory<byte> body);
+    IMessage DeserializeMessage(
+        MessageProperties properties,
+        in ReadOnlyMemory<byte> body,
+        Type? fallbackMessageType = null
+    );
 }
 
 /// <summary>

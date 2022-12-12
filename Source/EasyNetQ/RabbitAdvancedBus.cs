@@ -146,9 +146,9 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
                                 new ConsumedMessage(receivedInfo, properties, body)
                             );
                             var deserializedMessage = messageSerializationStrategy.DeserializeMessage(
-                                rawMessage.Properties, rawMessage.Body
+                                rawMessage.Properties, rawMessage.Body, x.Item2.FallbackMessageType
                             );
-                            var handler = x.Item2.GetHandler(deserializedMessage.MessageType);
+                            var handler = x.Item2.Get(deserializedMessage.MessageType);
                             using var scope = consumeScopeProvider.CreateScope();
                             return await handler(deserializedMessage, receivedInfo, cancellationToken)
                                 .ConfigureAwait(false);
