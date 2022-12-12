@@ -1143,7 +1143,6 @@ namespace EasyNetQ.Consumer
         public bool ThrowOnNoMatchingHandler { get; set; }
         public EasyNetQ.Consumer.IHandlerRegistration Add<T>(EasyNetQ.Consumer.IMessageHandler<T> handler) { }
         public EasyNetQ.Consumer.IMessageHandler GetHandler(System.Type messageType) { }
-        public EasyNetQ.Consumer.IMessageHandler<T> GetHandler<T>() { }
     }
     public class HandlerCollectionFactory : EasyNetQ.Consumer.IHandlerCollectionFactory
     {
@@ -1191,7 +1190,6 @@ namespace EasyNetQ.Consumer
     public interface IHandlerCollection : EasyNetQ.Consumer.IHandlerRegistration
     {
         EasyNetQ.Consumer.IMessageHandler GetHandler(System.Type messageType);
-        EasyNetQ.Consumer.IMessageHandler<T> GetHandler<T>();
     }
     public interface IHandlerCollectionFactory
     {

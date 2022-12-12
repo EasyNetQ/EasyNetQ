@@ -10,8 +10,8 @@ public class HandlerCollectionTests
 {
     private readonly IHandlerCollection handlerCollection;
 
-    private bool myMessageHandlerExecuted = false;
-    private bool animalHandlerExecuted = false;
+    private bool myMessageHandlerExecuted;
+    private bool animalHandlerExecuted;
 
     public HandlerCollectionTests()
     {
@@ -30,7 +30,7 @@ public class HandlerCollectionTests
     [Fact]
     public void Should_return_matching_handler()
     {
-        var handler = handlerCollection.GetHandler<MyMessage>();
+        var handler = handlerCollection.GetHandler(typeof(MyMessage));
 
         handler(new Message<MyMessage>(new MyMessage()), null, default);
         myMessageHandlerExecuted.Should().BeTrue();
@@ -39,7 +39,7 @@ public class HandlerCollectionTests
     [Fact]
     public void Should_return_supertype_handler()
     {
-        var handler = handlerCollection.GetHandler<Dog>();
+        var handler = handlerCollection.GetHandler(typeof(Dog));
 
         handler(new Message<Dog>(new Dog()), null, default);
         animalHandlerExecuted.Should().BeTrue();
@@ -50,7 +50,7 @@ public class HandlerCollectionTests
     {
         Assert.Throws<EasyNetQException>(() =>
         {
-            handlerCollection.GetHandler<MyOtherMessage>();
+            handlerCollection.GetHandler(typeof(MyOtherMessage));
         });
     }
 
@@ -76,7 +76,7 @@ public class HandlerCollectionTests
     public void Should_return_a_null_logger_if_ThrowOnNoMatchingHandler_is_false()
     {
         handlerCollection.ThrowOnNoMatchingHandler = false;
-        var handler = handlerCollection.GetHandler<MyOtherMessage>();
+        var handler = handlerCollection.GetHandler(typeof(MyOtherMessage));
 
         handler(new Message<MyOtherMessage>(new MyOtherMessage()), null, default);
         myMessageHandlerExecuted.Should().BeFalse();
