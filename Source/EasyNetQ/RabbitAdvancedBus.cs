@@ -17,7 +17,7 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ;
 
-/// <inheritdoc />
+/// <inheritdoc cref="IAdvancedBus"/>
 public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 {
     private readonly IPersistentChannelDispatcher persistentChannelDispatcher;
