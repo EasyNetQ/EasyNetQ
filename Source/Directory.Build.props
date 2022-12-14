@@ -6,6 +6,8 @@
     <PackageProjectUrl>https://github.com/EasyNetQ/EasyNetQ</PackageProjectUrl>
     <PackageLicenseFile>licence.txt</PackageLicenseFile>
     <PackageTags>RabbitMQ;Messaging;AMQP;C#</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>See https://github.com/EasyNetQ/EasyNetQ/releases</PackageReleaseNotes>
     <LangVersion>latest</LangVersion>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -25,5 +27,6 @@
   <ItemGroup Condition="'$(IsPackable)' == 'true'">
     <None Include="..\..\Assets\EasyNetQ.png" Pack="true" PackagePath="" />
     <None Include="..\..\licence.txt" Pack="true" PackagePath="" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 </Project>
