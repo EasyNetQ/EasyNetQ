@@ -223,6 +223,7 @@ public class Conventions : IConventions
     /// <inheritdoc />
     public ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; set; }
 
+    /// <inheritdoc />
     public ErrorExchangeTypeConvention ErrorExchangeTypeConvention { get; set; }
 
     /// <inheritdoc />
