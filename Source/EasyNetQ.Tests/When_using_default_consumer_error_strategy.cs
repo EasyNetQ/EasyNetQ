@@ -21,7 +21,8 @@ public class When_using_default_consumer_error_strategy
         {
             ErrorQueueNamingConvention = _ => "CustomEasyNetQErrorQueueName",
             ErrorExchangeNamingConvention = info => "CustomErrorExchangePrefixName." + info.RoutingKey,
-            ErrorQueueTypeConvention = () => QueueType.Quorum
+            ErrorQueueTypeConvention = () => QueueType.Quorum,
+            ErrorExchangeTypeConvention = () => ExchangeType.Topic
         };
 
         mockBuilder = new MockBuilder();
@@ -84,7 +85,7 @@ public class When_using_default_consumer_error_strategy
     {
         await errorStrategy.HandleConsumerErrorAsync(consumerExecutionContext, new Exception(), default);
 
-        mockBuilder.Channels[0].Received().ExchangeDeclare("CustomErrorExchangePrefixName.originalRoutingKey", "direct", true);
+        mockBuilder.Channels[0].Received().ExchangeDeclare("CustomErrorExchangePrefixName.originalRoutingKey", "topic", true);
     }
 
     [Fact]

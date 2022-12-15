@@ -1,5 +1,6 @@
 using System;
 using EasyNetQ.Internals;
+using EasyNetQ.Topology;
 
 namespace EasyNetQ;
 
@@ -37,6 +38,11 @@ public delegate string? ErrorQueueTypeConvention();
 ///     Convention for error exchange naming
 /// </summary>
 public delegate string ErrorExchangeNameConvention(MessageReceivedInfo receivedInfo);
+
+/// <summary>
+///     Convention for error exchange type
+/// </summary>
+public delegate string ErrorExchangeTypeConvention();
 
 /// <summary>
 ///     Convention for rpc routing key naming
@@ -122,6 +128,12 @@ public interface IConventions
     ///     Convention for error exchange naming
     /// </summary>
     ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; }
+
+    /// <summary>
+    ///     Convention for error exchange type
+    /// </summary>
+    ErrorExchangeTypeConvention ErrorExchangeTypeConvention { get; }
+
 }
 
 /// <inheritdoc />
@@ -168,6 +180,7 @@ public class Conventions : IConventions
         ErrorQueueNamingConvention = _ => "EasyNetQ_Default_Error_Queue";
         ErrorExchangeNamingConvention = receivedInfo => "ErrorExchange_" + receivedInfo.RoutingKey;
         ErrorQueueTypeConvention = () => null;
+        ErrorExchangeTypeConvention = () => ExchangeType.Direct;
 
         RpcRequestExchangeNamingConvention = _ => "easy_net_q_rpc";
         RpcResponseExchangeNamingConvention = _ => "easy_net_q_rpc";
@@ -209,6 +222,8 @@ public class Conventions : IConventions
 
     /// <inheritdoc />
     public ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; set; }
+
+    public ErrorExchangeTypeConvention ErrorExchangeTypeConvention { get; set; }
 
     /// <inheritdoc />
     public RpcExchangeNameConvention RpcRequestExchangeNamingConvention { get; set; }

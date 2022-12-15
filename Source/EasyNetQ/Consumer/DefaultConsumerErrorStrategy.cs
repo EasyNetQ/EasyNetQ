@@ -136,7 +136,14 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy, IDisposable
         disposed = true;
     }
 
-    private static void DeclareAndBindErrorExchangeWithErrorQueue(IModel model, string exchangeName, string queueName, string? queueType, string routingKey)
+    private static void DeclareAndBindErrorExchangeWithErrorQueue(
+        IModel model,
+        string exchangeName,
+        string exchangeType,
+        string queueName,
+        string? queueType,
+        string routingKey
+    )
     {
         Dictionary<string, object>? queueArgs = null;
         if (queueType != null)
@@ -144,13 +151,14 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy, IDisposable
             queueArgs = new Dictionary<string, object> { { "x-queue-type", queueType } };
         }
         model.QueueDeclare(queueName, true, false, false, queueArgs);
-        model.ExchangeDeclare(exchangeName, ExchangeType.Direct, true);
+        model.ExchangeDeclare(exchangeName, exchangeType, true);
         model.QueueBind(queueName, exchangeName, routingKey);
     }
 
     private string DeclareErrorExchangeWithQueue(IModel model, MessageReceivedInfo receivedInfo)
     {
         var errorExchangeName = conventions.ErrorExchangeNamingConvention(receivedInfo);
+        var errorExchangeType = conventions.ErrorExchangeTypeConvention();
         var errorQueueName = conventions.ErrorQueueNamingConvention(receivedInfo);
         var errorQueueType = conventions.ErrorQueueTypeConvention();
         var routingKey = receivedInfo.RoutingKey;
@@ -159,7 +167,7 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy, IDisposable
 
         existingErrorExchangesWithQueues.GetOrAdd(errorTopologyIdentifier, _ =>
         {
-            DeclareAndBindErrorExchangeWithErrorQueue(model, errorExchangeName, errorQueueName, errorQueueType, routingKey);
+            DeclareAndBindErrorExchangeWithErrorQueue(model, errorExchangeName, errorExchangeType, errorQueueName, errorQueueType, routingKey);
             return NoResult.Instance;
         });
 

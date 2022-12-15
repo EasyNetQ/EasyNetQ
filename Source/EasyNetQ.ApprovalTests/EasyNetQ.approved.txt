@@ -155,7 +155,7 @@ namespace EasyNetQ
     public class DefaultMessageSerializationStrategy : EasyNetQ.IMessageSerializationStrategy
     {
         public DefaultMessageSerializationStrategy(EasyNetQ.ITypeNameSerializer typeNameSerializer, EasyNetQ.ISerializer serializer, EasyNetQ.ICorrelationIdGenerationStrategy correlationIdGenerator) { }
-        public EasyNetQ.IMessage DeserializeMessage(EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
+        public EasyNetQ.IMessage DeserializeMessage(EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body, System.Type? fallbackMessageType = null) { }
         public EasyNetQ.SerializedMessage SerializeMessage(EasyNetQ.IMessage message) { }
     }
     public class DefaultPubSub : EasyNetQ.IPubSub
@@ -376,7 +376,7 @@ namespace EasyNetQ
     }
     public interface IMessageSerializationStrategy
     {
-        EasyNetQ.IMessage DeserializeMessage(EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body);
+        EasyNetQ.IMessage DeserializeMessage(EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body, System.Type? fallbackMessageType = null);
         EasyNetQ.SerializedMessage SerializeMessage(EasyNetQ.IMessage message);
     }
     public interface IMessage<out T> : EasyNetQ.IMessage
@@ -1140,9 +1140,10 @@ namespace EasyNetQ.Consumer
     public class HandlerCollection : EasyNetQ.Consumer.IHandlerCollection, EasyNetQ.Consumer.IHandlerRegistration
     {
         public HandlerCollection() { }
+        public System.Type? FallbackMessageType { get; }
         public bool ThrowOnNoMatchingHandler { get; set; }
         public EasyNetQ.Consumer.IHandlerRegistration Add<T>(EasyNetQ.Consumer.IMessageHandler<T> handler) { }
-        public EasyNetQ.Consumer.IMessageHandler GetHandler(System.Type messageType) { }
+        public EasyNetQ.Consumer.IMessageHandler Get(System.Type messageType) { }
     }
     public class HandlerCollectionFactory : EasyNetQ.Consumer.IHandlerCollectionFactory
     {
@@ -1189,7 +1190,8 @@ namespace EasyNetQ.Consumer
     }
     public interface IHandlerCollection : EasyNetQ.Consumer.IHandlerRegistration
     {
-        EasyNetQ.Consumer.IMessageHandler GetHandler(System.Type messageType);
+        System.Type? FallbackMessageType { get; }
+        EasyNetQ.Consumer.IMessageHandler Get(System.Type messageType);
     }
     public interface IHandlerCollectionFactory
     {
@@ -1725,7 +1727,7 @@ namespace EasyNetQ.MessageVersioning
     public class VersionedMessageSerializationStrategy : EasyNetQ.IMessageSerializationStrategy
     {
         public VersionedMessageSerializationStrategy(EasyNetQ.ITypeNameSerializer typeNameSerializer, EasyNetQ.ISerializer serializer, EasyNetQ.ICorrelationIdGenerationStrategy correlationIdGenerator) { }
-        public EasyNetQ.IMessage DeserializeMessage(EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
+        public EasyNetQ.IMessage DeserializeMessage(EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body, System.Type? fallbackMessageType = null) { }
         public EasyNetQ.SerializedMessage SerializeMessage(EasyNetQ.IMessage message) { }
     }
 }
