@@ -133,7 +133,6 @@ public interface IConventions
     ///     Convention for error exchange type
     /// </summary>
     ErrorExchangeTypeConvention ErrorExchangeTypeConvention { get; }
-
 }
 
 /// <inheritdoc />
