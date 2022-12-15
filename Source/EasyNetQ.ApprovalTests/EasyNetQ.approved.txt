@@ -126,6 +126,7 @@ namespace EasyNetQ
         public Conventions(EasyNetQ.ITypeNameSerializer typeNameSerializer) { }
         public EasyNetQ.ConsumerTagConvention ConsumerTagConvention { get; set; }
         public EasyNetQ.ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; set; }
+        public EasyNetQ.ErrorExchangeTypeConvention ErrorExchangeTypeConvention { get; set; }
         public EasyNetQ.ErrorQueueNameConvention ErrorQueueNamingConvention { get; set; }
         public EasyNetQ.ErrorQueueTypeConvention ErrorQueueTypeConvention { get; set; }
         public EasyNetQ.ExchangeNameConvention ExchangeNamingConvention { get; set; }
@@ -254,6 +255,7 @@ namespace EasyNetQ
         public EasyNetQResponderException(string? message, System.Exception? inner) { }
     }
     public delegate string ErrorExchangeNameConvention(EasyNetQ.MessageReceivedInfo receivedInfo);
+    public delegate string ErrorExchangeTypeConvention();
     public delegate string ErrorQueueNameConvention(EasyNetQ.MessageReceivedInfo receivedInfo);
     public delegate string? ErrorQueueTypeConvention();
     public sealed class EventBus : EasyNetQ.IEventBus
@@ -329,6 +331,7 @@ namespace EasyNetQ
     {
         EasyNetQ.ConsumerTagConvention ConsumerTagConvention { get; }
         EasyNetQ.ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; }
+        EasyNetQ.ErrorExchangeTypeConvention ErrorExchangeTypeConvention { get; }
         EasyNetQ.ErrorQueueNameConvention ErrorQueueNamingConvention { get; }
         EasyNetQ.ErrorQueueTypeConvention ErrorQueueTypeConvention { get; }
         EasyNetQ.ExchangeNameConvention ExchangeNamingConvention { get; }
