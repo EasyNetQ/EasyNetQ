@@ -126,6 +126,7 @@ namespace EasyNetQ
         public Conventions(EasyNetQ.ITypeNameSerializer typeNameSerializer) { }
         public EasyNetQ.ConsumerTagConvention ConsumerTagConvention { get; set; }
         public EasyNetQ.ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; set; }
+        public EasyNetQ.ErrorExchangeTypeConvention ErrorExchangeTypeConvention { get; set; }
         public EasyNetQ.ErrorQueueNameConvention ErrorQueueNamingConvention { get; set; }
         public EasyNetQ.ErrorQueueTypeConvention ErrorQueueTypeConvention { get; set; }
         public EasyNetQ.ExchangeNameConvention ExchangeNamingConvention { get; set; }
@@ -155,7 +156,7 @@ namespace EasyNetQ
     public class DefaultMessageSerializationStrategy : EasyNetQ.IMessageSerializationStrategy
     {
         public DefaultMessageSerializationStrategy(EasyNetQ.ITypeNameSerializer typeNameSerializer, EasyNetQ.ISerializer serializer, EasyNetQ.ICorrelationIdGenerationStrategy correlationIdGenerator) { }
-        public EasyNetQ.IMessage DeserializeMessage(EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body, System.Type? fallbackMessageType = null) { }
+        public EasyNetQ.IMessage DeserializeMessage(EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
         public EasyNetQ.SerializedMessage SerializeMessage(EasyNetQ.IMessage message) { }
     }
     public class DefaultPubSub : EasyNetQ.IPubSub
@@ -254,6 +255,7 @@ namespace EasyNetQ
         public EasyNetQResponderException(string? message, System.Exception? inner) { }
     }
     public delegate string ErrorExchangeNameConvention(EasyNetQ.MessageReceivedInfo receivedInfo);
+    public delegate string ErrorExchangeTypeConvention();
     public delegate string ErrorQueueNameConvention(EasyNetQ.MessageReceivedInfo receivedInfo);
     public delegate string? ErrorQueueTypeConvention();
     public sealed class EventBus : EasyNetQ.IEventBus
@@ -329,6 +331,7 @@ namespace EasyNetQ
     {
         EasyNetQ.ConsumerTagConvention ConsumerTagConvention { get; }
         EasyNetQ.ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; }
+        EasyNetQ.ErrorExchangeTypeConvention ErrorExchangeTypeConvention { get; }
         EasyNetQ.ErrorQueueNameConvention ErrorQueueNamingConvention { get; }
         EasyNetQ.ErrorQueueTypeConvention ErrorQueueTypeConvention { get; }
         EasyNetQ.ExchangeNameConvention ExchangeNamingConvention { get; }
@@ -376,7 +379,7 @@ namespace EasyNetQ
     }
     public interface IMessageSerializationStrategy
     {
-        EasyNetQ.IMessage DeserializeMessage(EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body, System.Type? fallbackMessageType = null);
+        EasyNetQ.IMessage DeserializeMessage(EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body);
         EasyNetQ.SerializedMessage SerializeMessage(EasyNetQ.IMessage message);
     }
     public interface IMessage<out T> : EasyNetQ.IMessage
@@ -1140,10 +1143,9 @@ namespace EasyNetQ.Consumer
     public class HandlerCollection : EasyNetQ.Consumer.IHandlerCollection, EasyNetQ.Consumer.IHandlerRegistration
     {
         public HandlerCollection() { }
-        public System.Type? FallbackMessageType { get; }
         public bool ThrowOnNoMatchingHandler { get; set; }
         public EasyNetQ.Consumer.IHandlerRegistration Add<T>(EasyNetQ.Consumer.IMessageHandler<T> handler) { }
-        public EasyNetQ.Consumer.IMessageHandler Get(System.Type messageType) { }
+        public EasyNetQ.Consumer.IMessageHandler GetHandler(System.Type messageType) { }
     }
     public class HandlerCollectionFactory : EasyNetQ.Consumer.IHandlerCollectionFactory
     {
@@ -1190,8 +1192,7 @@ namespace EasyNetQ.Consumer
     }
     public interface IHandlerCollection : EasyNetQ.Consumer.IHandlerRegistration
     {
-        System.Type? FallbackMessageType { get; }
-        EasyNetQ.Consumer.IMessageHandler Get(System.Type messageType);
+        EasyNetQ.Consumer.IMessageHandler GetHandler(System.Type messageType);
     }
     public interface IHandlerCollectionFactory
     {
@@ -1727,7 +1728,7 @@ namespace EasyNetQ.MessageVersioning
     public class VersionedMessageSerializationStrategy : EasyNetQ.IMessageSerializationStrategy
     {
         public VersionedMessageSerializationStrategy(EasyNetQ.ITypeNameSerializer typeNameSerializer, EasyNetQ.ISerializer serializer, EasyNetQ.ICorrelationIdGenerationStrategy correlationIdGenerator) { }
-        public EasyNetQ.IMessage DeserializeMessage(EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body, System.Type? fallbackMessageType = null) { }
+        public EasyNetQ.IMessage DeserializeMessage(EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
         public EasyNetQ.SerializedMessage SerializeMessage(EasyNetQ.IMessage message) { }
     }
 }
