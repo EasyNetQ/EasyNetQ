@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 
 namespace EasyNetQ.Consumer;
 
-/// <inheritdoc />
 public interface IConsumerErrorStrategy
 {
     /// <summary>
