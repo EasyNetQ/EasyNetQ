@@ -93,13 +93,11 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy, IDisposable
 
             using var message = CreateErrorMessage(receivedInfo, properties, body, exception);
 
-            var routingKey = GetRoutingKeyForErrorExchange(receivedInfo);
-
             var errorProperties = model.CreateBasicProperties();
             errorProperties.Persistent = true;
             errorProperties.Type = typeNameSerializer.Serialize(typeof(Error));
 
-            model.BasicPublish(errorExchange, routingKey, errorProperties, message.Memory);
+            model.BasicPublish(errorExchange, receivedInfo.RoutingKey, errorProperties, message.Memory);
 
             if (!configuration.PublisherConfirms) return Task.FromResult(AckStrategies.Ack);
 
@@ -181,12 +179,6 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy, IDisposable
         });
 
         return errorExchangeName;
-    }
-
-    private string GetRoutingKeyForErrorExchange(MessageReceivedInfo receivedInfo)
-    {
-        var errorRoutingKey = conventions.ErrorExchangeRoutingKeyConvention(receivedInfo);
-        return errorRoutingKey;
     }
 
     private IMemoryOwner<byte> CreateErrorMessage(
