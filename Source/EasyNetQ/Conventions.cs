@@ -44,6 +44,12 @@ public delegate string ErrorExchangeNameConvention(MessageReceivedInfo receivedI
 /// </summary>
 public delegate string ErrorExchangeTypeConvention();
 
+
+/// <summary>
+///     Convention for error exchange Routing Key
+/// </summary>
+public delegate string ErrorExchangeRoutingKeyConvention(MessageReceivedInfo receivedInfo);
+
 /// <summary>
 ///     Convention for rpc routing key naming
 /// </summary>
@@ -133,6 +139,11 @@ public interface IConventions
     ///     Convention for error exchange type
     /// </summary>
     ErrorExchangeTypeConvention ErrorExchangeTypeConvention { get; }
+
+    /// <summary>
+    ///     Convention for error exchange Routing key
+    /// </summary>
+    ErrorExchangeRoutingKeyConvention ErrorExchangeRoutingKeyConvention { get; }
 }
 
 /// <inheritdoc />
@@ -180,6 +191,7 @@ public class Conventions : IConventions
         ErrorExchangeNamingConvention = receivedInfo => "ErrorExchange_" + receivedInfo.RoutingKey;
         ErrorQueueTypeConvention = () => null;
         ErrorExchangeTypeConvention = () => ExchangeType.Direct;
+        ErrorExchangeRoutingKeyConvention = receivedInfo => receivedInfo.RoutingKey;
 
         RpcRequestExchangeNamingConvention = _ => "easy_net_q_rpc";
         RpcResponseExchangeNamingConvention = _ => "easy_net_q_rpc";
@@ -236,4 +248,7 @@ public class Conventions : IConventions
 
     /// <inheritdoc />
     public ConsumerTagConvention ConsumerTagConvention { get; set; }
+
+    /// <inheritdoc />
+    public ErrorExchangeRoutingKeyConvention ErrorExchangeRoutingKeyConvention { get; set; }
 }

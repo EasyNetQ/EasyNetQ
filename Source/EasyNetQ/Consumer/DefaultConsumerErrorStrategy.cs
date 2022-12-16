@@ -11,6 +11,7 @@ using RabbitMQ.Client.Exceptions;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Internals;
+using EasyNetQ.ConnectionString;
 
 namespace EasyNetQ.Consumer;
 
@@ -167,7 +168,7 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy, IDisposable
         var errorExchangeType = conventions.ErrorExchangeTypeConvention();
         var errorQueueName = conventions.ErrorQueueNamingConvention(receivedInfo);
         var errorQueueType = conventions.ErrorQueueTypeConvention();
-        var routingKey = receivedInfo.RoutingKey;
+        var routingKey = conventions.ErrorExchangeRoutingKeyConvention(receivedInfo);
 
         var errorTopologyIdentifier = $"{errorExchangeName}-{errorQueueName}-{routingKey}";
 
