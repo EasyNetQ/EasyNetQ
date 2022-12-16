@@ -22,7 +22,8 @@ public class When_using_default_consumer_error_strategy
             ErrorQueueNamingConvention = _ => "CustomEasyNetQErrorQueueName",
             ErrorExchangeNamingConvention = info => "CustomErrorExchangePrefixName." + info.RoutingKey,
             ErrorQueueTypeConvention = () => QueueType.Quorum,
-            ErrorExchangeTypeConvention = () => ExchangeType.Topic
+            ErrorExchangeTypeConvention = () => ExchangeType.Topic,
+            ErrorExchangeRoutingKeyConvention = info => info.RoutingKey
         };
 
         const string originalMessage = "";
