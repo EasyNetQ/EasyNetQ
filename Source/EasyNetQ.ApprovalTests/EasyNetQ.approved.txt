@@ -334,10 +334,10 @@ namespace EasyNetQ
         EasyNetQ.ConsumerTagConvention ConsumerTagConvention { get; }
         EasyNetQ.ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; }
         EasyNetQ.ErrorExchangeTypeConvention ErrorExchangeTypeConvention { get; }
-        EasyNetQ.ErrorExchangeRoutingKeyConvention ErrorExchangeRoutingKeyConvention { get; }
+        EasyNetQ.ErrorExchangeRoutingKeyConvention ErrorExchangeRoutingKeyConvention { get; }       
         EasyNetQ.ErrorQueueNameConvention ErrorQueueNamingConvention { get; }
         EasyNetQ.ErrorQueueTypeConvention ErrorQueueTypeConvention { get; }
-        EasyNetQ.ExchangeNameConvention ExchangeNamingConvention { get; }        
+        EasyNetQ.ExchangeNameConvention ExchangeNamingConvention { get; }
         EasyNetQ.QueueNameConvention QueueNamingConvention { get; }
         EasyNetQ.QueueTypeConvention QueueTypeConvention { get; }
         EasyNetQ.RpcExchangeNameConvention RpcRequestExchangeNamingConvention { get; }
