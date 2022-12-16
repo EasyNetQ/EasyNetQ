@@ -1130,10 +1130,9 @@ namespace EasyNetQ.Consumer
         public EasyNetQ.Consumer.IConsumer CreateConsumer(EasyNetQ.Consumer.ConsumerConfiguration configuration) { }
         public void Dispose() { }
     }
-    public class DefaultConsumerErrorStrategy : EasyNetQ.Consumer.IConsumerErrorStrategy, System.IDisposable
+    public class DefaultConsumerErrorStrategy : EasyNetQ.Consumer.IConsumerErrorStrategy
     {
         public DefaultConsumerErrorStrategy(EasyNetQ.Logging.ILogger<EasyNetQ.Consumer.DefaultConsumerErrorStrategy> logger, EasyNetQ.Consumer.IConsumerConnection connection, EasyNetQ.ISerializer serializer, EasyNetQ.IConventions conventions, EasyNetQ.ITypeNameSerializer typeNameSerializer, EasyNetQ.Consumer.IErrorMessageSerializer errorMessageSerializer, EasyNetQ.ConnectionConfiguration configuration) { }
-        public virtual void Dispose() { }
         public virtual System.Threading.Tasks.Task<EasyNetQ.Consumer.AckStrategy> HandleConsumerCancelledAsync(EasyNetQ.Consumer.ConsumerExecutionContext context, System.Threading.CancellationToken cancellationToken) { }
         public virtual System.Threading.Tasks.Task<EasyNetQ.Consumer.AckStrategy> HandleConsumerErrorAsync(EasyNetQ.Consumer.ConsumerExecutionContext context, System.Exception exception, System.Threading.CancellationToken cancellationToken) { }
     }

@@ -11,7 +11,6 @@ using RabbitMQ.Client.Exceptions;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Internals;
-using EasyNetQ.ConnectionString;
 
 namespace EasyNetQ.Consumer;
 
@@ -27,7 +26,7 @@ namespace EasyNetQ.Consumer;
 ///
 /// Each exchange is bound to the central EasyNetQ error queue.
 /// </summary>
-public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy, IDisposable
+public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
 {
     private readonly ILogger<DefaultConsumerErrorStrategy> logger;
     private readonly IConsumerConnection connection;
@@ -38,7 +37,6 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy, IDisposable
     private readonly ITypeNameSerializer typeNameSerializer;
     private readonly ConnectionConfiguration configuration;
 
-    private volatile bool disposed;
 
     /// <summary>
     ///     Creates DefaultConsumerErrorStrategy
@@ -69,9 +67,6 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy, IDisposable
         CancellationToken cancellationToken
     )
     {
-        if (disposed)
-            throw new ObjectDisposedException(nameof(DefaultConsumerErrorStrategy));
-
         var receivedInfo = context.ReceivedInfo;
         var properties = context.Properties;
         var body = context.Body.ToArray();
@@ -132,16 +127,7 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy, IDisposable
     public virtual Task<AckStrategy> HandleConsumerCancelledAsync(
         ConsumerExecutionContext context,
         CancellationToken cancellationToken
-    )
-    {
-        if (disposed)
-            throw new ObjectDisposedException(nameof(DefaultConsumerErrorStrategy));
-
-        return Task.FromResult(AckStrategies.NackWithRequeue);
-    }
-
-    /// <inheritdoc />
-    public virtual void Dispose() => disposed = true;
+    ) => Task.FromResult(AckStrategies.NackWithRequeue);
 
     private static void DeclareAndBindErrorExchangeWithErrorQueue(
         IModel model,
@@ -157,6 +143,7 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy, IDisposable
         {
             queueArgs = new Dictionary<string, object> { { "x-queue-type", queueType } };
         }
+
         model.QueueDeclare(queueName, true, false, false, queueArgs);
         model.ExchangeDeclare(exchangeName, exchangeType, true);
         model.QueueBind(queueName, exchangeName, routingKey);
