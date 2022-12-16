@@ -90,7 +90,7 @@ public class When_using_default_consumer_error_strategy
     {
         using var mockBuilder = new MockBuilder(
             x => x.Register<IConventions>(customConventions)
-                .Register(_ => new ConnectionConfiguration{PublisherConfirms = true}
+                .Register(_ => new ConnectionConfiguration { PublisherConfirms = true }
             )
         );
 
