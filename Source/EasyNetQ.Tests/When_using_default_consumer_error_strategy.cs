@@ -23,7 +23,7 @@ public class When_using_default_consumer_error_strategy
             ErrorExchangeNamingConvention = info => "CustomErrorExchangePrefixName." + info.RoutingKey,
             ErrorQueueTypeConvention = () => QueueType.Quorum,
             ErrorExchangeTypeConvention = () => ExchangeType.Topic,
-            ErrorExchangeRoutingKeyConvention = info => info.RoutingKey
+            ErrorExchangeRoutingKeyConvention = info => "CustomRoutingKey"
         };
 
         const string originalMessage = "";
@@ -111,12 +111,12 @@ public class When_using_default_consumer_error_strategy
         mockBuilder.Channels[0].Received().QueueBind(
             "CustomEasyNetQErrorQueueName",
             "CustomErrorExchangePrefixName.originalRoutingKey",
-            "originalRoutingKey",
+            "CustomRoutingKey",
             null
         );
         mockBuilder.Channels[0].Received().BasicPublish(
             "CustomErrorExchangePrefixName.originalRoutingKey",
-            "originalRoutingKey",
+            "CustomRoutingKey",
             false,
             Arg.Any<IBasicProperties>(),
             Arg.Any<ReadOnlyMemory<byte>>()

@@ -191,7 +191,7 @@ public class Conventions : IConventions
         ErrorExchangeNamingConvention = receivedInfo => "ErrorExchange_" + receivedInfo.RoutingKey;
         ErrorQueueTypeConvention = () => null;
         ErrorExchangeTypeConvention = () => ExchangeType.Direct;
-        ErrorExchangeRoutingKeyConvention = (MessageReceivedInfo receivedInfo) =>  receivedInfo.RoutingKey;
+        ErrorExchangeRoutingKeyConvention = receivedInfo =>  receivedInfo.RoutingKey;
 
         RpcRequestExchangeNamingConvention = _ => "easy_net_q_rpc";
         RpcResponseExchangeNamingConvention = _ => "easy_net_q_rpc";
@@ -249,5 +249,6 @@ public class Conventions : IConventions
     /// <inheritdoc />
     public ConsumerTagConvention ConsumerTagConvention { get; set; }
 
+    /// <inheritdoc />
     public ErrorExchangeRoutingKeyConvention ErrorExchangeRoutingKeyConvention { get; set;}
 }
