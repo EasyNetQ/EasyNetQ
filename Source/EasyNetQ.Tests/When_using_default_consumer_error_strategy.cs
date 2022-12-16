@@ -116,7 +116,7 @@ public class When_using_default_consumer_error_strategy
         );
         mockBuilder.Channels[0].Received().BasicPublish(
             "CustomErrorExchangePrefixName.originalRoutingKey",
-            "CustomRoutingKey",
+            "originalRoutingKey",
             false,
             Arg.Any<IBasicProperties>(),
             Arg.Any<ReadOnlyMemory<byte>>()
