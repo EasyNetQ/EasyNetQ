@@ -62,7 +62,11 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy, IDisposable
     }
 
     /// <inheritdoc />
-    public virtual Task<AckStrategy> HandleConsumerErrorAsync(ConsumerExecutionContext context, Exception exception, CancellationToken cancellationToken)
+    public virtual Task<AckStrategy> HandleConsumerErrorAsync(
+        ConsumerExecutionContext context,
+        Exception exception,
+        CancellationToken cancellationToken
+    )
     {
         if (disposed)
             throw new ObjectDisposedException(nameof(DefaultConsumerErrorStrategy));
@@ -124,17 +128,19 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy, IDisposable
     }
 
     /// <inheritdoc />
-    public virtual Task<AckStrategy> HandleConsumerCancelledAsync(ConsumerExecutionContext context, CancellationToken cancellationToken)
+    public virtual Task<AckStrategy> HandleConsumerCancelledAsync(
+        ConsumerExecutionContext context,
+        CancellationToken cancellationToken
+    )
     {
+        if (disposed)
+            throw new ObjectDisposedException(nameof(DefaultConsumerErrorStrategy));
+
         return Task.FromResult(AckStrategies.NackWithRequeue);
     }
 
     /// <inheritdoc />
-    public virtual void Dispose()
-    {
-        if (disposed) return;
-        disposed = true;
-    }
+    public virtual void Dispose() => disposed = true;
 
     private static void DeclareAndBindErrorExchangeWithErrorQueue(
         IModel model,

@@ -21,7 +21,6 @@ public class MockBuilder : IDisposable
     private readonly List<IModel> channels = new();
     private readonly IConnection connection = Substitute.For<IAutorecoveringConnection>();
     private readonly IConnectionFactory connectionFactory = Substitute.For<IConnectionFactory>();
-    private readonly List<string> consumerQueueNames = new();
     private readonly List<AsyncDefaultBasicConsumer> consumers = new();
 
     public MockBuilder() : this(_ => { })
@@ -69,6 +68,7 @@ public class MockBuilder : IDisposable
                     var queueName = (string)queueDeclareInvocation[0];
                     return new QueueDeclareOk(queueName, 0, 0);
                 });
+            channel.WaitForConfirms(default).ReturnsForAnyArgs(true);
 
             return channel;
         });
@@ -80,7 +80,8 @@ public class MockBuilder : IDisposable
         RabbitHutch.RegisterBus(
             adapter,
             x => x.Resolve<IConnectionStringParser>().Parse(connectionString),
-            registerServices);
+            registerServices
+        );
 
         bus = container.GetInstance<IBus>();
     }
@@ -116,7 +117,9 @@ public class MockBuilder : IDisposable
     public IProducerConnection ProducerConnection => container.GetInstance<IProducerConnection>();
     public IConsumerConnection ConsumerConnection => container.GetInstance<IConsumerConnection>();
 
-    public List<string> ConsumerQueueNames => consumerQueueNames;
+    public IConsumerErrorStrategy ConsumerErrorStrategy => container.GetInstance<IConsumerErrorStrategy>();
+
+    public List<string> ConsumerQueueNames { get; } = new();
 
     public void Dispose() => container.Dispose();
 }
