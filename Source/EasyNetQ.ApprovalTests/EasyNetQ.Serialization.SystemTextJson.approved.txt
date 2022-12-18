@@ -1,5 +1,11 @@
 namespace EasyNetQ.Serialization.SystemTextJson
 {
+    public class MessagePropertiesConverter : System.Text.Json.Serialization.JsonConverter<EasyNetQ.MessageProperties>
+    {
+        public MessagePropertiesConverter() { }
+        public override EasyNetQ.MessageProperties? Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options) { }
+        public override void Write(System.Text.Json.Utf8JsonWriter writer, EasyNetQ.MessageProperties value, System.Text.Json.JsonSerializerOptions options) { }
+    }
     public class SystemObjectNewtonsoftCompatibleConverter : System.Text.Json.Serialization.JsonConverter<object>
     {
         public SystemObjectNewtonsoftCompatibleConverter() { }
@@ -13,6 +19,13 @@ namespace EasyNetQ.Serialization.SystemTextJson
         public object BytesToMessage(System.Type messageType, in System.ReadOnlyMemory<byte> bytes) { }
         public System.Buffers.IMemoryOwner<byte> MessageToBytes(System.Type messageType, object message) { }
     }
+    public sealed class SystemTextJsonSerializerV2 : EasyNetQ.ISerializer
+    {
+        public SystemTextJsonSerializerV2() { }
+        public SystemTextJsonSerializerV2(System.Text.Json.JsonSerializerOptions options) { }
+        public object BytesToMessage(System.Type messageType, in System.ReadOnlyMemory<byte> bytes) { }
+        public System.Buffers.IMemoryOwner<byte> MessageToBytes(System.Type messageType, object message) { }
+    }
 }
 namespace EasyNetQ
 {
@@ -20,5 +33,7 @@ namespace EasyNetQ
     {
         public static EasyNetQ.DI.IServiceRegister EnableSystemTextJson(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
         public static EasyNetQ.DI.IServiceRegister EnableSystemTextJson(this EasyNetQ.DI.IServiceRegister serviceRegister, System.Text.Json.JsonSerializerOptions options) { }
+        public static EasyNetQ.DI.IServiceRegister EnableSystemTextJsonV2(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
+        public static EasyNetQ.DI.IServiceRegister EnableSystemTextJsonV2(this EasyNetQ.DI.IServiceRegister serviceRegister, System.Text.Json.JsonSerializerOptions options) { }
     }
 }
