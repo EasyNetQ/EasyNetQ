@@ -154,7 +154,7 @@ internal static class JsonHeaderExtensions
             case JsonHeaderType.BinaryTable:
                 return new BinaryTableValue(json.GetBytesFromBase64());
             default:
-                throw new InvalidOperationException();
+                throw new ArgumentOutOfRangeException(nameof(type), type, null);
         }
     }
 }

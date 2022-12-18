@@ -44,8 +44,7 @@ public class MessagePropertiesConverter : JsonConverter<MessageProperties>
                 messageProperties.Headers = headers.ConvertJsonToHeaders(options);
             return messageProperties;
         }
-
-        throw new ArgumentOutOfRangeException(nameof(reader.TokenType), reader.TokenType, "Cannot read message properties");
+        throw new ArgumentOutOfRangeException(nameof(reader.TokenType), reader.TokenType, null);
     }
 
     public override void Write(Utf8JsonWriter writer, MessageProperties value, JsonSerializerOptions options)
