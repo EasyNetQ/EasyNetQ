@@ -57,7 +57,11 @@ public class MessageProperties : ICloneable
     public string? ContentType
     {
         get => contentType;
-        set { contentType = CheckShortString(value, nameof(ContentType)); contentTypePresent = true; }
+        set
+        {
+            contentType = CheckShortString(value, nameof(ContentType));
+            contentTypePresent = true;
+        }
     }
 
     private string? contentEncoding;
@@ -68,7 +72,11 @@ public class MessageProperties : ICloneable
     public string? ContentEncoding
     {
         get => contentEncoding;
-        set { contentEncoding = CheckShortString(value, nameof(ContentEncoding)); contentEncodingPresent = true; }
+        set
+        {
+            contentEncoding = CheckShortString(value, nameof(ContentEncoding));
+            contentEncodingPresent = true;
+        }
     }
 
     private IDictionary<string, object?>? headers;
@@ -90,7 +98,11 @@ public class MessageProperties : ICloneable
     public byte DeliveryMode
     {
         get => deliveryMode;
-        set { deliveryMode = value; deliveryModePresent = true; }
+        set
+        {
+            deliveryMode = value;
+            deliveryModePresent = true;
+        }
     }
 
     private byte priority;
@@ -101,7 +113,11 @@ public class MessageProperties : ICloneable
     public byte Priority
     {
         get => priority;
-        set { priority = value; priorityPresent = true; }
+        set
+        {
+            priority = value;
+            priorityPresent = true;
+        }
     }
 
     private string? correlationId;
@@ -112,7 +128,11 @@ public class MessageProperties : ICloneable
     public string? CorrelationId
     {
         get => correlationId;
-        set { correlationId = CheckShortString(value, nameof(CorrelationId)); correlationIdPresent = true; }
+        set
+        {
+            correlationId = CheckShortString(value, nameof(CorrelationId));
+            correlationIdPresent = true;
+        }
     }
 
     private string? replyTo;
@@ -123,7 +143,11 @@ public class MessageProperties : ICloneable
     public string? ReplyTo
     {
         get => replyTo;
-        set { replyTo = CheckShortString(value, nameof(ReplyTo)); replyToPresent = true; }
+        set
+        {
+            replyTo = CheckShortString(value, nameof(ReplyTo));
+            replyToPresent = true;
+        }
     }
 
     private TimeSpan? expiration;
@@ -134,7 +158,11 @@ public class MessageProperties : ICloneable
     public TimeSpan? Expiration
     {
         get => expiration;
-        set { expiration = value; expirationPresent = true; }
+        set
+        {
+            expiration = value;
+            expirationPresent = true;
+        }
     }
 
     private string? messageId;
@@ -145,7 +173,11 @@ public class MessageProperties : ICloneable
     public string? MessageId
     {
         get => messageId;
-        set { messageId = CheckShortString(value, nameof(MessageId)); messageIdPresent = true; }
+        set
+        {
+            messageId = CheckShortString(value, nameof(MessageId));
+            messageIdPresent = true;
+        }
     }
 
     private long timestamp;
@@ -156,7 +188,11 @@ public class MessageProperties : ICloneable
     public long Timestamp
     {
         get => timestamp;
-        set { timestamp = value; timestampPresent = true; }
+        set
+        {
+            timestamp = value;
+            timestampPresent = true;
+        }
     }
 
     private string? type;
@@ -167,7 +203,11 @@ public class MessageProperties : ICloneable
     public string? Type
     {
         get => type;
-        set { type = CheckShortString(value, nameof(Type)); typePresent = true; }
+        set
+        {
+            type = CheckShortString(value, nameof(Type));
+            typePresent = true;
+        }
     }
 
     private string? userId;
@@ -178,7 +218,11 @@ public class MessageProperties : ICloneable
     public string? UserId
     {
         get => userId;
-        set { userId = CheckShortString(value, nameof(UserId)); userIdPresent = true; }
+        set
+        {
+            userId = CheckShortString(value, nameof(UserId));
+            userIdPresent = true;
+        }
     }
 
     private string? appId;
@@ -189,7 +233,11 @@ public class MessageProperties : ICloneable
     public string? AppId
     {
         get => appId;
-        set { appId = CheckShortString(value, nameof(AppId)); appIdPresent = true; }
+        set
+        {
+            appId = CheckShortString(value, nameof(AppId));
+            appIdPresent = true;
+        }
     }
 
     private string? clusterId;
@@ -200,7 +248,11 @@ public class MessageProperties : ICloneable
     public string? ClusterId
     {
         get => clusterId;
-        set { clusterId = CheckShortString(value, nameof(ClusterId)); clusterIdPresent = true; }
+        set
+        {
+            clusterId = CheckShortString(value, nameof(ClusterId));
+            clusterIdPresent = true;
+        }
     }
 
     /// <summary>

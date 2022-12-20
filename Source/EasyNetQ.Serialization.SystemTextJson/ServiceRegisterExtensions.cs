@@ -12,14 +12,24 @@ public static class ServiceRegisterExtensions
     /// <summary>
     ///     Enables serializer based on System.Text.Json
     /// </summary>
-    /// <param name="serviceRegister">The register</param>
     public static IServiceRegister EnableSystemTextJson(this IServiceRegister serviceRegister)
-    {
-        return serviceRegister.Register<ISerializer, SystemTextJsonSerializer>();
-    }
+        => serviceRegister.Register<ISerializer, SystemTextJsonSerializer>();
 
+    /// <summary>
+    ///     Enables serializer based on System.Text.Json
+    /// </summary>
     public static IServiceRegister EnableSystemTextJson(this IServiceRegister serviceRegister, System.Text.Json.JsonSerializerOptions options)
-    {
-        return serviceRegister.Register<ISerializer>(_ => new SystemTextJsonSerializer(options));
-    }
+        => serviceRegister.Register<ISerializer>(_ => new SystemTextJsonSerializer(options));
+
+    /// <summary>
+    ///     Enables serializer based on System.Text.Json
+    /// </summary>
+    public static IServiceRegister EnableSystemTextJsonV2(this IServiceRegister serviceRegister)
+        => serviceRegister.Register<ISerializer, SystemTextJsonSerializerV2>();
+
+    /// <summary>
+    ///     Enables serializer based on System.Text.Json
+    /// </summary>
+    public static IServiceRegister EnableSystemTextJsonV2(this IServiceRegister serviceRegister, System.Text.Json.JsonSerializerOptions options)
+        => serviceRegister.Register<ISerializer>(_ => new SystemTextJsonSerializerV2(options));
 }
