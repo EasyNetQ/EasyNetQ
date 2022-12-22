@@ -34,12 +34,26 @@ public class PersistentChannel : IPersistentChannel
     /// <param name="options">The channel options</param>
     /// <param name="connection">The connection</param>
     /// <param name="eventBus">The event bus</param>
+    public PersistentChannel(
+        in PersistentChannelOptions options,
+        IPersistentConnection connection,
+        IEventBus eventBus
+    ) : this(options, connection, eventBus, null)
+    {
+    }
+
+    /// <summary>
+    ///     Creates PersistentChannel
+    /// </summary>
+    /// <param name="options">The channel options</param>
+    /// <param name="connection">The connection</param>
+    /// <param name="eventBus">The event bus</param>
     /// <param name="logger">The logger</param>
     public PersistentChannel(
         in PersistentChannelOptions options,
         IPersistentConnection connection,
         IEventBus eventBus,
-        ILogger<PersistentChannel> logger = null
+        ILogger<PersistentChannel> logger
     )
     {
         Preconditions.CheckNotNull(connection, nameof(connection));
@@ -50,6 +64,7 @@ public class PersistentChannel : IPersistentChannel
         this.eventBus = eventBus;
         this.logger = logger;
     }
+
 
     /// <inheritdoc />
     public async Task<TResult> InvokeChannelActionAsync<TResult, TChannelAction>(

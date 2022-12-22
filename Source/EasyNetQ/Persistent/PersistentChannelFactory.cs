@@ -11,7 +11,14 @@ public class PersistentChannelFactory : IPersistentChannelFactory
     /// <summary>
     ///    Creates PersistentChannelFactory
     /// </summary>
-    public PersistentChannelFactory(IEventBus eventBus, ILogger<PersistentChannel> logger = null)
+    public PersistentChannelFactory(IEventBus eventBus) : this(eventBus, null)
+    {
+    }
+
+    /// <summary>
+    ///    Creates PersistentChannelFactory
+    /// </summary>
+    public PersistentChannelFactory(IEventBus eventBus, ILogger<PersistentChannel> logger)
     {
         Preconditions.CheckNotNull(eventBus, nameof(eventBus));
 
@@ -20,9 +27,7 @@ public class PersistentChannelFactory : IPersistentChannelFactory
     }
 
     /// <inheritdoc />
-    public IPersistentChannel CreatePersistentChannel(
-        IPersistentConnection connection, PersistentChannelOptions options
-    )
+    public IPersistentChannel CreatePersistentChannel(IPersistentConnection connection, PersistentChannelOptions options)
     {
         return new PersistentChannel(options, connection, eventBus, logger);
     }
