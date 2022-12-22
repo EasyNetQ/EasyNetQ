@@ -1787,7 +1787,7 @@ namespace EasyNetQ.Persistent
     }
     public class PersistentChannelFactory : EasyNetQ.Persistent.IPersistentChannelFactory
     {
-        public PersistentChannelFactory(EasyNetQ.IEventBus eventBus) { }
+        public PersistentChannelFactory(EasyNetQ.IEventBus eventBus, EasyNetQ.Logging.ILogger<EasyNetQ.Persistent.PersistentChannel> logger = null) { }
         public EasyNetQ.Persistent.IPersistentChannel CreatePersistentChannel(EasyNetQ.Persistent.IPersistentConnection connection, EasyNetQ.Persistent.PersistentChannelOptions options) { }
     }
     public readonly struct PersistentChannelOptions
