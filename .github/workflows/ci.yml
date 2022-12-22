@@ -4,12 +4,13 @@ on:
   push:
     branches:
       - master
+      - 7.x
       - '[0-9]+.x'
     tags: [ '[0-9]+.[0-9]+.[0-9]+*' ]
   pull_request:
     branches:
       - master
-      - develop
+      - 7.x
 
 permissions:
   contents: read
