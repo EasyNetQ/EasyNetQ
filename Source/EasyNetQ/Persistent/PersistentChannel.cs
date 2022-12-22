@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
+using EasyNetQ.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
@@ -20,6 +21,7 @@ public class PersistentChannel : IPersistentChannel
 
     private readonly CancellationTokenSource disposeCts = new();
     private readonly IEventBus eventBus;
+    private readonly ILogger<PersistentChannel> logger;
     private readonly AsyncLock mutex = new();
     private readonly PersistentChannelOptions options;
 
@@ -32,14 +34,21 @@ public class PersistentChannel : IPersistentChannel
     /// <param name="options">The channel options</param>
     /// <param name="connection">The connection</param>
     /// <param name="eventBus">The event bus</param>
-    public PersistentChannel(in PersistentChannelOptions options, IPersistentConnection connection, IEventBus eventBus)
+    /// <param name="logger">The logger</param>
+    public PersistentChannel(
+        in PersistentChannelOptions options,
+        IPersistentConnection connection,
+        IEventBus eventBus,
+        ILogger<PersistentChannel> logger = null
+    )
     {
         Preconditions.CheckNotNull(connection, nameof(connection));
         Preconditions.CheckNotNull(eventBus, nameof(eventBus));
 
+        this.options = options;
         this.connection = connection;
         this.eventBus = eventBus;
-        this.options = options;
+        this.logger = logger;
     }
 
     /// <inheritdoc />
@@ -72,6 +81,8 @@ public class PersistentChannel : IPersistentChannel
 
                 if (exceptionVerdict.Rethrow)
                     throw;
+
+                logger?.Error(exception, "Failed to invoke channel action, invocation will be retried");
             }
 
             await Task.Delay(retryTimeoutMs, cts.Token).ConfigureAwait(false);
