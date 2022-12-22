@@ -1780,7 +1780,7 @@ namespace EasyNetQ.Persistent
     }
     public class PersistentChannel : EasyNetQ.Persistent.IPersistentChannel, System.IDisposable
     {
-        public PersistentChannel(in EasyNetQ.Persistent.PersistentChannelOptions options, EasyNetQ.Persistent.IPersistentConnection connection, EasyNetQ.IEventBus eventBus) { }
+        public PersistentChannel(in EasyNetQ.Persistent.PersistentChannelOptions options, EasyNetQ.Persistent.IPersistentConnection connection, EasyNetQ.IEventBus eventBus, EasyNetQ.Logging.ILogger<EasyNetQ.Persistent.PersistentChannel> logger = null) { }
         public void Dispose() { }
         public System.Threading.Tasks.Task<TResult> InvokeChannelActionAsync<TResult, TChannelAction>(TChannelAction channelAction, System.Threading.CancellationToken cancellationToken = default)
             where TChannelAction :  struct, EasyNetQ.Persistent.IPersistentChannelAction<TResult> { }
