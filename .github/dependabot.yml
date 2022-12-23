@@ -26,6 +26,10 @@ updates:
     versions:
     - ">= 3.3.5"
     - "< 4"
+  - dependency-name: Microsoft.Bcl.AsyncInterfaces
+    versions:
+    - ">= 6.a"
+    - "< 8"
   - dependency-name: Microsoft.Extensions.Configuration
     versions:
     - ">= 5.a"
