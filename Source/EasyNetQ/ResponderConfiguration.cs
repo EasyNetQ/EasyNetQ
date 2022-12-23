@@ -20,9 +20,16 @@ public interface IResponderConfiguration
     /// <summary>
     /// Sets the queue name
     /// </summary>
-    /// <param name="queueName"></param>
+    /// <param name="queueName">The name of the queue</param>
     /// <returns>Reference to the same <see cref="IResponderConfiguration"/> to allow methods chaining</returns>
     IResponderConfiguration WithQueueName(string queueName);
+
+    /// <summary>
+    /// Sets the queue type. Valid values are "classic" and "quorum".
+    /// </summary>
+    /// <param name="queueType">The queue type</param>
+    /// <returns>Reference to the same <see cref="IResponderConfiguration"/> to allow methods chaining</returns>
+    IResponderConfiguration WithQueueType(string queueType);
 
     /// <summary>
     /// Configures the queue's durability
@@ -60,6 +67,7 @@ internal class ResponderConfiguration : IResponderConfiguration
 
     public ushort PrefetchCount { get; private set; }
     public string? QueueName { get; private set; }
+    public string? QueueType { get; private set; }
     public bool Durable { get; private set; } = true;
     public TimeSpan? Expires { get; private set; }
     public byte? MaxPriority { get; private set; }
@@ -73,6 +81,12 @@ internal class ResponderConfiguration : IResponderConfiguration
     public IResponderConfiguration WithQueueName(string queueName)
     {
         QueueName = queueName;
+        return this;
+    }
+
+    public IResponderConfiguration WithQueueType(string queueType)
+    {
+        QueueType = queueType;
         return this;
     }
 
