@@ -807,6 +807,7 @@ namespace EasyNetQ
     {
         public const string Classic = "classic";
         public const string Quorum = "quorum";
+        public const string Stream = "stream";
     }
     public delegate string? QueueTypeConvention(System.Type messageType);
     public class RabbitAdvancedBus : EasyNetQ.IAdvancedBus, System.IDisposable
