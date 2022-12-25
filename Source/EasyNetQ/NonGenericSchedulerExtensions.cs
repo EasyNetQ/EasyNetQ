@@ -1,8 +1,5 @@
-using System;
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EasyNetQ;
 

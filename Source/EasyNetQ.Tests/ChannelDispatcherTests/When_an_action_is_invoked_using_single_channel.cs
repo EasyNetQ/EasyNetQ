@@ -1,6 +1,5 @@
 // ReSharper disable InconsistentNaming
 
-using System;
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
 using EasyNetQ.Persistent;

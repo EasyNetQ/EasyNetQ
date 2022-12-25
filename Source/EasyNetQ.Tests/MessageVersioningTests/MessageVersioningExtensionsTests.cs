@@ -3,7 +3,6 @@
 using EasyNetQ.DI;
 using EasyNetQ.MessageVersioning;
 using EasyNetQ.Producer;
-using System;
 using NSubstitute;
 using Xunit;
 

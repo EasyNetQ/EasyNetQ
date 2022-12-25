@@ -1,4 +1,3 @@
-using System;
 using MS = Microsoft.Extensions.Logging;
 using MSExtensions = Microsoft.Extensions.Logging.LoggerExtensions;
 

@@ -1,7 +1,4 @@
 using EasyNetQ.Logging;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using FluentAssertions;
 using Xunit;
 

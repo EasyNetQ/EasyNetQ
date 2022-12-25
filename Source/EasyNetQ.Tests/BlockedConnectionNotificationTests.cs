@@ -2,7 +2,6 @@
 using EasyNetQ.Tests.Mocking;
 using NSubstitute;
 using RabbitMQ.Client.Events;
-using System;
 using Xunit;
 
 namespace EasyNetQ.Tests;

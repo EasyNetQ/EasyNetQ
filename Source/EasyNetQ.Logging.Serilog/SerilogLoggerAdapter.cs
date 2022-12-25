@@ -1,4 +1,3 @@
-using System;
 using S = Serilog;
 
 namespace EasyNetQ.Logging.Serilog;

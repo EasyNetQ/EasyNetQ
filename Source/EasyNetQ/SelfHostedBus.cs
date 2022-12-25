@@ -1,5 +1,4 @@
 using EasyNetQ.LightInject;
-using System;
 
 namespace EasyNetQ;
 

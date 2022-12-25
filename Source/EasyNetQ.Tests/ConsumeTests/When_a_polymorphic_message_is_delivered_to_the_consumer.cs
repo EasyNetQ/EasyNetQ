@@ -2,9 +2,6 @@
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using FluentAssertions;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests;

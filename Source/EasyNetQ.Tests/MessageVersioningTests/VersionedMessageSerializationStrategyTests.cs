@@ -2,9 +2,7 @@
 
 using EasyNetQ.MessageVersioning;
 using NSubstitute;
-using System;
 using System.Buffers;
-using System.Collections.Generic;
 using System.Text;
 using Xunit;
 

@@ -1,7 +1,4 @@
-using System;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Logging;
 using EasyNetQ.Producer;

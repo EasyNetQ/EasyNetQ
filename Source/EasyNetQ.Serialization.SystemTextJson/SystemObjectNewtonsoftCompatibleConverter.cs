@@ -1,5 +1,3 @@
-using System;
-
 namespace EasyNetQ.Serialization.SystemTextJson;
 
 public class SystemObjectNewtonsoftCompatibleConverter : System.Text.Json.Serialization.JsonConverter<object>

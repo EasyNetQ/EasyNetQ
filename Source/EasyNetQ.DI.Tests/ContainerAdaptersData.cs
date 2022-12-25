@@ -9,7 +9,6 @@ using LightInject;
 using Microsoft.Extensions.DependencyInjection;
 using Ninject;
 using System.Collections;
-using System.Collections.Generic;
 
 namespace EasyNetQ.DI.Tests;
 

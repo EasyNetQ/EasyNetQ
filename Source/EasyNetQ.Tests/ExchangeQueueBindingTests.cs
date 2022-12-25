@@ -1,9 +1,6 @@
 // ReSharper disable InconsistentNaming
 
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using FluentAssertions;

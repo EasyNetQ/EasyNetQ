@@ -1,6 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
 using EasyNetQ.Logging;

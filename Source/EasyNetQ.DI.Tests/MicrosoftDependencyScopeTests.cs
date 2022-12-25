@@ -1,4 +1,3 @@
-using System;
 using EasyNetQ.DI.Microsoft;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;

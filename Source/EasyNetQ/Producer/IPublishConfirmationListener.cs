@@ -1,4 +1,3 @@
-using System;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Producer;

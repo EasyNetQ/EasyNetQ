@@ -1,15 +1,10 @@
-using System;
 using System.Buffers;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using EasyNetQ.Logging;
 using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Internals;
 
 namespace EasyNetQ.Consumer;

@@ -5,6 +5,7 @@
       <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
       <PackageTags>Serilog;Logging;$(PackageTags)</PackageTags>
       <Nullable>enable</Nullable>
+      <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
     <ItemGroup>

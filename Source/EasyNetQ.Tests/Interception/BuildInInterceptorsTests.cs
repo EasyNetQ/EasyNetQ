@@ -1,6 +1,5 @@
 using EasyNetQ.Interception;
 using NSubstitute;
-using System;
 using System.Text;
 using Xunit;
 

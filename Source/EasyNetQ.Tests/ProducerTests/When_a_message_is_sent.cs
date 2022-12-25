@@ -1,5 +1,5 @@
 // ReSharper disable InconsistentNaming
-using System;
+
 using EasyNetQ.Tests.Mocking;
 using NSubstitute;
 using RabbitMQ.Client;

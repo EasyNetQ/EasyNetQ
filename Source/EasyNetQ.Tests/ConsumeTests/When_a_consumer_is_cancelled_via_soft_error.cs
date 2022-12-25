@@ -1,7 +1,5 @@
 // ReSharper disable InconsistentNaming
 
-using System;
-using System.Threading.Tasks;
 using EasyNetQ.Persistent;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;

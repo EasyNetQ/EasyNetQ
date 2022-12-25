@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using Ninject;
 using Ninject.Activation;
 using Ninject.Infrastructure;

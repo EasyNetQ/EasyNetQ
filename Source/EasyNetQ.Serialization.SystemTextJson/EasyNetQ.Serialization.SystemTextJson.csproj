@@ -3,6 +3,7 @@
       <Description>An adaptor to allow EasyNetQ to use System.Text.Json serializer</Description>
       <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
       <Nullable>enable</Nullable>
+      <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
     <ItemGroup>
       <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />

@@ -3,8 +3,6 @@ using LightInject;
 #else
 using EasyNetQ.LightInject;
 #endif
-using System;
-using System.Linq;
 
 #if LIGHT_INJECT_PACKAGE
 namespace EasyNetQ.DI.LightInject;

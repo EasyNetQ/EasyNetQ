@@ -1,7 +1,3 @@
-using System;
-using System.IO;
-using System.Threading;
-
 namespace EasyNetQ.Hosepipe.Tests;
 
 [Traits.Explicit(@"Requires a RabbitMQ broker on localhost and access to C:\Temp\MessageOutput")]

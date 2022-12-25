@@ -1,7 +1,6 @@
 // ReSharper disable InconsistentNaming
 
 using NSubstitute;
-using System;
 using System.Buffers;
 using System.Text;
 using Xunit;

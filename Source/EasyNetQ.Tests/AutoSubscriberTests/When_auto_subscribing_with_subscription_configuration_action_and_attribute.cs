@@ -3,9 +3,6 @@ using EasyNetQ.AutoSubscribe;
 using EasyNetQ.Internals;
 using FluentAssertions;
 using NSubstitute;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests;
