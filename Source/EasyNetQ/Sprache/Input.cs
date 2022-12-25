@@ -1,5 +1,3 @@
-using System;
-
 namespace EasyNetQ.Sprache;
 
 internal class Input

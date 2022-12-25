@@ -1,9 +1,7 @@
-using System;
 using System.Text;
 using EasyNetQ.Consumer;
 using NSubstitute;
 using RabbitMQ.Client;
-using System.Threading.Tasks;
 using EasyNetQ.Logging;
 using Xunit;
 

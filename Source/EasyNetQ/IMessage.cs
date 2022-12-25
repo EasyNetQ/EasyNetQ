@@ -1,5 +1,3 @@
-using System;
-
 namespace EasyNetQ;
 
 public interface IMessage<out T> : IMessage

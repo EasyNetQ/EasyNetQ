@@ -1,6 +1,3 @@
-using System;
-using System.IO;
-
 namespace EasyNetQ.Hosepipe;
 
 public class QueueParameters

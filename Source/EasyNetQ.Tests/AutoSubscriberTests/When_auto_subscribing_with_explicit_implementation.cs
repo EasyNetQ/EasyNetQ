@@ -4,9 +4,6 @@ using EasyNetQ.AutoSubscribe;
 using EasyNetQ.Tests.Mocking;
 using FluentAssertions;
 using NSubstitute;
-using System;
-using System.Collections.Generic;
-using System.Threading;
 using Xunit;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests;

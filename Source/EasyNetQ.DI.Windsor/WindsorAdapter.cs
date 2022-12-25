@@ -1,4 +1,3 @@
-using System;
 using Castle.Core;
 using Castle.MicroKernel;
 using Castle.MicroKernel.Registration;

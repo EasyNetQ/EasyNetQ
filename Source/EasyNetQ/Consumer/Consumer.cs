@@ -1,9 +1,5 @@
 using EasyNetQ.Events;
 using EasyNetQ.Topology;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using EasyNetQ.Internals;
 using EasyNetQ.Logging;
 using EasyNetQ.Persistent;

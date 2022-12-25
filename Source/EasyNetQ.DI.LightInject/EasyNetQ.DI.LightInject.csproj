@@ -5,6 +5,7 @@
     <PackageTags>LightInject;$(PackageTags)</PackageTags>
     <DefineConstants>$(DefineConstants);LIGHT_INJECT_PACKAGE</DefineConstants>
     <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\EasyNetQ\DI\LightInjectAdapter.cs" Link="LightInjectAdapter.cs" />

@@ -1,6 +1,5 @@
 // ReSharper disable InconsistentNaming
 
-using System.Linq;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Sprache;
 using FluentAssertions;

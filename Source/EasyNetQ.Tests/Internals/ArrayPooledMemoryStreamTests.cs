@@ -1,6 +1,3 @@
-using System;
-using System.IO;
-using System.Linq;
 using EasyNetQ.Internals;
 using Xunit;
 

@@ -1,5 +1,3 @@
-using System;
-using System.Threading;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 

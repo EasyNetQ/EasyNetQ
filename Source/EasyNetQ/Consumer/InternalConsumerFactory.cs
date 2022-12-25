@@ -1,4 +1,3 @@
-using System;
 using EasyNetQ.Logging;
 
 namespace EasyNetQ.Consumer;

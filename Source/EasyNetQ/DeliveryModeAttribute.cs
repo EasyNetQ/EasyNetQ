@@ -1,5 +1,3 @@
-using System;
-
 namespace EasyNetQ;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]

@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace EasyNetQ.Sprache;
 
 internal interface IFailure<out T> : IResult<T>

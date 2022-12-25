@@ -1,4 +1,3 @@
-using System;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ.Events;

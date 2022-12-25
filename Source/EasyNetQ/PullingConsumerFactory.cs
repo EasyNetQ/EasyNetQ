@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
 using EasyNetQ.Consumer;
 using EasyNetQ.Interception;
 using EasyNetQ.Persistent;

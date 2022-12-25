@@ -1,5 +1,3 @@
-using System;
-
 namespace EasyNetQ.AutoSubscribe;
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]

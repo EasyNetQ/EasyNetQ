@@ -1,4 +1,3 @@
-using System;
 using Castle.MicroKernel;
 using Castle.MicroKernel.SubSystems.Naming;
 using Castle.Windsor;

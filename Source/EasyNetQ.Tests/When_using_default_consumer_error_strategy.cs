@@ -1,9 +1,6 @@
 // ReSharper disable InconsistentNaming;
 
-using System;
-using System.Collections.Generic;
 using System.Text;
-using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;
 using EasyNetQ.Tests.Mocking;

@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using EasyNetQ.DI;
 using EasyNetQ.Serialization.NewtonsoftJson;
 using EasyNetQ.Serialization.SystemTextJson;

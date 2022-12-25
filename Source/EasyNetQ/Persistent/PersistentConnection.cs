@@ -1,6 +1,3 @@
-using System;
-using System.Linq;
-using System.Threading;
 using EasyNetQ.Events;
 using EasyNetQ.Logging;
 using RabbitMQ.Client;

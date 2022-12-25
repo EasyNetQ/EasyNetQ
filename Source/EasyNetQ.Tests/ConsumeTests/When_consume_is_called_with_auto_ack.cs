@@ -2,7 +2,6 @@
 
 using FluentAssertions;
 using NSubstitute;
-using System.Collections.Generic;
 using EasyNetQ.Consumer;
 using Xunit;
 

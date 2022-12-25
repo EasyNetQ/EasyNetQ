@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using EasyNetQ.Consumer;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;

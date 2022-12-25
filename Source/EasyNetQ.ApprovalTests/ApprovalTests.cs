@@ -1,4 +1,3 @@
-using System;
 using PublicApiGenerator;
 using Shouldly;
 using Xunit;

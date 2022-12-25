@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Management.Client;
 using EasyNetQ.Management.Client.Model;
 using Xunit;

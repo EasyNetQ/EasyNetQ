@@ -1,7 +1,5 @@
 // ReSharper disable InconsistentNaming
 
-using System.Collections.Generic;
-using System.Text;
 using EasyNetQ.Serialization.NewtonsoftJson;
 using EasyNetQ.Serialization.SystemTextJson;
 using FluentAssertions;

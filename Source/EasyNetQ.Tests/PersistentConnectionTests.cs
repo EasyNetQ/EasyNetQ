@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 using EasyNetQ.Tests.Mocking;

@@ -4,6 +4,7 @@
     <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
     <PackageTags>Ninject;$(PackageTags)</PackageTags>
     <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />

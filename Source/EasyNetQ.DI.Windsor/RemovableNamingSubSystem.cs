@@ -1,4 +1,3 @@
-using System;
 using Castle.MicroKernel.SubSystems.Naming;
 
 namespace EasyNetQ.DI.Windsor;

@@ -6,10 +6,7 @@ using EasyNetQ.Tests.Mocking;
 using FluentAssertions;
 using NSubstitute;
 using RabbitMQ.Client;
-using System;
-using System.Collections.Generic;
 using System.Text;
-using System.Threading;
 using Xunit;
 
 namespace EasyNetQ.Tests.ProducerTests;

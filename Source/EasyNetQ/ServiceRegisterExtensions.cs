@@ -1,4 +1,3 @@
-using System;
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Consumer;

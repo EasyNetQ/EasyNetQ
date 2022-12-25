@@ -1,5 +1,3 @@
-using System;
-
 namespace EasyNetQ.DI;
 
 /// <summary>

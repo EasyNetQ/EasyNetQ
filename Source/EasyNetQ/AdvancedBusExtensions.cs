@@ -1,10 +1,6 @@
 using EasyNetQ.Consumer;
 using EasyNetQ.Internals;
 using EasyNetQ.Topology;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EasyNetQ;
 
