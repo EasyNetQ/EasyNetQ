@@ -4,8 +4,6 @@ using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 using System.Text;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace EasyNetQ.Hosepipe.Tests;
 

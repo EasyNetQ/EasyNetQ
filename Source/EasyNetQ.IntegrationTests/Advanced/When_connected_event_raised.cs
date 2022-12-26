@@ -1,5 +1,4 @@
 using EasyNetQ.Topology;
-using Xunit;
 
 namespace EasyNetQ.IntegrationTests.Advanced;
 

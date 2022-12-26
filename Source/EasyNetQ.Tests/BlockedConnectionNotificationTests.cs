@@ -1,8 +1,6 @@
 // ReSharper disable InconsistentNaming
 using EasyNetQ.Tests.Mocking;
-using NSubstitute;
 using RabbitMQ.Client.Events;
-using Xunit;
 
 namespace EasyNetQ.Tests;
 

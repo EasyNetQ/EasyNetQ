@@ -3,9 +3,6 @@
 using EasyNetQ.MessageVersioning;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
-using FluentAssertions;
-using NSubstitute;
-using Xunit;
 
 namespace EasyNetQ.Tests.ProducerTests;
 

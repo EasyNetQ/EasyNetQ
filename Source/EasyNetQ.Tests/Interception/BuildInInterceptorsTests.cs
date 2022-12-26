@@ -1,7 +1,5 @@
 using EasyNetQ.Interception;
-using NSubstitute;
 using System.Text;
-using Xunit;
 
 namespace EasyNetQ.Tests.Interception;
 

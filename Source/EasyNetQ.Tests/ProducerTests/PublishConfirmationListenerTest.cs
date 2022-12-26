@@ -2,9 +2,7 @@ using System.Text;
 using EasyNetQ.Events;
 using EasyNetQ.Logging;
 using EasyNetQ.Producer;
-using NSubstitute;
 using RabbitMQ.Client;
-using Xunit;
 
 namespace EasyNetQ.Tests.ProducerTests;
 

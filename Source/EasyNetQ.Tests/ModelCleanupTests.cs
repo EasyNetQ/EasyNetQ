@@ -1,7 +1,5 @@
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
-using NSubstitute;
-using Xunit;
 
 namespace EasyNetQ.Tests;
 

@@ -2,9 +2,7 @@
 
 using EasyNetQ.Serialization.NewtonsoftJson;
 using EasyNetQ.Serialization.SystemTextJson;
-using FluentAssertions;
 using RabbitMQ.Client;
-using Xunit;
 
 namespace EasyNetQ.Serialization.Tests;
 

@@ -3,7 +3,6 @@
 using EasyNetQ.Consumer;
 using EasyNetQ.Logging;
 using EasyNetQ.Topology;
-using NSubstitute;
 
 namespace EasyNetQ.Tests.ConsumerTests;
 

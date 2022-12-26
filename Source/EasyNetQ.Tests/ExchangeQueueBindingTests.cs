@@ -3,9 +3,6 @@
 using System.Collections;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
-using FluentAssertions;
-using NSubstitute;
-using Xunit;
 using Queue = EasyNetQ.Topology.Queue;
 
 namespace EasyNetQ.Tests;

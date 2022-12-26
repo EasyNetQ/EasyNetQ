@@ -3,7 +3,6 @@ using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using System.Text;
-using Xunit;
 
 namespace EasyNetQ.Tests.ProducerTests;
 

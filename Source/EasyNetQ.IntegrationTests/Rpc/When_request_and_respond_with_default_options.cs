@@ -1,6 +1,4 @@
 using EasyNetQ.IntegrationTests.Utils;
-using FluentAssertions;
-using Xunit;
 
 namespace EasyNetQ.IntegrationTests.Rpc;
 

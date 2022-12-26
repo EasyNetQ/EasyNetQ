@@ -1,7 +1,6 @@
 // ReSharper disable InconsistentNaming
 
 using EasyNetQ.Tests.Mocking;
-using Xunit;
 
 namespace EasyNetQ.Tests.ProducerTests;
 

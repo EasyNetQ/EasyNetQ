@@ -1,7 +1,3 @@
-using FluentAssertions;
-using NSubstitute;
-using Xunit;
-
 namespace EasyNetQ.Tests;
 
 public class NonGenericRpcExtensionsTests

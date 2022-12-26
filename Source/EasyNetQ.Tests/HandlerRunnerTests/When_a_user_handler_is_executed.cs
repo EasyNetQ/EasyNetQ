@@ -2,10 +2,7 @@
 
 using EasyNetQ.Consumer;
 using EasyNetQ.Logging;
-using FluentAssertions;
-using NSubstitute;
 using RabbitMQ.Client;
-using Xunit;
 
 namespace EasyNetQ.Tests.HandlerRunnerTests;
 

@@ -2,9 +2,7 @@
 
 using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
-using NSubstitute;
 using RabbitMQ.Client;
-using Xunit;
 
 namespace EasyNetQ.Tests.PersistentChannelTests;
 

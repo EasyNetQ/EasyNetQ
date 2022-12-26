@@ -3,8 +3,6 @@
 using EasyNetQ.DI;
 using EasyNetQ.MessageVersioning;
 using EasyNetQ.Producer;
-using NSubstitute;
-using Xunit;
 
 namespace EasyNetQ.Tests.MessageVersioningTests;
 

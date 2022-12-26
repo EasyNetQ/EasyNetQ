@@ -1,6 +1,4 @@
 using EasyNetQ.Topology;
-using FluentAssertions;
-using Xunit;
 
 namespace EasyNetQ.IntegrationTests.Advanced;
 

@@ -1,6 +1,5 @@
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
-using Xunit;
 
 namespace EasyNetQ.IntegrationTests.Advanced;
 

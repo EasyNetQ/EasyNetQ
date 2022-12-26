@@ -1,4 +1,3 @@
-using Xunit;
 using EasyNetQ.Internals;
 
 namespace EasyNetQ.Tests;

@@ -1,8 +1,6 @@
 // ReSharper disable InconsistentNaming
 
-using FluentAssertions;
 using System.Reflection;
-using Xunit;
 
 namespace EasyNetQ.Tests;
 

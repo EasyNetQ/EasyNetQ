@@ -1,4 +1,3 @@
-using Xunit.Abstractions;
 using Xunit.Sdk;
 
 namespace EasyNetQ.Hosepipe.Tests.Traits;

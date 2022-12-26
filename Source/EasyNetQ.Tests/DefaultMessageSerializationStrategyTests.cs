@@ -1,9 +1,7 @@
 // ReSharper disable InconsistentNaming
 
-using NSubstitute;
 using System.Buffers;
 using System.Text;
-using Xunit;
 
 namespace EasyNetQ.Tests;
 

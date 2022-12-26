@@ -4,9 +4,7 @@ using System.Text;
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;
 using EasyNetQ.Tests.Mocking;
-using NSubstitute;
 using RabbitMQ.Client;
-using Xunit;
 
 namespace EasyNetQ.Tests;
 
