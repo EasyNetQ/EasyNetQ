@@ -1,6 +1,3 @@
-using FluentAssertions;
-using Xunit;
-
 namespace EasyNetQ.IntegrationTests.Rpc;
 
 [Collection("RabbitMQ")]

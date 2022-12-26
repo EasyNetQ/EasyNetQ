@@ -2,11 +2,8 @@
 using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
-using FluentAssertions;
-using NSubstitute;
 using RabbitMQ.Client;
 using System.Text;
-using Xunit;
 
 namespace EasyNetQ.Tests;
 

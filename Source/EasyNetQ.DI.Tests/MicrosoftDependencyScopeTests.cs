@@ -1,7 +1,5 @@
 using EasyNetQ.DI.Microsoft;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 
 namespace EasyNetQ.DI.Tests;
 

@@ -6,10 +6,7 @@ using EasyNetQ.Interception;
 using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
-using FluentAssertions;
-using NSubstitute;
 using RabbitMQ.Client;
-using Xunit;
 
 namespace EasyNetQ.Tests;
 

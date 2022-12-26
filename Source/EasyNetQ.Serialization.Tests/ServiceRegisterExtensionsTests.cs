@@ -1,8 +1,6 @@
 using EasyNetQ.DI;
 using EasyNetQ.Serialization.NewtonsoftJson;
 using EasyNetQ.Serialization.SystemTextJson;
-using NSubstitute;
-using Xunit;
 
 namespace EasyNetQ.Serialization.Tests;
 

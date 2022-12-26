@@ -1,6 +1,3 @@
-using NSubstitute;
-using Xunit;
-
 namespace EasyNetQ.Tests;
 
 public class NonGenericSendReceiveExtensionsTests

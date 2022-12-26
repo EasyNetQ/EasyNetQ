@@ -1,7 +1,6 @@
 using System.Runtime.InteropServices;
 using EasyNetQ.Management.Client;
 using EasyNetQ.Management.Client.Model;
-using Xunit;
 
 namespace EasyNetQ.IntegrationTests;
 

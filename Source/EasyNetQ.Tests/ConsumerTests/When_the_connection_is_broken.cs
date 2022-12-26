@@ -3,10 +3,7 @@
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
 using EasyNetQ.Persistent;
-using FluentAssertions;
-using NSubstitute;
 using RabbitMQ.Client;
-using Xunit;
 
 namespace EasyNetQ.Tests.ConsumerTests;
 

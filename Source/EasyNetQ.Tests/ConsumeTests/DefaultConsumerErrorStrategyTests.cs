@@ -1,9 +1,7 @@
 using System.Text;
 using EasyNetQ.Consumer;
-using NSubstitute;
 using RabbitMQ.Client;
 using EasyNetQ.Logging;
-using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 

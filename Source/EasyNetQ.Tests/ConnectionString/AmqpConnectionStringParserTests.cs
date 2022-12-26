@@ -1,6 +1,4 @@
 using EasyNetQ.ConnectionString;
-using FluentAssertions;
-using Xunit;
 
 namespace EasyNetQ.Tests.ConnectionString;
 

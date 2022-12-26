@@ -1,7 +1,5 @@
 // ReSharper disable InconsistentNaming
 
-using Xunit;
-
 namespace EasyNetQ.Hosepipe.Tests;
 
 public class ProgramTests

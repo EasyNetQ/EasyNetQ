@@ -3,7 +3,6 @@ using EasyNetQ.Consumer;
 using EasyNetQ.DI;
 using EasyNetQ.LightInject;
 using EasyNetQ.Producer;
-using NSubstitute;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.Mocking;

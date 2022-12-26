@@ -1,6 +1,4 @@
 using EasyNetQ.Logging;
-using FluentAssertions;
-using Xunit;
 
 namespace EasyNetQ.DI.Tests;
 

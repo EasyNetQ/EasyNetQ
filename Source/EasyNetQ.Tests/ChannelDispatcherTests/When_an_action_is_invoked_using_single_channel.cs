@@ -4,10 +4,7 @@ using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
-using FluentAssertions;
-using NSubstitute;
 using RabbitMQ.Client;
-using Xunit;
 
 namespace EasyNetQ.Tests.ChannelDispatcherTests;
 

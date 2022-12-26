@@ -4,9 +4,7 @@ using EasyNetQ.Events;
 using EasyNetQ.Persistent;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
-using NSubstitute;
 using RabbitMQ.Client;
-using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 

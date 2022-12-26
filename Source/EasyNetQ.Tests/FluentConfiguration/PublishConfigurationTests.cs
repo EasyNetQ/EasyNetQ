@@ -1,5 +1,3 @@
-using Xunit;
-
 namespace EasyNetQ.Tests.FluentConfiguration;
 
 public class PublishConfigurationTests

@@ -1,6 +1,4 @@
 using EasyNetQ.Internals;
-using FluentAssertions;
-using Xunit;
 
 namespace EasyNetQ.Tests.Internals;
 

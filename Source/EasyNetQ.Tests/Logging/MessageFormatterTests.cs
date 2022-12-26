@@ -1,7 +1,5 @@
 using System.Globalization;
 using EasyNetQ.Logging;
-using FluentAssertions;
-using Xunit;
 
 namespace EasyNetQ.Tests.Logging;
 

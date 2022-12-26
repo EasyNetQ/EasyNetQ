@@ -1,7 +1,6 @@
 // ReSharper disable InconsistentNaming
 
 using EasyNetQ.AutoSubscribe;
-using Xunit;
 
 namespace EasyNetQ.Tests;
 

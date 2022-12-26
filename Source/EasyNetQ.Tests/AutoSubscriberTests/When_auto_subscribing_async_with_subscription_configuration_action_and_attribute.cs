@@ -1,8 +1,5 @@
 using EasyNetQ.AutoSubscribe;
 using EasyNetQ.Internals;
-using FluentAssertions;
-using NSubstitute;
-using Xunit;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests;
 

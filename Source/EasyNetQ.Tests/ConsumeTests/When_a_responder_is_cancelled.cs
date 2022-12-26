@@ -2,7 +2,6 @@
 
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
-using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 

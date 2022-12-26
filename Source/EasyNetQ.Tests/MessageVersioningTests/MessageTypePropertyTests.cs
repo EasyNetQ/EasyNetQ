@@ -2,7 +2,6 @@
 
 using System.Text;
 using EasyNetQ.MessageVersioning;
-using Xunit;
 
 namespace EasyNetQ.Tests.MessageVersioningTests;
 

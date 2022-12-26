@@ -3,8 +3,6 @@
 using System.Text;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
-using FluentAssertions;
-using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 

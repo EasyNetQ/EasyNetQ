@@ -2,9 +2,7 @@
 
 using System.Text;
 using EasyNetQ.Tests.Mocking;
-using NSubstitute;
 using RabbitMQ.Client;
-using Xunit;
 
 namespace EasyNetQ.Tests.ProducerTests;
 

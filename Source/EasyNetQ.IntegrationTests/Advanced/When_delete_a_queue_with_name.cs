@@ -1,5 +1,4 @@
 using RabbitMQ.Client.Exceptions;
-using Xunit;
 
 namespace EasyNetQ.IntegrationTests.Advanced;
 

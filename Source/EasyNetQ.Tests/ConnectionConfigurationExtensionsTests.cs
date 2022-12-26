@@ -1,5 +1,3 @@
-using Xunit;
-
 namespace EasyNetQ.Tests;
 
 public class ConnectionConfigurationExtensionsTests

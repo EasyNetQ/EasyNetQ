@@ -2,9 +2,6 @@ using EasyNetQ.Consumer;
 using EasyNetQ.Logging;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
-using FluentAssertions;
-using NSubstitute;
-using Xunit;
 
 namespace EasyNetQ.Tests.InternalConsumerTests;
 

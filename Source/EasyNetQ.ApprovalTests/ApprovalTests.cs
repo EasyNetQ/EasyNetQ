@@ -1,6 +1,4 @@
 using PublicApiGenerator;
-using Shouldly;
-using Xunit;
 
 namespace EasyNetQ.Approval.Tests;
 

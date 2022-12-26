@@ -3,8 +3,6 @@
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
-using NSubstitute;
-using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 

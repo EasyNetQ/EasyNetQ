@@ -2,9 +2,6 @@
 
 using EasyNetQ.MessageVersioning;
 using EasyNetQ.Topology;
-using FluentAssertions;
-using NSubstitute;
-using Xunit;
 
 namespace EasyNetQ.Tests.MessageVersioningTests;
 
