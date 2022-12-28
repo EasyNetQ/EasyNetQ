@@ -1,4 +1,4 @@
-﻿namespace EasyNetQ.DI;
+namespace EasyNetQ.DI;
 
 /// <summary>
 /// An <see cref="IServiceResolverScope" /> implementation that implements <see cref="IAsyncDisposable" />.
