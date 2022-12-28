@@ -1273,6 +1273,19 @@ namespace EasyNetQ.Consumer
 }
 namespace EasyNetQ.DI
 {
+    public readonly struct AsyncServiceResolverScope : EasyNetQ.DI.IServiceResolver, EasyNetQ.DI.IServiceResolverScope, System.IAsyncDisposable, System.IDisposable
+    {
+        public AsyncServiceResolverScope(EasyNetQ.DI.IServiceResolverScope serviceResolverScope) { }
+        public EasyNetQ.DI.IServiceResolverScope CreateScope() { }
+        public void Dispose() { }
+        public System.Threading.Tasks.ValueTask DisposeAsync() { }
+        public TService Resolve<TService>()
+            where TService :  class { }
+    }
+    public static class ConsumeScopeProviderExtensions
+    {
+        public static EasyNetQ.DI.AsyncServiceResolverScope CreateAsyncScope(this EasyNetQ.DI.IConsumeScopeProvider provider) { }
+    }
     public class DefaultConsumeScopeProvider : EasyNetQ.DI.IConsumeScopeProvider
     {
         public DefaultConsumeScopeProvider(EasyNetQ.DI.IServiceResolver resolver) { }
