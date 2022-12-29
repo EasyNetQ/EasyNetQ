@@ -1,6 +1,5 @@
 using EasyNetQ.Topology;
 using RabbitMQ.Client.Exceptions;
-using ExchangeType = EasyNetQ.Topology.ExchangeType;
 
 namespace EasyNetQ.IntegrationTests.Advanced;
 

@@ -279,6 +279,13 @@ namespace EasyNetQ
         public static EasyNetQ.IExchangeDeclareConfiguration WithAlternateExchange(this EasyNetQ.IExchangeDeclareConfiguration configuration, in EasyNetQ.Topology.Exchange alternateExchange) { }
     }
     public delegate string ExchangeNameConvention(System.Type messageType);
+    public static class ExchangeType
+    {
+        public const string Direct = "direct";
+        public const string Fanout = "fanout";
+        public const string Header = "headers";
+        public const string Topic = "topic";
+    }
     public class HostConfiguration
     {
         public HostConfiguration(string host, ushort port) { }
@@ -1914,13 +1921,6 @@ namespace EasyNetQ.Topology
         public string Name { get; }
         public string Type { get; }
         public static EasyNetQ.Topology.Exchange Default { get; }
-    }
-    public static class ExchangeType
-    {
-        public const string Direct = "direct";
-        public const string Fanout = "fanout";
-        public const string Header = "headers";
-        public const string Topic = "topic";
     }
     public interface IBindable
     {
