@@ -144,7 +144,7 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
     public int? MaxLengthBytes { get; private set; }
     public string? QueueMode { get; private set; }
     public string? QueueType { get; private set; }
-    public string ExchangeType { get; private set; } = Topology.ExchangeType.Topic;
+    public string ExchangeType { get; private set; } = EasyNetQ.ExchangeType.Topic;
     public string? AlternateExchange { get; private set; }
     public bool SingleActiveConsumer { get; private set; }
 
