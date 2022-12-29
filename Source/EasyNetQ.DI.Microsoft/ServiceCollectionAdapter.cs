@@ -112,17 +112,14 @@ public class ServiceCollectionAdapter : IServiceRegister
 
         public IServiceResolverScope CreateScope() => new MicrosoftServiceResolverScope(serviceScope.ServiceProvider);
 
-        public void Dispose() => serviceScope?.Dispose();
+        public void Dispose() => serviceScope.Dispose();
 
         public ValueTask DisposeAsync()
         {
-            if (serviceScope is IAsyncDisposable ad)
-            {
-                return ad.DisposeAsync();
-            }
-            Dispose();
+            if (serviceScope is IAsyncDisposable asyncDisposable)
+                return asyncDisposable.DisposeAsync();
 
-            // ValueTask.CompletedTask is only available in net5.0 and later.
+            serviceScope.Dispose();
             return default;
         }
 
