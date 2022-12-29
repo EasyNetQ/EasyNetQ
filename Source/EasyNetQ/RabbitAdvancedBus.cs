@@ -121,7 +121,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
                         var rawMessage = produceConsumeInterceptors.OnConsume(
                             new ConsumedMessage(receivedInfo, properties, body)
                         );
-                        using var scope = consumeScopeProvider.CreateScope();
+                        await using var scope = consumeScopeProvider.CreateAsyncScope().ConfigureAwait(false);
                         return await x.Item2(
                             rawMessage.Body, rawMessage.Properties, rawMessage.ReceivedInfo, cancellationToken
                         ).ConfigureAwait(false);
@@ -144,7 +144,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
                                 rawMessage.Properties, rawMessage.Body
                             );
                             var handler = x.Item2.GetHandler(deserializedMessage.MessageType);
-                            using var scope = consumeScopeProvider.CreateScope();
+                            await using var scope = consumeScopeProvider.CreateAsyncScope().ConfigureAwait(false);
                             return await handler(deserializedMessage, receivedInfo, cancellationToken)
                                 .ConfigureAwait(false);
                         }
