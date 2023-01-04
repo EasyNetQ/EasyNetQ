@@ -207,7 +207,7 @@ public class DefaultRpc : IRpc
         if (responseSubscriptions.TryGetValue(rpcKey, out var responseSubscription))
             return responseSubscription.QueueName;
 
-        logger.Debug($"Subscribing for {requestType}/{responseType}", requestType, responseType);
+        logger.Debug("Subscribing for {requestType}/{responseType}", requestType, responseType);
 
         using var _ = await responseSubscriptionsLock.AcquireAsync(cancellationToken).ConfigureAwait(false);
 

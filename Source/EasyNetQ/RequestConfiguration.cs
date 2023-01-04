@@ -37,7 +37,7 @@ public interface IRequestConfiguration
     /// </summary>
     /// <param name="queueType">Desired queue type.</param>
     /// <returns>Returns a reference to itself</returns>
-    IRequestConfiguration WithQueueType(string queueType);
+    IRequestConfiguration WithQueueType(string queueType = QueueType.Classic);
 
     /// <summary>
     /// Sets headers
@@ -80,7 +80,7 @@ internal class RequestConfiguration : IRequestConfiguration
         return this;
     }
 
-    public IRequestConfiguration WithQueueType(string queueType)
+    public IRequestConfiguration WithQueueType(string queueType = EasyNetQ.QueueType.Classic)
     {
         QueueType = queueType;
         return this;

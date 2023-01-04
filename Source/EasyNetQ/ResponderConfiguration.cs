@@ -29,7 +29,7 @@ public interface IResponderConfiguration
     /// </summary>
     /// <param name="queueType">The queue type</param>
     /// <returns>Reference to the same <see cref="IResponderConfiguration"/> to allow methods chaining</returns>
-    IResponderConfiguration WithQueueType(string queueType);
+    IResponderConfiguration WithQueueType(string queueType = QueueType.Classic);
 
     /// <summary>
     /// Configures the queue's durability
@@ -84,7 +84,7 @@ internal class ResponderConfiguration : IResponderConfiguration
         return this;
     }
 
-    public IResponderConfiguration WithQueueType(string queueType)
+    public IResponderConfiguration WithQueueType(string queueType = EasyNetQ.QueueType.Classic)
     {
         QueueType = queueType;
         return this;
