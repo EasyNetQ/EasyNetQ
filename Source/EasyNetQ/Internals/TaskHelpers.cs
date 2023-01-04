@@ -15,15 +15,7 @@ public static class TaskHelpers
     ///     doing so can result in application failures when updating to a new EasyNetQ release.
     /// </summary>
     public static Func<T1, CancellationToken, Task<T2>> FromFunc<T1, T2>(Func<T1, CancellationToken, T2> func)
-    {
-        return async (x, c) =>
-        {
-            // To prevent blocking of a consumer dispatcher
-            // https://github.com/EasyNetQ/EasyNetQ/issues/1576
-            await Task.Yield();
-            return func(x, c);
-        };
-    }
+        => (x, c) => Task.Run(() => func(x, c), default);
 
     /// <summary>
     ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
@@ -33,16 +25,7 @@ public static class TaskHelpers
     /// </summary>
     public static Func<T1, T2, T3, CancellationToken, Task> FromAction<T1, T2, T3>(
         Action<T1, T2, T3, CancellationToken> action
-    )
-    {
-        return async (x, y, z, c) =>
-        {
-            // To prevent blocking of a consumer dispatcher
-            // https://github.com/EasyNetQ/EasyNetQ/issues/1576
-            await Task.Yield();
-            action(x, y, z, c);
-        };
-    }
+    ) => (x, y, z, c) => Task.Run(() => action(x, y, z, c), default);
 
     /// <summary>
     ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
@@ -51,15 +34,7 @@ public static class TaskHelpers
     ///     doing so can result in application failures when updating to a new EasyNetQ release.
     /// </summary>
     public static Func<T1, T2, CancellationToken, Task> FromAction<T1, T2>(Action<T1, T2, CancellationToken> action)
-    {
-        return async (x, y, c) =>
-        {
-            // To prevent blocking of a consumer dispatcher
-            // https://github.com/EasyNetQ/EasyNetQ/issues/1576
-            await Task.Yield();
-            action(x, y, c);
-        };
-    }
+        => (x, y, c) => Task.Run(() => action(x, y, c), default);
 
     /// <summary>
     ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
@@ -68,15 +43,7 @@ public static class TaskHelpers
     ///     doing so can result in application failures when updating to a new EasyNetQ release.
     /// </summary>
     public static Func<T1, CancellationToken, Task> FromAction<T1>(Action<T1, CancellationToken> action)
-    {
-        return async (x, c) =>
-        {
-            // To prevent blocking of a consumer dispatcher
-            // https://github.com/EasyNetQ/EasyNetQ/issues/1576
-            await Task.Yield();
-            action(x, c);
-        };
-    }
+        => (x, c) => Task.Run(() => action(x, c), default);
 
     /// <summary>
     ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
