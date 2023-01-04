@@ -7,7 +7,7 @@ namespace EasyNetQ.IntegrationTests;
 public class RabbitMQFixture : IAsyncLifetime, IDisposable
 {
     private static readonly TimeSpan InitializationTimeout = TimeSpan.FromMinutes(2);
-    private static readonly Vhost VirtualHost = new() { Name = "/", Tracing = false };
+    private static readonly Vhost VirtualHost = new(Name: "/");
 
     private const string ContainerName = "easynetq.tests";
     private const string Image = "heidiks/rabbitmq-delayed-message-exchange";
@@ -77,8 +77,8 @@ public class RabbitMQFixture : IAsyncLifetime, IDisposable
     {
         var portMappings = new Dictionary<string, ISet<string>>
         {
-            {"5672", new HashSet<string> {"5672"}},
-            {"15672", new HashSet<string> {"15672"}}
+            { "5672", new HashSet<string> { "5672" } },
+            { "15672", new HashSet<string> { "15672" } }
         };
         var envVars = new List<string> { "RABBITMQ_DEFAULT_VHOST=/" };
         var containerId = await dockerProxy.CreateContainerAsync(
