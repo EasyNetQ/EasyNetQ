@@ -56,7 +56,7 @@ public class When_a_request_is_sent : IDisposable
             "the_routing_key",
             properties,
             body
-        );
+        ).GetAwaiter().GetResult();
     }
 
     [Fact]

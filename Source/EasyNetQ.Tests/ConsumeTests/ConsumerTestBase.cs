@@ -79,11 +79,6 @@ public abstract class ConsumerTestBase : IDisposable
         };
         OriginalBody = "Hello World"u8.ToArray();
 
-        var waiter = new CountdownEvent(2);
-
-        MockBuilder.EventBus.Subscribe((in DeliveredMessageEvent _) => waiter.Signal());
-        MockBuilder.EventBus.Subscribe((in AckEvent _) => waiter.Signal());
-
         MockBuilder.Consumers[0].HandleBasicDeliver(
             ConsumerTag,
             DeliverTag,
@@ -92,11 +87,6 @@ public abstract class ConsumerTestBase : IDisposable
             "the_routing_key",
             OriginalProperties,
             OriginalBody
-        );
-
-        if (!waiter.Wait(5000))
-        {
-            throw new TimeoutException();
-        }
+        ).GetAwaiter().GetResult();
     }
 }

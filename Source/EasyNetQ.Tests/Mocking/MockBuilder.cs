@@ -54,7 +54,9 @@ public class MockBuilder : IDisposable
                     var consumer = (AsyncDefaultBasicConsumer)consumeInvocation[6];
 
                     ConsumerQueueNames.Add(queueName);
-                    consumer.HandleBasicConsumeOk(consumerTag);
+                    consumer.HandleBasicConsumeOk(consumerTag)
+                        .GetAwaiter()
+                        .GetResult();
                     consumers.Add(consumer);
                     return string.Empty;
                 });

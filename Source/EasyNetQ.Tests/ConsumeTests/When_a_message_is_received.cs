@@ -51,8 +51,6 @@ public class When_a_message_is_received : IDisposable
         };
         var body = Encoding.UTF8.GetBytes(message);
 
-        var autoResetEvent = new AutoResetEvent(false);
-        mockBuilder.EventBus.Subscribe((in AckEvent _) => autoResetEvent.Set());
         mockBuilder.Consumers[0].HandleBasicDeliver(
             "consumer tag",
             0,
@@ -61,11 +59,6 @@ public class When_a_message_is_received : IDisposable
             "the_routing_key",
             properties,
             body
-        );
-
-        if (!autoResetEvent.WaitOne(5000))
-        {
-            throw new TimeoutException();
-        }
+        ).GetAwaiter().GetResult();
     }
 }
