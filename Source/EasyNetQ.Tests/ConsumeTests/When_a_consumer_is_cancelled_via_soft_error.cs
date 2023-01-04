@@ -23,7 +23,7 @@ public class When_a_consumer_is_cancelled_via_soft_error : IDisposable
 
         mockBuilder.Bus.Advanced.Consume(
             queue,
-            (_, _, _) => Task.Run(() => { }),
+            (_, _, _) => { },
             c => c.WithConsumerTag("consumer_tag")
         );
 

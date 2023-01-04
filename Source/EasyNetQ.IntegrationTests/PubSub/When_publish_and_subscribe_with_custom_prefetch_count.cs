@@ -1,5 +1,10 @@
+using System;
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 using EasyNetQ.IntegrationTests.Utils;
+using FluentAssertions;
+using Xunit;
 
 namespace EasyNetQ.IntegrationTests.PubSub;
 
@@ -18,7 +23,7 @@ public class When_publish_and_subscribe_with_custom_prefetch_count : IDisposable
 
     private const int MessagesCount = 10;
 
-    private readonly SelfHostedBus bus;
+    private readonly IBus bus;
 
     [Fact]
     public async Task Should_publish_and_consume()
