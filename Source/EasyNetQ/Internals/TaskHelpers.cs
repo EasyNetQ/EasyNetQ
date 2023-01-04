@@ -16,20 +16,12 @@ public static class TaskHelpers
     /// </summary>
     public static Func<T1, CancellationToken, Task<T2>> FromFunc<T1, T2>(Func<T1, CancellationToken, T2> func)
     {
-        return (x, c) =>
+        return async (x, c) =>
         {
-            try
-            {
-                return Task.FromResult(func(x, c));
-            }
-            catch (OperationCanceledException oce)
-            {
-                return Task.FromCanceled<T2>(oce.CancellationToken);
-            }
-            catch (Exception exception)
-            {
-                return Task.FromException<T2>(exception);
-            }
+            // To prevent blocking of a consumer dispatcher
+            // https://github.com/EasyNetQ/EasyNetQ/issues/1576
+            await Task.Yield();
+            return func(x, c);
         };
     }
 
@@ -43,21 +35,12 @@ public static class TaskHelpers
         Action<T1, T2, T3, CancellationToken> action
     )
     {
-        return (x, y, z, c) =>
+        return async (x, y, z, c) =>
         {
-            try
-            {
-                action(x, y, z, c);
-                return Task.CompletedTask;
-            }
-            catch (OperationCanceledException oce)
-            {
-                return Task.FromCanceled(oce.CancellationToken);
-            }
-            catch (Exception exception)
-            {
-                return Task.FromException(exception);
-            }
+            // To prevent blocking of a consumer dispatcher
+            // https://github.com/EasyNetQ/EasyNetQ/issues/1576
+            await Task.Yield();
+            action(x, y, z, c);
         };
     }
 
@@ -69,21 +52,12 @@ public static class TaskHelpers
     /// </summary>
     public static Func<T1, T2, CancellationToken, Task> FromAction<T1, T2>(Action<T1, T2, CancellationToken> action)
     {
-        return (x, y, c) =>
+        return async (x, y, c) =>
         {
-            try
-            {
-                action(x, y, c);
-                return Task.CompletedTask;
-            }
-            catch (OperationCanceledException oce)
-            {
-                return Task.FromCanceled(oce.CancellationToken);
-            }
-            catch (Exception exception)
-            {
-                return Task.FromException(exception);
-            }
+            // To prevent blocking of a consumer dispatcher
+            // https://github.com/EasyNetQ/EasyNetQ/issues/1576
+            await Task.Yield();
+            action(x, y, c);
         };
     }
 
@@ -95,21 +69,12 @@ public static class TaskHelpers
     /// </summary>
     public static Func<T1, CancellationToken, Task> FromAction<T1>(Action<T1, CancellationToken> action)
     {
-        return (x, c) =>
+        return async (x, c) =>
         {
-            try
-            {
-                action(x, c);
-                return Task.CompletedTask;
-            }
-            catch (OperationCanceledException oce)
-            {
-                return Task.FromCanceled(oce.CancellationToken);
-            }
-            catch (Exception exception)
-            {
-                return Task.FromException(exception);
-            }
+            // To prevent blocking of a consumer dispatcher
+            // https://github.com/EasyNetQ/EasyNetQ/issues/1576
+            await Task.Yield();
+            action(x, c);
         };
     }
 
