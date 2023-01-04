@@ -11,7 +11,7 @@ public class DefaultMessageSerializationStrategyTests
     public void When_using_the_default_serialization_strategy_messages_are_correctly_serialized()
     {
         const string messageType = "MyMessageTypeName";
-        var serializedMessageBody = Encoding.UTF8.GetBytes("Hello world!");
+        var serializedMessageBody = "Hello world!"u8.ToArray();
         const string correlationId = "CorrelationId";
 
         var message = new Message<MyMessage>(new MyMessage());
@@ -26,7 +26,7 @@ public class DefaultMessageSerializationStrategyTests
     public void When_serializing_a_message_with_a_correlation_id_it_is_not_overwritten()
     {
         const string messageType = "MyMessageTypeName";
-        var serializedMessageBody = Encoding.UTF8.GetBytes("Hello world!");
+        var serializedMessageBody = "Hello world!"u8.ToArray();
         const string correlationId = "CorrelationId";
 
         var message = new Message<MyMessage>(new MyMessage())

@@ -77,7 +77,7 @@ public abstract class ConsumerTestBase : IDisposable
             Type = "the_message_type",
             CorrelationId = "the_correlation_id",
         };
-        OriginalBody = Encoding.UTF8.GetBytes("Hello World");
+        OriginalBody = "Hello World"u8.ToArray();
 
         var waiter = new CountdownEvent(2);
 

@@ -88,7 +88,7 @@ public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : ID
             properties.Headers.Add("ExceptionMessage", Encoding.UTF8.GetBytes(exceptionMessage));
         }
 
-        var body = Encoding.UTF8.GetBytes("{}");
+        var body = "{}"u8.ToArray();
 
         mockBuilder.Consumers[0].HandleBasicDeliver(
             "consumer_tag",

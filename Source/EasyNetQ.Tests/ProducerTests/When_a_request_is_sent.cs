@@ -48,7 +48,7 @@ public class When_a_request_is_sent : IDisposable
             Type = "EasyNetQ.Tests.TestResponseMessage, EasyNetQ.Tests",
             CorrelationId = correlationId
         };
-        var body = Encoding.UTF8.GetBytes("{ Id:12, Text:\"Hello World\"}");
+        var body = "{ Id:12, Text:\"Hello World\"}"u8.ToArray();
 
         mockBuilder.Consumers[0].HandleBasicDeliver(
             "consumer_tag",
