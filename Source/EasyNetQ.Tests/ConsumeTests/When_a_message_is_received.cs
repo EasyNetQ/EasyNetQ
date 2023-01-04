@@ -1,5 +1,4 @@
 using System.Text;
-using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 
 namespace EasyNetQ.Tests.ConsumeTests;

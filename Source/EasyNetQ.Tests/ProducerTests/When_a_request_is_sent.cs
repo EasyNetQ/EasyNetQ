@@ -2,7 +2,6 @@ using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using RabbitMQ.Client;
-using System.Text;
 
 namespace EasyNetQ.Tests.ProducerTests;
 

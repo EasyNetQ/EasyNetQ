@@ -1,10 +1,8 @@
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;
-using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using RabbitMQ.Client;
-using System.Text;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 
