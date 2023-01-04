@@ -230,9 +230,6 @@ public class When_a_message_is_delivered : IDisposable
 
         mockBuilder = new MockBuilder(x => x.Register<IConventions>(conventions));
 
-        var autoResetEvent = new AutoResetEvent(false);
-        mockBuilder.EventBus.Subscribe((in AckEvent _) => autoResetEvent.Set());
-
         mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, message => { deliveredMessage = message; });
 
         const string text = "Hello there, I am the text!";
@@ -253,10 +250,7 @@ public class When_a_message_is_delivered : IDisposable
                 CorrelationId = correlationId
             },
             serializedMessage.Memory
-        );
-
-        // wait for the subscription thread to handle the message ...
-        autoResetEvent.WaitOne(1000);
+        ).GetAwaiter().GetResult();
     }
 
     public void Dispose()
@@ -340,12 +334,7 @@ public class When_the_handler_throws_an_exception : IDisposable
                 CorrelationId = correlationId
             },
             serializedMessage.Memory
-        );
-
-        // wait for the subscription thread to handle the message ...
-        var autoResetEvent = new AutoResetEvent(false);
-        mockBuilder.EventBus.Subscribe((in AckEvent _) => autoResetEvent.Set());
-        autoResetEvent.WaitOne(1000);
+        ).GetAwaiter().GetResult();
     }
 
     public void Dispose()

@@ -14,12 +14,7 @@ public class When_a_polymorphic_message_is_delivered_to_the_consumer : IDisposab
 
         var queue = new Queue("test_queue", false);
 
-        var are = new AutoResetEvent(false);
-        mockBuilder.Bus.Advanced.Consume<ITestMessageInterface>(queue, (message, _) => Task.Factory.StartNew(() =>
-        {
-            receivedMessage = message.Body;
-            are.Set();
-        }));
+        mockBuilder.Bus.Advanced.Consume<ITestMessageInterface>(queue, (message, _) => receivedMessage = message.Body);
 
         var publishedMessage = new Implementation { Text = "Hello Polymorphs!" };
         var serializedMessage = new JsonSerializer().MessageToBytes(typeof(Implementation), publishedMessage);
@@ -36,12 +31,7 @@ public class When_a_polymorphic_message_is_delivered_to_the_consumer : IDisposab
             "routing_key",
             properties,
             serializedMessage.Memory
-        );
-
-        if (!are.WaitOne(5000))
-        {
-            throw new TimeoutException();
-        }
+        ).GetAwaiter().GetResult();
     }
 
     public void Dispose()

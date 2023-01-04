@@ -2,7 +2,6 @@ using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using RabbitMQ.Client;
-using System.Text;
 
 namespace EasyNetQ.Tests.ProducerTests;
 
@@ -56,7 +55,7 @@ public class When_a_request_is_sent : IDisposable
             "the_routing_key",
             properties,
             body
-        );
+        ).GetAwaiter().GetResult();
     }
 
     [Fact]

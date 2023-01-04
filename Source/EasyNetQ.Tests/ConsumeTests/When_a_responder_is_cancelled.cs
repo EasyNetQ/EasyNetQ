@@ -75,7 +75,7 @@ public class When_a_responder_is_cancelled : IDisposable
             "the_routing_key",
             properties,
             serializedMessage.Memory
-        );
+        ).GetAwaiter().GetResult();
 
         if (!waiter.Wait(5000))
             throw new TimeoutException();

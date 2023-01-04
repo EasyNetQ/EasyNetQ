@@ -1,5 +1,4 @@
 using EasyNetQ.Interception;
-using System.Text;
 
 namespace EasyNetQ.Tests.Interception;
 
