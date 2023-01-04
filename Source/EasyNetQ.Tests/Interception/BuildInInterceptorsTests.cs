@@ -9,7 +9,7 @@ public class BuildInInterceptorsTests
     public void ShouldCompressAndDecompress()
     {
         var interceptor = new GZipInterceptor();
-        var body = Encoding.UTF8.GetBytes("haha");
+        var body = "haha"u8.ToArray();
         var outgoingMessage = new ProducedMessage(new MessageProperties(), body);
         var message = interceptor.OnProduce(outgoingMessage);
         var incomingMessage = new ConsumedMessage(new MessageReceivedInfo("", 0, false, "exchange", "routingKey", "queue"), message.Properties, message.Body);
@@ -20,7 +20,7 @@ public class BuildInInterceptorsTests
     public void ShouldEncryptAndDecrypt()
     {
         var interceptor = new TripleDESInterceptor(Convert.FromBase64String("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"), Convert.FromBase64String("aaaaaaaaaaa="));
-        var body = Encoding.UTF8.GetBytes("haha");
+        var body = "haha"u8.ToArray();
         var outgoingMessage = new ProducedMessage(new MessageProperties(), body);
         var message = interceptor.OnProduce(outgoingMessage);
         var incomingMessage = new ConsumedMessage(new MessageReceivedInfo("", 0, false, "exchange", "routingKey", "queue"), message.Properties, message.Body);
