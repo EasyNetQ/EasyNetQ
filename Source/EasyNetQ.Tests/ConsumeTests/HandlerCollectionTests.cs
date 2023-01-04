@@ -1,5 +1,6 @@
 // ReSharper disable InconsistentNaming
 
+using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using FluentAssertions;
 using Xunit;
@@ -28,20 +29,20 @@ public class HandlerCollectionTests
     }
 
     [Fact]
-    public void Should_return_matching_handler()
+    public async Task Should_return_matching_handler()
     {
         var handler = handlerCollection.GetHandler<MyMessage>();
 
-        handler(new Message<MyMessage>(new MyMessage()), null, default);
+        await handler(new Message<MyMessage>(new MyMessage()), null, default);
         myMessageHandlerExecuted.Should().BeTrue();
     }
 
     [Fact]
-    public void Should_return_supertype_handler()
+    public async Task Should_return_supertype_handler()
     {
         var handler = handlerCollection.GetHandler<Dog>();
 
-        handler(new Message<Dog>(new Dog()), null, default);
+        await handler(new Message<Dog>(new Dog()), null, default);
         animalHandlerExecuted.Should().BeTrue();
     }
 
@@ -55,30 +56,30 @@ public class HandlerCollectionTests
     }
 
     [Fact]
-    public void Should_return_matching_handler_by_type()
+    public async Task Should_return_matching_handler_by_type()
     {
         var handler = handlerCollection.GetHandler(typeof(MyMessage));
 
-        handler(new Message<MyMessage>(new MyMessage()), null, default);
+        await handler(new Message<MyMessage>(new MyMessage()), null, default);
         myMessageHandlerExecuted.Should().BeTrue();
     }
 
     [Fact]
-    public void Should_return_supertype_handler_by_type()
+    public async Task Should_return_supertype_handler_by_type()
     {
         var handler = handlerCollection.GetHandler(typeof(Dog));
 
-        handler(new Message<Dog>(new Dog()), null, default);
+        await handler(new Message<Dog>(new Dog()), null, default);
         animalHandlerExecuted.Should().BeTrue();
     }
 
     [Fact]
-    public void Should_return_a_null_logger_if_ThrowOnNoMatchingHandler_is_false()
+    public async Task Should_return_a_null_logger_if_ThrowOnNoMatchingHandler_is_false()
     {
         handlerCollection.ThrowOnNoMatchingHandler = false;
         var handler = handlerCollection.GetHandler<MyOtherMessage>();
 
-        handler(new Message<MyOtherMessage>(new MyOtherMessage()), null, default);
+        await handler(new Message<MyOtherMessage>(new MyOtherMessage()), null, default);
         myMessageHandlerExecuted.Should().BeFalse();
         animalHandlerExecuted.Should().BeFalse();
     }
