@@ -65,8 +65,12 @@ public class VersionedMessageSerializationStrategyTests
 
         var deserializedMessage = serializationStrategy.DeserializeMessage(message.Properties, serializedMessageBody);
 
-        AssertMessageDeserializedCorrectly((Message<MyMessage>)deserializedMessage, messageContent, typeof(MyMessage),
-            p => AssertDefaultMessagePropertiesCorrect(p, messageType, correlationId));
+        AssertMessageDeserializedCorrectly(
+            (Message<MyMessage>)deserializedMessage,
+            messageContent,
+            typeof(MyMessage),
+            p => AssertDefaultMessagePropertiesCorrect(p, messageType, correlationId)
+        );
         Assert.Equal(deserializedMessage.Properties.UserId, message.Properties.UserId); //, "Additional message properties not serialized");
     }
 
@@ -78,8 +82,7 @@ public class VersionedMessageSerializationStrategyTests
 
         const string correlationId = "CorrelationId";
 
-        var serializationStrategy =
-            new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
+        var serializationStrategy = new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
 
         var messageBody = new MyMessage { Text = "Hello world!" };
         var message = new Message<MyMessage>(messageBody);
@@ -108,8 +111,11 @@ public class VersionedMessageSerializationStrategyTests
 
         var serializedMessage = serializationStrategy.SerializeMessage(message);
 
-        AssertMessageSerializedCorrectly(serializedMessage, serializedMessageBody,
-            p => AssertVersionedMessagePropertiesCorrect(p, messageType, correlationId, supersededMessageType));
+        AssertMessageSerializedCorrectly(
+            serializedMessage,
+            serializedMessageBody,
+            p => AssertVersionedMessagePropertiesCorrect(p, messageType, correlationId, supersededMessageType)
+        );
     }
 
     [Fact]
@@ -133,8 +139,11 @@ public class VersionedMessageSerializationStrategyTests
 
         var serializedMessage = serializationStrategy.SerializeMessage(message);
 
-        AssertMessageSerializedCorrectly(serializedMessage, serializedMessageBody,
-            p => AssertVersionedMessagePropertiesCorrect(p, messageType, correlationId, supersededMessageType));
+        AssertMessageSerializedCorrectly(
+            serializedMessage,
+            serializedMessageBody,
+            p => AssertVersionedMessagePropertiesCorrect(p, messageType, correlationId, supersededMessageType)
+        );
     }
 
     [Fact]
@@ -165,8 +174,12 @@ public class VersionedMessageSerializationStrategyTests
 
         var deserializedMessage = serializationStrategy.DeserializeMessage(message.Properties, serializedMessageBody);
 
-        AssertMessageDeserializedCorrectly((Message<MyMessageV2>)deserializedMessage, messageContent, typeof(MyMessageV2),
-            p => AssertVersionedMessagePropertiesCorrect(p, messageType, correlationId, supersededMessageType));
+        AssertMessageDeserializedCorrectly(
+            (Message<MyMessageV2>)deserializedMessage,
+            messageContent,
+            typeof(MyMessageV2),
+            p => AssertVersionedMessagePropertiesCorrect(p, messageType, correlationId, supersededMessageType)
+        );
     }
 
     [Fact]
@@ -222,15 +235,17 @@ public class VersionedMessageSerializationStrategyTests
         Assert.Equal(((Message<MyMessageV2>)deserializedMessage).Body.Number, message.Body.Number);
     }
 
-    private static void AssertMessageSerializedCorrectly(SerializedMessage message, byte[] expectedBody,
-        Action<MessageProperties> assertMessagePropertiesCorrect)
+    private static void AssertMessageSerializedCorrectly(
+        SerializedMessage message, byte[] expectedBody, Action<MessageProperties> assertMessagePropertiesCorrect
+    )
     {
         Assert.Equal(message.Body, expectedBody); //, "Serialized message body does not match expected value");
         assertMessagePropertiesCorrect(message.Properties); //;
     }
 
-    private static void AssertMessageDeserializedCorrectly(IMessage<MyMessage> message, string expectedBodyText, Type expectedMessageType,
-        Action<MessageProperties> assertMessagePropertiesCorrect)
+    private static void AssertMessageDeserializedCorrectly(
+        IMessage<MyMessage> message, string expectedBodyText, Type expectedMessageType, Action<MessageProperties> assertMessagePropertiesCorrect
+    )
     {
         Assert.Equal(message.Body.Text, expectedBodyText); //, "Deserialized message body text does not match expected value");
         Assert.Equal(message.MessageType, expectedMessageType); //, "Deserialized message type does not match expected value");
@@ -244,15 +259,17 @@ public class VersionedMessageSerializationStrategyTests
         Assert.Equal(properties.CorrelationId, expectedCorrelationId); //, "Message correlation id does not match expected value");
     }
 
-    private static void AssertVersionedMessagePropertiesCorrect(MessageProperties properties, string expectedType, string expectedCorrelationId,
-        string alternativeTypes)
+    private static void AssertVersionedMessagePropertiesCorrect(
+        MessageProperties properties, string expectedType, string expectedCorrelationId, string alternativeTypes
+    )
     {
         AssertDefaultMessagePropertiesCorrect(properties, expectedType, expectedCorrelationId);
         Assert.Equal(properties.Headers[AlternativeMessageTypesHeaderKey], alternativeTypes); //, "Alternative message types do not match expected value");
     }
 
-    private static VersionedMessageSerializationStrategy CreateSerializationStrategy<T>(IMessage<T> message,
-        IEnumerable<KeyValuePair<string, Type>> messageTypes, byte[] messageBody, string correlationId) where T : class
+    private static VersionedMessageSerializationStrategy CreateSerializationStrategy<T>(
+        IMessage<T> message, IEnumerable<KeyValuePair<string, Type>> messageTypes, byte[] messageBody, string correlationId
+    ) where T : class
     {
         var typeNameSerializer = Substitute.For<ITypeNameSerializer>();
         foreach (var messageType in messageTypes)
@@ -269,8 +286,9 @@ public class VersionedMessageSerializationStrategyTests
         return new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
     }
 
-    private static VersionedMessageSerializationStrategy CreateDeserializationStrategy<T>(T message, IEnumerable<KeyValuePair<string, Type>> messageTypes,
-        Type expectedMessageType, byte[] messageBody) where T : class
+    private static VersionedMessageSerializationStrategy CreateDeserializationStrategy<T>(
+        T message, IEnumerable<KeyValuePair<string, Type>> messageTypes, Type expectedMessageType, byte[] messageBody
+    ) where T : class
     {
         var typeNameSerializer = Substitute.For<ITypeNameSerializer>();
         foreach (var messageType in messageTypes)
