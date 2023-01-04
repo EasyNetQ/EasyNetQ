@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using EasyNetQ.ConnectionString;
 
 namespace EasyNetQ.Tests.ConnectionString;
@@ -64,5 +62,3 @@ public class ConnectionStringParserTests
         Assert.Throws<EasyNetQException>(() => connectionStringParser.Parse("amqp=Foo"));
     }
 }
-
-// ReSharper restore InconsistentNaming

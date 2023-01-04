@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using EasyNetQ.Tests.Mocking;
 using RabbitMQ.Client;
 
@@ -31,5 +29,3 @@ public class When_a_request_is_sent_but_the_connection_closes_before_a_reply_is_
         });
     }
 }
-
-// ReSharper restore InconsistentNaming

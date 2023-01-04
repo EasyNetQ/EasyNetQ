@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
@@ -103,5 +101,3 @@ public class When_a_request_is_sent : IDisposable
         responseMessage.Text.Should().Be("Hello World");
     }
 }
-
-// ReSharper restore InconsistentNaming

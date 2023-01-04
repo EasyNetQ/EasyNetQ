@@ -1,4 +1,3 @@
-// ReSharper disable InconsistentNaming
 using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
@@ -111,5 +110,3 @@ public class When_publish_with_topic_is_called : IDisposable
         );
     }
 }
-
-// ReSharper restore InconsistentNaming

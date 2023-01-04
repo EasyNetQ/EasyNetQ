@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 

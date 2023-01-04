@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using System.Text;
 using EasyNetQ.MessageVersioning;
 

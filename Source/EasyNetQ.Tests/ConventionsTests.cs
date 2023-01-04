@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using EasyNetQ.DI;
 using EasyNetQ.Tests.Mocking;
 using RabbitMQ.Client;
@@ -252,5 +250,3 @@ public class When_registering_response_handler : IDisposable
         );
     }
 }
-
-// ReSharper restore InconsistentNaming

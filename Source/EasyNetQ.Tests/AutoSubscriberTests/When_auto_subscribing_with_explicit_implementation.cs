@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using EasyNetQ.AutoSubscribe;
 using EasyNetQ.Tests.Mocking;
 
@@ -115,5 +113,3 @@ public class When_auto_subscribing_with_explicit_implementation : IDisposable
         public string Text { get; set; }
     }
 }
-
-// ReSharper restore InconsistentNaming

@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using EasyNetQ.Consumer;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
@@ -93,5 +91,3 @@ public class When_a_consumer_has_multiple_handlers : IDisposable
         myOtherMessageResult.Text.Should().Be("Hello Isomorphs!");
     }
 }
-
-// ReSharper restore InconsistentNaming

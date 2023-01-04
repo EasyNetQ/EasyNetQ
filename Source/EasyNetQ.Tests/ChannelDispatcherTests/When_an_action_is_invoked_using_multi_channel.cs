@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
 using EasyNetQ.Persistent;
@@ -48,5 +46,3 @@ public class When_an_action_is_invoked_using_multi_channel : IDisposable
         actionResult.Should().Be(42);
     }
 }
-
-// ReSharper restore InconsistentNaming

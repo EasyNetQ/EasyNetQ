@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 using RabbitMQ.Client;
@@ -129,5 +127,3 @@ public class When_an_action_is_performed_and_channel_reopens
         channel.Received().ExchangeDeclare("MyExchange", "direct");
     }
 }
-
-// ReSharper restore InconsistentNaming

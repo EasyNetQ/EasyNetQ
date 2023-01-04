@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using EasyNetQ.MessageVersioning;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
@@ -85,5 +83,3 @@ public class ExchangeDeclareStrategyTests
         exchangeDeclareCount.Should().Be(1);
     }
 }
-
-// ReSharper restore InconsistentNaming

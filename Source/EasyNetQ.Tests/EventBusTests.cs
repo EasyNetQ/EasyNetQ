@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using EasyNetQ.Logging;
 
 namespace EasyNetQ.Tests;
@@ -120,5 +118,3 @@ public class EventBusTests
         public string Text { get; set; }
     }
 }
-
-// ReSharper restore InconsistentNaming

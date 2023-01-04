@@ -8,6 +8,7 @@ internal class StaticCorrelationIdGenerationStrategy : ICorrelationIdGenerationS
     {
         this.correlationId = correlationId;
     }
+
     public string GetCorrelationId()
     {
         return correlationId;

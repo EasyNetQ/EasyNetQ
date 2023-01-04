@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using EasyNetQ.Tests.Mocking;
 
 namespace EasyNetQ.Tests.ProducerTests;
@@ -28,5 +26,3 @@ public class When_a_request_is_sent_but_no_reply_is_received : IDisposable
         );
     }
 }
-
-// ReSharper restore InconsistentNaming

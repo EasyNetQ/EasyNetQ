@@ -1,4 +1,3 @@
-// ReSharper disable InconsistentNaming
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 
@@ -68,5 +67,3 @@ public class Implementation : ITestMessageInterface
 {
     public string Text { get; set; }
 }
-
-// ReSharper restore InconsistentNaming

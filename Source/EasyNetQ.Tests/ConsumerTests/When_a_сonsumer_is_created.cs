@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using EasyNetQ.Consumer;
 
 namespace EasyNetQ.Tests.ConsumerTests;
@@ -23,5 +21,3 @@ public class WhenAСonsumerStartsConsuming : Given_a_сonsumer
         internalConsumerFactory.Received(1).CreateConsumer(Arg.Any<ConsumerConfiguration>());
     }
 }
-
-// ReSharper restore InconsistentNaming

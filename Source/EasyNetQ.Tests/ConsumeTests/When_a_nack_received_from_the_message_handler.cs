@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using EasyNetQ.Consumer;
 
 namespace EasyNetQ.Tests.ConsumeTests;
@@ -18,5 +16,3 @@ public class When_a_nack_received_from_the_message_handler : ConsumerTestBase
         MockBuilder.Channels[0].Received().BasicNack(DeliverTag, false, true);
     }
 }
-
-// ReSharper restore InconsistentNaming

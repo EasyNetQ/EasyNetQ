@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using System.Collections;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
@@ -422,5 +420,3 @@ public class When_a_queue_is_unbound_from_an_exchange : IDisposable
         mockBuilder.Channels[0].Received().QueueUnbind("my_queue", "my_exchange", "my_routing_key", null);
     }
 }
-
-// ReSharper restore InconsistentNaming
