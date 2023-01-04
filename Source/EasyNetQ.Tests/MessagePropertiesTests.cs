@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using System.Reflection;
 
 namespace EasyNetQ.Tests;
@@ -119,6 +117,7 @@ public class MessagePropertiesTests
                     throw;
                 }
             }
+
             if (!threw)
             {
                 Assert.True(false, "Over length property set didn't fail");
@@ -126,5 +125,3 @@ public class MessagePropertiesTests
         }
     }
 }
-
-// ReSharper restore InconsistentNaming

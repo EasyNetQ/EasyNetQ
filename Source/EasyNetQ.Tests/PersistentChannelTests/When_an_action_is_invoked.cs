@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 using RabbitMQ.Client;
@@ -43,5 +41,3 @@ public class When_an_action_is_invoked : IDisposable
         persistentChannel.Dispose();
     }
 }
-
-// ReSharper restore InconsistentNaming

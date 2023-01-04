@@ -1,4 +1,3 @@
-// ReSharper disable InconsistentNaming
 using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
@@ -101,5 +100,3 @@ public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : ID
         );
     }
 }
-
-// ReSharper restore InconsistentNaming

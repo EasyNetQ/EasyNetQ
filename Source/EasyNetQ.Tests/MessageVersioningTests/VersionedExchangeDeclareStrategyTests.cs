@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using EasyNetQ.MessageVersioning;
 using EasyNetQ.Topology;
 
@@ -115,7 +113,7 @@ public class VersionedExchangeDeclareStrategyTests
 
         boundExchanges.Should().BeEquivalentTo(new Dictionary<string, string>
         {
-            {exchanges[1], exchanges[0]}
+            { exchanges[1], exchanges[0] }
         });
     }
 }

@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using EasyNetQ.Events;
 using EasyNetQ.Persistent;
 using EasyNetQ.Tests.Mocking;
@@ -43,5 +41,3 @@ public class When_a_consumer_is_started_on_exclusive_queue_and_connection_is_dro
         mockBuilder.Consumers[0].Model.Received().Dispose();
     }
 }
-
-// ReSharper restore InconsistentNaming

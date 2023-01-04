@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using EasyNetQ.AutoSubscribe;
 
 namespace EasyNetQ.Tests;
@@ -30,5 +28,3 @@ public class DefaultMessageConsumerTests
         }
     }
 }
-
-// ReSharper restore InconsistentNaming

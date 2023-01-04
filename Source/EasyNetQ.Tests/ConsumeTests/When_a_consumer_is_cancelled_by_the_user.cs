@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
@@ -41,5 +39,3 @@ public class When_a_consumer_is_cancelled_by_the_user : IDisposable
         mockBuilder.Consumers[0].Model.Received().Dispose();
     }
 }
-
-// ReSharper restore InconsistentNaming

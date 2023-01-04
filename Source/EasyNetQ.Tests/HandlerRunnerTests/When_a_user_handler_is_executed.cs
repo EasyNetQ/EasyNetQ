@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using EasyNetQ.Consumer;
 using EasyNetQ.Logging;
 using RabbitMQ.Client;
@@ -83,5 +81,3 @@ public class When_a_user_handler_is_executed
         deliveredProperties.Should().BeSameAs(messageProperties);
     }
 }
-
-// ReSharper restore InconsistentNaming

@@ -45,9 +45,12 @@ public class BuildInInterceptorsTests
     [Fact]
     public void ShouldCallAddedInterceptorsOnConsume()
     {
-        var sourceMessage = new ConsumedMessage(new MessageReceivedInfo("", 0, false, "exchange", "routingKey", "queue"), new MessageProperties(), Array.Empty<byte>());
-        var firstMessage = new ConsumedMessage(new MessageReceivedInfo("", 0, false, "exchange", "routingKey", "queue"), new MessageProperties(), Array.Empty<byte>());
-        var secondMessage = new ConsumedMessage(new MessageReceivedInfo("", 0, false, "exchange", "routingKey", "queue"), new MessageProperties(), Array.Empty<byte>());
+        var sourceMessage = new ConsumedMessage(new MessageReceivedInfo("", 0, false, "exchange", "routingKey", "queue"), new MessageProperties(),
+            Array.Empty<byte>());
+        var firstMessage = new ConsumedMessage(new MessageReceivedInfo("", 0, false, "exchange", "routingKey", "queue"), new MessageProperties(),
+            Array.Empty<byte>());
+        var secondMessage = new ConsumedMessage(new MessageReceivedInfo("", 0, false, "exchange", "routingKey", "queue"), new MessageProperties(),
+            Array.Empty<byte>());
 
         var first = Substitute.For<IProduceConsumeInterceptor>();
         var second = Substitute.For<IProduceConsumeInterceptor>();

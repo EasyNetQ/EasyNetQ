@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using EasyNetQ.Consumer;
 using RabbitMQ.Client;
 using EasyNetQ.Logging;
@@ -12,6 +10,7 @@ public class When_a_user_handler_is_failed
     {
         CorrelationId = "correlation_id"
     };
+
     private readonly MessageReceivedInfo messageInfo = new("consumer_tag", 123, false, "exchange", "routingKey", "queue");
     private readonly byte[] messageBody = Array.Empty<byte>();
 
@@ -63,5 +62,3 @@ public class When_a_user_handler_is_failed
         channel.Received().BasicAck(42, false);
     }
 }
-
-// ReSharper restore InconsistentNaming

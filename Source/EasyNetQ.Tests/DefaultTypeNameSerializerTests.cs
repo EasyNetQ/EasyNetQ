@@ -1,6 +1,5 @@
-// ReSharper disable InconsistentNaming
-
-using EasyNetQ.Tests.ProducerTests.Very.Long.Namespace.Certainly.Longer.Than.The255.Char.Length.That.RabbitMQ.Likes.That.Will.Certainly.Cause.An.AMQP.Exception.If.We.Dont.Do.Something.About.It.And.Stop.It.From.Happening;
+using EasyNetQ.Tests.ProducerTests.Very.Long.Namespace.Certainly.Longer.Than.The255.Char.Length.That.RabbitMQ.Likes.That.Will.Certainly.Cause.An.AMQP.Exception.
+    If.We.Dont.Do.Something.About.It.And.Stop.It.From.Happening;
 
 namespace EasyNetQ.Tests;
 
@@ -58,10 +57,7 @@ public class DefaultTypeNameSerializerTests
     [Fact]
     public void Should_throw_exception_when_type_name_is_not_recognised()
     {
-        Assert.Throws<EasyNetQException>(() =>
-        {
-            typeNameSerializer.Deserialize("EasyNetQ.TypeNameSerializer.None, EasyNetQ");
-        });
+        Assert.Throws<EasyNetQException>(() => { typeNameSerializer.Deserialize("EasyNetQ.TypeNameSerializer.None, EasyNetQ"); });
     }
 
     [Fact]
@@ -76,4 +72,3 @@ public class DefaultTypeNameSerializerTests
         });
     }
 }
-// ReSharper restore InconsistentNaming

@@ -16,7 +16,9 @@ public class DefaultConsumerErrorStrategyTests
         persistedConnectionMock.CreateModel().Returns(modelMock);
         var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock, true);
 
-        var ackStrategy = await consumerErrorStrategy.HandleConsumerErrorAsync(CreateConsumerExcutionContext(CreateOriginalMessage()), new Exception("I just threw!"), default);
+        var ackStrategy =
+            await consumerErrorStrategy.HandleConsumerErrorAsync(CreateConsumerExcutionContext(CreateOriginalMessage()), new Exception("I just threw!"),
+                default);
 
         Assert.Equal(AckStrategies.Ack, ackStrategy);
         modelMock.Received().WaitForConfirms(Arg.Any<TimeSpan>());
@@ -33,7 +35,9 @@ public class DefaultConsumerErrorStrategyTests
         persistedConnectionMock.CreateModel().Returns(modelMock);
         var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock, true);
 
-        var ackStrategy = await consumerErrorStrategy.HandleConsumerErrorAsync(CreateConsumerExcutionContext(CreateOriginalMessage()), new Exception("I just threw!"), default);
+        var ackStrategy =
+            await consumerErrorStrategy.HandleConsumerErrorAsync(CreateConsumerExcutionContext(CreateOriginalMessage()), new Exception("I just threw!"),
+                default);
 
         Assert.Equal(AckStrategies.NackWithRequeue, ackStrategy);
         modelMock.Received().WaitForConfirms(Arg.Any<TimeSpan>());
@@ -49,7 +53,9 @@ public class DefaultConsumerErrorStrategyTests
         persistedConnectionMock.CreateModel().Returns(modelMock);
         var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock);
 
-        var ackStrategy = await consumerErrorStrategy.HandleConsumerErrorAsync(CreateConsumerExcutionContext(CreateOriginalMessage()), new Exception("I just threw!"), default);
+        var ackStrategy =
+            await consumerErrorStrategy.HandleConsumerErrorAsync(CreateConsumerExcutionContext(CreateOriginalMessage()), new Exception("I just threw!"),
+                default);
 
         Assert.Equal(AckStrategies.Ack, ackStrategy);
         modelMock.DidNotReceive().WaitForConfirms(Arg.Any<TimeSpan>());

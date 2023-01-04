@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using System.Buffers;
 using System.Text;
 
@@ -71,7 +69,8 @@ public class DefaultMessageSerializationStrategyTests
         var serializer = new JsonSerializer();
         const string correlationId = "CorrelationId";
 
-        var serializationStrategy = new DefaultMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
+        var serializationStrategy =
+            new DefaultMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
 
         var messageBody = new MyMessage { Text = "Hello world!" };
         var message = new Message<MyMessage>(messageBody);
@@ -89,7 +88,8 @@ public class DefaultMessageSerializationStrategyTests
         var serializer = new JsonSerializer();
         const string correlationId = "CorrelationId";
 
-        var serializationStrategy = new DefaultMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
+        var serializationStrategy =
+            new DefaultMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
 
         var message = new Message<MyMessage>();
         using var serializedMessage = serializationStrategy.SerializeMessage(message);
@@ -99,14 +99,16 @@ public class DefaultMessageSerializationStrategyTests
         Assert.Null(((Message<MyMessage>)deserializedMessage).Body);
     }
 
-    private static void AssertMessageSerializedCorrectly(SerializedMessage message, byte[] expectedBody, string expectedMessageType, string expectedCorrelationId)
+    private static void AssertMessageSerializedCorrectly(SerializedMessage message, byte[] expectedBody, string expectedMessageType,
+        string expectedCorrelationId)
     {
         Assert.Equal(message.Body, expectedBody); //, "Serialized message body does not match expected value");
         Assert.Equal(message.Properties.Type, expectedMessageType); //, "Serialized message type does not match expected value");
         Assert.Equal(message.Properties.CorrelationId, expectedCorrelationId); //, "Serialized message correlation id does not match expected value");
     }
 
-    private void AssertMessageDeserializedCorrectly(IMessage<MyMessage> message, string expectedBodyText, Type expectedMessageType, string expectedMessageProperties)
+    private void AssertMessageDeserializedCorrectly(IMessage<MyMessage> message, string expectedBodyText, Type expectedMessageType,
+        string expectedMessageProperties)
     {
         Assert.Equal(message.Body.Text, expectedBodyText); //, "Deserialized message body text does not match expected value");
         Assert.Equal(message.MessageType, expectedMessageType); //, "Deserialized message type does not match expected value");

@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using EasyNetQ.Consumer;
 
 namespace EasyNetQ.Tests.ConsumeTests;
@@ -87,5 +85,3 @@ public class HandlerCollectionTests
         Assert.Throws<EasyNetQException>(() => handlerCollection.Add<MyMessage>((_, _) => { }));
     }
 }
-
-// ReSharper restore InconsistentNaming

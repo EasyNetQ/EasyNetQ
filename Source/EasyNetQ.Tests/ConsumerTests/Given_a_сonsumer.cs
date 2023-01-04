@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using EasyNetQ.Consumer;
 using EasyNetQ.Logging;
 using EasyNetQ.Topology;
@@ -50,5 +48,3 @@ public abstract class Given_a_сonsumer
         );
     }
 }
-
-// ReSharper restore InconsistentNaming

@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 using RabbitMQ.Client;
@@ -41,5 +39,3 @@ public class When_an_action_is_performed_on_a_closed_channel_that_doesnt_open_ag
         persistentChannel.Dispose();
     }
 }
-
-// ReSharper restore InconsistentNaming

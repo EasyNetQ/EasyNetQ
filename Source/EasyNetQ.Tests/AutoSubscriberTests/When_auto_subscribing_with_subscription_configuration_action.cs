@@ -1,4 +1,3 @@
-// ReSharper disable InconsistentNaming
 using EasyNetQ.AutoSubscribe;
 using EasyNetQ.Internals;
 
@@ -72,5 +71,3 @@ public class When_auto_subscribing_with_subscription_configuration_action
     {
     }
 }
-
-// ReSharper restore InconsistentNaming

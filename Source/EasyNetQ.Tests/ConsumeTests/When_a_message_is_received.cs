@@ -1,5 +1,3 @@
-// ReSharper disable InconsistentNaming
-
 using System.Text;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
@@ -71,5 +69,3 @@ public class When_a_message_is_received : IDisposable
         }
     }
 }
-
-// ReSharper restore InconsistentNaming

@@ -1,6 +1,5 @@
-// ReSharper disable InconsistentNaming
-
-using EasyNetQ.Tests.ProducerTests.Very.Long.Namespace.Certainly.Longer.Than.The255.Char.Length.That.RabbitMQ.Likes.That.Will.Certainly.Cause.An.AMQP.Exception.If.We.Dont.Do.Something.About.It.And.Stop.It.From.Happening;
+using EasyNetQ.Tests.ProducerTests.Very.Long.Namespace.Certainly.Longer.Than.The255.Char.Length.That.RabbitMQ.Likes.That.Will.Certainly.Cause.An.AMQP.Exception.
+    If.We.Dont.Do.Something.About.It.And.Stop.It.From.Happening;
 
 namespace EasyNetQ.Tests;
 
@@ -17,7 +16,9 @@ public class LegacyTypeNameSerializerTests
     public void Should_serialize_hashset_of_string_type()
     {
         var typeName = typeNameSerializer.Serialize(typeof(HashSet<string>));
-        typeName.Should().Be("System.Collections.Generic.HashSet`1[[System.String, System.Private.CoreLib, Version=7.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]:System.Private.CoreLib");
+        typeName.Should()
+            .Be(
+                "System.Collections.Generic.HashSet`1[[System.String, System.Private.CoreLib, Version=7.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]:System.Private.CoreLib");
     }
 
     [Fact]
@@ -51,7 +52,8 @@ public class LegacyTypeNameSerializerTests
     [Fact]
     public void Should_deserialize_hashset_of_string_type()
     {
-        var type = typeNameSerializer.Deserialize("System.Collections.Generic.HashSet`1[[System.String, System.Private.CoreLib, Version=7.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]:System.Collections");
+        var type = typeNameSerializer.Deserialize(
+            "System.Collections.Generic.HashSet`1[[System.String, System.Private.CoreLib, Version=7.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]:System.Collections");
         type.Should().Be(typeof(HashSet<string>));
     }
 
@@ -65,10 +67,7 @@ public class LegacyTypeNameSerializerTests
     [Fact]
     public void Should_throw_exception_when_type_name_is_not_recognised()
     {
-        Assert.Throws<EasyNetQException>(() =>
-        {
-            typeNameSerializer.Deserialize("EasyNetQ.TypeNameSerializer.None:EasyNetQ");
-        });
+        Assert.Throws<EasyNetQException>(() => { typeNameSerializer.Deserialize("EasyNetQ.TypeNameSerializer.None:EasyNetQ"); });
     }
 
     [Fact]
@@ -83,4 +82,3 @@ public class LegacyTypeNameSerializerTests
         });
     }
 }
-// ReSharper restore InconsistentNaming
