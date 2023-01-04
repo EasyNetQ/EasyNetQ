@@ -39,9 +39,9 @@ public class When_a_queue_is_declared : IDisposable
             Arg.Is(true),
             Arg.Is(true),
             Arg.Is<IDictionary<string, object>>(args =>
-                ((int)args["x-message-ttl"] == 1000) &&
-                ((int)args["x-expires"] == 2000) &&
-                ((int)args["x-max-priority"] == 10)));
+                (int)args["x-message-ttl"] == 1000 &&
+                (int)args["x-expires"] == 2000 &&
+                (int)args["x-max-priority"] == 10));
     }
 
     [Fact]
@@ -89,11 +89,11 @@ public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange : IDisposa
             Arg.Is(true),
             Arg.Is(true),
             Arg.Is<IDictionary<string, object>>(args =>
-                ((int)args["x-message-ttl"] == 1000) &&
-                ((int)args["x-expires"] == 2000) &&
-                ((int)args["x-max-priority"] == 10) &&
-                ((string)args["x-dead-letter-exchange"] == "my_exchange") &&
-                ((string)args["x-dead-letter-routing-key"] == "my_routing_key")));
+                (int)args["x-message-ttl"] == 1000 &&
+                (int)args["x-expires"] == 2000 &&
+                (int)args["x-max-priority"] == 10 &&
+                (string)args["x-dead-letter-exchange"] == "my_exchange" &&
+                (string)args["x-dead-letter-routing-key"] == "my_routing_key"));
     }
 
     [Fact]
@@ -140,11 +140,11 @@ public class When_a_queue_is_declared_With_EmptyDeadLetterExchange : IDisposable
             Arg.Is(true),
             Arg.Is(true),
             Arg.Is<IDictionary<string, object>>(args =>
-                ((int)args["x-message-ttl"] == 1000) &&
-                ((int)args["x-expires"] == 2000) &&
-                ((int)args["x-max-priority"] == 10) &&
-                ((string)args["x-dead-letter-exchange"] == "") &&
-                ((string)args["x-dead-letter-routing-key"] == "my_queue2")));
+                (int)args["x-message-ttl"] == 1000 &&
+                (int)args["x-expires"] == 2000 &&
+                (int)args["x-max-priority"] == 10 &&
+                (string)args["x-dead-letter-exchange"] == "" &&
+                (string)args["x-dead-letter-routing-key"] == "my_queue2"));
     }
 
     [Fact]
