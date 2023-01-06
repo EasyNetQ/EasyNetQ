@@ -1606,10 +1606,6 @@ namespace EasyNetQ.Internals
         public static System.Collections.Generic.IEnumerable<T> Intersperse<T>(this System.Collections.Generic.IEnumerable<T> items, T separator) { }
         public static System.Collections.Generic.IEnumerable<T> SurroundWith<T>(this System.Collections.Generic.IEnumerable<T> items, T first, T last) { }
     }
-    public class NoResult : System.IEquatable<EasyNetQ.Internals.NoResult>
-    {
-        public static readonly EasyNetQ.Internals.NoResult Instance;
-    }
     public sealed class ReadOnlyMemoryStream : System.IO.Stream
     {
         public ReadOnlyMemoryStream(in System.ReadOnlyMemory<byte> content) { }
@@ -1768,10 +1764,10 @@ namespace EasyNetQ.MultipleExchange
 }
 namespace EasyNetQ.Persistent
 {
-    public readonly struct ActionBasedPersistentChannelAction : EasyNetQ.Persistent.IPersistentChannelAction<EasyNetQ.Internals.NoResult>
+    public readonly struct ActionBasedPersistentChannelAction : EasyNetQ.Persistent.IPersistentChannelAction<bool>
     {
         public ActionBasedPersistentChannelAction(System.Action<RabbitMQ.Client.IModel> action) { }
-        public EasyNetQ.Internals.NoResult Invoke(RabbitMQ.Client.IModel model) { }
+        public bool Invoke(RabbitMQ.Client.IModel model) { }
     }
     public readonly struct FuncBasedPersistentChannelAction<TResult> : EasyNetQ.Persistent.IPersistentChannelAction<TResult>
     {
