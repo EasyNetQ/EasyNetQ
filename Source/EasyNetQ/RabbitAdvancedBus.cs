@@ -295,7 +295,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         }
         else
         {
-            await persistentChannelDispatcher.InvokeAsync<NoResult, BasicPublishAction>(
+            await persistentChannelDispatcher.InvokeAsync<bool, BasicPublishAction>(
                 new BasicPublishAction(exchange, routingKey, mandatory, rawMessage),
                 PersistentChannelDispatchOptions.ProducerPublish,
                 cts.Token
@@ -646,7 +646,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         MessageReturned?.Invoke(this, new MessageReturnedEventArgs(@event.Body, @event.Properties, @event.Info));
     }
 
-    private readonly struct BasicPublishAction : IPersistentChannelAction<NoResult>
+    private readonly struct BasicPublishAction : IPersistentChannelAction<bool>
     {
         private readonly Exchange exchange;
         private readonly string routingKey;
@@ -661,12 +661,12 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             this.message = message;
         }
 
-        public NoResult Invoke(IModel model)
+        public bool Invoke(IModel model)
         {
             var basicProperties = model.CreateBasicProperties();
             message.Properties.CopyTo(basicProperties);
             model.BasicPublish(exchange.Name, routingKey, mandatory, basicProperties, message.Body);
-            return NoResult.Instance;
+            return true;
         }
     }
 

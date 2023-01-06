@@ -13,7 +13,7 @@ internal static class PersistentChannelDispatcherExtensions
         CancellationToken cancellationToken = default
     )
     {
-        return dispatcher.InvokeAsync<NoResult, ActionBasedPersistentChannelAction>(
+        return dispatcher.InvokeAsync<bool, ActionBasedPersistentChannelAction>(
             new ActionBasedPersistentChannelAction(channelAction), options, cancellationToken
         );
     }

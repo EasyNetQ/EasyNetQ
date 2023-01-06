@@ -373,7 +373,7 @@ public class PullingConsumer : IPullingConsumer<PullResult>
 
         using var cts = cancellationToken.WithTimeout(options.Timeout);
 
-        await channel.InvokeChannelActionAsync<NoResult, BasicAckAction>(
+        await channel.InvokeChannelActionAsync<bool, BasicAckAction>(
             new BasicAckAction(deliveryTag, multiple), cts.Token
         ).ConfigureAwait(false);
     }
@@ -388,7 +388,7 @@ public class PullingConsumer : IPullingConsumer<PullResult>
 
         using var cts = cancellationToken.WithTimeout(options.Timeout);
 
-        await channel.InvokeChannelActionAsync<NoResult, BasicNackAction>(
+        await channel.InvokeChannelActionAsync<bool, BasicNackAction>(
             new BasicNackAction(deliveryTag, multiple, requeue), cts.Token
         ).ConfigureAwait(false);
     }
@@ -413,7 +413,7 @@ public class PullingConsumer : IPullingConsumer<PullResult>
         public BasicGetResult? Invoke(IModel model) => model.BasicGet(queue.Name, autoAck);
     }
 
-    private readonly struct BasicAckAction : IPersistentChannelAction<NoResult>
+    private readonly struct BasicAckAction : IPersistentChannelAction<bool>
     {
         private readonly ulong deliveryTag;
         private readonly bool multiple;
@@ -424,14 +424,14 @@ public class PullingConsumer : IPullingConsumer<PullResult>
             this.multiple = multiple;
         }
 
-        public NoResult Invoke(IModel model)
+        public bool Invoke(IModel model)
         {
             model.BasicAck(deliveryTag, multiple);
-            return NoResult.Instance;
+            return true;
         }
     }
 
-    private readonly struct BasicNackAction : IPersistentChannelAction<NoResult>
+    private readonly struct BasicNackAction : IPersistentChannelAction<bool>
     {
         private readonly ulong deliveryTag;
         private readonly bool multiple;
@@ -444,10 +444,10 @@ public class PullingConsumer : IPullingConsumer<PullResult>
             this.requeue = requeue;
         }
 
-        public NoResult Invoke(IModel model)
+        public bool Invoke(IModel model)
         {
             model.BasicNack(deliveryTag, multiple, requeue);
-            return NoResult.Instance;
+            return true;
         }
     }
 }

@@ -27,11 +27,10 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
     private readonly IConsumerConnection connection;
     private readonly IConventions conventions;
     private readonly IErrorMessageSerializer errorMessageSerializer;
-    private readonly ConcurrentDictionary<string, NoResult> existingErrorExchangesWithQueues = new();
+    private readonly ConcurrentDictionary<string, bool> existingErrorExchangesWithQueues = new();
     private readonly ISerializer serializer;
     private readonly ITypeNameSerializer typeNameSerializer;
     private readonly ConnectionConfiguration configuration;
-
 
     /// <summary>
     ///     Creates DefaultConsumerErrorStrategy
@@ -157,7 +156,7 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
         existingErrorExchangesWithQueues.GetOrAdd(errorTopologyIdentifier, _ =>
         {
             DeclareAndBindErrorExchangeWithErrorQueue(model, errorExchangeName, errorExchangeType, errorQueueName, errorQueueType, routingKey);
-            return NoResult.Instance;
+            return true;
         });
 
         return errorExchangeName;
