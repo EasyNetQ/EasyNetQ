@@ -5,7 +5,7 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Producer;
 
-using UnconfirmedRequests = ConcurrentDictionary<ulong, TaskCompletionSource<NoResult>>;
+using UnconfirmedRequests = ConcurrentDictionary<ulong, TaskCompletionSource<bool>>;
 
 /// <inheritdoc />
 public class PublishConfirmationListener : IPublishConfirmationListener
@@ -39,7 +39,7 @@ public class PublishConfirmationListener : IPublishConfirmationListener
             throw new InvalidOperationException("Confirms not selected");
 
         var requests = unconfirmedChannelRequests.GetOrAdd(model.ChannelNumber, _ => new UnconfirmedRequests());
-        var confirmationTcs = new TaskCompletionSource<NoResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var confirmationTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         if (!requests.TryAdd(sequenceNumber, confirmationTcs))
             throw new InvalidOperationException($"Confirmation {sequenceNumber} already exists");
 
@@ -139,7 +139,7 @@ public class PublishConfirmationListener : IPublishConfirmationListener
     }
 
     private static void Confirm(
-        TaskCompletionSource<NoResult> confirmationTcs, ulong sequenceNumber, ConfirmationType type
+        TaskCompletionSource<bool> confirmationTcs, ulong sequenceNumber, ConfirmationType type
     )
     {
         switch (type)
@@ -155,7 +155,7 @@ public class PublishConfirmationListener : IPublishConfirmationListener
                 );
                 break;
             case ConfirmationType.Ack:
-                confirmationTcs.TrySetResult(NoResult.Instance);
+                confirmationTcs.TrySetResult(true);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
@@ -172,10 +172,10 @@ public class PublishConfirmationListener : IPublishConfirmationListener
     private sealed class PublishPendingConfirmation : IPublishPendingConfirmation
     {
         private readonly ulong id;
-        private readonly TaskCompletionSource<NoResult> confirmationTcs;
+        private readonly TaskCompletionSource<bool> confirmationTcs;
         private readonly Action cleanup;
 
-        public PublishPendingConfirmation(ulong id, TaskCompletionSource<NoResult> confirmationTcs, Action cleanup)
+        public PublishPendingConfirmation(ulong id, TaskCompletionSource<bool> confirmationTcs, Action cleanup)
         {
             this.id = id;
             this.confirmationTcs = confirmationTcs;

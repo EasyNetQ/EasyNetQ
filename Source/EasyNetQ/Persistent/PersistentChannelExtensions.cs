@@ -18,7 +18,7 @@ internal static class PersistentChannelExtensions
         this IPersistentChannel source, Action<IModel> channelAction, CancellationToken cancellationToken = default
     )
     {
-        return source.InvokeChannelActionAsync<NoResult, ActionBasedPersistentChannelAction>(
+        return source.InvokeChannelActionAsync<bool, ActionBasedPersistentChannelAction>(
             new ActionBasedPersistentChannelAction(channelAction), cancellationToken
         );
     }
