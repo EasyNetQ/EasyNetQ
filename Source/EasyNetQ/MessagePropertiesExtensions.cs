@@ -13,7 +13,18 @@ public static class MessagePropertiesExtensions
 
     internal static MessageProperties SetConfirmationId(this MessageProperties properties, ulong confirmationId)
     {
+#if NET6_0_OR_GREATER
+        // this code path eliminates additional ToString() heap allocation
+        Span<char> span = stackalloc char[20]; // length of ulong.MaxValue
+        var ok = confirmationId.TryFormat(span, out var charsWritten);
+        if (!ok)
+            throw new InvalidOperationException("TryFormat failed"); // should not happen
+        Span<byte> bytes = stackalloc byte[20];
+        var writtenBytes = Encoding.UTF8.GetBytes(span[..charsWritten], bytes);
+        properties.Headers[ConfirmationIdHeader] = bytes[..writtenBytes].ToArray();
+#else
         properties.Headers[ConfirmationIdHeader] = Encoding.UTF8.GetBytes(confirmationId.ToString());
+#endif
         return properties;
     }
 
