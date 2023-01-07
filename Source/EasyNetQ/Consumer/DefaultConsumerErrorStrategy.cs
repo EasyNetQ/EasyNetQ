@@ -166,28 +166,16 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
         MessageReceivedInfo receivedInfo, MessageProperties properties, byte[] body, Exception exception
     )
     {
-        var messageAsString = errorMessageSerializer.Serialize(body);
-        var patchedProperties = (MessageProperties)properties.Clone();
-        patchedProperties.Headers = PatchHeaders(patchedProperties.Headers);
-
         var error = new Error(
             receivedInfo.RoutingKey,
             receivedInfo.Exchange,
             receivedInfo.Queue,
             exception.ToString(),
-            messageAsString,
+            errorMessageSerializer.Serialize(body),
             DateTime.UtcNow,
-            patchedProperties
+            properties
         );
-
         return serializer.MessageToBytes(typeof(Error), error);
     }
 
-    private static IDictionary<string, object?> PatchHeaders(IDictionary<string, object?> headers)
-    {
-        return headers.ToDictionary(
-            kvp => kvp.Key,
-            kvp => kvp.Value is byte[] bytes ? Encoding.UTF8.GetString(bytes) : kvp.Value
-        );
-    }
 }

@@ -51,7 +51,7 @@ public class MessageTypePropertyTests
         property.AppendTo(properties);
 
         Assert.Equal(properties.Type, typeNameSerialiser.Serialize(typeof(MyMessageV2)));
-        Assert.Equal(properties.Headers[AlternativeMessageTypesHeaderKey], typeNameSerialiser.Serialize(typeof(MyMessage)));
+        Assert.Equal(Encoding.UTF8.GetString((byte[])properties.Headers[AlternativeMessageTypesHeaderKey]), typeNameSerialiser.Serialize(typeof(MyMessage)));
     }
 
     [Fact]

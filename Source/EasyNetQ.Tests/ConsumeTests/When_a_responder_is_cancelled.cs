@@ -1,3 +1,4 @@
+using System.Text;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 
@@ -40,7 +41,7 @@ public class When_a_responder_is_cancelled : IDisposable
     public void Should_ACK_with_faulted_response()
     {
         Assert.True((bool)publishedMessage.Properties.Headers["IsFaulted"]);
-        Assert.Equal("A task was canceled.", publishedMessage.Properties.Headers["ExceptionMessage"]);
+        Assert.Equal("A task was canceled.", Encoding.UTF8.GetString((byte[])publishedMessage.Properties.Headers["ExceptionMessage"]));
         Assert.Equal(AckResult.Nack, ackEvent.AckResult);
     }
 

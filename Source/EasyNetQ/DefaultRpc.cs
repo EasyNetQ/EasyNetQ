@@ -340,7 +340,7 @@ public class DefaultRpc : IRpc, IDisposable
         {
             var responseMessage = new Message<TResponse>();
             responseMessage.Properties.Headers.Add(IsFaultedKey, true);
-            responseMessage.Properties.Headers.Add(ExceptionMessageKey, exception.Message);
+            responseMessage.Properties.Headers.Add(ExceptionMessageKey, Encoding.UTF8.GetBytes(exception.Message));
             responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
             responseMessage.Properties.DeliveryMode = MessageDeliveryMode.NonPersistent;
 
