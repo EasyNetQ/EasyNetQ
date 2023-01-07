@@ -13,7 +13,9 @@ public class VersionedMessageSerializationStrategy : IMessageSerializationStrate
     ///     Creates VersionedMessageSerializationStrategy
     /// </summary>
     public VersionedMessageSerializationStrategy(
-        ITypeNameSerializer typeNameSerializer, ISerializer serializer, ICorrelationIdGenerationStrategy correlationIdGenerator
+        ITypeNameSerializer typeNameSerializer,
+        ISerializer serializer,
+        ICorrelationIdGenerationStrategy correlationIdGenerator
     )
     {
         this.typeNameSerializer = typeNameSerializer;
@@ -25,7 +27,7 @@ public class VersionedMessageSerializationStrategy : IMessageSerializationStrate
     public SerializedMessage SerializeMessage(IMessage message)
     {
         var messageBody = message.GetBody() is null
-            ? new ArrayPooledMemoryStream()
+            ? EmptyMemoryOwner.Instance
             : serializer.MessageToBytes(message.MessageType, message.GetBody()!);
         var messageTypeProperties = MessageTypeProperty.CreateForMessageType(message.MessageType, typeNameSerializer);
         var messageProperties = message.Properties;

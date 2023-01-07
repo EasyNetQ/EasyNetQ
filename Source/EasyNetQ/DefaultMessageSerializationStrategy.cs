@@ -1,4 +1,4 @@
-using System.Buffers;
+using EasyNetQ.Internals;
 
 namespace EasyNetQ;
 
@@ -48,17 +48,6 @@ public class DefaultMessageSerializationStrategy : IMessageSerializationStrategy
         var messageType = typeNameSerializer.Deserialize(properties.Type!);
         var messageBody = body.IsEmpty ? null : serializer.BytesToMessage(messageType, body);
         return MessageFactory.CreateInstance(messageType, messageBody, properties);
-    }
-
-    private sealed class EmptyMemoryOwner : IMemoryOwner<byte>
-    {
-        public static readonly EmptyMemoryOwner Instance = new();
-
-        public void Dispose()
-        {
-        }
-
-        public Memory<byte> Memory => Memory<byte>.Empty;
     }
 }
 

@@ -1601,6 +1601,13 @@ namespace EasyNetQ.Internals
         public DisposableAction(System.Action<TState> action, TState state) { }
         public void Dispose() { }
     }
+    public sealed class EmptyMemoryOwner : System.Buffers.IMemoryOwner<byte>, System.IDisposable
+    {
+        public static readonly EasyNetQ.Internals.EmptyMemoryOwner Instance;
+        public EmptyMemoryOwner() { }
+        public System.Memory<byte> Memory { get; }
+        public void Dispose() { }
+    }
     public static class EnumerableExtensions
     {
         public static System.Collections.Generic.IEnumerable<T> Intersperse<T>(this System.Collections.Generic.IEnumerable<T> items, T separator) { }
