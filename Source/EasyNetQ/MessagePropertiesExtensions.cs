@@ -13,7 +13,7 @@ public static class MessagePropertiesExtensions
 
     internal static MessageProperties SetConfirmationId(this MessageProperties properties, ulong confirmationId)
     {
-        properties.Headers[ConfirmationIdHeader] = confirmationId.ToString();
+        properties.Headers[ConfirmationIdHeader] = Encoding.UTF8.GetBytes(confirmationId.ToString());
         return properties;
     }
 

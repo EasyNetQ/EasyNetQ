@@ -39,7 +39,7 @@ public class MessageTypeProperty
         messageProperties.Type = firstAlternativeMessageType;
 
         if (alternativeTypes.Count > 0)
-            messageProperties.Headers[AlternativeMessageTypesHeaderKey] = string.Join(AlternativeMessageTypeSeparator, alternativeTypes);
+            messageProperties.Headers[AlternativeMessageTypesHeaderKey] = Encoding.UTF8.GetBytes(string.Join(AlternativeMessageTypeSeparator, alternativeTypes));
     }
 
     public Type GetMessageType()

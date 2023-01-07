@@ -196,10 +196,6 @@ public class VersionedMessageSerializationStrategyTests
         var message = new Message<MyMessageV2>(messageBody);
         var serializedMessage = serializationStrategy.SerializeMessage(message);
 
-        // RMQ converts the Header values into a byte[] so mimic the translation here
-        var alternativeMessageHeader = (string)serializedMessage.Properties.Headers[AlternativeMessageTypesHeaderKey];
-        serializedMessage.Properties.Headers[AlternativeMessageTypesHeaderKey] = Encoding.UTF8.GetBytes(alternativeMessageHeader);
-
         var deserializedMessage = serializationStrategy.DeserializeMessage(serializedMessage.Properties, serializedMessage.Body);
 
         Assert.Equal(deserializedMessage.MessageType, message.Body.GetType());
@@ -224,7 +220,7 @@ public class VersionedMessageSerializationStrategyTests
         // Mess with the properties to mimic a message serialized as MyMessageV3
         var messageType = serializedMessage.Properties.Type;
         serializedMessage.Properties.Type = messageType.Replace("MyMessageV2", "SomeCompletelyRandomType");
-        var alternativeMessageHeader = (string)serializedMessage.Properties.Headers[AlternativeMessageTypesHeaderKey];
+        var alternativeMessageHeader = Encoding.UTF8.GetString((byte[])serializedMessage.Properties.Headers[AlternativeMessageTypesHeaderKey]);
         alternativeMessageHeader = string.Concat(messageType, ";", alternativeMessageHeader);
         serializedMessage.Properties.Headers[AlternativeMessageTypesHeaderKey] = Encoding.UTF8.GetBytes(alternativeMessageHeader);
 
@@ -264,7 +260,7 @@ public class VersionedMessageSerializationStrategyTests
     )
     {
         AssertDefaultMessagePropertiesCorrect(properties, expectedType, expectedCorrelationId);
-        Assert.Equal(properties.Headers[AlternativeMessageTypesHeaderKey], alternativeTypes); //, "Alternative message types do not match expected value");
+        Assert.Equal(Encoding.UTF8.GetString((byte[])properties.Headers[AlternativeMessageTypesHeaderKey]), alternativeTypes);
     }
 
     private static VersionedMessageSerializationStrategy CreateSerializationStrategy<T>(
