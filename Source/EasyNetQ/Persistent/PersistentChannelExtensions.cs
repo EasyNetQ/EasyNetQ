@@ -1,4 +1,3 @@
-using EasyNetQ.Internals;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Persistent;

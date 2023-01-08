@@ -1,5 +1,4 @@
 using EasyNetQ.Producer;
-using EasyNetQ.Topology;
 
 namespace EasyNetQ.IntegrationTests.Advanced;
 
