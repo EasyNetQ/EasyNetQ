@@ -44,13 +44,12 @@ public class DefaultSendReceive : ISendReceive
         var sendConfiguration = new SendConfiguration();
         configure(sendConfiguration);
 
-        var properties = new MessageProperties();
-        if (sendConfiguration.Priority != null)
-            properties.Priority = sendConfiguration.Priority.Value;
-        if (sendConfiguration.Headers?.Count > 0)
-            properties.Headers.UnionWith(sendConfiguration.Headers);
-        properties.DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T));
-
+        var properties = new MessageProperties
+        {
+            Priority = sendConfiguration.Priority ?? 0,
+            Headers = sendConfiguration.Headers,
+            DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T))
+        };
         await advancedBus.PublishAsync(
             Exchange.Default, queue, configuration.MandatoryPublish, new Message<T>(message, properties), cts.Token
         ).ConfigureAwait(false);

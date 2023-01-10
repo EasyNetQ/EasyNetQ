@@ -175,5 +175,4 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
         );
         return serializer.MessageToBytes(typeof(Error), error);
     }
-
 }

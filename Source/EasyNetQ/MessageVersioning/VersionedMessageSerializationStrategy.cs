@@ -29,16 +29,16 @@ public class VersionedMessageSerializationStrategy : IMessageSerializationStrate
         var messageBody = message.GetBody() is null
             ? EmptyMemoryOwner.Instance
             : serializer.MessageToBytes(message.MessageType, message.GetBody()!);
-        var messageTypeProperties = MessageTypeProperty.CreateForMessageType(message.MessageType, typeNameSerializer);
+        var messageTypeProperty = MessageTypeProperty.CreateForMessageType(message.MessageType, typeNameSerializer);
         var messageProperties = message.Properties;
-        messageTypeProperties.AppendTo(messageProperties);
+        messageProperties = messageTypeProperty.AppendTo(messageProperties);
         if (string.IsNullOrEmpty(messageProperties.CorrelationId))
-            messageProperties.CorrelationId = correlationIdGenerator.GetCorrelationId();
+            messageProperties = messageProperties with { CorrelationId = correlationIdGenerator.GetCorrelationId() };
         return new SerializedMessage(messageProperties, messageBody);
     }
 
     /// <inheritdoc />
-    public IMessage DeserializeMessage(MessageProperties properties, in ReadOnlyMemory<byte> body)
+    public IMessage DeserializeMessage(in MessageProperties properties, in ReadOnlyMemory<byte> body)
     {
         var messageTypeProperty = MessageTypeProperty.ExtractFromProperties(properties, typeNameSerializer);
         var messageType = messageTypeProperty.GetMessageType();

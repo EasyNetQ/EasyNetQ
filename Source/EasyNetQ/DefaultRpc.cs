@@ -147,24 +147,22 @@ public class DefaultRpc : IRpc, IDisposable
         var responseAction = new ResponseAction(
             message =>
             {
-                var msg = (IMessage<TResponse>)message;
+                var messageOfTResponse = (IMessage<TResponse>)message;
 
                 var isFaulted = false;
                 var exceptionMessage = "The exception message has not been specified.";
-                if (msg.Properties.HeadersPresent)
+                if (messageOfTResponse.Properties is { HeadersPresent: true, Headers: { } })
                 {
-                    if (msg.Properties.Headers.ContainsKey(IsFaultedKey))
-                        isFaulted = Convert.ToBoolean(msg.Properties.Headers[IsFaultedKey]);
-                    if (msg.Properties.Headers.ContainsKey(ExceptionMessageKey))
-                        exceptionMessage = Encoding.UTF8.GetString(
-                            (byte[])msg.Properties.Headers[ExceptionMessageKey]!
-                        );
+                    if (messageOfTResponse.Properties.Headers.ContainsKey(IsFaultedKey))
+                        isFaulted = Convert.ToBoolean(messageOfTResponse.Properties.Headers[IsFaultedKey]);
+                    if (messageOfTResponse.Properties.Headers.ContainsKey(ExceptionMessageKey))
+                        exceptionMessage = Encoding.UTF8.GetString((byte[])messageOfTResponse.Properties.Headers[ExceptionMessageKey]!);
                 }
 
                 if (isFaulted)
                     tcs.TrySetException(new EasyNetQResponderException(exceptionMessage));
                 else
-                    tcs.TrySetResult(msg.Body!);
+                    tcs.TrySetResult(messageOfTResponse.Body!);
             },
             () => tcs.TrySetException(
                 new EasyNetQException(
@@ -231,7 +229,7 @@ public class DefaultRpc : IRpc, IDisposable
         TimeSpan expiration,
         byte? priority,
         bool mandatory,
-        IDictionary<string, object?>? headers,
+        IReadOnlyDictionary<string, object?>? headers,
         CancellationToken cancellationToken
     )
     {
@@ -246,15 +244,11 @@ public class DefaultRpc : IRpc, IDisposable
         {
             ReplyTo = returnQueueName,
             CorrelationId = correlationId,
-            DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(requestType)
+            Priority = priority ?? 0,
+            Headers = headers,
+            DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(requestType),
+            Expiration = expiration == Timeout.InfiniteTimeSpan ? null : expiration
         };
-
-        if (expiration != Timeout.InfiniteTimeSpan)
-            properties.Expiration = expiration;
-        if (priority != null)
-            properties.Priority = priority.Value;
-        if (headers?.Count > 0)
-            properties.Headers.UnionWith(headers);
 
         var requestMessage = new Message<TRequest>(request, properties);
         await advancedBus.PublishAsync(exchange, routingKey, mandatory, requestMessage, cancellationToken)
@@ -320,14 +314,14 @@ public class DefaultRpc : IRpc, IDisposable
         {
             var request = requestMessage.Body!;
             var response = await responder(request, cancellationToken).ConfigureAwait(false);
-            var responseMessage = new Message<TResponse>(response)
-            {
-                Properties =
+            var responseMessage = new Message<TResponse>(
+                response,
+                new MessageProperties
                 {
                     CorrelationId = requestMessage.Properties.CorrelationId,
                     DeliveryMode = MessageDeliveryMode.NonPersistent
                 }
-            };
+            );
             await advancedBus.PublishAsync(
                 exchange,
                 requestMessage.Properties.ReplyTo!,
@@ -338,12 +332,19 @@ public class DefaultRpc : IRpc, IDisposable
         }
         catch (Exception exception)
         {
-            var responseMessage = new Message<TResponse>();
-            responseMessage.Properties.Headers.Add(IsFaultedKey, true);
-            responseMessage.Properties.Headers.Add(ExceptionMessageKey, Encoding.UTF8.GetBytes(exception.Message));
-            responseMessage.Properties.CorrelationId = requestMessage.Properties.CorrelationId;
-            responseMessage.Properties.DeliveryMode = MessageDeliveryMode.NonPersistent;
-
+            var responseMessage = new Message<TResponse>(
+                default,
+                new MessageProperties
+                {
+                    CorrelationId = requestMessage.Properties.CorrelationId,
+                    DeliveryMode = MessageDeliveryMode.NonPersistent,
+                    Headers = new Dictionary<string, object?>
+                    {
+                        { IsFaultedKey, true },
+                        { ExceptionMessageKey, Encoding.UTF8.GetBytes(exception.Message) }
+                    }
+                }
+            );
             await advancedBus.PublishAsync(
                 exchange,
                 requestMessage.Properties.ReplyTo!,

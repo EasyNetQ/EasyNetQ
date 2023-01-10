@@ -32,10 +32,13 @@ public class VersionedMessageSerializationStrategyTests
         const string correlationId = "CorrelationId";
         var messageTypes = new Dictionary<string, Type> { { messageType, typeof(MyMessage) } };
 
-        var message = new Message<MyMessage>(new MyMessage())
-        {
-            Properties = { CorrelationId = correlationId }
-        };
+        var message = new Message<MyMessage>(
+            new MyMessage(),
+            new MessageProperties
+            {
+                CorrelationId = correlationId
+            }
+        );
         var serializationStrategy = CreateSerializationStrategy(message, messageTypes, serializedMessageBody, "SomeOtherCorrelationId");
 
         var serializedMessage = serializationStrategy.SerializeMessage(message);
@@ -52,15 +55,15 @@ public class VersionedMessageSerializationStrategyTests
         const string correlationId = "CorrelationId";
         var messageTypes = new Dictionary<string, Type> { { messageType, typeof(MyMessage) } };
 
-        var message = new Message<MyMessage>(new MyMessage { Text = messageContent })
-        {
-            Properties =
+        var message = new Message<MyMessage>(
+            new MyMessage { Text = messageContent },
+            new MessageProperties
             {
                 Type = messageType,
                 CorrelationId = correlationId,
                 UserId = "Bob"
-            },
-        };
+            }
+        );
         var serializationStrategy = CreateDeserializationStrategy(message.Body, messageTypes, typeof(MyMessage), serializedMessageBody);
 
         var deserializedMessage = serializationStrategy.DeserializeMessage(message.Properties, serializedMessageBody);
@@ -82,7 +85,8 @@ public class VersionedMessageSerializationStrategyTests
 
         const string correlationId = "CorrelationId";
 
-        var serializationStrategy = new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
+        var serializationStrategy =
+            new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
 
         var messageBody = new MyMessage { Text = "Hello world!" };
         var message = new Message<MyMessage>(messageBody);
@@ -131,10 +135,7 @@ public class VersionedMessageSerializationStrategyTests
             { supersededMessageType, typeof(MyMessage) }
         };
 
-        var message = new Message<MyMessageV2>(new MyMessageV2())
-        {
-            Properties = { CorrelationId = correlationId }
-        };
+        var message = new Message<MyMessageV2>(new MyMessageV2(), new MessageProperties { CorrelationId = correlationId });
         var serializationStrategy = CreateSerializationStrategy(message, messageTypes, serializedMessageBody, "SomeOtherCorrelationId");
 
         var serializedMessage = serializationStrategy.SerializeMessage(message);
@@ -160,18 +161,21 @@ public class VersionedMessageSerializationStrategyTests
             { supersededMessageType, typeof(MyMessage) }
         };
 
-        var message = new Message<MyMessageV2>(new MyMessageV2 { Text = messageContent })
-        {
-            Properties =
+        var message = new Message<MyMessageV2>(
+            new MyMessageV2 { Text = messageContent },
+            new MessageProperties
             {
                 Type = messageType,
                 CorrelationId = correlationId,
                 UserId = "Bob",
-            },
-        };
-        message.Properties.Headers.Add("Alternative-Message-Types", Encoding.UTF8.GetBytes(supersededMessageType));
-        var serializationStrategy = CreateDeserializationStrategy(message.Body, messageTypes, typeof(MyMessageV2), serializedMessageBody);
+                Headers = new Dictionary<string, object>
+                {
+                    { "Alternative-Message-Types", Encoding.UTF8.GetBytes(supersededMessageType) }
+                }
+            }
+        );
 
+        var serializationStrategy = CreateDeserializationStrategy(message.Body, messageTypes, typeof(MyMessageV2), serializedMessageBody);
         var deserializedMessage = serializationStrategy.DeserializeMessage(message.Properties, serializedMessageBody);
 
         AssertMessageDeserializedCorrectly(
@@ -219,12 +223,12 @@ public class VersionedMessageSerializationStrategyTests
 
         // Mess with the properties to mimic a message serialized as MyMessageV3
         var messageType = serializedMessage.Properties.Type;
-        serializedMessage.Properties.Type = messageType.Replace("MyMessageV2", "SomeCompletelyRandomType");
+        var properties = serializedMessage.Properties with { Type = messageType?.Replace("MyMessageV2", "SomeCompletelyRandomType") };
         var alternativeMessageHeader = Encoding.UTF8.GetString((byte[])serializedMessage.Properties.Headers[AlternativeMessageTypesHeaderKey]);
         alternativeMessageHeader = string.Concat(messageType, ";", alternativeMessageHeader);
-        serializedMessage.Properties.Headers[AlternativeMessageTypesHeaderKey] = Encoding.UTF8.GetBytes(alternativeMessageHeader);
+        properties = properties.SetHeader(AlternativeMessageTypesHeaderKey, Encoding.UTF8.GetBytes(alternativeMessageHeader));
 
-        var deserializedMessage = serializationStrategy.DeserializeMessage(serializedMessage.Properties, serializedMessage.Body);
+        var deserializedMessage = serializationStrategy.DeserializeMessage(properties, serializedMessage.Body);
 
         Assert.Equal(typeof(MyMessageV2), deserializedMessage.MessageType);
         Assert.Equal(((Message<MyMessageV2>)deserializedMessage).Body.Text, message.Body.Text);

@@ -27,10 +27,7 @@ public class DefaultMessageSerializationStrategyTests
         var serializedMessageBody = "Hello world!"u8.ToArray();
         const string correlationId = "CorrelationId";
 
-        var message = new Message<MyMessage>(new MyMessage())
-        {
-            Properties = { CorrelationId = correlationId }
-        };
+        var message = new Message<MyMessage>(new MyMessage(), new MessageProperties { CorrelationId = correlationId });
         var serializationStrategy = CreateSerializationStrategy(message, messageType, serializedMessageBody, "SomeOtherCorrelationId");
 
         using var serializedMessage = serializationStrategy.SerializeMessage(message);
@@ -46,15 +43,15 @@ public class DefaultMessageSerializationStrategyTests
         var serializedMessageBody = Encoding.UTF8.GetBytes(messageContent);
         const string correlationId = "CorrelationId";
 
-        var message = new Message<MyMessage>(new MyMessage { Text = messageContent })
-        {
-            Properties =
+        var message = new Message<MyMessage>(
+            new MyMessage { Text = messageContent },
+            new MessageProperties
             {
                 Type = messageType,
                 CorrelationId = correlationId,
                 UserId = "Bob"
-            },
-        };
+            }
+        );
         var serializationStrategy = CreateDeserializationStrategy(message, serializedMessageBody, correlationId);
 
         var deserializedMessage = serializationStrategy.DeserializeMessage(message.Properties, serializedMessageBody);

@@ -20,8 +20,5 @@ public static class DelayedExchangeExtensions
     /// <param name="message">The message</param>
     /// <param name="delay">The delay</param>
     public static IMessage<T> WithDelay<T>(this IMessage<T> message, TimeSpan delay)
-    {
-        message.Properties.Headers["x-delay"] = (int)delay.TotalMilliseconds;
-        return message;
-    }
+        => new Message<T>(message.Body, message.Properties.SetHeader("x-delay", (int)delay.TotalMilliseconds));
 }
