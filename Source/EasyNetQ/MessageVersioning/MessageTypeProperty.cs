@@ -70,7 +70,7 @@ public class MessageTypeProperty
         if (messageType == null)
             throw new EasyNetQException("Type is empty");
 
-        if (!messageProperties.HeadersPresent || messageProperties.Headers == null || !messageProperties.Headers.ContainsKey(AlternativeMessageTypesHeaderKey))
+        if (!messageProperties.HeadersPresent || !messageProperties.Headers!.ContainsKey(AlternativeMessageTypesHeaderKey))
             return new MessageTypeProperty(typeNameSerializer, messageType, null);
 
         if (messageProperties.Headers[AlternativeMessageTypesHeaderKey] is not byte[] rawHeader)
