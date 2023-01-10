@@ -45,8 +45,8 @@ public static class MessagePropertiesExtensions
         if (source.AppIdPresent) basicProperties.AppId = source.AppId;
         if (source.ClusterIdPresent) basicProperties.ClusterId = source.ClusterId;
 
-        if (source is { HeadersPresent: true, Headers: { } })
-            basicProperties.Headers = source.Headers as IDictionary<string, object?> ?? source.Headers.ToImmutableDictionary();
+        if (source.HeadersPresent)
+            basicProperties.Headers = source.Headers as IDictionary<string, object?> ?? source.Headers!.ToImmutableDictionary();
     }
 
     private static ImmutableDictionary<string, object?> EnsureHeadersImmutable(IReadOnlyDictionary<string, object?>? headers)

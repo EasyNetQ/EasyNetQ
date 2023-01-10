@@ -28,7 +28,6 @@ public readonly record struct MessageProperties
         Headers = basicProperties.Headers switch
         {
             null => null,
-
             IReadOnlyDictionary<string, object?> readonlyDictionary => readonlyDictionary,
             _ => new ReadOnlyDictionary<string, object?>(basicProperties.Headers)
         };
