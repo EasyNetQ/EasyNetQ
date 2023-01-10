@@ -25,10 +25,10 @@ public class MessageTypePropertyTests
         var property = MessageTypeProperty.CreateForMessageType(typeof(MyMessage), typeNameSerialiser);
         var properties = new MessageProperties();
 
-        property.AppendTo(properties);
+        properties = property.AppendTo(properties);
 
         Assert.Equal(properties.Type, typeNameSerialiser.Serialize(typeof(MyMessage)));
-        Assert.False(properties.Headers.ContainsKey(AlternativeMessageTypesHeaderKey));
+        Assert.True(properties.Headers is null);
     }
 
     [Fact]
@@ -48,7 +48,7 @@ public class MessageTypePropertyTests
         var property = MessageTypeProperty.CreateForMessageType(typeof(MyMessageV2), typeNameSerialiser);
         var properties = new MessageProperties();
 
-        property.AppendTo(properties);
+        properties = property.AppendTo(properties);
 
         Assert.Equal(properties.Type, typeNameSerialiser.Serialize(typeof(MyMessageV2)));
         Assert.Equal(Encoding.UTF8.GetString((byte[])properties.Headers[AlternativeMessageTypesHeaderKey]), typeNameSerialiser.Serialize(typeof(MyMessage)));
@@ -69,12 +69,12 @@ public class MessageTypePropertyTests
     [Fact]
     public void MessageTypeProperty_is_created_correctly_from_message_properties_for_versioned_message()
     {
-        var typeNameSerialiser = new DefaultTypeNameSerializer();
-        var properties = new MessageProperties { Type = typeNameSerialiser.Serialize(typeof(MyMessageV2)) };
-        var encodedAlternativeMessageTypes = Encoding.UTF8.GetBytes(typeNameSerialiser.Serialize(typeof(MyMessage)));
-        properties.Headers.Add(AlternativeMessageTypesHeaderKey, encodedAlternativeMessageTypes);
+        var typeNameSerializer = new DefaultTypeNameSerializer();
+        var encodedAlternativeMessageTypes = Encoding.UTF8.GetBytes(typeNameSerializer.Serialize(typeof(MyMessage)));
 
-        var property = MessageTypeProperty.ExtractFromProperties(properties, typeNameSerialiser);
+        var properties = new MessageProperties { Type = typeNameSerializer.Serialize(typeof(MyMessageV2)) }
+            .SetHeader(AlternativeMessageTypesHeaderKey, encodedAlternativeMessageTypes);
+        var property = MessageTypeProperty.ExtractFromProperties(properties, typeNameSerializer);
         var messageType = property.GetMessageType();
 
         Assert.Equal(typeof(MyMessageV2), messageType);
@@ -83,17 +83,17 @@ public class MessageTypePropertyTests
     [Fact]
     public void GetType_returns_first_available_alternative_if_message_type_unavailable()
     {
-        var typeNameSerialiser = new DefaultTypeNameSerializer();
-        var v1 = typeNameSerialiser.Serialize(typeof(MyMessage));
-        var v2 = typeNameSerialiser.Serialize(typeof(MyMessageV2));
+        var typeNameSerializer = new DefaultTypeNameSerializer();
+        var v1 = typeNameSerializer.Serialize(typeof(MyMessage));
+        var v2 = typeNameSerializer.Serialize(typeof(MyMessageV2));
         var vUnknown = v2.Replace("MyMessageV2", "MyUnknownMessage");
         var alternativeTypes = string.Concat(v2, ";", v1);
         var encodedAlternativeTypes = Encoding.UTF8.GetBytes(alternativeTypes);
 
-        var properties = new MessageProperties { Type = vUnknown };
-        properties.Headers.Add(AlternativeMessageTypesHeaderKey, encodedAlternativeTypes);
+        var properties = new MessageProperties { Type = vUnknown }
+            .SetHeader(AlternativeMessageTypesHeaderKey, encodedAlternativeTypes);
 
-        var property = MessageTypeProperty.ExtractFromProperties(properties, typeNameSerialiser);
+        var property = MessageTypeProperty.ExtractFromProperties(properties, typeNameSerializer);
         var messageType = property.GetMessageType();
 
         Assert.Equal(typeof(MyMessageV2), messageType);
@@ -102,18 +102,18 @@ public class MessageTypePropertyTests
     [Fact]
     public void GetType_returns_first_available_alternative_if_message_type_and_some_alternatives_unavailable()
     {
-        var typeNameSerialiser = new DefaultTypeNameSerializer();
-        var v1 = typeNameSerialiser.Serialize(typeof(MyMessage));
-        var v2 = typeNameSerialiser.Serialize(typeof(MyMessageV2));
+        var typeNameSerializer = new DefaultTypeNameSerializer();
+        var v1 = typeNameSerializer.Serialize(typeof(MyMessage));
+        var v2 = typeNameSerializer.Serialize(typeof(MyMessageV2));
         var vUnknown1 = v2.Replace("MyMessageV2", "MyUnknownMessage");
         var vUnknown2 = v2.Replace("MyMessageV2", "MyUnknownMessageV2");
         var alternativeTypes = string.Concat(vUnknown1, ";", v2, ";", v1);
         var encodedAlternativeTypes = Encoding.UTF8.GetBytes(alternativeTypes);
 
-        var properties = new MessageProperties { Type = vUnknown2 };
-        properties.Headers.Add(AlternativeMessageTypesHeaderKey, encodedAlternativeTypes);
+        var properties = new MessageProperties { Type = vUnknown2 }
+            .SetHeader(AlternativeMessageTypesHeaderKey, encodedAlternativeTypes);
 
-        var property = MessageTypeProperty.ExtractFromProperties(properties, typeNameSerialiser);
+        var property = MessageTypeProperty.ExtractFromProperties(properties, typeNameSerializer);
         var messageType = property.GetMessageType();
 
         Assert.Equal(typeof(MyMessageV2), messageType);
@@ -130,8 +130,8 @@ public class MessageTypePropertyTests
         var alternativeTypes = string.Concat(vUnknown2, ";", vUnknown1);
         var encodedAlternativeTypes = Encoding.UTF8.GetBytes(alternativeTypes);
 
-        var properties = new MessageProperties { Type = vUnknown3 };
-        properties.Headers.Add(AlternativeMessageTypesHeaderKey, encodedAlternativeTypes);
+        var properties = new MessageProperties { Type = vUnknown3 }
+            .SetHeader(AlternativeMessageTypesHeaderKey, encodedAlternativeTypes);
 
         var property = MessageTypeProperty.ExtractFromProperties(properties, typeNameSerialiser);
         Assert.Throws<EasyNetQException>(() => property.GetMessageType());

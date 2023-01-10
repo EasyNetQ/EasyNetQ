@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using RabbitMQ.Client;
 using System.Globalization;
 using System.Text;
@@ -11,43 +12,21 @@ public static class MessagePropertiesExtensions
 {
     internal const string ConfirmationIdHeader = "EasyNetQ.Confirmation.Id";
 
-    internal static MessageProperties SetConfirmationId(this MessageProperties properties, ulong confirmationId)
-    {
-        properties.Headers[ConfirmationIdHeader] = Encoding.UTF8.GetBytes(confirmationId.ToString());
-        return properties;
-    }
+    internal static MessageProperties SetConfirmationId(this in MessageProperties properties, ulong confirmationId)
+        => properties.SetHeader(ConfirmationIdHeader, Encoding.UTF8.GetBytes(confirmationId.ToString()));
 
-    internal static bool TryGetConfirmationId(this MessageProperties properties, out ulong confirmationId)
+    public static MessageProperties SetHeader(in this MessageProperties source, string key, object? value)
+        => source with { Headers = EnsureHeadersImmutable(source.Headers).SetItem(key, value) };
+
+    internal static bool TryGetConfirmationId(this in MessageProperties properties, out ulong confirmationId)
     {
         confirmationId = 0;
-        return properties.Headers.TryGetValue(ConfirmationIdHeader, out var value) &&
+        return properties.Headers != null &&
+               properties.Headers.TryGetValue(ConfirmationIdHeader, out var value) &&
                ulong.TryParse(Encoding.UTF8.GetString(value as byte[] ?? Array.Empty<byte>()), out confirmationId);
     }
 
-    public static void CopyFrom(this MessageProperties source, IBasicProperties basicProperties)
-    {
-        if (basicProperties.IsContentTypePresent()) source.ContentType = basicProperties.ContentType;
-        if (basicProperties.IsContentEncodingPresent()) source.ContentEncoding = basicProperties.ContentEncoding;
-        if (basicProperties.IsDeliveryModePresent()) source.DeliveryMode = basicProperties.DeliveryMode;
-        if (basicProperties.IsPriorityPresent()) source.Priority = basicProperties.Priority;
-        if (basicProperties.IsCorrelationIdPresent()) source.CorrelationId = basicProperties.CorrelationId;
-        if (basicProperties.IsReplyToPresent()) source.ReplyTo = basicProperties.ReplyTo;
-        if (basicProperties.IsExpirationPresent())
-            source.Expiration = int.TryParse(basicProperties.Expiration, out var expirationMilliseconds)
-                ? TimeSpan.FromMilliseconds(expirationMilliseconds)
-                : default;
-        if (basicProperties.IsMessageIdPresent()) source.MessageId = basicProperties.MessageId;
-        if (basicProperties.IsTimestampPresent()) source.Timestamp = basicProperties.Timestamp.UnixTime;
-        if (basicProperties.IsTypePresent()) source.Type = basicProperties.Type;
-        if (basicProperties.IsUserIdPresent()) source.UserId = basicProperties.UserId;
-        if (basicProperties.IsAppIdPresent()) source.AppId = basicProperties.AppId;
-        if (basicProperties.IsClusterIdPresent()) source.ClusterId = basicProperties.ClusterId;
-
-        if (basicProperties.IsHeadersPresent() && basicProperties.Headers?.Count > 0)
-            source.Headers = new Dictionary<string, object?>(basicProperties.Headers);
-    }
-
-    public static void CopyTo(this MessageProperties source, IBasicProperties basicProperties)
+    public static void CopyTo(this in MessageProperties source, IBasicProperties basicProperties)
     {
         if (source.ContentTypePresent) basicProperties.ContentType = source.ContentType;
         if (source.ContentEncodingPresent) basicProperties.ContentEncoding = source.ContentEncoding;
@@ -66,7 +45,17 @@ public static class MessagePropertiesExtensions
         if (source.AppIdPresent) basicProperties.AppId = source.AppId;
         if (source.ClusterIdPresent) basicProperties.ClusterId = source.ClusterId;
 
-        if (source.HeadersPresent)
-            basicProperties.Headers = new Dictionary<string, object?>(source.Headers);
+        if (source is { HeadersPresent: true, Headers: { } })
+            basicProperties.Headers = source.Headers as IDictionary<string, object?> ?? source.Headers.ToImmutableDictionary();
+    }
+
+    private static ImmutableDictionary<string, object?> EnsureHeadersImmutable(IReadOnlyDictionary<string, object?>? headers)
+    {
+        return headers switch
+        {
+            null => ImmutableDictionary<string, object?>.Empty,
+            ImmutableDictionary<string, object?> immutable => immutable,
+            _ => ImmutableDictionary.CreateRange(headers)
+        };
     }
 }

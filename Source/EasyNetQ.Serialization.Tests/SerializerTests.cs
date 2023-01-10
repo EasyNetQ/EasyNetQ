@@ -48,8 +48,7 @@ public class SerializerTests
             }
         };
 
-        var messageBasicProperties = new MessageProperties();
-        messageBasicProperties.CopyFrom(originalProperties);
+        var messageBasicProperties = new MessageProperties(originalProperties);
         using var serializedMessage = serializer.MessageToBytes(typeof(MessageProperties), messageBasicProperties);
         var deserializedMessageBasicProperties = (MessageProperties)serializer.BytesToMessage(
             typeof(MessageProperties), serializedMessage.Memory
@@ -104,8 +103,7 @@ public class SerializerTests
             }
         };
 
-        var messageBasicProperties = new MessageProperties();
-        messageBasicProperties.CopyFrom(originalProperties);
+        var messageBasicProperties = new MessageProperties(originalProperties);
         using var serializedMessage = serializer.MessageToBytes(typeof(MessageProperties), messageBasicProperties);
 
         var deserializedMessageBasicProperties = (MessageProperties)serializer.BytesToMessage(

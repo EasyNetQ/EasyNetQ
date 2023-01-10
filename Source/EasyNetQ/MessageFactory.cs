@@ -11,27 +11,26 @@ public static class MessageFactory
 {
     private static readonly ConcurrentDictionary<Type, Func<object?, MessageProperties, IMessage>> InstanceActivators = new();
 
-    public static IMessage CreateInstance(Type messageType, object? body, MessageProperties properties)
+    public static IMessage CreateInstance(Type messageType, object? body, in MessageProperties properties)
     {
         var activator = InstanceActivators.GetOrAdd(messageType, bodyType =>
         {
-            var genericMessageType = typeof(Message<>).MakeGenericType(bodyType);
-
-            var constructor = genericMessageType.GetConstructor(new[] { bodyType, typeof(MessageProperties) })!;
+            var constructor = typeof(Message<>).MakeGenericType(bodyType)
+                .GetConstructors()
+                .Single(x => x.GetParameters().Length == 2);
             var bodyParameter = Expression.Parameter(typeof(object));
             var propertiesParameter = Expression.Parameter(typeof(MessageProperties));
-
-            Expression<Func<object?, MessageProperties, IMessage>> expression =
-                Expression.Lambda<Func<object?, MessageProperties, IMessage>>(
-                    Expression.New(
-                        constructor,
-                        Expression.Convert(bodyParameter, bodyType),
-                        Expression.Convert(propertiesParameter, typeof(MessageProperties))),
-                    bodyParameter, propertiesParameter);
-
+            var expression = Expression.Lambda<Func<object?, MessageProperties, IMessage>>(
+                Expression.New(
+                    constructor,
+                    Expression.Convert(bodyParameter, bodyType),
+                    Expression.Convert(propertiesParameter, typeof(MessageProperties))
+                ),
+                bodyParameter,
+                propertiesParameter
+            );
             return expression.Compile();
         });
-
         return activator(body, properties);
     }
 }
