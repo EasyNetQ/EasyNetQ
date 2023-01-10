@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using RabbitMQ.Client;
 using System.Globalization;
 using System.Text;
@@ -16,7 +15,11 @@ public static class MessagePropertiesExtensions
         => properties.SetHeader(ConfirmationIdHeader, Encoding.UTF8.GetBytes(confirmationId.ToString()));
 
     public static MessageProperties SetHeader(in this MessageProperties source, string key, object? value)
-        => source with { Headers = EnsureHeadersImmutable(source.Headers).SetItem(key, value) };
+    {
+        var headers = source.Headers ?? new Dictionary<string, object?>();
+        headers[key] = value;
+        return source with { Headers = headers };
+    }
 
     internal static bool TryGetConfirmationId(this in MessageProperties properties, out ulong confirmationId)
     {
@@ -46,16 +49,6 @@ public static class MessagePropertiesExtensions
         if (source.ClusterIdPresent) basicProperties.ClusterId = source.ClusterId;
 
         if (source.HeadersPresent)
-            basicProperties.Headers = source.Headers as IDictionary<string, object?> ?? source.Headers!.ToImmutableDictionary();
-    }
-
-    private static ImmutableDictionary<string, object?> EnsureHeadersImmutable(IReadOnlyDictionary<string, object?>? headers)
-    {
-        return headers switch
-        {
-            null => ImmutableDictionary<string, object?>.Empty,
-            ImmutableDictionary<string, object?> immutable => immutable,
-            _ => ImmutableDictionary.CreateRange(headers)
-        };
+            basicProperties.Headers = source.Headers;
     }
 }

@@ -179,7 +179,7 @@ namespace EasyNetQ
         public void Dispose() { }
         protected void RegisterResponseActions<TResponse>(string correlationId, System.Threading.Tasks.TaskCompletionSource<TResponse> tcs) { }
         public virtual System.Threading.Tasks.Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, System.Action<EasyNetQ.IRequestConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
-        protected virtual System.Threading.Tasks.Task RequestPublishAsync<TRequest>(TRequest request, string routingKey, string returnQueueName, string correlationId, System.TimeSpan expiration, byte? priority, bool mandatory, System.Collections.Generic.IReadOnlyDictionary<string, object?>? headers, System.Threading.CancellationToken cancellationToken) { }
+        protected virtual System.Threading.Tasks.Task RequestPublishAsync<TRequest>(TRequest request, string routingKey, string returnQueueName, string correlationId, System.TimeSpan expiration, byte? priority, bool mandatory, System.Collections.Generic.IDictionary<string, object?>? headers, System.Threading.CancellationToken cancellationToken) { }
         public virtual EasyNetQ.Internals.AwaitableDisposable<System.IDisposable> RespondAsync<TRequest, TResponse>(System.Func<TRequest, System.Threading.CancellationToken, System.Threading.Tasks.Task<TResponse>> responder, System.Action<EasyNetQ.IResponderConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
         protected virtual System.Threading.Tasks.Task<string> SubscribeToResponseAsync<TRequest, TResponse>(System.Threading.CancellationToken cancellationToken) { }
         protected readonly struct ResponseAction
@@ -373,7 +373,7 @@ namespace EasyNetQ
     }
     public interface IFuturePublishConfiguration
     {
-        EasyNetQ.IFuturePublishConfiguration WithHeaders(System.Collections.Generic.IReadOnlyDictionary<string, object?> headers);
+        EasyNetQ.IFuturePublishConfiguration WithHeaders(System.Collections.Generic.IDictionary<string, object?> headers);
         EasyNetQ.IFuturePublishConfiguration WithPriority(byte priority);
         EasyNetQ.IFuturePublishConfiguration WithTopic(string topic);
     }
@@ -411,7 +411,7 @@ namespace EasyNetQ
     public interface IPublishConfiguration
     {
         EasyNetQ.IPublishConfiguration WithExpires(System.TimeSpan expires);
-        EasyNetQ.IPublishConfiguration WithHeaders(System.Collections.Generic.IReadOnlyDictionary<string, object?> headers);
+        EasyNetQ.IPublishConfiguration WithHeaders(System.Collections.Generic.IDictionary<string, object?> headers);
         EasyNetQ.IPublishConfiguration WithPriority(byte priority);
         EasyNetQ.IPublishConfiguration WithTopic(string topic);
     }
@@ -462,7 +462,7 @@ namespace EasyNetQ
     public interface IRequestConfiguration
     {
         EasyNetQ.IRequestConfiguration WithExpiration(System.TimeSpan expiration);
-        EasyNetQ.IRequestConfiguration WithHeaders(System.Collections.Generic.IReadOnlyDictionary<string, object?> headers);
+        EasyNetQ.IRequestConfiguration WithHeaders(System.Collections.Generic.IDictionary<string, object?> headers);
         EasyNetQ.IRequestConfiguration WithPriority(byte priority);
         EasyNetQ.IRequestConfiguration WithQueueName(string queueName);
     }
@@ -485,7 +485,7 @@ namespace EasyNetQ
     }
     public interface ISendConfiguration
     {
-        EasyNetQ.ISendConfiguration WithHeaders(System.Collections.Generic.IReadOnlyDictionary<string, object?> headers);
+        EasyNetQ.ISendConfiguration WithHeaders(System.Collections.Generic.IDictionary<string, object?> headers);
         EasyNetQ.ISendConfiguration WithPriority(byte priority);
     }
     public interface ISendReceive
@@ -576,7 +576,7 @@ namespace EasyNetQ
         public bool DeliveryModePresent { get; }
         public System.TimeSpan? Expiration { get; set; }
         public bool ExpirationPresent { get; }
-        public System.Collections.Generic.IReadOnlyDictionary<string, object?>? Headers { get; set; }
+        public System.Collections.Generic.IDictionary<string, object?>? Headers { get; set; }
         public bool HeadersPresent { get; }
         public string? MessageId { get; set; }
         public bool MessageIdPresent { get; }
@@ -1587,7 +1587,6 @@ namespace EasyNetQ.Internals
     public static class DictionaryExtensions
     {
         public static string Stringify(this System.Collections.Generic.IDictionary<string, object> source) { }
-        public static void UnionWith(this System.Collections.Generic.IDictionary<string, object?> source, System.Collections.Generic.IDictionary<string, object?>? addendum) { }
     }
     public static class DisposableAction
     {
@@ -1604,11 +1603,6 @@ namespace EasyNetQ.Internals
         public EmptyMemoryOwner() { }
         public System.Memory<byte> Memory { get; }
         public void Dispose() { }
-    }
-    public static class EnumerableExtensions
-    {
-        public static System.Collections.Generic.IEnumerable<T> Intersperse<T>(this System.Collections.Generic.IEnumerable<T> items, T separator) { }
-        public static System.Collections.Generic.IEnumerable<T> SurroundWith<T>(this System.Collections.Generic.IEnumerable<T> items, T first, T last) { }
     }
     public sealed class ReadOnlyMemoryStream : System.IO.Stream
     {
