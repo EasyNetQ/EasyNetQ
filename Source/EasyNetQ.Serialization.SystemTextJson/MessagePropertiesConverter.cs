@@ -64,10 +64,10 @@ public class MessagePropertiesConverter : JsonConverter<MessageProperties>
             json.Add(options.ConvertName("AppId"), value.AppId);
         if (value.ClusterIdPresent)
             json.Add(options.ConvertName("ClusterId"), value.ClusterId);
-        if (value is { HeadersPresent: true, Headers: { } })
+        if (value.HeadersPresent)
         {
             var headersJson = new JsonObject();
-            foreach (var kvp in value.Headers)
+            foreach (var kvp in value.Headers!)
                 headersJson.AddHeaderToJson(kvp.Key, kvp.Value, options);
             json.Add(options.ConvertName("Headers"), headersJson);
         }
