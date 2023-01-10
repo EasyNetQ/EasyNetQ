@@ -229,7 +229,7 @@ public class DefaultRpc : IRpc, IDisposable
         TimeSpan expiration,
         byte? priority,
         bool mandatory,
-        IReadOnlyDictionary<string, object?>? headers,
+        IDictionary<string, object?>? headers,
         CancellationToken cancellationToken
     )
     {

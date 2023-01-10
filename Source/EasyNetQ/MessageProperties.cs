@@ -25,12 +25,7 @@ public readonly record struct MessageProperties
         UserId = basicProperties.UserId;
         AppId = basicProperties.AppId;
         ClusterId = basicProperties.ClusterId;
-        Headers = basicProperties.Headers switch
-        {
-            null => null,
-            IReadOnlyDictionary<string, object?> readonlyDictionary => readonlyDictionary,
-            _ => new ReadOnlyDictionary<string, object?>(basicProperties.Headers)
-        };
+        Headers = basicProperties.Headers;
     }
 
     /// <summary>
@@ -46,7 +41,7 @@ public readonly record struct MessageProperties
     /// <summary>
     ///     Various headers
     /// </summary>
-    public IReadOnlyDictionary<string, object?>? Headers { get; init; }
+    public IDictionary<string, object?>? Headers { get; init; }
 
     /// <summary>
     ///     non-persistent (1) or persistent (2)
