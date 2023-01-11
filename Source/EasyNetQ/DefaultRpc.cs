@@ -151,7 +151,7 @@ public class DefaultRpc : IRpc, IDisposable
 
                 var isFaulted = false;
                 var exceptionMessage = "The exception message has not been specified.";
-                if (messageOfTResponse.Properties is { HeadersPresent: true })
+                if (messageOfTResponse.Properties.HeadersPresent)
                 {
                     if (messageOfTResponse.Properties.Headers!.ContainsKey(IsFaultedKey))
                         isFaulted = Convert.ToBoolean(messageOfTResponse.Properties.Headers[IsFaultedKey]);
