@@ -216,7 +216,7 @@ namespace EasyNetQ
     public static class DelayedExchangeExtensions
     {
         public static EasyNetQ.IExchangeDeclareConfiguration AsDelayedExchange(this EasyNetQ.IExchangeDeclareConfiguration configuration, string exchangeType = "fanout") { }
-        public static EasyNetQ.IMessage<T> WithDelay<T>(this EasyNetQ.IMessage<T> message, System.TimeSpan delay) { }
+        public static EasyNetQ.MessageProperties WithDelay(in this EasyNetQ.MessageProperties messageProperties, System.TimeSpan delay) { }
     }
     public class DelayedExchangeScheduler : EasyNetQ.IScheduler
     {
