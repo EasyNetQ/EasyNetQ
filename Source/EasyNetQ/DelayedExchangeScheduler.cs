@@ -66,10 +66,10 @@ public class DelayedExchangeScheduler : IScheduler
             Priority = publishConfiguration.Priority ?? 0,
             Headers = publishConfiguration.Headers,
             DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T))
-        };
+        }.WithDelay(delay);
 
         await advancedBus.PublishAsync(
-            futureExchange, topic, configuration.MandatoryPublish, new Message<T>(message, properties).WithDelay(delay), cts.Token
+            futureExchange, topic, configuration.MandatoryPublish, new Message<T>(message, properties), cts.Token
         ).ConfigureAwait(false);
     }
 }
