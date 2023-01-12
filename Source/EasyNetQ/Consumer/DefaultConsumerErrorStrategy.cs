@@ -161,7 +161,7 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
     }
 
     private IMemoryOwner<byte> CreateErrorMessage(
-        MessageReceivedInfo receivedInfo, MessageProperties properties, byte[] body, Exception exception
+        in MessageReceivedInfo receivedInfo, in MessageProperties properties, byte[] body, Exception exception
     )
     {
         var error = new Error(

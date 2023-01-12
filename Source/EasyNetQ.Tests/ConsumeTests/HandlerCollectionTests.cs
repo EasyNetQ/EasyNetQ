@@ -21,7 +21,7 @@ public class HandlerCollectionTests
     {
         var handler = handlerCollection.GetHandler(typeof(MyMessage));
 
-        await handler(new Message<MyMessage>(new MyMessage()), null, default);
+        await handler(new Message<MyMessage>(new MyMessage()), default, default);
 
         myMessageHandlerExecuted.Should().BeTrue();
         animalHandlerExecuted.Should().BeFalse();
@@ -32,7 +32,7 @@ public class HandlerCollectionTests
     {
         var handler = handlerCollection.GetHandler(typeof(Dog));
 
-        await handler(new Message<Dog>(new Dog()), null, default);
+        await handler(new Message<Dog>(new Dog()), default, default);
 
         animalHandlerExecuted.Should().BeTrue();
         myMessageHandlerExecuted.Should().BeFalse();
@@ -49,7 +49,7 @@ public class HandlerCollectionTests
     {
         var handler = handlerCollection.GetHandler(typeof(MyMessage));
 
-        await handler(new Message<MyMessage>(new MyMessage()), null, default);
+        await handler(new Message<MyMessage>(new MyMessage()), default, default);
 
         myMessageHandlerExecuted.Should().BeTrue();
         animalHandlerExecuted.Should().BeFalse();
@@ -60,7 +60,7 @@ public class HandlerCollectionTests
     {
         var handler = handlerCollection.GetHandler(typeof(Dog));
 
-        await handler(new Message<Dog>(new Dog()), null, default);
+        await handler(new Message<Dog>(new Dog()), default, default);
 
         animalHandlerExecuted.Should().BeTrue();
         myMessageHandlerExecuted.Should().BeFalse();
@@ -73,7 +73,7 @@ public class HandlerCollectionTests
 
         var handler = handlerCollection.GetHandler(typeof(MyOtherMessage));
 
-        await handler(new Message<MyOtherMessage>(new MyOtherMessage()), null, default);
+        await handler(new Message<MyOtherMessage>(new MyOtherMessage()), default, default);
 
         myMessageHandlerExecuted.Should().BeFalse();
         animalHandlerExecuted.Should().BeFalse();

@@ -119,7 +119,7 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
         eventBus.Publish(new ConsumerModelDisposedEvent(ConsumerTags));
     }
 
-    private AckResult Ack(AckStrategy ackStrategy, MessageReceivedInfo receivedInfo)
+    private AckResult Ack(AckStrategy ackStrategy, in MessageReceivedInfo receivedInfo)
     {
         try
         {

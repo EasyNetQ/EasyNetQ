@@ -115,7 +115,7 @@ namespace EasyNetQ
     }
     public readonly struct ConsumedMessage
     {
-        public ConsumedMessage(EasyNetQ.MessageReceivedInfo receivedInfo, EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
+        public ConsumedMessage(in EasyNetQ.MessageReceivedInfo receivedInfo, in EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
         public System.ReadOnlyMemory<byte> Body { get; }
         public EasyNetQ.MessageProperties Properties { get; }
         public EasyNetQ.MessageReceivedInfo ReceivedInfo { get; }
@@ -596,20 +596,19 @@ namespace EasyNetQ
         public static void CopyTo(in this EasyNetQ.MessageProperties source, RabbitMQ.Client.IBasicProperties basicProperties) { }
         public static EasyNetQ.MessageProperties SetHeader(in this EasyNetQ.MessageProperties source, string key, object? value) { }
     }
-    public class MessageReceivedInfo
+    public readonly struct MessageReceivedInfo : System.IEquatable<EasyNetQ.MessageReceivedInfo>
     {
-        public MessageReceivedInfo(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey, string queue) { }
-        public string ConsumerTag { get; }
-        public ulong DeliveryTag { get; }
-        public string Exchange { get; }
-        public string Queue { get; }
-        public bool Redelivered { get; }
-        public string RoutingKey { get; }
-        public override string ToString() { }
+        public MessageReceivedInfo(string ConsumerTag, ulong DeliveryTag, bool Redelivered, string Exchange, string RoutingKey, string Queue) { }
+        public string ConsumerTag { get; set; }
+        public ulong DeliveryTag { get; set; }
+        public string Exchange { get; set; }
+        public string Queue { get; set; }
+        public bool Redelivered { get; set; }
+        public string RoutingKey { get; set; }
     }
     public class MessageReturnedEventArgs : System.EventArgs
     {
-        public MessageReturnedEventArgs(in System.ReadOnlyMemory<byte> messageBody, EasyNetQ.MessageProperties messageProperties, in EasyNetQ.MessageReturnedInfo messageReturnedInfo) { }
+        public MessageReturnedEventArgs(in System.ReadOnlyMemory<byte> messageBody, in EasyNetQ.MessageProperties messageProperties, in EasyNetQ.MessageReturnedInfo messageReturnedInfo) { }
         public System.ReadOnlyMemory<byte> MessageBody { get; }
         public EasyNetQ.MessageProperties MessageProperties { get; }
         public EasyNetQ.MessageReturnedInfo MessageReturnedInfo { get; }
@@ -677,7 +676,7 @@ namespace EasyNetQ
     }
     public readonly struct ProducedMessage
     {
-        public ProducedMessage(EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
+        public ProducedMessage(in EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
         public System.ReadOnlyMemory<byte> Body { get; }
         public EasyNetQ.MessageProperties Properties { get; }
     }
@@ -713,7 +712,7 @@ namespace EasyNetQ
         public EasyNetQ.MessageReceivedInfo ReceivedInfo { get; }
         public static EasyNetQ.PullResult NotAvailable { get; }
         public void Dispose() { }
-        public static EasyNetQ.PullResult Available(ulong messagesCount, EasyNetQ.MessageReceivedInfo receivedInfo, in EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body, System.IDisposable? disposable) { }
+        public static EasyNetQ.PullResult Available(ulong messagesCount, in EasyNetQ.MessageReceivedInfo receivedInfo, in EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body, System.IDisposable? disposable) { }
     }
     public readonly struct PullResult<T> : EasyNetQ.IPullResult, System.IDisposable
     {
@@ -1125,7 +1124,7 @@ namespace EasyNetQ.Consumer
     }
     public readonly struct ConsumerExecutionContext
     {
-        public ConsumerExecutionContext(EasyNetQ.Consumer.MessageHandler handler, EasyNetQ.MessageReceivedInfo receivedInfo, EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
+        public ConsumerExecutionContext(EasyNetQ.Consumer.MessageHandler handler, in EasyNetQ.MessageReceivedInfo receivedInfo, in EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
         public System.ReadOnlyMemory<byte> Body { get; }
         public EasyNetQ.Consumer.MessageHandler Handler { get; }
         public EasyNetQ.MessageProperties Properties { get; }
@@ -1362,7 +1361,7 @@ namespace EasyNetQ.Events
 {
     public readonly struct AckEvent
     {
-        public AckEvent(EasyNetQ.MessageReceivedInfo info, EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body, EasyNetQ.Events.AckResult ackResult) { }
+        public AckEvent(in EasyNetQ.MessageReceivedInfo info, in EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body, EasyNetQ.Events.AckResult ackResult) { }
         public EasyNetQ.Events.AckResult AckResult { get; }
         public System.ReadOnlyMemory<byte> Body { get; }
         public EasyNetQ.MessageProperties Properties { get; }
@@ -1421,7 +1420,7 @@ namespace EasyNetQ.Events
     }
     public readonly struct DeliveredMessageEvent
     {
-        public DeliveredMessageEvent(EasyNetQ.MessageReceivedInfo info, EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
+        public DeliveredMessageEvent(in EasyNetQ.MessageReceivedInfo info, in EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
         public System.ReadOnlyMemory<byte> Body { get; }
         public EasyNetQ.MessageProperties Properties { get; }
         public EasyNetQ.MessageReceivedInfo ReceivedInfo { get; }
@@ -1437,7 +1436,7 @@ namespace EasyNetQ.Events
     }
     public readonly struct PublishedMessageEvent
     {
-        public PublishedMessageEvent(in EasyNetQ.Topology.Exchange exchange, string routingKey, EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
+        public PublishedMessageEvent(in EasyNetQ.Topology.Exchange exchange, string routingKey, in EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
         public System.ReadOnlyMemory<byte> Body { get; }
         public EasyNetQ.Topology.Exchange Exchange { get; }
         public EasyNetQ.MessageProperties Properties { get; }
@@ -1445,7 +1444,7 @@ namespace EasyNetQ.Events
     }
     public readonly struct ReturnedMessageEvent
     {
-        public ReturnedMessageEvent(RabbitMQ.Client.IModel channel, in System.ReadOnlyMemory<byte> body, EasyNetQ.MessageProperties properties, in EasyNetQ.MessageReturnedInfo info) { }
+        public ReturnedMessageEvent(RabbitMQ.Client.IModel channel, in System.ReadOnlyMemory<byte> body, in EasyNetQ.MessageProperties properties, in EasyNetQ.MessageReturnedInfo info) { }
         public System.ReadOnlyMemory<byte> Body { get; }
         public RabbitMQ.Client.IModel Channel { get; }
         public EasyNetQ.MessageReturnedInfo Info { get; }

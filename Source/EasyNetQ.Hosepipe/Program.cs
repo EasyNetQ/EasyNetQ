@@ -154,14 +154,14 @@ public class Program
     private void ErrorDump(QueueParameters parameters)
     {
         if (parameters.QueueName == null)
-            parameters.QueueName = conventions.ErrorQueueNamingConvention(null);
+            parameters.QueueName = conventions.ErrorQueueNamingConvention(default);
         Dump(parameters);
     }
 
     private void Retry(QueueParameters parameters)
     {
         var count = 0;
-        var queueName = parameters.QueueName ?? conventions.ErrorQueueNamingConvention(null);
+        var queueName = parameters.QueueName ?? conventions.ErrorQueueNamingConvention(default);
 
         errorRetry.RetryErrors(
             WithEach(messageReader.ReadMessages(parameters, queueName), () => count++), parameters

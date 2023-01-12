@@ -29,7 +29,7 @@ public class ErrorRetryTests
         };
 
         var rawErrorMessages = new MessageReader()
-            .ReadMessages(parameters, conventions.ErrorQueueNamingConvention(null));
+            .ReadMessages(parameters, conventions.ErrorQueueNamingConvention(default));
 
         errorRetry.RetryErrors(rawErrorMessages, parameters);
     }

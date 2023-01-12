@@ -46,7 +46,7 @@ public class MessageReaderTests
             MessagesOutputDirectory = @"C:\temp\MessageOutput"
         };
 
-        var messages = messageReader.ReadMessages(parameters, conventions.ErrorQueueNamingConvention(null));
+        var messages = messageReader.ReadMessages(parameters, conventions.ErrorQueueNamingConvention(default));
         foreach (var message in messages)
         {
             Console.WriteLine(message.Body);
