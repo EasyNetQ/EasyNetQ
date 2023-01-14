@@ -45,7 +45,7 @@ internal static class NumberHelpers
             if (bytes[i] < '0' || bytes[i] > '9')
                 return false;
 
-            value = value * 10 + bytes[i] - '0';
+            value = value * 10 + (bytes[i] - '0');
         }
 
         return true;
