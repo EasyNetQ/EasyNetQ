@@ -696,9 +696,9 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         public IPublishPendingConfirmation Invoke(IModel model)
         {
             var confirmation = confirmationListener.CreatePendingConfirmation(model);
-            message.Properties.SetConfirmationId(confirmation.Id);
             var basicProperties = model.CreateBasicProperties();
-            message.Properties.CopyTo(basicProperties);
+            message.Properties.SetConfirmationId(confirmation.Id)
+                .CopyTo(basicProperties);
             try
             {
                 model.BasicPublish(exchange.Name, routingKey, mandatory, basicProperties, message.Body);
@@ -708,6 +708,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
                 confirmation.Cancel();
                 throw;
             }
+
             return confirmation;
         }
     }

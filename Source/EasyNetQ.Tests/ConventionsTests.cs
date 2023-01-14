@@ -27,7 +27,7 @@ public class When_using_default_conventions
     [Fact]
     public void The_default_error_queue_name_should_be()
     {
-        var result = conventions.ErrorQueueNamingConvention(null);
+        var result = conventions.ErrorQueueNamingConvention(default);
         result.Should().Be("EasyNetQ_Default_Error_Queue");
     }
 

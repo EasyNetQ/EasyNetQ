@@ -1,11 +1,9 @@
 using System.Buffers;
 using System.Collections.Concurrent;
-using System.Text;
 using EasyNetQ.Logging;
 using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
-using EasyNetQ.Internals;
 
 namespace EasyNetQ.Consumer;
 
@@ -163,7 +161,7 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
     }
 
     private IMemoryOwner<byte> CreateErrorMessage(
-        MessageReceivedInfo receivedInfo, MessageProperties properties, byte[] body, Exception exception
+        in MessageReceivedInfo receivedInfo, in MessageProperties properties, byte[] body, Exception exception
     )
     {
         var error = new Error(
@@ -177,5 +175,4 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
         );
         return serializer.MessageToBytes(typeof(Error), error);
     }
-
 }

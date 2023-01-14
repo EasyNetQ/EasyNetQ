@@ -30,8 +30,8 @@ public readonly struct ConsumerExecutionContext
     /// </summary>
     public ConsumerExecutionContext(
         MessageHandler handler,
-        MessageReceivedInfo receivedInfo,
-        MessageProperties properties,
+        in MessageReceivedInfo receivedInfo,
+        in MessageProperties properties,
         in ReadOnlyMemory<byte> body
     )
     {

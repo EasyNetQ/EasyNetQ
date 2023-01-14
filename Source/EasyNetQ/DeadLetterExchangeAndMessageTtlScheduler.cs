@@ -1,6 +1,5 @@
 using EasyNetQ.Internals;
 using EasyNetQ.Producer;
-using EasyNetQ.Topology;
 
 namespace EasyNetQ;
 
@@ -77,13 +76,12 @@ public class DeadLetterExchangeAndMessageTtlScheduler : IScheduler
 
         await advancedBus.BindAsync(futureExchange, futureQueue, topic, cts.Token).ConfigureAwait(false);
 
-        var properties = new MessageProperties();
-        if (publishConfiguration.Priority != null)
-            properties.Priority = publishConfiguration.Priority.Value;
-        if (publishConfiguration.Headers?.Count > 0)
-            properties.Headers.UnionWith(publishConfiguration.Headers);
-        properties.DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T));
-
+        var properties = new MessageProperties
+        {
+            Priority = publishConfiguration.Priority ?? 0,
+            Headers = publishConfiguration.Headers,
+            DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T)),
+        };
         var advancedMessage = new Message<T>(message, properties);
         await advancedBus.PublishAsync(
             futureExchange, topic, configuration.MandatoryPublish, advancedMessage, cts.Token

@@ -6,7 +6,7 @@ public readonly struct DeliveredMessageEvent
     public MessageProperties Properties { get; }
     public ReadOnlyMemory<byte> Body { get; }
 
-    public DeliveredMessageEvent(MessageReceivedInfo info, MessageProperties properties, in ReadOnlyMemory<byte> body)
+    public DeliveredMessageEvent(in MessageReceivedInfo info, in MessageProperties properties, in ReadOnlyMemory<byte> body)
     {
         ReceivedInfo = info;
         Properties = properties;

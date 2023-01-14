@@ -14,7 +14,7 @@ public readonly struct PublishedMessageEvent
     /// <param name="routingKey">The routing key</param>
     /// <param name="properties">The properties</param>
     /// <param name="body">The body</param>
-    public PublishedMessageEvent(in Exchange exchange, string routingKey, MessageProperties properties, in ReadOnlyMemory<byte> body)
+    public PublishedMessageEvent(in Exchange exchange, string routingKey, in MessageProperties properties, in ReadOnlyMemory<byte> body)
     {
         Exchange = exchange;
         RoutingKey = routingKey;

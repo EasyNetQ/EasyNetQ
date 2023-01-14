@@ -10,7 +10,7 @@ public readonly struct ProducedMessage
     /// </summary>
     /// <param name="properties">The properties</param>
     /// <param name="body">The body</param>
-    public ProducedMessage(MessageProperties properties, in ReadOnlyMemory<byte> body)
+    public ProducedMessage(in MessageProperties properties, in ReadOnlyMemory<byte> body)
     {
         Properties = properties;
         Body = body;

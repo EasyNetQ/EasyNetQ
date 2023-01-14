@@ -3,7 +3,7 @@ namespace EasyNetQ.Serialization.SystemTextJson
     public class MessagePropertiesConverter : System.Text.Json.Serialization.JsonConverter<EasyNetQ.MessageProperties>
     {
         public MessagePropertiesConverter() { }
-        public override EasyNetQ.MessageProperties? Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options) { }
+        public override EasyNetQ.MessageProperties Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options) { }
         public override void Write(System.Text.Json.Utf8JsonWriter writer, EasyNetQ.MessageProperties value, System.Text.Json.JsonSerializerOptions options) { }
     }
     public class SystemObjectNewtonsoftCompatibleConverter : System.Text.Json.Serialization.JsonConverter<object>

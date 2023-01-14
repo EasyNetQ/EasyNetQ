@@ -72,12 +72,12 @@ public class When_a_user_handler_is_executed
     [Fact]
     public void Should_deliver_info()
     {
-        deliveredInfo.Should().BeSameAs(messageInfo);
+        deliveredInfo.Should().BeEquivalentTo(messageInfo);
     }
 
     [Fact]
     public void Should_deliver_properties()
     {
-        deliveredProperties.Should().BeSameAs(messageProperties);
+        deliveredProperties.Should().BeEquivalentTo(messageProperties);
     }
 }

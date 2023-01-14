@@ -1,5 +1,3 @@
-using EasyNetQ.Topology;
-
 namespace EasyNetQ;
 
 /// <summary>
@@ -17,13 +15,10 @@ public static class DelayedExchangeExtensions
     ) => configuration.WithType("x-delayed-message").WithArgument("x-delayed-type", exchangeType);
 
     /// <summary>
-    ///     Add the delay to the message to be used by delayed exchange
+    ///     Add the delay to the message properties to be used by delayed exchange
     /// </summary>
-    /// <param name="message">The message</param>
+    /// <param name="messageProperties">The message properties</param>
     /// <param name="delay">The delay</param>
-    public static IMessage<T> WithDelay<T>(this IMessage<T> message, TimeSpan delay)
-    {
-        message.Properties.Headers["x-delay"] = (int)delay.TotalMilliseconds;
-        return message;
-    }
+    public static MessageProperties WithDelay(in this MessageProperties messageProperties, TimeSpan delay)
+        => messageProperties.SetHeader("x-delay", (int)delay.TotalMilliseconds);
 }

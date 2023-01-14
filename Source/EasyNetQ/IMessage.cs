@@ -45,11 +45,11 @@ public class Message<T> : IMessage<T>
     public Message()
     {
         Body = default;
-        Properties = new MessageProperties();
+        Properties = default;
         MessageType = typeof(T);
     }
 
-    public Message(T? body, MessageProperties properties)
+    public Message(T? body, in MessageProperties properties)
     {
         Body = body;
         Properties = properties;

@@ -45,15 +45,13 @@ public class DefaultPubSub : IPubSub
         configure(publishConfiguration);
 
         var messageType = typeof(T);
-        var advancedMessageProperties = new MessageProperties();
-        if (publishConfiguration.Priority != null)
-            advancedMessageProperties.Priority = publishConfiguration.Priority.Value;
-        if (publishConfiguration.Expires != null)
-            advancedMessageProperties.Expiration = publishConfiguration.Expires.Value;
-        if (publishConfiguration.Headers?.Count > 0)
-            advancedMessageProperties.Headers.UnionWith(publishConfiguration.Headers);
-        advancedMessageProperties.DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType);
-
+        var advancedMessageProperties = new MessageProperties
+        {
+            Priority = publishConfiguration.Priority ?? 0,
+            Expiration = publishConfiguration.Expires,
+            Headers = publishConfiguration.Headers,
+            DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType),
+        };
         var advancedMessage = new Message<T>(message, advancedMessageProperties);
         var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(
             messageType, ExchangeType.Topic, cts.Token

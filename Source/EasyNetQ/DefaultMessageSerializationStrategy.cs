@@ -33,17 +33,18 @@ public class DefaultMessageSerializationStrategy : IMessageSerializationStrategy
         var messageBody = message.GetBody() is null
             ? EmptyMemoryOwner.Instance
             : serializer.MessageToBytes(message.MessageType, message.GetBody()!);
-        var messageProperties = message.Properties;
-
-        messageProperties.Type = typeName;
-        if (string.IsNullOrEmpty(messageProperties.CorrelationId))
-            messageProperties.CorrelationId = correlationIdGenerator.GetCorrelationId();
-
+        var messageProperties = message.Properties with
+        {
+            Type = typeName,
+            CorrelationId = string.IsNullOrEmpty(message.Properties.CorrelationId)
+                ? correlationIdGenerator.GetCorrelationId()
+                : message.Properties.CorrelationId
+        };
         return new SerializedMessage(messageProperties, messageBody);
     }
 
     /// <inheritdoc />
-    public IMessage DeserializeMessage(MessageProperties properties, in ReadOnlyMemory<byte> body)
+    public IMessage DeserializeMessage(in MessageProperties properties, in ReadOnlyMemory<byte> body)
     {
         var messageType = typeNameSerializer.Deserialize(properties.Type!);
         var messageBody = body.IsEmpty ? null : serializer.BytesToMessage(messageType, body);

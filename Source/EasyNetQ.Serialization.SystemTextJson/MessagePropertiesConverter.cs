@@ -6,44 +6,33 @@ namespace EasyNetQ.Serialization.SystemTextJson;
 
 public class MessagePropertiesConverter : JsonConverter<MessageProperties>
 {
-    public override MessageProperties? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override MessageProperties Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         var parsed = JsonElement.ParseValue(ref reader);
-        if (parsed.ValueKind == JsonValueKind.Null) return null;
-        if (parsed.ValueKind == JsonValueKind.Object)
+        return parsed.ValueKind switch
         {
-            var messageProperties = new MessageProperties();
-            if (parsed.TryGetProperty(options.ConvertName("ContentType"), out var contentType))
-                messageProperties.ContentType = contentType.GetString();
-            if (parsed.TryGetProperty(options.ConvertName("ContentEncoding"), out var contentEncoding))
-                messageProperties.ContentEncoding = contentEncoding.GetString();
-            if (parsed.TryGetProperty(options.ConvertName("DeliveryMode"), out var deliveryMode))
-                messageProperties.DeliveryMode = deliveryMode.GetByte();
-            if (parsed.TryGetProperty(options.ConvertName("Priority"), out var priority))
-                messageProperties.Priority = priority.GetByte();
-            if (parsed.TryGetProperty(options.ConvertName("CorrelationId"), out var correlationId))
-                messageProperties.CorrelationId = correlationId.GetString();
-            if (parsed.TryGetProperty(options.ConvertName("ReplyTo"), out var replyTo))
-                messageProperties.ReplyTo = replyTo.GetString();
-            if (parsed.TryGetProperty(options.ConvertName("Expiration"), out var expiration))
-                messageProperties.Expiration = expiration.Deserialize<TimeSpan>();
-            if (parsed.TryGetProperty(options.ConvertName("MessageId"), out var messageId))
-                messageProperties.MessageId = messageId.GetString();
-            if (parsed.TryGetProperty(options.ConvertName("Timestamp"), out var timestamp))
-                messageProperties.Timestamp = timestamp.GetInt64();
-            if (parsed.TryGetProperty(options.ConvertName("Type"), out var type))
-                messageProperties.Type = type.GetString();
-            if (parsed.TryGetProperty(options.ConvertName("UserId"), out var userId))
-                messageProperties.UserId = userId.GetString();
-            if (parsed.TryGetProperty(options.ConvertName("AppId"), out var appId))
-                messageProperties.AppId = appId.GetString();
-            if (parsed.TryGetProperty(options.ConvertName("ClusterId"), out var clusterId))
-                messageProperties.ClusterId = clusterId.GetString();
-            if (parsed.TryGetProperty(options.ConvertName("Headers"), out var headers))
-                messageProperties.Headers = headers.ConvertJsonToHeaders(options);
-            return messageProperties;
-        }
-        throw new ArgumentOutOfRangeException(nameof(reader.TokenType), reader.TokenType, null);
+            JsonValueKind.Null => default,
+            JsonValueKind.Object => new MessageProperties
+            {
+                ContentType = parsed.TryGetProperty(options.ConvertName("ContentType"), out var contentType) ? contentType.GetString() : null,
+                ContentEncoding = parsed.TryGetProperty(options.ConvertName("ContentEncoding"), out var contentEncoding) ? contentEncoding.GetString() : null,
+                DeliveryMode = parsed.TryGetProperty(options.ConvertName("DeliveryMode"), out var deliveryMode) ? deliveryMode.GetByte() : default,
+                Priority = parsed.TryGetProperty(options.ConvertName("Priority"), out var priority) ? priority.GetByte() : default,
+                CorrelationId = parsed.TryGetProperty(options.ConvertName("CorrelationId"), out var correlationId) ? correlationId.GetString() : null,
+                ReplyTo = parsed.TryGetProperty(options.ConvertName("ReplyTo"), out var replyTo) ? replyTo.GetString() : null,
+                Expiration = parsed.TryGetProperty(options.ConvertName("Expiration"), out var expiration) ? expiration.Deserialize<TimeSpan>() : null,
+                MessageId = parsed.TryGetProperty(options.ConvertName("MessageId"), out var messageId) ? messageId.GetString() : null,
+                Timestamp = parsed.TryGetProperty(options.ConvertName("Timestamp"), out var timestamp) ? timestamp.GetInt64() : default,
+                Type = parsed.TryGetProperty(options.ConvertName("Type"), out var type) ? type.GetString() : null,
+                UserId = parsed.TryGetProperty(options.ConvertName("UserId"), out var userId) ? userId.GetString() : null,
+                AppId = parsed.TryGetProperty(options.ConvertName("AppId"), out var appId) ? appId.GetString() : null,
+                ClusterId = parsed.TryGetProperty(options.ConvertName("ClusterId"), out var clusterId) ? clusterId.GetString() : null,
+                Headers = parsed.TryGetProperty(options.ConvertName("Headers"), out var headers)
+                    ? headers.ConvertJsonToHeaders(options)
+                    : null
+            },
+            _ => throw new ArgumentOutOfRangeException(nameof(parsed.ValueKind), parsed.ValueKind, null)
+        };
     }
 
     public override void Write(Utf8JsonWriter writer, MessageProperties value, JsonSerializerOptions options)
@@ -78,7 +67,7 @@ public class MessagePropertiesConverter : JsonConverter<MessageProperties>
         if (value.HeadersPresent)
         {
             var headersJson = new JsonObject();
-            foreach (var kvp in value.Headers)
+            foreach (var kvp in value.Headers!)
                 headersJson.AddHeaderToJson(kvp.Key, kvp.Value, options);
             json.Add(options.ConvertName("Headers"), headersJson);
         }

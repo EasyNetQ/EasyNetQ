@@ -1,5 +1,4 @@
 using EasyNetQ.Internals;
-using EasyNetQ.Topology;
 
 namespace EasyNetQ;
 
@@ -62,15 +61,15 @@ public class DelayedExchangeScheduler : IScheduler
         ).ConfigureAwait(false);
         await advancedBus.BindAsync(futureExchange, exchange, topic, cts.Token).ConfigureAwait(false);
 
-        var properties = new MessageProperties();
-        if (publishConfiguration.Priority != null)
-            properties.Priority = publishConfiguration.Priority.Value;
-        if (publishConfiguration.Headers?.Count > 0)
-            properties.Headers.UnionWith(publishConfiguration.Headers);
-        properties.DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T));
+        var properties = new MessageProperties
+        {
+            Priority = publishConfiguration.Priority ?? 0,
+            Headers = publishConfiguration.Headers,
+            DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T))
+        }.WithDelay(delay);
 
         await advancedBus.PublishAsync(
-            futureExchange, topic, configuration.MandatoryPublish, new Message<T>(message, properties).WithDelay(delay), cts.Token
+            futureExchange, topic, configuration.MandatoryPublish, new Message<T>(message, properties), cts.Token
         ).ConfigureAwait(false);
     }
 }

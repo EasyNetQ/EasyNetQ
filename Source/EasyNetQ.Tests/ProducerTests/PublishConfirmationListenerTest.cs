@@ -99,9 +99,9 @@ public class PublishConfirmationListenerTest
         var confirmation1 = publishConfirmationListener.CreatePendingConfirmation(model);
         var properties = new MessageProperties
         {
-            Headers =
+            Headers = new Dictionary<string, object>
             {
-                [MessagePropertiesExtensions.ConfirmationIdHeader] = Encoding.UTF8.GetBytes(confirmation1.Id.ToString())
+                { MessagePropertiesExtensions.ConfirmationIdHeader, Encoding.UTF8.GetBytes(confirmation1.Id.ToString()) }
             }
         };
         eventBus.Publish(

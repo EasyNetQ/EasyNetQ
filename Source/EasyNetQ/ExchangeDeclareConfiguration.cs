@@ -1,5 +1,3 @@
-using EasyNetQ.Topology;
-
 namespace EasyNetQ;
 
 /// <summary>

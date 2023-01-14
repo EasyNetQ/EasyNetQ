@@ -53,8 +53,7 @@ public class QueueRetrieval : IQueueRetrieval
                 throw;
             }
 
-            var properties = new MessageProperties();
-            properties.CopyFrom(basicGetResult.BasicProperties);
+            var properties = new MessageProperties(basicGetResult.BasicProperties);
             var info = new MessageReceivedInfo(
                 "hosepipe",
                 basicGetResult.DeliveryTag,

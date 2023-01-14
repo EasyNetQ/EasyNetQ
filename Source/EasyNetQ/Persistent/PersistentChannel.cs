@@ -161,8 +161,7 @@ public class PersistentChannel : IPersistentChannel
 
     private void OnReturn(object? sender, BasicReturnEventArgs args)
     {
-        var messageProperties = new MessageProperties();
-        messageProperties.CopyFrom(args.BasicProperties);
+        var messageProperties = new MessageProperties(args.BasicProperties);
         var messageReturnedInfo = new MessageReturnedInfo(args.Exchange, args.RoutingKey, args.ReplyText);
         var @event = new ReturnedMessageEvent(
             (IModel)sender!,
