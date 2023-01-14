@@ -25,7 +25,7 @@ public static class MessagePropertiesExtensions
 #else
         return properties.SetHeader(ConfirmationIdHeader, Encoding.UTF8.GetBytes(confirmationId.ToString()));
 #endif
-        }
+    }
 
     public static MessageProperties SetHeader(in this MessageProperties source, string key, object? value)
     {
