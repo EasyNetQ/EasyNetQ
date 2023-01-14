@@ -1,6 +1,6 @@
 using RabbitMQ.Client;
 using System.Globalization;
-using System.Text;
+using EasyNetQ.Internals;
 
 namespace EasyNetQ;
 
@@ -11,9 +11,6 @@ public static class MessagePropertiesExtensions
 {
     internal const string ConfirmationIdHeader = "EasyNetQ.Confirmation.Id";
 
-    internal static MessageProperties SetConfirmationId(this in MessageProperties properties, ulong confirmationId)
-        => properties.SetHeader(ConfirmationIdHeader, Encoding.UTF8.GetBytes(confirmationId.ToString()));
-
     public static MessageProperties SetHeader(in this MessageProperties source, string key, object? value)
     {
         var headers = source.Headers ?? new Dictionary<string, object?>();
@@ -21,12 +18,16 @@ public static class MessagePropertiesExtensions
         return source with { Headers = headers };
     }
 
+    internal static MessageProperties SetConfirmationId(this in MessageProperties properties, ulong confirmationId)
+        => properties.SetHeader(ConfirmationIdHeader, NumberHelpers.FormatULongToBytes(confirmationId));
+
     internal static bool TryGetConfirmationId(this in MessageProperties properties, out ulong confirmationId)
     {
         confirmationId = 0;
         return properties.Headers != null &&
                properties.Headers.TryGetValue(ConfirmationIdHeader, out var value) &&
-               ulong.TryParse(Encoding.UTF8.GetString(value as byte[] ?? Array.Empty<byte>()), out confirmationId);
+               value is byte[] bytesValue &&
+               NumberHelpers.TryParseULongFromBytes(bytesValue, out confirmationId);
     }
 
     public static void CopyTo(this in MessageProperties source, IBasicProperties basicProperties)
