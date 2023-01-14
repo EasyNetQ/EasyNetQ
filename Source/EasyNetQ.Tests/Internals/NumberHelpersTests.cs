@@ -59,6 +59,6 @@ public class NumberHelpersTests
     {
         var bytes = Encoding.UTF8.GetBytes(value.ToString());
         NumberHelpers.TryParseULongFromBytes(bytes, out var result).Should().BeTrue();
-        result.Should().Be(ulong.Parse(Encoding.UTF8.GetString(bytes)));
+        result.Should().Be(value);
     }
 }
