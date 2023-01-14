@@ -1,6 +1,6 @@
 namespace EasyNetQ.Internals;
 
-public static class NumberHelpers
+internal static class NumberHelpers
 {
     private static readonly ulong[] UlongDigitsCountLookup;
 
