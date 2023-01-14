@@ -13,6 +13,7 @@ public class PublishConfirmationListener : IPublishConfirmationListener
     private readonly IDisposable[] subscriptions;
 
     private readonly ConcurrentDictionary<int, UnconfirmedRequests> unconfirmedChannelRequests;
+    private readonly Action<int, ulong> cleanup;
 
     /// <summary>
     ///     Creates publish confirmations listener
@@ -27,6 +28,13 @@ public class PublishConfirmationListener : IPublishConfirmationListener
             eventBus.Subscribe<ChannelRecoveredEvent>(OnChannelRecovered),
             eventBus.Subscribe<ChannelShutdownEvent>(OnChannelShutdown),
             eventBus.Subscribe<ReturnedMessageEvent>(OnReturnedMessage)
+        };
+        cleanup = (cn, sn) =>
+        {
+            if (!unconfirmedChannelRequests.TryGetValue(cn, out var requests))
+                return;
+
+            requests.TryRemove(sn, out _);
         };
     }
 
@@ -43,9 +51,7 @@ public class PublishConfirmationListener : IPublishConfirmationListener
         if (!requests.TryAdd(sequenceNumber, confirmationTcs))
             throw new InvalidOperationException($"Confirmation {sequenceNumber} already exists");
 
-        return new PublishPendingConfirmation(
-            sequenceNumber, confirmationTcs, () => requests.Remove(sequenceNumber)
-        );
+        return new PublishPendingConfirmation(model.ChannelNumber, sequenceNumber, confirmationTcs, cleanup);
     }
 
     /// <inheritdoc />
@@ -171,18 +177,20 @@ public class PublishConfirmationListener : IPublishConfirmationListener
 
     private sealed class PublishPendingConfirmation : IPublishPendingConfirmation
     {
-        private readonly ulong id;
+        private readonly int channelNumber;
+        private readonly ulong sequenceNumber;
         private readonly TaskCompletionSource<bool> confirmationTcs;
-        private readonly Action cleanup;
+        private readonly Action<int, ulong> cleanup;
 
-        public PublishPendingConfirmation(ulong id, TaskCompletionSource<bool> confirmationTcs, Action cleanup)
+        public PublishPendingConfirmation(int channelNumber, ulong sequenceNumber, TaskCompletionSource<bool> confirmationTcs, Action<int, ulong> cleanup)
         {
-            this.id = id;
+            this.channelNumber = channelNumber;
+            this.sequenceNumber = sequenceNumber;
             this.confirmationTcs = confirmationTcs;
             this.cleanup = cleanup;
         }
 
-        public ulong Id => id;
+        public ulong Id => sequenceNumber;
 
         public async Task WaitAsync(CancellationToken cancellationToken)
         {
@@ -193,7 +201,7 @@ public class PublishConfirmationListener : IPublishConfirmationListener
             }
             finally
             {
-                cleanup();
+                cleanup(channelNumber, sequenceNumber);
             }
         }
 
@@ -205,7 +213,7 @@ public class PublishConfirmationListener : IPublishConfirmationListener
             }
             finally
             {
-                cleanup();
+                cleanup(channelNumber, sequenceNumber);
             }
         }
     }
