@@ -12,9 +12,7 @@ public class PublishConfigurationTests
     [Fact]
     public void Should_return_custom_topic()
     {
-        var configuration = new PublishConfiguration("default");
-
-        configuration.WithTopic("custom");
+        var configuration = new PublishConfiguration("default") with { Topic = "custom" };
 
         Assert.Equal("custom", configuration.Topic);
     }

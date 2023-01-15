@@ -82,7 +82,7 @@ public class When_publish_with_topic_is_called : IDisposable
         mockBuilder = new MockBuilder();
 
         var message = new MyMessage { Text = "Hiya!" };
-        mockBuilder.PubSub.Publish(message, c => c.WithTopic("X.A"));
+        mockBuilder.PubSub.Publish(message, (in PublishConfiguration c) => c with { Topic = "X.A" });
         WaitForMessageToPublish();
     }
 
