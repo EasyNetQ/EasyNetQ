@@ -1,5 +1,3 @@
-using System.Reflection;
-
 namespace EasyNetQ.Tests;
 
 public class MessagePropertiesTests
