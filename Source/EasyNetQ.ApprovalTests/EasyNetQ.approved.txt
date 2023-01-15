@@ -1441,7 +1441,7 @@ namespace EasyNetQ.Events
     }
     public readonly struct PublishedMessageEvent
     {
-        public PublishedMessageEvent(in string exchange, string routingKey, in EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
+        public PublishedMessageEvent(string exchange, string routingKey, in EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
         public System.ReadOnlyMemory<byte> Body { get; }
         public string Exchange { get; }
         public EasyNetQ.MessageProperties Properties { get; }
