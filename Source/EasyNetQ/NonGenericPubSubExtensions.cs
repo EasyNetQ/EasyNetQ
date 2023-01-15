@@ -4,7 +4,7 @@ using EasyNetQ.Internals;
 
 namespace EasyNetQ;
 
-using NonGenericPublishDelegate = Func<IPubSub, object, Type, Action<IPublishConfiguration>, CancellationToken, Task>;
+using NonGenericPublishDelegate = Func<IPubSub, object, Type, PublishConfigurationFunc, CancellationToken, Task>;
 using NonGenericSubscribeDelegate = Func<IPubSub, string, Type, Func<object, Type, CancellationToken, Task>, Action<ISubscriptionConfiguration>, CancellationToken, AwaitableDisposable<SubscriptionResult>>;
 
 /// <summary>
@@ -26,7 +26,7 @@ public static class NonGenericPubSubExtensions
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns></returns>
     public static Task PublishAsync(this IPubSub pubSub, object message, Type messageType, CancellationToken cancellationToken = default)
-        => pubSub.PublishAsync(message, messageType, _ => { }, cancellationToken);
+        => pubSub.PublishAsync(message, messageType, (in PublishConfiguration _) => _, cancellationToken);
 
     /// <summary>
     /// Publishes a message with a topic.
@@ -45,7 +45,7 @@ public static class NonGenericPubSubExtensions
         Type messageType,
         string topic,
         CancellationToken cancellationToken = default
-    ) => pubSub.PublishAsync(message, messageType, c => c.WithTopic(topic), cancellationToken);
+    ) => pubSub.PublishAsync(message, messageType, (in PublishConfiguration c) => c with { Topic = topic }, cancellationToken);
 
     /// <summary>
     /// Publishes a message.
@@ -54,14 +54,14 @@ public static class NonGenericPubSubExtensions
     /// <param name="message">The message to publish</param>
     /// <param name="messageType">The message type</param>
     /// <param name="configure">
-    /// Fluent configuration e.g. x => x.WithTopic("*.brighton").WithPriority(2)
+    /// Fluent configuration e.g. x => x with { Topic = "*.brighton", Priority = 2 }
     /// </param>
     /// <param name="cancellationToken">The cancellation token</param>
     public static Task PublishAsync(
         this IPubSub pubSub,
         object message,
         Type messageType,
-        Action<IPublishConfiguration> configure,
+        PublishConfigurationFunc configure,
         CancellationToken cancellationToken = default
     )
     {
@@ -75,7 +75,7 @@ public static class NonGenericPubSubExtensions
             var pubSubParameter = Expression.Parameter(typeof(IPubSub), "pubSub");
             var messageParameter = Expression.Parameter(typeof(object), "message");
             var messageTypeParameter = Expression.Parameter(typeof(Type), "messageType");
-            var configureParameter = Expression.Parameter(typeof(Action<IPublishConfiguration>), "configure");
+            var configureParameter = Expression.Parameter(typeof(PublishConfigurationFunc), "configure");
             var cancellationTokenParameter = Expression.Parameter(typeof(CancellationToken), "cancellationToken");
             var genericPublishMethodCallExpression = Expression.Call(
                 pubSubParameter,
@@ -105,7 +105,7 @@ public static class NonGenericPubSubExtensions
     /// <param name="messageType">The message type</param>
     /// <param name="cancellationToken">The cancellation token</param>
     public static void Publish(this IPubSub pubSub, object message, Type messageType, CancellationToken cancellationToken = default)
-        => pubSub.Publish(message, messageType, _ => { }, cancellationToken);
+        => pubSub.Publish(message, messageType, (in PublishConfiguration _) => _, cancellationToken);
 
     /// <summary>
     /// Publishes a message.
@@ -114,14 +114,14 @@ public static class NonGenericPubSubExtensions
     /// <param name="message">The message to publish</param>
     /// <param name="messageType">The message type</param>
     /// <param name="configure">
-    /// Fluent configuration e.g. x => x.WithTopic("*.brighton").WithPriority(2)
+    /// Fluent configuration e.g. x => x with { Topic = "*.brighton", Priority = 2 }
     /// </param>
     /// <param name="cancellationToken">The cancellation token</param>
     public static void Publish(
         this IPubSub pubSub,
         object message,
         Type messageType,
-        Action<IPublishConfiguration> configure,
+        PublishConfigurationFunc configure,
         CancellationToken cancellationToken = default
     )
     {
@@ -144,7 +144,7 @@ public static class NonGenericPubSubExtensions
         Type messageType,
         string topic,
         CancellationToken cancellationToken = default
-    ) => pubSub.Publish(message, messageType, c => c.WithTopic(topic), cancellationToken);
+    ) => pubSub.Publish(message, messageType, (in PublishConfiguration c) => c with { Topic = topic }, cancellationToken);
 
     /// <summary>
     /// Subscribes to a stream of messages that match a .NET type.

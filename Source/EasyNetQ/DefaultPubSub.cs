@@ -37,12 +37,11 @@ public class DefaultPubSub : IPubSub
     }
 
     /// <inheritdoc />
-    public virtual async Task PublishAsync<T>(T message, Action<IPublishConfiguration> configure, CancellationToken cancellationToken)
+    public virtual async Task PublishAsync<T>(T message, PublishConfigurationFunc configure, CancellationToken cancellationToken)
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-        var publishConfiguration = new PublishConfiguration(conventions.TopicNamingConvention(typeof(T)));
-        configure(publishConfiguration);
+        var publishConfiguration = configure(new PublishConfiguration(conventions.TopicNamingConvention(typeof(T))));
 
         var messageType = typeof(T);
         var advancedMessageProperties = new MessageProperties

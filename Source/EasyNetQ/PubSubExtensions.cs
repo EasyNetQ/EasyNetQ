@@ -18,7 +18,7 @@ public static class PubSubExtensions
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns></returns>
     public static Task PublishAsync<T>(this IPubSub pubSub, T message, CancellationToken cancellationToken = default)
-        => pubSub.PublishAsync(message, _ => { }, cancellationToken);
+        => pubSub.PublishAsync(message, (in PublishConfiguration _) => _, cancellationToken);
 
     /// <summary>
     /// Publishes a message with a topic.
@@ -32,7 +32,7 @@ public static class PubSubExtensions
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns></returns>
     public static Task PublishAsync<T>(this IPubSub pubSub, T message, string topic, CancellationToken cancellationToken = default)
-        => pubSub.PublishAsync(message, c => c.WithTopic(topic), cancellationToken);
+        => pubSub.PublishAsync(message, (in PublishConfiguration c) => c with { Topic = topic }, cancellationToken);
 
     /// <summary>
     /// Publishes a message.
@@ -42,7 +42,7 @@ public static class PubSubExtensions
     /// <param name="message">The message to publish</param>
     /// <param name="cancellationToken">The cancellation token</param>
     public static void Publish<T>(this IPubSub pubSub, T message, CancellationToken cancellationToken = default)
-        => pubSub.Publish(message, _ => { }, cancellationToken);
+        => pubSub.Publish(message, (in PublishConfiguration _) => _, cancellationToken);
 
     /// <summary>
     /// Publishes a message.
@@ -51,10 +51,10 @@ public static class PubSubExtensions
     /// <param name="pubSub">The pubSub instance</param>
     /// <param name="message">The message to publish</param>
     /// <param name="configure">
-    /// Fluent configuration e.g. x => x.WithTopic("*.brighton").WithPriority(2)
+    /// Fluent configuration e.g. x => x with { Topic = "*.brighton", Priority = 2 }
     /// </param>
     /// <param name="cancellationToken">The cancellation token</param>
-    public static void Publish<T>(this IPubSub pubSub, T message, Action<IPublishConfiguration> configure, CancellationToken cancellationToken = default)
+    public static void Publish<T>(this IPubSub pubSub, T message, PublishConfigurationFunc configure, CancellationToken cancellationToken = default)
     {
         pubSub.PublishAsync(message, configure, cancellationToken)
             .GetAwaiter()
@@ -70,7 +70,7 @@ public static class PubSubExtensions
     /// <param name="topic">The topic string</param>
     /// <param name="cancellationToken">The cancellation token</param>
     public static void Publish<T>(this IPubSub pubSub, T message, string topic, CancellationToken cancellationToken = default)
-        => pubSub.Publish(message, c => c.WithTopic(topic), cancellationToken);
+        => pubSub.Publish(message, (in PublishConfiguration c) => c with { Topic = topic }, cancellationToken);
 
     /// <summary>
     /// Subscribes to a stream of messages that match a .NET type.

@@ -15,13 +15,13 @@ public interface IPubSub
     /// <typeparam name="T">The message type</typeparam>
     /// <param name="message">The message to publish</param>
     /// <param name="configure">
-    /// Fluent configuration e.g. x => x.WithTopic("*.brighton").WithPriority(2)
+    /// Fluent configuration e.g. x => x with { Topic = "*.brighton", Priority = 2 }
     /// </param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns></returns>
     Task PublishAsync<T>(
         T message,
-        Action<IPublishConfiguration> configure,
+        PublishConfigurationFunc configure,
         CancellationToken cancellationToken = default
     );
 
@@ -54,3 +54,5 @@ public interface IPubSub
         CancellationToken cancellationToken = default
     );
 }
+
+public delegate PublishConfiguration PublishConfigurationFunc(in PublishConfiguration configuration);
