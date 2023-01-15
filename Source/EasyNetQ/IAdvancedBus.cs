@@ -29,7 +29,6 @@ public interface IAdvancedBus
 
     /// <summary>
     /// Publish a message as a .NET type when the type is only known at runtime.
-    /// Use the generic version of this method <see cref="PublishAsync{T}"/> when you know the type of the message at compile time.
     /// Task completes after publish has completed. If publisherConfirms=true is set in the connection string,
     /// the task completes after an ACK is received. The task will throw on either NACK or timeout.
     /// </summary>
@@ -49,31 +48,6 @@ public interface IAdvancedBus
         string routingKey,
         bool mandatory,
         IMessage message,
-        CancellationToken cancellationToken = default
-    );
-
-    /// <summary>
-    /// Publish a message as a .NET type
-    /// Task completes after publish has completed. If publisherConfirms=true is set in the connection string,
-    /// the task completes after an ACK is received. The task will throw on either NACK or timeout.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="exchange">The exchange to publish to</param>
-    /// <param name="routingKey">
-    /// The routing key for the message. The routing key is used for routing messages depending on the
-    /// exchange configuration.</param>
-    /// <param name="mandatory">
-    /// This flag tells the server how to react if the message cannot be routed to a queue.
-    /// If this flag is true, the server will return an unroutable message with a Return method.
-    /// If this flag is false, the server silently drops the message.
-    /// </param>
-    /// <param name="message">The message to publish</param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    Task PublishAsync<T>(
-        string exchange,
-        string routingKey,
-        bool mandatory,
-        IMessage<T> message,
         CancellationToken cancellationToken = default
     );
 

@@ -245,21 +245,6 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     }
 
     /// <inheritdoc />
-    public virtual async Task PublishAsync<T>(
-        string exchange,
-        string routingKey,
-        bool mandatory,
-        IMessage<T> message,
-        CancellationToken cancellationToken
-    )
-    {
-        using var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
-        await PublishAsync(
-            exchange, routingKey, mandatory, serializedMessage.Properties, serializedMessage.Body, cancellationToken
-        ).ConfigureAwait(false);
-    }
-
-    /// <inheritdoc />
     public virtual async Task PublishAsync(
         string exchange,
         string routingKey,
