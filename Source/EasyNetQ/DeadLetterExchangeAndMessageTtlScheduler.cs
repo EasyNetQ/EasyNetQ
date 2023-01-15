@@ -84,7 +84,7 @@ public class DeadLetterExchangeAndMessageTtlScheduler : IScheduler
         };
         var advancedMessage = new Message<T>(message, properties);
         await advancedBus.PublishAsync(
-            futureExchange, topic, configuration.MandatoryPublish, advancedMessage, cts.Token
+            futureExchange.Name, topic, configuration.MandatoryPublish, advancedMessage, cts.Token
         ).ConfigureAwait(false);
     }
 }

@@ -231,7 +231,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 
     /// <inheritdoc />
     public virtual async Task PublishAsync(
-        Exchange exchange,
+        string exchange,
         string routingKey,
         bool mandatory,
         IMessage message,
@@ -246,7 +246,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 
     /// <inheritdoc />
     public virtual async Task PublishAsync<T>(
-        Exchange exchange,
+        string exchange,
         string routingKey,
         bool mandatory,
         IMessage<T> message,
@@ -261,7 +261,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 
     /// <inheritdoc />
     public virtual async Task PublishAsync(
-        Exchange exchange,
+        string exchange,
         string routingKey,
         bool mandatory,
         MessageProperties properties,
@@ -310,7 +310,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         {
             logger.DebugFormat(
                 "Published to exchange {exchange} with routingKey={routingKey} and correlationId={correlationId}",
-                exchange.Name,
+                exchange,
                 routingKey,
                 properties.CorrelationId
             );
@@ -648,12 +648,12 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 
     private readonly struct BasicPublishAction : IPersistentChannelAction<bool>
     {
-        private readonly Exchange exchange;
+        private readonly string exchange;
         private readonly string routingKey;
         private readonly bool mandatory;
         private readonly ProducedMessage message;
 
-        public BasicPublishAction(in Exchange exchange, string routingKey, bool mandatory, in ProducedMessage message)
+        public BasicPublishAction(string exchange, string routingKey, bool mandatory, in ProducedMessage message)
         {
             this.exchange = exchange;
             this.routingKey = routingKey;
@@ -665,7 +665,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         {
             var basicProperties = model.CreateBasicProperties();
             message.Properties.CopyTo(basicProperties);
-            model.BasicPublish(exchange.Name, routingKey, mandatory, basicProperties, message.Body);
+            model.BasicPublish(exchange, routingKey, mandatory, basicProperties, message.Body);
             return true;
         }
     }
@@ -673,14 +673,14 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     private readonly struct BasicPublishWithConfirmsAction : IPersistentChannelAction<IPublishPendingConfirmation>
     {
         private readonly IPublishConfirmationListener confirmationListener;
-        private readonly Exchange exchange;
+        private readonly string exchange;
         private readonly string routingKey;
         private readonly bool mandatory;
         private readonly ProducedMessage message;
 
         public BasicPublishWithConfirmsAction(
             IPublishConfirmationListener confirmationListener,
-            in Exchange exchange,
+            string exchange,
             string routingKey,
             bool mandatory,
             in ProducedMessage message
@@ -701,7 +701,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
                 .CopyTo(basicProperties);
             try
             {
-                model.BasicPublish(exchange.Name, routingKey, mandatory, basicProperties, message.Body);
+                model.BasicPublish(exchange, routingKey, mandatory, basicProperties, message.Body);
             }
             catch (Exception)
             {
