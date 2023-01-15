@@ -40,10 +40,10 @@ public class When_publish_and_subscribe_with_priority : IDisposable
         }
 
         await bus.PubSub.PublishBatchAsync(
-            lowPriorityMessages, x => x.WithPriority(LowPriority), cts.Token
+            lowPriorityMessages, (in PublishConfiguration x) => x with { Priority = LowPriority }, cts.Token
         );
         await bus.PubSub.PublishBatchAsync(
-            highPriorityMessages, x => x.WithPriority(HighPriority), cts.Token
+            highPriorityMessages, (in PublishConfiguration x) => x with { Priority = HighPriority }, cts.Token
         );
 
         using (
