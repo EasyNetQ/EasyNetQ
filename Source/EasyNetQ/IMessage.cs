@@ -27,32 +27,9 @@ public interface IMessage
     Type MessageType { get; }
 }
 
-public class Message<T> : IMessage<T>
+public readonly record struct Message<T>(T? Body, in MessageProperties Properties = default) : IMessage<T>
 {
-    public MessageProperties Properties { get; }
-    public Type MessageType { get; }
-    public T? Body { get; }
+    public Type MessageType => Body != null ? Body.GetType() : typeof(T);
 
-    public object? GetBody() { return Body; }
-
-    public Message(T? body)
-    {
-        Body = body;
-        Properties = new MessageProperties();
-        MessageType = body != null ? body.GetType() : typeof(T);
-    }
-
-    public Message()
-    {
-        Body = default;
-        Properties = default;
-        MessageType = typeof(T);
-    }
-
-    public Message(T? body, in MessageProperties properties)
-    {
-        Body = body;
-        Properties = properties;
-        MessageType = body != null ? body.GetType() : typeof(T);
-    }
+    public object? GetBody() => Body;
 }

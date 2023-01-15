@@ -230,13 +230,13 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     #region Publish
 
     /// <inheritdoc />
-    public virtual async Task PublishAsync(
+    public virtual async Task PublishAsync<TMessage>(
         Exchange exchange,
         string routingKey,
         bool mandatory,
-        IMessage message,
+        TMessage message,
         CancellationToken cancellationToken
-    )
+    ) where TMessage: IMessage
     {
         using var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
         await PublishAsync(
@@ -245,13 +245,13 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     }
 
     /// <inheritdoc />
-    public virtual async Task PublishAsync<T>(
+    public virtual async Task PublishAsync<TType, TMessage>(
         Exchange exchange,
         string routingKey,
         bool mandatory,
-        IMessage<T> message,
+        TMessage message,
         CancellationToken cancellationToken
-    )
+    ) where TMessage: IMessage<TType>
     {
         using var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
         await PublishAsync(

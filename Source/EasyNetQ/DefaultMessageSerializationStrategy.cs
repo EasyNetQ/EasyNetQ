@@ -27,7 +27,7 @@ public class DefaultMessageSerializationStrategy : IMessageSerializationStrategy
     }
 
     /// <inheritdoc />
-    public SerializedMessage SerializeMessage(IMessage message)
+    public SerializedMessage SerializeMessage<TMessage>(in TMessage message) where TMessage : IMessage
     {
         var typeName = typeNameSerializer.Serialize(message.MessageType);
         var messageBody = message.GetBody() is null

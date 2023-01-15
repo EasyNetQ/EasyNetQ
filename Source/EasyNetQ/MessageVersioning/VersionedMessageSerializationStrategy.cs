@@ -24,7 +24,7 @@ public class VersionedMessageSerializationStrategy : IMessageSerializationStrate
     }
 
     /// <inheritdoc />
-    public SerializedMessage SerializeMessage(IMessage message)
+    public SerializedMessage SerializeMessage<TMessage>(in TMessage message) where TMessage : IMessage
     {
         var messageBody = message.GetBody() is null
             ? EmptyMemoryOwner.Instance

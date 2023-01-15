@@ -12,7 +12,7 @@ public interface IMessageSerializationStrategy
     /// </summary>
     /// <param name="message">The message</param>
     /// <returns></returns>
-    SerializedMessage SerializeMessage(IMessage message);
+    SerializedMessage SerializeMessage<TMessage>(in TMessage message) where TMessage : IMessage;
 
     /// <summary>
     ///     Deserializes the message

@@ -44,20 +44,21 @@ public interface IAdvancedBus
     /// </param>
     /// <param name="message">The message to publish</param>
     /// <param name="cancellationToken">The cancellation token</param>
-    Task PublishAsync(
+    Task PublishAsync<TMessage>(
         Exchange exchange,
         string routingKey,
         bool mandatory,
-        IMessage message,
+        TMessage message,
         CancellationToken cancellationToken = default
-    );
+    ) where TMessage : IMessage;
 
     /// <summary>
     /// Publish a message as a .NET type
     /// Task completes after publish has completed. If publisherConfirms=true is set in the connection string,
     /// the task completes after an ACK is received. The task will throw on either NACK or timeout.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TType"></typeparam>
+    /// <typeparam name="TMessage"></typeparam>
     /// <param name="exchange">The exchange to publish to</param>
     /// <param name="routingKey">
     /// The routing key for the message. The routing key is used for routing messages depending on the
@@ -69,13 +70,13 @@ public interface IAdvancedBus
     /// </param>
     /// <param name="message">The message to publish</param>
     /// <param name="cancellationToken">The cancellation token</param>
-    Task PublishAsync<T>(
+    Task PublishAsync<TType, TMessage>(
         Exchange exchange,
         string routingKey,
         bool mandatory,
-        IMessage<T> message,
+        TMessage message,
         CancellationToken cancellationToken = default
-    );
+    ) where TMessage : IMessage<TType>;
 
     /// <summary>
     /// Publish a message as a byte array.
