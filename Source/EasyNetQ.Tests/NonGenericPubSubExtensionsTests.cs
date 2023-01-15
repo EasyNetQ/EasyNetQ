@@ -6,7 +6,7 @@ namespace EasyNetQ.Tests;
 
 public class NonGenericPubSubExtensionsTests
 {
-    private readonly Action<IPublishConfiguration> publishConfigure = _ => { };
+    private readonly PublishConfigurationFunc publishConfigure = (in PublishConfiguration _) => _;
     private readonly Action<ISubscriptionConfiguration> subscribeConfigure = _ => { };
     private readonly IPubSub pubSub;
     private readonly AwaitableDisposable<SubscriptionResult> subscribeResult;
