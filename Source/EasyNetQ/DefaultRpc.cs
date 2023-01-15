@@ -251,7 +251,7 @@ public class DefaultRpc : IRpc, IDisposable
         };
 
         var requestMessage = new Message<TRequest>(request, properties);
-        await advancedBus.PublishAsync(exchange, routingKey, mandatory, requestMessage, cancellationToken)
+        await advancedBus.PublishAsync(exchange.Name, routingKey, mandatory, requestMessage, cancellationToken)
             .ConfigureAwait(false);
     }
 
@@ -323,7 +323,7 @@ public class DefaultRpc : IRpc, IDisposable
                 }
             );
             await advancedBus.PublishAsync(
-                exchange,
+                exchange.Name,
                 requestMessage.Properties.ReplyTo!,
                 false,
                 responseMessage,
@@ -346,7 +346,7 @@ public class DefaultRpc : IRpc, IDisposable
                 }
             );
             await advancedBus.PublishAsync(
-                exchange,
+                exchange.Name,
                 requestMessage.Properties.ReplyTo!,
                 false,
                 responseMessage,

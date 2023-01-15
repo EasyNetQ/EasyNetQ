@@ -45,7 +45,7 @@ public interface IAdvancedBus
     /// <param name="message">The message to publish</param>
     /// <param name="cancellationToken">The cancellation token</param>
     Task PublishAsync(
-        Exchange exchange,
+        string exchange,
         string routingKey,
         bool mandatory,
         IMessage message,
@@ -70,7 +70,7 @@ public interface IAdvancedBus
     /// <param name="message">The message to publish</param>
     /// <param name="cancellationToken">The cancellation token</param>
     Task PublishAsync<T>(
-        Exchange exchange,
+        string exchange,
         string routingKey,
         bool mandatory,
         IMessage<T> message,
@@ -95,7 +95,7 @@ public interface IAdvancedBus
     /// <param name="body">The message body</param>
     /// <param name="cancellationToken">The cancellation token</param>
     Task PublishAsync(
-        Exchange exchange,
+        string exchange,
         string routingKey,
         bool mandatory,
         MessageProperties properties,

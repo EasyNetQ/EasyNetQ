@@ -57,7 +57,7 @@ public class DefaultPubSub : IPubSub
             messageType, ExchangeType.Topic, cts.Token
         ).ConfigureAwait(false);
         await advancedBus.PublishAsync(
-            exchange, publishConfiguration.Topic, configuration.MandatoryPublish, advancedMessage, cts.Token
+            exchange.Name, publishConfiguration.Topic, configuration.MandatoryPublish, advancedMessage, cts.Token
         ).ConfigureAwait(false);
     }
 
