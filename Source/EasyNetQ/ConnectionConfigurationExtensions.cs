@@ -36,12 +36,13 @@ internal static class ConnectionConfigurationExtensions
             {
             }
 
+        configuration.Name ??= applicationName;
+
         AddValueIfNotExists(configuration.ClientProperties, "client_api", "EasyNetQ");
         AddValueIfNotExists(configuration.ClientProperties, "product", configuration.Product ?? applicationName);
         AddValueIfNotExists(configuration.ClientProperties, "platform", configuration.Platform ?? GetPlatform());
         AddValueIfNotExists(configuration.ClientProperties, "os", Environment.OSVersion.ToString());
         AddValueIfNotExists(configuration.ClientProperties, "version", GetApplicationVersion());
-        AddValueIfNotExists(configuration.ClientProperties, "connection_name", configuration.Name ?? applicationName);
         AddValueIfNotExists(configuration.ClientProperties, "easynetq_version", typeof(ConnectionConfigurationExtensions).Assembly.GetName().Version?.ToString() ?? "unknown");
         AddValueIfNotExists(configuration.ClientProperties, "application", applicationName);
         AddValueIfNotExists(configuration.ClientProperties, "application_location", applicationPath);
