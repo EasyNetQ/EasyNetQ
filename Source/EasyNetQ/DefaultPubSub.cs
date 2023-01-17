@@ -37,11 +37,9 @@ public class DefaultPubSub : IPubSub
     }
 
     /// <inheritdoc />
-    public virtual async Task PublishAsync<T>(T message, PublishConfigurationFunc configure, CancellationToken cancellationToken)
+    public virtual Task PublishAsync<T>(T message, in PublishConfiguration publishConfiguration, CancellationToken cancellationToken)
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
-
-        var publishConfiguration = configure(new PublishConfiguration(conventions.TopicNamingConvention(typeof(T))));
 
         var messageType = typeof(T);
         var advancedMessageProperties = new MessageProperties
@@ -52,12 +50,18 @@ public class DefaultPubSub : IPubSub
             DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType),
         };
         var advancedMessage = new Message<T>(message, advancedMessageProperties);
-        var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(
-            messageType, ExchangeType.Topic, cts.Token
-        ).ConfigureAwait(false);
-        await advancedBus.PublishAsync(
-            exchange.Name, publishConfiguration.Topic, configuration.MandatoryPublish, advancedMessage, cts.Token
-        ).ConfigureAwait(false);
+        var topic = publishConfiguration.Topic ?? conventions.TopicNamingConvention(typeof(T));
+        return DoPublishAsync();
+
+        async Task DoPublishAsync()
+        {
+            var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(
+                messageType, ExchangeType.Topic, cts.Token
+            ).ConfigureAwait(false);
+            await advancedBus.PublishAsync(
+                exchange.Name, topic, configuration.MandatoryPublish, advancedMessage, cts.Token
+            ).ConfigureAwait(false);
+        }
     }
 
     /// <inheritdoc />

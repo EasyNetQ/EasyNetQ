@@ -1,18 +1,10 @@
 namespace EasyNetQ;
 
 /// <summary>
-/// Allows publish configuration to be fluently extended without adding overloads
-///
-/// e.g.
-/// x => x with { Topic = "*.brighton", Priority = 2 }
+/// Allows publish configuration to be fluently extended without adding overloads.
 /// </summary>
 public readonly record struct PublishConfiguration
 {
-    public PublishConfiguration(string defaultTopic)
-    {
-        Topic = defaultTopic;
-    }
-
     /// <summary>
     /// Priority of the message
     /// </summary>
@@ -21,7 +13,7 @@ public readonly record struct PublishConfiguration
     /// <summary>
     /// Topic for the message
     /// </summary>
-    public string Topic { get; init; }
+    public string? Topic { get; init; }
 
     /// <summary>
     /// A TTL for the message

@@ -6,7 +6,7 @@ namespace EasyNetQ.Tests;
 
 public class NonGenericPubSubExtensionsTests
 {
-    private readonly PublishConfigurationFunc publishConfigure = (in PublishConfiguration _) => _;
+    private readonly PublishConfiguration publishConfiguration = default;
     private readonly Action<ISubscriptionConfiguration> subscribeConfigure = _ => { };
     private readonly IPubSub pubSub;
     private readonly AwaitableDisposable<SubscriptionResult> subscribeResult;
@@ -30,13 +30,13 @@ public class NonGenericPubSubExtensionsTests
     {
         var message = DateTime.UtcNow;
         var messageType = typeof(DateTime);
-        await pubSub.PublishAsync(message, messageType, publishConfigure);
+        await pubSub.PublishAsync(message, messageType, publishConfiguration);
 
 #pragma warning disable 4014
         pubSub.Received()
             .PublishAsync(
                 Arg.Is(message),
-                Arg.Is(publishConfigure),
+                Arg.Is(publishConfiguration),
                 Arg.Any<CancellationToken>()
             );
 #pragma warning restore 4014
@@ -48,13 +48,13 @@ public class NonGenericPubSubExtensionsTests
         var message = new Dog();
         var messageType = typeof(Dog);
 
-        await pubSub.PublishAsync(message, messageType, publishConfigure);
+        await pubSub.PublishAsync(message, messageType, publishConfiguration);
 
 #pragma warning disable 4014
         pubSub.Received()
             .PublishAsync(
                 Arg.Is(message),
-                Arg.Is(publishConfigure),
+                Arg.Is(publishConfiguration),
                 Arg.Any<CancellationToken>()
             );
 #pragma warning restore 4014
@@ -66,13 +66,13 @@ public class NonGenericPubSubExtensionsTests
         var message = (IAnimal)new Dog();
         var messageType = typeof(IAnimal);
 
-        await pubSub.PublishAsync(message, messageType, publishConfigure);
+        await pubSub.PublishAsync(message, messageType, publishConfiguration);
 
 #pragma warning disable 4014
         pubSub.Received()
             .PublishAsync(
                 Arg.Is(message),
-                Arg.Is(publishConfigure),
+                Arg.Is(publishConfiguration),
                 Arg.Any<CancellationToken>()
             );
 #pragma warning restore 4014

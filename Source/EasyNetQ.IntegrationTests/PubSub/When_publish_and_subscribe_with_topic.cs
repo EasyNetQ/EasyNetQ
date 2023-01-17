@@ -48,10 +48,10 @@ public class When_publish_and_subscribe_with_topic : IDisposable
         )
         {
             await bus.PubSub.PublishBatchAsync(
-                firstTopicMessages, (in PublishConfiguration x) => x with { Topic = "first" }, cts.Token
+                firstTopicMessages, new PublishConfiguration { Topic = "first" }, cts.Token
             );
             await bus.PubSub.PublishBatchAsync(
-                secondTopicMessages, (in PublishConfiguration x) => x with { Topic = "second" }, cts.Token
+                secondTopicMessages, new PublishConfiguration { Topic = "second" }, cts.Token
             );
 
             await Task.WhenAll(
