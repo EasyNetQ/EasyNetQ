@@ -322,15 +322,14 @@ public class DefaultRpc : IRpc
         CancellationToken cancellationToken
     )
     {
-        //TODO Cache declaration of exchange
-        var exchangeName = conventions.RpcResponseExchangeNamingConvention(typeof(TResponse));
-        var exchange = exchangeName == Exchange.Default.Name
+        var responseExchangeName = conventions.RpcResponseExchangeNamingConvention(typeof(TResponse));
+        var responseExchange = responseExchangeName == Exchange.Default.Name
             ? Exchange.Default
-            : await advancedBus.ExchangeDeclareAsync(
-                exchangeName,
+            : await exchangeDeclareStrategy.DeclareExchangeAsync(
+                responseExchangeName,
                 ExchangeType.Direct,
                 cancellationToken: cancellationToken
-            ).ConfigureAwait(false);
+            );
 
         try
         {
@@ -345,7 +344,7 @@ public class DefaultRpc : IRpc
                 }
             };
             await advancedBus.PublishAsync(
-                exchange,
+                responseExchange,
                 requestMessage.Properties.ReplyTo,
                 false,
                 responseMessage,
@@ -361,7 +360,7 @@ public class DefaultRpc : IRpc
             responseMessage.Properties.DeliveryMode = MessageDeliveryMode.NonPersistent;
 
             await advancedBus.PublishAsync(
-                exchange,
+                responseExchange,
                 requestMessage.Properties.ReplyTo,
                 false,
                 responseMessage,
