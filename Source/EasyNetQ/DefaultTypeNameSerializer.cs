@@ -14,10 +14,10 @@ public class DefaultTypeNameSerializer : ITypeNameSerializer
     /// <inheritdoc />
     public string Serialize(Type type)
     {
-        if (type.AssemblyQualifiedName == null) throw new ArgumentOutOfRangeException(nameof(type), type, null);
-
         return serializedTypes.GetOrAdd(type, t =>
         {
+            if (t.AssemblyQualifiedName == null) throw new ArgumentOutOfRangeException(nameof(t), t, null);
+
             var typeName = RemoveAssemblyDetails(t.AssemblyQualifiedName!);
             if (typeName.Length > 255)
             {
