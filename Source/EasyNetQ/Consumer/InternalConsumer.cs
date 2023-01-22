@@ -150,6 +150,9 @@ public class InternalConsumer : IInternalConsumer
             }
             catch (Exception exception)
             {
+                model?.Dispose();
+                model = null;
+
                 logger.Error(exception, "Failed to create model");
                 return new InternalConsumerStatus(Array.Empty<Queue>(), Array.Empty<Queue>(), Array.Empty<Queue>());
             }
