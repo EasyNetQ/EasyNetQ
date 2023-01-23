@@ -307,7 +307,7 @@ public class DefaultRpc : IRpc, IDisposable
                 responseExchangeName,
                 ExchangeType.Direct,
                 cancellationToken: cancellationToken
-            );
+            ).ConfigureAwait(false);
 
         try
         {
