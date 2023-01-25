@@ -7,6 +7,8 @@ namespace EasyNetQ;
 /// </summary>
 public readonly record struct MessageProperties
 {
+    public static MessageProperties Empty => default;
+
     internal MessageProperties(IBasicProperties basicProperties)
     {
         ContentType = basicProperties.ContentType;

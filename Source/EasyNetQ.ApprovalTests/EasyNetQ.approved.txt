@@ -591,6 +591,7 @@ namespace EasyNetQ
         public bool TypePresent { get; }
         public string? UserId { get; set; }
         public bool UserIdPresent { get; }
+        public static EasyNetQ.MessageProperties Empty { get; }
     }
     public static class MessagePropertiesExtensions
     {
