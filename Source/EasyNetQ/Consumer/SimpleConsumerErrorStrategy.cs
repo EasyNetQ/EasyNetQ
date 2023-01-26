@@ -3,7 +3,7 @@ namespace EasyNetQ.Consumer;
 /// <summary>
 ///     A simple strategy which does nothing, only applies AckStrategies
 /// </summary>
-public class SimpleConsumerErrorStrategy : IConsumerErrorStrategy, IDisposable
+public class SimpleConsumerErrorStrategy : IConsumerErrorStrategy
 {
     /// <summary>
     ///     Acks a message in case of an error
@@ -23,11 +23,6 @@ public class SimpleConsumerErrorStrategy : IConsumerErrorStrategy, IDisposable
     private readonly AckStrategy errorStrategy;
 
     private SimpleConsumerErrorStrategy(AckStrategy errorStrategy) => this.errorStrategy = errorStrategy;
-
-    /// <inheritdoc />
-    public void Dispose()
-    {
-    }
 
     /// <inheritdoc />
     public Task<AckStrategy> HandleConsumerErrorAsync(ConsumerExecutionContext context, Exception exception, CancellationToken cancellationToken = default) => Task.FromResult(errorStrategy);

@@ -1173,10 +1173,9 @@ namespace EasyNetQ.Consumer
         public static EasyNetQ.Consumer.IHandlerRegistration Add<T>(this EasyNetQ.Consumer.IHandlerRegistration handlerRegistration, System.Func<EasyNetQ.IMessage<T>, EasyNetQ.MessageReceivedInfo, System.Threading.Tasks.Task<EasyNetQ.Consumer.AckStrategy>> handler) { }
         public static EasyNetQ.Consumer.IHandlerRegistration Add<T>(this EasyNetQ.Consumer.IHandlerRegistration handlerRegistration, System.Func<EasyNetQ.IMessage<T>, EasyNetQ.MessageReceivedInfo, System.Threading.CancellationToken, System.Threading.Tasks.Task> handler) { }
     }
-    public class HandlerRunner : EasyNetQ.Consumer.IHandlerRunner, System.IDisposable
+    public class HandlerRunner : EasyNetQ.Consumer.IHandlerRunner
     {
         public HandlerRunner(EasyNetQ.Logging.ILogger<EasyNetQ.Consumer.IHandlerRunner> logger, EasyNetQ.Consumer.IConsumerErrorStrategy consumerErrorStrategy) { }
-        public virtual void Dispose() { }
         public virtual System.Threading.Tasks.Task<EasyNetQ.Consumer.AckStrategy> InvokeUserMessageHandlerAsync(EasyNetQ.Consumer.ConsumerExecutionContext context, System.Threading.CancellationToken cancellationToken) { }
     }
     public interface IConsumer : System.IDisposable
@@ -1265,12 +1264,11 @@ namespace EasyNetQ.Consumer
         public EasyNetQ.Consumer.MessageHandler Handler { get; }
         public bool IsExclusive { get; }
     }
-    public class SimpleConsumerErrorStrategy : EasyNetQ.Consumer.IConsumerErrorStrategy, System.IDisposable
+    public class SimpleConsumerErrorStrategy : EasyNetQ.Consumer.IConsumerErrorStrategy
     {
         public static readonly EasyNetQ.Consumer.SimpleConsumerErrorStrategy Ack;
         public static readonly EasyNetQ.Consumer.SimpleConsumerErrorStrategy NackWithRequeue;
         public static readonly EasyNetQ.Consumer.SimpleConsumerErrorStrategy NackWithoutRequeue;
-        public void Dispose() { }
         public System.Threading.Tasks.Task<EasyNetQ.Consumer.AckStrategy> HandleConsumerCancelledAsync(EasyNetQ.Consumer.ConsumerExecutionContext context, System.Threading.CancellationToken cancellationToken = default) { }
         public System.Threading.Tasks.Task<EasyNetQ.Consumer.AckStrategy> HandleConsumerErrorAsync(EasyNetQ.Consumer.ConsumerExecutionContext context, System.Exception exception, System.Threading.CancellationToken cancellationToken = default) { }
     }
