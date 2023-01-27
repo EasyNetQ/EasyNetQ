@@ -774,6 +774,18 @@ namespace EasyNetQ
         public string? Name { get; set; }
         public string? Type { get; set; }
     }
+    public class QueueDeclareConfiguration : EasyNetQ.IQueueDeclareConfiguration
+    {
+        public QueueDeclareConfiguration() { }
+        public System.Collections.Generic.IDictionary<string, object>? Arguments { get; }
+        public bool IsAutoDelete { get; }
+        public bool IsDurable { get; }
+        public bool IsExclusive { get; }
+        public EasyNetQ.IQueueDeclareConfiguration AsAutoDelete(bool isAutoDelete) { }
+        public EasyNetQ.IQueueDeclareConfiguration AsDurable(bool isDurable) { }
+        public EasyNetQ.IQueueDeclareConfiguration AsExclusive(bool isExclusive) { }
+        public EasyNetQ.IQueueDeclareConfiguration WithArgument(string name, object value) { }
+    }
     public static class QueueDeclareConfigurationExtensions
     {
         public static EasyNetQ.IQueueDeclareConfiguration WithDeadLetterExchange(this EasyNetQ.IQueueDeclareConfiguration configuration, EasyNetQ.Topology.Exchange deadLetterExchange) { }
