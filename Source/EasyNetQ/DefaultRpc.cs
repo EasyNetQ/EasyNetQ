@@ -247,7 +247,8 @@ public class DefaultRpc : IRpc, IDisposable
             Priority = priority ?? 0,
             Headers = headers,
             DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(requestType),
-            Expiration = expiration == Timeout.InfiniteTimeSpan ? null : expiration
+            Expiration = expiration == Timeout.InfiniteTimeSpan ? null : expiration,
+            // TODO: implement tracecontext propagation for RPC
         };
 
         var requestMessage = new Message<TRequest>(request, properties);
@@ -318,7 +319,8 @@ public class DefaultRpc : IRpc, IDisposable
                 new MessageProperties
                 {
                     CorrelationId = requestMessage.Properties.CorrelationId,
-                    DeliveryMode = MessageDeliveryMode.NonPersistent
+                    DeliveryMode = MessageDeliveryMode.NonPersistent,
+                    // TODO: implement tracecontext propagation for RPC
                 }
             );
             await advancedBus.PublishAsync(
@@ -342,6 +344,7 @@ public class DefaultRpc : IRpc, IDisposable
                         { IsFaultedKey, true },
                         { ExceptionMessageKey, Encoding.UTF8.GetBytes(exception.Message) }
                     }
+                    // TODO: implement tracecontext propagation for RPC
                 }
             );
             await advancedBus.PublishAsync(

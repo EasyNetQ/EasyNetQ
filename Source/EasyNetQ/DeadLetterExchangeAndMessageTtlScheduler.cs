@@ -79,8 +79,10 @@ public class DeadLetterExchangeAndMessageTtlScheduler : IScheduler
         var properties = new MessageProperties
         {
             Priority = publishConfiguration.Priority ?? 0,
-            Headers = publishConfiguration.Headers,
+            Headers = publishConfiguration.Headers
+                ?? (publishConfiguration.PropagateTraceContext ? new Dictionary<string, object?>() : null),
             DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T)),
+            PropagateTraceContext = publishConfiguration.PropagateTraceContext,
         };
         var advancedMessage = new Message<T>(message, properties);
         await advancedBus.PublishAsync(

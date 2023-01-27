@@ -11,6 +11,7 @@ public class SubscriptionConfigurationTests
         Assert.Equal(0, configuration.Priority);
         Assert.Equal(99, configuration.PrefetchCount);
         Assert.False(configuration.IsExclusive);
+        Assert.False(configuration.PropagateTraceContext);
         Assert.True(configuration.Durable);
         Assert.Null(configuration.QueueName);
         Assert.Null(configuration.MaxLength);

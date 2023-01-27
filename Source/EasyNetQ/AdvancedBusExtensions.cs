@@ -133,6 +133,8 @@ public static class AdvancedBusExtensions
                         p.WithExclusive(consumeConfiguration.IsExclusive.Value);
                     if (consumeConfiguration.Arguments != null)
                         p.WithArguments(consumeConfiguration.Arguments);
+
+                    p.WithTraceContext(consumeConfiguration.PropagateTraceContext);
                 }
             );
         });
@@ -183,6 +185,8 @@ public static class AdvancedBusExtensions
                         p.WithExclusive(consumeConfiguration.IsExclusive.Value);
                     if (consumeConfiguration.Arguments != null)
                         p.WithArguments(consumeConfiguration.Arguments);
+
+                    p.WithTraceContext(consumeConfiguration.PropagateTraceContext);
                 }
             );
         });
@@ -396,6 +400,8 @@ public static class AdvancedBusExtensions
                         p.WithExclusive(consumeConfiguration.IsExclusive.Value);
                     if (consumeConfiguration.Arguments != null)
                         p.WithArguments(consumeConfiguration.Arguments);
+
+                    p.WithTraceContext(consumeConfiguration.PropagateTraceContext);
                 }
             );
         });
@@ -1066,6 +1072,7 @@ public static class AdvancedBusExtensions
     private class SimpleConsumeConfiguration : ISimpleConsumeConfiguration
     {
         public bool AutoAck { get; private set; }
+        public bool PropagateTraceContext { get; private set; }
         public string? ConsumerTag { get; private set; }
         public bool? IsExclusive { get; private set; }
         public ushort? PrefetchCount { get; private set; }
@@ -1098,6 +1105,12 @@ public static class AdvancedBusExtensions
         public ISimpleConsumeConfiguration WithPrefetchCount(ushort prefetchCount)
         {
             PrefetchCount = prefetchCount;
+            return this;
+        }
+
+        public ISimpleConsumeConfiguration WithTraceContext(bool propagateTraceContext = true)
+        {
+            PropagateTraceContext = propagateTraceContext;
             return this;
         }
     }

@@ -49,8 +49,10 @@ public class DefaultPubSub : IPubSub
         {
             Priority = publishConfiguration.Priority ?? 0,
             Expiration = publishConfiguration.Expires,
-            Headers = publishConfiguration.Headers,
+            Headers = publishConfiguration.Headers
+                ?? (publishConfiguration.PropagateTraceContext ? new Dictionary<string, object?>() : null),
             DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType),
+            PropagateTraceContext = publishConfiguration.PropagateTraceContext,
         };
         var advancedMessage = new Message<T>(message, advancedMessageProperties);
         var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(
@@ -135,6 +137,7 @@ public class DefaultPubSub : IPubSub
                 .WithPriority(subscriptionConfiguration.Priority)
                 .WithExclusive(subscriptionConfiguration.IsExclusive)
                 .WithConsumerTag(conventions.ConsumerTagConvention())
+                .WithTraceContext(subscriptionConfiguration.PropagateTraceContext)
         );
 
         return new SubscriptionResult(exchange, queue, consumerCancellation);

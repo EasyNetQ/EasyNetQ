@@ -64,8 +64,10 @@ public class DelayedExchangeScheduler : IScheduler
         var properties = new MessageProperties
         {
             Priority = publishConfiguration.Priority ?? 0,
-            Headers = publishConfiguration.Headers,
-            DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T))
+            Headers = publishConfiguration.Headers
+                ?? (publishConfiguration.PropagateTraceContext ? new Dictionary<string, object?>() : null),
+            DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T)),
+            PropagateTraceContext = publishConfiguration.PropagateTraceContext,
         }.WithDelay(delay);
 
         await advancedBus.PublishAsync(

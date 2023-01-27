@@ -100,6 +100,11 @@ public readonly record struct MessageProperties
     public string? ClusterId { get; init; }
 
     /// <summary>
+    ///     If <see langword="true"/> adds w3c trace context headers
+    /// </summary>
+    public bool PropagateTraceContext { get; init; }
+
+    /// <summary>
     ///     True if <see cref="ContentType"/> is present
     /// </summary>
     public bool ContentTypePresent => ContentType != default;

@@ -48,7 +48,8 @@ public class DefaultSendReceive : ISendReceive
         {
             Priority = sendConfiguration.Priority ?? 0,
             Headers = sendConfiguration.Headers,
-            DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T))
+            DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T)),
+            // TODO: implement tracecontext propagation for general send/receive
         };
         await advancedBus.PublishAsync(
             Exchange.DefaultName, queue, configuration.MandatoryPublish, new Message<T>(message, properties), cts.Token

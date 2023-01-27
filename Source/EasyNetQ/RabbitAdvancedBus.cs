@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Text;
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;
@@ -100,7 +102,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     #region Consume
 
     /// <inheritdoc />
-    public IDisposable Consume(Action<IConsumeConfiguration> configure)
+    public virtual IDisposable Consume(Action<IConsumeConfiguration> configure)
     {
         var consumeConfiguration = new ConsumeConfiguration(
             configuration.PrefetchCount, handlerCollectionFactory
@@ -118,13 +120,23 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
                     x.Item3.Arguments,
                     async (body, properties, receivedInfo, cancellationToken) =>
                     {
-                        var rawMessage = produceConsumeInterceptors.OnConsume(
-                            new ConsumedMessage(receivedInfo, properties, body)
-                        );
-                        await using var scope = consumeScopeProvider.CreateAsyncScope().ConfigureAwait(false);
-                        return await x.Item2(
-                            rawMessage.Body, rawMessage.Properties, rawMessage.ReceivedInfo, cancellationToken
-                        ).ConfigureAwait(false);
+                        // interceptors might change the message properties, we want to record the original message
+                        using var activity = StartConsumeActivity(properties, receivedInfo, x.Item3.PropagateTraceContext);
+                        try
+                        {
+                            var rawMessage = produceConsumeInterceptors.OnConsume(
+                                new ConsumedMessage(receivedInfo, properties, body)
+                            );
+                            await using var scope = consumeScopeProvider.CreateAsyncScope().ConfigureAwait(false);
+                            return await x.Item2(
+                                rawMessage.Body, rawMessage.Properties, rawMessage.ReceivedInfo, cancellationToken
+                            ).ConfigureAwait(false);
+                        }
+                        catch (Exception ex)
+                        {
+                            activity?.RecordException(ex);
+                            throw;
+                        }
                     }
                 )
             ).Union(
@@ -137,16 +149,26 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
                         x.Item3.Arguments,
                         async (body, properties, receivedInfo, cancellationToken) =>
                         {
-                            var rawMessage = produceConsumeInterceptors.OnConsume(
-                                new ConsumedMessage(receivedInfo, properties, body)
-                            );
-                            var deserializedMessage = messageSerializationStrategy.DeserializeMessage(
-                                rawMessage.Properties, rawMessage.Body
-                            );
-                            var handler = x.Item2.GetHandler(deserializedMessage.MessageType);
-                            await using var scope = consumeScopeProvider.CreateAsyncScope().ConfigureAwait(false);
-                            return await handler(deserializedMessage, receivedInfo, cancellationToken)
-                                .ConfigureAwait(false);
+                            // interceptors might change the message properties, we want to record the original message
+                            using var activity = StartConsumeActivity(properties, receivedInfo, x.Item3.PropagateTraceContext);
+                            try
+                            {
+                                var rawMessage = produceConsumeInterceptors.OnConsume(
+                                    new ConsumedMessage(receivedInfo, properties, body)
+                                );
+                                var deserializedMessage = messageSerializationStrategy.DeserializeMessage(
+                                    rawMessage.Properties, rawMessage.Body
+                                );
+                                var handler = x.Item2.GetHandler(deserializedMessage.MessageType);
+                                await using var scope = consumeScopeProvider.CreateAsyncScope().ConfigureAwait(false);
+                                return await handler(deserializedMessage, receivedInfo, cancellationToken)
+                                    .ConfigureAwait(false);
+                            }
+                            catch (Exception ex)
+                            {
+                                activity?.RecordException(ex);
+                                throw;
+                            }
                         }
                     )
                 )
@@ -155,6 +177,50 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         var consumer = consumerFactory.CreateConsumer(consumerConfiguration);
         consumer.StartConsuming();
         return consumer;
+    }
+
+    private static Activity? StartConsumeActivity(MessageProperties properties, MessageReceivedInfo info, bool propagateTraceContext)
+    {
+        ActivityContext parentContext = new();
+        if (propagateTraceContext && properties.Headers != null)
+        {
+            if (properties.Headers.TryGetValue(W3cTraceContext.TraceParent, out var value) && value is byte[] bytes)
+            {
+                var traceparent = Encoding.UTF8.GetString(bytes);
+                if (W3cTraceContext.TryParseTraceparent(traceparent, out var traceId, out var spanId, out var flags))
+                {
+                    string? tracestate = null;
+                    if (properties.Headers.TryGetValue(W3cTraceContext.TraceState, out value) && value is byte[] stateBytes)
+                        tracestate = Encoding.UTF8.GetString(stateBytes);
+
+                    parentContext = new ActivityContext(traceId, spanId, flags, tracestate, isRemote: true);
+                }
+            }
+        }
+        var activity = Diagnostics.ActivitySource.StartActivity("Consume", ActivityKind.Consumer, parentContext);
+        if (activity != null)
+        {
+            activity.AddTag(SpanAttributes.Messaging.System, "rabbitmq");
+            activity.AddTag(SpanAttributes.Messaging.DestinationKind, "queue");
+            if (!string.IsNullOrEmpty(info.RoutingKey))
+            {
+                activity.AddTag(SpanAttributes.RabbitMq.RoutingKey, info.RoutingKey);
+            }
+            if (!string.IsNullOrEmpty(info.Queue))
+            {
+                activity.AddTag(SpanAttributes.Messaging.Destination, info.Queue);
+            }
+            activity.AddTag(SpanAttributes.Payload.Type, info.Queue);
+            if (properties.CorrelationIdPresent)
+            {
+                activity.AddTag(SpanAttributes.Messaging.ConversationId, properties.CorrelationId);
+            }
+            if (properties.MessageIdPresent)
+            {
+                activity.AddTag(SpanAttributes.Messaging.MessageId, properties.MessageId);
+            }
+        }
+        return activity;
     }
 
     #endregion
@@ -238,14 +304,85 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         CancellationToken cancellationToken
     )
     {
-        using var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
-        await PublishAsync(
-            exchange, routingKey, mandatory, serializedMessage.Properties, serializedMessage.Body, cancellationToken
-        ).ConfigureAwait(false);
+        using var activity = StartPublishActivity(exchange, routingKey, message.Properties, message.MessageType.FullName);
+        try
+        {
+            using var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
+
+            await PublishAsyncInternal(
+                exchange, routingKey, mandatory, serializedMessage.Properties, serializedMessage.Body, cancellationToken
+            ).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            activity?.RecordException(ex);
+            throw;
+        }
     }
 
     /// <inheritdoc />
     public virtual async Task PublishAsync(
+        string exchange,
+        string routingKey,
+        bool mandatory,
+        MessageProperties properties,
+        ReadOnlyMemory<byte> body,
+        CancellationToken cancellationToken
+    )
+    {
+        using var activity = StartPublishActivity(exchange, routingKey, properties);
+        try
+        {
+            await PublishAsyncInternal(
+                exchange, routingKey, mandatory, properties, body, cancellationToken
+            ).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            activity?.RecordException(ex);
+            throw;
+        }
+    }
+
+    private static Activity? StartPublishActivity(
+        string exchange,
+        string routingKey,
+        MessageProperties properties,
+        string? messageType = null
+    )
+    {
+        var activity = Diagnostics.ActivitySource.StartActivity("Publish", ActivityKind.Producer);
+
+        if (activity != null)
+        {
+            var activityId = activity.Id;
+            if (properties.PropagateTraceContext && properties.Headers != null && !string.IsNullOrEmpty(activityId))
+            {
+                properties.Headers.Add(W3cTraceContext.TraceParent, Encoding.UTF8.GetBytes(activityId));
+            }
+
+            activity.AddTag(SpanAttributes.Messaging.System, "rabbitmq");
+            activity.AddTag(SpanAttributes.Messaging.DestinationKind, "queue");
+
+            if (!string.IsNullOrEmpty(routingKey))
+                activity.AddTag(SpanAttributes.RabbitMq.RoutingKey, routingKey);
+
+            if (properties.CorrelationIdPresent)
+                activity.AddTag(SpanAttributes.Messaging.ConversationId, properties.CorrelationId);
+
+            if (properties.MessageIdPresent)
+                activity.AddTag(SpanAttributes.Messaging.MessageId, properties.MessageId);
+
+            if (!string.IsNullOrEmpty(exchange))
+                activity.AddTag(SpanAttributes.Messaging.Destination, exchange);
+
+            if (!string.IsNullOrEmpty(messageType))
+                activity.AddTag(SpanAttributes.Payload.Type, messageType);
+        }
+        return activity;
+    }
+
+    protected async Task PublishAsyncInternal(
         string exchange,
         string routingKey,
         bool mandatory,

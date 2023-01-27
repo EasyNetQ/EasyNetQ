@@ -127,6 +127,14 @@ public interface ISubscriptionConfiguration
     /// <param name="singleActiveConsumer">Queue's single-active-consumer flag</param>
     /// <returns>Returns a reference to itself</returns>
     ISubscriptionConfiguration WithSingleActiveConsumer(bool singleActiveConsumer = true);
+
+    /// <summary>
+    ///     Allows to propagate trace context information that enables distributed tracing scenarios.
+    ///     <seealso href="https://www.w3.org/TR/trace-context/" />
+    ///     <seealso href="https://opentelemetry.io" />
+    /// </summary>
+    /// <returns><see cref="ISubscriptionConfiguration"/></returns>
+    ISubscriptionConfiguration WithTraceContext(bool propagateTraceContext = true);
 }
 
 internal class SubscriptionConfiguration : ISubscriptionConfiguration
@@ -147,6 +155,7 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
     public string ExchangeType { get; private set; } = EasyNetQ.ExchangeType.Topic;
     public string? AlternateExchange { get; private set; }
     public bool SingleActiveConsumer { get; private set; }
+    public bool PropagateTraceContext { get; private set; }
 
     public SubscriptionConfiguration(ushort defaultPrefetchCount)
     {
@@ -254,6 +263,12 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
     public ISubscriptionConfiguration WithSingleActiveConsumer(bool singleActiveConsumer = true)
     {
         SingleActiveConsumer = singleActiveConsumer;
+        return this;
+    }
+
+    public ISubscriptionConfiguration WithTraceContext(bool propagateTraceContext = true)
+    {
+        PropagateTraceContext = propagateTraceContext;
         return this;
     }
 }

@@ -1,6 +1,5 @@
 using EasyNetQ.Consumer;
 using EasyNetQ.Topology;
-
 namespace EasyNetQ;
 
 internal class PerQueueConsumeConfiguration : IPerQueueConsumeConfiguration
@@ -13,6 +12,7 @@ internal class PerQueueConsumeConfiguration : IPerQueueConsumeConfiguration
 
     public IDictionary<string, object>? Arguments { get; private set; }
 
+    public bool PropagateTraceContext { get; private set; }
 
     public IPerQueueConsumeConfiguration WithConsumerTag(string consumerTag)
     {
@@ -35,6 +35,12 @@ internal class PerQueueConsumeConfiguration : IPerQueueConsumeConfiguration
     public IPerQueueConsumeConfiguration WithAutoAck()
     {
         AutoAck = true;
+        return this;
+    }
+
+    public IPerQueueConsumeConfiguration WithTraceContext(bool propagateTraceContext = true)
+    {
+        PropagateTraceContext = propagateTraceContext;
         return this;
     }
 }
@@ -121,6 +127,14 @@ public interface IPerQueueConsumeConfiguration
     /// <param name="value">The argument value to set</param>
     /// <returns>IPerQueueConsumeConfiguration</returns>
     IPerQueueConsumeConfiguration WithArgument(string name, object value);
+
+    /// <summary>
+    ///     Allows to propagate trace context information that enables distributed tracing scenarios.
+    ///     <seealso href="https://www.w3.org/TR/trace-context/" />
+    ///     <seealso href="https://opentelemetry.io" />
+    /// </summary>
+    /// <returns><see cref="IPerQueueConsumeConfiguration"/></returns>
+    IPerQueueConsumeConfiguration WithTraceContext(bool propagateTraceContext = true);
 }
 
 /// <summary>
@@ -196,4 +210,11 @@ public interface ISimpleConsumeConfiguration
     /// <param name="prefetchCount">The prefetchCount to set</param>
     /// <returns>IConsumerConfiguration</returns>
     ISimpleConsumeConfiguration WithPrefetchCount(ushort prefetchCount);
+
+    /// <summary>
+    ///     Allows to propagate trace context information that enables distributed tracing scenarios.
+    ///     <seealso href="https://www.w3.org/TR/trace-context/" />
+    ///     <seealso href="https://opentelemetry.io" />
+    /// </summary>
+    ISimpleConsumeConfiguration WithTraceContext(bool propagateTraceContext = true);
 }

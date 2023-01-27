@@ -35,6 +35,14 @@ public interface IPublishConfiguration
     /// <param name="headers">Headers to set</param>
     /// <returns>Returns a reference to itself</returns>
     IPublishConfiguration WithHeaders(IDictionary<string, object?> headers);
+
+    /// <summary>
+    /// Allows to propagate trace context information that enables distributed tracing scenarios.
+    /// <seealso href="https://www.w3.org/TR/trace-context/" />
+    /// <seealso href="https://opentelemetry.io" />
+    /// </summary>
+    /// <returns><see cref="IPublishConfiguration"/></returns>
+    IPublishConfiguration WithTraceContext(bool propagateTraceContext = true);
 }
 
 internal class PublishConfiguration : IPublishConfiguration
@@ -68,8 +76,15 @@ internal class PublishConfiguration : IPublishConfiguration
         return this;
     }
 
+    public IPublishConfiguration WithTraceContext(bool propagateTraceContext = true)
+    {
+        PropagateTraceContext = propagateTraceContext;
+        return this;
+    }
+
     public byte? Priority { get; private set; }
     public string Topic { get; private set; }
     public TimeSpan? Expires { get; private set; }
     public IDictionary<string, object?>? Headers { get; private set; }
+    public bool PropagateTraceContext { get; private set; }
 }
