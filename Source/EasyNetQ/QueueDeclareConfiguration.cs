@@ -38,7 +38,7 @@ public interface IQueueDeclareConfiguration
     IQueueDeclareConfiguration WithArgument(string name, object value);
 }
 
-internal class QueueDeclareConfiguration : IQueueDeclareConfiguration
+public class QueueDeclareConfiguration : IQueueDeclareConfiguration
 {
     public bool IsDurable { get; private set; } = true;
     public bool IsExclusive { get; private set; }
