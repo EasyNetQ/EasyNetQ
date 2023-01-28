@@ -129,7 +129,8 @@ public class When_subscribe_with_configuration_is_called
         bool durable,
         string queueName,
         int? maxLength,
-        int? maxLengthBytes)
+        int? maxLengthBytes
+    )
     {
         var mockBuilder = new MockBuilder();
         // Configure subscription
@@ -176,7 +177,7 @@ public class When_subscribe_with_configuration_is_called
         mockBuilder.Channels[1].Received().QueueDeclare(
             Arg.Is(queueName ?? "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests_x"),
             Arg.Is(durable),
-            Arg.Is(isExclusive),
+            Arg.Is(false),
             Arg.Is(autoDelete),
             Arg.Is<IDictionary<string, object>>(
                 x =>
