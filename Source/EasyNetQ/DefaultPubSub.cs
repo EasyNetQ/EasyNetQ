@@ -104,7 +104,6 @@ public class DefaultPubSub : IPubSub
             queueName,
             c =>
             {
-                c.AsExclusive(subscriptionConfiguration.IsExclusive);
                 c.AsDurable(subscriptionConfiguration.Durable);
                 c.AsAutoDelete(subscriptionConfiguration.AutoDelete);
                 if (subscriptionConfiguration.Expires.HasValue)
