@@ -91,6 +91,19 @@ public interface IAdvancedBus
     );
 
     /// <summary>
+    /// Declare a queue. If the queue already exists this method does nothing
+    /// </summary>
+    /// <param name="queue">The name of the queue</param>
+    /// <param name="queueDeclareConfiguration">Queue configuration</param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    /// <returns>The queue</returns>
+    Task<Queue> QueueDeclareAsync(
+        string queue,
+        QueueDeclareConfiguration queueDeclareConfiguration,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Declare a transient server named queue. Note, this queue will only last for duration of the
     /// connection. If there is a connection outage, EasyNetQ will not attempt to recreate
     /// consumers.

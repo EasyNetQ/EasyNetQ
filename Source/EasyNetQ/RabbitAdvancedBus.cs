@@ -332,16 +332,23 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     }
 
     /// <inheritdoc />
-    public async Task<Queue> QueueDeclareAsync(
+    public Task<Queue> QueueDeclareAsync(
         string queue,
         Action<IQueueDeclareConfiguration> configure,
         CancellationToken cancellationToken = default
     )
     {
-        using var cts = cancellationToken.WithTimeout(configuration.Timeout);
-
         var queueDeclareConfiguration = new QueueDeclareConfiguration();
         configure(queueDeclareConfiguration);
+
+        return QueueDeclareAsync(queue, queueDeclareConfiguration, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<Queue> QueueDeclareAsync (string queue, QueueDeclareConfiguration queueDeclareConfiguration, CancellationToken cancellationToken = default)
+    {
+       using var cts = cancellationToken.WithTimeout(configuration.Timeout);
+
         var isDurable = queueDeclareConfiguration.IsDurable;
         var isExclusive = queueDeclareConfiguration.IsExclusive;
         var isAutoDelete = queueDeclareConfiguration.IsAutoDelete;
@@ -365,8 +372,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             );
         }
 
-        return new Queue(queueDeclareOk.QueueName, isDurable, isExclusive, isAutoDelete, arguments);
-    }
+        return new Queue(queueDeclareOk.QueueName, isDurable, isExclusive, isAutoDelete, arguments);    }
 
     /// <inheritdoc />
     public virtual async Task QueueDeleteAsync(

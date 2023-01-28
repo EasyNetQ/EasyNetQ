@@ -577,6 +577,28 @@ public static class AdvancedBusExtensions
     /// </summary>
     /// <param name="bus">The bus instance</param>
     /// <param name="queue">The name of the queue</param>
+    /// <param name="queueDeclareConfiguration">Queue configuration</param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    /// <returns>
+    /// The queue
+    /// </returns>
+    public static Queue QueueDeclare(
+        this IAdvancedBus bus,
+        string queue,
+        QueueDeclareConfiguration queueDeclareConfiguration,
+        CancellationToken cancellationToken = default
+    )
+    {
+        return bus.QueueDeclareAsync(queue, queueDeclareConfiguration, cancellationToken)
+                  .GetAwaiter()
+                  .GetResult();
+    }
+
+    /// <summary>
+    /// Declare a queue. If the queue already exists this method does nothing
+    /// </summary>
+    /// <param name="bus">The bus instance</param>
+    /// <param name="queue">The name of the queue</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>
     /// The queue
