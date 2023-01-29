@@ -8,7 +8,7 @@ public interface IHandlerRunner
 }
 
 /// <inheritdoc cref="IHandlerRunner"/>
-public class HandlerRunner : IHandlerRunner, IDisposable
+public class HandlerRunner : IHandlerRunner
 {
     private readonly IConsumerErrorStrategy consumerErrorStrategy;
     private readonly ILogger logger;
@@ -49,10 +49,5 @@ public class HandlerRunner : IHandlerRunner, IDisposable
             logger.Error(exception, "Consumer error strategy has failed");
             return AckStrategies.NackWithRequeue;
         }
-    }
-
-    /// <inheritdoc />
-    public virtual void Dispose()
-    {
     }
 }

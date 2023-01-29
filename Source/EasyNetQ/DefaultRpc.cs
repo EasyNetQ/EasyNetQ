@@ -300,12 +300,11 @@ public class DefaultRpc : IRpc, IDisposable
         CancellationToken cancellationToken
     )
     {
-        //TODO Cache declaration of exchange
-        var exchangeName = conventions.RpcResponseExchangeNamingConvention(typeof(TResponse));
-        var exchange = exchangeName == Exchange.Default.Name
+        var responseExchangeName = conventions.RpcResponseExchangeNamingConvention(typeof(TResponse));
+        var responseExchange = responseExchangeName == Exchange.Default.Name
             ? Exchange.Default
-            : await advancedBus.ExchangeDeclareAsync(
-                exchangeName,
+            : await exchangeDeclareStrategy.DeclareExchangeAsync(
+                responseExchangeName,
                 ExchangeType.Direct,
                 cancellationToken: cancellationToken
             ).ConfigureAwait(false);
@@ -323,7 +322,7 @@ public class DefaultRpc : IRpc, IDisposable
                 }
             );
             await advancedBus.PublishAsync(
-                exchange.Name,
+                responseExchange.Name,
                 requestMessage.Properties.ReplyTo!,
                 false,
                 responseMessage,
@@ -346,7 +345,7 @@ public class DefaultRpc : IRpc, IDisposable
                 }
             );
             await advancedBus.PublishAsync(
-                exchange.Name,
+                responseExchange.Name,
                 requestMessage.Properties.ReplyTo!,
                 false,
                 responseMessage,

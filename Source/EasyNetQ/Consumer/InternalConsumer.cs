@@ -150,6 +150,9 @@ public class InternalConsumer : IInternalConsumer
             }
             catch (Exception exception)
             {
+                model?.Dispose();
+                model = null;
+
                 logger.Error(exception, "Failed to create model");
                 return new InternalConsumerStatus(Array.Empty<Queue>(), Array.Empty<Queue>(), Array.Empty<Queue>());
             }
@@ -191,7 +194,7 @@ public class InternalConsumer : IInternalConsumer
                     perQueueConfiguration.Handler
                 );
                 consumer.ConsumerCancelled += AsyncBasicConsumerOnConsumerCancelled;
-                model.BasicConsume(
+                var consumerTag = model.BasicConsume(
                     queue.Name, // queue
                     perQueueConfiguration.AutoAck, // noAck
                     perQueueConfiguration.ConsumerTag, // consumerTag
@@ -203,10 +206,9 @@ public class InternalConsumer : IInternalConsumer
                 consumers.Add(queue.Name, consumer);
 
                 logger.InfoFormat(
-                    "Declared consumer with consumerTag {consumerTag} on queue {queue} and configuration {configuration}",
-                    perQueueConfiguration.ConsumerTag,
-                    queue.Name,
-                    configuration
+                    "Declared consumer with consumerTag {consumerTag} on queue {queue}",
+                    consumerTag,
+                    queue.Name
                 );
 
                 startedQueues.Add(queue);
@@ -216,8 +218,7 @@ public class InternalConsumer : IInternalConsumer
             {
                 logger.Error(
                     exception,
-                    "Consume with consumerTag {consumerTag} on queue {queue} failed",
-                    perQueueConfiguration.ConsumerTag,
+                    "Failed to declare consumer on queue {queue}",
                     queue.Name
                 );
 

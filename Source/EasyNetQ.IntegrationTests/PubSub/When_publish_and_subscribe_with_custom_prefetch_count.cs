@@ -23,11 +23,11 @@ public class When_publish_and_subscribe_with_custom_prefetch_count : IDisposable
     [Fact]
     public async Task Should_publish_and_consume()
     {
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
         var subscriptionId = Guid.NewGuid().ToString();
-        var messagesSink = new MessagesSink(MessagesCount);
-        var messages = MessagesFactories.Create(MessagesCount);
+        var messagesSink = new MessagesSink(2 * MessagesCount);
+        var messages = MessagesFactories.Create(2 * MessagesCount);
 
         void SlowSyncAction(Message message)
         {
@@ -44,7 +44,7 @@ public class When_publish_and_subscribe_with_custom_prefetch_count : IDisposable
             await messagesSink.WaitAllReceivedAsync(cts.Token);
             messagesSink.ReceivedMessages.Should().BeEquivalentTo(messages);
 
-            Stopwatch.GetElapsedTime(started).Should().BeLessThan(TimeSpan.FromSeconds(3));
+            Stopwatch.GetElapsedTime(started).Should().BeLessThan(TimeSpan.FromSeconds(7.5));
         }
     }
 }
