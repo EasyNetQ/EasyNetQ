@@ -356,17 +356,7 @@ public class DefaultRpc : IRpc, IDisposable
         }
     }
 
-    protected readonly struct RpcKey
-    {
-        public RpcKey(Type requestType, Type responseType)
-        {
-            RequestType = requestType;
-            ResponseType = responseType;
-        }
-
-        public Type RequestType { get; }
-        public Type ResponseType { get; }
-    }
+    protected readonly record struct RpcKey(Type RequestType, Type ResponseType);
 
     protected readonly struct ResponseAction
     {
