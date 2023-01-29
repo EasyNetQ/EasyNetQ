@@ -54,7 +54,7 @@ public readonly struct AsyncLock : IDisposable
     /// </summary>
     /// <param name="result">Releaser, which should be disposed to release a lock</param>
     /// <returns>True if acquired</returns>
-    public bool TryAcquireImmediately(out Releaser result)
+    public bool TryAcquire(out Releaser result)
     {
         if (semaphore.Wait(0))
         {

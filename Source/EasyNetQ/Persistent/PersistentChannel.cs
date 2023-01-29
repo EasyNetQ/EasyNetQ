@@ -78,7 +78,7 @@ public class PersistentChannel : IPersistentChannel
         in TChannelAction channelAction, [MaybeNullWhen(false)] out TResult result
     ) where TChannelAction : struct, IPersistentChannelAction<TResult>
     {
-        if (mutex.TryAcquireImmediately(out var releaser))
+        if (mutex.TryAcquire(out var releaser))
         {
             try
             {
