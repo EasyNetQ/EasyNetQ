@@ -50,7 +50,7 @@ public readonly struct AsyncLock : IDisposable
     }
 
     /// <summary>
-    /// Acquires a lock
+    /// Tries to acquires a lock
     /// </summary>
     /// <returns>Releaser, which should be disposed to release a lock</returns>
     public bool TryAcquireImmediately(out Releaser result)
