@@ -1,4 +1,4 @@
-﻿namespace EasyNetQ;
+namespace EasyNetQ;
 
 internal static class SpanAttributes
 {
