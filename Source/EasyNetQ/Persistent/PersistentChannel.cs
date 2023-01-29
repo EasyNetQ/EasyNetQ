@@ -96,7 +96,7 @@ public class PersistentChannel : IPersistentChannel
                 if (exceptionVerdict.Rethrow)
                     throw;
 
-                logger.Error(exception, "Failed to invoke channel action, invocation will be retried");
+                logger.Error(exception, "Failed to fast invoke channel action, invocation will be retried");
             }
             finally
             {
