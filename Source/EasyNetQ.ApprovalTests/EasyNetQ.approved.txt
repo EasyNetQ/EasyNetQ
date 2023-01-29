@@ -1532,7 +1532,7 @@ namespace EasyNetQ.Internals
         public EasyNetQ.Internals.AsyncLock.Releaser Acquire(System.Threading.CancellationToken cancellationToken = default) { }
         public System.Threading.Tasks.Task<EasyNetQ.Internals.AsyncLock.Releaser> AcquireAsync(System.Threading.CancellationToken cancellationToken = default) { }
         public void Dispose() { }
-        public bool TryAcquireImmediately(out EasyNetQ.Internals.AsyncLock.Releaser result) { }
+        public bool TryAcquire(out EasyNetQ.Internals.AsyncLock.Releaser result) { }
         public readonly struct Releaser : System.IDisposable
         {
             public Releaser(System.Threading.SemaphoreSlim? semaphore) { }
