@@ -50,9 +50,10 @@ public readonly struct AsyncLock : IDisposable
     }
 
     /// <summary>
-    /// Tries to acquires a lock
+    /// Tries to acquire a lock
     /// </summary>
-    /// <returns>Releaser, which should be disposed to release a lock</returns>
+    /// <param name="result">Releaser, which should be disposed to release a lock</param>
+    /// <returns>True if acquired</returns>
     public bool TryAcquireImmediately(out Releaser result)
     {
         if (semaphore.Wait(0))
