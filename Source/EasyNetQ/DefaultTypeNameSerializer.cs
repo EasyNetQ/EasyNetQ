@@ -217,15 +217,5 @@ public class DefaultTypeNameSerializer : ITypeNameSerializer
         return null;
     }
 
-    private readonly struct TypeNameKey
-    {
-        public string? AssemblyName { get; }
-        public string TypeName { get; }
-
-        public TypeNameKey(string? assemblyName, string typeName)
-        {
-            AssemblyName = assemblyName;
-            TypeName = typeName;
-        }
-    }
+    private readonly record struct TypeNameKey(string? AssemblyName, string TypeName);
 }
