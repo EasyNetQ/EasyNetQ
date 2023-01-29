@@ -186,11 +186,11 @@ namespace EasyNetQ
             public string QueueName { get; }
             public System.Action Unsubscribe { get; }
         }
-        protected readonly struct RpcKey
+        protected readonly struct RpcKey : System.IEquatable<EasyNetQ.DefaultRpc.RpcKey>
         {
-            public RpcKey(System.Type requestType, System.Type responseType) { }
-            public System.Type RequestType { get; }
-            public System.Type ResponseType { get; }
+            public RpcKey(System.Type RequestType, System.Type ResponseType) { }
+            public System.Type RequestType { get; set; }
+            public System.Type ResponseType { get; set; }
         }
     }
     public class DefaultSendReceive : EasyNetQ.ISendReceive

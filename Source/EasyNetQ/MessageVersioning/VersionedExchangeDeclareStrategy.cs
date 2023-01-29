@@ -53,16 +53,5 @@ public class VersionedExchangeDeclareStrategy : IExchangeDeclareStrategy
         return destinationExchange ?? throw new ArgumentOutOfRangeException(nameof(messageVersions));
     }
 
-    private readonly struct ExchangeKey
-    {
-        public ExchangeKey(string name, string type)
-        {
-            Name = name;
-            Type = type;
-        }
-
-        public string Name { get; }
-
-        public string Type { get; }
-    }
+    private readonly record struct ExchangeKey(string Name, string Type);
 }
