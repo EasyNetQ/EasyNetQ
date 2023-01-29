@@ -16,7 +16,7 @@ public interface IPersistentChannelDispatcher
     /// <typeparam name="TResult"></typeparam>
     /// <typeparam name="TChannelAction"></typeparam>
     /// <returns></returns>
-    Task<TResult> InvokeAsync<TResult, TChannelAction>(
+    ValueTask<TResult> InvokeAsync<TResult, TChannelAction>(
         TChannelAction channelAction,
         PersistentChannelDispatchOptions options,
         CancellationToken cancellationToken = default

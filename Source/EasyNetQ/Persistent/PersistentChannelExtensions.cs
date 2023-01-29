@@ -13,7 +13,7 @@ internal static class PersistentChannelExtensions
             .GetResult();
     }
 
-    public static Task InvokeChannelActionAsync(
+    public static ValueTask<bool> InvokeChannelActionAsync(
         this IPersistentChannel source, Action<IModel> channelAction, CancellationToken cancellationToken = default
     )
     {
@@ -22,7 +22,7 @@ internal static class PersistentChannelExtensions
         );
     }
 
-    public static Task<TResult> InvokeChannelActionAsync<TResult>(
+    public static ValueTask<TResult> InvokeChannelActionAsync<TResult>(
         this IPersistentChannel source, Func<IModel, TResult> channelAction, CancellationToken cancellationToken = default
     )
     {

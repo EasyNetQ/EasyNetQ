@@ -34,7 +34,7 @@ public class When_an_action_is_invoked_that_throws_using_multi_channel : IDispos
     public async Task Should_raise_the_exception_on_the_calling_thread()
     {
         await Assert.ThrowsAsync<CrazyTestOnlyException>(
-            () => dispatcher.InvokeAsync<int>(_ => throw new CrazyTestOnlyException(), PersistentChannelDispatchOptions.ProducerTopology)
+            () => dispatcher.InvokeAsync<int>(_ => throw new CrazyTestOnlyException(), PersistentChannelDispatchOptions.ProducerTopology).AsTask()
         );
     }
 
@@ -42,7 +42,7 @@ public class When_an_action_is_invoked_that_throws_using_multi_channel : IDispos
     public async Task Should_call_action_when_previous_threw_an_exception()
     {
         await Assert.ThrowsAsync<Exception>(
-            () => dispatcher.InvokeAsync<int>(_ => throw new Exception(), PersistentChannelDispatchOptions.ProducerTopology)
+            () => dispatcher.InvokeAsync<int>(_ => throw new Exception(), PersistentChannelDispatchOptions.ProducerTopology).AsTask()
         );
 
         var result = await dispatcher.InvokeAsync(_ => 42, PersistentChannelDispatchOptions.ProducerTopology);

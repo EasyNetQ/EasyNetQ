@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
 using EasyNetQ.Logging;
@@ -46,13 +47,71 @@ public class PersistentChannel : IPersistentChannel
     }
 
     /// <inheritdoc />
-    public async Task<TResult> InvokeChannelActionAsync<TResult, TChannelAction>(
+    public ValueTask<TResult> InvokeChannelActionAsync<TResult, TChannelAction>(
         TChannelAction channelAction, CancellationToken cancellationToken = default
     ) where TChannelAction : struct, IPersistentChannelAction<TResult>
     {
         if (disposed)
             throw new ObjectDisposedException(nameof(PersistentChannel));
 
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return TryInvokeChannelActionFast<TResult, TChannelAction>(channelAction, out var result)
+            ? new ValueTask<TResult>(result)
+            : new ValueTask<TResult>(InvokeChannelActionSlowAsync<TResult, TChannelAction>(channelAction, cancellationToken));
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        if (disposed)
+            return;
+
+        disposed = true;
+        disposeCts.Cancel();
+        mutex.Dispose();
+        CloseChannel();
+        disposeCts.Dispose();
+    }
+
+    private bool TryInvokeChannelActionFast<TResult, TChannelAction>(
+        in TChannelAction channelAction, [MaybeNullWhen(false)] out TResult result
+    ) where TChannelAction : struct, IPersistentChannelAction<TResult>
+    {
+        if (mutex.TryAcquireImmediately(out var releaser))
+        {
+            try
+            {
+                var channel = initializedChannel ??= CreateChannel();
+                // ReSharper disable once PossiblyImpureMethodCallOnReadonlyVariable
+                result = channelAction.Invoke(channel);
+                return true;
+            }
+            catch (Exception exception)
+            {
+                var exceptionVerdict = GetExceptionVerdict(exception);
+                if (exceptionVerdict.CloseChannel)
+                    CloseChannel();
+
+                if (exceptionVerdict.Rethrow)
+                    throw;
+
+                logger.Error(exception, "Failed to invoke channel action, invocation will be retried");
+            }
+            finally
+            {
+                releaser.Dispose();
+            }
+        }
+
+        result = default;
+        return false;
+    }
+
+    private async Task<TResult> InvokeChannelActionSlowAsync<TResult, TChannelAction>(
+        TChannelAction channelAction, CancellationToken cancellationToken = default
+    ) where TChannelAction : struct, IPersistentChannelAction<TResult>
+    {
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, disposeCts.Token);
         using var _ = await mutex.AcquireAsync(cts.Token).ConfigureAwait(false);
 
@@ -82,19 +141,6 @@ public class PersistentChannel : IPersistentChannel
             await Task.Delay(retryTimeoutMs, cts.Token).ConfigureAwait(false);
             retryTimeoutMs = Math.Min(retryTimeoutMs * 2, MaxRetryTimeoutMs);
         }
-    }
-
-    /// <inheritdoc />
-    public void Dispose()
-    {
-        if (disposed)
-            return;
-
-        disposed = true;
-        disposeCts.Cancel();
-        mutex.Dispose();
-        CloseChannel();
-        disposeCts.Dispose();
     }
 
     private IModel CreateChannel()
