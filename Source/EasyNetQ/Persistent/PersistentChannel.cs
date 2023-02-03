@@ -224,8 +224,11 @@ public class PersistentChannel : IPersistentChannel
                 return isRequestPipeliningForbiddenException
                     ? ExceptionVerdict.SuppressAndCloseChannel
                     : ExceptionVerdict.Throw;
-            case BrokerUnreachableException:
-                return ExceptionVerdict.Suppress;
+            case BrokerUnreachableException e:
+                var isAuthenticationFailureException = e.InnerException is AuthenticationFailureException;
+                return isAuthenticationFailureException
+                    ? ExceptionVerdict.Throw
+                    : ExceptionVerdict.Suppress;
             case EasyNetQException:
                 return ExceptionVerdict.Suppress;
             default:
