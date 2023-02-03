@@ -126,4 +126,26 @@ public class When_an_action_is_performed_and_channel_reopens
 
         channel.Received().ExchangeDeclare("MyExchange", "direct");
     }
+
+    [Fact]
+    public void Should_fail_when_auth_is_failed()
+    {
+        var persistentConnection = Substitute.For<IPersistentConnection>();
+        var channel = Substitute.For<IModel, IRecoverable>();
+        persistentConnection.CreateModel()
+            .Returns(
+                _ => throw new BrokerUnreachableException(new AuthenticationFailureException("Oops")),
+                _ => channel
+            );
+
+        using var persistentChannel = new PersistentChannel(
+            new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, Substitute.For<IEventBus>()
+        );
+
+        Assert.Throws<BrokerUnreachableException>(
+            () => persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"))
+        );
+
+        channel.DidNotReceive().ExchangeDeclare("MyExchange", "direct");
+    }
 }
