@@ -58,7 +58,7 @@ public sealed class MultiPersistentChannelDispatcher : IPersistentChannelDispatc
     }
 
     /// <inheritdoc />
-    public async Task<TResult> InvokeAsync<TResult, TChannelAction>(
+    public async ValueTask<TResult> InvokeAsync<TResult, TChannelAction>(
         TChannelAction channelAction,
         PersistentChannelDispatchOptions options,
         CancellationToken cancellationToken = default

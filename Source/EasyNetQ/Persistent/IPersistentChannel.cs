@@ -23,7 +23,7 @@ public interface IPersistentChannel : IDisposable
     /// </summary>
     /// <param name="channelAction">The action to invoke</param>
     /// <param name="cancellationToken">The cancellation token</param>
-    Task<TResult> InvokeChannelActionAsync<TResult, TChannelAction>(
+    ValueTask<TResult> InvokeChannelActionAsync<TResult, TChannelAction>(
         TChannelAction channelAction, CancellationToken cancellationToken = default
     ) where TChannelAction : struct, IPersistentChannelAction<TResult>;
 }

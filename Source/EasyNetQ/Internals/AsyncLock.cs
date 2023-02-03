@@ -49,13 +49,30 @@ public readonly struct AsyncLock : IDisposable
         return releaser;
     }
 
+    /// <summary>
+    /// Tries to acquire a lock
+    /// </summary>
+    /// <param name="result">Releaser, which should be disposed to release a lock</param>
+    /// <returns>True if acquired</returns>
+    public bool TryAcquire(out Releaser result)
+    {
+        if (semaphore.Wait(0))
+        {
+            result = releaser;
+            return true;
+        }
+
+        result = default;
+        return false;
+    }
+
     public readonly struct Releaser : IDisposable
     {
-        private readonly SemaphoreSlim semaphore;
+        private readonly SemaphoreSlim? semaphore;
 
-        public Releaser(SemaphoreSlim semaphore) => this.semaphore = semaphore;
+        public Releaser(SemaphoreSlim? semaphore) => this.semaphore = semaphore;
 
-        public void Dispose() => semaphore.Release();
+        public void Dispose() => semaphore?.Release();
     }
 
     /// <inheritdoc />
