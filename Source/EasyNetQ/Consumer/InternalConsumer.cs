@@ -116,7 +116,6 @@ public class InternalConsumer : IInternalConsumer
         this.eventBus = eventBus;
     }
 
-
     /// <inheritdoc />
     public InternalConsumerStatus StartConsuming(bool firstStart)
     {

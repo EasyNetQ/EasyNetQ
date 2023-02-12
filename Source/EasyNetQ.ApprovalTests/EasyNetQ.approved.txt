@@ -1221,7 +1221,7 @@ namespace EasyNetQ.Consumer
         EasyNetQ.Consumer.InternalConsumerStatus StartConsuming(bool firstStart = true);
         void StopConsuming();
     }
-    public interface IInternalConsumerFactory : System.IDisposable
+    public interface IInternalConsumerFactory
     {
         EasyNetQ.Consumer.IInternalConsumer CreateConsumer(EasyNetQ.Consumer.ConsumerConfiguration configuration);
     }
@@ -1241,11 +1241,10 @@ namespace EasyNetQ.Consumer
         public System.Collections.Generic.IReadOnlyCollection<EasyNetQ.Topology.Queue> Active { get; }
         public EasyNetQ.Topology.Queue Cancelled { get; }
     }
-    public class InternalConsumerFactory : EasyNetQ.Consumer.IInternalConsumerFactory, System.IDisposable
+    public class InternalConsumerFactory : EasyNetQ.Consumer.IInternalConsumerFactory
     {
         public InternalConsumerFactory(EasyNetQ.Logging.ILogger<EasyNetQ.Consumer.InternalConsumer> logger, EasyNetQ.Consumer.IConsumerConnection connection, EasyNetQ.Consumer.IHandlerRunner handlerRunner, EasyNetQ.IEventBus eventBus) { }
         public EasyNetQ.Consumer.IInternalConsumer CreateConsumer(EasyNetQ.Consumer.ConsumerConfiguration configuration) { }
-        public void Dispose() { }
     }
     public readonly struct InternalConsumerStatus
     {

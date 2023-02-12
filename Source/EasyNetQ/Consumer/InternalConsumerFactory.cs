@@ -2,8 +2,7 @@ using EasyNetQ.Logging;
 
 namespace EasyNetQ.Consumer;
 
-/// <inheritdoc />
-public interface IInternalConsumerFactory : IDisposable
+public interface IInternalConsumerFactory
 {
     /// <summary>
     ///     Creates a consumer based on the configuration
@@ -39,12 +38,5 @@ public class InternalConsumerFactory : IInternalConsumerFactory
 
     /// <inheritdoc />
     public IInternalConsumer CreateConsumer(ConsumerConfiguration configuration)
-    {
-        return new InternalConsumer(logger, configuration, connection, handlerRunner, eventBus);
-    }
-
-    /// <inheritdoc />
-    public void Dispose()
-    {
-    }
+        => new InternalConsumer(logger, configuration, connection, handlerRunner, eventBus);
 }
