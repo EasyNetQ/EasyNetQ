@@ -18,10 +18,10 @@ public static class MessagePropertiesExtensions
         return source with { Headers = headers };
     }
 
-    internal static MessageProperties SetConfirmationId(this in MessageProperties properties, ulong confirmationId)
+    internal static MessageProperties SetConfirmationId(in this MessageProperties properties, ulong confirmationId)
         => properties.SetHeader(ConfirmationIdHeader, NumberHelpers.FormatULongToBytes(confirmationId));
 
-    internal static bool TryGetConfirmationId(this in MessageProperties properties, out ulong confirmationId)
+    internal static bool TryGetConfirmationId(in this MessageProperties properties, out ulong confirmationId)
     {
         confirmationId = 0;
         return properties.Headers != null &&
@@ -30,7 +30,7 @@ public static class MessagePropertiesExtensions
                NumberHelpers.TryParseULongFromBytes(bytesValue, out confirmationId);
     }
 
-    public static void CopyTo(this in MessageProperties source, IBasicProperties basicProperties)
+    public static void CopyTo(in this MessageProperties source, IBasicProperties basicProperties)
     {
         if (source.ContentTypePresent) basicProperties.ContentType = source.ContentType;
         if (source.ContentEncodingPresent) basicProperties.ContentEncoding = source.ContentEncoding;
