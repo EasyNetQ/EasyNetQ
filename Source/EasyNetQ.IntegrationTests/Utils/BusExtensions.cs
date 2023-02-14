@@ -18,18 +18,18 @@ internal static class BusExtensions
         this IPubSub pubSub, IEnumerable<T> messages, CancellationToken cancellationToken = default
     )
     {
-        return pubSub.PublishBatchAsync(messages, _ => { }, cancellationToken);
+        return pubSub.PublishBatchAsync(messages, default, cancellationToken);
     }
 
     public static async Task PublishBatchAsync<T>(
         this IPubSub pubSub,
         IEnumerable<T> messages,
-        Action<IPublishConfiguration> configuration,
+        PublishConfiguration publishConfiguration,
         CancellationToken cancellationToken = default
     )
     {
         foreach (var message in messages)
-            await pubSub.PublishAsync(message, configuration, cancellationToken);
+            await pubSub.PublishAsync(message, publishConfiguration, cancellationToken);
     }
 
     public static async Task FuturePublishBatchAsync<T>(
