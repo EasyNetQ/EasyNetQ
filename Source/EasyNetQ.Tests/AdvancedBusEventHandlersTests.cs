@@ -1,8 +1,6 @@
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
-using EasyNetQ.DI;
 using EasyNetQ.Events;
-using EasyNetQ.Interception;
 using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
@@ -50,11 +48,11 @@ public class AdvancedBusEventHandlersTests : IDisposable
             eventBus,
             Substitute.For<IHandlerCollectionFactory>(),
             Substitute.For<ConnectionConfiguration>(),
-            Substitute.For<IEnumerable<IProduceConsumeInterceptor>>(),
+            Substitute.For<IEnumerable<IPublishMiddleware>>(),
+            Substitute.For<IEnumerable<IConsumeMiddleware>>(),
             Substitute.For<IMessageSerializationStrategy>(),
             Substitute.For<IPullingConsumerFactory>(),
-            advancedBusEventHandlers,
-            Substitute.For<IConsumeScopeProvider>()
+            advancedBusEventHandlers
         );
     }
 

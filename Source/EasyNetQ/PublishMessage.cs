@@ -3,14 +3,14 @@ namespace EasyNetQ;
 /// <summary>
 ///     Represents a publishing message
 /// </summary>
-public readonly struct ProducedMessage
+public readonly struct PublishMessage
 {
     /// <summary>
     ///    Creates ProducedMessage
     /// </summary>
     /// <param name="properties">The properties</param>
     /// <param name="body">The body</param>
-    public ProducedMessage(in MessageProperties properties, in ReadOnlyMemory<byte> body)
+    public PublishMessage(in MessageProperties properties, in ReadOnlyMemory<byte> body)
     {
         Properties = properties;
         Body = body;

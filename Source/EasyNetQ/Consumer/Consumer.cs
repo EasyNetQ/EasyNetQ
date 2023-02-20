@@ -36,14 +36,14 @@ public class PerQueueConsumerConfiguration
         string consumerTag,
         bool isExclusive,
         IDictionary<string, object>? arguments,
-        MessageHandler handler
+        ConsumeDelegate consumeDelegate
     )
     {
         AutoAck = autoAck;
         ConsumerTag = consumerTag;
         IsExclusive = isExclusive;
         Arguments = arguments;
-        Handler = handler;
+        ConsumeDelegate = consumeDelegate;
     }
 
     /// <summary>
@@ -69,7 +69,7 @@ public class PerQueueConsumerConfiguration
     /// <summary>
     ///     Handler for messages which are received by consumer
     /// </summary>
-    public MessageHandler Handler { get; }
+    public ConsumeDelegate ConsumeDelegate { get; }
 }
 
 /// <summary>

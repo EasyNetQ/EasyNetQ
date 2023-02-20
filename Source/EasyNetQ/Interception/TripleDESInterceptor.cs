@@ -6,7 +6,7 @@ namespace EasyNetQ.Interception;
 /// <summary>
 ///     An interceptor which encrypts and decrypts messages
 /// </summary>
-public class TripleDESInterceptor : IProduceConsumeInterceptor
+public class TripleDESInterceptor : IPublishConsumeInterceptor
 {
     private readonly byte[] iv;
     private readonly byte[] key;
@@ -21,7 +21,7 @@ public class TripleDESInterceptor : IProduceConsumeInterceptor
     }
 
     /// <inheritdoc />
-    public ProducedMessage OnProduce(in ProducedMessage message)
+    public PublishMessage OnPublish(in PublishMessage message)
     {
         var body = ArrayPool<byte>.Shared.Rent(message.Body.Length); // most likely rented array is larger than message.Body
 
@@ -31,7 +31,7 @@ public class TripleDESInterceptor : IProduceConsumeInterceptor
             using var tripleDes = TripleDES.Create();
             using var tripleDesEncryptor = tripleDes.CreateEncryptor(key, iv);
             var encryptedBody = tripleDesEncryptor.TransformFinalBlock(body, 0, message.Body.Length);
-            return new ProducedMessage(message.Properties, encryptedBody);
+            return new PublishMessage(message.Properties, encryptedBody);
         }
         finally
         {
@@ -40,7 +40,7 @@ public class TripleDESInterceptor : IProduceConsumeInterceptor
     }
 
     /// <inheritdoc />
-    public ConsumedMessage OnConsume(in ConsumedMessage message)
+    public ConsumeMessage OnConsume(in ConsumeMessage message)
     {
         using var tripleDes = TripleDES.Create();
         using var tripleDesDecryptor = tripleDes.CreateDecryptor(key, iv);
@@ -50,7 +50,7 @@ public class TripleDESInterceptor : IProduceConsumeInterceptor
         try
         {
             message.Body.CopyTo(body);
-            return new ConsumedMessage(
+            return new ConsumeMessage(
                 message.ReceivedInfo,
                 message.Properties,
                 tripleDesDecryptor.TransformFinalBlock(body, 0, message.Body.Length)

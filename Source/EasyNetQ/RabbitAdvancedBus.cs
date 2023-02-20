@@ -1,6 +1,5 @@
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
-using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Interception;
 using EasyNetQ.Internals;
@@ -17,6 +16,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 {
     private readonly IPersistentChannelDispatcher persistentChannelDispatcher;
     private readonly ConnectionConfiguration configuration;
+    private readonly IConsumeMiddleware[] consumeMiddlewares;
     private readonly IPublishConfirmationListener confirmationListener;
     private readonly ILogger logger;
     private readonly IProducerConnection producerConnection;
@@ -26,12 +26,11 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     private readonly IDisposable[] eventSubscriptions;
     private readonly IHandlerCollectionFactory handlerCollectionFactory;
     private readonly IMessageSerializationStrategy messageSerializationStrategy;
-    private readonly IProduceConsumeInterceptor[] produceConsumeInterceptors;
     private readonly IPullingConsumerFactory pullingConsumerFactory;
     private readonly AdvancedBusEventHandlers advancedBusEventHandlers;
-    private readonly IConsumeScopeProvider consumeScopeProvider;
 
     private volatile bool disposed;
+    private readonly PublishDelegate publishDelegate;
 
     /// <summary>
     ///     Creates RabbitAdvancedBus
@@ -46,11 +45,11 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         IEventBus eventBus,
         IHandlerCollectionFactory handlerCollectionFactory,
         ConnectionConfiguration configuration,
-        IEnumerable<IProduceConsumeInterceptor> produceConsumeInterceptors,
+        IEnumerable<IPublishMiddleware> publishMiddlewares,
+        IEnumerable<IConsumeMiddleware> consumeMiddlewares,
         IMessageSerializationStrategy messageSerializationStrategy,
         IPullingConsumerFactory pullingConsumerFactory,
-        AdvancedBusEventHandlers advancedBusEventHandlers,
-        IConsumeScopeProvider consumeScopeProvider
+        AdvancedBusEventHandlers advancedBusEventHandlers
     )
     {
         this.logger = logger;
@@ -62,11 +61,10 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         this.eventBus = eventBus;
         this.handlerCollectionFactory = handlerCollectionFactory;
         this.configuration = configuration;
-        this.produceConsumeInterceptors = produceConsumeInterceptors.ToArray();
+        this.consumeMiddlewares = consumeMiddlewares.ToArray();
         this.messageSerializationStrategy = messageSerializationStrategy;
         this.pullingConsumerFactory = pullingConsumerFactory;
         this.advancedBusEventHandlers = advancedBusEventHandlers;
-        this.consumeScopeProvider = consumeScopeProvider;
 
         Connected += advancedBusEventHandlers.Connected;
         Disconnected += advancedBusEventHandlers.Disconnected;
@@ -83,6 +81,8 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             this.eventBus.Subscribe<ConnectionUnblockedEvent>(OnConnectionUnblocked),
             this.eventBus.Subscribe<ReturnedMessageEvent>(OnMessageReturned),
         };
+
+        publishDelegate = PublishPipeline.Build(publishMiddlewares.ToArray(), PublishInternalAsync);
     }
 
 
@@ -102,9 +102,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     /// <inheritdoc />
     public IDisposable Consume(Action<IConsumeConfiguration> configure)
     {
-        var consumeConfiguration = new ConsumeConfiguration(
-            configuration.PrefetchCount, handlerCollectionFactory
-        );
+        var consumeConfiguration = new ConsumeConfiguration(configuration.PrefetchCount, handlerCollectionFactory);
         configure(consumeConfiguration);
 
         var consumerConfiguration = new ConsumerConfiguration(
@@ -116,18 +114,11 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
                     x.Item3.ConsumerTag,
                     x.Item3.IsExclusive,
                     x.Item3.Arguments,
-                    async (body, properties, receivedInfo, cancellationToken) =>
-                    {
-                        var rawMessage = produceConsumeInterceptors.OnConsume(
-                            new ConsumedMessage(receivedInfo, properties, body)
-                        );
-                        await using var scope = consumeScopeProvider.CreateAsyncScope().ConfigureAwait(false);
-                        return await x.Item2(
-                            rawMessage.Body, rawMessage.Properties, rawMessage.ReceivedInfo, cancellationToken
-                        ).ConfigureAwait(false);
-                    }
-                )
-            ).Union(
+                    ConsumePipeline.Build(
+                        consumeMiddlewares,
+                        ctx => new ValueTask<AckStrategy>(x.Item2(ctx.Body, ctx.Properties, ctx.ReceivedInfo, ctx.CancellationToken))
+                    )
+                )).Union(
                 consumeConfiguration.PerQueueTypedConsumeConfigurations.ToDictionary(
                     x => x.Item1,
                     x => new PerQueueConsumerConfiguration(
@@ -135,19 +126,15 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
                         x.Item3.ConsumerTag,
                         x.Item3.IsExclusive,
                         x.Item3.Arguments,
-                        async (body, properties, receivedInfo, cancellationToken) =>
-                        {
-                            var rawMessage = produceConsumeInterceptors.OnConsume(
-                                new ConsumedMessage(receivedInfo, properties, body)
-                            );
-                            var deserializedMessage = messageSerializationStrategy.DeserializeMessage(
-                                rawMessage.Properties, rawMessage.Body
-                            );
-                            var handler = x.Item2.GetHandler(deserializedMessage.MessageType);
-                            await using var scope = consumeScopeProvider.CreateAsyncScope().ConfigureAwait(false);
-                            return await handler(deserializedMessage, receivedInfo, cancellationToken)
-                                .ConfigureAwait(false);
-                        }
+                        ConsumePipeline.Build(
+                            consumeMiddlewares,
+                            async ctx =>
+                            {
+                                var deserializedMessage = messageSerializationStrategy.DeserializeMessage(ctx.Properties, ctx.Body);
+                                var handler = x.Item2.GetHandler(deserializedMessage.MessageType);
+                                return await handler(deserializedMessage, ctx.ReceivedInfo, ctx.CancellationToken).ConfigureAwait(false);
+                            }
+                        )
                     )
                 )
             ).ToDictionary(x => x.Key, x => x.Value)
@@ -256,50 +243,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-        var rawMessage = produceConsumeInterceptors.OnProduce(new ProducedMessage(properties, body));
-
-        if (configuration.PublisherConfirms)
-        {
-            while (true)
-            {
-                var pendingConfirmation = await persistentChannelDispatcher.InvokeAsync<IPublishPendingConfirmation, BasicPublishWithConfirmsAction>(
-                    new BasicPublishWithConfirmsAction(confirmationListener, exchange, routingKey, mandatory, rawMessage),
-                    PersistentChannelDispatchOptions.ProducerPublishWithConfirms,
-                    cts.Token
-                ).ConfigureAwait(false);
-
-                try
-                {
-                    await pendingConfirmation.WaitAsync(cts.Token).ConfigureAwait(false);
-                    break;
-                }
-                catch (PublishInterruptedException)
-                {
-                }
-            }
-        }
-        else
-        {
-            await persistentChannelDispatcher.InvokeAsync<bool, BasicPublishAction>(
-                new BasicPublishAction(exchange, routingKey, mandatory, rawMessage),
-                PersistentChannelDispatchOptions.ProducerPublish,
-                cts.Token
-            ).ConfigureAwait(false);
-        }
-
-        eventBus.Publish(
-            new PublishedMessageEvent(exchange, routingKey, rawMessage.Properties, rawMessage.Body)
-        );
-
-        if (logger.IsDebugEnabled())
-        {
-            logger.DebugFormat(
-                "Published to exchange {exchange} with routingKey={routingKey} and correlationId={correlationId}",
-                exchange,
-                routingKey,
-                properties.CorrelationId
-            );
-        }
+        await publishDelegate(new PublishContext(exchange, routingKey, mandatory, properties, body, cts.Token)).ConfigureAwait(false);
     }
 
     #endregion
@@ -631,26 +575,82 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         MessageReturned?.Invoke(this, new MessageReturnedEventArgs(@event.Body, @event.Properties, @event.Info));
     }
 
+    private async ValueTask PublishInternalAsync(PublishContext context)
+    {
+        if (configuration.PublisherConfirms)
+        {
+            while (true)
+            {
+                var pendingConfirmation = await persistentChannelDispatcher.InvokeAsync<IPublishPendingConfirmation, BasicPublishWithConfirmsAction>(
+                    new BasicPublishWithConfirmsAction(
+                        confirmationListener, context.Exchange, context.RoutingKey, context.Mandatory, context.Properties, context.Body
+                    ),
+                    PersistentChannelDispatchOptions.ProducerPublishWithConfirms,
+                    context.CancellationToken
+                ).ConfigureAwait(false);
+
+                try
+                {
+                    await pendingConfirmation.WaitAsync(context.CancellationToken).ConfigureAwait(false);
+                    break;
+                }
+                catch (PublishInterruptedException)
+                {
+                }
+            }
+        }
+        else
+        {
+            await persistentChannelDispatcher.InvokeAsync<bool, BasicPublishAction>(
+                new BasicPublishAction(context.Exchange, context.RoutingKey, context.Mandatory, context.Properties, context.Body),
+                PersistentChannelDispatchOptions.ProducerPublish,
+                context.CancellationToken
+            ).ConfigureAwait(false);
+        }
+
+        if (logger.IsDebugEnabled())
+        {
+            logger.DebugFormat(
+                "Published to exchange {exchange} with routingKey={routingKey} and correlationId={correlationId}",
+                context.Exchange,
+                context.RoutingKey,
+                context.Properties.CorrelationId
+            );
+        }
+
+        eventBus.Publish(
+            new PublishedMessageEvent(context.Exchange, context.RoutingKey, context.Properties, context.Body)
+        );
+    }
+
     private readonly struct BasicPublishAction : IPersistentChannelAction<bool>
     {
         private readonly string exchange;
         private readonly string routingKey;
         private readonly bool mandatory;
-        private readonly ProducedMessage message;
+        private readonly MessageProperties properties;
+        private readonly ReadOnlyMemory<byte> body;
 
-        public BasicPublishAction(string exchange, string routingKey, bool mandatory, in ProducedMessage message)
+        public BasicPublishAction(
+            string exchange,
+            string routingKey,
+            bool mandatory,
+            in MessageProperties properties,
+            in ReadOnlyMemory<byte> body
+        )
         {
             this.exchange = exchange;
             this.routingKey = routingKey;
             this.mandatory = mandatory;
-            this.message = message;
+            this.properties = properties;
+            this.body = body;
         }
 
         public bool Invoke(IModel model)
         {
             var basicProperties = model.CreateBasicProperties();
-            message.Properties.CopyTo(basicProperties);
-            model.BasicPublish(exchange, routingKey, mandatory, basicProperties, message.Body);
+            properties.CopyTo(basicProperties);
+            model.BasicPublish(exchange, routingKey, mandatory, basicProperties, body);
             return true;
         }
     }
@@ -661,39 +661,40 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         private readonly string exchange;
         private readonly string routingKey;
         private readonly bool mandatory;
-        private readonly ProducedMessage message;
+        private readonly MessageProperties properties;
+        private readonly ReadOnlyMemory<byte> body;
 
         public BasicPublishWithConfirmsAction(
             IPublishConfirmationListener confirmationListener,
             string exchange,
             string routingKey,
             bool mandatory,
-            in ProducedMessage message
+            in MessageProperties properties,
+            in ReadOnlyMemory<byte> body
         )
         {
             this.confirmationListener = confirmationListener;
             this.exchange = exchange;
             this.routingKey = routingKey;
             this.mandatory = mandatory;
-            this.message = message;
+            this.properties = properties;
+            this.body = body;
         }
 
         public IPublishPendingConfirmation Invoke(IModel model)
         {
             var confirmation = confirmationListener.CreatePendingConfirmation(model);
             var basicProperties = model.CreateBasicProperties();
-            message.Properties.SetConfirmationId(confirmation.Id)
-                .CopyTo(basicProperties);
+            properties.SetConfirmationId(confirmation.Id).CopyTo(basicProperties);
             try
             {
-                model.BasicPublish(exchange, routingKey, mandatory, basicProperties, message.Body);
+                model.BasicPublish(exchange, routingKey, mandatory, basicProperties, body);
             }
             catch (Exception)
             {
                 confirmation.Cancel();
                 throw;
             }
-
             return confirmation;
         }
     }

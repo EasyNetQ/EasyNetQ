@@ -92,7 +92,6 @@ public class InternalConsumer : IInternalConsumer
     private readonly ConsumerConfiguration configuration;
     private readonly IConsumerConnection connection;
     private readonly IEventBus eventBus;
-    private readonly IHandlerRunner handlerRunner;
     private readonly ILogger logger;
 
     private volatile bool disposed;
@@ -105,14 +104,12 @@ public class InternalConsumer : IInternalConsumer
         ILogger<InternalConsumer> logger,
         ConsumerConfiguration configuration,
         IConsumerConnection connection,
-        IHandlerRunner handlerRunner,
         IEventBus eventBus
     )
     {
         this.logger = logger;
         this.configuration = configuration;
         this.connection = connection;
-        this.handlerRunner = handlerRunner;
         this.eventBus = eventBus;
     }
 
@@ -189,8 +186,7 @@ public class InternalConsumer : IInternalConsumer
                     queue,
                     perQueueConfiguration.AutoAck,
                     eventBus,
-                    handlerRunner,
-                    perQueueConfiguration.Handler
+                    perQueueConfiguration.ConsumeDelegate
                 );
                 consumer.ConsumerCancelled += AsyncBasicConsumerOnConsumerCancelled;
                 var consumerTag = model.BasicConsume(

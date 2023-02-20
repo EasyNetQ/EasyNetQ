@@ -8,10 +8,11 @@ public class When_an_error_occurs_in_the_message_handler : ConsumerTestBase
 
     protected override void AdditionalSetUp()
     {
-        ConsumerErrorStrategy.HandleConsumerErrorAsync(default, null)
-            .ReturnsForAnyArgs(Task.FromResult(AckStrategies.Ack));
-
         exception = new Exception("I've had a bad day :(");
+
+        ConsumeErrorStrategy.HandleErrorAsync(default, exception)
+            .ReturnsForAnyArgs(new ValueTask<AckStrategy>(AckStrategies.Ack));
+
         StartConsumer((_, _, _) => throw exception);
         DeliverMessage();
     }
@@ -19,13 +20,12 @@ public class When_an_error_occurs_in_the_message_handler : ConsumerTestBase
     [Fact]
     public async Task Should_invoke_the_error_strategy()
     {
-        await ConsumerErrorStrategy.Received().HandleConsumerErrorAsync(
-            Arg.Is<ConsumerExecutionContext>(args => args.ReceivedInfo.ConsumerTag == ConsumerTag &&
-                                                     args.ReceivedInfo.DeliveryTag == DeliverTag &&
-                                                     args.ReceivedInfo.Exchange == "the_exchange" &&
-                                                     args.Body.ToArray().SequenceEqual(OriginalBody)),
-            Arg.Is<Exception>(e => e == exception),
-            Arg.Any<CancellationToken>()
+        await ConsumeErrorStrategy.Received().HandleErrorAsync(
+            Arg.Is<ConsumeContext>(args => args.ReceivedInfo.ConsumerTag == ConsumerTag &&
+                                           args.ReceivedInfo.DeliveryTag == DeliverTag &&
+                                           args.ReceivedInfo.Exchange == "the_exchange" &&
+                                           args.Body.ToArray().SequenceEqual(OriginalBody)),
+            Arg.Is<Exception>(e => e == exception)
         );
     }
 

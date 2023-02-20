@@ -9,9 +9,9 @@ public class BuildInInterceptorsTests
     {
         var interceptor = new GZipInterceptor();
         var body = "haha"u8.ToArray();
-        var outgoingMessage = new ProducedMessage(new MessageProperties(), body);
-        var message = interceptor.OnProduce(outgoingMessage);
-        var incomingMessage = new ConsumedMessage(new MessageReceivedInfo("", 0, false, "exchange", "routingKey", "queue"), message.Properties, message.Body);
+        var outgoingMessage = new PublishMessage(new MessageProperties(), body);
+        var message = interceptor.OnPublish(outgoingMessage);
+        var incomingMessage = new ConsumeMessage(new MessageReceivedInfo("", 0, false, "exchange", "routingKey", "queue"), message.Properties, message.Body);
         Assert.Equal(body, interceptor.OnConsume(incomingMessage).Body.ToArray());
     }
 
@@ -20,42 +20,42 @@ public class BuildInInterceptorsTests
     {
         var interceptor = new TripleDESInterceptor(Convert.FromBase64String("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"), Convert.FromBase64String("aaaaaaaaaaa="));
         var body = "haha"u8.ToArray();
-        var outgoingMessage = new ProducedMessage(new MessageProperties(), body);
-        var message = interceptor.OnProduce(outgoingMessage);
-        var incomingMessage = new ConsumedMessage(new MessageReceivedInfo("", 0, false, "exchange", "routingKey", "queue"), message.Properties, message.Body);
+        var outgoingMessage = new PublishMessage(new MessageProperties(), body);
+        var message = interceptor.OnPublish(outgoingMessage);
+        var incomingMessage = new ConsumeMessage(new MessageReceivedInfo("", 0, false, "exchange", "routingKey", "queue"), message.Properties, message.Body);
         Assert.Equal(body, interceptor.OnConsume(incomingMessage).Body.ToArray());
     }
 
     [Fact]
     public void ShouldCallAddedInterceptorsOnProduce()
     {
-        var sourceMessage = new ProducedMessage(new MessageProperties(), Array.Empty<byte>());
-        var firstMessage = new ProducedMessage(new MessageProperties(), Array.Empty<byte>());
-        var secondMessage = new ProducedMessage(new MessageProperties(), Array.Empty<byte>());
+        var sourceMessage = new PublishMessage(new MessageProperties(), Array.Empty<byte>());
+        var firstMessage = new PublishMessage(new MessageProperties(), Array.Empty<byte>());
+        var secondMessage = new PublishMessage(new MessageProperties(), Array.Empty<byte>());
 
-        var first = Substitute.For<IProduceConsumeInterceptor>();
-        var second = Substitute.For<IProduceConsumeInterceptor>();
-        first.OnProduce(sourceMessage).Returns(firstMessage);
-        second.OnProduce(firstMessage).Returns(secondMessage);
-        var composite = new CompositeProduceConsumerInterceptor(new[] { first, second });
-        Assert.Equal(secondMessage, composite.OnProduce(sourceMessage));
+        var first = Substitute.For<IPublishConsumeInterceptor>();
+        var second = Substitute.For<IPublishConsumeInterceptor>();
+        first.OnPublish(sourceMessage).Returns(firstMessage);
+        second.OnPublish(firstMessage).Returns(secondMessage);
+        var composite = new CompositePublishConsumerInterceptor(new[] { first, second });
+        Assert.Equal(secondMessage, composite.OnPublish(sourceMessage));
     }
 
     [Fact]
     public void ShouldCallAddedInterceptorsOnConsume()
     {
-        var sourceMessage = new ConsumedMessage(new MessageReceivedInfo("", 0, false, "exchange", "routingKey", "queue"), new MessageProperties(),
+        var sourceMessage = new ConsumeMessage(new MessageReceivedInfo("", 0, false, "exchange", "routingKey", "queue"), new MessageProperties(),
             Array.Empty<byte>());
-        var firstMessage = new ConsumedMessage(new MessageReceivedInfo("", 0, false, "exchange", "routingKey", "queue"), new MessageProperties(),
+        var firstMessage = new ConsumeMessage(new MessageReceivedInfo("", 0, false, "exchange", "routingKey", "queue"), new MessageProperties(),
             Array.Empty<byte>());
-        var secondMessage = new ConsumedMessage(new MessageReceivedInfo("", 0, false, "exchange", "routingKey", "queue"), new MessageProperties(),
+        var secondMessage = new ConsumeMessage(new MessageReceivedInfo("", 0, false, "exchange", "routingKey", "queue"), new MessageProperties(),
             Array.Empty<byte>());
 
-        var first = Substitute.For<IProduceConsumeInterceptor>();
-        var second = Substitute.For<IProduceConsumeInterceptor>();
+        var first = Substitute.For<IPublishConsumeInterceptor>();
+        var second = Substitute.For<IPublishConsumeInterceptor>();
         first.OnConsume(secondMessage).Returns(firstMessage);
         second.OnConsume(sourceMessage).Returns(secondMessage);
-        var composite = new CompositeProduceConsumerInterceptor(new[] { first, second });
+        var composite = new CompositePublishConsumerInterceptor(new[] { first, second });
         Assert.Equal(firstMessage, composite.OnConsume(sourceMessage));
     }
 }

@@ -18,7 +18,6 @@ public class InternalConsumerFactory : IInternalConsumerFactory
     private readonly ILogger<InternalConsumer> logger;
     private readonly IConsumerConnection connection;
     private readonly IEventBus eventBus;
-    private readonly IHandlerRunner handlerRunner;
 
     /// <summary>
     ///     Creates InternalConsumerFactory
@@ -26,17 +25,15 @@ public class InternalConsumerFactory : IInternalConsumerFactory
     public InternalConsumerFactory(
         ILogger<InternalConsumer> logger,
         IConsumerConnection connection,
-        IHandlerRunner handlerRunner,
         IEventBus eventBus
     )
     {
         this.logger = logger;
         this.connection = connection;
-        this.handlerRunner = handlerRunner;
         this.eventBus = eventBus;
     }
 
     /// <inheritdoc />
     public IInternalConsumer CreateConsumer(ConsumerConfiguration configuration)
-        => new InternalConsumer(logger, configuration, connection, handlerRunner, eventBus);
+        => new InternalConsumer(logger, configuration, connection, eventBus);
 }

@@ -2,6 +2,7 @@ using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;
+using EasyNetQ.Interception;
 using EasyNetQ.Logging;
 using EasyNetQ.MessageVersioning;
 using EasyNetQ.MultipleExchange;
@@ -38,14 +39,26 @@ public static class ServiceRegisterExtensions
             .TryRegister<IConventions, Conventions>()
             .TryRegister<IEventBus, EventBus>()
             .TryRegister<ITypeNameSerializer, DefaultTypeNameSerializer>()
+            .TryRegister<IEnumerable<IConsumeMiddleware>>(
+                c => new IConsumeMiddleware[]
+                {
+                    new ConsumeErrorHandlingMiddleware(c.Resolve<ILogger<ConsumeErrorHandlingMiddleware>>(), c.Resolve<IConsumeErrorStrategy>()),
+                    new ConsumeInterceptorsMiddleware(c.Resolve<IEnumerable<IPublishConsumeInterceptor>>()),
+                }
+            )
+            .TryRegister<IEnumerable<IPublishMiddleware>>(
+                c => new IPublishMiddleware[]
+                {
+                    new PublishInterceptorsMiddleware(c.Resolve<IEnumerable<IPublishConsumeInterceptor>>())
+                }
+            )
             .TryRegister<ICorrelationIdGenerationStrategy, DefaultCorrelationIdGenerationStrategy>()
             .TryRegister<IMessageSerializationStrategy, DefaultMessageSerializationStrategy>()
             .TryRegister<IMessageDeliveryModeStrategy, MessageDeliveryModeStrategy>()
             .TryRegister(new AdvancedBusEventHandlers())
             .TryRegister<IExchangeDeclareStrategy, DefaultExchangeDeclareStrategy>()
-            .TryRegister<IConsumerErrorStrategy, DefaultConsumerErrorStrategy>()
+            .TryRegister<IConsumeErrorStrategy, DefaultConsumeErrorStrategy>()
             .TryRegister<IErrorMessageSerializer, DefaultErrorMessageSerializer>()
-            .TryRegister<IHandlerRunner, HandlerRunner>()
             .TryRegister<IInternalConsumerFactory, InternalConsumerFactory>()
             .TryRegister<IConsumerFactory, ConsumerFactory>()
             .TryRegister(c => ConnectionFactoryFactory.CreateConnectionFactory(c.Resolve<ConnectionConfiguration>()))
@@ -61,7 +74,6 @@ public static class ServiceRegisterExtensions
             .TryRegister<IRpc, DefaultRpc>()
             .TryRegister<ISendReceive, DefaultSendReceive>()
             .TryRegister<IScheduler, DeadLetterExchangeAndMessageTtlScheduler>()
-            .TryRegister<IConsumeScopeProvider, NoopConsumeScopeProvider>()
             .TryRegister<IBus, RabbitBus>();
     }
 
@@ -149,19 +161,19 @@ public static class ServiceRegisterExtensions
     /// </summary>
     /// <param name="serviceRegister">The register</param>
     public static IServiceRegister EnableAlwaysAckConsumerErrorStrategy(this IServiceRegister serviceRegister)
-        => serviceRegister.Register<IConsumerErrorStrategy>(SimpleConsumerErrorStrategy.Ack);
+        => serviceRegister.Register<IConsumeErrorStrategy>(SimpleConsumeErrorStrategy.Ack);
 
     /// <summary>
     ///     Enables a consumer error strategy which nacks failed messages with requeue
     /// </summary>
     /// <param name="serviceRegister">The register</param>
     public static IServiceRegister EnableAlwaysNackWithRequeueConsumerErrorStrategy(this IServiceRegister serviceRegister)
-        => serviceRegister.Register<IConsumerErrorStrategy>(SimpleConsumerErrorStrategy.NackWithRequeue);
+        => serviceRegister.Register<IConsumeErrorStrategy>(SimpleConsumeErrorStrategy.NackWithRequeue);
 
     /// <summary>
     ///     Enables a consumer error strategy which nacks failed messages without requeue
     /// </summary>
     /// <param name="serviceRegister">The register</param>
     public static IServiceRegister EnableAlwaysNackWithoutRequeueConsumerErrorStrategy(this IServiceRegister serviceRegister)
-        => serviceRegister.Register<IConsumerErrorStrategy>(SimpleConsumerErrorStrategy.NackWithoutRequeue);
+        => serviceRegister.Register<IConsumeErrorStrategy>(SimpleConsumeErrorStrategy.NackWithoutRequeue);
 }

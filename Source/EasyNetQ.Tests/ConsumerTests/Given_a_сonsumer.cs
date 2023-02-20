@@ -38,7 +38,7 @@ public abstract class Given_a_сonsumer
                     {
                         queue,
                         new PerQueueConsumerConfiguration(
-                            false, "", false, null, (_, _, _, _) => Task.FromResult(AckStrategies.Ack)
+                            false, "", false, null, _ => new(AckStrategies.Ack)
                         )
                     }
                 }
