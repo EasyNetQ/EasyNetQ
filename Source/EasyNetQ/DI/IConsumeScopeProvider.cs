@@ -12,22 +12,6 @@ public interface IConsumeScopeProvider
 }
 
 /// <summary>
-/// Provides extension methods to work with <see cref="IConsumeScopeProvider"/>.
-/// </summary>
-public static class ConsumeScopeProviderExtensions
-{
-    /// <summary>
-    /// Creates a new <see cref="AsyncServiceResolverScope"/> that can be used to resolve scoped services.
-    /// </summary>
-    /// <param name="provider">The <see cref="IConsumeScopeProvider"/> to create the scope from.</param>
-    /// <returns>An <see cref="AsyncServiceResolverScope"/> that can be used to resolve scoped services.</returns>
-    public static AsyncServiceResolverScope CreateAsyncScope(this IConsumeScopeProvider provider)
-    {
-        return new AsyncServiceResolverScope(provider.CreateScope());
-    }
-}
-
-/// <summary>
 /// Default scope provider that uses already registered <see cref="IServiceResolver"/>
 /// </summary>
 public class DefaultConsumeScopeProvider : IConsumeScopeProvider
@@ -54,11 +38,14 @@ public class NoopConsumeScopeProvider : IConsumeScopeProvider
     {
         public IServiceResolverScope CreateScope() => this;
 
-        public void Dispose() { }
+        public void Dispose()
+        {
+        }
 
         public TService Resolve<TService>() where TService : class
         {
-            throw new NotImplementedException($"To resolve services from {nameof(IConsumeScopeProvider)} register {nameof(DefaultConsumeScopeProvider)} or your custom scope provider.");
+            throw new NotImplementedException(
+                $"To resolve services from {nameof(IConsumeScopeProvider)} register {nameof(DefaultConsumeScopeProvider)} or your custom scope provider.");
         }
     }
 

@@ -38,12 +38,15 @@ internal
     }
 
     /// <inheritdoc />
-    public IServiceRegister Register(Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton)
+    public IServiceRegister Register(
+        Type serviceType, Func<IServiceResolver, object> implementationFactory, Lifetime lifetime = Lifetime.Singleton
+    )
     {
         var serviceRegistration = new ServiceRegistration
         {
             ServiceType = serviceType,
-            FactoryExpression = (Func<IServiceFactory, object>)(x => implementationFactory((IServiceResolver)x.GetInstance(typeof(IServiceResolver)))),
+            FactoryExpression = (Func<IServiceFactory, object>)(x =>
+                implementationFactory((IServiceResolver)x.GetInstance(typeof(IServiceResolver)))),
             Lifetime = ToLifetime(lifetime),
         };
         ServiceRegistry.Register(serviceRegistration);
@@ -83,7 +86,7 @@ internal
     private bool IsServiceRegistered(Type serviceType) =>
         ServiceRegistry.AvailableServices.Any(r => r.ServiceType == serviceType);
 
-    private class LightInjectResolver : IServiceResolver
+    private sealed class LightInjectResolver : IServiceResolver
     {
         private readonly IServiceFactory serviceFactory;
 
@@ -91,6 +94,28 @@ internal
 
         public TService Resolve<TService>() where TService : class => serviceFactory.GetInstance<TService>();
 
-        public IServiceResolverScope CreateScope() => new ServiceResolverScope(this);
+        public IServiceResolverScope CreateScope() => new LightInjectScope(serviceFactory);
+    }
+
+    private sealed class LightInjectScope : IServiceResolverScope, IAsyncDisposable
+    {
+        private readonly Scope scope;
+
+        public LightInjectScope(IServiceFactory serviceFactory) => scope = serviceFactory.BeginScope();
+
+        public TService Resolve<TService>() where TService : class => scope.GetInstance<TService>();
+
+        public IServiceResolverScope CreateScope() => new LightInjectScope(scope);
+
+        public void Dispose() => scope.Dispose();
+
+        public ValueTask DisposeAsync()
+        {
+            if (scope is IAsyncDisposable asyncDisposable)
+                return asyncDisposable.DisposeAsync();
+
+            scope.Dispose();
+            return default;
+        }
     }
 }
