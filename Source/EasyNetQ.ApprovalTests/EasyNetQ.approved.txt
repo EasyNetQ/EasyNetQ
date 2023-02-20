@@ -115,9 +115,9 @@ namespace EasyNetQ
         public static EasyNetQ.IConsumeConfiguration ForQueue<T>(this EasyNetQ.IConsumeConfiguration configuration, in EasyNetQ.Topology.Queue queue, System.Action<EasyNetQ.IMessage<T>, EasyNetQ.MessageReceivedInfo> handler, System.Action<EasyNetQ.IPerQueueConsumeConfiguration> configure) { }
         public static EasyNetQ.IConsumeConfiguration ForQueue<T>(this EasyNetQ.IConsumeConfiguration configuration, in EasyNetQ.Topology.Queue queue, System.Func<EasyNetQ.IMessage<T>, EasyNetQ.MessageReceivedInfo, System.Threading.CancellationToken, System.Threading.Tasks.Task> handler, System.Action<EasyNetQ.IPerQueueConsumeConfiguration> configure) { }
     }
-    public readonly struct ConsumedMessage
+    public readonly struct ConsumeMessage
     {
-        public ConsumedMessage(in EasyNetQ.MessageReceivedInfo receivedInfo, in EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
+        public ConsumeMessage(in EasyNetQ.MessageReceivedInfo receivedInfo, in EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
         public System.ReadOnlyMemory<byte> Body { get; }
         public EasyNetQ.MessageProperties Properties { get; }
         public EasyNetQ.MessageReceivedInfo ReceivedInfo { get; }
@@ -687,12 +687,6 @@ namespace EasyNetQ
         public static EasyNetQ.IPerQueueConsumeConfiguration WithArguments(this EasyNetQ.IPerQueueConsumeConfiguration configuration, System.Collections.Generic.IDictionary<string, object> arguments) { }
         public static EasyNetQ.IPerQueueConsumeConfiguration WithPriority(this EasyNetQ.IPerQueueConsumeConfiguration configuration, int priority) { }
     }
-    public readonly struct ProducedMessage
-    {
-        public ProducedMessage(in EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
-        public System.ReadOnlyMemory<byte> Body { get; }
-        public EasyNetQ.MessageProperties Properties { get; }
-    }
     public static class PubSubExtensions
     {
         public static void Publish<T>(this EasyNetQ.IPubSub pubSub, T message, System.Threading.CancellationToken cancellationToken = default) { }
@@ -707,6 +701,12 @@ namespace EasyNetQ
         public static EasyNetQ.Internals.AwaitableDisposable<EasyNetQ.SubscriptionResult> SubscribeAsync<T>(this EasyNetQ.IPubSub pubSub, string subscriptionId, System.Action<T> onMessage, System.Threading.CancellationToken cancellationToken = default) { }
         public static EasyNetQ.Internals.AwaitableDisposable<EasyNetQ.SubscriptionResult> SubscribeAsync<T>(this EasyNetQ.IPubSub pubSub, string subscriptionId, System.Func<T, System.Threading.Tasks.Task> onMessage, System.Threading.CancellationToken cancellationToken = default) { }
         public static EasyNetQ.Internals.AwaitableDisposable<EasyNetQ.SubscriptionResult> SubscribeAsync<T>(this EasyNetQ.IPubSub pubSub, string subscriptionId, System.Action<T> onMessage, System.Action<EasyNetQ.ISubscriptionConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
+    }
+    public readonly struct PublishMessage
+    {
+        public PublishMessage(in EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
+        public System.ReadOnlyMemory<byte> Body { get; }
+        public EasyNetQ.MessageProperties Properties { get; }
     }
     public readonly struct PullBatchResult<TPullResult> : System.IDisposable
         where TPullResult : EasyNetQ.IPullResult
@@ -739,7 +739,7 @@ namespace EasyNetQ
     }
     public class PullingConsumer : EasyNetQ.IPullingConsumer<EasyNetQ.PullResult>, System.IDisposable
     {
-        public PullingConsumer(in EasyNetQ.PullingConsumerOptions options, in EasyNetQ.Topology.Queue queue, EasyNetQ.Persistent.IPersistentChannel channel, EasyNetQ.Interception.IProduceConsumeInterceptor[] produceConsumeInterceptors) { }
+        public PullingConsumer(in EasyNetQ.PullingConsumerOptions options, in EasyNetQ.Topology.Queue queue, EasyNetQ.Persistent.IPersistentChannel channel, EasyNetQ.Interception.IPublishConsumeInterceptor[] produceConsumeInterceptors) { }
         public System.Threading.Tasks.Task AckAsync(ulong deliveryTag, bool multiple, System.Threading.CancellationToken cancellationToken = default) { }
         public void Dispose() { }
         public System.Threading.Tasks.Task<EasyNetQ.PullResult> PullAsync(System.Threading.CancellationToken cancellationToken = default) { }
@@ -760,7 +760,7 @@ namespace EasyNetQ
     }
     public class PullingConsumerFactory : EasyNetQ.IPullingConsumerFactory
     {
-        public PullingConsumerFactory(EasyNetQ.Consumer.IConsumerConnection connection, EasyNetQ.Persistent.IPersistentChannelFactory channelFactory, System.Collections.Generic.IEnumerable<EasyNetQ.Interception.IProduceConsumeInterceptor> produceConsumeInterceptors, EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy) { }
+        public PullingConsumerFactory(EasyNetQ.Consumer.IConsumerConnection connection, EasyNetQ.Persistent.IPersistentChannelFactory channelFactory, System.Collections.Generic.IEnumerable<EasyNetQ.Interception.IPublishConsumeInterceptor> produceConsumeInterceptors, EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy) { }
         public EasyNetQ.IPullingConsumer<EasyNetQ.PullResult> CreateConsumer(in EasyNetQ.Topology.Queue queue, in EasyNetQ.PullingConsumerOptions options) { }
         public EasyNetQ.IPullingConsumer<EasyNetQ.PullResult<T>> CreateConsumer<T>(in EasyNetQ.Topology.Queue queue, in EasyNetQ.PullingConsumerOptions options) { }
     }
@@ -1133,7 +1133,7 @@ namespace EasyNetQ.Consumer
     }
     public sealed class ConsumeInterceptorsMiddleware : EasyNetQ.Consumer.IConsumeMiddleware
     {
-        public ConsumeInterceptorsMiddleware(System.Collections.Generic.IEnumerable<EasyNetQ.Interception.IProduceConsumeInterceptor> interceptors) { }
+        public ConsumeInterceptorsMiddleware(System.Collections.Generic.IEnumerable<EasyNetQ.Interception.IPublishConsumeInterceptor> interceptors) { }
         public System.Threading.Tasks.ValueTask<EasyNetQ.Consumer.AckStrategy> InvokeAsync(EasyNetQ.Consumer.ConsumeContext context, EasyNetQ.Consumer.ConsumeDelegate next) { }
     }
     public sealed class ConsumeServiceScopeMiddleware : EasyNetQ.Consumer.IConsumeMiddleware
@@ -1472,28 +1472,28 @@ namespace EasyNetQ.Events
 }
 namespace EasyNetQ.Interception
 {
-    public sealed class CompositeProduceConsumerInterceptor : EasyNetQ.Interception.IProduceConsumeInterceptor
+    public class CompositePublishConsumerInterceptor : EasyNetQ.Interception.IPublishConsumeInterceptor
     {
-        public CompositeProduceConsumerInterceptor(System.Collections.Generic.IEnumerable<EasyNetQ.Interception.IProduceConsumeInterceptor> interceptors) { }
-        public EasyNetQ.ConsumedMessage OnConsume(in EasyNetQ.ConsumedMessage message) { }
-        public EasyNetQ.ProducedMessage OnProduce(in EasyNetQ.ProducedMessage message) { }
+        public CompositePublishConsumerInterceptor(System.Collections.Generic.IEnumerable<EasyNetQ.Interception.IPublishConsumeInterceptor> interceptors) { }
+        public EasyNetQ.ConsumeMessage OnConsume(in EasyNetQ.ConsumeMessage message) { }
+        public EasyNetQ.PublishMessage OnPublish(in EasyNetQ.PublishMessage message) { }
     }
-    public sealed class GZipInterceptor : EasyNetQ.Interception.IProduceConsumeInterceptor
+    public class GZipInterceptor : EasyNetQ.Interception.IPublishConsumeInterceptor
     {
         public GZipInterceptor() { }
-        public EasyNetQ.ConsumedMessage OnConsume(in EasyNetQ.ConsumedMessage message) { }
-        public EasyNetQ.ProducedMessage OnProduce(in EasyNetQ.ProducedMessage message) { }
+        public EasyNetQ.ConsumeMessage OnConsume(in EasyNetQ.ConsumeMessage message) { }
+        public EasyNetQ.PublishMessage OnPublish(in EasyNetQ.PublishMessage message) { }
     }
-    public interface IProduceConsumeInterceptor
+    public interface IPublishConsumeInterceptor
     {
-        EasyNetQ.ConsumedMessage OnConsume(in EasyNetQ.ConsumedMessage message);
-        EasyNetQ.ProducedMessage OnProduce(in EasyNetQ.ProducedMessage message);
+        EasyNetQ.ConsumeMessage OnConsume(in EasyNetQ.ConsumeMessage message);
+        EasyNetQ.PublishMessage OnPublish(in EasyNetQ.PublishMessage message);
     }
-    public sealed class TripleDESInterceptor : EasyNetQ.Interception.IProduceConsumeInterceptor
+    public class TripleDESInterceptor : EasyNetQ.Interception.IPublishConsumeInterceptor
     {
         public TripleDESInterceptor(byte[] key, byte[] iv) { }
-        public EasyNetQ.ConsumedMessage OnConsume(in EasyNetQ.ConsumedMessage message) { }
-        public EasyNetQ.ProducedMessage OnProduce(in EasyNetQ.ProducedMessage message) { }
+        public EasyNetQ.ConsumeMessage OnConsume(in EasyNetQ.ConsumeMessage message) { }
+        public EasyNetQ.PublishMessage OnPublish(in EasyNetQ.PublishMessage message) { }
     }
 }
 namespace EasyNetQ.Internals
@@ -1864,7 +1864,7 @@ namespace EasyNetQ.Producer
     public delegate System.Threading.Tasks.ValueTask PublishDelegate(EasyNetQ.Producer.PublishContext context);
     public sealed class PublishInterceptorsMiddleware : EasyNetQ.Producer.IPublishMiddleware
     {
-        public PublishInterceptorsMiddleware(System.Collections.Generic.IEnumerable<EasyNetQ.Interception.IProduceConsumeInterceptor> interceptors) { }
+        public PublishInterceptorsMiddleware(System.Collections.Generic.IEnumerable<EasyNetQ.Interception.IPublishConsumeInterceptor> interceptors) { }
         public System.Threading.Tasks.ValueTask InvokeAsync(EasyNetQ.Producer.PublishContext context, EasyNetQ.Producer.PublishDelegate next) { }
     }
     [System.Serializable]
