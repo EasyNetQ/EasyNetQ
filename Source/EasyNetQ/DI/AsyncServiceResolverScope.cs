@@ -13,11 +13,9 @@ public readonly struct AsyncServiceResolverScope : IServiceResolverScope, IAsync
     /// </summary>
     /// <param name="serviceResolverScope">The <see cref="IServiceResolverScope"/> instance to wrap.</param>
     public AsyncServiceResolverScope(IServiceResolverScope serviceResolverScope)
-    {
-        this.serviceResolverScope = serviceResolverScope;
-    }
+        => this.serviceResolverScope = serviceResolverScope;
 
-    public IServiceResolverScope CreateScope() => new AsyncServiceResolverScope(serviceResolverScope.CreateScope());
+    public IServiceResolverScope CreateScope() => serviceResolverScope.CreateScope();
 
     public TService Resolve<TService>() where TService : class => serviceResolverScope.Resolve<TService>();
 
