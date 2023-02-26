@@ -19,10 +19,8 @@ public class MicrosoftDependencyScopeTests
 
     private static IService ResolveFromScope(IServiceResolver resolver)
     {
-        using (var scope = resolver.CreateScope())
-        {
-            return scope.Resolve<IService>();
-        }
+        using var scope = resolver.CreateScope();
+        return scope.Resolve<IService>();
     }
 
     private static IServiceResolver CreateResolver(Action<IServiceRegister> configure)

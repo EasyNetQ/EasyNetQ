@@ -8,25 +8,28 @@ namespace LightInject;
 
 public static class EasyNetQServiceContainerExtensions
 {
-    public static IServiceContainer RegisterEasyNetQ(this IServiceContainer serviceContainer, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices)
+    public static IServiceContainer RegisterEasyNetQ(
+        this IServiceContainer serviceContainer,
+        Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory,
+        Action<IServiceRegister> registerServices
+    )
     {
         var serviceRegister = new LightInjectAdapter(serviceContainer);
         RabbitHutch.RegisterBus(serviceRegister, connectionConfigurationFactory, registerServices);
         return serviceContainer;
     }
 
-    public static IServiceContainer RegisterEasyNetQ(this IServiceContainer serviceContainer, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory)
-    {
-        return serviceContainer.RegisterEasyNetQ(connectionConfigurationFactory, _ => { });
-    }
+    public static IServiceContainer RegisterEasyNetQ(
+        this IServiceContainer serviceContainer,
+        Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory
+    ) => serviceContainer.RegisterEasyNetQ(connectionConfigurationFactory, _ => { });
 
-    public static IServiceContainer RegisterEasyNetQ(this IServiceContainer serviceContainer, string connectionString, Action<IServiceRegister> registerServices)
-    {
-        return serviceContainer.RegisterEasyNetQ(c => c.Resolve<IConnectionStringParser>().Parse(connectionString), registerServices);
-    }
+    public static IServiceContainer RegisterEasyNetQ(
+        this IServiceContainer serviceContainer,
+        string connectionString,
+        Action<IServiceRegister> registerServices
+    ) => serviceContainer.RegisterEasyNetQ(c => c.Resolve<IConnectionStringParser>().Parse(connectionString), registerServices);
 
     public static IServiceContainer RegisterEasyNetQ(this IServiceContainer serviceContainer, string connectionString)
-    {
-        return serviceContainer.RegisterEasyNetQ(c => c.Resolve<IConnectionStringParser>().Parse(connectionString));
-    }
+        => serviceContainer.RegisterEasyNetQ(c => c.Resolve<IConnectionStringParser>().Parse(connectionString));
 }

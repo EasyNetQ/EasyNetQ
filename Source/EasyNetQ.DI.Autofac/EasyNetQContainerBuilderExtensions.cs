@@ -9,33 +9,28 @@ namespace Autofac;
 
 public static class EasyNetQContainerBuilderExtensions
 {
-    public static ContainerBuilder RegisterEasyNetQ(this ContainerBuilder containerBuilder, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices)
+    public static ContainerBuilder RegisterEasyNetQ(
+        this ContainerBuilder containerBuilder,
+        Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory,
+        Action<IServiceRegister> registerServices
+    )
     {
-        if (containerBuilder == null) throw new ArgumentNullException(nameof(containerBuilder));
-
         var serviceRegister = new AutofacAdapter(containerBuilder);
         RabbitHutch.RegisterBus(serviceRegister, connectionConfigurationFactory, registerServices);
         return containerBuilder;
     }
 
-    public static ContainerBuilder RegisterEasyNetQ(this ContainerBuilder containerBuilder, Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory)
-    {
-        if (containerBuilder == null) throw new ArgumentNullException(nameof(containerBuilder));
+    public static ContainerBuilder RegisterEasyNetQ(
+        this ContainerBuilder containerBuilder,
+        Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory
+    ) => containerBuilder.RegisterEasyNetQ(connectionConfigurationFactory, _ => { });
 
-        return containerBuilder.RegisterEasyNetQ(connectionConfigurationFactory, _ => { });
-    }
-
-    public static ContainerBuilder RegisterEasyNetQ(this ContainerBuilder containerBuilder, string connectionString, Action<IServiceRegister> registerServices)
-    {
-        if (containerBuilder == null) throw new ArgumentNullException(nameof(containerBuilder));
-
-        return containerBuilder.RegisterEasyNetQ(c => c.Resolve<IConnectionStringParser>().Parse(connectionString), registerServices);
-    }
+    public static ContainerBuilder RegisterEasyNetQ(
+        this ContainerBuilder containerBuilder,
+        string connectionString,
+        Action<IServiceRegister> registerServices
+    ) => containerBuilder.RegisterEasyNetQ(c => c.Resolve<IConnectionStringParser>().Parse(connectionString), registerServices);
 
     public static ContainerBuilder RegisterEasyNetQ(this ContainerBuilder containerBuilder, string connectionString)
-    {
-        if (containerBuilder == null) throw new ArgumentNullException(nameof(containerBuilder));
-
-        return containerBuilder.RegisterEasyNetQ(c => c.Resolve<IConnectionStringParser>().Parse(connectionString));
-    }
+        => containerBuilder.RegisterEasyNetQ(c => c.Resolve<IConnectionStringParser>().Parse(connectionString));
 }

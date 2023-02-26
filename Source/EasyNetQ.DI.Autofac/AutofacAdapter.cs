@@ -46,7 +46,6 @@ public class AutofacAdapter : IServiceRegister
                 ContainerBuilder.RegisterType(implementationType)
                     .As(serviceType)
                     .SingleInstance();
-
                 return this;
             default:
                 throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
@@ -152,23 +151,27 @@ public class AutofacAdapter : IServiceRegister
         return this;
     }
 
-    private class AutofacResolver : IServiceResolver
+    private sealed class AutofacResolver : IServiceResolver
     {
-        protected readonly ILifetimeScope Lifetime;
+        private readonly ILifetimeScope lifetime;
 
-        public AutofacResolver(ILifetimeScope lifetime) => Lifetime = lifetime;
+        public AutofacResolver(ILifetimeScope lifetime) => this.lifetime = lifetime;
 
-        public TService Resolve<TService>() where TService : class => Lifetime.Resolve<TService>();
+        public TService Resolve<TService>() where TService : class => lifetime.Resolve<TService>();
 
-        public IServiceResolverScope CreateScope() => new AutofacResolverScope(Lifetime.BeginLifetimeScope());
+        public IServiceResolverScope CreateScope() => new AutofacResolverScope(lifetime.BeginLifetimeScope());
     }
 
-    private class AutofacResolverScope : AutofacResolver, IServiceResolverScope
+    private sealed class AutofacResolverScope : IServiceResolverScope
     {
-        public AutofacResolverScope(ILifetimeScope lifetime) : base(lifetime)
-        {
-        }
+        private readonly ILifetimeScope lifetime;
 
-        public void Dispose() => Lifetime.Dispose();
+        public AutofacResolverScope(ILifetimeScope lifetime) => this.lifetime = lifetime;
+
+        public TService Resolve<TService>() where TService : class => lifetime.Resolve<TService>();
+
+        public IServiceResolverScope CreateScope() => new AutofacResolverScope(lifetime.BeginLifetimeScope());
+
+        public void Dispose() => lifetime.Dispose();
     }
 }

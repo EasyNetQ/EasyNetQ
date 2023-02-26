@@ -83,8 +83,8 @@ public class ContainerAdapterTests
     {
         var resolver = resolverFactory(c =>
         {
-            c.Register<IService, Service>(resolver => new Service());
-            c.TryRegister<IService, DummyService>(r => new DummyService());
+            c.Register<IService, Service>(_ => new Service());
+            c.TryRegister<IService, DummyService>(_ => new DummyService());
         });
 
         resolver.Resolve<IService>().Should().BeOfType<Service>();
@@ -278,7 +278,7 @@ public class ContainerAdapterTests
 
         public override string ToString()
         {
-            return GetType().Name + "_" + number.ToString();
+            return GetType().Name + "_" + number;
         }
     }
 

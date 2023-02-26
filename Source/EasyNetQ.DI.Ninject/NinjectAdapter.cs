@@ -5,7 +5,7 @@ using Ninject.Infrastructure;
 namespace EasyNetQ.DI.Ninject;
 
 /// <see cref="IServiceRegister"/> implementation for Ninject DI container.
-public class NinjectAdapter : IServiceRegister
+public sealed class NinjectAdapter : IServiceRegister
 {
     /// <summary>
     /// Creates an adapter on top of <see cref="IKernel"/>.
@@ -16,7 +16,7 @@ public class NinjectAdapter : IServiceRegister
         Kernel.Rebind<IServiceResolver>().ToMethod(x => new NinjectResolver(x.Kernel)).InTransientScope();
     }
 
-    public IKernel Kernel { get; set; }
+    public IKernel Kernel { get; }
 
     /// <inheritdoc />
     public IServiceRegister Register(Type serviceType, Type implementationType, Lifetime lifetime = Lifetime.Singleton)
@@ -67,7 +67,7 @@ public class NinjectAdapter : IServiceRegister
             _ => throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null)
         };
 
-    private class NinjectResolver : IServiceResolver
+    private sealed class NinjectResolver : IServiceResolver
     {
         private readonly IKernel kernel;
 

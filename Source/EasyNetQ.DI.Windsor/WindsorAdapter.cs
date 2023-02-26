@@ -95,7 +95,7 @@ public class WindsorAdapter : IServiceRegister
             _ => throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null)
         };
 
-    private class WindsorResolver : IServiceResolver
+    private sealed class WindsorResolver : IServiceResolver
     {
         private readonly IKernel kernel;
 

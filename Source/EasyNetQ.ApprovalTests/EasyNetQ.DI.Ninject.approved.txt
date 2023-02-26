@@ -1,9 +1,9 @@
 namespace EasyNetQ.DI.Ninject
 {
-    public class NinjectAdapter : EasyNetQ.DI.IServiceRegister
+    public sealed class NinjectAdapter : EasyNetQ.DI.IServiceRegister
     {
         public NinjectAdapter(Ninject.IKernel kernel) { }
-        public Ninject.IKernel Kernel { get; set; }
+        public Ninject.IKernel Kernel { get; }
         public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, object implementationInstance) { }
         public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Func<EasyNetQ.DI.IServiceResolver, object> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1) { }
         public EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Type implementationType, EasyNetQ.DI.Lifetime lifetime = 1) { }

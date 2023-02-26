@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace EasyNetQ.DI.Microsoft;
 
 /// <see cref="IServiceRegister"/> implementation for Microsoft.Extensions.DependencyInjection DI container.
-public class ServiceCollectionAdapter : IServiceRegister
+public sealed class ServiceCollectionAdapter : IServiceRegister
 {
     /// <summary>
     /// Creates an adapter on top of <see cref="IServiceCollection"/>.
@@ -93,7 +93,7 @@ public class ServiceCollectionAdapter : IServiceRegister
         );
     }
 
-    private class ServiceProviderAdapter : IServiceResolver
+    private sealed class ServiceProviderAdapter : IServiceResolver
     {
         private readonly IServiceProvider serviceProvider;
 
@@ -104,7 +104,7 @@ public class ServiceCollectionAdapter : IServiceRegister
         public IServiceResolverScope CreateScope() => new MicrosoftServiceResolverScope(serviceProvider);
     }
 
-    private class MicrosoftServiceResolverScope : IServiceResolverScope, IAsyncDisposable
+    private sealed class MicrosoftServiceResolverScope : IServiceResolverScope, IAsyncDisposable
     {
         private readonly IServiceScope serviceScope;
 
@@ -126,7 +126,7 @@ public class ServiceCollectionAdapter : IServiceRegister
         public TService Resolve<TService>() where TService : class => serviceScope.ServiceProvider.GetService<TService>()!;
     }
 
-    private class ImplementationFactoryAdapter<T>
+    private sealed class ImplementationFactoryAdapter<T>
     {
         private readonly Func<IServiceResolver, object> implementationFactory;
 

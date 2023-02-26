@@ -16,7 +16,7 @@ public class When_using_default_consumer_error_strategy
             ErrorExchangeNamingConvention = info => "CustomErrorExchangePrefixName." + info.RoutingKey,
             ErrorQueueTypeConvention = () => QueueType.Quorum,
             ErrorExchangeTypeConvention = () => ExchangeType.Topic,
-            ErrorExchangeRoutingKeyConvention = info => "CustomRoutingKey"
+            ErrorExchangeRoutingKeyConvention = _ => "CustomRoutingKey"
         };
 
         const string originalMessage = "";
@@ -84,8 +84,7 @@ public class When_using_default_consumer_error_strategy
     {
         using var mockBuilder = new MockBuilder(
             x => x.Register<IConventions>(customConventions)
-                .Register(_ => new ConnectionConfiguration { PublisherConfirms = true }
-                )
+                .Register(_ => new ConnectionConfiguration { PublisherConfirms = true })
         );
 
         var errorAckStrategy = await mockBuilder.ConsumerErrorStrategy.HandleConsumerErrorAsync(consumerExecutionContext, new Exception());

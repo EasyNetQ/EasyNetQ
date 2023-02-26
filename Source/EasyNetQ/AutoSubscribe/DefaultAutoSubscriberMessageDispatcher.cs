@@ -6,13 +6,9 @@ public class DefaultAutoSubscriberMessageDispatcher : IAutoSubscriberMessageDisp
 {
     private readonly IServiceResolver resolver;
 
-    public DefaultAutoSubscriberMessageDispatcher(IServiceResolver resolver)
-    {
-        this.resolver = resolver;
-    }
+    public DefaultAutoSubscriberMessageDispatcher(IServiceResolver resolver) => this.resolver = resolver;
 
-    public DefaultAutoSubscriberMessageDispatcher()
-        : this(new ActivatorBasedResolver())
+    public DefaultAutoSubscriberMessageDispatcher() : this(new ActivatorBasedResolver())
     {
     }
 
@@ -21,11 +17,9 @@ public class DefaultAutoSubscriberMessageDispatcher : IAutoSubscriberMessageDisp
         where TMessage : class
         where TConsumer : class, IConsume<TMessage>
     {
-        using (var scope = resolver.CreateScope())
-        {
-            var consumer = scope.Resolve<TConsumer>();
-            consumer.Consume(message, cancellationToken);
-        }
+        using var scope = resolver.CreateScope();
+        var consumer = scope.Resolve<TConsumer>();
+        consumer.Consume(message, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -40,14 +34,8 @@ public class DefaultAutoSubscriberMessageDispatcher : IAutoSubscriberMessageDisp
 
     private class ActivatorBasedResolver : IServiceResolver
     {
-        public TService Resolve<TService>() where TService : class
-        {
-            return Activator.CreateInstance<TService>();
-        }
+        public TService Resolve<TService>() where TService : class => Activator.CreateInstance<TService>();
 
-        public IServiceResolverScope CreateScope()
-        {
-            return new ServiceResolverScope(this);
-        }
+        public IServiceResolverScope CreateScope() => new ServiceResolverScope(this);
     }
 }

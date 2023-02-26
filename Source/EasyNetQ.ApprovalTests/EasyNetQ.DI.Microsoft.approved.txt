@@ -1,6 +1,6 @@
 namespace EasyNetQ.DI.Microsoft
 {
-    public class ServiceCollectionAdapter : EasyNetQ.DI.IServiceRegister
+    public sealed class ServiceCollectionAdapter : EasyNetQ.DI.IServiceRegister
     {
         public ServiceCollectionAdapter(Microsoft.Extensions.DependencyInjection.IServiceCollection serviceCollection) { }
         public Microsoft.Extensions.DependencyInjection.IServiceCollection ServiceCollection { get; }
