@@ -1,3 +1,5 @@
+using EasyNetQ.DI;
+
 namespace EasyNetQ.Producer;
 
 public readonly record struct PublishContext(
@@ -6,30 +8,40 @@ public readonly record struct PublishContext(
     in bool Mandatory,
     in MessageProperties Properties,
     in ReadOnlyMemory<byte> Body,
+    in IServiceResolver ServiceResolver,
     in CancellationToken CancellationToken
 );
 
 public delegate ValueTask PublishDelegate(PublishContext context);
 
-public interface IPublishMiddleware
-{
-    ValueTask InvokeAsync(PublishContext context, PublishDelegate next);
-}
 
-internal static class PublishPipeline
+public sealed class PublishPipelineBuilder
 {
-    public static PublishDelegate Build(IPublishMiddleware[] middlewares, PublishDelegate publishDelegate)
+    private readonly IReadOnlyList<Func<PublishDelegate, PublishDelegate>> middlewares;
+
+    public PublishPipelineBuilder()
     {
-        var result = publishDelegate;
+        middlewares = Array.Empty<Func<PublishDelegate, PublishDelegate>>();
+    }
 
-        for (var i = middlewares.Length - 1; i >= 0; i--)
-        {
-            var currentMiddleware = middlewares[i];
-            var currentResult = result;
+    private PublishPipelineBuilder(IReadOnlyList<Func<PublishDelegate, PublishDelegate>> middlewares)
+    {
+        this.middlewares = middlewares;
+    }
 
-            result = ctx => currentMiddleware.InvokeAsync(ctx, currentResult);
-        }
+    public PublishPipelineBuilder Use(Func<PublishDelegate, PublishDelegate> middleware)
+    {
+        // ReSharper disable once UseObjectOrCollectionInitializer
+        var newMiddlewares = new List<Func<PublishDelegate, PublishDelegate>>(middlewares);
+        newMiddlewares.Add(middleware);
+        return new PublishPipelineBuilder(newMiddlewares);
+    }
 
+    public PublishDelegate Build()
+    {
+        PublishDelegate result = _ => default;
+        for (var i = middlewares.Count - 1; i >= 0; i--)
+            result = middlewares[i](result);
         return result;
     }
 }

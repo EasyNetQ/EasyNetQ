@@ -6,9 +6,9 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests;
 
-public class When_using_default_consumer_error_strategy
+public class When_using_default_consume_error_strategy
 {
-    public When_using_default_consumer_error_strategy()
+    public When_using_default_consume_error_strategy()
     {
         customConventions = new Conventions(new DefaultTypeNameSerializer())
         {
@@ -30,6 +30,7 @@ public class When_using_default_consumer_error_strategy
                 AppId = string.Empty
             },
             originalMessageBody,
+            Substitute.For<IServiceResolver>(),
             CancellationToken.None
         );
     }

@@ -1,3 +1,4 @@
+using EasyNetQ.DI;
 using EasyNetQ.Internals;
 using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
@@ -92,6 +93,7 @@ public class InternalConsumer : IInternalConsumer
     private readonly ConsumerConfiguration configuration;
     private readonly IConsumerConnection connection;
     private readonly IEventBus eventBus;
+    private readonly IServiceResolver serviceResolver;
     private readonly ILogger logger;
 
     private volatile bool disposed;
@@ -101,12 +103,14 @@ public class InternalConsumer : IInternalConsumer
     ///     Creates InternalConsumer
     /// </summary>
     public InternalConsumer(
+        IServiceResolver serviceResolver,
         ILogger<InternalConsumer> logger,
         ConsumerConfiguration configuration,
         IConsumerConnection connection,
         IEventBus eventBus
     )
     {
+        this.serviceResolver = serviceResolver;
         this.logger = logger;
         this.configuration = configuration;
         this.connection = connection;
@@ -181,6 +185,7 @@ public class InternalConsumer : IInternalConsumer
             try
             {
                 var consumer = new AsyncBasicConsumer(
+                    serviceResolver,
                     logger,
                     model,
                     queue,

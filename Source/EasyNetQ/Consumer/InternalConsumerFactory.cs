@@ -1,3 +1,4 @@
+using EasyNetQ.DI;
 using EasyNetQ.Logging;
 
 namespace EasyNetQ.Consumer;
@@ -15,6 +16,7 @@ public interface IInternalConsumerFactory
 /// <inheritdoc />
 public class InternalConsumerFactory : IInternalConsumerFactory
 {
+    private readonly IServiceResolver serviceResolver;
     private readonly ILogger<InternalConsumer> logger;
     private readonly IConsumerConnection connection;
     private readonly IEventBus eventBus;
@@ -23,11 +25,13 @@ public class InternalConsumerFactory : IInternalConsumerFactory
     ///     Creates InternalConsumerFactory
     /// </summary>
     public InternalConsumerFactory(
+        IServiceResolver serviceResolver,
         ILogger<InternalConsumer> logger,
         IConsumerConnection connection,
         IEventBus eventBus
     )
     {
+        this.serviceResolver = serviceResolver;
         this.logger = logger;
         this.connection = connection;
         this.eventBus = eventBus;
@@ -35,5 +39,5 @@ public class InternalConsumerFactory : IInternalConsumerFactory
 
     /// <inheritdoc />
     public IInternalConsumer CreateConsumer(ConsumerConfiguration configuration)
-        => new InternalConsumer(logger, configuration, connection, eventBus);
+        => new InternalConsumer(serviceResolver, logger, configuration, connection, eventBus);
 }

@@ -1,5 +1,6 @@
 using System.Text;
 using EasyNetQ.Consumer;
+using EasyNetQ.DI;
 using RabbitMQ.Client;
 using EasyNetQ.Logging;
 
@@ -17,7 +18,7 @@ public class DefaultConsumerErrorStrategyTests
         var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock, true);
 
         var ackStrategy = await consumerErrorStrategy.HandleErrorAsync(
-            CreateConsumerExcutionContext(CreateOriginalMessage()), new Exception("I just threw!")
+            CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!")
         );
 
         Assert.Equal(AckStrategies.Ack, ackStrategy);
@@ -36,7 +37,7 @@ public class DefaultConsumerErrorStrategyTests
         var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock, true);
 
         var ackStrategy = await consumerErrorStrategy.HandleErrorAsync(
-            CreateConsumerExcutionContext(CreateOriginalMessage()), new Exception("I just threw!")
+            CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!")
         );
 
         Assert.Equal(AckStrategies.NackWithRequeue, ackStrategy);
@@ -54,7 +55,7 @@ public class DefaultConsumerErrorStrategyTests
         var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock);
 
         var ackStrategy = await consumerErrorStrategy.HandleErrorAsync(
-            CreateConsumerExcutionContext(CreateOriginalMessage()), new Exception("I just threw!")
+            CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!")
         );
 
         Assert.Equal(AckStrategies.Ack, ackStrategy);
@@ -77,7 +78,7 @@ public class DefaultConsumerErrorStrategyTests
         return consumerErrorStrategy;
     }
 
-    private static ConsumeContext CreateConsumerExcutionContext(byte[] originalMessageBody)
+    private static ConsumeContext CreateConsumerExecutionContext(byte[] originalMessageBody)
     {
         return new ConsumeContext(
             new MessageReceivedInfo("consumertag", 0, false, "orginalExchange", "originalRoutingKey", "queue"),
@@ -87,6 +88,7 @@ public class DefaultConsumerErrorStrategyTests
                 AppId = "456"
             },
             originalMessageBody,
+            Substitute.For<IServiceResolver>(),
             CancellationToken.None
         );
     }

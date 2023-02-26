@@ -1,7 +1,7 @@
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
+using EasyNetQ.DI;
 using EasyNetQ.Events;
-using EasyNetQ.Interception;
 using EasyNetQ.Internals;
 using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
@@ -16,7 +16,8 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 {
     private readonly IPersistentChannelDispatcher persistentChannelDispatcher;
     private readonly ConnectionConfiguration configuration;
-    private readonly IConsumeMiddleware[] consumeMiddlewares;
+    private readonly ConsumePipelineBuilder consumePipelineBuilder;
+    private readonly IServiceResolver serviceResolver;
     private readonly IPublishConfirmationListener confirmationListener;
     private readonly ILogger logger;
     private readonly IProducerConnection producerConnection;
@@ -45,8 +46,9 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         IEventBus eventBus,
         IHandlerCollectionFactory handlerCollectionFactory,
         ConnectionConfiguration configuration,
-        IEnumerable<IPublishMiddleware> publishMiddlewares,
-        IEnumerable<IConsumeMiddleware> consumeMiddlewares,
+        PublishPipelineBuilder publishPipelineBuilder,
+        ConsumePipelineBuilder consumePipelineBuilder,
+        IServiceResolver serviceResolver,
         IMessageSerializationStrategy messageSerializationStrategy,
         IPullingConsumerFactory pullingConsumerFactory,
         AdvancedBusEventHandlers advancedBusEventHandlers
@@ -61,7 +63,8 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         this.eventBus = eventBus;
         this.handlerCollectionFactory = handlerCollectionFactory;
         this.configuration = configuration;
-        this.consumeMiddlewares = consumeMiddlewares.ToArray();
+        this.consumePipelineBuilder = consumePipelineBuilder;
+        this.serviceResolver = serviceResolver;
         this.messageSerializationStrategy = messageSerializationStrategy;
         this.pullingConsumerFactory = pullingConsumerFactory;
         this.advancedBusEventHandlers = advancedBusEventHandlers;
@@ -82,7 +85,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             this.eventBus.Subscribe<ReturnedMessageEvent>(OnMessageReturned),
         };
 
-        publishDelegate = PublishPipeline.Build(publishMiddlewares.ToArray(), PublishInternalAsync);
+        publishDelegate = publishPipelineBuilder.Use(_ => PublishInternalAsync).Build();
     }
 
 
@@ -114,10 +117,9 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
                     x.Item3.ConsumerTag,
                     x.Item3.IsExclusive,
                     x.Item3.Arguments,
-                    ConsumePipeline.Build(
-                        consumeMiddlewares,
-                        ctx => new ValueTask<AckStrategy>(x.Item2(ctx.Body, ctx.Properties, ctx.ReceivedInfo, ctx.CancellationToken))
-                    )
+                    consumePipelineBuilder.Use(
+                        _ => ctx => new ValueTask<AckStrategy>(x.Item2(ctx.Body, ctx.Properties, ctx.ReceivedInfo, ctx.CancellationToken))
+                    ).Build()
                 )).Union(
                 consumeConfiguration.PerQueueTypedConsumeConfigurations.ToDictionary(
                     x => x.Item1,
@@ -126,15 +128,14 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
                         x.Item3.ConsumerTag,
                         x.Item3.IsExclusive,
                         x.Item3.Arguments,
-                        ConsumePipeline.Build(
-                            consumeMiddlewares,
-                            async ctx =>
+                        consumePipelineBuilder.Use(
+                            _ => async ctx =>
                             {
                                 var deserializedMessage = messageSerializationStrategy.DeserializeMessage(ctx.Properties, ctx.Body);
                                 var handler = x.Item2.GetHandler(deserializedMessage.MessageType);
                                 return await handler(deserializedMessage, ctx.ReceivedInfo, ctx.CancellationToken).ConfigureAwait(false);
                             }
-                        )
+                        ).Build()
                     )
                 )
             ).ToDictionary(x => x.Key, x => x.Value)
@@ -243,7 +244,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-        await publishDelegate(new PublishContext(exchange, routingKey, mandatory, properties, body, cts.Token)).ConfigureAwait(false);
+        await publishDelegate(new PublishContext(exchange, routingKey, mandatory, properties, body, serviceResolver, cts.Token)).ConfigureAwait(false);
     }
 
     #endregion
@@ -695,6 +696,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
                 confirmation.Cancel();
                 throw;
             }
+
             return confirmation;
         }
     }
