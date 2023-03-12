@@ -20,7 +20,7 @@ public class ApprovalTests
         var publicApi = type?.Assembly.GeneratePublicApi(new ApiGeneratorOptions
         {
             IncludeAssemblyAttributes = false,
-            WhitelistedNamespacePrefixes = new[] { "Microsoft.Extensions.DependencyInjection" },
+            AllowNamespacePrefixes = new[] { "Microsoft.Extensions.DependencyInjection" },
             ExcludeAttributes = new[] { "System.Diagnostics.DebuggerDisplayAttribute" },
         });
 
