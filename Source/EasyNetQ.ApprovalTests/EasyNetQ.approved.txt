@@ -199,8 +199,8 @@ namespace EasyNetQ
         protected readonly struct RpcKey : System.IEquatable<EasyNetQ.DefaultRpc.RpcKey>
         {
             public RpcKey(System.Type RequestType, System.Type ResponseType) { }
-            public System.Type RequestType { get; set; }
-            public System.Type ResponseType { get; set; }
+            public System.Type RequestType { get; init; }
+            public System.Type ResponseType { get; init; }
         }
     }
     public class DefaultSendReceive : EasyNetQ.ISendReceive
@@ -563,34 +563,34 @@ namespace EasyNetQ
     }
     public readonly struct MessageProperties : System.IEquatable<EasyNetQ.MessageProperties>
     {
-        public string? AppId { get; set; }
         public bool AppIdPresent { get; }
-        public string? ClusterId { get; set; }
         public bool ClusterIdPresent { get; }
-        public string? ContentEncoding { get; set; }
         public bool ContentEncodingPresent { get; }
-        public string? ContentType { get; set; }
         public bool ContentTypePresent { get; }
-        public string? CorrelationId { get; set; }
         public bool CorrelationIdPresent { get; }
-        public byte DeliveryMode { get; set; }
         public bool DeliveryModePresent { get; }
-        public System.TimeSpan? Expiration { get; set; }
         public bool ExpirationPresent { get; }
-        public System.Collections.Generic.IDictionary<string, object?>? Headers { get; set; }
         public bool HeadersPresent { get; }
-        public string? MessageId { get; set; }
         public bool MessageIdPresent { get; }
-        public byte Priority { get; set; }
         public bool PriorityPresent { get; }
-        public string? ReplyTo { get; set; }
         public bool ReplyToPresent { get; }
-        public long Timestamp { get; set; }
         public bool TimestampPresent { get; }
-        public string? Type { get; set; }
         public bool TypePresent { get; }
-        public string? UserId { get; set; }
         public bool UserIdPresent { get; }
+        public string? AppId { get; init; }
+        public string? ClusterId { get; init; }
+        public string? ContentEncoding { get; init; }
+        public string? ContentType { get; init; }
+        public string? CorrelationId { get; init; }
+        public byte DeliveryMode { get; init; }
+        public System.TimeSpan? Expiration { get; init; }
+        public System.Collections.Generic.IDictionary<string, object?>? Headers { get; init; }
+        public string? MessageId { get; init; }
+        public byte Priority { get; init; }
+        public string? ReplyTo { get; init; }
+        public long Timestamp { get; init; }
+        public string? Type { get; init; }
+        public string? UserId { get; init; }
         public static EasyNetQ.MessageProperties Empty { get; }
     }
     public static class MessagePropertiesExtensions
@@ -601,12 +601,12 @@ namespace EasyNetQ
     public readonly struct MessageReceivedInfo : System.IEquatable<EasyNetQ.MessageReceivedInfo>
     {
         public MessageReceivedInfo(string ConsumerTag, ulong DeliveryTag, bool Redelivered, string Exchange, string RoutingKey, string Queue) { }
-        public string ConsumerTag { get; set; }
-        public ulong DeliveryTag { get; set; }
-        public string Exchange { get; set; }
-        public string Queue { get; set; }
-        public bool Redelivered { get; set; }
-        public string RoutingKey { get; set; }
+        public string ConsumerTag { get; init; }
+        public ulong DeliveryTag { get; init; }
+        public string Exchange { get; init; }
+        public string Queue { get; init; }
+        public bool Redelivered { get; init; }
+        public string RoutingKey { get; init; }
     }
     public class MessageReturnedEventArgs : System.EventArgs
     {
