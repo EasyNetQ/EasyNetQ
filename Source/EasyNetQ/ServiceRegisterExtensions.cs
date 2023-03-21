@@ -39,7 +39,7 @@ public static class ServiceRegisterExtensions
             .TryRegister<IConventions, Conventions>()
             .TryRegister<IEventBus, EventBus>()
             .TryRegister<ITypeNameSerializer, DefaultTypeNameSerializer>()
-            .TryRegister(new ProducePipelineBuilder().UsePublishInterceptors())
+            .TryRegister(new ProducePipelineBuilder().UseProduceInterceptors())
             .TryRegister(new ConsumePipelineBuilder().UseConsumeErrorStrategy().UseConsumeInterceptors())
             .TryRegister<ICorrelationIdGenerationStrategy, DefaultCorrelationIdGenerationStrategy>()
             .TryRegister<IMessageSerializationStrategy, DefaultMessageSerializationStrategy>()
@@ -166,7 +166,7 @@ public static class ServiceRegisterExtensions
     public static IServiceRegister EnableAlwaysNackWithoutRequeueConsumerErrorStrategy(this IServiceRegister serviceRegister)
         => serviceRegister.Register<IConsumeErrorStrategy>(SimpleConsumeErrorStrategy.NackWithoutRequeue);
 
-    public static ProducePipelineBuilder UsePublishInterceptors(this ProducePipelineBuilder pipelineBuilder)
+    public static ProducePipelineBuilder UseProduceInterceptors(this ProducePipelineBuilder pipelineBuilder)
     {
         return pipelineBuilder.Use(next => ctx =>
         {
