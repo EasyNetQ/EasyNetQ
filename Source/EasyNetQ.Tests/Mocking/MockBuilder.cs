@@ -115,7 +115,7 @@ public class MockBuilder : IDisposable
     public IProducerConnection ProducerConnection => container.GetInstance<IProducerConnection>();
     public IConsumerConnection ConsumerConnection => container.GetInstance<IConsumerConnection>();
 
-    public IConsumerErrorStrategy ConsumerErrorStrategy => container.GetInstance<IConsumerErrorStrategy>();
+    public IConsumeErrorStrategy ConsumeErrorStrategy => container.GetInstance<IConsumeErrorStrategy>();
 
     public List<string> ConsumerQueueNames { get; } = new();
 

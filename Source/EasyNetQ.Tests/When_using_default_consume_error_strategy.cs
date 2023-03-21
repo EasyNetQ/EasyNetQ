@@ -6,9 +6,9 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests;
 
-public class When_using_default_consumer_error_strategy
+public class When_using_default_consume_error_strategy
 {
-    public When_using_default_consumer_error_strategy()
+    public When_using_default_consume_error_strategy()
     {
         customConventions = new Conventions(new DefaultTypeNameSerializer())
         {
@@ -22,19 +22,20 @@ public class When_using_default_consumer_error_strategy
         const string originalMessage = "";
         var originalMessageBody = Encoding.UTF8.GetBytes(originalMessage);
 
-        consumerExecutionContext = new ConsumerExecutionContext(
-            (_, _, _, _) => Task.FromResult(AckStrategies.Ack),
+        consumerExecutionContext = new ConsumeContext(
             new MessageReceivedInfo("consumerTag", 0, false, "originalExchange", "originalRoutingKey", "queue"),
             new MessageProperties
             {
                 CorrelationId = string.Empty,
                 AppId = string.Empty
             },
-            originalMessageBody
+            originalMessageBody,
+            Substitute.For<IServiceResolver>(),
+            CancellationToken.None
         );
     }
 
-    private readonly ConsumerExecutionContext consumerExecutionContext;
+    private readonly ConsumeContext consumerExecutionContext;
     private readonly Conventions customConventions;
 
     [Fact]
@@ -42,7 +43,7 @@ public class When_using_default_consumer_error_strategy
     {
         using var mockBuilder = new MockBuilder(x => x.Register<IConventions>(customConventions));
 
-        var cancelAckStrategy = await mockBuilder.ConsumerErrorStrategy.HandleConsumerCancelledAsync(consumerExecutionContext, default);
+        var cancelAckStrategy = await mockBuilder.ConsumeErrorStrategy.HandleCancelledAsync(consumerExecutionContext);
 
         Assert.Same(AckStrategies.NackWithRequeue, cancelAckStrategy);
     }
@@ -52,7 +53,7 @@ public class When_using_default_consumer_error_strategy
     {
         using var mockBuilder = new MockBuilder(x => x.Register<IConventions>(customConventions));
 
-        var errorAckStrategy = await mockBuilder.ConsumerErrorStrategy.HandleConsumerErrorAsync(consumerExecutionContext, new Exception());
+        var errorAckStrategy = await mockBuilder.ConsumeErrorStrategy.HandleErrorAsync(consumerExecutionContext, new Exception());
 
         Assert.Same(AckStrategies.Ack, errorAckStrategy);
 
@@ -87,7 +88,7 @@ public class When_using_default_consumer_error_strategy
                 .Register(_ => new ConnectionConfiguration { PublisherConfirms = true })
         );
 
-        var errorAckStrategy = await mockBuilder.ConsumerErrorStrategy.HandleConsumerErrorAsync(consumerExecutionContext, new Exception());
+        var errorAckStrategy = await mockBuilder.ConsumeErrorStrategy.HandleErrorAsync(consumerExecutionContext, new Exception());
 
         Assert.Same(AckStrategies.Ack, errorAckStrategy);
 

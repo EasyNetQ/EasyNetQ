@@ -289,8 +289,8 @@ public class When_the_handler_throws_an_exception : IDisposable
     private readonly Exception originalException = new("Some exception message");
 
     private readonly MyMessage originalMessage;
-    private ConsumerExecutionContext basicDeliverEventArgs;
-    private readonly IConsumerErrorStrategy consumerErrorStrategy;
+    private ConsumeContext basicDeliverEventArgs;
+    private readonly IConsumeErrorStrategy consumeErrorStrategy;
     private readonly MockBuilder mockBuilder;
     private Exception raisedException;
 
@@ -301,18 +301,20 @@ public class When_the_handler_throws_an_exception : IDisposable
             ConsumerTagConvention = () => consumerTag
         };
 
-        consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
-        consumerErrorStrategy.HandleConsumerErrorAsync(default, null)
-            .ReturnsForAnyArgs(i =>
-            {
-                basicDeliverEventArgs = (ConsumerExecutionContext)i[0];
-                raisedException = (Exception)i[1];
-                return Task.FromResult(AckStrategies.Ack);
-            });
+        consumeErrorStrategy = Substitute.For<IConsumeErrorStrategy>();
+        consumeErrorStrategy.HandleErrorAsync(Arg.Any<ConsumeContext>(), Arg.Any<Exception>())
+            .ReturnsForAnyArgs(
+                i =>
+                {
+                    basicDeliverEventArgs = (ConsumeContext)i[0];
+                    raisedException = (Exception)i[1];
+                    return new ValueTask<AckStrategy>(AckStrategies.Ack);
+                }
+            );
 
         mockBuilder = new MockBuilder(x => x
             .Register<IConventions>(conventions)
-            .Register(consumerErrorStrategy)
+            .Register(consumeErrorStrategy)
         );
 
         mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, _ => throw originalException);
@@ -352,8 +354,8 @@ public class When_the_handler_throws_an_exception : IDisposable
     [Fact]
     public void Should_invoke_the_consumer_error_strategy()
     {
-        consumerErrorStrategy.Received()
-            .HandleConsumerErrorAsync(Arg.Any<ConsumerExecutionContext>(), Arg.Any<Exception>(), Arg.Any<CancellationToken>());
+        consumeErrorStrategy.Received()
+            .HandleErrorAsync(Arg.Any<ConsumeContext>(), Arg.Any<Exception>());
     }
 
     [Fact]

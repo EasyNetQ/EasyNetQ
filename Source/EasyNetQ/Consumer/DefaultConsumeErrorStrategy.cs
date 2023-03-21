@@ -19,9 +19,9 @@ namespace EasyNetQ.Consumer;
 ///
 /// Each exchange is bound to the central EasyNetQ error queue.
 /// </summary>
-public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
+public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
 {
-    private readonly ILogger<DefaultConsumerErrorStrategy> logger;
+    private readonly ILogger<DefaultConsumeErrorStrategy> logger;
     private readonly IConsumerConnection connection;
     private readonly IConventions conventions;
     private readonly IErrorMessageSerializer errorMessageSerializer;
@@ -33,8 +33,8 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
     /// <summary>
     ///     Creates DefaultConsumerErrorStrategy
     /// </summary>
-    public DefaultConsumerErrorStrategy(
-        ILogger<DefaultConsumerErrorStrategy> logger,
+    public DefaultConsumeErrorStrategy(
+        ILogger<DefaultConsumeErrorStrategy> logger,
         IConsumerConnection connection,
         ISerializer serializer,
         IConventions conventions,
@@ -53,11 +53,7 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
     }
 
     /// <inheritdoc />
-    public virtual Task<AckStrategy> HandleConsumerErrorAsync(
-        ConsumerExecutionContext context,
-        Exception exception,
-        CancellationToken cancellationToken
-    )
+    public virtual ValueTask<AckStrategy> HandleErrorAsync(ConsumeContext context, Exception exception)
     {
         var receivedInfo = context.ReceivedInfo;
         var properties = context.Properties;
@@ -86,9 +82,11 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
 
             model.BasicPublish(errorExchange, receivedInfo.RoutingKey, errorProperties, message.Memory);
 
-            if (!configuration.PublisherConfirms) return Task.FromResult(AckStrategies.Ack);
-
-            return Task.FromResult(model.WaitForConfirms(configuration.Timeout) ? AckStrategies.Ack : AckStrategies.NackWithRequeue);
+            return new ValueTask<AckStrategy>(
+                configuration.PublisherConfirms
+                    ? model.WaitForConfirms(configuration.Timeout) ? AckStrategies.Ack : AckStrategies.NackWithRequeue
+                    : AckStrategies.Ack
+            );
         }
         catch (BrokerUnreachableException unreachableException)
         {
@@ -112,14 +110,11 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
             logger.Error(unexpectedException, "Failed to publish error message");
         }
 
-        return Task.FromResult(AckStrategies.NackWithRequeue);
+        return new ValueTask<AckStrategy>(AckStrategies.NackWithRequeue);
     }
 
     /// <inheritdoc />
-    public virtual Task<AckStrategy> HandleConsumerCancelledAsync(
-        ConsumerExecutionContext context,
-        CancellationToken cancellationToken
-    ) => Task.FromResult(AckStrategies.NackWithRequeue);
+    public virtual ValueTask<AckStrategy> HandleCancelledAsync(ConsumeContext context) => new(AckStrategies.NackWithRequeue);
 
     private static void DeclareAndBindErrorExchangeWithErrorQueue(
         IModel model,
