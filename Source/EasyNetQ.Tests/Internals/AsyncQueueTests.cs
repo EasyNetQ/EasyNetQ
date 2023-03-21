@@ -26,7 +26,7 @@ public class AsyncQueueTests
     {
         using var queue = new AsyncQueue<int>();
         using var dequeueCts = new CancellationTokenSource();
-        var dequeueTask = queue.DequeueAsync(dequeueCts.Token);
+        var dequeueTask = queue.DequeueAsync(dequeueCts.Token).AsTask();
         var _ = Task.Run(dequeueCts.Cancel, CancellationToken.None);
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => dequeueTask);
     }

@@ -88,19 +88,22 @@ public sealed class AsyncQueue<T> : IDisposable
     /// </summary>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>The dequeued element</returns>
-    public Task<T> DequeueAsync(CancellationToken cancellationToken = default)
+    public ValueTask<T> DequeueAsync(CancellationToken cancellationToken = default)
     {
+        if (cancellationToken.IsCancellationRequested)
+            return new ValueTask<T>(Task.FromCanceled<T>(cancellationToken));
+
         lock (mutex)
         {
             if (elements.Count > 0)
-                return Task.FromResult(elements.Dequeue());
+                return new ValueTask<T>(elements.Dequeue());
 
             CleanUpCancelledWaiters();
 
             var waiter = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
             waiter.AttachCancellation(cancellationToken);
             waiters.Enqueue(waiter);
-            return waiter.Task;
+            return new ValueTask<T>(waiter.Task);
         }
     }
 

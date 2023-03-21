@@ -1539,7 +1539,7 @@ namespace EasyNetQ.Internals
         public AsyncQueue() { }
         public AsyncQueue(System.Collections.Generic.IEnumerable<T> collection) { }
         public int Count { get; }
-        public System.Threading.Tasks.Task<T> DequeueAsync(System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.ValueTask<T> DequeueAsync(System.Threading.CancellationToken cancellationToken = default) { }
         public void Dispose() { }
         public void Enqueue(T element) { }
         public bool TryDequeue(out T? element) { }
