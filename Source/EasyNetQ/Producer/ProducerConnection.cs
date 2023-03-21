@@ -5,14 +5,14 @@ using RabbitMQ.Client;
 namespace EasyNetQ.Producer;
 
 /// <summary>
-/// 
+///
 /// </summary>
 public interface IProducerConnection : IPersistentConnection
 {
 }
 
 /// <inheritdoc cref="EasyNetQ.Producer.IProducerConnection" />
-public class ProducerConnection : PersistentConnection, IProducerConnection
+public sealed class ProducerConnection : PersistentConnection, IProducerConnection
 {
     /// <summary>
     ///     Creates ProducerConnection
