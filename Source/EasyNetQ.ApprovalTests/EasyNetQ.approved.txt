@@ -828,7 +828,7 @@ namespace EasyNetQ
     public delegate string? QueueTypeConvention(System.Type messageType);
     public class RabbitAdvancedBus : EasyNetQ.IAdvancedBus, System.IDisposable
     {
-        public RabbitAdvancedBus(EasyNetQ.Logging.ILogger<EasyNetQ.RabbitAdvancedBus> logger, EasyNetQ.Producer.IProducerConnection producerConnection, EasyNetQ.Consumer.IConsumerConnection consumerConnection, EasyNetQ.Consumer.IConsumerFactory consumerFactory, EasyNetQ.ChannelDispatcher.IPersistentChannelDispatcher persistentChannelDispatcher, EasyNetQ.Producer.IPublishConfirmationListener confirmationListener, EasyNetQ.IEventBus eventBus, EasyNetQ.Consumer.IHandlerCollectionFactory handlerCollectionFactory, EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.Producer.PublishPipelineBuilder publishPipelineBuilder, EasyNetQ.Consumer.ConsumePipelineBuilder consumePipelineBuilder, EasyNetQ.DI.IServiceResolver serviceResolver, EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy, EasyNetQ.IPullingConsumerFactory pullingConsumerFactory, EasyNetQ.AdvancedBusEventHandlers advancedBusEventHandlers) { }
+        public RabbitAdvancedBus(EasyNetQ.Logging.ILogger<EasyNetQ.RabbitAdvancedBus> logger, EasyNetQ.Producer.IProducerConnection producerConnection, EasyNetQ.Consumer.IConsumerConnection consumerConnection, EasyNetQ.Consumer.IConsumerFactory consumerFactory, EasyNetQ.ChannelDispatcher.IPersistentChannelDispatcher persistentChannelDispatcher, EasyNetQ.Producer.IPublishConfirmationListener confirmationListener, EasyNetQ.IEventBus eventBus, EasyNetQ.Consumer.IHandlerCollectionFactory handlerCollectionFactory, EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.Producer.ProducePipelineBuilder producePipelineBuilder, EasyNetQ.Consumer.ConsumePipelineBuilder consumePipelineBuilder, EasyNetQ.DI.IServiceResolver serviceResolver, EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy, EasyNetQ.IPullingConsumerFactory pullingConsumerFactory, EasyNetQ.AdvancedBusEventHandlers advancedBusEventHandlers) { }
         public bool IsConnected { get; }
         public event System.EventHandler<EasyNetQ.BlockedEventArgs>? Blocked;
         public event System.EventHandler<EasyNetQ.ConnectedEventArgs>? Connected;
@@ -951,7 +951,7 @@ namespace EasyNetQ
         public static void RegisterDefaultServices(this EasyNetQ.DI.IServiceRegister serviceRegister, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory) { }
         public static EasyNetQ.Consumer.ConsumePipelineBuilder UseConsumeErrorStrategy(this EasyNetQ.Consumer.ConsumePipelineBuilder pipelineBuilder) { }
         public static EasyNetQ.Consumer.ConsumePipelineBuilder UseConsumeInterceptors(this EasyNetQ.Consumer.ConsumePipelineBuilder pipelineBuilder) { }
-        public static EasyNetQ.Producer.PublishPipelineBuilder UsePublishInterceptors(this EasyNetQ.Producer.PublishPipelineBuilder pipelineBuilder) { }
+        public static EasyNetQ.Producer.ProducePipelineBuilder UsePublishInterceptors(this EasyNetQ.Producer.ProducePipelineBuilder pipelineBuilder) { }
         public static EasyNetQ.Consumer.ConsumePipelineBuilder UseScope(this EasyNetQ.Consumer.ConsumePipelineBuilder pipelineBuilder) { }
     }
     public static class SimpleConsumeConfigurationExtensions
@@ -1829,6 +1829,24 @@ namespace EasyNetQ.Producer
         void Cancel();
         System.Threading.Tasks.Task WaitAsync(System.Threading.CancellationToken cancellationToken = default);
     }
+    public readonly struct ProduceContext : System.IEquatable<EasyNetQ.Producer.ProduceContext>
+    {
+        public ProduceContext(in string Exchange, in string RoutingKey, in bool Mandatory, in EasyNetQ.MessageProperties Properties, in System.ReadOnlyMemory<byte> Body, in EasyNetQ.DI.IServiceResolver ServiceResolver, in System.Threading.CancellationToken CancellationToken) { }
+        public System.ReadOnlyMemory<byte> Body { get; init; }
+        public System.Threading.CancellationToken CancellationToken { get; init; }
+        public string Exchange { get; init; }
+        public bool Mandatory { get; init; }
+        public EasyNetQ.MessageProperties Properties { get; init; }
+        public string RoutingKey { get; init; }
+        public EasyNetQ.DI.IServiceResolver ServiceResolver { get; init; }
+    }
+    public delegate System.Threading.Tasks.ValueTask ProduceDelegate(EasyNetQ.Producer.ProduceContext context);
+    public sealed class ProducePipelineBuilder
+    {
+        public ProducePipelineBuilder() { }
+        public EasyNetQ.Producer.ProduceDelegate Build() { }
+        public EasyNetQ.Producer.ProducePipelineBuilder Use(System.Func<EasyNetQ.Producer.ProduceDelegate, EasyNetQ.Producer.ProduceDelegate> middleware) { }
+    }
     public class ProducerConnection : EasyNetQ.Persistent.PersistentConnection, EasyNetQ.Persistent.IPersistentConnection, EasyNetQ.Producer.IProducerConnection, System.IDisposable
     {
         public ProducerConnection(EasyNetQ.Logging.ILogger<EasyNetQ.Producer.ProducerConnection> logger, EasyNetQ.ConnectionConfiguration configuration, RabbitMQ.Client.IConnectionFactory connectionFactory, EasyNetQ.IEventBus eventBus) { }
@@ -1839,18 +1857,6 @@ namespace EasyNetQ.Producer
         public EasyNetQ.Producer.IPublishPendingConfirmation CreatePendingConfirmation(RabbitMQ.Client.IModel model) { }
         public void Dispose() { }
     }
-    public readonly struct PublishContext : System.IEquatable<EasyNetQ.Producer.PublishContext>
-    {
-        public PublishContext(in string Exchange, in string RoutingKey, in bool Mandatory, in EasyNetQ.MessageProperties Properties, in System.ReadOnlyMemory<byte> Body, in EasyNetQ.DI.IServiceResolver ServiceResolver, in System.Threading.CancellationToken CancellationToken) { }
-        public System.ReadOnlyMemory<byte> Body { get; init; }
-        public System.Threading.CancellationToken CancellationToken { get; init; }
-        public string Exchange { get; init; }
-        public bool Mandatory { get; init; }
-        public EasyNetQ.MessageProperties Properties { get; init; }
-        public string RoutingKey { get; init; }
-        public EasyNetQ.DI.IServiceResolver ServiceResolver { get; init; }
-    }
-    public delegate System.Threading.Tasks.ValueTask PublishDelegate(EasyNetQ.Producer.PublishContext context);
     [System.Serializable]
     public class PublishInterruptedException : System.Exception
     {
@@ -1866,12 +1872,6 @@ namespace EasyNetQ.Producer
         public PublishNackedException(string? message) { }
         protected PublishNackedException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public PublishNackedException(string? message, System.Exception? inner) { }
-    }
-    public sealed class PublishPipelineBuilder
-    {
-        public PublishPipelineBuilder() { }
-        public EasyNetQ.Producer.PublishDelegate Build() { }
-        public EasyNetQ.Producer.PublishPipelineBuilder Use(System.Func<EasyNetQ.Producer.PublishDelegate, EasyNetQ.Producer.PublishDelegate> middleware) { }
     }
     [System.Serializable]
     public class PublishReturnedException : System.Exception

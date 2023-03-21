@@ -49,7 +49,7 @@ public class AdvancedBusEventHandlersTests : IDisposable
             eventBus,
             Substitute.For<IHandlerCollectionFactory>(),
             Substitute.For<ConnectionConfiguration>(),
-            new PublishPipelineBuilder(),
+            new ProducePipelineBuilder(),
             new ConsumePipelineBuilder(),
             Substitute.For<IServiceResolver>(),
             Substitute.For<IMessageSerializationStrategy>(),

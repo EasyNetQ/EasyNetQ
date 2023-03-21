@@ -31,7 +31,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     private readonly AdvancedBusEventHandlers advancedBusEventHandlers;
 
     private volatile bool disposed;
-    private readonly PublishDelegate publishDelegate;
+    private readonly ProduceDelegate produceDelegate;
 
     /// <summary>
     ///     Creates RabbitAdvancedBus
@@ -46,7 +46,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         IEventBus eventBus,
         IHandlerCollectionFactory handlerCollectionFactory,
         ConnectionConfiguration configuration,
-        PublishPipelineBuilder publishPipelineBuilder,
+        ProducePipelineBuilder producePipelineBuilder,
         ConsumePipelineBuilder consumePipelineBuilder,
         IServiceResolver serviceResolver,
         IMessageSerializationStrategy messageSerializationStrategy,
@@ -85,7 +85,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             this.eventBus.Subscribe<ReturnedMessageEvent>(OnMessageReturned),
         };
 
-        publishDelegate = publishPipelineBuilder.Use(_ => PublishInternalAsync).Build();
+        produceDelegate = producePipelineBuilder.Use(_ => PublishInternalAsync).Build();
     }
 
 
@@ -244,7 +244,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-        await publishDelegate(new PublishContext(exchange, routingKey, mandatory, properties, body, serviceResolver, cts.Token)).ConfigureAwait(false);
+        await produceDelegate(new ProduceContext(exchange, routingKey, mandatory, properties, body, serviceResolver, cts.Token)).ConfigureAwait(false);
     }
 
     #endregion
@@ -576,7 +576,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         MessageReturned?.Invoke(this, new MessageReturnedEventArgs(@event.Body, @event.Properties, @event.Info));
     }
 
-    private async ValueTask PublishInternalAsync(PublishContext context)
+    private async ValueTask PublishInternalAsync(ProduceContext context)
     {
         if (configuration.PublisherConfirms)
         {
