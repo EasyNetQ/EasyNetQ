@@ -6,8 +6,8 @@ public class When_cancellation_of_message_handler_occurs : ConsumerTestBase
 {
     protected override void AdditionalSetUp()
     {
-        ConsumerErrorStrategy.HandleConsumerCancelledAsync(default)
-            .ReturnsForAnyArgs(Task.FromResult(AckStrategies.Ack));
+        ConsumeErrorStrategy.HandleCancelledAsync(default)
+            .ReturnsForAnyArgs(new ValueTask<AckStrategy>(AckStrategies.Ack));
 
         StartConsumer((_, _, _) =>
         {
@@ -21,12 +21,14 @@ public class When_cancellation_of_message_handler_occurs : ConsumerTestBase
     [Fact]
     public async Task Should_invoke_the_cancellation_strategy()
     {
-        await ConsumerErrorStrategy.Received().HandleConsumerCancelledAsync(
-            Arg.Is<ConsumerExecutionContext>(args => args.ReceivedInfo.ConsumerTag == ConsumerTag &&
-                                                     args.ReceivedInfo.DeliveryTag == DeliverTag &&
-                                                     args.ReceivedInfo.Exchange == "the_exchange" &&
-                                                     args.Body.ToArray().SequenceEqual(OriginalBody)),
-            Arg.Any<CancellationToken>());
+        await ConsumeErrorStrategy.Received().HandleCancelledAsync(
+            Arg.Is<ConsumeContext>(
+                args => args.ReceivedInfo.ConsumerTag == ConsumerTag &&
+                        args.ReceivedInfo.DeliveryTag == DeliverTag &&
+                        args.ReceivedInfo.Exchange == "the_exchange" &&
+                        args.Body.ToArray().SequenceEqual(OriginalBody)
+            )
+        );
     }
 
     [Fact]

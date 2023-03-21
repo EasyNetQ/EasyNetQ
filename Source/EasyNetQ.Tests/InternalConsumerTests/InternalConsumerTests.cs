@@ -1,4 +1,5 @@
 using EasyNetQ.Consumer;
+using EasyNetQ.DI;
 using EasyNetQ.Logging;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
@@ -18,6 +19,7 @@ public class InternalConsumerTests : IDisposable
         mockBuilder = new MockBuilder();
 
         internalConsumer = new InternalConsumer(
+            Substitute.For<IServiceResolver>(),
             Substitute.For<ILogger<InternalConsumer>>(),
             new ConsumerConfiguration(
                 42,
@@ -30,7 +32,7 @@ public class InternalConsumerTests : IDisposable
                             "exclusiveConsumerTag",
                             false,
                             new Dictionary<string, object>(),
-                            (_, _, _, _) => Task.FromResult(AckStrategies.Ack)
+                            _ => new ValueTask<AckStrategy>(AckStrategies.Ack)
                         )
                     },
                     {
@@ -40,13 +42,12 @@ public class InternalConsumerTests : IDisposable
                             "nonExclusiveConsumerTag",
                             false,
                             new Dictionary<string, object>(),
-                            (_, _, _, _) => Task.FromResult(AckStrategies.Ack)
+                            _ => new ValueTask<AckStrategy>(AckStrategies.Ack)
                         )
                     }
                 }
             ),
             mockBuilder.ConsumerConnection,
-            Substitute.For<IHandlerRunner>(),
             Substitute.For<IEventBus>()
         );
     }

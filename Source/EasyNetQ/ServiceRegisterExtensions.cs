@@ -2,6 +2,7 @@ using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;
+using EasyNetQ.Interception;
 using EasyNetQ.Logging;
 using EasyNetQ.MessageVersioning;
 using EasyNetQ.MultipleExchange;
@@ -38,14 +39,15 @@ public static class ServiceRegisterExtensions
             .TryRegister<IConventions, Conventions>()
             .TryRegister<IEventBus, EventBus>()
             .TryRegister<ITypeNameSerializer, DefaultTypeNameSerializer>()
+            .TryRegister<ProducePipelineBuilder>(_ => new ProducePipelineBuilder().UseProduceInterceptors())
+            .TryRegister<ConsumePipelineBuilder>(_ => new ConsumePipelineBuilder().UseConsumeErrorStrategy().UseConsumeInterceptors())
             .TryRegister<ICorrelationIdGenerationStrategy, DefaultCorrelationIdGenerationStrategy>()
             .TryRegister<IMessageSerializationStrategy, DefaultMessageSerializationStrategy>()
             .TryRegister<IMessageDeliveryModeStrategy, MessageDeliveryModeStrategy>()
-            .TryRegister(new AdvancedBusEventHandlers())
+            .TryRegister<AdvancedBusEventHandlers>(_ => new AdvancedBusEventHandlers())
             .TryRegister<IExchangeDeclareStrategy, DefaultExchangeDeclareStrategy>()
-            .TryRegister<IConsumerErrorStrategy, DefaultConsumerErrorStrategy>()
+            .TryRegister<IConsumeErrorStrategy, DefaultConsumeErrorStrategy>()
             .TryRegister<IErrorMessageSerializer, DefaultErrorMessageSerializer>()
-            .TryRegister<IHandlerRunner, HandlerRunner>()
             .TryRegister<IInternalConsumerFactory, InternalConsumerFactory>()
             .TryRegister<IConsumerFactory, ConsumerFactory>()
             .TryRegister(c => ConnectionFactoryFactory.CreateConnectionFactory(c.Resolve<ConnectionConfiguration>()))
@@ -61,7 +63,6 @@ public static class ServiceRegisterExtensions
             .TryRegister<IRpc, DefaultRpc>()
             .TryRegister<ISendReceive, DefaultSendReceive>()
             .TryRegister<IScheduler, DeadLetterExchangeAndMessageTtlScheduler>()
-            .TryRegister<IConsumeScopeProvider, NoopConsumeScopeProvider>()
             .TryRegister<IBus, RabbitBus>();
     }
 
@@ -149,19 +150,80 @@ public static class ServiceRegisterExtensions
     /// </summary>
     /// <param name="serviceRegister">The register</param>
     public static IServiceRegister EnableAlwaysAckConsumerErrorStrategy(this IServiceRegister serviceRegister)
-        => serviceRegister.Register<IConsumerErrorStrategy>(SimpleConsumerErrorStrategy.Ack);
+        => serviceRegister.Register<IConsumeErrorStrategy>(SimpleConsumeErrorStrategy.Ack);
 
     /// <summary>
     ///     Enables a consumer error strategy which nacks failed messages with requeue
     /// </summary>
     /// <param name="serviceRegister">The register</param>
     public static IServiceRegister EnableAlwaysNackWithRequeueConsumerErrorStrategy(this IServiceRegister serviceRegister)
-        => serviceRegister.Register<IConsumerErrorStrategy>(SimpleConsumerErrorStrategy.NackWithRequeue);
+        => serviceRegister.Register<IConsumeErrorStrategy>(SimpleConsumeErrorStrategy.NackWithRequeue);
 
     /// <summary>
     ///     Enables a consumer error strategy which nacks failed messages without requeue
     /// </summary>
     /// <param name="serviceRegister">The register</param>
     public static IServiceRegister EnableAlwaysNackWithoutRequeueConsumerErrorStrategy(this IServiceRegister serviceRegister)
-        => serviceRegister.Register<IConsumerErrorStrategy>(SimpleConsumerErrorStrategy.NackWithoutRequeue);
+        => serviceRegister.Register<IConsumeErrorStrategy>(SimpleConsumeErrorStrategy.NackWithoutRequeue);
+
+    public static ProducePipelineBuilder UseProduceInterceptors(this ProducePipelineBuilder pipelineBuilder)
+    {
+        return pipelineBuilder.Use(next => ctx =>
+        {
+            var interceptors = ctx.ServiceResolver.Resolve<IEnumerable<IProduceConsumeInterceptor>>().ToArray();
+            var producedMessage = interceptors.OnProduce(new ProducedMessage(ctx.Properties, ctx.Body));
+            return next(ctx with { Properties = producedMessage.Properties, Body = producedMessage.Body });
+        });
+    }
+
+    public static ConsumePipelineBuilder UseConsumeInterceptors(this ConsumePipelineBuilder pipelineBuilder)
+    {
+        return pipelineBuilder.Use(next => ctx =>
+        {
+            var interceptors = ctx.ServiceResolver.Resolve<IEnumerable<IProduceConsumeInterceptor>>().ToArray();
+            var consumedMessage = interceptors.OnConsume(new ConsumedMessage(ctx.ReceivedInfo, ctx.Properties, ctx.Body));
+            return next(ctx with { ReceivedInfo = consumedMessage.ReceivedInfo, Properties = consumedMessage.Properties, Body = consumedMessage.Body });
+        });
+    }
+
+    public static ConsumePipelineBuilder UseScope(this ConsumePipelineBuilder pipelineBuilder)
+    {
+        return pipelineBuilder.Use(next => async ctx =>
+        {
+            var scope = ctx.ServiceResolver.CreateScope();
+            await using var asyncScope = new AsyncServiceResolverScope(scope);
+            return await next(ctx with { ServiceResolver = scope }).ConfigureAwait(false);
+        });
+    }
+
+    public static ConsumePipelineBuilder UseConsumeErrorStrategy(this ConsumePipelineBuilder pipelineBuilder)
+    {
+        return pipelineBuilder.Use(next => async ctx =>
+        {
+            var errorStrategy = ctx.ServiceResolver.Resolve<IConsumeErrorStrategy>();
+            var logger = ctx.ServiceResolver.Resolve<ILogger<IConsumeErrorStrategy>>();
+
+            try
+            {
+                try
+                {
+                    return await next(ctx).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    return await errorStrategy.HandleCancelledAsync(ctx).ConfigureAwait(false);
+                }
+                catch (Exception exception)
+                {
+                    return await errorStrategy.HandleErrorAsync(ctx, exception).ConfigureAwait(false);
+                }
+            }
+            catch (Exception exception)
+            {
+                logger.Error(exception, "Consume error strategy has failed");
+
+                return AckStrategies.NackWithRequeue;
+            }
+        });
+    }
 }

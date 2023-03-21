@@ -1,3 +1,4 @@
+using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
 using EasyNetQ.Logging;
@@ -13,8 +14,8 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
     private readonly AsyncCountdownEvent onTheFlyMessages = new();
 
     private readonly IEventBus eventBus;
-    private readonly IHandlerRunner handlerRunner;
-    private readonly MessageHandler messageHandler;
+    private readonly ConsumeDelegate consumeDelegate;
+    private readonly IServiceResolver serviceResolver;
     private readonly ILogger logger;
     private readonly Queue queue;
     private readonly bool autoAck;
@@ -22,21 +23,21 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
     private volatile bool disposed;
 
     public AsyncBasicConsumer(
+        IServiceResolver serviceResolver,
         ILogger logger,
         IModel model,
         Queue queue,
         bool autoAck,
         IEventBus eventBus,
-        IHandlerRunner handlerRunner,
-        MessageHandler messageHandler
+        ConsumeDelegate consumeDelegate
     ) : base(model)
     {
+        this.serviceResolver = serviceResolver;
         this.logger = logger;
         this.queue = queue;
         this.autoAck = autoAck;
         this.eventBus = eventBus;
-        this.handlerRunner = handlerRunner;
-        this.messageHandler = messageHandler;
+        this.consumeDelegate = consumeDelegate;
     }
 
     public Queue Queue => queue;
@@ -86,13 +87,7 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
             );
             var messageProperties = new MessageProperties(properties);
             eventBus.Publish(new DeliveredMessageEvent(messageReceivedInfo, messageProperties, messageBody));
-            var context = new ConsumerExecutionContext(
-                messageHandler, messageReceivedInfo, messageProperties, messageBody
-            );
-            var ackStrategy = await handlerRunner.InvokeUserMessageHandlerAsync(
-                context, cts.Token
-            ).ConfigureAwait(false);
-
+            var ackStrategy = await consumeDelegate(new ConsumeContext(messageReceivedInfo, messageProperties, messageBody, serviceResolver, cts.Token)).ConfigureAwait(false);
             if (!autoAck)
             {
                 var ackResult = Ack(ackStrategy, messageReceivedInfo);
