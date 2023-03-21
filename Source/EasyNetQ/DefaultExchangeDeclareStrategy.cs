@@ -1,7 +1,7 @@
 using EasyNetQ.Internals;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.Producer;
+namespace EasyNetQ;
 
 /// <inheritdoc />
 public class DefaultExchangeDeclareStrategy : IExchangeDeclareStrategy

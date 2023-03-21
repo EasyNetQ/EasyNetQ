@@ -143,7 +143,7 @@ namespace EasyNetQ
     }
     public class DeadLetterExchangeAndMessageTtlScheduler : EasyNetQ.IScheduler
     {
-        public DeadLetterExchangeAndMessageTtlScheduler(EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.IAdvancedBus advancedBus, EasyNetQ.IConventions conventions, EasyNetQ.IMessageDeliveryModeStrategy messageDeliveryModeStrategy, EasyNetQ.Producer.IExchangeDeclareStrategy exchangeDeclareStrategy) { }
+        public DeadLetterExchangeAndMessageTtlScheduler(EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.IAdvancedBus advancedBus, EasyNetQ.IConventions conventions, EasyNetQ.IMessageDeliveryModeStrategy messageDeliveryModeStrategy, EasyNetQ.IExchangeDeclareStrategy exchangeDeclareStrategy) { }
         public System.Threading.Tasks.Task FuturePublishAsync<T>(T message, System.TimeSpan delay, System.Action<EasyNetQ.IFuturePublishConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
     }
     public static class DeadLetterStrategy
@@ -156,6 +156,12 @@ namespace EasyNetQ
         public DefaultCorrelationIdGenerationStrategy() { }
         public string GetCorrelationId() { }
     }
+    public class DefaultExchangeDeclareStrategy : EasyNetQ.IExchangeDeclareStrategy
+    {
+        public DefaultExchangeDeclareStrategy(EasyNetQ.IConventions conventions, EasyNetQ.IAdvancedBus advancedBus) { }
+        public System.Threading.Tasks.Task<EasyNetQ.Topology.Exchange> DeclareExchangeAsync(string exchangeName, string exchangeType, System.Threading.CancellationToken cancellationToken) { }
+        public System.Threading.Tasks.Task<EasyNetQ.Topology.Exchange> DeclareExchangeAsync(System.Type messageType, string exchangeType, System.Threading.CancellationToken cancellationToken) { }
+    }
     public class DefaultMessageSerializationStrategy : EasyNetQ.IMessageSerializationStrategy
     {
         public DefaultMessageSerializationStrategy(EasyNetQ.ITypeNameSerializer typeNameSerializer, EasyNetQ.ISerializer serializer, EasyNetQ.ICorrelationIdGenerationStrategy correlationIdGenerator) { }
@@ -164,7 +170,7 @@ namespace EasyNetQ
     }
     public class DefaultPubSub : EasyNetQ.IPubSub
     {
-        public DefaultPubSub(EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.IConventions conventions, EasyNetQ.Producer.IExchangeDeclareStrategy exchangeDeclareStrategy, EasyNetQ.IMessageDeliveryModeStrategy messageDeliveryModeStrategy, EasyNetQ.IAdvancedBus advancedBus) { }
+        public DefaultPubSub(EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.IConventions conventions, EasyNetQ.IExchangeDeclareStrategy exchangeDeclareStrategy, EasyNetQ.IMessageDeliveryModeStrategy messageDeliveryModeStrategy, EasyNetQ.IAdvancedBus advancedBus) { }
         public virtual System.Threading.Tasks.Task PublishAsync<T>(T message, System.Action<EasyNetQ.IPublishConfiguration> configure, System.Threading.CancellationToken cancellationToken) { }
         public virtual EasyNetQ.Internals.AwaitableDisposable<EasyNetQ.SubscriptionResult> SubscribeAsync<T>(string subscriptionId, System.Func<T, System.Threading.CancellationToken, System.Threading.Tasks.Task> onMessage, System.Action<EasyNetQ.ISubscriptionConfiguration> configure, System.Threading.CancellationToken cancellationToken) { }
     }
@@ -174,9 +180,9 @@ namespace EasyNetQ
         protected const string IsFaultedKey = "IsFaulted";
         protected readonly EasyNetQ.IAdvancedBus advancedBus;
         protected readonly EasyNetQ.IConventions conventions;
-        protected readonly EasyNetQ.Producer.IExchangeDeclareStrategy exchangeDeclareStrategy;
+        protected readonly EasyNetQ.IExchangeDeclareStrategy exchangeDeclareStrategy;
         protected readonly EasyNetQ.IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
-        public DefaultRpc(EasyNetQ.Logging.ILogger<EasyNetQ.DefaultRpc> logger, EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.IAdvancedBus advancedBus, EasyNetQ.IEventBus eventBus, EasyNetQ.IConventions conventions, EasyNetQ.Producer.IExchangeDeclareStrategy exchangeDeclareStrategy, EasyNetQ.IMessageDeliveryModeStrategy messageDeliveryModeStrategy, EasyNetQ.ITypeNameSerializer typeNameSerializer, EasyNetQ.ICorrelationIdGenerationStrategy correlationIdGenerationStrategy) { }
+        public DefaultRpc(EasyNetQ.Logging.ILogger<EasyNetQ.DefaultRpc> logger, EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.IAdvancedBus advancedBus, EasyNetQ.IEventBus eventBus, EasyNetQ.IConventions conventions, EasyNetQ.IExchangeDeclareStrategy exchangeDeclareStrategy, EasyNetQ.IMessageDeliveryModeStrategy messageDeliveryModeStrategy, EasyNetQ.ITypeNameSerializer typeNameSerializer, EasyNetQ.ICorrelationIdGenerationStrategy correlationIdGenerationStrategy) { }
         protected void DeRegisterResponseActions(string correlationId) { }
         public void Dispose() { }
         protected void RegisterResponseActions<TResponse>(string correlationId, System.Threading.Tasks.TaskCompletionSource<TResponse> tcs) { }
@@ -371,6 +377,11 @@ namespace EasyNetQ
         EasyNetQ.IExchangeDeclareConfiguration AsDurable(bool isDurable);
         EasyNetQ.IExchangeDeclareConfiguration WithArgument(string name, object value);
         EasyNetQ.IExchangeDeclareConfiguration WithType(string type);
+    }
+    public interface IExchangeDeclareStrategy
+    {
+        System.Threading.Tasks.Task<EasyNetQ.Topology.Exchange> DeclareExchangeAsync(string exchangeName, string exchangeType, System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.Task<EasyNetQ.Topology.Exchange> DeclareExchangeAsync(System.Type messageType, string exchangeType, System.Threading.CancellationToken cancellationToken = default);
     }
     public interface IFuturePublishConfiguration
     {
@@ -1736,7 +1747,7 @@ namespace EasyNetQ.MessageVersioning
         public bool IsEmpty() { }
         public System.Type Pop() { }
     }
-    public class VersionedExchangeDeclareStrategy : EasyNetQ.Producer.IExchangeDeclareStrategy
+    public class VersionedExchangeDeclareStrategy : EasyNetQ.IExchangeDeclareStrategy
     {
         public VersionedExchangeDeclareStrategy(EasyNetQ.IConventions conventions, EasyNetQ.IAdvancedBus advancedBus) { }
         public System.Threading.Tasks.Task<EasyNetQ.Topology.Exchange> DeclareExchangeAsync(string exchangeName, string exchangeType, System.Threading.CancellationToken cancellationToken) { }
@@ -1751,7 +1762,7 @@ namespace EasyNetQ.MessageVersioning
 }
 namespace EasyNetQ.MultipleExchange
 {
-    public class MultipleExchangeDeclareStrategy : EasyNetQ.Producer.IExchangeDeclareStrategy
+    public class MultipleExchangeDeclareStrategy : EasyNetQ.IExchangeDeclareStrategy
     {
         public MultipleExchangeDeclareStrategy(EasyNetQ.IConventions conventions, EasyNetQ.IAdvancedBus advancedBus) { }
         public System.Threading.Tasks.Task<EasyNetQ.Topology.Exchange> DeclareExchangeAsync(string exchangeName, string exchangeType, System.Threading.CancellationToken cancellationToken) { }
@@ -1822,17 +1833,6 @@ namespace EasyNetQ.Persistent
 }
 namespace EasyNetQ.Producer
 {
-    public class DefaultExchangeDeclareStrategy : EasyNetQ.Producer.IExchangeDeclareStrategy
-    {
-        public DefaultExchangeDeclareStrategy(EasyNetQ.IConventions conventions, EasyNetQ.IAdvancedBus advancedBus) { }
-        public System.Threading.Tasks.Task<EasyNetQ.Topology.Exchange> DeclareExchangeAsync(string exchangeName, string exchangeType, System.Threading.CancellationToken cancellationToken) { }
-        public System.Threading.Tasks.Task<EasyNetQ.Topology.Exchange> DeclareExchangeAsync(System.Type messageType, string exchangeType, System.Threading.CancellationToken cancellationToken) { }
-    }
-    public interface IExchangeDeclareStrategy
-    {
-        System.Threading.Tasks.Task<EasyNetQ.Topology.Exchange> DeclareExchangeAsync(string exchangeName, string exchangeType, System.Threading.CancellationToken cancellationToken = default);
-        System.Threading.Tasks.Task<EasyNetQ.Topology.Exchange> DeclareExchangeAsync(System.Type messageType, string exchangeType, System.Threading.CancellationToken cancellationToken = default);
-    }
     public interface IProducerConnection : EasyNetQ.Persistent.IPersistentConnection, System.IDisposable { }
     public interface IPublishConfirmationListener : System.IDisposable
     {

@@ -1,6 +1,6 @@
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.Producer;
+namespace EasyNetQ;
 
 public interface IExchangeDeclareStrategy
 {
