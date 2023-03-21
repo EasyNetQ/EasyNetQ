@@ -6,10 +6,10 @@ namespace EasyNetQ.Interception;
 /// <summary>
 ///     An interceptor which compresses and decompressed messages
 /// </summary>
-public class GZipInterceptor : IPublishConsumeInterceptor
+public class GZipInterceptor : IProduceConsumeInterceptor
 {
     /// <inheritdoc />
-    public PublishMessage OnPublish(in PublishMessage message)
+    public ProducedMessage OnProduce(in ProducedMessage message)
     {
         var body = ArrayPool<byte>.Shared.Rent(message.Body.Length); // most likely rented array is larger than message.Body
 
@@ -19,7 +19,7 @@ public class GZipInterceptor : IPublishConsumeInterceptor
             using var output = new MemoryStream();
             using (var compressingStream = new GZipStream(output, CompressionMode.Compress))
                 compressingStream.Write(body, 0, message.Body.Length);
-            return new PublishMessage(message.Properties, output.ToArray()); // TODO: think of a better memory management for interceptors
+            return new ProducedMessage(message.Properties, output.ToArray()); // TODO: think of a better memory management for interceptors
         }
         finally
         {
@@ -28,7 +28,7 @@ public class GZipInterceptor : IPublishConsumeInterceptor
     }
 
     /// <inheritdoc />
-    public ConsumeMessage OnConsume(in ConsumeMessage message)
+    public ConsumedMessage OnConsume(in ConsumedMessage message)
     {
         var body = ArrayPool<byte>.Shared.Rent(message.Body.Length); // most likely rented array is larger than message.Body
 
@@ -40,7 +40,7 @@ public class GZipInterceptor : IPublishConsumeInterceptor
             using (var compressedStream = new MemoryStream(body, 0, message.Body.Length))
             using (var decompressingStream = new GZipStream(compressedStream, CompressionMode.Decompress))
                 decompressingStream.CopyTo(output);
-            return new ConsumeMessage(message.ReceivedInfo, message.Properties, output.ToArray()); // TODO: think of better memory management for interceptors
+            return new ConsumedMessage(message.ReceivedInfo, message.Properties, output.ToArray()); // TODO: think of better memory management for interceptors
         }
         finally
         {

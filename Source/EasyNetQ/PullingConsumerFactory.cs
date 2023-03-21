@@ -33,7 +33,7 @@ public class PullingConsumerFactory : IPullingConsumerFactory
     private readonly IConsumerConnection connection;
     private readonly IPersistentChannelFactory channelFactory;
     private readonly IMessageSerializationStrategy messageSerializationStrategy;
-    private readonly IPublishConsumeInterceptor[] produceConsumeInterceptors;
+    private readonly IProduceConsumeInterceptor[] produceConsumeInterceptors;
 
     /// <summary>
     ///     Creates PullingConsumerFactory
@@ -41,7 +41,7 @@ public class PullingConsumerFactory : IPullingConsumerFactory
     public PullingConsumerFactory(
         IConsumerConnection connection,
         IPersistentChannelFactory channelFactory,
-        IEnumerable<IPublishConsumeInterceptor> produceConsumeInterceptors,
+        IEnumerable<IProduceConsumeInterceptor> produceConsumeInterceptors,
         IMessageSerializationStrategy messageSerializationStrategy
     )
     {

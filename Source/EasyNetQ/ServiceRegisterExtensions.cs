@@ -170,8 +170,8 @@ public static class ServiceRegisterExtensions
     {
         return pipelineBuilder.Use(next => ctx =>
         {
-            var interceptors = ctx.ServiceResolver.Resolve<IEnumerable<IPublishConsumeInterceptor>>().ToArray();
-            var producedMessage = interceptors.OnPublish(new PublishMessage(ctx.Properties, ctx.Body));
+            var interceptors = ctx.ServiceResolver.Resolve<IEnumerable<IProduceConsumeInterceptor>>().ToArray();
+            var producedMessage = interceptors.OnProduce(new ProducedMessage(ctx.Properties, ctx.Body));
             return next(ctx with { Properties = producedMessage.Properties, Body = producedMessage.Body });
         });
     }
@@ -180,8 +180,8 @@ public static class ServiceRegisterExtensions
     {
         return pipelineBuilder.Use(next => ctx =>
         {
-            var interceptors = ctx.ServiceResolver.Resolve<IEnumerable<IPublishConsumeInterceptor>>().ToArray();
-            var consumedMessage = interceptors.OnConsume(new ConsumeMessage(ctx.ReceivedInfo, ctx.Properties, ctx.Body));
+            var interceptors = ctx.ServiceResolver.Resolve<IEnumerable<IProduceConsumeInterceptor>>().ToArray();
+            var consumedMessage = interceptors.OnConsume(new ConsumedMessage(ctx.ReceivedInfo, ctx.Properties, ctx.Body));
             return next(ctx with { ReceivedInfo = consumedMessage.ReceivedInfo, Properties = consumedMessage.Properties, Body = consumedMessage.Body });
         });
     }
