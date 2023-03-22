@@ -3,7 +3,7 @@ using EasyNetQ.Logging;
 namespace EasyNetQ.Persistent;
 
 /// <inheritdoc />
-public class PersistentChannelFactory : IPersistentChannelFactory
+public sealed class PersistentChannelFactory : IPersistentChannelFactory
 {
     private readonly ILogger<PersistentChannel> logger;
     private readonly IEventBus eventBus;
@@ -18,10 +18,6 @@ public class PersistentChannelFactory : IPersistentChannelFactory
     }
 
     /// <inheritdoc />
-    public IPersistentChannel CreatePersistentChannel(
-        IPersistentConnection connection, PersistentChannelOptions options
-    )
-    {
-        return new PersistentChannel(options, logger, connection, eventBus);
-    }
+    public IPersistentChannel CreatePersistentChannel(IPersistentConnection connection, PersistentChannelOptions options)
+        => new PersistentChannel(options, logger, connection, eventBus);
 }

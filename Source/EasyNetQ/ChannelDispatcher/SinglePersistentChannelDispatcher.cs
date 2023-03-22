@@ -1,6 +1,4 @@
-using System.Collections.Concurrent;
 using EasyNetQ.Consumer;
-using EasyNetQ.Internals;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 
@@ -11,8 +9,7 @@ namespace EasyNetQ.ChannelDispatcher;
 /// </summary>
 public sealed class SinglePersistentChannelDispatcher : IPersistentChannelDispatcher, IDisposable
 {
-    private readonly ConcurrentDictionary<PersistentChannelDispatchOptions, IPersistentChannel> channelPerOptions;
-    private readonly Func<PersistentChannelDispatchOptions, IPersistentChannel> createChannelFactory;
+    private readonly Dictionary<PersistentChannelDispatchOptions, IPersistentChannel> channelPerOptions = new();
 
     /// <summary>
     /// Creates a dispatcher
@@ -23,21 +20,22 @@ public sealed class SinglePersistentChannelDispatcher : IPersistentChannelDispat
         IPersistentChannelFactory channelFactory
     )
     {
-        channelPerOptions = new ConcurrentDictionary<PersistentChannelDispatchOptions, IPersistentChannel>();
-        createChannelFactory = o =>
-        {
-            var options = new PersistentChannelOptions(o.PublisherConfirms);
-            return o.ConnectionType switch
-            {
-                PersistentConnectionType.Producer => channelFactory.CreatePersistentChannel(
-                    producerConnection, options
-                ),
-                PersistentConnectionType.Consumer => channelFactory.CreatePersistentChannel(
-                    consumerConnection, options
-                ),
-                _ => throw new ArgumentOutOfRangeException()
-            };
-        };
+        channelPerOptions.Add(
+            PersistentChannelDispatchOptions.ProducerTopology,
+            channelFactory.CreatePersistentChannel(producerConnection, new PersistentChannelOptions(false))
+        );
+        channelPerOptions.Add(
+            PersistentChannelDispatchOptions.ProducerPublish,
+            channelFactory.CreatePersistentChannel(producerConnection, new PersistentChannelOptions(false))
+        );
+        channelPerOptions.Add(
+            PersistentChannelDispatchOptions.ProducerPublishWithConfirms,
+            channelFactory.CreatePersistentChannel(producerConnection, new PersistentChannelOptions(true))
+        );
+        channelPerOptions.Add(
+            PersistentChannelDispatchOptions.ConsumerTopology,
+            channelFactory.CreatePersistentChannel(consumerConnection, new PersistentChannelOptions(false))
+        );
     }
 
     /// <inheritdoc />
@@ -46,12 +44,12 @@ public sealed class SinglePersistentChannelDispatcher : IPersistentChannelDispat
         PersistentChannelDispatchOptions options,
         CancellationToken cancellationToken = default
     ) where TChannelAction : struct, IPersistentChannelAction<TResult>
-    {
-        // TODO createChannelFactory could be called multiple time, fix it
-        var channel = channelPerOptions.GetOrAdd(options, createChannelFactory);
-        return channel.InvokeChannelActionAsync<TResult, TChannelAction>(channelAction, cancellationToken);
-    }
+        => channelPerOptions[options].InvokeChannelActionAsync<TResult, TChannelAction>(channelAction, cancellationToken);
 
     /// <inheritdoc />
-    public void Dispose() => channelPerOptions.ClearAndDispose();
+    public void Dispose()
+    {
+        foreach (var channel in channelPerOptions.Values)
+            channel.Dispose();
+    }
 }

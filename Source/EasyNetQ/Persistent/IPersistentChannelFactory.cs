@@ -3,22 +3,7 @@ namespace EasyNetQ.Persistent;
 /// <summary>
 ///     An options for PersistentChannel
 /// </summary>
-public readonly struct PersistentChannelOptions
-{
-    /// <summary>
-    ///     Creates an options for PersistentChannel
-    /// </summary>
-    /// <param name="publisherConfirms"></param>
-    public PersistentChannelOptions(bool publisherConfirms)
-    {
-        PublisherConfirms = publisherConfirms;
-    }
-
-    /// <summary>
-    ///     Enables publisher confirms
-    /// </summary>
-    public bool PublisherConfirms { get; }
-}
+public readonly record struct PersistentChannelOptions(bool PublisherConfirms);
 
 /// <summary>
 ///     Creates PersistentChannel using the connection and the options

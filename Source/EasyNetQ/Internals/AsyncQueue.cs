@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace EasyNetQ.Internals;
 
 /// <summary>
@@ -53,7 +55,7 @@ public sealed class AsyncQueue<T> : IDisposable
     /// </summary>
     /// <param name="element">Dequeued element</param>
     /// <returns><see langword="true"/> if an element was dequeued</returns>
-    public bool TryDequeue(out T? element)
+    public bool TryDequeue([MaybeNullWhen(false)] out T element)
     {
         lock (mutex)
         {

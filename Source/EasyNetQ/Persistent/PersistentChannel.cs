@@ -9,7 +9,7 @@ using RabbitMQ.Client.Exceptions;
 namespace EasyNetQ.Persistent;
 
 /// <inheritdoc />
-public class PersistentChannel : IPersistentChannel
+public sealed class PersistentChannel : IPersistentChannel
 {
     private const string RequestPipeliningForbiddenMessage = "Pipelining of requests forbidden";
 

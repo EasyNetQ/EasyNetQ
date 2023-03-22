@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using EasyNetQ.Consumer;
 using EasyNetQ.Internals;
 using EasyNetQ.Persistent;
@@ -11,8 +10,7 @@ namespace EasyNetQ.ChannelDispatcher;
 /// </summary>
 public sealed class MultiPersistentChannelDispatcher : IPersistentChannelDispatcher, IDisposable
 {
-    private readonly ConcurrentDictionary<PersistentChannelDispatchOptions, AsyncQueue<IPersistentChannel>> channelsPoolPerOptions;
-    private readonly Func<PersistentChannelDispatchOptions, AsyncQueue<IPersistentChannel>> channelsPoolFactory;
+    private readonly Dictionary<PersistentChannelDispatchOptions, AsyncQueue<IPersistentChannel>> channelsPoolPerOptions = new();
 
     /// <summary>
     ///     Creates a dispatcher
@@ -24,37 +22,28 @@ public sealed class MultiPersistentChannelDispatcher : IPersistentChannelDispatc
         IPersistentChannelFactory channelFactory
     )
     {
-        channelsPoolPerOptions = new ConcurrentDictionary<PersistentChannelDispatchOptions, AsyncQueue<IPersistentChannel>>();
-        channelsPoolFactory = o =>
-        {
-            var options = new PersistentChannelOptions(o.PublisherConfirms);
-            return new AsyncQueue<IPersistentChannel>(
-                Enumerable.Range(0, channelsCount)
-                    .Select(
-                        _ => o.ConnectionType switch
-                        {
-                            PersistentConnectionType.Producer => channelFactory.CreatePersistentChannel(
-                                producerConnection, options
-                            ),
-                            PersistentConnectionType.Consumer => channelFactory.CreatePersistentChannel(
-                                consumerConnection, options
-                            ),
-                            _ => throw new ArgumentOutOfRangeException()
-                        }
-                    )
-            );
-        };
-    }
+        channelsPoolPerOptions.Add(
+            PersistentChannelDispatchOptions.ProducerTopology,
+            CreateChannelsPool(producerConnection, new PersistentChannelOptions(false))
+        );
+        channelsPoolPerOptions.Add(
+            PersistentChannelDispatchOptions.ProducerPublish,
+            CreateChannelsPool(producerConnection, new PersistentChannelOptions(false))
+        );
+        channelsPoolPerOptions.Add(
+            PersistentChannelDispatchOptions.ProducerPublishWithConfirms,
+            CreateChannelsPool(producerConnection, new PersistentChannelOptions(true))
+        );
+        channelsPoolPerOptions.Add(
+            PersistentChannelDispatchOptions.ConsumerTopology,
+            CreateChannelsPool(consumerConnection, new PersistentChannelOptions(false))
+        );
 
-    /// <inheritdoc />
-    public void Dispose()
-    {
-        channelsPoolPerOptions.ClearAndDispose(x =>
+        AsyncQueue<IPersistentChannel> CreateChannelsPool(IPersistentConnection connection, PersistentChannelOptions options)
         {
-            while (x.TryDequeue(out var channel))
-                channel!.Dispose();
-            x.Dispose();
-        });
+            var channels = Enumerable.Range(0, channelsCount).Select(_ => channelFactory.CreatePersistentChannel(connection, options));
+            return new AsyncQueue<IPersistentChannel>(channels);
+        }
     }
 
     /// <inheritdoc />
@@ -64,7 +53,7 @@ public sealed class MultiPersistentChannelDispatcher : IPersistentChannelDispatc
         CancellationToken cancellationToken = default
     ) where TChannelAction : struct, IPersistentChannelAction<TResult>
     {
-        var channelsPool = channelsPoolPerOptions.GetOrAdd(options, channelsPoolFactory);
+        var channelsPool = channelsPoolPerOptions[options];
         var channel = await channelsPool.DequeueAsync(cancellationToken).ConfigureAwait(false);
         try
         {
@@ -74,5 +63,13 @@ public sealed class MultiPersistentChannelDispatcher : IPersistentChannelDispatc
         {
             channelsPool.Enqueue(channel);
         }
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        foreach (var channelsPool in channelsPoolPerOptions.Values)
+            while (channelsPool.TryDequeue(out var channel))
+                channel.Dispose();
     }
 }
