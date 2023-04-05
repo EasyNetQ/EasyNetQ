@@ -71,3 +71,4 @@ No particular order. Don't forget to add your name with your pull request.
 * Jens Willmer
 * Pierre Malatre
 * Piotr Zięzio
+* Fabio Stein
