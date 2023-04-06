@@ -58,3 +58,11 @@ RPC server...
 ## Getting started
 
 Just open EasyNetQ.sln in VisualStudio or Rider and build. All the required dependencies for the solution file to build the software are included.
+
+## Contributors
+
+Thanks to all the people who already contributed!
+
+<a href="https://github.com/EasyNetQ/EasyNetQ/graphs/contributors">
+  <img src="https://contributors-img.web.app/image?repo=EasyNetQ/EasyNetQ" />
+</a>
