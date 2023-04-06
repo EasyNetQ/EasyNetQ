@@ -63,6 +63,6 @@ Just open EasyNetQ.sln in VisualStudio or Rider and build. All the required depe
 
 Thanks to all the people who already contributed!
 
-<a href="https://github.com/redis/go-redis/graphs/contributors">
+<a href="https://github.com/EasyNetQ/EasyNetQ/graphs/contributors">
   <img src="https://contributors-img.web.app/image?repo=EasyNetQ/EasyNetQ" />
 </a>
