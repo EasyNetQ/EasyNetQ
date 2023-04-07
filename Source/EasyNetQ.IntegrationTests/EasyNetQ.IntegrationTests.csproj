@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net7</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -9,7 +9,7 @@
   <ItemGroup>
     <PackageReference Include="EasyNetQ.Management.Client" Version="2.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.*" />
-    <PackageReference Include="NSubstitute" Version="4.3.0" />
+    <PackageReference Include="NSubstitute" Version="5.0.0" />
     <PackageReference Include="RabbitMQ.Client" Version="6.5.*" />
     <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
