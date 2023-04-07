@@ -19,7 +19,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="NullGuard.Fody" Version="3.1.1" PrivateAssets="All" />
-    <PackageReference Include="PolySharp" Version="1.12.1">
+    <PackageReference Include="PolySharp" Version="1.13.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
