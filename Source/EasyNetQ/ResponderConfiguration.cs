@@ -88,7 +88,7 @@ internal class ResponderConfiguration : IResponderConfiguration
 
     public IResponderConfiguration WithMaxPriority(byte priority)
     {
-        MaxPriority = MaxPriority;
+        MaxPriority = priority;
         return this;
     }
 }
