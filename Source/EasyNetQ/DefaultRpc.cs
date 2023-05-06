@@ -245,7 +245,7 @@ public class DefaultRpc : IRpc, IDisposable
             ReplyTo = returnQueueName,
             CorrelationId = correlationId,
             Priority = priority ?? 0,
-            Headers = headers,
+            Headers = headers == null ? null : new Dictionary<string, object?>(headers),
             DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(requestType),
             Expiration = expiration == Timeout.InfiniteTimeSpan ? null : expiration
         };

@@ -79,7 +79,7 @@ public class DeadLetterExchangeAndMessageTtlScheduler : IScheduler
         var properties = new MessageProperties
         {
             Priority = publishConfiguration.Priority ?? 0,
-            Headers = publishConfiguration.Headers,
+            Headers = publishConfiguration.Headers == null ? null : new Dictionary<string, object?>(publishConfiguration.Headers),
             DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T)),
         };
         var advancedMessage = new Message<T>(message, properties);

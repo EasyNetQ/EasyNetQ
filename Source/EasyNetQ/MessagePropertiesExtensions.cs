@@ -49,7 +49,7 @@ public static class MessagePropertiesExtensions
         if (source.AppIdPresent) basicProperties.AppId = source.AppId;
         if (source.ClusterIdPresent) basicProperties.ClusterId = source.ClusterId;
 
-        if (source.HeadersPresent)
-            basicProperties.Headers = source.Headers;
+        if (source is { HeadersPresent: true, Headers: not null })
+            basicProperties.Headers = new Dictionary<string, object?>(source.Headers);
     }
 }

@@ -47,7 +47,7 @@ public class DefaultSendReceive : ISendReceive
         var properties = new MessageProperties
         {
             Priority = sendConfiguration.Priority ?? 0,
-            Headers = sendConfiguration.Headers,
+            Headers = sendConfiguration.Headers == null ? null : new Dictionary<string, object?>(sendConfiguration.Headers),
             DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T))
         };
         await advancedBus.PublishAsync(
