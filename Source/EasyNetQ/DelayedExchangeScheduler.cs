@@ -64,7 +64,7 @@ public class DelayedExchangeScheduler : IScheduler
         var properties = new MessageProperties
         {
             Priority = publishConfiguration.Priority ?? 0,
-            Headers = publishConfiguration.Headers,
+            Headers = publishConfiguration.Headers == null ? null : new Dictionary<string, object?>(publishConfiguration.Headers),
             DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T))
         }.WithDelay(delay);
 

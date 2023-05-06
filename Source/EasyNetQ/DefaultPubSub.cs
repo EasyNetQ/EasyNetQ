@@ -49,7 +49,7 @@ public class DefaultPubSub : IPubSub
         {
             Priority = publishConfiguration.Priority ?? 0,
             Expiration = publishConfiguration.Expires,
-            Headers = publishConfiguration.Headers,
+            Headers = publishConfiguration.Headers == null ? null : new Dictionary<string, object?>(publishConfiguration.Headers),
             DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType),
         };
         var advancedMessage = new Message<T>(message, advancedMessageProperties);
