@@ -26,6 +26,10 @@ updates:
     versions:
     - ">= 3.3.5"
     - "< 4"
+  - dependency-name: NSubstitute
+    versions:
+    - ">= 4.3.0"
+    - "< 6"
   - dependency-name: Microsoft.Bcl.AsyncInterfaces
     versions:
     - ">= 6.a"
