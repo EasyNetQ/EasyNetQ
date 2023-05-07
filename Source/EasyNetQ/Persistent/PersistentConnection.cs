@@ -35,7 +35,6 @@ public class PersistentConnection : IPersistentConnection
         this.eventBus = eventBus;
     }
 
-
     /// <inheritdoc />
     public bool IsConnected => initializedConnection is { IsOpen: true };
 
@@ -55,12 +54,6 @@ public class PersistentConnection : IPersistentConnection
             throw new ObjectDisposedException(nameof(PersistentConnection));
 
         var connection = InitializeConnection();
-
-        if (!connection.IsOpen)
-            throw new EasyNetQException(
-                "PersistentConnection: Attempt to create a channel while being disconnected"
-            );
-
         return connection.CreateModel();
     }
 
