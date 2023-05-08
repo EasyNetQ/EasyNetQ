@@ -19,7 +19,7 @@ public readonly record struct MessageProperties
         ReplyTo = basicProperties.ReplyTo;
         Expiration = int.TryParse(basicProperties.Expiration, out var expirationMilliseconds)
             ? TimeSpan.FromMilliseconds(expirationMilliseconds)
-            : default;
+            : null;
         MessageId = basicProperties.MessageId;
         Timestamp = basicProperties.Timestamp.UnixTime;
         Type = basicProperties.Type;
