@@ -1,4 +1,5 @@
 using EasyNetQ.DI;
+using EasyNetQ.Internals;
 
 namespace EasyNetQ.Producer;
 
@@ -9,11 +10,11 @@ public readonly record struct ProduceContext(
     in MessageProperties Properties,
     in ReadOnlyMemory<byte> Body,
     in IServiceResolver ServiceResolver,
+    in TimeBudget Timeout,
     in CancellationToken CancellationToken
 );
 
 public delegate ValueTask ProduceDelegate(ProduceContext context);
-
 
 public sealed class ProducePipelineBuilder
 {

@@ -1,5 +1,7 @@
+using EasyNetQ.Internals;
 using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
+using FluentAssertions.Extensions;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 
@@ -72,7 +74,7 @@ public class When_an_action_is_performed_and_channel_reopens
             new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, Substitute.For<IEventBus>()
         );
 
-        persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));
+        persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"), TimeBudget.Start(20.Seconds()));
 
         brokenChannel.Received().ExchangeDeclare("MyExchange", "direct");
         brokenChannel.Received().Close();
@@ -98,7 +100,7 @@ public class When_an_action_is_performed_and_channel_reopens
 
         Assert.Throws(
             exception.GetType(),
-            () => persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"))
+            () => persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"), TimeBudget.Start(20.Seconds()))
         );
 
         brokenChannel.Received().ExchangeDeclare("MyExchange", "direct");
@@ -122,7 +124,7 @@ public class When_an_action_is_performed_and_channel_reopens
             new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, Substitute.For<IEventBus>()
         );
 
-        persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));
+        persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"), TimeBudget.Start(20.Seconds()));
 
         channel.Received().ExchangeDeclare("MyExchange", "direct");
     }
@@ -143,7 +145,7 @@ public class When_an_action_is_performed_and_channel_reopens
         );
 
         Assert.Throws<BrokerUnreachableException>(
-            () => persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"))
+            () => persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"), TimeBudget.Start(20.Seconds()))
         );
 
         channel.DidNotReceive().ExchangeDeclare("MyExchange", "direct");

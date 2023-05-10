@@ -1,5 +1,7 @@
+using EasyNetQ.Internals;
 using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
+using FluentAssertions.Extensions;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.PersistentChannelTests;
@@ -16,8 +18,7 @@ public class When_an_action_is_invoked : IDisposable
         persistentChannel = new PersistentChannel(
             new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, Substitute.For<IEventBus>()
         );
-
-        persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));
+        persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"), TimeBudget.Start(20.Seconds()));
     }
 
     private readonly IPersistentChannel persistentChannel;

@@ -1,7 +1,9 @@
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
+using EasyNetQ.Internals;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
+using FluentAssertions.Extensions;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.ChannelDispatcherTests;
@@ -18,15 +20,16 @@ public class When_an_action_is_invoked_using_single_channel : IDisposable
     {
         channelFactory = Substitute.For<IPersistentChannelFactory>();
         producerConnection = Substitute.For<IProducerConnection>();
+        var timeoutBudget = TimeBudget.Start(20.Seconds());
         var consumerConnection = Substitute.For<IConsumerConnection>();
         var channel = Substitute.For<IPersistentChannel>();
         var action = Substitute.For<Func<IModel, int>>();
         channelFactory.CreatePersistentChannel(producerConnection, new PersistentChannelOptions()).Returns(channel);
-        channel.InvokeChannelActionAsync(action).Returns(42);
+        channel.InvokeChannelActionAsync(action, timeoutBudget).Returns(42);
 
         dispatcher = new SinglePersistentChannelDispatcher(producerConnection, consumerConnection, channelFactory);
 
-        actionResult = dispatcher.InvokeAsync(action, PersistentChannelDispatchOptions.ProducerTopology)
+        actionResult = dispatcher.InvokeAsync(action, PersistentChannelDispatchOptions.ProducerTopology, timeoutBudget)
             .GetAwaiter()
             .GetResult();
     }

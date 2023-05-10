@@ -1,3 +1,4 @@
+using EasyNetQ.Internals;
 using EasyNetQ.Persistent;
 using RabbitMQ.Client;
 
@@ -9,11 +10,12 @@ internal static class PersistentChannelDispatcherExtensions
         this IPersistentChannelDispatcher dispatcher,
         Action<IModel> channelAction,
         PersistentChannelDispatchOptions options,
+        TimeBudget timeout,
         CancellationToken cancellationToken = default
     )
     {
         return dispatcher.InvokeAsync<bool, ActionBasedPersistentChannelAction>(
-            new ActionBasedPersistentChannelAction(channelAction), options, cancellationToken
+            new ActionBasedPersistentChannelAction(channelAction), options, timeout, cancellationToken
         );
     }
 
@@ -21,11 +23,12 @@ internal static class PersistentChannelDispatcherExtensions
         this IPersistentChannelDispatcher dispatcher,
         Func<IModel, TResult> channelAction,
         PersistentChannelDispatchOptions options,
+        TimeBudget timeout,
         CancellationToken cancellationToken = default
     )
     {
         return dispatcher.InvokeAsync<TResult, FuncBasedPersistentChannelAction<TResult>>(
-            new FuncBasedPersistentChannelAction<TResult>(channelAction), options, cancellationToken
+            new FuncBasedPersistentChannelAction<TResult>(channelAction), options, timeout, cancellationToken
         );
     }
 }

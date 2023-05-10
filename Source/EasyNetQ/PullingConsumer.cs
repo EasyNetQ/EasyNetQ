@@ -243,7 +243,6 @@ public readonly struct PullResult<T> : IPullResult
     }
 }
 
-
 /// <summary>
 ///     Allows to receive messages by pulling them one by one
 /// </summary>
@@ -334,10 +333,9 @@ public class PullingConsumer : IPullingConsumer<PullResult>
     /// <inheritdoc />
     public async Task<PullResult> PullAsync(CancellationToken cancellationToken = default)
     {
-        using var cts = cancellationToken.WithTimeout(options.Timeout);
-
+        var timeoutBudget = TimeBudget.Start(options.Timeout);
         var basicGetResult = await channel.InvokeChannelActionAsync<BasicGetResult?, BasicGetAction>(
-            new BasicGetAction(queue, options.AutoAck), cts.Token
+            new BasicGetAction(queue, options.AutoAck), timeoutBudget, cancellationToken
         ).ConfigureAwait(false);
 
         if (basicGetResult == null)
@@ -370,10 +368,9 @@ public class PullingConsumer : IPullingConsumer<PullResult>
         if (options.AutoAck)
             throw new InvalidOperationException("Cannot ack in auto ack mode");
 
-        using var cts = cancellationToken.WithTimeout(options.Timeout);
-
+        var timeoutBudget = TimeBudget.Start(options.Timeout);
         await channel.InvokeChannelActionAsync<bool, BasicAckAction>(
-            new BasicAckAction(deliveryTag, multiple), cts.Token
+            new BasicAckAction(deliveryTag, multiple), timeoutBudget, cancellationToken
         ).ConfigureAwait(false);
     }
 
@@ -385,10 +382,9 @@ public class PullingConsumer : IPullingConsumer<PullResult>
         if (options.AutoAck)
             throw new InvalidOperationException("Cannot reject in auto ack mode");
 
-        using var cts = cancellationToken.WithTimeout(options.Timeout);
-
+        var timeoutBudget = TimeBudget.Start(options.Timeout);
         await channel.InvokeChannelActionAsync<bool, BasicNackAction>(
-            new BasicNackAction(deliveryTag, multiple, requeue), cts.Token
+            new BasicNackAction(deliveryTag, multiple, requeue), timeoutBudget, cancellationToken
         ).ConfigureAwait(false);
     }
 

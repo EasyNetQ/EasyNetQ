@@ -44,12 +44,13 @@ public sealed class SinglePersistentChannelDispatcher : IPersistentChannelDispat
     public ValueTask<TResult> InvokeAsync<TResult, TChannelAction>(
         TChannelAction channelAction,
         PersistentChannelDispatchOptions options,
+        TimeBudget timeout,
         CancellationToken cancellationToken = default
     ) where TChannelAction : struct, IPersistentChannelAction<TResult>
     {
         // TODO createChannelFactory could be called multiple time, fix it
         var channel = channelPerOptions.GetOrAdd(options, createChannelFactory);
-        return channel.InvokeChannelActionAsync<TResult, TChannelAction>(channelAction, cancellationToken);
+        return channel.InvokeChannelActionAsync<TResult, TChannelAction>(channelAction, timeout, cancellationToken);
     }
 
     /// <inheritdoc />

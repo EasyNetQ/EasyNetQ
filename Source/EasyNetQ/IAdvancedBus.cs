@@ -42,12 +42,14 @@ public interface IAdvancedBus
     /// If this flag is false, the server silently drops the message.
     /// </param>
     /// <param name="message">The message to publish</param>
+    /// <param name="timeout">The timeout</param>
     /// <param name="cancellationToken">The cancellation token</param>
     Task PublishAsync(
         string exchange,
         string routingKey,
         bool mandatory,
         IMessage message,
+        TimeSpan? timeout = null,
         CancellationToken cancellationToken = default
     );
 
@@ -67,6 +69,7 @@ public interface IAdvancedBus
     /// </param>
     /// <param name="properties">The message properties</param>
     /// <param name="body">The message body</param>
+    /// <param name="timeout">The timeout</param>
     /// <param name="cancellationToken">The cancellation token</param>
     Task PublishAsync(
         string exchange,
@@ -74,6 +77,7 @@ public interface IAdvancedBus
         bool mandatory,
         MessageProperties properties,
         ReadOnlyMemory<byte> body,
+        TimeSpan? timeout = null,
         CancellationToken cancellationToken = default
     );
 
@@ -82,11 +86,13 @@ public interface IAdvancedBus
     /// </summary>
     /// <param name="queue">The name of the queue</param>
     /// <param name="configure">Delegate to configure queue declaration</param>
+    /// <param name="timeout">The timeout</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>The queue</returns>
     Task<Queue> QueueDeclareAsync(
         string queue,
         Action<IQueueDeclareConfiguration> configure,
+        TimeSpan? timeout = null,
         CancellationToken cancellationToken = default
     );
 
@@ -95,16 +101,18 @@ public interface IAdvancedBus
     /// connection. If there is a connection outage, EasyNetQ will not attempt to recreate
     /// consumers.
     /// </summary>
+    /// <param name="timeout">The timeout</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>The queue</returns>
-    Task<Queue> QueueDeclareAsync(CancellationToken cancellationToken = default);
+    Task<Queue> QueueDeclareAsync(TimeSpan? timeout = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Declare a queue passively. Throw an exception rather than create the queue if it doesn't exist
     /// </summary>
     /// <param name="queue">The queue to declare</param>
+    /// <param name="timeout">The timeout</param>
     /// <param name="cancellationToken">The cancellation token</param>
-    Task QueueDeclarePassiveAsync(string queue, CancellationToken cancellationToken = default);
+    Task QueueDeclarePassiveAsync(string queue, TimeSpan? timeout = null,CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Delete a queue
@@ -112,11 +120,13 @@ public interface IAdvancedBus
     /// <param name="queue">The name of the queue to delete</param>
     /// <param name="ifUnused">Only delete if unused</param>
     /// <param name="ifEmpty">Only delete if empty</param>
+    /// <param name="timeout">The timeout</param>
     /// <param name="cancellationToken">The cancellation token</param>
     Task QueueDeleteAsync(
         string queue,
         bool ifUnused = false,
         bool ifEmpty = false,
+        TimeSpan? timeout = null,
         CancellationToken cancellationToken = default
     );
 
@@ -124,26 +134,30 @@ public interface IAdvancedBus
     /// Purges a queue
     /// </summary>
     /// <param name="queue">The name of the queue to purge</param>
+    /// <param name="timeout">The timeout</param>
     /// <param name="cancellationToken">The cancellation token</param>
-    Task QueuePurgeAsync(string queue, CancellationToken cancellationToken = default);
+    Task QueuePurgeAsync(string queue, TimeSpan? timeout = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Declare a exchange passively. Throw an exception rather than create the exchange if it doesn't exist
     /// </summary>
     /// <param name="exchange">The exchange to declare</param>
+    /// <param name="timeout">The timeout</param>
     /// <param name="cancellationToken">The cancellation token</param>
-    Task ExchangeDeclarePassiveAsync(string exchange, CancellationToken cancellationToken = default);
+    Task ExchangeDeclarePassiveAsync(string exchange, TimeSpan? timeout = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Declare an exchange
     /// </summary>
     /// <param name="exchange">The exchange name</param>
     /// <param name="configure">Delegate to configure exchange declaration</param>
+    /// <param name="timeout">The timeout</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>The exchange</returns>
     Task<Exchange> ExchangeDeclareAsync(
         string exchange,
         Action<IExchangeDeclareConfiguration> configure,
+        TimeSpan? timeout = null,
         CancellationToken cancellationToken = default
     );
 
@@ -152,10 +166,12 @@ public interface IAdvancedBus
     /// </summary>
     /// <param name="exchange">The exchange to delete</param>
     /// <param name="ifUnused">If set, the server will only delete the exchange if it has no queue bindings.</param>
+    /// <param name="timeout">The timeout</param>
     /// <param name="cancellationToken">The cancellation token</param>
     Task ExchangeDeleteAsync(
         string exchange,
         bool ifUnused = false,
+        TimeSpan? timeout = null,
         CancellationToken cancellationToken = default
     );
 
@@ -167,6 +183,7 @@ public interface IAdvancedBus
         string exchange,
         string routingKey,
         IDictionary<string, object>? arguments,
+        TimeSpan? timeout = null,
         CancellationToken cancellationToken = default
     );
 
@@ -178,6 +195,7 @@ public interface IAdvancedBus
         string exchange,
         string routingKey,
         IDictionary<string, object>? arguments,
+        TimeSpan? timeout = null,
         CancellationToken cancellationToken = default
     );
 
@@ -189,6 +207,7 @@ public interface IAdvancedBus
         string sourceExchange,
         string routingKey,
         IDictionary<string, object>? arguments,
+        TimeSpan? timeout = null,
         CancellationToken cancellationToken = default
     );
 
@@ -200,6 +219,7 @@ public interface IAdvancedBus
         string sourceExchange,
         string routingKey,
         IDictionary<string, object>? arguments,
+        TimeSpan? timeout = null,
         CancellationToken cancellationToken = default
     );
 
@@ -207,9 +227,10 @@ public interface IAdvancedBus
     /// Gets stats for the given queue
     /// </summary>
     /// <param name="queue">The name of the queue</param>
+    /// <param name="timeout">The timeout</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>The stats of the queue</returns>
-    Task<QueueStats> GetQueueStatsAsync(string queue, CancellationToken cancellationToken = default);
+    Task<QueueStats> GetQueueStatsAsync(string queue, TimeSpan? timeout = null,CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Creates a new pulling consumer

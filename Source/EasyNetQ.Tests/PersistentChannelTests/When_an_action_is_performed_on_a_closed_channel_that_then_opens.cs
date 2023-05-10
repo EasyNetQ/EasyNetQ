@@ -1,5 +1,7 @@
+using EasyNetQ.Internals;
 using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
+using FluentAssertions.Extensions;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 
@@ -27,7 +29,7 @@ public class When_an_action_is_performed_on_a_closed_channel_that_then_opens
         var persistentChannel = new PersistentChannel(
             new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, eventBus
         );
-        persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));
+        persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"), TimeBudget.Start(20.Seconds()));
     }
 
     private readonly IModel channel;

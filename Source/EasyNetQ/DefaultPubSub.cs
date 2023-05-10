@@ -56,7 +56,7 @@ public class DefaultPubSub : IPubSub
             messageType, ExchangeType.Topic, cts.Token
         ).ConfigureAwait(false);
         await advancedBus.PublishAsync(
-            exchange.Name, publishConfiguration.Topic, configuration.MandatoryPublish, advancedMessage, cts.Token
+            exchange.Name, publishConfiguration.Topic, configuration.MandatoryPublish, advancedMessage, null, cts.Token
         ).ConfigureAwait(false);
     }
 
@@ -78,7 +78,7 @@ public class DefaultPubSub : IPubSub
         CancellationToken cancellationToken
     )
     {
-        using var cts = cancellationToken.WithTimeout(configuration.Timeout);
+        var timeoutBudget = TimeBudget.Start(configuration.Timeout);
 
         var subscriptionConfiguration = new SubscriptionConfiguration(configuration.PrefetchCount);
         configure(subscriptionConfiguration);
@@ -92,7 +92,8 @@ public class DefaultPubSub : IPubSub
                 if (subscriptionConfiguration.AlternateExchange != null)
                     c.WithAlternateExchange(new Exchange(subscriptionConfiguration.AlternateExchange));
             },
-            cts.Token
+            timeoutBudget.Remaining,
+            cancellationToken
         ).ConfigureAwait(false);
 
         var queueName = subscriptionConfiguration.QueueName ?? conventions.QueueNamingConvention(typeof(T), subscriptionId);
@@ -120,11 +121,12 @@ public class DefaultPubSub : IPubSub
                 if (subscriptionConfiguration.SingleActiveConsumer)
                     c.WithSingleActiveConsumer();
             },
-            cts.Token
+            timeoutBudget.Remaining,
+            cancellationToken
         ).ConfigureAwait(false);
 
         foreach (var topic in subscriptionConfiguration.Topics.DefaultIfEmpty("#"))
-            await advancedBus.BindAsync(exchange, queue, topic, cts.Token).ConfigureAwait(false);
+            await advancedBus.BindAsync(exchange, queue, topic, cancellationToken).ConfigureAwait(false);
 
         var consumerCancellation = advancedBus.Consume<T>(
             queue,

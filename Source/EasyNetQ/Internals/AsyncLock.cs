@@ -10,7 +10,6 @@ public readonly struct AsyncLock : IDisposable
 {
     private readonly SemaphoreSlim semaphore;
     private readonly Releaser releaser;
-    private readonly Task<Releaser> releaserTask;
 
     /// <summary>
     ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
@@ -22,7 +21,6 @@ public readonly struct AsyncLock : IDisposable
     {
         semaphore = new SemaphoreSlim(1);
         releaser = new Releaser(semaphore);
-        releaserTask = Task.FromResult(releaser);
     }
 
     /// <summary>
@@ -30,13 +28,31 @@ public readonly struct AsyncLock : IDisposable
     /// </summary>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>Releaser, which should be disposed to release a lock</returns>
-    public Task<Releaser> AcquireAsync(CancellationToken cancellationToken = default)
+    public ValueTask<Releaser> AcquireAsync(CancellationToken cancellationToken = default)
     {
         var acquireAsync = semaphore.WaitAsync(cancellationToken);
         return acquireAsync.Status == TaskStatus.RanToCompletion
-            ? releaserTask
+            ? new ValueTask<Releaser>(releaser)
             : WaitForAcquireAsync(acquireAsync);
     }
+
+
+    /// <summary>
+    /// Acquires a lock
+    /// </summary>
+    /// <param name="timeout"></param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    /// <returns>Releaser, which should be disposed to release a lock</returns>
+    public ValueTask<Releaser> AcquireAsync(TimeSpan timeout, CancellationToken cancellationToken = default)
+    {
+        var acquireTask = semaphore.WaitAsync(timeout, cancellationToken);
+        return acquireTask.Status == TaskStatus.RanToCompletion
+            ? acquireTask.GetAwaiter().GetResult()
+                ? new ValueTask<Releaser>(releaser)
+                : new ValueTask<Releaser>(Task.FromException<Releaser>(new TimeoutException(("The operation has timed out"))))
+            : WaitForAcquireAsync(acquireTask);
+    }
+
 
     /// <summary>
     /// Acquires a lock
@@ -47,23 +63,6 @@ public readonly struct AsyncLock : IDisposable
     {
         semaphore.Wait(cancellationToken);
         return releaser;
-    }
-
-    /// <summary>
-    /// Tries to acquire a lock
-    /// </summary>
-    /// <param name="result">Releaser, which should be disposed to release a lock</param>
-    /// <returns>True if acquired</returns>
-    public bool TryAcquire(out Releaser result)
-    {
-        if (semaphore.Wait(0))
-        {
-            result = releaser;
-            return true;
-        }
-
-        result = default;
-        return false;
     }
 
     public readonly struct Releaser : IDisposable
@@ -78,9 +77,15 @@ public readonly struct AsyncLock : IDisposable
     /// <inheritdoc />
     public void Dispose() => semaphore.Dispose();
 
-    private async Task<Releaser> WaitForAcquireAsync(Task acquireAsync)
+    private async ValueTask<Releaser> WaitForAcquireAsync(Task acquireTask)
     {
-        await acquireAsync.ConfigureAwait(false);
+        await acquireTask.ConfigureAwait(false);
         return releaser;
+    }
+
+    private async ValueTask<Releaser> WaitForAcquireAsync(Task<bool> acquireTask)
+    {
+        var acquired = await acquireTask.ConfigureAwait(false);
+        return acquired ? releaser : throw new TimeoutException("The operation has timed out");
     }
 }

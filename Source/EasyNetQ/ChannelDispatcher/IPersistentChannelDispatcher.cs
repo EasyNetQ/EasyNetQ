@@ -1,3 +1,4 @@
+using EasyNetQ.Internals;
 using EasyNetQ.Persistent;
 
 namespace EasyNetQ.ChannelDispatcher;
@@ -12,6 +13,7 @@ public interface IPersistentChannelDispatcher
     /// </summary>
     /// <param name="channelAction"></param>
     /// <param name="options"></param>
+    /// <param name="timeout"></param>
     /// <param name="cancellationToken"></param>
     /// <typeparam name="TResult"></typeparam>
     /// <typeparam name="TChannelAction"></typeparam>
@@ -19,6 +21,7 @@ public interface IPersistentChannelDispatcher
     ValueTask<TResult> InvokeAsync<TResult, TChannelAction>(
         TChannelAction channelAction,
         PersistentChannelDispatchOptions options,
+        TimeBudget timeout,
         CancellationToken cancellationToken = default
     ) where TChannelAction : struct, IPersistentChannelAction<TResult>;
 }

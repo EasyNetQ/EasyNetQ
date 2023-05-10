@@ -1,5 +1,6 @@
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
+using EasyNetQ.Internals;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 using RabbitMQ.Client;
@@ -20,11 +21,13 @@ public class When_an_action_is_invoked_using_multi_channel : IDisposable
         var consumerConnection = Substitute.For<IConsumerConnection>();
         var channel = Substitute.For<IPersistentChannel>();
         var action = Substitute.For<Func<IModel, int>>();
+        var timeBudget = TimeBudget.Start(TimeSpan.FromSeconds(20));
         channelFactory.CreatePersistentChannel(producerConnection, new PersistentChannelOptions()).Returns(channel);
-        channel.InvokeChannelActionAsync(action).Returns(42);
+        channel.InvokeChannelActionAsync(action, timeBudget).Returns(42);
 
         dispatcher = new MultiPersistentChannelDispatcher(1, producerConnection, consumerConnection, channelFactory);
-        actionResult = dispatcher.InvokeAsync(action, PersistentChannelDispatchOptions.ProducerTopology)
+        actionResult = dispatcher.InvokeAsync(action, PersistentChannelDispatchOptions.ProducerTopology, timeBudget)
+            .AsTask()
             .GetAwaiter()
             .GetResult();
     }

@@ -12,7 +12,7 @@ public class AsyncLockTests
 
         cts.Cancel();
 
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => mutex.AcquireAsync(cts.Token));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => mutex.AcquireAsync(cts.Token).AsTask());
     }
 
     [Fact]
@@ -28,6 +28,6 @@ public class AsyncLockTests
 
         cts.CancelAfter(50);
 
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => acquireAsync);
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => acquireAsync.AsTask());
     }
 }
