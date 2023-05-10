@@ -4,7 +4,6 @@ using EasyNetQ.Events;
 using EasyNetQ.Internals;
 using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
-using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ;

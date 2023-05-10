@@ -1,6 +1,5 @@
 using EasyNetQ.DI;
 using EasyNetQ.MessageVersioning;
-using EasyNetQ.Producer;
 
 namespace EasyNetQ.Tests.MessageVersioningTests;
 

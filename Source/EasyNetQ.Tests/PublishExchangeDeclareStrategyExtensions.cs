@@ -1,4 +1,3 @@
-using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ.Tests;
