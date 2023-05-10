@@ -145,30 +145,6 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         return consumer;
     }
 
-    #endregion
-
-    /// <inheritdoc />
-    public async Task<QueueStats> GetQueueStatsAsync(string queue, CancellationToken cancellationToken)
-    {
-        using var cts = cancellationToken.WithTimeout(configuration.Timeout);
-
-        var declareResult = await persistentChannelDispatcher.InvokeAsync(
-            x => x.QueueDeclarePassive(queue), PersistentChannelDispatchOptions.ConsumerTopology, cts.Token
-        ).ConfigureAwait(false);
-
-        if (logger.IsDebugEnabled())
-        {
-            logger.DebugFormat(
-                "{messagesCount} messages, {consumersCount} consumers in queue {queue}",
-                declareResult.MessageCount,
-                declareResult.ConsumerCount,
-                queue
-            );
-        }
-
-        return new QueueStats(declareResult.MessageCount, declareResult.ConsumerCount);
-    }
-
     /// <inheritdoc />
     public IPullingConsumer<PullResult> CreatePullingConsumer(in Queue queue, bool autoAck = true)
     {
@@ -182,6 +158,8 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         var options = new PullingConsumerOptions(autoAck, configuration.Timeout);
         return pullingConsumerFactory.CreateConsumer<T>(queue, options);
     }
+
+    #endregion
 
     /// <inheritdoc />
     public event EventHandler<ConnectedEventArgs>? Connected;
@@ -249,7 +227,29 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 
     #endregion
 
-    #region Exchage, Queue, Binding
+    #region Topology
+
+    /// <inheritdoc />
+    public async Task<QueueStats> GetQueueStatsAsync(string queue, CancellationToken cancellationToken)
+    {
+        using var cts = cancellationToken.WithTimeout(configuration.Timeout);
+
+        var declareResult = await persistentChannelDispatcher.InvokeAsync(
+            x => x.QueueDeclarePassive(queue), PersistentChannelDispatchOptions.ConsumerTopology, cts.Token
+        ).ConfigureAwait(false);
+
+        if (logger.IsDebugEnabled())
+        {
+            logger.DebugFormat(
+                "{messagesCount} messages, {consumersCount} consumers in queue {queue}",
+                declareResult.MessageCount,
+                declareResult.ConsumerCount,
+                queue
+            );
+        }
+
+        return new QueueStats(declareResult.MessageCount, declareResult.ConsumerCount);
+    }
 
     /// <inheritdoc />
     public Task<Queue> QueueDeclareAsync(CancellationToken cancellationToken)
