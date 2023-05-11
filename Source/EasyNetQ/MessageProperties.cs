@@ -137,7 +137,7 @@ public readonly record struct MessageProperties
     /// <summary>
     ///     True if <see cref="Expiration"/> is present
     /// </summary>
-    public bool ExpirationPresent => Expiration != default;
+    public bool ExpirationPresent => Expiration != null;
 
     /// <summary>
     ///     True if <see cref="MessageId"/> is present
