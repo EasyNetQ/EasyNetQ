@@ -246,12 +246,13 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     #region Topology
 
     /// <inheritdoc />
-    public async Task<QueueStats> GetQueueStatsAsync(string queue, CancellationToken cancellationToken)
+    public async Task<QueueStats> GetQueueStatsAsync(string queue, TimeSpan? timeout, CancellationToken cancellationToken)
     {
-        using var cts = cancellationToken.WithTimeout(configuration.Timeout);
-
         var declareResult = await persistentChannelDispatcher.InvokeAsync(
-            x => x.QueueDeclarePassive(queue), PersistentChannelDispatchOptions.ConsumerTopology, cts.Token
+            x => x.QueueDeclarePassive(queue),
+            PersistentChannelDispatchOptions.ConsumerTopology,
+            TimeBudget.Start(timeout ?? configuration.Timeout),
+            cancellationToken
         ).ConfigureAwait(false);
 
         if (logger.IsDebugEnabled())
