@@ -78,14 +78,6 @@ internal static class ConnectionStringGrammar
         Expression<Func<ConnectionConfiguration, T>> getter
     ) => CreateSetter<ConnectionConfiguration, T>(getter);
 
-    /// <summary>
-    /// Stolen from SO:
-    /// http://stackoverflow.com/questions/4596453/create-an-actiont-to-set-a-property-when-i-am-provided-with-the-linq-expres
-    /// </summary>
-    /// <typeparam name="TContaining"></typeparam>
-    /// <typeparam name="TProperty"></typeparam>
-    /// <param name="getter"></param>
-    /// <returns></returns>
     private static Action<TContaining, TProperty> CreateSetter<TContaining, TProperty>(Expression<Func<TContaining, TProperty>> getter)
     {
         if (getter.Body is not MemberExpression memberEx)
