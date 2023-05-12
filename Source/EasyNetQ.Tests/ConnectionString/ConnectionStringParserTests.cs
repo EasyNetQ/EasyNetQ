@@ -11,15 +11,15 @@ public class ConnectionStringParserTests
 
     private readonly ConnectionStringParser connectionStringParser;
 
-    private const string connectionString =
+    private const string ConnectionString =
         "virtualHost=Copa;username=Copa;host=192.168.1.1;password=abc_xyz;port=12345;" +
         "requestedHeartbeat=3;prefetchcount=2;timeout=12;publisherConfirms=true;" +
-        "name=unit-test;mandatoryPublish=true;consumerDispatcherConcurrency=1";
+        "name=unit-test;mandatoryPublish=true;consumerDispatcherConcurrency=1;ssl=true";
 
     [Fact]
     public void Should_correctly_parse_connection_string()
     {
-        var configuration = connectionStringParser.Parse(connectionString);
+        var configuration = connectionStringParser.Parse(ConnectionString);
 
         configuration.Hosts.First().Host.Should().Be("192.168.1.1");
         configuration.VirtualHost.Should().Be("Copa");
@@ -33,15 +33,7 @@ public class ConnectionStringParserTests
         configuration.Name.Should().Be("unit-test");
         configuration.MandatoryPublish.Should().BeTrue();
         configuration.ConsumerDispatcherConcurrency.Should().Be(1);
-    }
-
-    [Fact]
-    public void Should_parse_global_timeout()
-    {
-        const string connectionStringWithTimeout = "host=localhost;timeout=13";
-        var connectionConfiguration = connectionStringParser.Parse(connectionStringWithTimeout);
-
-        connectionConfiguration.Timeout.Should().Be(TimeSpan.FromSeconds(13));
+        configuration.Ssl.Enabled.Should().BeTrue();
     }
 
     [Fact]
