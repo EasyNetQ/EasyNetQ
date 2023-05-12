@@ -39,7 +39,7 @@ public class DefaultSendReceive : ISendReceive
         string queue, T message, Action<ISendConfiguration> configure, CancellationToken cancellationToken
     )
     {
-        using var cts = cancellationToken.WithTimeout(configuration.Timeout);
+        var timeoutBudget = TimeBudget.Start(configuration.Timeout);
 
         var sendConfiguration = new SendConfiguration();
         configure(sendConfiguration);
@@ -51,7 +51,12 @@ public class DefaultSendReceive : ISendReceive
             DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T))
         };
         await advancedBus.PublishAsync(
-            Exchange.DefaultName, queue, configuration.MandatoryPublish, new Message<T>(message, properties), cts.Token
+            Exchange.DefaultName,
+            queue,
+            configuration.MandatoryPublish,
+            new Message<T>(message, properties),
+            timeoutBudget.Remaining,
+            cancellationToken
         ).ConfigureAwait(false);
     }
 
@@ -73,7 +78,7 @@ public class DefaultSendReceive : ISendReceive
         CancellationToken cancellationToken
     )
     {
-        using var cts = cancellationToken.WithTimeout(configuration.Timeout);
+        var timeoutBudget = TimeBudget.Start(configuration.Timeout);
 
         var receiveConfiguration = new ReceiveConfiguration(configuration.PrefetchCount);
         configure(receiveConfiguration);
@@ -99,7 +104,8 @@ public class DefaultSendReceive : ISendReceive
                 if (receiveConfiguration.SingleActiveConsumer)
                     c.WithSingleActiveConsumer();
             },
-            cts.Token
+            timeoutBudget.Remaining,
+            cancellationToken
         ).ConfigureAwait(false);
 
         return advancedBus.Consume(

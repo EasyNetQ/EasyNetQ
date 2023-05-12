@@ -43,9 +43,9 @@ public readonly struct AsyncLock : IDisposable
     /// <param name="timeout"></param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>Releaser, which should be disposed to release a lock</returns>
-    public ValueTask<Releaser> AcquireAsync(TimeSpan timeout, CancellationToken cancellationToken = default)
+    public ValueTask<Releaser> AcquireAsync(TimeBudget timeout, CancellationToken cancellationToken = default)
     {
-        var acquireTask = semaphore.WaitAsync(timeout, cancellationToken);
+        var acquireTask = semaphore.WaitAsync(timeout.Remaining, cancellationToken);
         return acquireTask.Status == TaskStatus.RanToCompletion
             ? acquireTask.GetAwaiter().GetResult()
                 ? new ValueTask<Releaser>(releaser)

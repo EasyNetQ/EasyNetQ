@@ -12,7 +12,7 @@ public sealed class AsyncCache<TKey, TValue> : IDisposable where TKey : notnull
 {
     private readonly AsyncLock mutex = new();
     private readonly ConcurrentDictionary<TKey, Task<TValue>> storage = new();
-    private readonly Func<TKey, CancellationToken, Task<TValue>> valueFactory;
+    private readonly Func<TKey, TimeBudget, CancellationToken, Task<TValue>> valueFactory;
 
     /// <summary>
     ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
@@ -20,29 +20,31 @@ public sealed class AsyncCache<TKey, TValue> : IDisposable where TKey : notnull
     ///     any release. You should only use it directly in your code with extreme caution and knowing that
     ///     doing so can result in application failures when updating to a new EasyNetQ release.
     /// </summary>
-    public AsyncCache(Func<TKey, CancellationToken, Task<TValue>> valueFactory) => this.valueFactory = valueFactory;
+    public AsyncCache(Func<TKey, TimeBudget, CancellationToken, Task<TValue>> valueFactory) => this.valueFactory = valueFactory;
 
     /// <summary>
     ///
     /// </summary>
     /// <param name="key">The key to acquire value from cache</param>
+    /// <param name="timeout">The timeout</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>The existent or created value associated with <paramref name="key"/></returns>
-    public Task<TValue> GetOrAddAsync(TKey key, CancellationToken cancellationToken = default)
+    public Task<TValue> GetOrAddAsync(TKey key, TimeBudget timeout, CancellationToken cancellationToken = default)
     {
-        return storage.TryGetValue(key, out var existentValue) ? existentValue : GetOrAddInternalAsync(key, cancellationToken);
+        return storage.TryGetValue(key, out var existentValue)
+            ? existentValue
+            : GetOrAddInternalAsync(key, timeout, cancellationToken);
     }
 
-    private async Task<TValue> GetOrAddInternalAsync(TKey key, CancellationToken cancellationToken)
+    private async Task<TValue> GetOrAddInternalAsync(TKey key, TimeBudget timeout, CancellationToken cancellationToken)
     {
-        using (await mutex.AcquireAsync(cancellationToken).ConfigureAwait(false))
-        {
-            if (storage.TryGetValue(key, out var existentValue)) return await existentValue.ConfigureAwait(false);
+        using var _ = await mutex.AcquireAsync(timeout, cancellationToken).ConfigureAwait(false);
 
-            var newValue = await valueFactory(key, cancellationToken).ConfigureAwait(false);
-            storage[key] = Task.FromResult(newValue);
-            return newValue;
-        }
+        if (storage.TryGetValue(key, out var existentValue)) return await existentValue.ConfigureAwait(false);
+
+        var newValue = await valueFactory(key, timeout, cancellationToken).ConfigureAwait(false);
+        storage[key] = Task.FromResult(newValue);
+        return newValue;
     }
 
     /// <inheritdoc />

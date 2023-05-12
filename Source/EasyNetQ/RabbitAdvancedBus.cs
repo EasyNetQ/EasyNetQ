@@ -93,7 +93,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     public bool IsConnected => producerConnection.IsConnected && consumerConnection.IsConnected;
 
     /// <inheritdoc />
-    public Task ConnectAsync(CancellationToken cancellationToken = default)
+    public Task ConnectAsync(CancellationToken cancellationToken)
     {
         producerConnection.Connect();
         consumerConnection.Connect();
@@ -201,8 +201,8 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         string routingKey,
         bool mandatory,
         IMessage message,
-        TimeSpan? timeout = null,
-        CancellationToken cancellationToken = default
+        TimeSpan? timeout,
+        CancellationToken cancellationToken
     )
     {
         using var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
@@ -224,8 +224,8 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         bool mandatory,
         MessageProperties properties,
         ReadOnlyMemory<byte> body,
-        TimeSpan? timeout = null,
-        CancellationToken cancellationToken = default
+        TimeSpan? timeout,
+        CancellationToken cancellationToken
     )
     {
         var produceContext = new ProduceContext(
@@ -269,7 +269,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     }
 
     /// <inheritdoc />
-    public Task<Queue> QueueDeclareAsync(TimeSpan? timeout = null, CancellationToken cancellationToken = default)
+    public Task<Queue> QueueDeclareAsync(TimeSpan? timeout, CancellationToken cancellationToken)
     {
         return QueueDeclareAsync(
             string.Empty,
@@ -280,7 +280,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     }
 
     /// <inheritdoc />
-    public async Task QueueDeclarePassiveAsync(string queue, TimeSpan? timeout = null, CancellationToken cancellationToken = default)
+    public async Task QueueDeclarePassiveAsync(string queue, TimeSpan? timeout, CancellationToken cancellationToken)
     {
         await persistentChannelDispatcher.InvokeAsync(
             x => x.QueueDeclarePassive(queue),
@@ -299,8 +299,8 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     public async Task<Queue> QueueDeclareAsync(
         string queue,
         Action<IQueueDeclareConfiguration> configure,
-        TimeSpan? timeout = null,
-        CancellationToken cancellationToken = default
+        TimeSpan? timeout,
+        CancellationToken cancellationToken
     )
     {
         var queueDeclareConfiguration = new QueueDeclareConfiguration();
@@ -335,10 +335,10 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     /// <inheritdoc />
     public virtual async Task QueueDeleteAsync(
         string queue,
-        bool ifUnused = false,
-        bool ifEmpty = false,
-        TimeSpan? timeout = null,
-        CancellationToken cancellationToken = default
+        bool ifUnused,
+        bool ifEmpty,
+        TimeSpan? timeout,
+        CancellationToken cancellationToken
     )
     {
         await persistentChannelDispatcher.InvokeAsync(
@@ -355,7 +355,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     }
 
     /// <inheritdoc />
-    public virtual async Task QueuePurgeAsync(string queue, TimeSpan? timeout = null, CancellationToken cancellationToken = default)
+    public virtual async Task QueuePurgeAsync(string queue, TimeSpan? timeout, CancellationToken cancellationToken)
     {
         await persistentChannelDispatcher.InvokeAsync(
             x => x.QueuePurge(queue),
@@ -371,7 +371,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     }
 
     /// <inheritdoc />
-    public async Task ExchangeDeclarePassiveAsync(string exchange, TimeSpan? timeout = null, CancellationToken cancellationToken = default)
+    public async Task ExchangeDeclarePassiveAsync(string exchange, TimeSpan? timeout, CancellationToken cancellationToken)
     {
         await persistentChannelDispatcher.InvokeAsync(
             x => x.ExchangeDeclarePassive(exchange),
@@ -390,8 +390,8 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     public async Task<Exchange> ExchangeDeclareAsync(
         string exchange,
         Action<IExchangeDeclareConfiguration> configure,
-        TimeSpan? timeout = null,
-        CancellationToken cancellationToken = default
+        TimeSpan? timeout,
+        CancellationToken cancellationToken
     )
     {
         var exchangeDeclareConfiguration = new ExchangeDeclareConfiguration();
@@ -426,9 +426,9 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     /// <inheritdoc />
     public virtual async Task ExchangeDeleteAsync(
         string exchange,
-        bool ifUnused = false,
-        TimeSpan? timeout = null,
-        CancellationToken cancellationToken = default
+        bool ifUnused,
+        TimeSpan? timeout,
+        CancellationToken cancellationToken
     )
     {
         await persistentChannelDispatcher.InvokeAsync(
@@ -450,8 +450,8 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         string exchange,
         string routingKey,
         IDictionary<string, object>? arguments,
-        TimeSpan? timeout = null,
-        CancellationToken cancellationToken = default
+        TimeSpan? timeout,
+        CancellationToken cancellationToken
     )
     {
         await persistentChannelDispatcher.InvokeAsync(
@@ -479,8 +479,8 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         string exchange,
         string routingKey,
         IDictionary<string, object>? arguments,
-        TimeSpan? timeout = null,
-        CancellationToken cancellationToken = default
+        TimeSpan? timeout,
+        CancellationToken cancellationToken
     )
     {
         await persistentChannelDispatcher.InvokeAsync(
@@ -508,8 +508,8 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         string sourceExchange,
         string routingKey,
         IDictionary<string, object>? arguments,
-        TimeSpan? timeout = null,
-        CancellationToken cancellationToken = default
+        TimeSpan? timeout,
+        CancellationToken cancellationToken
     )
     {
         await persistentChannelDispatcher.InvokeAsync(
@@ -537,8 +537,8 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         string sourceExchange,
         string routingKey,
         IDictionary<string, object>? arguments,
-        TimeSpan? timeout = null,
-        CancellationToken cancellationToken = default
+        TimeSpan? timeout,
+        CancellationToken cancellationToken
     )
     {
         await persistentChannelDispatcher.InvokeAsync(

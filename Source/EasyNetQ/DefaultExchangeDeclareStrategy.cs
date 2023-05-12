@@ -12,20 +12,27 @@ public class DefaultExchangeDeclareStrategy : IExchangeDeclareStrategy
     public DefaultExchangeDeclareStrategy(IConventions conventions, IAdvancedBus advancedBus)
     {
         this.conventions = conventions;
-        declaredExchanges = new AsyncCache<ExchangeKey, Exchange>((k, c) => advancedBus.ExchangeDeclareAsync(k.Name, k.Type, cancellationToken: c));
+        declaredExchanges = new AsyncCache<ExchangeKey, Exchange>((k, t, c) => advancedBus.ExchangeDeclareAsync(k.Name, k.Type, cancellationToken: c));
     }
 
     /// <inheritdoc />
-    public Task<Exchange> DeclareExchangeAsync(string exchangeName, string exchangeType, CancellationToken cancellationToken)
-    {
-        return declaredExchanges.GetOrAddAsync(new ExchangeKey(exchangeName, exchangeType), cancellationToken);
-    }
+    public Task<Exchange> DeclareExchangeAsync(
+        string exchangeName,
+        string exchangeType,
+        TimeBudget timeout,
+        CancellationToken cancellationToken
+    ) => declaredExchanges.GetOrAddAsync(new ExchangeKey(exchangeName, exchangeType), timeout, cancellationToken);
 
     /// <inheritdoc />
-    public Task<Exchange> DeclareExchangeAsync(Type messageType, string exchangeType, CancellationToken cancellationToken)
+    public Task<Exchange> DeclareExchangeAsync(
+        Type messageType,
+        string exchangeType,
+        TimeBudget timeout,
+        CancellationToken cancellationToken
+    )
     {
         var exchangeName = conventions.ExchangeNamingConvention(messageType);
-        return DeclareExchangeAsync(exchangeName, exchangeType, cancellationToken);
+        return DeclareExchangeAsync(exchangeName, exchangeType, timeout, cancellationToken);
     }
 
     private readonly record struct ExchangeKey(string Name, string Type);

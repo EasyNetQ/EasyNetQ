@@ -44,7 +44,7 @@ public class DeadLetterExchangeAndMessageTtlScheduler : IScheduler
         CancellationToken cancellationToken = default
     )
     {
-        using var cts = cancellationToken.WithTimeout(configuration.Timeout);
+        var timeoutBudget = TimeBudget.Start(configuration.Timeout);
 
         var publishConfiguration = new FuturePublishConfiguration(conventions.TopicNamingConvention(typeof(T)));
         configure(publishConfiguration);
@@ -53,14 +53,16 @@ public class DeadLetterExchangeAndMessageTtlScheduler : IScheduler
         var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(
             conventions.ExchangeNamingConvention(typeof(T)),
             ExchangeType.Topic,
-            cts.Token
+            timeoutBudget,
+            cancellationToken
         ).ConfigureAwait(false);
 
         var delayString = delay.ToString(@"dd\_hh\_mm\_ss");
         var futureExchange = await exchangeDeclareStrategy.DeclareExchangeAsync(
             $"{conventions.ExchangeNamingConvention(typeof(T))}_{delayString}",
             ExchangeType.Topic,
-            cts.Token
+            timeoutBudget,
+            cancellationToken
         ).ConfigureAwait(false);
 
         var futureQueue = await advancedBus.QueueDeclareAsync(
@@ -70,7 +72,8 @@ public class DeadLetterExchangeAndMessageTtlScheduler : IScheduler
                 c.WithMessageTtl(delay);
                 c.WithDeadLetterExchange(exchange);
             },
-            cts.Token
+            timeoutBudget.Remaining,
+            cancellationToken
         ).ConfigureAwait(false);
 
         await advancedBus.BindAsync(futureExchange, futureQueue, topic, cts.Token).ConfigureAwait(false);
