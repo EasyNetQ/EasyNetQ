@@ -94,6 +94,15 @@ public class ConnectionConfiguration
     public SslOption Ssl { get; }
 
     /// <summary>
+    ///     Needed for setting ssl enabled from connection string grammar.
+    /// </summary>
+    internal bool SslEnabled
+    {
+        get => Ssl.Enabled;
+        set => Ssl.Enabled = value;
+    }
+
+    /// <summary>
     ///     Operations timeout (default is 10s)
     /// </summary>
     public TimeSpan Timeout { get; set; }

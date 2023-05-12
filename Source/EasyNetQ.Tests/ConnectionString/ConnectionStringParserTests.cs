@@ -61,4 +61,24 @@ public class ConnectionStringParserTests
     {
         Assert.Throws<EasyNetQException>(() => connectionStringParser.Parse("amqp=Foo"));
     }
+
+    [Fact]
+    public void Should_correctly_parse_multiple_hosts_with_ssl()
+    {
+        var configuration = connectionStringParser.Parse("host=host1.b.com,host2.b.com,host3.b.com;sslEnabled=true");
+        configuration.Ssl.Enabled.Should().BeTrue();
+        configuration.Hosts.Count.Should().Be(3);
+
+        configuration.Hosts[0].Ssl.Enabled.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Should_correctly_parse_multiple_hosts_with_ssl_first()
+    {
+        var configuration = connectionStringParser.Parse("sslEnabled=true;host=host1.b.com,host2.b.com,host3.b.com");
+        configuration.Ssl.Enabled.Should().BeTrue();
+        configuration.Hosts.Count.Should().Be(3);
+
+        configuration.Hosts[0].Ssl.Enabled.Should().BeTrue();
+    }
 }

@@ -44,6 +44,7 @@ internal static class ConnectionStringGrammar
         BuildKeyValueParser("connectIntervalAttempt", TimeSpanSeconds, c => c.ConnectIntervalAttempt),
         BuildKeyValueParser("publisherConfirms", Bool, c => c.PublisherConfirms),
         BuildKeyValueParser("persistentMessages", Bool, c => c.PersistentMessages),
+        BuildKeyValueParser("sslEnabled", Bool, c => c.SslEnabled),
         BuildKeyValueParser("product", Text, c => c.Product),
         BuildKeyValueParser("platform", Text, c => c.Platform),
         BuildKeyValueParser("name", Text, c => c.Name),
@@ -91,7 +92,7 @@ internal static class ConnectionStringGrammar
         if (memberEx.Member is not PropertyInfo propertyInfo) throw new ArgumentOutOfRangeException(nameof(getter), "Member is not a property.");
         if (!propertyInfo.CanWrite) throw new ArgumentOutOfRangeException(nameof(getter), "Member is not a writeable property.");
 
-        var setMethodInfo = propertyInfo.GetSetMethod() ?? throw new ArgumentOutOfRangeException(nameof(getter), "No set method.");
+        var setMethodInfo = propertyInfo.GetSetMethod(true) ?? throw new ArgumentOutOfRangeException(nameof(getter), "No set method.");
         return (Action<TContaining, TProperty>)setMethodInfo.CreateDelegate(typeof(Action<TContaining, TProperty>));
     }
 
