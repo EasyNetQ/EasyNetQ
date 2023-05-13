@@ -14,7 +14,8 @@ public class ConnectionStringParserTests
     private const string ConnectionString =
         "virtualHost=Copa;username=Copa;host=192.168.1.1;password=abc_xyz;port=12345;" +
         "requestedHeartbeat=3;prefetchcount=2;timeout=12;publisherConfirms=true;" +
-        "name=unit-test;mandatoryPublish=true;consumerDispatcherConcurrency=1;ssl=true";
+        "name=unit-test;mandatoryPublish=true;consumerDispatcherConcurrency=1;ssl=true;" +
+        "sslServerName=serverName;sslCertificatePath=certificatePath;sslCertificatePassphrase=certificatePassphrase";
 
     [Fact]
     public void Should_correctly_parse_connection_string()
@@ -34,6 +35,9 @@ public class ConnectionStringParserTests
         configuration.MandatoryPublish.Should().BeTrue();
         configuration.ConsumerDispatcherConcurrency.Should().Be(1);
         configuration.Ssl.Enabled.Should().BeTrue();
+        configuration.Ssl.ServerName.Should().Be("serverName");
+        configuration.Ssl.CertPath.Should().Be("certificatePath");
+        configuration.Ssl.CertPassphrase.Should().Be("certificatePassphrase");
     }
 
     [Fact]
