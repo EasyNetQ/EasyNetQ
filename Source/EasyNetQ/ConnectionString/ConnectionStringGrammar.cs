@@ -50,7 +50,8 @@ internal static class ConnectionStringGrammar
         BuildKeyValueParser("product", Text, c => c.Product),
         BuildKeyValueParser("platform", Text, c => c.Platform),
         BuildKeyValueParser("name", Text, c => c.Name),
-        BuildKeyValueParser("mandatoryPublish", Bool, c => c.MandatoryPublish)
+        BuildKeyValueParser("mandatoryPublish", Bool, c => c.MandatoryPublish),
+        BuildKeyValueParser("ssl", Bool, c => c.Ssl.Enabled)
     }.Aggregate((a, b) => a.Or(b));
 
     internal static readonly Parser<IEnumerable<UpdateConfiguration>> ConnectionStringBuilder = Part.ListDelimitedBy(';');
@@ -80,29 +81,19 @@ internal static class ConnectionStringGrammar
         Expression<Func<ConnectionConfiguration, T>> getter
     ) => CreateSetter<ConnectionConfiguration, T>(getter);
 
-    /// <summary>
-    /// Stolen from SO:
-    /// http://stackoverflow.com/questions/4596453/create-an-actiont-to-set-a-property-when-i-am-provided-with-the-linq-expres
-    /// </summary>
-    /// <typeparam name="TContaining"></typeparam>
-    /// <typeparam name="TProperty"></typeparam>
-    /// <param name="getter"></param>
-    /// <returns></returns>
     private static Action<TContaining, TProperty> CreateSetter<TContaining, TProperty>(Expression<Func<TContaining, TProperty>> getter)
     {
-        Preconditions.CheckNotNull(getter, nameof(getter));
+        if (getter.Body is not MemberExpression memberExpr)
+            throw new ArgumentOutOfRangeException(nameof(getter), "Body is not a member-expression");
+        if (memberExpr.Member is not PropertyInfo propertyInfo)
+            throw new ArgumentOutOfRangeException(nameof(getter), "Member is not a property");
+        if (!propertyInfo.CanWrite)
+            throw new ArgumentOutOfRangeException(nameof(getter), "Property is not writeable");
 
-        var memberEx = getter.Body as MemberExpression;
-
-        Preconditions.CheckNotNull(memberEx, nameof(getter), "Body is not a member-expression.");
-
-        var property = memberEx.Member as PropertyInfo;
-
-        Preconditions.CheckNotNull(property, nameof(getter), "Member is not a property.");
-
-        if (!property.CanWrite) throw new ArgumentOutOfRangeException(nameof(getter), null, "Member is not a writeable property.");
-
-        return (Action<TContaining, TProperty>)property.GetSetMethod().CreateDelegate(typeof(Action<TContaining, TProperty>));
+        var valueParameterExpr = Expression.Parameter(typeof(TProperty), "value");
+        var setter = propertyInfo.GetSetMethod() ?? throw new ArgumentOutOfRangeException(nameof(getter), "No set method");
+        var expr = Expression.Call(memberExpr.Expression, setter, valueParameterExpr);
+        return Expression.Lambda<Action<TContaining, TProperty>>(expr, getter.Parameters.Single(), valueParameterExpr).Compile();
     }
 
     private static IEnumerable<T> Cons<T>(this T head, IEnumerable<T> rest)

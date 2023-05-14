@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading;
+using System.Security.Cryptography.X509Certificates;
 using EasyNetQ.Events;
 using EasyNetQ.Logging;
 using RabbitMQ.Client;
@@ -109,12 +110,10 @@ public class PersistentConnection : IPersistentConnection
     {
         var endpoints = configuration.Hosts.Select(x =>
         {
-            var endpoint = new AmqpTcpEndpoint(x.Host, x.Port);
-            if (x.Ssl.Enabled)
-                endpoint.Ssl = x.Ssl;
-            else if (configuration.Ssl.Enabled)
-                endpoint.Ssl = configuration.Ssl;
-            return endpoint;
+            var ssl = !x.Ssl.Enabled && configuration.Ssl.Enabled
+                ? NewSslForHost(configuration.Ssl, x.Host)
+                : x.Ssl;
+            return new AmqpTcpEndpoint(x.Host, x.Port, ssl);
         }).ToList();
 
         if (connectionFactory.CreateConnection(endpoints) is not IAutorecoveringConnection connection)
@@ -178,4 +177,19 @@ public class PersistentConnection : IPersistentConnection
         logger.InfoFormat("Connection {type} unblocked", type);
         eventBus.Publish(new ConnectionUnblockedEvent(type));
     }
+
+    private static SslOption NewSslForHost(SslOption option, string host) =>
+        new()
+        {
+            Certs = option.Certs,
+            AcceptablePolicyErrors = option.AcceptablePolicyErrors,
+            CertPassphrase = option.CertPassphrase,
+            CertPath = option.CertPath,
+            CertificateSelectionCallback = option.CertificateSelectionCallback,
+            CertificateValidationCallback = option.CertificateValidationCallback,
+            CheckCertificateRevocation = option.CheckCertificateRevocation,
+            Enabled = option.Enabled,
+            ServerName = host,
+            Version = option.Version,
+        };
 }
