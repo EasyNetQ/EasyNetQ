@@ -99,7 +99,11 @@ public class PersistentConnection : IPersistentConnection
             if (x.Ssl.Enabled)
                 endpoint.Ssl = Copy(x.Ssl);
             else if (configuration.Ssl.Enabled)
-                endpoint.Ssl = Copy(configuration.Ssl, serverName: endpoint.HostName);
+            {
+                var ssl = Copy(configuration.Ssl);
+                ssl.ServerName = endpoint.HostName;
+                endpoint.Ssl = ssl;
+            }
             return endpoint;
         }).ToList();
 
@@ -165,10 +169,9 @@ public class PersistentConnection : IPersistentConnection
         eventBus.Publish(new ConnectionUnblockedEvent(type));
     }
 
-    private static SslOption Copy(SslOption option, string? serverName = null) =>
+    private static SslOption Copy(SslOption option) =>
         new()
         {
-            // It is important to Certs it before CertPassphrase and CertPath, do not reorder
             Certs = option.Certs == null ? null : new X509CertificateCollection(option.Certs),
             AcceptablePolicyErrors = option.AcceptablePolicyErrors,
             CertPassphrase = option.CertPassphrase,
@@ -177,7 +180,7 @@ public class PersistentConnection : IPersistentConnection
             CertificateValidationCallback = option.CertificateValidationCallback,
             CheckCertificateRevocation = option.CheckCertificateRevocation,
             Enabled = option.Enabled,
-            ServerName = serverName ?? option.ServerName,
+            ServerName = option.ServerName,
             Version = option.Version,
         };
 }
