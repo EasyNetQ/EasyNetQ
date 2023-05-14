@@ -49,7 +49,6 @@ internal static class ConnectionStringGrammar
         BuildKeyValueParser("name", Text, c => c.Name),
         BuildKeyValueParser("mandatoryPublish", Bool, c => c.MandatoryPublish),
         BuildKeyValueParser("ssl", Bool, c => c.Ssl.Enabled),
-        BuildKeyValueParser("sslServerName", Text, c => c.Ssl.ServerName),
         BuildKeyValueParser("sslCertificatePath", Text, c => c.Ssl.CertPath),
         BuildKeyValueParser("sslCertificatePassphrase", Text, c => c.Ssl.CertPassphrase)
     }.Aggregate((a, b) => a.Or(b));
