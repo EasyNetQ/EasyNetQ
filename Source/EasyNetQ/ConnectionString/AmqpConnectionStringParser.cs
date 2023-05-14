@@ -44,7 +44,6 @@ public class AmqpConnectionStringParser : IConnectionStringParser
         if (secured)
         {
             host.Ssl.Enabled = true;
-            host.Ssl.Version = SslProtocols.None;
             host.Ssl.ServerName = host.Host;
         }
 
