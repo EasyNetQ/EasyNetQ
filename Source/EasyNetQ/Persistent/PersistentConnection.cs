@@ -1,3 +1,4 @@
+using System.Security.Cryptography.X509Certificates;
 using EasyNetQ.Events;
 using EasyNetQ.Logging;
 using RabbitMQ.Client;
@@ -96,9 +97,9 @@ public class PersistentConnection : IPersistentConnection
         {
             var endpoint = new AmqpTcpEndpoint(x.Host, x.Port);
             if (x.Ssl.Enabled)
-                endpoint.Ssl = x.Ssl;
+                endpoint.Ssl = Copy(x.Ssl);
             else if (configuration.Ssl.Enabled)
-                endpoint.Ssl = configuration.Ssl;
+                endpoint.Ssl = Copy(configuration.Ssl, serverName: endpoint.HostName);
             return endpoint;
         }).ToList();
 
@@ -163,4 +164,20 @@ public class PersistentConnection : IPersistentConnection
         logger.InfoFormat("Connection {type} unblocked", type);
         eventBus.Publish(new ConnectionUnblockedEvent(type));
     }
+
+    private static SslOption Copy(SslOption option, string? serverName = null) =>
+        new()
+        {
+            // It is important to Certs it before CertPassphrase and CertPath, do not reorder
+            Certs = option.Certs == null ? null : new X509CertificateCollection(option.Certs),
+            AcceptablePolicyErrors = option.AcceptablePolicyErrors,
+            CertPassphrase = option.CertPassphrase,
+            CertPath = option.CertPath,
+            CertificateSelectionCallback = option.CertificateSelectionCallback,
+            CertificateValidationCallback = option.CertificateValidationCallback,
+            CheckCertificateRevocation = option.CheckCertificateRevocation,
+            Enabled = option.Enabled,
+            ServerName = serverName ?? option.ServerName,
+            Version = option.Version,
+        };
 }
