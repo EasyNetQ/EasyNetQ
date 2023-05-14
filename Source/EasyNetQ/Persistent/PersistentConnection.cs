@@ -97,7 +97,7 @@ public class PersistentConnection : IPersistentConnection
         {
             var endpoint = new AmqpTcpEndpoint(x.Host, x.Port);
             if (x.Ssl.Enabled)
-                endpoint.Ssl = Copy(x.Ssl);
+                endpoint.Ssl = x.Ssl;
             else if (configuration.Ssl.Enabled)
             {
                 var ssl = Copy(configuration.Ssl);
