@@ -48,9 +48,7 @@ internal static class ConnectionStringGrammar
         BuildKeyValueParser("platform", Text, c => c.Platform),
         BuildKeyValueParser("name", Text, c => c.Name),
         BuildKeyValueParser("mandatoryPublish", Bool, c => c.MandatoryPublish),
-        BuildKeyValueParser("ssl", Bool, c => c.Ssl.Enabled),
-        BuildKeyValueParser("sslCertificatePath", Text, c => c.Ssl.CertPath),
-        BuildKeyValueParser("sslCertificatePassphrase", Text, c => c.Ssl.CertPassphrase)
+        BuildKeyValueParser("ssl", Bool, c => c.Ssl.Enabled)
     }.Aggregate((a, b) => a.Or(b));
 
     internal static readonly Parser<IEnumerable<UpdateConfiguration>> ConnectionStringBuilder = Part.ListDelimitedBy(';');
@@ -82,16 +80,16 @@ internal static class ConnectionStringGrammar
 
     private static Action<TContaining, TProperty> CreateSetter<TContaining, TProperty>(Expression<Func<TContaining, TProperty>> getter)
     {
-        if (getter.Body is not MemberExpression memberEx)
+        if (getter.Body is not MemberExpression memberExpr)
             throw new ArgumentOutOfRangeException(nameof(getter), "Body is not a member-expression");
-        if (memberEx.Member is not PropertyInfo propertyInfo)
+        if (memberExpr.Member is not PropertyInfo propertyInfo)
             throw new ArgumentOutOfRangeException(nameof(getter), "Member is not a property");
         if (!propertyInfo.CanWrite)
-            throw new ArgumentOutOfRangeException(nameof(getter), "Member is not a writeable property");
+            throw new ArgumentOutOfRangeException(nameof(getter), "Property is not writeable");
 
         var valueParameterExpr = Expression.Parameter(typeof(TProperty), "value");
         var setter = propertyInfo.GetSetMethod() ?? throw new ArgumentOutOfRangeException(nameof(getter), "No set method");
-        var expr = Expression.Call(memberEx.Expression, setter, valueParameterExpr);
+        var expr = Expression.Call(memberExpr.Expression, setter, valueParameterExpr);
         return Expression.Lambda<Action<TContaining, TProperty>>(expr, getter.Parameters.Single(), valueParameterExpr).Compile();
     }
 
