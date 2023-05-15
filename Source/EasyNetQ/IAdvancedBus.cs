@@ -46,7 +46,7 @@ public interface IAdvancedBus
     Task PublishAsync(
         string exchange,
         string routingKey,
-        bool mandatory,
+        bool? mandatory,
         IMessage message,
         CancellationToken cancellationToken = default
     );
@@ -71,7 +71,7 @@ public interface IAdvancedBus
     Task PublishAsync(
         string exchange,
         string routingKey,
-        bool mandatory,
+        bool? mandatory,
         MessageProperties properties,
         ReadOnlyMemory<byte> body,
         CancellationToken cancellationToken = default

@@ -28,7 +28,7 @@ public static partial class AdvancedBusExtensions
         this IAdvancedBus bus,
         in Exchange exchange,
         string routingKey,
-        bool mandatory,
+        bool? mandatory,
         IMessage message,
         CancellationToken cancellationToken = default
     ) => bus.PublishAsync(exchange.Name, routingKey, mandatory, message, cancellationToken);
@@ -55,7 +55,7 @@ public static partial class AdvancedBusExtensions
         this IAdvancedBus bus,
         in Exchange exchange,
         string routingKey,
-        bool mandatory,
+        bool? mandatory,
         in MessageProperties properties,
         in ReadOnlyMemory<byte> body,
         CancellationToken cancellationToken = default
@@ -84,7 +84,7 @@ public static partial class AdvancedBusExtensions
         this IAdvancedBus bus,
         in Exchange exchange,
         string routingKey,
-        bool mandatory,
+        bool? mandatory,
         in MessageProperties messageProperties,
         in ReadOnlyMemory<byte> body,
         CancellationToken cancellationToken = default
@@ -118,7 +118,7 @@ public static partial class AdvancedBusExtensions
         this IAdvancedBus bus,
         string exchange,
         string routingKey,
-        bool mandatory,
+        bool? mandatory,
         in MessageProperties messageProperties,
         in ReadOnlyMemory<byte> body,
         CancellationToken cancellationToken = default

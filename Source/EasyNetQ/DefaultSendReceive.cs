@@ -51,7 +51,7 @@ public class DefaultSendReceive : ISendReceive
             DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T))
         };
         await advancedBus.PublishAsync(
-            Exchange.DefaultName, queue, configuration.MandatoryPublish, new Message<T>(message, properties), cts.Token
+            Exchange.DefaultName, queue, null, new Message<T>(message, properties), cts.Token
         ).ConfigureAwait(false);
     }
 

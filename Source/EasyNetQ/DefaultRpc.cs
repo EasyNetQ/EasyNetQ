@@ -89,7 +89,7 @@ public class DefaultRpc : IRpc, IDisposable
             correlationId,
             expiration,
             priority,
-            configuration.MandatoryPublish,
+            null,
             headers,
             cts.Token
         ).ConfigureAwait(false);
@@ -227,7 +227,7 @@ public class DefaultRpc : IRpc, IDisposable
         string correlationId,
         TimeSpan expiration,
         byte? priority,
-        bool mandatory,
+        bool? mandatory,
         IDictionary<string, object?>? headers,
         CancellationToken cancellationToken
     )
