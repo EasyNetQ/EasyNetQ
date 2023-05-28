@@ -1,4 +1,5 @@
 using EasyNetQ.DI;
+using EasyNetQ.Internals;
 
 namespace EasyNetQ.Producer;
 
@@ -9,6 +10,7 @@ public readonly record struct ProduceContext(
     in MessageProperties Properties,
     in ReadOnlyMemory<byte> Body,
     in IServiceResolver ServiceResolver,
+    in TimeoutToken TimeoutToken,
     in CancellationToken CancellationToken
 );
 

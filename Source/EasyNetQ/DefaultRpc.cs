@@ -93,7 +93,7 @@ public class DefaultRpc : IRpc, IDisposable
             headers,
             cts.Token
         ).ConfigureAwait(false);
-        tcs.AttachCancellation(cts.Token);
+        tcs.AttachCancellation(cancellationToken: cts.Token);
         return await tcs.Task.ConfigureAwait(false);
     }
 
@@ -193,7 +193,7 @@ public class DefaultRpc : IRpc, IDisposable
         var queue = await advancedBus.QueueDeclareAsync(
             conventions.RpcReturnQueueNamingConvention(responseType),
             c => c.AsDurable(false).AsExclusive(true).AsAutoDelete(true),
-            cancellationToken
+            cancellationToken: cancellationToken
         ).ConfigureAwait(false);
 
         var exchangeName = conventions.RpcResponseExchangeNamingConvention(responseType);
@@ -250,7 +250,7 @@ public class DefaultRpc : IRpc, IDisposable
         };
 
         var requestMessage = new Message<TRequest>(request, properties);
-        await advancedBus.PublishAsync(exchange.Name, routingKey, mandatory, requestMessage, cancellationToken)
+        await advancedBus.PublishAsync(exchange.Name, routingKey, mandatory, requestMessage, cancellationToken: cancellationToken)
             .ConfigureAwait(false);
     }
 
@@ -282,7 +282,7 @@ public class DefaultRpc : IRpc, IDisposable
                 if (responderConfiguration.MaxPriority.HasValue)
                     c.WithMaxPriority(responderConfiguration.MaxPriority.Value);
             },
-            cancellationToken
+            cancellationToken: cancellationToken
         ).ConfigureAwait(false);
         await advancedBus.BindAsync(exchange, queue, routingKey, cancellationToken).ConfigureAwait(false);
 
@@ -325,7 +325,7 @@ public class DefaultRpc : IRpc, IDisposable
                 requestMessage.Properties.ReplyTo!,
                 false,
                 responseMessage,
-                cancellationToken
+                cancellationToken: cancellationToken
             ).ConfigureAwait(false);
         }
         catch (Exception exception)
@@ -348,7 +348,7 @@ public class DefaultRpc : IRpc, IDisposable
                 requestMessage.Properties.ReplyTo!,
                 false,
                 responseMessage,
-                cancellationToken
+                cancellationToken: cancellationToken
             ).ConfigureAwait(false);
 
             throw;

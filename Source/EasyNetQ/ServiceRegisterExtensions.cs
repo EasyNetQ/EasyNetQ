@@ -54,7 +54,12 @@ public static class ServiceRegisterExtensions
             .TryRegister<IPersistentChannelDispatcher, SinglePersistentChannelDispatcher>()
             .TryRegister<IProducerConnection, ProducerConnection>()
             .TryRegister<IConsumerConnection, ConsumerConnection>()
-            .TryRegister<IPersistentChannelFactory, PersistentChannelFactory>()
+            .TryRegister<IPersistentChannelFactory>(
+                c => new PersistentChannelFactory(
+                    c.Resolve<ILogger<PersistentChannel>>(),
+                    c.Resolve<IEventBus>()
+                )
+            )
             .TryRegister<IPublishConfirmationListener, PublishConfirmationListener>()
             .TryRegister<IHandlerCollectionFactory, HandlerCollectionFactory>()
             .TryRegister<IPullingConsumerFactory, PullingConsumerFactory>()

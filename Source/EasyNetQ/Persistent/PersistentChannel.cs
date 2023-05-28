@@ -17,7 +17,6 @@ public class PersistentChannel : IPersistentChannel
     private const int MaxRetryTimeoutMs = 5000;
     private readonly IPersistentConnection connection;
 
-    private readonly CancellationTokenSource disposeCts = new();
     private readonly IEventBus eventBus;
     private readonly AsyncLock mutex = new();
     private readonly PersistentChannelOptions options;
@@ -48,7 +47,9 @@ public class PersistentChannel : IPersistentChannel
 
     /// <inheritdoc />
     public ValueTask<TResult> InvokeChannelActionAsync<TResult, TChannelAction>(
-        TChannelAction channelAction, CancellationToken cancellationToken = default
+        TChannelAction channelAction,
+        TimeoutToken timeoutToken,
+        CancellationToken cancellationToken
     ) where TChannelAction : struct, IPersistentChannelAction<TResult>
     {
         if (disposed)
@@ -56,9 +57,9 @@ public class PersistentChannel : IPersistentChannel
 
         cancellationToken.ThrowIfCancellationRequested();
 
-        return TryInvokeChannelActionFast<TResult, TChannelAction>(channelAction, out var result)
+        return TryInvokeChannelActionFast<TResult, TChannelAction>(channelAction, timeoutToken, out var result)
             ? new ValueTask<TResult>(result)
-            : new ValueTask<TResult>(InvokeChannelActionSlowAsync<TResult, TChannelAction>(channelAction, cancellationToken));
+            : new ValueTask<TResult>(InvokeChannelActionSlowAsync<TResult, TChannelAction>(channelAction, timeoutToken, cancellationToken));
     }
 
     /// <inheritdoc />
@@ -67,15 +68,14 @@ public class PersistentChannel : IPersistentChannel
         if (disposed)
             return;
 
-        disposed = true;
-        disposeCts.Cancel();
         mutex.Dispose();
         CloseChannel();
-        disposeCts.Dispose();
+
+        disposed = true;
     }
 
     private bool TryInvokeChannelActionFast<TResult, TChannelAction>(
-        in TChannelAction channelAction, [MaybeNullWhen(false)] out TResult result
+        in TChannelAction channelAction, TimeoutToken timeoutToken, [MaybeNullWhen(false)] out TResult result
     ) where TChannelAction : struct, IPersistentChannelAction<TResult>
     {
         if (mutex.TryAcquire(out var releaser))
@@ -96,7 +96,10 @@ public class PersistentChannel : IPersistentChannel
                 if (exceptionVerdict.Rethrow)
                     throw;
 
-                logger.Error(exception, "Failed to fast invoke channel action, invocation will be retried");
+                if (timeoutToken.Expired)
+                    throw new TimeoutException("Timeout invoking the channel action", exception);
+
+                logger.Warn(exception, "Failed to fast invoke the channel action, invocation will be retried");
             }
             finally
             {
@@ -109,18 +112,15 @@ public class PersistentChannel : IPersistentChannel
     }
 
     private async Task<TResult> InvokeChannelActionSlowAsync<TResult, TChannelAction>(
-        TChannelAction channelAction, CancellationToken cancellationToken = default
+        TChannelAction channelAction, TimeoutToken timeoutToken, CancellationToken cancellationToken
     ) where TChannelAction : struct, IPersistentChannelAction<TResult>
     {
-        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, disposeCts.Token);
-        using var _ = await mutex.AcquireAsync(cts.Token).ConfigureAwait(false);
+        using var _ = await mutex.AcquireAsync(timeoutToken, cancellationToken).ConfigureAwait(false);
 
         var retryTimeoutMs = MinRetryTimeoutMs;
 
         while (true)
         {
-            cts.Token.ThrowIfCancellationRequested();
-
             try
             {
                 var channel = initializedChannel ??= CreateChannel();
@@ -135,10 +135,13 @@ public class PersistentChannel : IPersistentChannel
                 if (exceptionVerdict.Rethrow)
                     throw;
 
-                logger.Error(exception, "Failed to invoke channel action, invocation will be retried");
+                if (timeoutToken.Expired)
+                    throw new TimeoutException("Timeout invoking the channel action", exception);
+
+                logger.Warn(exception, "Failed to invoke the channel action, invocation will be retried");
             }
 
-            await Task.Delay(retryTimeoutMs, cts.Token).ConfigureAwait(false);
+            await Task.Delay(timeoutToken.TryAcquire(TimeSpan.FromMilliseconds(retryTimeoutMs)), cancellationToken).ConfigureAwait(false);
             retryTimeoutMs = Math.Min(retryTimeoutMs * 2, MaxRetryTimeoutMs);
         }
     }

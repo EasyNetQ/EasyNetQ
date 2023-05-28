@@ -52,10 +52,23 @@ public static class TaskHelpers
     ///     doing so can result in application failures when updating to a new EasyNetQ release.
     /// </summary>
     public static void AttachCancellation<T>(
-        this TaskCompletionSource<T> taskCompletionSource, CancellationToken cancellationToken
+        this TaskCompletionSource<T> taskCompletionSource,
+        CancellationToken cancellationToken
+    ) => taskCompletionSource.AttachTimeoutAndCancellation(Timeout.InfiniteTimeSpan, cancellationToken);
+
+    /// <summary>
+    ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
+    ///     the same compatibility as public APIs. It may be changed or removed without notice in
+    ///     any release. You should only use it directly in your code with extreme caution and knowing that
+    ///     doing so can result in application failures when updating to a new EasyNetQ release.
+    /// </summary>
+    public static void AttachTimeoutAndCancellation<T>(
+        this TaskCompletionSource<T> taskCompletionSource,
+        TimeSpan timeout,
+        CancellationToken cancellationToken
     )
     {
-        if (!cancellationToken.CanBeCanceled || taskCompletionSource.Task.IsCompleted)
+        if (taskCompletionSource.Task.IsCompleted)
             return;
 
         if (cancellationToken.IsCancellationRequested)
@@ -64,21 +77,47 @@ public static class TaskHelpers
             return;
         }
 
+        if (timeout == TimeSpan.Zero)
+        {
+            taskCompletionSource.TrySetException(new TimeoutException());
+            return;
+        }
+
         var state = new TcsWithCancellationToken<T>(taskCompletionSource, cancellationToken);
-        state.CancellationTokenRegistration = cancellationToken.Register(
-            s =>
-            {
-                var t = (TcsWithCancellationToken<T>)s!;
-                t.Tcs.TrySetCanceled(t.CancellationToken);
-            },
-            state,
-            false
-        );
+
+        if (timeout != Timeout.InfiniteTimeSpan)
+        {
+            state.Timer = new Timer(
+                s =>
+                {
+                    var t = (TcsWithCancellationToken<T>)s!;
+                    t.Tcs.TrySetException(new TimeoutException());
+                },
+                state,
+                timeout,
+                Timeout.InfiniteTimeSpan
+            );
+        }
+
+        if (cancellationToken.CanBeCanceled)
+        {
+            state.CancellationTokenRegistration = cancellationToken.Register(
+                s =>
+                {
+                    var t = (TcsWithCancellationToken<T>)s!;
+                    t.Tcs.TrySetCanceled(t.CancellationToken);
+                },
+                state,
+                false
+            );
+        }
+
         taskCompletionSource.Task.ContinueWith(
             (_, s) =>
             {
-                var r = (TcsWithCancellationToken<T>)s!;
-                r.CancellationTokenRegistration.Dispose();
+                var t = (TcsWithCancellationToken<T>)s!;
+                t.CancellationTokenRegistration?.Dispose();
+                t.Timer?.Dispose();
             },
             state,
             default,
@@ -97,6 +136,7 @@ public static class TaskHelpers
 
         public TaskCompletionSource<T> Tcs { get; }
         public CancellationToken CancellationToken { get; }
-        public CancellationTokenRegistration CancellationTokenRegistration { get; set; }
+        public CancellationTokenRegistration? CancellationTokenRegistration { get; set; }
+        public Timer? Timer { get; set; }
     }
 }

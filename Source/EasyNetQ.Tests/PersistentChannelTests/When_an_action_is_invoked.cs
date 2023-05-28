@@ -36,8 +36,5 @@ public class When_an_action_is_invoked : IDisposable
         channel.Received().ExchangeDeclare("MyExchange", "direct");
     }
 
-    public void Dispose()
-    {
-        persistentChannel.Dispose();
-    }
+    public void Dispose() => persistentChannel.Dispose();
 }

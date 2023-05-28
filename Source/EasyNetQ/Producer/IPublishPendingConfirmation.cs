@@ -13,9 +13,10 @@ public interface IPublishPendingConfirmation
     /// <summary>
     ///     Wait confirmation for ack, nack and etc.
     /// </summary>
+    /// <param name="timeout"></param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns></returns>
-    Task WaitAsync(CancellationToken cancellationToken = default);
+    Task WaitAsync(TimeSpan timeout, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Cancel confirmation

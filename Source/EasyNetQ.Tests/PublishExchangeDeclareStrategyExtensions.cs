@@ -1,6 +1,6 @@
-using EasyNetQ.Topology;
+// ReSharper disable once CheckNamespace
 
-namespace EasyNetQ.Tests;
+namespace EasyNetQ.Topology;
 
 public static class PublishExchangeDeclareStrategyExtensions
 {

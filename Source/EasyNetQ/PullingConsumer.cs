@@ -1,5 +1,4 @@
 using EasyNetQ.Interception;
-using EasyNetQ.Internals;
 using EasyNetQ.Persistent;
 using EasyNetQ.Topology;
 using RabbitMQ.Client;
@@ -287,7 +286,7 @@ public readonly struct PullingConsumerOptions
     public bool AutoAck { get; }
 
     /// <summary>
-    ///     Operations timeout
+    ///     Operation timeout
     /// </summary>
     public TimeSpan Timeout { get; }
 
@@ -332,12 +331,10 @@ public class PullingConsumer : IPullingConsumer<PullResult>
     }
 
     /// <inheritdoc />
-    public async Task<PullResult> PullAsync(CancellationToken cancellationToken = default)
+    public async Task<PullResult> PullAsync(CancellationToken cancellationToken)
     {
-        using var cts = cancellationToken.WithTimeout(options.Timeout);
-
         var basicGetResult = await channel.InvokeChannelActionAsync<BasicGetResult?, BasicGetAction>(
-            new BasicGetAction(queue, options.AutoAck), cts.Token
+            new BasicGetAction(queue, options.AutoAck), options.Timeout, cancellationToken
         ).ConfigureAwait(false);
 
         if (basicGetResult == null)
@@ -365,30 +362,26 @@ public class PullingConsumer : IPullingConsumer<PullResult>
     }
 
     /// <inheritdoc />
-    public async Task AckAsync(ulong deliveryTag, bool multiple, CancellationToken cancellationToken = default)
+    public async Task AckAsync(ulong deliveryTag, bool multiple, CancellationToken cancellationToken)
     {
         if (options.AutoAck)
             throw new InvalidOperationException("Cannot ack in auto ack mode");
 
-        using var cts = cancellationToken.WithTimeout(options.Timeout);
-
         await channel.InvokeChannelActionAsync<bool, BasicAckAction>(
-            new BasicAckAction(deliveryTag, multiple), cts.Token
+            new BasicAckAction(deliveryTag, multiple), options.Timeout, cancellationToken
         ).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
     public async Task RejectAsync(
-        ulong deliveryTag, bool multiple, bool requeue, CancellationToken cancellationToken = default
+        ulong deliveryTag, bool multiple, bool requeue, CancellationToken cancellationToken
     )
     {
         if (options.AutoAck)
             throw new InvalidOperationException("Cannot reject in auto ack mode");
 
-        using var cts = cancellationToken.WithTimeout(options.Timeout);
-
         await channel.InvokeChannelActionAsync<bool, BasicNackAction>(
-            new BasicNackAction(deliveryTag, multiple, requeue), cts.Token
+            new BasicNackAction(deliveryTag, multiple, requeue), options.Timeout, cancellationToken
         ).ConfigureAwait(false);
     }
 
@@ -469,7 +462,7 @@ public class PullingConsumer<T> : IPullingConsumer<PullResult<T>>
     }
 
     /// <inheritdoc />
-    public async Task<PullResult<T>> PullAsync(CancellationToken cancellationToken = default)
+    public async Task<PullResult<T>> PullAsync(CancellationToken cancellationToken)
     {
         var pullResult = await consumer.PullAsync(cancellationToken).ConfigureAwait(false);
         if (!pullResult.IsAvailable)
@@ -492,14 +485,14 @@ public class PullingConsumer<T> : IPullingConsumer<PullResult<T>>
     }
 
     /// <inheritdoc />
-    public Task AckAsync(ulong deliveryTag, bool multiple, CancellationToken cancellationToken = default)
+    public Task AckAsync(ulong deliveryTag, bool multiple, CancellationToken cancellationToken)
     {
         return consumer.AckAsync(deliveryTag, multiple, cancellationToken);
     }
 
     /// <inheritdoc />
     public Task RejectAsync(
-        ulong deliveryTag, bool multiple, bool requeue, CancellationToken cancellationToken = default
+        ulong deliveryTag, bool multiple, bool requeue, CancellationToken cancellationToken
     )
     {
         return consumer.RejectAsync(deliveryTag, multiple, requeue, cancellationToken);

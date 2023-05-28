@@ -18,10 +18,6 @@ public class PersistentChannelFactory : IPersistentChannelFactory
     }
 
     /// <inheritdoc />
-    public IPersistentChannel CreatePersistentChannel(
-        IPersistentConnection connection, PersistentChannelOptions options
-    )
-    {
-        return new PersistentChannel(options, logger, connection, eventBus);
-    }
+    public IPersistentChannel CreatePersistentChannel(IPersistentConnection connection, PersistentChannelOptions options) =>
+        new PersistentChannel(options, logger, connection, eventBus);
 }

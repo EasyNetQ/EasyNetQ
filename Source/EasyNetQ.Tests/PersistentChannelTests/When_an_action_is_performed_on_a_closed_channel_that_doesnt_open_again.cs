@@ -1,3 +1,4 @@
+using EasyNetQ.Internals;
 using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 using RabbitMQ.Client;
@@ -25,17 +26,35 @@ public class When_an_action_is_performed_on_a_closed_channel_that_doesnt_open_ag
     private readonly IPersistentChannel persistentChannel;
 
     [Fact]
-    public void Should_throw_timeout_exception()
+    public async Task Should_timed_out()
     {
-        Assert.Throws<TaskCanceledException>(() =>
-        {
-            using var cts = new CancellationTokenSource(1000);
-            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"), cts.Token);
-        });
+        await Assert.ThrowsAsync<TimeoutException>(async () =>
+            {
+                await persistentChannel.InvokeChannelActionAsync(
+                    x => x.ExchangeDeclare("MyExchange", "direct"),
+                    TimeSpan.FromSeconds(1),
+                    CancellationToken.None
+                );
+            }
+        );
     }
 
-    public void Dispose()
+
+    [Fact]
+    public async Task Should_cancelled()
     {
-        persistentChannel.Dispose();
+        await Assert.ThrowsAsync<TaskCanceledException>(async () =>
+            {
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(1));
+
+                await persistentChannel.InvokeChannelActionAsync(
+                    x => x.ExchangeDeclare("MyExchange", "direct"),
+                    TimeoutToken.None,
+                    cts.Token
+                );
+            }
+        );
     }
+
+    public void Dispose() => persistentChannel.Dispose();
 }

@@ -181,11 +181,11 @@ public class PublishConfirmationListener : IPublishConfirmationListener
 
         public ulong Id => sequenceNumber;
 
-        public async Task WaitAsync(CancellationToken cancellationToken)
+        public async Task WaitAsync(TimeSpan timeout, CancellationToken cancellationToken)
         {
             try
             {
-                confirmationTcs.AttachCancellation(cancellationToken);
+                confirmationTcs.AttachTimeoutAndCancellation(timeout, cancellationToken);
                 await confirmationTcs.Task.ConfigureAwait(false);
             }
             finally

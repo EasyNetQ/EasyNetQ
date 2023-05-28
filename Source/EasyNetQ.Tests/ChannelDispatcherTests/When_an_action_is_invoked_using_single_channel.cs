@@ -1,5 +1,6 @@
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
+using EasyNetQ.Internals;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 using RabbitMQ.Client;
@@ -26,7 +27,8 @@ public class When_an_action_is_invoked_using_single_channel : IDisposable
 
         dispatcher = new SinglePersistentChannelDispatcher(producerConnection, consumerConnection, channelFactory);
 
-        actionResult = dispatcher.InvokeAsync(action, PersistentChannelDispatchOptions.ProducerTopology)
+        actionResult = dispatcher.InvokeAsync(action, PersistentChannelDispatchOptions.ProducerTopology, TimeoutToken.None, CancellationToken.None)
+            .AsTask()
             .GetAwaiter()
             .GetResult();
     }

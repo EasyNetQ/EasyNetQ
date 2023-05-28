@@ -61,14 +61,15 @@ public sealed class MultiPersistentChannelDispatcher : IPersistentChannelDispatc
     public async ValueTask<TResult> InvokeAsync<TResult, TChannelAction>(
         TChannelAction channelAction,
         PersistentChannelDispatchOptions options,
+        TimeoutToken timeoutToken = default,
         CancellationToken cancellationToken = default
     ) where TChannelAction : struct, IPersistentChannelAction<TResult>
     {
         var channelsPool = channelsPoolPerOptions.GetOrAdd(options, channelsPoolFactory);
-        var channel = await channelsPool.DequeueAsync(cancellationToken).ConfigureAwait(false);
+        var channel = await channelsPool.DequeueAsync(timeoutToken, cancellationToken).ConfigureAwait(false);
         try
         {
-            return await channel.InvokeChannelActionAsync<TResult, TChannelAction>(channelAction, cancellationToken).ConfigureAwait(false);
+            return await channel.InvokeChannelActionAsync<TResult, TChannelAction>(channelAction, timeoutToken, cancellationToken).ConfigureAwait(false);
         }
         finally
         {

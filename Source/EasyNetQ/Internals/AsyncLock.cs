@@ -25,6 +25,8 @@ public readonly struct AsyncLock : IDisposable
         releaserTask = Task.FromResult(releaser);
     }
 
+    public bool Acquired => semaphore.CurrentCount == 0;
+
     /// <summary>
     /// Acquires a lock
     /// </summary>
@@ -32,9 +34,29 @@ public readonly struct AsyncLock : IDisposable
     /// <returns>Releaser, which should be disposed to release a lock</returns>
     public Task<Releaser> AcquireAsync(CancellationToken cancellationToken = default)
     {
+        if (cancellationToken.IsCancellationRequested)
+            return Task.FromCanceled<Releaser>(cancellationToken);
+
         var acquireAsync = semaphore.WaitAsync(cancellationToken);
         return acquireAsync.Status == TaskStatus.RanToCompletion
             ? releaserTask
+            : WaitForAcquireAsync(acquireAsync);
+    }
+
+    /// <summary>
+    /// Acquires a lock
+    /// </summary>
+    /// <param name="cancellationToken">The cancellation token</param>
+    /// <param name="timeout">The timeout</param>
+    /// <returns>Releaser, which should be disposed to release a lock</returns>
+    public Task<Releaser> AcquireAsync(TimeSpan timeout, CancellationToken cancellationToken = default)
+    {
+        if (cancellationToken.IsCancellationRequested)
+            return Task.FromCanceled<Releaser>(cancellationToken);
+
+        var acquireAsync = semaphore.WaitAsync(timeout, cancellationToken);
+        return acquireAsync.Status == TaskStatus.RanToCompletion
+            ? acquireAsync.GetAwaiter().GetResult() ? releaserTask : Task.FromException<Releaser>(new TimeoutException("Timeout acquiring the lock"))
             : WaitForAcquireAsync(acquireAsync);
     }
 
@@ -81,6 +103,14 @@ public readonly struct AsyncLock : IDisposable
     private async Task<Releaser> WaitForAcquireAsync(Task acquireAsync)
     {
         await acquireAsync.ConfigureAwait(false);
+        return releaser;
+    }
+
+    private async Task<Releaser> WaitForAcquireAsync(Task<bool> acquireAsync)
+    {
+        var acquired = await acquireAsync.ConfigureAwait(false);
+        if (!acquired)
+            throw new TimeoutException("Timeout acquiring the lock");
         return releaser;
     }
 }

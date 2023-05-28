@@ -28,10 +28,10 @@ public class PublishConfirmationListenerTest
         var confirmation2 = publishConfirmationListener.CreatePendingConfirmation(model);
         eventBus.Publish(MessageConfirmationEvent.Nack(model, DeliveryTag, true));
         await Assert.ThrowsAsync<PublishNackedException>(
-            () => confirmation1.WaitAsync()
+            () => confirmation1.WaitAsync(Timeout.InfiniteTimeSpan)
         );
         await Assert.ThrowsAsync<PublishNackedException>(
-            () => confirmation2.WaitAsync()
+            () => confirmation2.WaitAsync(Timeout.InfiniteTimeSpan)
         );
     }
 
@@ -42,7 +42,7 @@ public class PublishConfirmationListenerTest
         var confirmation = publishConfirmationListener.CreatePendingConfirmation(model);
         eventBus.Publish(MessageConfirmationEvent.Nack(model, DeliveryTag, false));
         await Assert.ThrowsAsync<PublishNackedException>(
-            () => confirmation.WaitAsync()
+            () => confirmation.WaitAsync(Timeout.InfiniteTimeSpan)
         );
     }
 
@@ -52,7 +52,7 @@ public class PublishConfirmationListenerTest
         model.NextPublishSeqNo.Returns(DeliveryTag);
         var confirmation = publishConfirmationListener.CreatePendingConfirmation(model);
         eventBus.Publish(MessageConfirmationEvent.Ack(model, DeliveryTag, false));
-        await confirmation.WaitAsync();
+        await confirmation.WaitAsync(Timeout.InfiniteTimeSpan);
     }
 
     [Fact]
@@ -62,8 +62,8 @@ public class PublishConfirmationListenerTest
         var confirmation1 = publishConfirmationListener.CreatePendingConfirmation(model);
         var confirmation2 = publishConfirmationListener.CreatePendingConfirmation(model);
         eventBus.Publish(MessageConfirmationEvent.Ack(model, DeliveryTag, true));
-        await confirmation1.WaitAsync();
-        await confirmation2.WaitAsync();
+        await confirmation1.WaitAsync(Timeout.InfiniteTimeSpan);
+        await confirmation2.WaitAsync(Timeout.InfiniteTimeSpan);
     }
 
     [Fact]
@@ -73,7 +73,7 @@ public class PublishConfirmationListenerTest
         var confirmation = publishConfirmationListener.CreatePendingConfirmation(model);
         using var cts = new CancellationTokenSource(1000);
         await Assert.ThrowsAsync<TaskCanceledException>(
-            () => confirmation.WaitAsync(cts.Token)
+            () => confirmation.WaitAsync(Timeout.InfiniteTimeSpan, cts.Token)
         );
     }
 
@@ -84,12 +84,12 @@ public class PublishConfirmationListenerTest
         var confirmation1 = publishConfirmationListener.CreatePendingConfirmation(model);
         eventBus.Publish(new ChannelRecoveredEvent(model));
         await Assert.ThrowsAsync<PublishInterruptedException>(
-            () => confirmation1.WaitAsync()
+            () => confirmation1.WaitAsync(Timeout.InfiniteTimeSpan)
         );
 
         var confirmation2 = publishConfirmationListener.CreatePendingConfirmation(model);
         eventBus.Publish(MessageConfirmationEvent.Ack(model, DeliveryTag, false));
-        await confirmation2.WaitAsync();
+        await confirmation2.WaitAsync(Timeout.InfiniteTimeSpan);
     }
 
     [Fact]
@@ -113,7 +113,7 @@ public class PublishConfirmationListenerTest
             )
         );
         await Assert.ThrowsAsync<PublishReturnedException>(
-            () => confirmation1.WaitAsync()
+            () => confirmation1.WaitAsync(Timeout.InfiniteTimeSpan)
         );
     }
 }
