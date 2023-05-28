@@ -23,7 +23,7 @@ public class When_pull_messages : IDisposable
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
         var queue = await bus.Advanced.QueueDeclareAsync(
-            Guid.NewGuid().ToString("N"), cts.Token
+            queue: Guid.NewGuid().ToString("N"), cancellationToken: cts.Token
         );
         await bus.Advanced.PublishAsync(
             Exchange.Default, queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
@@ -51,7 +51,7 @@ public class When_pull_messages : IDisposable
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
         var queue = await bus.Advanced.QueueDeclareAsync(
-            Guid.NewGuid().ToString("N"), cts.Token
+            queue: Guid.NewGuid().ToString("N"), cancellationToken: cts.Token
         );
         await bus.Advanced.PublishAsync(
             Exchange.Default, queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
@@ -79,7 +79,7 @@ public class When_pull_messages : IDisposable
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
         var queue = await bus.Advanced.QueueDeclareAsync(
-            Guid.NewGuid().ToString("N"), cts.Token
+            queue: Guid.NewGuid().ToString("N"), cancellationToken: cts.Token
         );
         await bus.Advanced.PublishAsync(
             Exchange.Default, queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
@@ -107,7 +107,7 @@ public class When_pull_messages : IDisposable
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
         var queue = await bus.Advanced.QueueDeclareAsync(
-            Guid.NewGuid().ToString("N"), cts.Token
+            queue: Guid.NewGuid().ToString("N"), cancellationToken: cts.Token
         );
         await bus.Advanced.PublishAsync(
             Exchange.Default, queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token

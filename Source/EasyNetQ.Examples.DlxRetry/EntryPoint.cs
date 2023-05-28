@@ -14,26 +14,28 @@ using var bus = RabbitHutch.CreateBus(
 );
 
 await bus.Advanced.QueueDeclareAsync(
-    "Events:Failed",
-    c => c.WithQueueType(QueueType.Quorum)
-        .WithDeadLetterExchange(Exchange.Default)
-        .WithDeadLetterRoutingKey("Events")
-        .WithMessageTtl(TimeSpan.FromSeconds(5)) // A fixed delay between retry attempts
-        .WithOverflowType(OverflowType.RejectPublish)
-        .WithDeadLetterStrategy(DeadLetterStrategy.AtLeastOnce)
+    queue: "Events:Failed",
+    arguments: new Dictionary<string, object>()
+        .WithQueueType(QueueType.Quorum)
+        .WithQueueDeadLetterExchange(Exchange.DefaultName)
+        .WithQueueDeadLetterRoutingKey("Events")
+        .WithQueueMessageTtl(TimeSpan.FromSeconds(5)) // A fixed delay between retry attempts
+        .WithQueueOverflowType(OverflowType.RejectPublish)
+        .WithQueueDeadLetterStrategy(DeadLetterStrategy.AtLeastOnce)
 );
 
 var eventQueue = await bus.Advanced.QueueDeclareAsync(
-    "Events",
-    c => c.WithQueueType(QueueType.Quorum)
-        .WithDeadLetterExchange(Exchange.Default)
-        .WithDeadLetterRoutingKey("Events:Failed")
-        .WithOverflowType(OverflowType.RejectPublish)
-        .WithDeadLetterStrategy(DeadLetterStrategy.AtLeastOnce)
+    queue: "Events",
+    arguments: new Dictionary<string, object>()
+        .WithQueueType(QueueType.Quorum)
+        .WithQueueDeadLetterExchange(Exchange.DefaultName)
+        .WithQueueDeadLetterRoutingKey("Events:Failed")
+        .WithQueueOverflowType(OverflowType.RejectPublish)
+        .WithQueueDeadLetterStrategy(DeadLetterStrategy.AtLeastOnce)
 );
 
 using var eventsConsumer = bus.Advanced.Consume(eventQueue, (_, _, _) => throw new Exception("Oops"));
 
-await bus.Advanced.PublishAsync(Exchange.Default, "Events", true, new MessageProperties(), ReadOnlyMemory<byte>.Empty);
+await bus.Advanced.PublishAsync(Exchange.Default, "Events", true, MessageProperties.Empty, ReadOnlyMemory<byte>.Empty);
 
 await completionTcs.Task;

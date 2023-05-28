@@ -64,13 +64,11 @@ public class DeadLetterExchangeAndMessageTtlScheduler : IScheduler
         ).ConfigureAwait(false);
 
         var futureQueue = await advancedBus.QueueDeclareAsync(
-            conventions.QueueNamingConvention(typeof(T), delayString),
-            c =>
-            {
-                c.WithMessageTtl(delay);
-                c.WithDeadLetterExchange(exchange);
-            },
-            cts.Token
+            queue: conventions.QueueNamingConvention(typeof(T), delayString),
+            arguments: new Dictionary<string, object>()
+                .WithQueueMessageTtl(delay)
+                .WithQueueDeadLetterExchange(exchange.Name),
+            cancellationToken: cts.Token
         ).ConfigureAwait(false);
 
         await advancedBus.BindAsync(futureExchange, futureQueue, topic, cts.Token).ConfigureAwait(false);
@@ -78,7 +76,7 @@ public class DeadLetterExchangeAndMessageTtlScheduler : IScheduler
         var properties = new MessageProperties
         {
             Priority = publishConfiguration.Priority ?? 0,
-            Headers = publishConfiguration.Headers == null ? null : new Dictionary<string, object?>(publishConfiguration.Headers),
+            Headers = publishConfiguration.MessageHeaders,
             DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T)),
         };
         var advancedMessage = new Message<T>(message, properties);

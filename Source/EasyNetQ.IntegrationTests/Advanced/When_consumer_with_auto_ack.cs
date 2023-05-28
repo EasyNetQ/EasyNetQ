@@ -19,14 +19,14 @@ public class When_consumer_with_auto_ack : IDisposable
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
         var queueName = Guid.NewGuid().ToString();
-        var queue = await bus.Advanced.QueueDeclareAsync(queueName, cts.Token);
+        var queue = await bus.Advanced.QueueDeclareAsync(queueName, cancellationToken: cts.Token);
 
         var allMessagesReceived = new AsyncCountdownEvent();
 
         for (var i = 0; i < 10; ++i)
         {
             await bus.Advanced.PublishAsync(
-                Exchange.Default, queueName, true, new MessageProperties(), ReadOnlyMemory<byte>.Empty, cts.Token
+                Exchange.Default, queueName, true, MessageProperties.Empty, ReadOnlyMemory<byte>.Empty, cts.Token
             );
             allMessagesReceived.Increment();
         }

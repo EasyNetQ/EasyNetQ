@@ -47,7 +47,7 @@ public interface IReceiveConfiguration
     /// </summary>
     /// <param name="expires">The value of the x-expires argument or expires policy describes the expiration period in milliseconds and is subject to the same constraints as x-message-ttl and cannot be zero. Thus a value of 1000 means a queue which is unused for 1 second will be deleted.</param>
     /// <returns>Returns a reference to itself</returns>
-    IReceiveConfiguration WithExpires(int expires);
+    IReceiveConfiguration WithExpires(TimeSpan expires);
 
     /// <summary>
     /// Configures the consumer's to be exclusive
@@ -106,15 +106,10 @@ internal class ReceiveConfiguration : IReceiveConfiguration
     public bool AutoDelete { get; private set; }
     public int Priority { get; private set; }
     public ushort PrefetchCount { get; private set; }
-    public int? Expires { get; private set; }
     public bool IsExclusive { get; private set; }
-    public byte? MaxPriority { get; private set; }
     public bool Durable { get; private set; }
-    public int? MaxLength { get; private set; }
-    public int? MaxLengthBytes { get; private set; }
-    public string? QueueMode { get; private set; }
-    public string? QueueType { get; private set; }
-    public bool SingleActiveConsumer { get; private set; }
+
+    public IDictionary<string, object>? QueueArguments { get; private set; }
 
     public ReceiveConfiguration(ushort defaultPrefetchCount)
     {
@@ -123,7 +118,6 @@ internal class ReceiveConfiguration : IReceiveConfiguration
         PrefetchCount = defaultPrefetchCount;
         IsExclusive = false;
         Durable = true;
-        SingleActiveConsumer = false;
     }
 
     public IReceiveConfiguration WithAutoDelete(bool autoDelete = true)
@@ -151,9 +145,9 @@ internal class ReceiveConfiguration : IReceiveConfiguration
         return this;
     }
 
-    public IReceiveConfiguration WithExpires(int expires)
+    public IReceiveConfiguration WithExpires(TimeSpan expires)
     {
-        Expires = expires;
+        QueueArguments = QueueArguments.WithQueueExpires(expires);
         return this;
     }
 
@@ -165,37 +159,37 @@ internal class ReceiveConfiguration : IReceiveConfiguration
 
     public IReceiveConfiguration WithMaxPriority(byte priority)
     {
-        MaxPriority = priority;
+        QueueArguments = QueueArguments.WithQueueMaxPriority(priority);
         return this;
     }
 
     public IReceiveConfiguration WithMaxLength(int maxLength)
     {
-        MaxLength = maxLength;
+        QueueArguments = QueueArguments.WithQueueMaxLength(maxLength);
         return this;
     }
 
     public IReceiveConfiguration WithMaxLengthBytes(int maxLengthBytes)
     {
-        MaxLengthBytes = maxLengthBytes;
+        QueueArguments = QueueArguments.WithQueueMaxLengthBytes(maxLengthBytes);
         return this;
     }
 
     public IReceiveConfiguration WithQueueMode(string queueMode)
     {
-        QueueMode = queueMode;
+        QueueArguments = QueueArguments.WithQueueMode(queueMode);
         return this;
     }
 
     public IReceiveConfiguration WithQueueType(string queueType = EasyNetQ.QueueType.Classic)
     {
-        QueueType = queueType;
+        QueueArguments = QueueArguments.WithQueueType(queueType);
         return this;
     }
 
     public IReceiveConfiguration WithSingleActiveConsumer(bool singleActiveConsumer = true)
     {
-        SingleActiveConsumer = singleActiveConsumer;
+        QueueArguments = QueueArguments.WithQueueSingleActiveConsumer(singleActiveConsumer);
         return this;
     }
 }

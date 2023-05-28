@@ -81,7 +81,7 @@ public class DefaultRpc : IRpc, IDisposable
         var routingKey = requestConfiguration.QueueName;
         var expiration = requestConfiguration.Expiration;
         var priority = requestConfiguration.Priority;
-        var headers = requestConfiguration.Headers;
+        var headers = requestConfiguration.MessageHeaders;
         await RequestPublishAsync(
             request,
             routingKey,
@@ -193,8 +193,10 @@ public class DefaultRpc : IRpc, IDisposable
 
         var queue = await advancedBus.QueueDeclareAsync(
             conventions.RpcReturnQueueNamingConvention(responseType),
-            c => c.AsDurable(false).AsExclusive(true).AsAutoDelete(true),
-            cancellationToken
+            durable: false,
+            exclusive: true,
+            autoDelete: true,
+            cancellationToken: cancellationToken
         ).ConfigureAwait(false);
 
         var exchangeName = conventions.RpcResponseExchangeNamingConvention(responseType);
@@ -245,7 +247,7 @@ public class DefaultRpc : IRpc, IDisposable
             ReplyTo = returnQueueName,
             CorrelationId = correlationId,
             Priority = priority ?? 0,
-            Headers = headers == null ? null : new Dictionary<string, object?>(headers),
+            Headers = headers,
             DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(requestType),
             Expiration = expiration == Timeout.InfiniteTimeSpan ? null : expiration
         };
@@ -269,22 +271,18 @@ public class DefaultRpc : IRpc, IDisposable
         var routingKey = responderConfiguration.QueueName ?? conventions.RpcRoutingKeyNamingConvention(requestType);
 
         var exchange = await advancedBus.ExchangeDeclareAsync(
-            conventions.RpcRequestExchangeNamingConvention(requestType),
-            ExchangeType.Direct,
+            exchange: conventions.RpcRequestExchangeNamingConvention(requestType),
+            type: ExchangeType.Direct,
             cancellationToken: cancellationToken
         ).ConfigureAwait(false);
+
         var queue = await advancedBus.QueueDeclareAsync(
-            routingKey,
-            c =>
-            {
-                c.AsDurable(responderConfiguration.Durable);
-                if (responderConfiguration.Expires != null)
-                    c.WithExpires(responderConfiguration.Expires.Value);
-                if (responderConfiguration.MaxPriority.HasValue)
-                    c.WithMaxPriority(responderConfiguration.MaxPriority.Value);
-            },
-            cancellationToken
+            queue: routingKey,
+            durable: responderConfiguration.Durable,
+            arguments: responderConfiguration.QueueArguments,
+            cancellationToken: cancellationToken
         ).ConfigureAwait(false);
+
         await advancedBus.BindAsync(exchange, queue, routingKey, cancellationToken).ConfigureAwait(false);
 
         return advancedBus.Consume<TRequest>(

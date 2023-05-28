@@ -25,7 +25,7 @@ public interface ISendConfiguration
 internal class SendConfiguration : ISendConfiguration
 {
     public byte? Priority { get; private set; }
-    public IDictionary<string, object?>? Headers { get; private set; }
+    public IDictionary<string, object?>? MessageHeaders { get; private set; }
 
     public ISendConfiguration WithPriority(byte priority)
     {
@@ -35,7 +35,8 @@ internal class SendConfiguration : ISendConfiguration
 
     public ISendConfiguration WithHeaders(IDictionary<string, object?> headers)
     {
-        Headers = headers;
+        foreach (var kvp in headers)
+            (MessageHeaders ??= new Dictionary<string, object?>()).Add(kvp.Key, kvp.Value);
         return this;
     }
 }

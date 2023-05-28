@@ -12,13 +12,14 @@ public class When_a_queue_is_declared : IDisposable
         mockBuilder = new MockBuilder();
 
         queue = mockBuilder.Bus.Advanced.QueueDeclare(
-            "my_queue",
-            c => c.AsDurable(false)
-                .AsExclusive(true)
-                .AsAutoDelete(true)
-                .WithMessageTtl(TimeSpan.FromSeconds(1))
-                .WithExpires(TimeSpan.FromSeconds(2))
-                .WithMaxPriority(10)
+            queue: "my_queue",
+            durable: false,
+            exclusive: true,
+            autoDelete: true,
+            arguments: new Dictionary<string, object>()
+                .WithQueueMessageTtl(TimeSpan.FromSeconds(1))
+                .WithQueueExpires(TimeSpan.FromSeconds(2))
+                .WithQueueMaxPriority(10)
         );
     }
 
@@ -60,15 +61,16 @@ public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange : IDisposa
 
         var advancedBus = mockBuilder.Bus.Advanced;
         queue = advancedBus.QueueDeclare(
-            "my_queue",
-            c => c.AsDurable(false)
-                .AsExclusive(true)
-                .AsAutoDelete(true)
-                .WithMessageTtl(TimeSpan.FromSeconds(1))
-                .WithExpires(TimeSpan.FromSeconds(2))
-                .WithMaxPriority(10)
-                .WithDeadLetterExchange(new Exchange("my_exchange"))
-                .WithDeadLetterRoutingKey("my_routing_key")
+            queue: "my_queue",
+            durable: false,
+            exclusive: true,
+            autoDelete: true,
+            arguments: new Dictionary<string, object>()
+                .WithQueueMessageTtl(TimeSpan.FromSeconds(1))
+                .WithQueueExpires(TimeSpan.FromSeconds(2))
+                .WithQueueMaxPriority(10)
+                .WithQueueDeadLetterExchange("my_exchange")
+                .WithQueueDeadLetterRoutingKey("my_routing_key")
         );
     }
 
@@ -111,15 +113,16 @@ public class When_a_queue_is_declared_With_EmptyDeadLetterExchange : IDisposable
         mockBuilder = new MockBuilder();
 
         queue = mockBuilder.Bus.Advanced.QueueDeclare(
-            "my_queue",
-            c => c.AsDurable(false)
-                .AsExclusive(true)
-                .AsAutoDelete(true)
-                .WithMessageTtl(TimeSpan.FromSeconds(1))
-                .WithExpires(TimeSpan.FromSeconds(2))
-                .WithMaxPriority(10)
-                .WithDeadLetterExchange(Exchange.Default)
-                .WithDeadLetterRoutingKey("my_queue2")
+            queue: "my_queue",
+            durable: false,
+            exclusive: true,
+            autoDelete: true,
+            arguments: new Dictionary<string, object>()
+                .WithQueueMessageTtl(TimeSpan.FromSeconds(1))
+                .WithQueueExpires(TimeSpan.FromSeconds(2))
+                .WithQueueMaxPriority(10)
+                .WithQueueDeadLetterExchange(Exchange.DefaultName)
+                .WithQueueDeadLetterRoutingKey("my_queue2")
         );
     }
 
@@ -212,10 +215,13 @@ public class When_an_exchange_is_declared : IDisposable
 
         exchange = mockBuilder.Bus.Advanced.ExchangeDeclare(
             "my_exchange",
-            c => c.WithType(ExchangeType.Direct)
-                .AsDurable(false)
-                .AsAutoDelete(true)
-                .WithAlternateExchange(new Exchange("my.alternate.exchange"))
+            type: ExchangeType.Direct,
+            durable: false,
+            autoDelete: true,
+            arguments: new Dictionary<string, object>
+            {
+                {ExchangeArgument.AlternateExchange, "my.alternate.exchange"}
+            }
         );
     }
 
@@ -243,7 +249,8 @@ public class When_an_exchange_is_declared : IDisposable
             Arg.Is("direct"),
             Arg.Is(false),
             Arg.Is(true),
-            Arg.Any<IDictionary<string, object>>());
+            Arg.Any<IDictionary<string, object>>()
+        );
     }
 
     [Fact]

@@ -49,22 +49,22 @@ public class DelayedExchangeScheduler : IScheduler
         var exchangeName = conventions.ExchangeNamingConvention(typeof(T));
         var futureExchangeName = exchangeName + "_delayed";
         var futureExchange = await advancedBus.ExchangeDeclareAsync(
-            futureExchangeName,
-            c => c.AsDelayedExchange(ExchangeType.Topic),
-            cts.Token
+            exchange: futureExchangeName,
+            type: ExchangeType.DelayedMessage,
+            arguments: new Dictionary<string, object>().WithExchangeDelayedType(ExchangeType.Topic),
+            cancellationToken: cts.Token
         ).ConfigureAwait(false);
 
         var exchange = await advancedBus.ExchangeDeclareAsync(
-            exchangeName,
-            c => c.WithType(ExchangeType.Topic),
-            cts.Token
+            exchange: exchangeName,
+            cancellationToken: cts.Token
         ).ConfigureAwait(false);
         await advancedBus.BindAsync(futureExchange, exchange, topic, cts.Token).ConfigureAwait(false);
 
         var properties = new MessageProperties
         {
             Priority = publishConfiguration.Priority ?? 0,
-            Headers = publishConfiguration.Headers == null ? null : new Dictionary<string, object?>(publishConfiguration.Headers),
+            Headers = publishConfiguration.MessageHeaders,
             DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T))
         }.WithDelay(delay);
 

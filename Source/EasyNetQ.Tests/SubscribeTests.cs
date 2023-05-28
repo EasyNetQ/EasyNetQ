@@ -158,7 +158,7 @@ public class When_subscribe_with_configuration_is_called
 
                 if (expires.HasValue)
                 {
-                    c.WithExpires(expires.Value);
+                    c.WithExpires(TimeSpan.FromMilliseconds(expires.Value));
                 }
 
                 if (maxLength.HasValue)

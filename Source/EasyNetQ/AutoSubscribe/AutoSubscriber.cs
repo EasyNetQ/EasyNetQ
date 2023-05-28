@@ -205,7 +205,7 @@ public class AutoSubscriber
                 configuration.WithPrefetchCount(configSettings.PrefetchCount);
 
             if (configSettings.Expires > 0)
-                configuration.WithExpires(configSettings.Expires);
+                configuration.WithExpires(TimeSpan.FromMilliseconds(configSettings.Expires));
 
             configuration
                 .WithAutoDelete(configSettings.AutoDelete)

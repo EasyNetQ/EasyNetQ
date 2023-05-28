@@ -12,10 +12,11 @@ using var bus = RabbitHutch.CreateBus(
 );
 
 var eventQueue = await bus.Advanced.QueueDeclareAsync(
-    "Events",
-    c => c.WithQueueType(QueueType.Quorum)
-        .WithOverflowType(OverflowType.RejectPublish),
-    cts.Token
+    queue: "Events",
+    arguments: new Dictionary<string, object>()
+        .WithQueueType(QueueType.Quorum)
+        .WithQueueOverflowType(OverflowType.RejectPublish),
+    cancellationToken: cts.Token
 );
 
 using var eventsConsumer = bus.Advanced.Consume(eventQueue, (_, _, _) => { });
@@ -28,7 +29,7 @@ while (!cts.IsCancellationRequested)
             Exchange.Default,
             "Events",
             true,
-            new MessageProperties(),
+            MessageProperties.Empty,
             ReadOnlyMemory<byte>.Empty,
             cts.Token
         );

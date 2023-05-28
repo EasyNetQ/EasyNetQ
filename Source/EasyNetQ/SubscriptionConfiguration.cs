@@ -54,7 +54,7 @@ public interface ISubscriptionConfiguration
     /// </summary>
     /// <param name="expires">The value of the x-expires argument or expires policy describes the expiration period in milliseconds and is subject to the same constraints as x-message-ttl and cannot be zero. Thus a value of 1000 means a queue which is unused for 1 second will be deleted.</param>
     /// <returns>Returns a reference to itself</returns>
-    ISubscriptionConfiguration WithExpires(int expires);
+    ISubscriptionConfiguration WithExpires(TimeSpan expires);
 
     /// <summary>
     /// Configures the consumer's to be exclusive
@@ -135,18 +135,13 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
     public bool AutoDelete { get; private set; }
     public int Priority { get; private set; }
     public ushort PrefetchCount { get; private set; }
-    public int? Expires { get; private set; }
     public bool IsExclusive { get; private set; }
-    public byte? MaxPriority { get; private set; }
     public bool Durable { get; private set; }
     public string? QueueName { get; private set; }
-    public int? MaxLength { get; private set; }
-    public int? MaxLengthBytes { get; private set; }
-    public string? QueueMode { get; private set; }
-    public string? QueueType { get; private set; }
     public string ExchangeType { get; private set; } = EasyNetQ.ExchangeType.Topic;
-    public string? AlternateExchange { get; private set; }
-    public bool SingleActiveConsumer { get; private set; }
+
+    public IDictionary<string, object>? QueueArguments { get; private set; }
+    public IDictionary<string, object>? ExchangeArguments { get; private set; }
 
     public SubscriptionConfiguration(ushort defaultPrefetchCount)
     {
@@ -156,7 +151,6 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
         PrefetchCount = defaultPrefetchCount;
         IsExclusive = false;
         Durable = true;
-        SingleActiveConsumer = false;
     }
 
     public ISubscriptionConfiguration WithTopic(string topic)
@@ -191,9 +185,9 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
         return this;
     }
 
-    public ISubscriptionConfiguration WithExpires(int expires)
+    public ISubscriptionConfiguration WithExpires(TimeSpan expires)
     {
-        Expires = expires;
+        QueueArguments = QueueArguments.WithQueueExpires(expires);
         return this;
     }
 
@@ -205,7 +199,7 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
 
     public ISubscriptionConfiguration WithMaxPriority(byte priority)
     {
-        MaxPriority = priority;
+        QueueArguments = QueueArguments.WithQueueMaxPriority(priority);
         return this;
     }
 
@@ -217,25 +211,25 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
 
     public ISubscriptionConfiguration WithMaxLength(int maxLength)
     {
-        MaxLength = maxLength;
+        QueueArguments = QueueArguments.WithQueueMaxLength(maxLength);
         return this;
     }
 
     public ISubscriptionConfiguration WithMaxLengthBytes(int maxLengthBytes)
     {
-        MaxLengthBytes = maxLengthBytes;
+        QueueArguments = QueueArguments.WithQueueMaxLengthBytes(maxLengthBytes);
         return this;
     }
 
-    public ISubscriptionConfiguration WithQueueMode(string queueMode = EasyNetQ.QueueMode.Default)
+    public ISubscriptionConfiguration WithQueueMode(string queueMode = QueueMode.Default)
     {
-        QueueMode = queueMode;
+        QueueArguments = QueueArguments.WithQueueMode(queueMode);
         return this;
     }
 
-    public ISubscriptionConfiguration WithQueueType(string queueType = EasyNetQ.QueueType.Classic)
+    public ISubscriptionConfiguration WithQueueType(string queueType = QueueType.Classic)
     {
-        QueueType = queueType;
+        QueueArguments = QueueArguments.WithQueueType(queueType);
         return this;
     }
 
@@ -247,13 +241,13 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
 
     public ISubscriptionConfiguration WithAlternateExchange(string alternateExchange)
     {
-        AlternateExchange = alternateExchange;
+        ExchangeArguments = ExchangeArguments.WithExchangeAlternate(alternateExchange);
         return this;
     }
 
     public ISubscriptionConfiguration WithSingleActiveConsumer(bool singleActiveConsumer = true)
     {
-        SingleActiveConsumer = singleActiveConsumer;
+        QueueArguments = QueueArguments.WithQueueSingleActiveConsumer(singleActiveConsumer);
         return this;
     }
 }

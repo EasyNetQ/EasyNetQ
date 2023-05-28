@@ -47,7 +47,7 @@ public class DefaultSendReceive : ISendReceive
         var properties = new MessageProperties
         {
             Priority = sendConfiguration.Priority ?? 0,
-            Headers = sendConfiguration.Headers == null ? null : new Dictionary<string, object?>(sendConfiguration.Headers),
+            Headers = sendConfiguration.MessageHeaders,
             DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T))
         };
         await advancedBus.PublishAsync(
@@ -76,27 +76,11 @@ public class DefaultSendReceive : ISendReceive
         configure(receiveConfiguration);
 
         var queue = await advancedBus.QueueDeclareAsync(
-            queueName,
-            c =>
-            {
-                c.AsDurable(receiveConfiguration.Durable);
-                c.AsAutoDelete(receiveConfiguration.AutoDelete);
-                if (receiveConfiguration.Expires.HasValue)
-                    c.WithExpires(TimeSpan.FromMilliseconds(receiveConfiguration.Expires.Value));
-                if (receiveConfiguration.MaxPriority.HasValue)
-                    c.WithMaxPriority(receiveConfiguration.MaxPriority.Value);
-                if (receiveConfiguration.MaxLength.HasValue)
-                    c.WithMaxLength(receiveConfiguration.MaxLength.Value);
-                if (receiveConfiguration.MaxLengthBytes.HasValue)
-                    c.WithMaxLengthBytes(receiveConfiguration.MaxLengthBytes.Value);
-                if (receiveConfiguration.QueueMode != null)
-                    c.WithQueueMode(receiveConfiguration.QueueMode);
-                if (receiveConfiguration.QueueType != null)
-                    c.WithQueueType(receiveConfiguration.QueueType);
-                if (receiveConfiguration.SingleActiveConsumer)
-                    c.WithSingleActiveConsumer();
-            },
-            cts.Token
+            queue: queueName,
+            durable: receiveConfiguration.Durable,
+            autoDelete: receiveConfiguration.AutoDelete,
+            arguments: receiveConfiguration.QueueArguments,
+            cancellationToken: cts.Token
         ).ConfigureAwait(false);
 
         return advancedBus.Consume(

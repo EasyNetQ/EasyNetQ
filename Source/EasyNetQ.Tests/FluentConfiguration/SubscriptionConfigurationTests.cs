@@ -13,20 +13,15 @@ public class SubscriptionConfigurationTests
         Assert.False(configuration.IsExclusive);
         Assert.True(configuration.Durable);
         Assert.Null(configuration.QueueName);
-        Assert.Null(configuration.MaxLength);
-        Assert.Null(configuration.MaxLengthBytes);
-        Assert.Null(configuration.QueueMode);
-        Assert.Null(configuration.QueueType);
+        Assert.Null(configuration.QueueArguments);
     }
 
     [Fact]
     public void WithQueueType_default_is_classic()
     {
         var configuration = new SubscriptionConfiguration(99);
-
         configuration.WithQueueType();
-
-        Assert.Equal(QueueType.Classic, configuration.QueueType);
+        configuration.QueueArguments.Should().BeEquivalentTo(new Dictionary<string, object> { { "x-queue-type", "classic" } });
     }
 
     [Theory]
@@ -35,9 +30,7 @@ public class SubscriptionConfigurationTests
     public void WithQueueType_sets_correct_queueType(string queueType)
     {
         var configuration = new SubscriptionConfiguration(99);
-
         configuration.WithQueueType(queueType);
-
-        Assert.Equal(queueType, configuration.QueueType);
+        configuration.QueueArguments.Should().BeEquivalentTo(new Dictionary<string, object> { { "x-queue-type", "classic" } });
     }
 }

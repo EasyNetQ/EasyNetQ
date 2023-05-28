@@ -19,7 +19,7 @@ public class When_auto_subscribing_with_subscription_configuration_action
         {
             ConfigureSubscriptionConfiguration =
                 c => c.WithAutoDelete()
-                    .WithExpires(10)
+                    .WithExpires(TimeSpan.FromMilliseconds(10))
                     .WithPrefetchCount(10)
                     .WithPriority(10)
         };
@@ -53,9 +53,9 @@ public class When_auto_subscribing_with_subscription_configuration_action
         capturedAction(subscriptionConfiguration);
 
         subscriptionConfiguration.AutoDelete.Should().BeTrue();
-        subscriptionConfiguration.Expires.Should().Be(10);
         subscriptionConfiguration.PrefetchCount.Should().Be(10);
         subscriptionConfiguration.Priority.Should().Be(10);
+        subscriptionConfiguration.QueueArguments.Should().BeEquivalentTo(new Dictionary<string, object> { { "x-expires", 10 } });
     }
 
     // Discovered by reflection over test assembly, do not remove.
