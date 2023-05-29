@@ -47,7 +47,7 @@ public interface IPubSub
     /// An <see cref="SubscriptionResult"/>
     /// Call Dispose on it to cancel the subscription.
     /// </returns>
-    AwaitableDisposable<SubscriptionResult> SubscribeAsync<T>(
+    Task<SubscriptionResult> SubscribeAsync<T>(
         string subscriptionId,
         Func<T, CancellationToken, Task> onMessage,
         Action<ISubscriptionConfiguration> configure,

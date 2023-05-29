@@ -73,7 +73,7 @@ public class AutoSubscriber
 
         foreach (var subscriberConsumerInfo in GetSubscriberConsumerInfos(consumerTypes, typeof(IConsumeAsync<>)))
         {
-            var awaitableSubscriptionResult = (AwaitableDisposable<SubscriptionResult>)AutoSubscribeAsyncConsumerMethodInfo
+            var awaitableSubscriptionResult = (Task<SubscriptionResult>)AutoSubscribeAsyncConsumerMethodInfo
                 .MakeGenericMethod(subscriberConsumerInfo.MessageType, subscriberConsumerInfo.ConcreteType)
                 .Invoke(this, new object[] { subscriberConsumerInfo, cancellationToken })!;
 
@@ -82,7 +82,7 @@ public class AutoSubscriber
 
         foreach (var subscriberConsumerInfo in GetSubscriberConsumerInfos(consumerTypes, typeof(IConsume<>)))
         {
-            var awaitableSubscriptionResult = (AwaitableDisposable<SubscriptionResult>)AutoSubscribeConsumerMethodInfo
+            var awaitableSubscriptionResult = (Task<SubscriptionResult>)AutoSubscribeConsumerMethodInfo
                 .MakeGenericMethod(subscriberConsumerInfo.MessageType, subscriberConsumerInfo.ConcreteType)
                 .Invoke(this, new object[] { subscriberConsumerInfo, cancellationToken })!;
 
@@ -121,7 +121,7 @@ public class AutoSubscriber
         return string.Concat(SubscriptionIdPrefix, ":", r.ToString());
     }
 
-    private AwaitableDisposable<SubscriptionResult> AutoSubscribeAsyncConsumerAsync<TMessage, TConsumerAsync>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken)
+    private Task<SubscriptionResult> AutoSubscribeAsyncConsumerAsync<TMessage, TConsumerAsync>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken)
         where TMessage : class
         where TConsumerAsync : class, IConsumeAsync<TMessage>
     {
@@ -137,7 +137,7 @@ public class AutoSubscriber
         );
     }
 
-    private AwaitableDisposable<SubscriptionResult> AutoSubscribeConsumerAsync<TMessage, TConsumer>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken)
+    private Task<SubscriptionResult> AutoSubscribeConsumerAsync<TMessage, TConsumer>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken)
         where TMessage : class
         where TConsumer : class, IConsume<TMessage>
     {

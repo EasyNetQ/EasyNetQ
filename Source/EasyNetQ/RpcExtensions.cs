@@ -77,7 +77,7 @@ public static class RpcExtensions
     /// <param name="rpc">The rpc instance</param>
     /// <param name="responder">A function that performs the response</param>
     /// <param name="cancellationToken">The cancellation token</param>
-    public static AwaitableDisposable<IDisposable> RespondAsync<TRequest, TResponse>(
+    public static Task<IDisposable> RespondAsync<TRequest, TResponse>(
         this IRpc rpc,
         Func<TRequest, TResponse> responder,
         CancellationToken cancellationToken = default
@@ -95,7 +95,7 @@ public static class RpcExtensions
     /// <param name="rpc">The rpc instance</param>
     /// <param name="responder">A function that performs the response</param>
     /// <param name="cancellationToken">The cancellation token</param>
-    public static AwaitableDisposable<IDisposable> RespondAsync<TRequest, TResponse>(
+    public static Task<IDisposable> RespondAsync<TRequest, TResponse>(
         this IRpc rpc,
         Func<TRequest, Task<TResponse>> responder,
         CancellationToken cancellationToken = default

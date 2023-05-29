@@ -61,15 +61,12 @@ public class DefaultPubSub : IPubSub
     }
 
     /// <inheritdoc />
-    public virtual AwaitableDisposable<SubscriptionResult> SubscribeAsync<T>(
+    public virtual Task<SubscriptionResult> SubscribeAsync<T>(
         string subscriptionId,
         Func<T, CancellationToken, Task> onMessage,
         Action<ISubscriptionConfiguration> configure,
         CancellationToken cancellationToken
-    )
-    {
-        return SubscribeAsyncInternal(subscriptionId, onMessage, configure, cancellationToken).ToAwaitableDisposable();
-    }
+    ) => SubscribeAsyncInternal(subscriptionId, onMessage, configure, cancellationToken);
 
     private async Task<SubscriptionResult> SubscribeAsyncInternal<T>(
         string subscriptionId,
