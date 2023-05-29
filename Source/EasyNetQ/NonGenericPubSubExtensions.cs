@@ -5,7 +5,7 @@ using EasyNetQ.Internals;
 namespace EasyNetQ;
 
 using NonGenericPublishDelegate = Func<IPubSub, object, Type, Action<IPublishConfiguration>, CancellationToken, Task>;
-using NonGenericSubscribeDelegate = Func<IPubSub, string, Type, Func<object, Type, CancellationToken, Task>, Action<ISubscriptionConfiguration>, CancellationToken, AwaitableDisposable<SubscriptionResult>>;
+using NonGenericSubscribeDelegate = Func<IPubSub, string, Type, Func<object, Type, CancellationToken, Task>, Action<ISubscriptionConfiguration>, CancellationToken, Task<SubscriptionResult>>;
 
 /// <summary>
 ///     Various non-generic extensions for <see cref="IPubSub"/>
@@ -171,7 +171,7 @@ public static class NonGenericPubSubExtensions
     /// An <see cref="SubscriptionResult"/>
     /// Call Dispose on it or on its <see cref="SubscriptionResult.ConsumerCancellation"/> to cancel the subscription.
     /// </returns>
-    public static AwaitableDisposable<SubscriptionResult> SubscribeAsync(
+    public static Task<SubscriptionResult> SubscribeAsync(
         this IPubSub pubSub,
         string subscriptionId,
         Type messageType,

@@ -56,15 +56,12 @@ public class DefaultSendReceive : ISendReceive
     }
 
     /// <inheritdoc />
-    public AwaitableDisposable<IDisposable> ReceiveAsync(
+    public Task<IDisposable> ReceiveAsync(
         string queue,
         Action<IReceiveRegistration> addHandlers,
         Action<IReceiveConfiguration> configure,
         CancellationToken cancellationToken
-    )
-    {
-        return ReceiveInternalAsync(queue, addHandlers, configure, cancellationToken).ToAwaitableDisposable();
-    }
+    ) => ReceiveInternalAsync(queue, addHandlers, configure, cancellationToken);
 
     private async Task<IDisposable> ReceiveInternalAsync(
         string queueName,

@@ -98,7 +98,7 @@ public class DefaultRpc : IRpc, IDisposable
     }
 
     /// <inheritdoc />
-    public virtual AwaitableDisposable<IDisposable> RespondAsync<TRequest, TResponse>(
+    public virtual Task<IDisposable> RespondAsync<TRequest, TResponse>(
         Func<TRequest, CancellationToken, Task<TResponse>> responder,
         Action<IResponderConfiguration> configure,
         CancellationToken cancellationToken = default
@@ -110,7 +110,7 @@ public class DefaultRpc : IRpc, IDisposable
         if (serializedResponse.Length > 255)
             throw new ArgumentOutOfRangeException(nameof(TResponse), typeof(TResponse), "Must be less than or equal to 255 characters when serialized.");
 
-        return RespondAsyncInternal(responder, configure, cancellationToken).ToAwaitableDisposable();
+        return RespondAsyncInternal(responder, configure, cancellationToken);
     }
 
     /// <inheritdoc />

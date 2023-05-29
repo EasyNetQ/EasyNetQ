@@ -92,7 +92,7 @@ public static class PubSubExtensions
     /// An <see cref="SubscriptionResult"/>
     /// Call Dispose on it to cancel the subscription.
     /// </returns>
-    public static AwaitableDisposable<SubscriptionResult> SubscribeAsync<T>(
+    public static Task<SubscriptionResult> SubscribeAsync<T>(
         this IPubSub pubSub,
         string subscriptionId,
         Action<T> onMessage,
@@ -130,7 +130,7 @@ public static class PubSubExtensions
     /// An <see cref="SubscriptionResult"/>
     /// Call Dispose on it to cancel the subscription.
     /// </returns>
-    public static AwaitableDisposable<SubscriptionResult> SubscribeAsync<T>(
+    public static Task<SubscriptionResult> SubscribeAsync<T>(
         this IPubSub pubSub,
         string subscriptionId,
         Action<T> onMessage,
@@ -171,15 +171,13 @@ public static class PubSubExtensions
     /// An <see cref="SubscriptionResult"/>
     /// Call Dispose on it to cancel the subscription.
     /// </returns>
-    public static AwaitableDisposable<SubscriptionResult> SubscribeAsync<T>(
+    public static Task<SubscriptionResult> SubscribeAsync<T>(
         this IPubSub pubSub,
         string subscriptionId,
         Func<T, Task> onMessage,
         CancellationToken cancellationToken = default
     )
     {
-
-
         return pubSub.SubscribeAsync<T>(
             subscriptionId,
             (m, _) => onMessage(m),

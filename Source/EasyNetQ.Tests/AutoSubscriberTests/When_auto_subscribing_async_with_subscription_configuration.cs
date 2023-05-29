@@ -22,7 +22,7 @@ public class When_auto_subscribing_async_with_subscription_configuration_attribu
                 Arg.Any<Func<MessageA, CancellationToken, Task>>(),
                 Arg.Any<Action<ISubscriptionConfiguration>>()
             )
-            .Returns(Task.FromResult(new SubscriptionResult()).ToAwaitableDisposable())
+            .Returns(Task.FromResult(new SubscriptionResult()))
             .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
 
         autoSubscriber.Subscribe(new[] { typeof(MyConsumerWithAttr) });
@@ -87,7 +87,7 @@ public class When_auto_subscribing_async_explicit_implementation_with_subscripti
                 Arg.Any<Func<MessageA, CancellationToken, Task>>(),
                 Arg.Any<Action<ISubscriptionConfiguration>>()
             )
-            .Returns(Task.FromResult(new SubscriptionResult()).ToAwaitableDisposable())
+            .Returns(Task.FromResult(new SubscriptionResult()))
             .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
 
         autoSubscriber.Subscribe(new[] { typeof(MyConsumerWithAttr) });

@@ -172,7 +172,7 @@ namespace EasyNetQ
     {
         public DefaultPubSub(EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.IConventions conventions, EasyNetQ.IExchangeDeclareStrategy exchangeDeclareStrategy, EasyNetQ.IMessageDeliveryModeStrategy messageDeliveryModeStrategy, EasyNetQ.IAdvancedBus advancedBus) { }
         public virtual System.Threading.Tasks.Task PublishAsync<T>(T message, System.Action<EasyNetQ.IPublishConfiguration> configure, System.Threading.CancellationToken cancellationToken) { }
-        public virtual EasyNetQ.Internals.AwaitableDisposable<EasyNetQ.SubscriptionResult> SubscribeAsync<T>(string subscriptionId, System.Func<T, System.Threading.CancellationToken, System.Threading.Tasks.Task> onMessage, System.Action<EasyNetQ.ISubscriptionConfiguration> configure, System.Threading.CancellationToken cancellationToken) { }
+        public virtual System.Threading.Tasks.Task<EasyNetQ.SubscriptionResult> SubscribeAsync<T>(string subscriptionId, System.Func<T, System.Threading.CancellationToken, System.Threading.Tasks.Task> onMessage, System.Action<EasyNetQ.ISubscriptionConfiguration> configure, System.Threading.CancellationToken cancellationToken) { }
     }
     public class DefaultRpc : EasyNetQ.IRpc, System.IDisposable
     {
@@ -188,7 +188,7 @@ namespace EasyNetQ
         protected void RegisterResponseActions<TResponse>(string correlationId, System.Threading.Tasks.TaskCompletionSource<TResponse> tcs) { }
         public virtual System.Threading.Tasks.Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, System.Action<EasyNetQ.IRequestConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
         protected virtual System.Threading.Tasks.Task RequestPublishAsync<TRequest>(TRequest request, string routingKey, string returnQueueName, string correlationId, System.TimeSpan expiration, byte? priority, bool? mandatory, System.Collections.Generic.IDictionary<string, object?>? headers, System.Threading.CancellationToken cancellationToken) { }
-        public virtual EasyNetQ.Internals.AwaitableDisposable<System.IDisposable> RespondAsync<TRequest, TResponse>(System.Func<TRequest, System.Threading.CancellationToken, System.Threading.Tasks.Task<TResponse>> responder, System.Action<EasyNetQ.IResponderConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
+        public virtual System.Threading.Tasks.Task<System.IDisposable> RespondAsync<TRequest, TResponse>(System.Func<TRequest, System.Threading.CancellationToken, System.Threading.Tasks.Task<TResponse>> responder, System.Action<EasyNetQ.IResponderConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
         protected virtual System.Threading.Tasks.Task<string> SubscribeToResponseAsync<TRequest, TResponse>(System.Threading.CancellationToken cancellationToken) { }
         protected readonly struct ResponseAction
         {
@@ -212,7 +212,7 @@ namespace EasyNetQ
     public class DefaultSendReceive : EasyNetQ.ISendReceive
     {
         public DefaultSendReceive(EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.IConventions conventions, EasyNetQ.IAdvancedBus advancedBus, EasyNetQ.IMessageDeliveryModeStrategy messageDeliveryModeStrategy) { }
-        public EasyNetQ.Internals.AwaitableDisposable<System.IDisposable> ReceiveAsync(string queue, System.Action<EasyNetQ.IReceiveRegistration> addHandlers, System.Action<EasyNetQ.IReceiveConfiguration> configure, System.Threading.CancellationToken cancellationToken) { }
+        public System.Threading.Tasks.Task<System.IDisposable> ReceiveAsync(string queue, System.Action<EasyNetQ.IReceiveRegistration> addHandlers, System.Action<EasyNetQ.IReceiveConfiguration> configure, System.Threading.CancellationToken cancellationToken) { }
         public System.Threading.Tasks.Task SendAsync<T>(string queue, T message, System.Action<EasyNetQ.ISendConfiguration> configure, System.Threading.CancellationToken cancellationToken) { }
     }
     public class DefaultTypeNameSerializer : EasyNetQ.ITypeNameSerializer
@@ -418,7 +418,7 @@ namespace EasyNetQ
     public interface IPubSub
     {
         System.Threading.Tasks.Task PublishAsync<T>(T message, System.Action<EasyNetQ.IPublishConfiguration> configure, System.Threading.CancellationToken cancellationToken = default);
-        EasyNetQ.Internals.AwaitableDisposable<EasyNetQ.SubscriptionResult> SubscribeAsync<T>(string subscriptionId, System.Func<T, System.Threading.CancellationToken, System.Threading.Tasks.Task> onMessage, System.Action<EasyNetQ.ISubscriptionConfiguration> configure, System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.Task<EasyNetQ.SubscriptionResult> SubscribeAsync<T>(string subscriptionId, System.Func<T, System.Threading.CancellationToken, System.Threading.Tasks.Task> onMessage, System.Action<EasyNetQ.ISubscriptionConfiguration> configure, System.Threading.CancellationToken cancellationToken = default);
     }
     public interface IPublishConfiguration
     {
@@ -489,7 +489,7 @@ namespace EasyNetQ
     public interface IRpc
     {
         System.Threading.Tasks.Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, System.Action<EasyNetQ.IRequestConfiguration> configure, System.Threading.CancellationToken cancellationToken = default);
-        EasyNetQ.Internals.AwaitableDisposable<System.IDisposable> RespondAsync<TRequest, TResponse>(System.Func<TRequest, System.Threading.CancellationToken, System.Threading.Tasks.Task<TResponse>> responder, System.Action<EasyNetQ.IResponderConfiguration> configure, System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.Task<System.IDisposable> RespondAsync<TRequest, TResponse>(System.Func<TRequest, System.Threading.CancellationToken, System.Threading.Tasks.Task<TResponse>> responder, System.Action<EasyNetQ.IResponderConfiguration> configure, System.Threading.CancellationToken cancellationToken = default);
     }
     public interface IScheduler
     {
@@ -502,7 +502,7 @@ namespace EasyNetQ
     }
     public interface ISendReceive
     {
-        EasyNetQ.Internals.AwaitableDisposable<System.IDisposable> ReceiveAsync(string queue, System.Action<EasyNetQ.IReceiveRegistration> addHandlers, System.Action<EasyNetQ.IReceiveConfiguration> configure, System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.Task<System.IDisposable> ReceiveAsync(string queue, System.Action<EasyNetQ.IReceiveRegistration> addHandlers, System.Action<EasyNetQ.IReceiveConfiguration> configure, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task SendAsync<T>(string queue, T message, System.Action<EasyNetQ.ISendConfiguration> configure, System.Threading.CancellationToken cancellationToken = default);
     }
     public interface ISerializer
@@ -652,7 +652,7 @@ namespace EasyNetQ
         public static System.Threading.Tasks.Task PublishAsync(this EasyNetQ.IPubSub pubSub, object message, System.Type messageType, System.Action<EasyNetQ.IPublishConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
         public static System.Threading.Tasks.Task PublishAsync(this EasyNetQ.IPubSub pubSub, object message, System.Type messageType, string topic, System.Threading.CancellationToken cancellationToken = default) { }
         public static EasyNetQ.SubscriptionResult Subscribe(this EasyNetQ.IPubSub pubSub, string subscriptionId, System.Type messageType, System.Func<object, System.Type, System.Threading.CancellationToken, System.Threading.Tasks.Task> onMessage, System.Action<EasyNetQ.ISubscriptionConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
-        public static EasyNetQ.Internals.AwaitableDisposable<EasyNetQ.SubscriptionResult> SubscribeAsync(this EasyNetQ.IPubSub pubSub, string subscriptionId, System.Type messageType, System.Func<object, System.Type, System.Threading.CancellationToken, System.Threading.Tasks.Task> onMessage, System.Action<EasyNetQ.ISubscriptionConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
+        public static System.Threading.Tasks.Task<EasyNetQ.SubscriptionResult> SubscribeAsync(this EasyNetQ.IPubSub pubSub, string subscriptionId, System.Type messageType, System.Func<object, System.Type, System.Threading.CancellationToken, System.Threading.Tasks.Task> onMessage, System.Action<EasyNetQ.ISubscriptionConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
     }
     public static class NonGenericRpcExtensions
     {
@@ -704,9 +704,9 @@ namespace EasyNetQ
         public static EasyNetQ.SubscriptionResult Subscribe<T>(this EasyNetQ.IPubSub pubSub, string subscriptionId, System.Func<T, System.Threading.Tasks.Task> onMessage, System.Threading.CancellationToken cancellationToken = default) { }
         public static EasyNetQ.SubscriptionResult Subscribe<T>(this EasyNetQ.IPubSub pubSub, string subscriptionId, System.Action<T> onMessage, System.Action<EasyNetQ.ISubscriptionConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
         public static EasyNetQ.SubscriptionResult Subscribe<T>(this EasyNetQ.IPubSub pubSub, string subscriptionId, System.Func<T, System.Threading.CancellationToken, System.Threading.Tasks.Task> onMessage, System.Action<EasyNetQ.ISubscriptionConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
-        public static EasyNetQ.Internals.AwaitableDisposable<EasyNetQ.SubscriptionResult> SubscribeAsync<T>(this EasyNetQ.IPubSub pubSub, string subscriptionId, System.Action<T> onMessage, System.Threading.CancellationToken cancellationToken = default) { }
-        public static EasyNetQ.Internals.AwaitableDisposable<EasyNetQ.SubscriptionResult> SubscribeAsync<T>(this EasyNetQ.IPubSub pubSub, string subscriptionId, System.Func<T, System.Threading.Tasks.Task> onMessage, System.Threading.CancellationToken cancellationToken = default) { }
-        public static EasyNetQ.Internals.AwaitableDisposable<EasyNetQ.SubscriptionResult> SubscribeAsync<T>(this EasyNetQ.IPubSub pubSub, string subscriptionId, System.Action<T> onMessage, System.Action<EasyNetQ.ISubscriptionConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
+        public static System.Threading.Tasks.Task<EasyNetQ.SubscriptionResult> SubscribeAsync<T>(this EasyNetQ.IPubSub pubSub, string subscriptionId, System.Action<T> onMessage, System.Threading.CancellationToken cancellationToken = default) { }
+        public static System.Threading.Tasks.Task<EasyNetQ.SubscriptionResult> SubscribeAsync<T>(this EasyNetQ.IPubSub pubSub, string subscriptionId, System.Func<T, System.Threading.Tasks.Task> onMessage, System.Threading.CancellationToken cancellationToken = default) { }
+        public static System.Threading.Tasks.Task<EasyNetQ.SubscriptionResult> SubscribeAsync<T>(this EasyNetQ.IPubSub pubSub, string subscriptionId, System.Action<T> onMessage, System.Action<EasyNetQ.ISubscriptionConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
     }
     public readonly struct PullBatchResult<TPullResult> : System.IDisposable
         where TPullResult : EasyNetQ.IPullResult
@@ -889,8 +889,8 @@ namespace EasyNetQ
         public static System.IDisposable Respond<TRequest, TResponse>(this EasyNetQ.IRpc rpc, System.Func<TRequest, TResponse> responder, System.Threading.CancellationToken cancellationToken = default) { }
         public static System.IDisposable Respond<TRequest, TResponse>(this EasyNetQ.IRpc rpc, System.Func<TRequest, System.Threading.Tasks.Task<TResponse>> responder, System.Action<EasyNetQ.IResponderConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
         public static System.IDisposable Respond<TRequest, TResponse>(this EasyNetQ.IRpc rpc, System.Func<TRequest, System.Threading.CancellationToken, System.Threading.Tasks.Task<TResponse>> responder, System.Action<EasyNetQ.IResponderConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
-        public static EasyNetQ.Internals.AwaitableDisposable<System.IDisposable> RespondAsync<TRequest, TResponse>(this EasyNetQ.IRpc rpc, System.Func<TRequest, System.Threading.Tasks.Task<TResponse>> responder, System.Threading.CancellationToken cancellationToken = default) { }
-        public static EasyNetQ.Internals.AwaitableDisposable<System.IDisposable> RespondAsync<TRequest, TResponse>(this EasyNetQ.IRpc rpc, System.Func<TRequest, TResponse> responder, System.Threading.CancellationToken cancellationToken = default) { }
+        public static System.Threading.Tasks.Task<System.IDisposable> RespondAsync<TRequest, TResponse>(this EasyNetQ.IRpc rpc, System.Func<TRequest, System.Threading.Tasks.Task<TResponse>> responder, System.Threading.CancellationToken cancellationToken = default) { }
+        public static System.Threading.Tasks.Task<System.IDisposable> RespondAsync<TRequest, TResponse>(this EasyNetQ.IRpc rpc, System.Func<TRequest, TResponse> responder, System.Threading.CancellationToken cancellationToken = default) { }
     }
     public delegate string RpcReturnQueueNamingConvention(System.Type messageType);
     public delegate string RpcRoutingKeyNamingConvention(System.Type messageType);
@@ -917,13 +917,13 @@ namespace EasyNetQ
         public static System.IDisposable Receive<T>(this EasyNetQ.ISendReceive sendReceive, string queue, System.Func<T, System.Threading.Tasks.Task> onMessage, System.Threading.CancellationToken cancellationToken = default) { }
         public static System.IDisposable Receive<T>(this EasyNetQ.ISendReceive sendReceive, string queue, System.Action<T> onMessage, System.Action<EasyNetQ.IReceiveConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
         public static System.IDisposable Receive<T>(this EasyNetQ.ISendReceive sendReceive, string queue, System.Func<T, System.Threading.CancellationToken, System.Threading.Tasks.Task> onMessage, System.Action<EasyNetQ.IReceiveConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
-        public static EasyNetQ.Internals.AwaitableDisposable<System.IDisposable> ReceiveAsync(this EasyNetQ.ISendReceive sendReceive, string queue, System.Action<EasyNetQ.IReceiveRegistration> addHandlers, System.Threading.CancellationToken cancellationToken = default) { }
-        public static EasyNetQ.Internals.AwaitableDisposable<System.IDisposable> ReceiveAsync<T>(this EasyNetQ.ISendReceive sendReceive, string queue, System.Action<T> onMessage, System.Threading.CancellationToken cancellationToken = default) { }
-        public static EasyNetQ.Internals.AwaitableDisposable<System.IDisposable> ReceiveAsync<T>(this EasyNetQ.ISendReceive sendReceive, string queue, System.Func<T, System.Threading.Tasks.Task> onMessage, System.Threading.CancellationToken cancellationToken = default) { }
-        public static EasyNetQ.Internals.AwaitableDisposable<System.IDisposable> ReceiveAsync<T>(this EasyNetQ.ISendReceive sendReceive, string queue, System.Func<T, System.Threading.CancellationToken, System.Threading.Tasks.Task> onMessage, System.Threading.CancellationToken cancellationToken = default) { }
-        public static EasyNetQ.Internals.AwaitableDisposable<System.IDisposable> ReceiveAsync<T>(this EasyNetQ.ISendReceive sendReceive, string queue, System.Action<T> onMessage, System.Action<EasyNetQ.IReceiveConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
-        public static EasyNetQ.Internals.AwaitableDisposable<System.IDisposable> ReceiveAsync<T>(this EasyNetQ.ISendReceive sendReceive, string queue, System.Func<T, System.Threading.Tasks.Task> onMessage, System.Action<EasyNetQ.IReceiveConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
-        public static EasyNetQ.Internals.AwaitableDisposable<System.IDisposable> ReceiveAsync<T>(this EasyNetQ.ISendReceive sendReceive, string queue, System.Func<T, System.Threading.CancellationToken, System.Threading.Tasks.Task> onMessage, System.Action<EasyNetQ.IReceiveConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
+        public static System.Threading.Tasks.Task<System.IDisposable> ReceiveAsync(this EasyNetQ.ISendReceive sendReceive, string queue, System.Action<EasyNetQ.IReceiveRegistration> addHandlers, System.Threading.CancellationToken cancellationToken = default) { }
+        public static System.Threading.Tasks.Task<System.IDisposable> ReceiveAsync<T>(this EasyNetQ.ISendReceive sendReceive, string queue, System.Action<T> onMessage, System.Threading.CancellationToken cancellationToken = default) { }
+        public static System.Threading.Tasks.Task<System.IDisposable> ReceiveAsync<T>(this EasyNetQ.ISendReceive sendReceive, string queue, System.Func<T, System.Threading.Tasks.Task> onMessage, System.Threading.CancellationToken cancellationToken = default) { }
+        public static System.Threading.Tasks.Task<System.IDisposable> ReceiveAsync<T>(this EasyNetQ.ISendReceive sendReceive, string queue, System.Func<T, System.Threading.CancellationToken, System.Threading.Tasks.Task> onMessage, System.Threading.CancellationToken cancellationToken = default) { }
+        public static System.Threading.Tasks.Task<System.IDisposable> ReceiveAsync<T>(this EasyNetQ.ISendReceive sendReceive, string queue, System.Action<T> onMessage, System.Action<EasyNetQ.IReceiveConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
+        public static System.Threading.Tasks.Task<System.IDisposable> ReceiveAsync<T>(this EasyNetQ.ISendReceive sendReceive, string queue, System.Func<T, System.Threading.Tasks.Task> onMessage, System.Action<EasyNetQ.IReceiveConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
+        public static System.Threading.Tasks.Task<System.IDisposable> ReceiveAsync<T>(this EasyNetQ.ISendReceive sendReceive, string queue, System.Func<T, System.Threading.CancellationToken, System.Threading.Tasks.Task> onMessage, System.Action<EasyNetQ.IReceiveConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
         public static void Send<T>(this EasyNetQ.ISendReceive sendReceive, string queue, T message, System.Threading.CancellationToken cancellationToken = default) { }
         public static void Send<T>(this EasyNetQ.ISendReceive sendReceive, string queue, T message, System.Action<EasyNetQ.ISendConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
         public static System.Threading.Tasks.Task SendAsync<T>(this EasyNetQ.ISendReceive sendReceive, string queue, T message, System.Threading.CancellationToken cancellationToken = default) { }
@@ -1543,20 +1543,6 @@ namespace EasyNetQ.Internals
         public void Dispose() { }
         public void Enqueue(T element) { }
         public bool TryDequeue(out T? element) { }
-    }
-    public static class AwaitableDisposableExtensions
-    {
-        public static EasyNetQ.Internals.AwaitableDisposable<T> ToAwaitableDisposable<T>(this System.Threading.Tasks.Task<T> source)
-            where T : System.IDisposable { }
-    }
-    public readonly struct AwaitableDisposable<T>
-        where T : System.IDisposable
-    {
-        public AwaitableDisposable(System.Threading.Tasks.Task<T> task) { }
-        public System.Threading.Tasks.Task<T> AsTask() { }
-        public System.Runtime.CompilerServices.ConfiguredTaskAwaitable<T> ConfigureAwait(bool continueOnCapturedContext) { }
-        public System.Runtime.CompilerServices.TaskAwaiter<T> GetAwaiter() { }
-        public static System.Threading.Tasks.Task<T> op_Implicit(EasyNetQ.Internals.AwaitableDisposable<T> source) { }
     }
     public static class CancellationTokenExtensions
     {
