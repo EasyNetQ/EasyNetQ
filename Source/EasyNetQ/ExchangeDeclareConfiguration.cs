@@ -40,9 +40,9 @@ public interface IExchangeDeclareConfiguration
 
 internal class ExchangeDeclareConfiguration : IExchangeDeclareConfiguration
 {
-    public bool IsDurable { get; private set; } = true;
+    public bool Durable { get; private set; } = true;
 
-    public bool IsAutoDelete { get; private set; }
+    public bool AutoDelete { get; private set; }
 
     public string Type { get; private set; } = ExchangeType.Topic;
 
@@ -50,13 +50,13 @@ internal class ExchangeDeclareConfiguration : IExchangeDeclareConfiguration
 
     public IExchangeDeclareConfiguration AsDurable(bool isDurable)
     {
-        IsDurable = isDurable;
+        Durable = isDurable;
         return this;
     }
 
     public IExchangeDeclareConfiguration AsAutoDelete(bool isAutoDelete)
     {
-        IsAutoDelete = isAutoDelete;
+        AutoDelete = isAutoDelete;
         return this;
     }
 
