@@ -82,13 +82,16 @@ internal class ResponderConfiguration : IResponderConfiguration
 
     public IResponderConfiguration WithExpires(TimeSpan expires)
     {
-        QueueArguments = QueueArguments.WithQueueExpires(expires);
+        InitializedQueueArguments.WithQueueExpires(expires);
         return this;
     }
 
     public IResponderConfiguration WithMaxPriority(byte priority)
     {
-        QueueArguments = QueueArguments.WithQueueMaxPriority(priority);
+        InitializedQueueArguments.WithQueueMaxPriority(priority);
         return this;
     }
+
+    private IDictionary<string, object> InitializedQueueArguments => QueueArguments ??= new Dictionary<string, object>();
+
 }

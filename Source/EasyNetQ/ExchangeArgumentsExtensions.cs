@@ -1,16 +1,18 @@
 namespace EasyNetQ;
 
+using Arguments = IDictionary<string, object>;
+
 public static class ExchangeArgumentsExtensions
 {
-    public static IDictionary<string, object> WithExchangeAlternate(this IDictionary<string, object>? arguments, string alternateExchange) =>
+    public static Arguments WithExchangeAlternate(this Arguments arguments, string alternateExchange) =>
         arguments.WithExchangeArgument(ExchangeArgument.AlternateExchange, alternateExchange);
 
-    public static IDictionary<string, object> WithExchangeDelayedType(this IDictionary<string, object>? arguments, string delayedType) =>
+    public static Arguments WithExchangeDelayedType(this Arguments arguments, string delayedType) =>
         arguments.WithExchangeArgument(ExchangeArgument.DelayedType, delayedType);
 
-    public static IDictionary<string, object> WithExchangeArgument(this IDictionary<string, object>? arguments, string key, object value)
+    public static IDictionary<string, object> WithExchangeArgument(this Arguments arguments, string key, object value)
     {
-        (arguments ??= new Dictionary<string, object>()).Add(key, value);
+        arguments[key] = value;
         return arguments;
     }
 }

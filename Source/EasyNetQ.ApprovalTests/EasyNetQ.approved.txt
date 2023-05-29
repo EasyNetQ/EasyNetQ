@@ -280,9 +280,9 @@ namespace EasyNetQ
     }
     public static class ExchangeArgumentsExtensions
     {
-        public static System.Collections.Generic.IDictionary<string, object> WithExchangeAlternate(this System.Collections.Generic.IDictionary<string, object>? arguments, string alternateExchange) { }
-        public static System.Collections.Generic.IDictionary<string, object> WithExchangeArgument(this System.Collections.Generic.IDictionary<string, object>? arguments, string key, object value) { }
-        public static System.Collections.Generic.IDictionary<string, object> WithExchangeDelayedType(this System.Collections.Generic.IDictionary<string, object>? arguments, string delayedType) { }
+        public static System.Collections.Generic.IDictionary<string, object> WithExchangeAlternate(this System.Collections.Generic.IDictionary<string, object> arguments, string alternateExchange) { }
+        public static System.Collections.Generic.IDictionary<string, object> WithExchangeArgument(this System.Collections.Generic.IDictionary<string, object> arguments, string key, object value) { }
+        public static System.Collections.Generic.IDictionary<string, object> WithExchangeDelayedType(this System.Collections.Generic.IDictionary<string, object> arguments, string delayedType) { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Interface)]
     public sealed class ExchangeAttribute : System.Attribute
@@ -804,20 +804,20 @@ namespace EasyNetQ
     }
     public static class QueueArgumentsExtensions
     {
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueArgument(this System.Collections.Generic.IDictionary<string, object>? arguments, string key, object value) { }
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueDeadLetterExchange(this System.Collections.Generic.IDictionary<string, object>? arguments, string deadLetterExchange) { }
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueDeadLetterRoutingKey(this System.Collections.Generic.IDictionary<string, object>? arguments, string deadLetterRoutingKey) { }
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueDeadLetterStrategy(this System.Collections.Generic.IDictionary<string, object>? arguments, string deadLetterStrategy = "at-most-once") { }
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueExpires(this System.Collections.Generic.IDictionary<string, object>? arguments, System.TimeSpan expires) { }
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueMasterLocator(this System.Collections.Generic.IDictionary<string, object>? arguments, string queueMasterLocator = "min-masters") { }
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueMaxLength(this System.Collections.Generic.IDictionary<string, object>? arguments, int maxLength) { }
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueMaxLengthBytes(this System.Collections.Generic.IDictionary<string, object>? arguments, int maxLengthBytes) { }
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueMaxPriority(this System.Collections.Generic.IDictionary<string, object>? arguments, byte maxPriority) { }
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueMessageTtl(this System.Collections.Generic.IDictionary<string, object>? arguments, System.TimeSpan messageTtl) { }
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueMode(this System.Collections.Generic.IDictionary<string, object>? arguments, string queueMode = "default") { }
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueOverflowType(this System.Collections.Generic.IDictionary<string, object>? arguments, string overflowType = "drop-head") { }
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueSingleActiveConsumer(this System.Collections.Generic.IDictionary<string, object>? arguments, bool singleActiveConsumer = true) { }
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueType(this System.Collections.Generic.IDictionary<string, object>? arguments, string queueType = "classic") { }
+        public static System.Collections.Generic.IDictionary<string, object> WithQueueArgument(this System.Collections.Generic.IDictionary<string, object> arguments, string key, object value) { }
+        public static System.Collections.Generic.IDictionary<string, object> WithQueueDeadLetterExchange(this System.Collections.Generic.IDictionary<string, object> arguments, string deadLetterExchange) { }
+        public static System.Collections.Generic.IDictionary<string, object> WithQueueDeadLetterRoutingKey(this System.Collections.Generic.IDictionary<string, object> arguments, string deadLetterRoutingKey) { }
+        public static System.Collections.Generic.IDictionary<string, object> WithQueueDeadLetterStrategy(this System.Collections.Generic.IDictionary<string, object> arguments, string deadLetterStrategy = "at-most-once") { }
+        public static System.Collections.Generic.IDictionary<string, object> WithQueueExpires(this System.Collections.Generic.IDictionary<string, object> arguments, System.TimeSpan expires) { }
+        public static System.Collections.Generic.IDictionary<string, object> WithQueueMasterLocator(this System.Collections.Generic.IDictionary<string, object> arguments, string queueMasterLocator = "min-masters") { }
+        public static System.Collections.Generic.IDictionary<string, object> WithQueueMaxLength(this System.Collections.Generic.IDictionary<string, object> arguments, int maxLength) { }
+        public static System.Collections.Generic.IDictionary<string, object> WithQueueMaxLengthBytes(this System.Collections.Generic.IDictionary<string, object> arguments, int maxLengthBytes) { }
+        public static System.Collections.Generic.IDictionary<string, object> WithQueueMaxPriority(this System.Collections.Generic.IDictionary<string, object> arguments, byte maxPriority) { }
+        public static System.Collections.Generic.IDictionary<string, object> WithQueueMessageTtl(this System.Collections.Generic.IDictionary<string, object> arguments, System.TimeSpan messageTtl) { }
+        public static System.Collections.Generic.IDictionary<string, object> WithQueueMode(this System.Collections.Generic.IDictionary<string, object> arguments, string queueMode = "default") { }
+        public static System.Collections.Generic.IDictionary<string, object> WithQueueOverflowType(this System.Collections.Generic.IDictionary<string, object> arguments, string overflowType = "drop-head") { }
+        public static System.Collections.Generic.IDictionary<string, object> WithQueueSingleActiveConsumer(this System.Collections.Generic.IDictionary<string, object> arguments, bool singleActiveConsumer = true) { }
+        public static System.Collections.Generic.IDictionary<string, object> WithQueueType(this System.Collections.Generic.IDictionary<string, object> arguments, string queueType = "classic") { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Interface)]
     public sealed class QueueAttribute : System.Attribute

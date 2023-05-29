@@ -147,7 +147,7 @@ internal class ReceiveConfiguration : IReceiveConfiguration
 
     public IReceiveConfiguration WithExpires(TimeSpan expires)
     {
-        QueueArguments = QueueArguments.WithQueueExpires(expires);
+        InitializedQueueArguments.WithQueueExpires(expires);
         return this;
     }
 
@@ -159,37 +159,39 @@ internal class ReceiveConfiguration : IReceiveConfiguration
 
     public IReceiveConfiguration WithMaxPriority(byte priority)
     {
-        QueueArguments = QueueArguments.WithQueueMaxPriority(priority);
+        InitializedQueueArguments.WithQueueMaxPriority(priority);
         return this;
     }
 
     public IReceiveConfiguration WithMaxLength(int maxLength)
     {
-        QueueArguments = QueueArguments.WithQueueMaxLength(maxLength);
+        InitializedQueueArguments.WithQueueMaxLength(maxLength);
         return this;
     }
 
     public IReceiveConfiguration WithMaxLengthBytes(int maxLengthBytes)
     {
-        QueueArguments = QueueArguments.WithQueueMaxLengthBytes(maxLengthBytes);
+        InitializedQueueArguments.WithQueueMaxLengthBytes(maxLengthBytes);
         return this;
     }
 
     public IReceiveConfiguration WithQueueMode(string queueMode)
     {
-        QueueArguments = QueueArguments.WithQueueMode(queueMode);
+        InitializedQueueArguments.WithQueueMode(queueMode);
         return this;
     }
 
     public IReceiveConfiguration WithQueueType(string queueType = EasyNetQ.QueueType.Classic)
     {
-        QueueArguments = QueueArguments.WithQueueType(queueType);
+        InitializedQueueArguments.WithQueueType(queueType);
         return this;
     }
 
     public IReceiveConfiguration WithSingleActiveConsumer(bool singleActiveConsumer = true)
     {
-        QueueArguments = QueueArguments.WithQueueSingleActiveConsumer(singleActiveConsumer);
+        InitializedQueueArguments.WithQueueSingleActiveConsumer(singleActiveConsumer);
         return this;
     }
+
+    private IDictionary<string, object> InitializedQueueArguments => QueueArguments ??= new Dictionary<string, object>();
 }

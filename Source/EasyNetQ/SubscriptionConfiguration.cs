@@ -139,7 +139,6 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
     public bool Durable { get; private set; }
     public string? QueueName { get; private set; }
     public string ExchangeType { get; private set; } = EasyNetQ.ExchangeType.Topic;
-
     public IDictionary<string, object>? QueueArguments { get; private set; }
     public IDictionary<string, object>? ExchangeArguments { get; private set; }
 
@@ -152,7 +151,7 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
         IsExclusive = false;
         Durable = true;
         if (queueType != null)
-            QueueArguments = QueueArguments.WithQueueType(queueType);
+            QueueArguments = new Dictionary<string, object> { { QueueArgument.QueueType, queueType } };
     }
 
     public ISubscriptionConfiguration WithTopic(string topic)
@@ -189,7 +188,7 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
 
     public ISubscriptionConfiguration WithExpires(TimeSpan expires)
     {
-        QueueArguments = QueueArguments.WithQueueExpires(expires);
+        InitializedQueueArguments.WithQueueExpires(expires);
         return this;
     }
 
@@ -201,7 +200,7 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
 
     public ISubscriptionConfiguration WithMaxPriority(byte priority)
     {
-        QueueArguments = QueueArguments.WithQueueMaxPriority(priority);
+        InitializedQueueArguments.WithQueueMaxPriority(priority);
         return this;
     }
 
@@ -213,25 +212,25 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
 
     public ISubscriptionConfiguration WithMaxLength(int maxLength)
     {
-        QueueArguments = QueueArguments.WithQueueMaxLength(maxLength);
+        InitializedQueueArguments.WithQueueMaxLength(maxLength);
         return this;
     }
 
     public ISubscriptionConfiguration WithMaxLengthBytes(int maxLengthBytes)
     {
-        QueueArguments = QueueArguments.WithQueueMaxLengthBytes(maxLengthBytes);
+        InitializedQueueArguments.WithQueueMaxLengthBytes(maxLengthBytes);
         return this;
     }
 
     public ISubscriptionConfiguration WithQueueMode(string queueMode = QueueMode.Default)
     {
-        QueueArguments = QueueArguments.WithQueueMode(queueMode);
+        InitializedQueueArguments.WithQueueMode(queueMode);
         return this;
     }
 
     public ISubscriptionConfiguration WithQueueType(string queueType = QueueType.Classic)
     {
-        QueueArguments = QueueArguments.WithQueueType(queueType);
+        InitializedQueueArguments.WithQueueType(queueType);
         return this;
     }
 
@@ -243,13 +242,23 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
 
     public ISubscriptionConfiguration WithAlternateExchange(string alternateExchange)
     {
-        ExchangeArguments = ExchangeArguments.WithExchangeAlternate(alternateExchange);
+        InitializedExchangeArguments.WithExchangeAlternate(alternateExchange);
         return this;
     }
 
     public ISubscriptionConfiguration WithSingleActiveConsumer(bool singleActiveConsumer = true)
     {
-        QueueArguments = QueueArguments.WithQueueSingleActiveConsumer(singleActiveConsumer);
+        InitializedQueueArguments.WithQueueSingleActiveConsumer(singleActiveConsumer);
         return this;
     }
+
+    public ISubscriptionConfiguration WithQueueArguments(IDictionary<string, object> arguments)
+    {
+        foreach (var kvp in arguments)
+            InitializedQueueArguments[kvp.Key] = kvp.Value;
+        return this;
+    }
+
+    private IDictionary<string, object> InitializedQueueArguments => QueueArguments ??= new Dictionary<string, object>();
+    private IDictionary<string, object> InitializedExchangeArguments => ExchangeArguments ??= new Dictionary<string, object>();
 }
