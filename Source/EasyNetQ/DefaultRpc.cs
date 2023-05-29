@@ -150,12 +150,13 @@ public class DefaultRpc : IRpc, IDisposable
 
                 var isFaulted = false;
                 var exceptionMessage = "The exception message has not been specified.";
-                if (messageOfTResponse.Properties.HeadersPresent)
+
+                if (messageOfTResponse.Properties is { HeadersPresent: true, Headers: not null })
                 {
-                    if (messageOfTResponse.Properties.Headers!.ContainsKey(IsFaultedKey))
-                        isFaulted = Convert.ToBoolean(messageOfTResponse.Properties.Headers[IsFaultedKey]);
-                    if (messageOfTResponse.Properties.Headers.ContainsKey(ExceptionMessageKey))
-                        exceptionMessage = Encoding.UTF8.GetString((byte[])messageOfTResponse.Properties.Headers[ExceptionMessageKey]!);
+                    if (messageOfTResponse.Properties.Headers.TryGetValue(IsFaultedKey, out var isFaultedValue))
+                        isFaulted = Convert.ToBoolean(isFaultedValue);
+                    if (messageOfTResponse.Properties.Headers.TryGetValue(ExceptionMessageKey, out var exchangeMessageValue))
+                        exceptionMessage = Encoding.UTF8.GetString((byte[])exchangeMessageValue!);
                 }
 
                 if (isFaulted)
