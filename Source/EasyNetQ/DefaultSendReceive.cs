@@ -79,7 +79,7 @@ public class DefaultSendReceive : ISendReceive
             queue: queueName,
             durable: receiveConfiguration.Durable,
             autoDelete: receiveConfiguration.AutoDelete,
-            arguments: receiveConfiguration.QueueArguments,
+            arguments: receiveConfiguration.QueueArgumentsBuilder.Build(),
             cancellationToken: cts.Token
         ).ConfigureAwait(false);
 

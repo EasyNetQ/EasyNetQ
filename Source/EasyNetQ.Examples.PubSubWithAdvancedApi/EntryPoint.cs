@@ -13,9 +13,10 @@ using var bus = RabbitHutch.CreateBus(
 
 var eventQueue = await bus.Advanced.QueueDeclareAsync(
     queue: "Events",
-    arguments: new Dictionary<string, object>()
+    arguments: QueueArgumentsBuilder.Empty
         .WithQueueType(QueueType.Quorum)
-        .WithQueueOverflowType(OverflowType.RejectPublish),
+        .WithOverflowType(OverflowType.RejectPublish)
+        .Build(),
     cancellationToken: cts.Token
 );
 

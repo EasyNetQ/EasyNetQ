@@ -1,18 +1,36 @@
 namespace EasyNetQ;
 
-using Arguments = IDictionary<string, object>;
+public readonly struct QueueArgumentsBuilder
+{
+    public static QueueArgumentsBuilder Empty => default;
 
-public static class QueueArgumentsExtensions
+    public static QueueArgumentsBuilder From(IDictionary<string, object> arguments) => new(arguments);
+
+    private readonly IDictionary<string, object>? arguments;
+
+    private QueueArgumentsBuilder(IDictionary<string, object> arguments) => this.arguments = arguments;
+
+    public QueueArgumentsBuilder WithArgument(string name, object value)
+    {
+        var newArguments = arguments ?? new Dictionary<string, object>();
+        newArguments[name] = value;
+        return new QueueArgumentsBuilder(newArguments);
+    }
+
+    public IDictionary<string, object>? Build() => arguments;
+}
+
+public static class QueueQueueArgumentsBuilderExtensions
 {
     /// <summary>
     ///     Sets queue type.
     ///     Valid types are classic and quorum, see <see cref="QueueType"/>.
     /// </summary>
-    /// <param name="arguments">The queue arguments</param>
+    /// <param name="builder">The queue arguments</param>
     /// <param name="queueType">The queue type to set</param>
-    /// <returns>The same <paramref name="arguments"/></returns>
-    public static Arguments WithQueueType(this Arguments arguments, string queueType) =>
-        arguments.WithQueueArgument(QueueArgument.QueueType, queueType);
+    /// <returns>The same <paramref name="builder"/></returns>
+    public static QueueArgumentsBuilder WithQueueType(this QueueArgumentsBuilder builder, string queueType) =>
+        builder.WithArgument(QueueArgument.QueueType, queueType);
 
     /// <summary>
     ///     Sets queue mode.
@@ -21,8 +39,8 @@ public static class QueueArgumentsExtensions
     /// <param name="arguments">The queue arguments</param>
     /// <param name="queueMode">The queue mode to set</param>
     /// <returns>The same <paramref name="arguments"/></returns>
-    public static Arguments WithQueueMode(this Arguments arguments, string queueMode) =>
-        arguments.WithQueueArgument(QueueArgument.QueueMode, queueMode);
+    public static QueueArgumentsBuilder WithQueueMode(this QueueArgumentsBuilder arguments, string queueMode) =>
+        arguments.WithArgument(QueueArgument.QueueMode, queueMode);
 
     /// <summary>
     ///     Sets expires of the queue.
@@ -31,8 +49,10 @@ public static class QueueArgumentsExtensions
     /// <param name="arguments">The queue arguments</param>
     /// <param name="expires">The expires to set</param>
     /// <returns>The same <paramref name="arguments"/></returns>
-    public static Arguments WithQueueExpires(this Arguments arguments, TimeSpan expires) =>
-        arguments.WithQueueArgument(QueueArgument.Expires, (int)expires.TotalMilliseconds);
+    public static QueueArgumentsBuilder WithExpires(this QueueArgumentsBuilder arguments, TimeSpan expires)
+    {
+        return arguments.WithArgument(QueueArgument.Expires, (int)expires.TotalMilliseconds);
+    }
 
     /// <summary>
     ///     Sets maximum priority the queue should support.
@@ -40,8 +60,8 @@ public static class QueueArgumentsExtensions
     /// <param name="arguments">The queue arguments</param>
     /// <param name="maxPriority">The maximum priority to set, should be a positive integer between 1 and 255</param>
     /// <returns>The same <paramref name="arguments"/></returns>
-    public static Arguments WithQueueMaxPriority(this Arguments arguments, byte maxPriority) =>
-        arguments.WithQueueArgument(QueueArgument.MaxPriority, maxPriority);
+    public static QueueArgumentsBuilder WithMaxPriority(this QueueArgumentsBuilder arguments, byte maxPriority) =>
+        arguments.WithArgument(QueueArgument.MaxPriority, maxPriority);
 
     /// <summary>
     ///     Sets maximum queue length. The maximum number of ready messages that may exist on the queue.
@@ -51,8 +71,8 @@ public static class QueueArgumentsExtensions
     /// <param name="arguments">The queue arguments</param>
     /// <param name="maxLength">The maximum length to set</param>
     /// <returns>The same <paramref name="arguments"/></returns>
-    public static Arguments WithQueueMaxLength(this Arguments arguments, int maxLength) =>
-        arguments.WithQueueArgument(QueueArgument.MaxLength, maxLength);
+    public static QueueArgumentsBuilder WithMaxLength(this QueueArgumentsBuilder arguments, int maxLength) =>
+        arguments.WithArgument(QueueArgument.MaxLength, maxLength);
 
     /// <summary>
     ///     Sets maximum queue length in bytes. The maximum size of the queue in bytes.
@@ -62,8 +82,8 @@ public static class QueueArgumentsExtensions
     /// <param name="arguments">The queue arguments</param>
     /// <param name="maxLengthBytes">The maximum queue length to set</param>
     /// <returns>The same <paramref name="arguments"/></returns>
-    public static Arguments WithQueueMaxLengthBytes(this Arguments arguments, int maxLengthBytes) =>
-        arguments.WithQueueArgument(QueueArgument.MaxLengthBytes, maxLengthBytes);
+    public static QueueArgumentsBuilder WithMaxLengthBytes(this QueueArgumentsBuilder arguments, int maxLengthBytes) =>
+        arguments.WithArgument(QueueArgument.MaxLengthBytes, maxLengthBytes);
 
     /// <summary>
     ///     Enables single active consumer.
@@ -73,8 +93,8 @@ public static class QueueArgumentsExtensions
     /// <param name="arguments">The configuration instance</param>
     /// <param name="singleActiveConsumer"><see langword="true"/> if a queue has a single active consumer</param>
     /// <returns>The same <paramref name="arguments"/></returns>
-    public static Arguments WithQueueSingleActiveConsumer(this Arguments arguments, bool singleActiveConsumer = true) =>
-        arguments.WithQueueArgument(QueueArgument.SingleActiveConsumer, singleActiveConsumer);
+    public static QueueArgumentsBuilder WithSingleActiveConsumer(this QueueArgumentsBuilder arguments, bool singleActiveConsumer) =>
+        arguments.WithArgument(QueueArgument.SingleActiveConsumer, singleActiveConsumer);
 
     /// <summary>
     ///     Sets message TTL.
@@ -83,8 +103,8 @@ public static class QueueArgumentsExtensions
     /// <param name="arguments">The configuration instance</param>
     /// <param name="messageTtl">The message TTL to set</param>
     /// <returns>The same <paramref name="arguments"/></returns>
-    public static Arguments WithQueueMessageTtl(this Arguments arguments, TimeSpan messageTtl) =>
-        arguments.WithQueueArgument(QueueArgument.MessageTtl, (int)messageTtl.TotalMilliseconds);
+    public static QueueArgumentsBuilder WithMessageTtl(this QueueArgumentsBuilder arguments, TimeSpan messageTtl) =>
+        arguments.WithArgument(QueueArgument.MessageTtl, (int)messageTtl.TotalMilliseconds);
 
     /// <summary>
     ///     Sets dead letter exchange for queue.
@@ -93,8 +113,8 @@ public static class QueueArgumentsExtensions
     /// <param name="arguments">The configuration instance</param>
     /// <param name="deadLetterExchange">The dead letter exchange to set</param>
     /// <returns>The same <paramref name="arguments"/></returns>
-    public static Arguments WithQueueDeadLetterExchange(this Arguments arguments, string deadLetterExchange) =>
-        arguments.WithQueueArgument(QueueArgument.DeadLetterExchange, deadLetterExchange);
+    public static QueueArgumentsBuilder WithDeadLetterExchange(this QueueArgumentsBuilder arguments, string deadLetterExchange) =>
+        arguments.WithArgument(QueueArgument.DeadLetterExchange, deadLetterExchange);
 
     /// <summary>
     ///     Sets dead letter routing key.
@@ -104,8 +124,8 @@ public static class QueueArgumentsExtensions
     /// <param name="arguments">The configuration instance</param>
     /// <param name="deadLetterRoutingKey">The dead letter routing key to set</param>
     /// <returns>The same <paramref name="arguments"/></returns>
-    public static Arguments WithQueueDeadLetterRoutingKey(this Arguments arguments, string deadLetterRoutingKey) =>
-        arguments.WithQueueArgument(QueueArgument.DeadLetterRoutingKey, deadLetterRoutingKey);
+    public static QueueArgumentsBuilder WithDeadLetterRoutingKey(this QueueArgumentsBuilder arguments, string deadLetterRoutingKey) =>
+        arguments.WithArgument(QueueArgument.DeadLetterRoutingKey, deadLetterRoutingKey);
 
     /// <summary>
     ///     Sets queue master locator.
@@ -114,8 +134,8 @@ public static class QueueArgumentsExtensions
     /// <param name="arguments">The configuration instance</param>
     /// <param name="queueMasterLocator">The queue master locator to set</param>
     /// <returns>The same <paramref name="arguments"/></returns>
-    public static Arguments WithQueueMasterLocator(this Arguments arguments, string queueMasterLocator) =>
-        arguments.WithQueueArgument(QueueArgument.QueueMasterLocator, queueMasterLocator);
+    public static QueueArgumentsBuilder WithQueueMasterLocator(this QueueArgumentsBuilder arguments, string queueMasterLocator) =>
+        arguments.WithArgument(QueueArgument.QueueMasterLocator, queueMasterLocator);
 
     /// <summary>
     ///     Sets dead letter strategy.
@@ -124,8 +144,8 @@ public static class QueueArgumentsExtensions
     /// <param name="arguments">The configuration instance</param>
     /// <param name="deadLetterStrategy">The dead letter strategy to set</param>
     /// <returns>The same <paramref name="arguments"/></returns>
-    public static Arguments WithQueueDeadLetterStrategy(this Arguments arguments, string deadLetterStrategy) =>
-        arguments.WithQueueArgument(QueueArgument.DeadLetterStrategy, deadLetterStrategy);
+    public static QueueArgumentsBuilder WithDeadLetterStrategy(this QueueArgumentsBuilder arguments, string deadLetterStrategy) =>
+        arguments.WithArgument(QueueArgument.DeadLetterStrategy, deadLetterStrategy);
 
     /// <summary>
     ///     Sets overflow type to configure overflow behaviour.
@@ -134,12 +154,6 @@ public static class QueueArgumentsExtensions
     /// <param name="arguments">The configuration instance</param>
     /// <param name="overflowType">The overflow type to set</param>
     /// <returns>The same <paramref name="arguments"/></returns>
-    public static Arguments WithQueueOverflowType(this Arguments arguments, string overflowType) =>
-        arguments.WithQueueArgument(QueueArgument.Overflow, overflowType);
-
-    public static Arguments WithQueueArgument(this Arguments arguments, string key, object value)
-    {
-        arguments[key] = value;
-        return arguments;
-    }
+    public static QueueArgumentsBuilder WithOverflowType(this QueueArgumentsBuilder arguments, string overflowType) =>
+        arguments.WithArgument(QueueArgument.Overflow, overflowType);
 }

@@ -82,7 +82,7 @@ public class DefaultPubSub : IPubSub
         var exchange = await advancedBus.ExchangeDeclareAsync(
             exchange: conventions.ExchangeNamingConvention(typeof(T)),
             type: subscriptionConfiguration.ExchangeType,
-            arguments: subscriptionConfiguration.ExchangeArguments,
+            arguments: subscriptionConfiguration.ExchangeArguments.Build(),
             cancellationToken: cts.Token
         ).ConfigureAwait(false);
 
@@ -90,7 +90,7 @@ public class DefaultPubSub : IPubSub
             queue: subscriptionConfiguration.QueueName ?? conventions.QueueNamingConvention(typeof(T), subscriptionId),
             durable: subscriptionConfiguration.Durable,
             autoDelete: subscriptionConfiguration.AutoDelete,
-            arguments: subscriptionConfiguration.QueueArguments,
+            arguments: subscriptionConfiguration.QueueArguments.Build(),
             cancellationToken: cts.Token
         ).ConfigureAwait(false);
 

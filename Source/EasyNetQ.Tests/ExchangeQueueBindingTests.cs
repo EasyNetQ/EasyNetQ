@@ -1,4 +1,3 @@
-using System.Collections;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using Queue = EasyNetQ.Topology.Queue;
@@ -16,10 +15,11 @@ public class When_a_queue_is_declared : IDisposable
             durable: false,
             exclusive: true,
             autoDelete: true,
-            arguments: new Dictionary<string, object>()
-                .WithQueueMessageTtl(TimeSpan.FromSeconds(1))
-                .WithQueueExpires(TimeSpan.FromSeconds(2))
-                .WithQueueMaxPriority(10)
+            arguments: QueueArgumentsBuilder.Empty
+                .WithMessageTtl(TimeSpan.FromSeconds(1))
+                .WithExpires(TimeSpan.FromSeconds(2))
+                .WithMaxPriority(10)
+                .Build()
         );
     }
 
@@ -67,12 +67,13 @@ public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange : IDisposa
             durable: false,
             exclusive: true,
             autoDelete: true,
-            arguments: new Dictionary<string, object>()
-                .WithQueueMessageTtl(TimeSpan.FromSeconds(1))
-                .WithQueueExpires(TimeSpan.FromSeconds(2))
-                .WithQueueMaxPriority(10)
-                .WithQueueDeadLetterExchange("my_exchange")
-                .WithQueueDeadLetterRoutingKey("my_routing_key")
+            arguments: QueueArgumentsBuilder.Empty
+                .WithMessageTtl(TimeSpan.FromSeconds(1))
+                .WithExpires(TimeSpan.FromSeconds(2))
+                .WithMaxPriority(10)
+                .WithDeadLetterExchange("my_exchange")
+                .WithDeadLetterRoutingKey("my_routing_key")
+                .Build()
         );
     }
 
@@ -121,12 +122,13 @@ public class When_a_queue_is_declared_With_EmptyDeadLetterExchange : IDisposable
             durable: false,
             exclusive: true,
             autoDelete: true,
-            arguments: new Dictionary<string, object>()
-                .WithQueueMessageTtl(TimeSpan.FromSeconds(1))
-                .WithQueueExpires(TimeSpan.FromSeconds(2))
-                .WithQueueMaxPriority(10)
-                .WithQueueDeadLetterExchange(Exchange.DefaultName)
-                .WithQueueDeadLetterRoutingKey("my_queue2")
+            arguments: QueueArgumentsBuilder.Empty
+                .WithMessageTtl(TimeSpan.FromSeconds(1))
+                .WithExpires(TimeSpan.FromSeconds(2))
+                .WithMaxPriority(10)
+                .WithDeadLetterExchange(Exchange.DefaultName)
+                .WithDeadLetterRoutingKey("my_queue2")
+                .Build()
         );
     }
 
@@ -221,7 +223,9 @@ public class When_an_exchange_is_declared : IDisposable
             type: ExchangeType.Direct,
             durable: false,
             autoDelete: true,
-            arguments: new Dictionary<string, object>().WithExchangeAlternate("my.alternate.exchange")
+            arguments: ExchangeArgumentsBuilder.Empty
+                .WithAlternateExchange("my.alternate.exchange")
+                .Build()
         );
     }
 

@@ -13,7 +13,7 @@ public class SubscriptionConfigurationTests
         Assert.False(configuration.IsExclusive);
         Assert.True(configuration.Durable);
         Assert.Null(configuration.QueueName);
-        Assert.Null(configuration.QueueArguments);
+        Assert.Null(configuration.QueueArguments.Build());
     }
 
     [Fact]
@@ -21,7 +21,9 @@ public class SubscriptionConfigurationTests
     {
         var configuration = new SubscriptionConfiguration(99);
         configuration.WithQueueType();
-        configuration.QueueArguments.Should().BeEquivalentTo(new Dictionary<string, object> { { "x-queue-type", "classic" } });
+
+        configuration.QueueArguments.Build()
+            .Should().BeEquivalentTo(new Dictionary<string, object> { { "x-queue-type", "classic" } });
     }
 
     [Theory]
@@ -31,6 +33,8 @@ public class SubscriptionConfigurationTests
     {
         var configuration = new SubscriptionConfiguration(99);
         configuration.WithQueueType(queueType);
-        configuration.QueueArguments.Should().BeEquivalentTo(new Dictionary<string, object> { { "x-queue-type", queueType } });
+
+        configuration.QueueArguments.Build()
+            .Should().BeEquivalentTo(new Dictionary<string, object> { { "x-queue-type", queueType } });
     }
 }

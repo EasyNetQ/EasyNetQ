@@ -139,8 +139,8 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
     public bool Durable { get; private set; }
     public string? QueueName { get; private set; }
     public string ExchangeType { get; private set; } = EasyNetQ.ExchangeType.Topic;
-    public IDictionary<string, object>? QueueArguments { get; private set; }
-    public IDictionary<string, object>? ExchangeArguments { get; private set; }
+    public QueueArgumentsBuilder QueueArguments { get; private set; }
+    public ExchangeArgumentsBuilder ExchangeArguments { get; private set; }
 
     public SubscriptionConfiguration(ushort defaultPrefetchCount, string? queueType = null)
     {
@@ -150,8 +150,7 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
         PrefetchCount = defaultPrefetchCount;
         IsExclusive = false;
         Durable = true;
-        if (queueType != null)
-            QueueArguments = new Dictionary<string, object> { { QueueArgument.QueueType, queueType } };
+        QueueArguments = queueType == null ? QueueArgumentsBuilder.Empty : QueueArgumentsBuilder.Empty.WithQueueType(queueType);
     }
 
     public ISubscriptionConfiguration WithTopic(string topic)
@@ -188,7 +187,7 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
 
     public ISubscriptionConfiguration WithExpires(TimeSpan expires)
     {
-        InitializedQueueArguments.WithQueueExpires(expires);
+        QueueArguments = QueueArguments.WithExpires(expires);
         return this;
     }
 
@@ -200,7 +199,7 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
 
     public ISubscriptionConfiguration WithMaxPriority(byte priority)
     {
-        InitializedQueueArguments.WithQueueMaxPriority(priority);
+        QueueArguments = QueueArguments.WithMaxPriority(priority);
         return this;
     }
 
@@ -212,25 +211,25 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
 
     public ISubscriptionConfiguration WithMaxLength(int maxLength)
     {
-        InitializedQueueArguments.WithQueueMaxLength(maxLength);
+        QueueArguments = QueueArguments.WithMaxLength(maxLength);
         return this;
     }
 
     public ISubscriptionConfiguration WithMaxLengthBytes(int maxLengthBytes)
     {
-        InitializedQueueArguments.WithQueueMaxLengthBytes(maxLengthBytes);
+        QueueArguments = QueueArguments.WithMaxLengthBytes(maxLengthBytes);
         return this;
     }
 
     public ISubscriptionConfiguration WithQueueMode(string queueMode = QueueMode.Default)
     {
-        InitializedQueueArguments.WithQueueMode(queueMode);
+        QueueArguments = QueueArguments.WithQueueMode(queueMode);
         return this;
     }
 
     public ISubscriptionConfiguration WithQueueType(string queueType = QueueType.Classic)
     {
-        InitializedQueueArguments.WithQueueType(queueType);
+        QueueArguments = QueueArguments.WithQueueType(queueType);
         return this;
     }
 
@@ -242,23 +241,20 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
 
     public ISubscriptionConfiguration WithAlternateExchange(string alternateExchange)
     {
-        InitializedExchangeArguments.WithExchangeAlternate(alternateExchange);
+        ExchangeArguments = ExchangeArguments.WithAlternateExchange(alternateExchange);
         return this;
     }
 
     public ISubscriptionConfiguration WithSingleActiveConsumer(bool singleActiveConsumer = true)
     {
-        InitializedQueueArguments.WithQueueSingleActiveConsumer(singleActiveConsumer);
+        QueueArguments = QueueArguments.WithSingleActiveConsumer(singleActiveConsumer);
         return this;
     }
 
     public ISubscriptionConfiguration WithQueueArguments(IDictionary<string, object> arguments)
     {
         foreach (var kvp in arguments)
-            InitializedQueueArguments[kvp.Key] = kvp.Value;
+            QueueArguments = QueueArguments.WithArgument(kvp.Key, kvp.Value);
         return this;
     }
-
-    private IDictionary<string, object> InitializedQueueArguments => QueueArguments ??= new Dictionary<string, object>();
-    private IDictionary<string, object> InitializedExchangeArguments => ExchangeArguments ??= new Dictionary<string, object>();
 }

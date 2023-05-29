@@ -59,8 +59,7 @@ internal class ResponderConfiguration : IResponderConfiguration
     public ushort PrefetchCount { get; private set; }
     public string? QueueName { get; private set; }
     public bool Durable { get; private set; } = true;
-
-    public IDictionary<string, object>? QueueArguments { get; private set; }
+    public QueueArgumentsBuilder QueueArgumentsBuilder { get; private set; }
 
     public IResponderConfiguration WithPrefetchCount(ushort prefetchCount)
     {
@@ -82,15 +81,13 @@ internal class ResponderConfiguration : IResponderConfiguration
 
     public IResponderConfiguration WithExpires(TimeSpan expires)
     {
-        InitializedQueueArguments.WithQueueExpires(expires);
+        QueueArgumentsBuilder = QueueArgumentsBuilder.WithExpires(expires);
         return this;
     }
 
     public IResponderConfiguration WithMaxPriority(byte priority)
     {
-        InitializedQueueArguments.WithQueueMaxPriority(priority);
+        QueueArgumentsBuilder = QueueArgumentsBuilder.WithMaxPriority(priority);
         return this;
     }
-
-    private IDictionary<string, object> InitializedQueueArguments => QueueArguments ??= new Dictionary<string, object>();
 }

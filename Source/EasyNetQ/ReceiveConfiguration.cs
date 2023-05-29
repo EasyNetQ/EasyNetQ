@@ -108,8 +108,7 @@ internal class ReceiveConfiguration : IReceiveConfiguration
     public ushort PrefetchCount { get; private set; }
     public bool IsExclusive { get; private set; }
     public bool Durable { get; private set; }
-
-    public IDictionary<string, object>? QueueArguments { get; private set; }
+    public QueueArgumentsBuilder QueueArgumentsBuilder { get; private set; }
 
     public ReceiveConfiguration(ushort defaultPrefetchCount)
     {
@@ -147,7 +146,7 @@ internal class ReceiveConfiguration : IReceiveConfiguration
 
     public IReceiveConfiguration WithExpires(TimeSpan expires)
     {
-        InitializedQueueArguments.WithQueueExpires(expires);
+        QueueArgumentsBuilder = QueueArgumentsBuilder.WithExpires(expires);
         return this;
     }
 
@@ -159,39 +158,37 @@ internal class ReceiveConfiguration : IReceiveConfiguration
 
     public IReceiveConfiguration WithMaxPriority(byte priority)
     {
-        InitializedQueueArguments.WithQueueMaxPriority(priority);
+        QueueArgumentsBuilder = QueueArgumentsBuilder.WithMaxPriority(priority);
         return this;
     }
 
     public IReceiveConfiguration WithMaxLength(int maxLength)
     {
-        InitializedQueueArguments.WithQueueMaxLength(maxLength);
+        QueueArgumentsBuilder = QueueArgumentsBuilder.WithMaxLength(maxLength);
         return this;
     }
 
     public IReceiveConfiguration WithMaxLengthBytes(int maxLengthBytes)
     {
-        InitializedQueueArguments.WithQueueMaxLengthBytes(maxLengthBytes);
+        QueueArgumentsBuilder = QueueArgumentsBuilder.WithMaxLengthBytes(maxLengthBytes);
         return this;
     }
 
     public IReceiveConfiguration WithQueueMode(string queueMode)
     {
-        InitializedQueueArguments.WithQueueMode(queueMode);
+        QueueArgumentsBuilder = QueueArgumentsBuilder.WithQueueMode(queueMode);
         return this;
     }
 
-    public IReceiveConfiguration WithQueueType(string queueType = EasyNetQ.QueueType.Classic)
+    public IReceiveConfiguration WithQueueType(string queueType = QueueType.Classic)
     {
-        InitializedQueueArguments.WithQueueType(queueType);
+        QueueArgumentsBuilder = QueueArgumentsBuilder.WithQueueType(queueType);
         return this;
     }
 
     public IReceiveConfiguration WithSingleActiveConsumer(bool singleActiveConsumer = true)
     {
-        InitializedQueueArguments.WithQueueSingleActiveConsumer(singleActiveConsumer);
+        QueueArgumentsBuilder = QueueArgumentsBuilder.WithSingleActiveConsumer(singleActiveConsumer);
         return this;
     }
-
-    private IDictionary<string, object> InitializedQueueArguments => QueueArguments ??= new Dictionary<string, object>();
 }

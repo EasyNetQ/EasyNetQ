@@ -279,7 +279,7 @@ public class DefaultRpc : IRpc, IDisposable
         var queue = await advancedBus.QueueDeclareAsync(
             queue: routingKey,
             durable: responderConfiguration.Durable,
-            arguments: responderConfiguration.QueueArguments,
+            arguments: responderConfiguration.QueueArgumentsBuilder.Build(),
             cancellationToken: cancellationToken
         ).ConfigureAwait(false);
 

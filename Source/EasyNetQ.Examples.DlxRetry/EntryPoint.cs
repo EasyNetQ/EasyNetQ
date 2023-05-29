@@ -15,23 +15,25 @@ using var bus = RabbitHutch.CreateBus(
 
 await bus.Advanced.QueueDeclareAsync(
     queue: "Events:Failed",
-    arguments: new Dictionary<string, object>()
+    arguments: QueueArgumentsBuilder.Empty
         .WithQueueType(QueueType.Quorum)
-        .WithQueueDeadLetterExchange(Exchange.DefaultName)
-        .WithQueueDeadLetterRoutingKey("Events")
-        .WithQueueMessageTtl(TimeSpan.FromSeconds(5))
-        .WithQueueOverflowType(OverflowType.RejectPublish)
-        .WithQueueDeadLetterStrategy(DeadLetterStrategy.AtLeastOnce)
+        .WithDeadLetterExchange(Exchange.DefaultName)
+        .WithDeadLetterRoutingKey("Events")
+        .WithMessageTtl(TimeSpan.FromSeconds(5))
+        .WithOverflowType(OverflowType.RejectPublish)
+        .WithDeadLetterStrategy(DeadLetterStrategy.AtLeastOnce)
+        .Build()
 );
 
 var eventQueue = await bus.Advanced.QueueDeclareAsync(
     queue: "Events",
-    arguments: new Dictionary<string, object>()
+    arguments: QueueArgumentsBuilder.Empty
         .WithQueueType(QueueType.Quorum)
-        .WithQueueDeadLetterExchange(Exchange.DefaultName)
-        .WithQueueDeadLetterRoutingKey("Events:Failed")
-        .WithQueueOverflowType(OverflowType.RejectPublish)
-        .WithQueueDeadLetterStrategy(DeadLetterStrategy.AtLeastOnce)
+        .WithDeadLetterExchange(Exchange.DefaultName)
+        .WithDeadLetterRoutingKey("Events:Failed")
+        .WithOverflowType(OverflowType.RejectPublish)
+        .WithDeadLetterStrategy(DeadLetterStrategy.AtLeastOnce)
+        .Build()
 );
 
 using var eventsConsumer = bus.Advanced.Consume(eventQueue, (_, _, _) => throw new Exception("Oops"));

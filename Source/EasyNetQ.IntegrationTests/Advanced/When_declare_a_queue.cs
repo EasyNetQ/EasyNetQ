@@ -22,7 +22,7 @@ public class When_declare_a_queue : IDisposable
         {
             await bus.Advanced.QueueDeclareAsync(
                 queue: Guid.NewGuid().ToString("N"),
-                arguments: new Dictionary<string, object>().WithQueueMode(queueMode),
+                arguments: QueueArgumentsBuilder.Empty.WithQueueMode(queueMode).Build(),
                 cancellationToken: cts.Token
             );
         }
@@ -32,7 +32,7 @@ public class When_declare_a_queue : IDisposable
         {
             await bus.Advanced.QueueDeclareAsync(
                 queue: Guid.NewGuid().ToString("N"),
-                arguments: new Dictionary<string, object>().WithQueueType(queueType),
+                arguments: QueueArgumentsBuilder.Empty.WithQueueType(queueType).Build(),
                 cancellationToken: cts.Token
             );
         }

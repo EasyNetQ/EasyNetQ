@@ -65,9 +65,10 @@ public class DeadLetterExchangeAndMessageTtlScheduler : IScheduler
 
         var futureQueue = await advancedBus.QueueDeclareAsync(
             queue: conventions.QueueNamingConvention(typeof(T), delayString),
-            arguments: new Dictionary<string, object>()
-                .WithQueueMessageTtl(delay)
-                .WithQueueDeadLetterExchange(exchange.Name),
+            arguments: QueueArgumentsBuilder.Empty
+                .WithMessageTtl(delay)
+                .WithDeadLetterExchange(exchange.Name)
+                .Build(),
             cancellationToken: cts.Token
         ).ConfigureAwait(false);
 
