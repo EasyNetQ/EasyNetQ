@@ -199,7 +199,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     public virtual async Task PublishAsync(
         string exchange,
         string routingKey,
-        bool mandatory,
+        bool? mandatory,
         IMessage message,
         CancellationToken cancellationToken
     )
@@ -214,7 +214,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     public virtual async Task PublishAsync(
         string exchange,
         string routingKey,
-        bool mandatory,
+        bool? mandatory,
         MessageProperties properties,
         ReadOnlyMemory<byte> body,
         CancellationToken cancellationToken
@@ -222,7 +222,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-        await produceDelegate(new ProduceContext(exchange, routingKey, mandatory, properties, body, serviceResolver, cts.Token)).ConfigureAwait(false);
+        await produceDelegate(new ProduceContext(exchange, routingKey, mandatory ?? configuration.MandatoryPublish, properties, body, serviceResolver, cts.Token)).ConfigureAwait(false);
     }
 
     #endregion
