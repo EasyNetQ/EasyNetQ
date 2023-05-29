@@ -216,9 +216,6 @@ public class When_an_exchange_is_declared : IDisposable
     {
         mockBuilder = new MockBuilder();
 
-        mockBuilder.NextModel.WhenForAnyArgs(x => x.ExchangeDeclare(null, null, false, false, null))
-            .Do(x => { arguments = x[4] as IDictionary; });
-
         exchange = mockBuilder.Bus.Advanced.ExchangeDeclare(
             "my_exchange",
             type: ExchangeType.Direct,
@@ -235,14 +232,6 @@ public class When_an_exchange_is_declared : IDisposable
 
     private readonly MockBuilder mockBuilder;
     private readonly Exchange exchange;
-    private IDictionary arguments;
-
-    [Fact]
-    public void Should_add_correct_arguments()
-    {
-        arguments.Should().NotBeNull();
-        arguments["alternate-exchange"].Should().Be("my.alternate.exchange");
-    }
 
     [Fact]
     public void Should_declare_an_exchange()
@@ -252,7 +241,7 @@ public class When_an_exchange_is_declared : IDisposable
             Arg.Is("direct"),
             Arg.Is(false),
             Arg.Is(true),
-            Arg.Any<IDictionary<string, object>>()
+            Arg.Is<IDictionary<string, object>>(c => (string)c["alternate-exchange"] == "my.alternate.exchange")
         );
     }
 
