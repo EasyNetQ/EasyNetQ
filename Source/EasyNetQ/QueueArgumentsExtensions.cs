@@ -11,7 +11,7 @@ public static class QueueArgumentsExtensions
     /// <param name="arguments">The queue arguments</param>
     /// <param name="queueType">The queue type to set</param>
     /// <returns>The same <paramref name="arguments"/></returns>
-    public static Arguments WithQueueType(this Arguments arguments, string queueType = QueueType.Classic) =>
+    public static Arguments WithQueueType(this Arguments arguments, string queueType) =>
         arguments.WithQueueArgument(QueueArgument.QueueType, queueType);
 
     /// <summary>
@@ -21,7 +21,7 @@ public static class QueueArgumentsExtensions
     /// <param name="arguments">The queue arguments</param>
     /// <param name="queueMode">The queue mode to set</param>
     /// <returns>The same <paramref name="arguments"/></returns>
-    public static Arguments WithQueueMode(this Arguments arguments, string queueMode = QueueMode.Default) =>
+    public static Arguments WithQueueMode(this Arguments arguments, string queueMode) =>
         arguments.WithQueueArgument(QueueArgument.QueueMode, queueMode);
 
     /// <summary>
@@ -114,7 +114,7 @@ public static class QueueArgumentsExtensions
     /// <param name="arguments">The configuration instance</param>
     /// <param name="queueMasterLocator">The queue master locator to set</param>
     /// <returns>The same <paramref name="arguments"/></returns>
-    public static Arguments WithQueueMasterLocator(this Arguments arguments, string queueMasterLocator = QueueMasterLocator.MinMasters) =>
+    public static Arguments WithQueueMasterLocator(this Arguments arguments, string queueMasterLocator) =>
         arguments.WithQueueArgument(QueueArgument.QueueMasterLocator, queueMasterLocator);
 
     /// <summary>
@@ -124,7 +124,7 @@ public static class QueueArgumentsExtensions
     /// <param name="arguments">The configuration instance</param>
     /// <param name="deadLetterStrategy">The dead letter strategy to set</param>
     /// <returns>The same <paramref name="arguments"/></returns>
-    public static Arguments WithQueueDeadLetterStrategy(this Arguments arguments, string deadLetterStrategy = DeadLetterStrategy.AtMostOnce) =>
+    public static Arguments WithQueueDeadLetterStrategy(this Arguments arguments, string deadLetterStrategy) =>
         arguments.WithQueueArgument(QueueArgument.DeadLetterStrategy, deadLetterStrategy);
 
     /// <summary>
@@ -134,7 +134,7 @@ public static class QueueArgumentsExtensions
     /// <param name="arguments">The configuration instance</param>
     /// <param name="overflowType">The overflow type to set</param>
     /// <returns>The same <paramref name="arguments"/></returns>
-    public static Arguments WithQueueOverflowType(this Arguments arguments, string overflowType = OverflowType.DropHead) =>
+    public static Arguments WithQueueOverflowType(this Arguments arguments, string overflowType) =>
         arguments.WithQueueArgument(QueueArgument.Overflow, overflowType);
 
     public static Arguments WithQueueArgument(this Arguments arguments, string key, object value)
