@@ -143,7 +143,7 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
     public IDictionary<string, object>? QueueArguments { get; private set; }
     public IDictionary<string, object>? ExchangeArguments { get; private set; }
 
-    public SubscriptionConfiguration(ushort defaultPrefetchCount)
+    public SubscriptionConfiguration(ushort defaultPrefetchCount, string? queueType = null)
     {
         Topics = new List<string>();
         AutoDelete = false;
@@ -151,6 +151,8 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
         PrefetchCount = defaultPrefetchCount;
         IsExclusive = false;
         Durable = true;
+        if (queueType != null)
+            QueueArguments = QueueArguments.WithQueueType(queueType);
     }
 
     public ISubscriptionConfiguration WithTopic(string topic)

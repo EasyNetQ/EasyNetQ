@@ -31,6 +31,6 @@ public class SubscriptionConfigurationTests
     {
         var configuration = new SubscriptionConfiguration(99);
         configuration.WithQueueType(queueType);
-        configuration.QueueArguments.Should().BeEquivalentTo(new Dictionary<string, object> { { "x-queue-type", "classic" } });
+        configuration.QueueArguments.Should().BeEquivalentTo(new Dictionary<string, object> { { "x-queue-type", queueType } });
     }
 }

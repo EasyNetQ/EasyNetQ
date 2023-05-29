@@ -12,7 +12,7 @@ public static class QueueArgumentsExtensions
     /// <param name="queueType">The queue type to set</param>
     /// <returns>The same <paramref name="arguments"/></returns>
     public static Arguments WithQueueType(this Arguments? arguments, string queueType = QueueType.Classic) =>
-        WithQueueArgument(arguments, QueueArgument.QueueType, queueType);
+        arguments.WithQueueArgument(QueueArgument.QueueType, queueType);
 
     /// <summary>
     ///     Sets queue mode.
@@ -22,7 +22,7 @@ public static class QueueArgumentsExtensions
     /// <param name="queueMode">The queue mode to set</param>
     /// <returns>The same <paramref name="arguments"/></returns>
     public static Arguments WithQueueMode(this Arguments? arguments, string queueMode = QueueMode.Default) =>
-        WithQueueArgument(arguments, QueueArgument.QueueMode, queueMode);
+        arguments.WithQueueArgument(QueueArgument.QueueMode, queueMode);
 
     /// <summary>
     ///     Sets expires of the queue.
@@ -32,7 +32,7 @@ public static class QueueArgumentsExtensions
     /// <param name="expires">The expires to set</param>
     /// <returns>The same <paramref name="arguments"/></returns>
     public static Arguments WithQueueExpires(this Arguments? arguments, TimeSpan expires) =>
-        WithQueueArgument(arguments, QueueArgument.Expires, (int)expires.TotalMilliseconds);
+        arguments.WithQueueArgument(QueueArgument.Expires, (int)expires.TotalMilliseconds);
 
     /// <summary>
     ///     Sets maximum priority the queue should support.
@@ -41,7 +41,7 @@ public static class QueueArgumentsExtensions
     /// <param name="maxPriority">The maximum priority to set, should be a positive integer between 1 and 255</param>
     /// <returns>The same <paramref name="arguments"/></returns>
     public static Arguments WithQueueMaxPriority(this Arguments? arguments, byte maxPriority) =>
-        WithQueueArgument(arguments, QueueArgument.MaxPriority, maxPriority);
+        arguments.WithQueueArgument(QueueArgument.MaxPriority, maxPriority);
 
     /// <summary>
     ///     Sets maximum queue length. The maximum number of ready messages that may exist on the queue.
@@ -52,7 +52,7 @@ public static class QueueArgumentsExtensions
     /// <param name="maxLength">The maximum length to set</param>
     /// <returns>The same <paramref name="arguments"/></returns>
     public static Arguments WithQueueMaxLength(this Arguments? arguments, int maxLength) =>
-        WithQueueArgument(arguments, QueueArgument.MaxLength, maxLength);
+        arguments.WithQueueArgument(QueueArgument.MaxLength, maxLength);
 
     /// <summary>
     ///     Sets maximum queue length in bytes. The maximum size of the queue in bytes.
@@ -63,7 +63,7 @@ public static class QueueArgumentsExtensions
     /// <param name="maxLengthBytes">The maximum queue length to set</param>
     /// <returns>The same <paramref name="arguments"/></returns>
     public static Arguments WithQueueMaxLengthBytes(this Arguments? arguments, int maxLengthBytes) =>
-        WithQueueArgument(arguments, QueueArgument.MaxLengthBytes, maxLengthBytes);
+        arguments.WithQueueArgument(QueueArgument.MaxLengthBytes, maxLengthBytes);
 
     /// <summary>
     ///     Enables single active consumer.
@@ -111,11 +111,11 @@ public static class QueueArgumentsExtensions
     ///     Sets queue master locator.
     ///     Valid types are min-masters, client-local and random, see <see cref="QueueMasterLocator"/>.
     /// </summary>
-    /// <param name="configuration">The configuration instance</param>
+    /// <param name="arguments">The configuration instance</param>
     /// <param name="queueMasterLocator">The queue master locator to set</param>
-    /// <returns>The same <paramref name="configuration"/></returns>
-    public static Arguments WithQueueMasterLocator(this Arguments? configuration, string queueMasterLocator = QueueMasterLocator.MinMasters) =>
-        configuration.WithQueueArgument(QueueArgument.QueueMasterLocator, queueMasterLocator);
+    /// <returns>The same <paramref name="arguments"/></returns>
+    public static Arguments WithQueueMasterLocator(this Arguments? arguments, string queueMasterLocator = QueueMasterLocator.MinMasters) =>
+        arguments.WithQueueArgument(QueueArgument.QueueMasterLocator, queueMasterLocator);
 
     /// <summary>
     ///     Sets dead letter strategy.
@@ -134,12 +134,12 @@ public static class QueueArgumentsExtensions
     /// <param name="arguments">The configuration instance</param>
     /// <param name="overflowType">The overflow type to set</param>
     /// <returns>The same <paramref name="arguments"/></returns>
-    public static Arguments WithQueueOverflowType(this Arguments? arguments, string overflowType = OverflowType.DropHead)
-        => arguments.WithQueueArgument(QueueArgument.Overflow, overflowType);
+    public static Arguments WithQueueOverflowType(this Arguments? arguments, string overflowType = OverflowType.DropHead) =>
+        arguments.WithQueueArgument(QueueArgument.Overflow, overflowType);
 
     public static Arguments WithQueueArgument(this Arguments? arguments, string key, object value)
     {
-        (arguments ??= new Dictionary<string, object>()).Add(key, value);
+        (arguments ??= new Dictionary<string, object>())[key] = value;
         return arguments;
     }
 }

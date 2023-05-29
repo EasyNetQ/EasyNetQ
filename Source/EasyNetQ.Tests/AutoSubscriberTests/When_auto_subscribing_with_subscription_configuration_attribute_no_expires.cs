@@ -48,7 +48,7 @@ public class When_auto_subscribing_with_subscription_configuration_attribute_no_
         subscriptionConfiguration.AutoDelete.Should().BeTrue();
         subscriptionConfiguration.PrefetchCount.Should().Be(10);
         subscriptionConfiguration.Priority.Should().Be(10);
-        subscriptionConfiguration.QueueArguments.Should().BeEquivalentTo(new Dictionary<string, object> { { "x-expires", 10 } });
+        subscriptionConfiguration.QueueArguments.Should().BeNull();
     }
 
     // Discovered by reflection over test assembly, do not remove.
