@@ -40,27 +40,27 @@ public interface IQueueDeclareConfiguration
 
 internal class QueueDeclareConfiguration : IQueueDeclareConfiguration
 {
-    public bool Durable { get; private set; } = true;
-    public bool Exclusive { get; private set; }
-    public bool AutoDelete { get; private set; }
+    public bool IsDurable { get; private set; } = true;
+    public bool IsExclusive { get; private set; }
+    public bool IsAutoDelete { get; private set; }
 
     public IDictionary<string, object>? Arguments { get; private set; }
 
     public IQueueDeclareConfiguration AsDurable(bool isDurable)
     {
-        Durable = isDurable;
+        IsDurable = isDurable;
         return this;
     }
 
     public IQueueDeclareConfiguration AsExclusive(bool isExclusive)
     {
-        Exclusive = isExclusive;
+        IsExclusive = isExclusive;
         return this;
     }
 
     public IQueueDeclareConfiguration AsAutoDelete(bool isAutoDelete)
     {
-        AutoDelete = isAutoDelete;
+        IsAutoDelete = isAutoDelete;
         return this;
     }
 

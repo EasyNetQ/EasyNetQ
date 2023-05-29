@@ -29,9 +29,9 @@ public static partial class AdvancedBusExtensions
 
         return bus.QueueDeclareAsync(
             queue: queue,
-            durable: queueDeclareConfiguration.Durable,
-            exclusive: queueDeclareConfiguration.Exclusive,
-            autoDelete: queueDeclareConfiguration.AutoDelete,
+            durable: queueDeclareConfiguration.IsDurable,
+            exclusive: queueDeclareConfiguration.IsExclusive,
+            autoDelete: queueDeclareConfiguration.IsAutoDelete,
             arguments: queueDeclareConfiguration.Arguments,
             cancellationToken: cancellationToken
         );
@@ -81,8 +81,8 @@ public static partial class AdvancedBusExtensions
         return bus.ExchangeDeclareAsync(
             exchange: exchange,
             type: exchangeDeclareConfiguration.Type,
-            durable: exchangeDeclareConfiguration.Durable,
-            autoDelete: exchangeDeclareConfiguration.AutoDelete,
+            durable: exchangeDeclareConfiguration.IsDurable,
+            autoDelete: exchangeDeclareConfiguration.IsAutoDelete,
             arguments: exchangeDeclareConfiguration.Arguments,
             cancellationToken: cancellationToken
         );
