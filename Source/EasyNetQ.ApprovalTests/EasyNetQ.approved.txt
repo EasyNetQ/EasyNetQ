@@ -793,7 +793,7 @@ namespace EasyNetQ
         public static EasyNetQ.IQueueDeclareConfiguration WithExpires(this EasyNetQ.IQueueDeclareConfiguration configuration, System.TimeSpan expires) { }
         public static EasyNetQ.IQueueDeclareConfiguration WithMaxLength(this EasyNetQ.IQueueDeclareConfiguration configuration, int maxLength) { }
         public static EasyNetQ.IQueueDeclareConfiguration WithMaxLengthBytes(this EasyNetQ.IQueueDeclareConfiguration configuration, int maxLengthBytes) { }
-        public static EasyNetQ.IQueueDeclareConfiguration WithMaxPriority(this EasyNetQ.IQueueDeclareConfiguration configuration, int maxPriority) { }
+        public static EasyNetQ.IQueueDeclareConfiguration WithMaxPriority(this EasyNetQ.IQueueDeclareConfiguration configuration, byte maxPriority) { }
         public static EasyNetQ.IQueueDeclareConfiguration WithMessageTtl(this EasyNetQ.IQueueDeclareConfiguration configuration, System.TimeSpan messageTtl) { }
         public static EasyNetQ.IQueueDeclareConfiguration WithOverflowType(this EasyNetQ.IQueueDeclareConfiguration configuration, string overflowType = "drop-head") { }
         public static EasyNetQ.IQueueDeclareConfiguration WithQueueMasterLocator(this EasyNetQ.IQueueDeclareConfiguration configuration, string queueMasterLocator = "min-masters") { }
