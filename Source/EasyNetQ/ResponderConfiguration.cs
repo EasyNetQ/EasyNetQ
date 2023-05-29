@@ -93,5 +93,4 @@ internal class ResponderConfiguration : IResponderConfiguration
     }
 
     private IDictionary<string, object> InitializedQueueArguments => QueueArguments ??= new Dictionary<string, object>();
-
 }
