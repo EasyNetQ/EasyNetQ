@@ -19,7 +19,7 @@ await bus.Advanced.QueueDeclareAsync(
         .WithQueueType(QueueType.Quorum)
         .WithQueueDeadLetterExchange(Exchange.DefaultName)
         .WithQueueDeadLetterRoutingKey("Events")
-        .WithQueueMessageTtl(TimeSpan.FromSeconds(5)) // A fixed delay between retry attempts
+        .WithQueueMessageTtl(TimeSpan.FromSeconds(5))
         .WithQueueOverflowType(OverflowType.RejectPublish)
         .WithQueueDeadLetterStrategy(DeadLetterStrategy.AtLeastOnce)
 );
