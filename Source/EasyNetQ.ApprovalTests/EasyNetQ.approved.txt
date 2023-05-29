@@ -278,11 +278,17 @@ namespace EasyNetQ
         public const string AlternateExchange = "alternate-exchange";
         public const string DelayedType = "x-delayed-type";
     }
+    public readonly struct ExchangeArgumentsBuilder
+    {
+        public static EasyNetQ.ExchangeArgumentsBuilder Empty { get; }
+        public System.Collections.Generic.IDictionary<string, object>? Build() { }
+        public EasyNetQ.ExchangeArgumentsBuilder WithArgument(string name, object value) { }
+        public static EasyNetQ.ExchangeArgumentsBuilder From(System.Collections.Generic.IDictionary<string, object> arguments) { }
+    }
     public static class ExchangeArgumentsExtensions
     {
-        public static System.Collections.Generic.IDictionary<string, object> WithExchangeAlternate(this System.Collections.Generic.IDictionary<string, object> arguments, string alternateExchange) { }
-        public static System.Collections.Generic.IDictionary<string, object> WithExchangeArgument(this System.Collections.Generic.IDictionary<string, object> arguments, string key, object value) { }
-        public static System.Collections.Generic.IDictionary<string, object> WithExchangeDelayedType(this System.Collections.Generic.IDictionary<string, object> arguments, string delayedType) { }
+        public static EasyNetQ.ExchangeArgumentsBuilder WithAlternateExchange(this EasyNetQ.ExchangeArgumentsBuilder builder, string alternateExchange) { }
+        public static EasyNetQ.ExchangeArgumentsBuilder WithDelayedExchangeType(this EasyNetQ.ExchangeArgumentsBuilder arguments, string delayedType) { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Interface)]
     public sealed class ExchangeAttribute : System.Attribute
@@ -802,22 +808,12 @@ namespace EasyNetQ
         public const string QueueType = "x-queue-type";
         public const string SingleActiveConsumer = "x-single-active-consumer";
     }
-    public static class QueueArgumentsExtensions
+    public readonly struct QueueArgumentsBuilder
     {
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueArgument(this System.Collections.Generic.IDictionary<string, object> arguments, string key, object value) { }
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueDeadLetterExchange(this System.Collections.Generic.IDictionary<string, object> arguments, string deadLetterExchange) { }
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueDeadLetterRoutingKey(this System.Collections.Generic.IDictionary<string, object> arguments, string deadLetterRoutingKey) { }
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueDeadLetterStrategy(this System.Collections.Generic.IDictionary<string, object> arguments, string deadLetterStrategy) { }
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueExpires(this System.Collections.Generic.IDictionary<string, object> arguments, System.TimeSpan expires) { }
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueMasterLocator(this System.Collections.Generic.IDictionary<string, object> arguments, string queueMasterLocator) { }
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueMaxLength(this System.Collections.Generic.IDictionary<string, object> arguments, int maxLength) { }
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueMaxLengthBytes(this System.Collections.Generic.IDictionary<string, object> arguments, int maxLengthBytes) { }
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueMaxPriority(this System.Collections.Generic.IDictionary<string, object> arguments, byte maxPriority) { }
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueMessageTtl(this System.Collections.Generic.IDictionary<string, object> arguments, System.TimeSpan messageTtl) { }
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueMode(this System.Collections.Generic.IDictionary<string, object> arguments, string queueMode) { }
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueOverflowType(this System.Collections.Generic.IDictionary<string, object> arguments, string overflowType) { }
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueSingleActiveConsumer(this System.Collections.Generic.IDictionary<string, object> arguments, bool singleActiveConsumer = true) { }
-        public static System.Collections.Generic.IDictionary<string, object> WithQueueType(this System.Collections.Generic.IDictionary<string, object> arguments, string queueType) { }
+        public static EasyNetQ.QueueArgumentsBuilder Empty { get; }
+        public System.Collections.Generic.IDictionary<string, object>? Build() { }
+        public EasyNetQ.QueueArgumentsBuilder WithArgument(string name, object value) { }
+        public static EasyNetQ.QueueArgumentsBuilder From(System.Collections.Generic.IDictionary<string, object> arguments) { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Interface)]
     public sealed class QueueAttribute : System.Attribute
@@ -854,6 +850,22 @@ namespace EasyNetQ
         public const string Lazy = "lazy";
     }
     public delegate string QueueNameConvention(System.Type messageType, string subscriberId);
+    public static class QueueQueueArgumentsBuilderExtensions
+    {
+        public static EasyNetQ.QueueArgumentsBuilder WithDeadLetterExchange(this EasyNetQ.QueueArgumentsBuilder builder, string deadLetterExchange) { }
+        public static EasyNetQ.QueueArgumentsBuilder WithDeadLetterRoutingKey(this EasyNetQ.QueueArgumentsBuilder builder, string deadLetterRoutingKey) { }
+        public static EasyNetQ.QueueArgumentsBuilder WithDeadLetterStrategy(this EasyNetQ.QueueArgumentsBuilder builder, string deadLetterStrategy) { }
+        public static EasyNetQ.QueueArgumentsBuilder WithExpires(this EasyNetQ.QueueArgumentsBuilder builder, System.TimeSpan expires) { }
+        public static EasyNetQ.QueueArgumentsBuilder WithMaxLength(this EasyNetQ.QueueArgumentsBuilder builder, int maxLength) { }
+        public static EasyNetQ.QueueArgumentsBuilder WithMaxLengthBytes(this EasyNetQ.QueueArgumentsBuilder builder, int maxLengthBytes) { }
+        public static EasyNetQ.QueueArgumentsBuilder WithMaxPriority(this EasyNetQ.QueueArgumentsBuilder builder, byte maxPriority) { }
+        public static EasyNetQ.QueueArgumentsBuilder WithMessageTtl(this EasyNetQ.QueueArgumentsBuilder builder, System.TimeSpan messageTtl) { }
+        public static EasyNetQ.QueueArgumentsBuilder WithOverflowType(this EasyNetQ.QueueArgumentsBuilder builder, string overflowType) { }
+        public static EasyNetQ.QueueArgumentsBuilder WithQueueMasterLocator(this EasyNetQ.QueueArgumentsBuilder builder, string queueMasterLocator) { }
+        public static EasyNetQ.QueueArgumentsBuilder WithQueueMode(this EasyNetQ.QueueArgumentsBuilder builder, string queueMode) { }
+        public static EasyNetQ.QueueArgumentsBuilder WithQueueType(this EasyNetQ.QueueArgumentsBuilder builder, string queueType) { }
+        public static EasyNetQ.QueueArgumentsBuilder WithSingleActiveConsumer(this EasyNetQ.QueueArgumentsBuilder builder, bool singleActiveConsumer) { }
+    }
     public readonly struct QueueStats
     {
         public QueueStats(ulong messagesCount, ulong consumersCount) { }

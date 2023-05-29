@@ -23,8 +23,8 @@ public readonly struct ExchangeArgumentsBuilder
 
 public static class ExchangeArgumentsExtensions
 {
-    public static ExchangeArgumentsBuilder WithAlternateExchange(this ExchangeArgumentsBuilder arguments, string alternateExchange) =>
-        arguments.WithArgument(ExchangeArgument.AlternateExchange, alternateExchange);
+    public static ExchangeArgumentsBuilder WithAlternateExchange(this ExchangeArgumentsBuilder builder, string alternateExchange) =>
+        builder.WithArgument(ExchangeArgument.AlternateExchange, alternateExchange);
 
     public static ExchangeArgumentsBuilder WithDelayedExchangeType(this ExchangeArgumentsBuilder arguments, string delayedType) =>
         arguments.WithArgument(ExchangeArgument.DelayedType, delayedType);
