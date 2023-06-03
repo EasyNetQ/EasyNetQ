@@ -7,7 +7,7 @@ public class When_pull_messages_batch : IDisposable
 {
     public When_pull_messages_batch(RabbitMQFixture rmqFixture)
     {
-        bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=-1;publisherConfirms=True");
+        bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=-1");
     }
 
     public void Dispose()
@@ -26,10 +26,10 @@ public class When_pull_messages_batch : IDisposable
             Guid.NewGuid().ToString("N"), cts.Token
         );
         await bus.Advanced.PublishAsync(
-            Exchange.Default, queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
+            Exchange.Default, queue.Name, false, true, new MessageProperties(), Array.Empty<byte>(), cts.Token
         );
         await bus.Advanced.PublishAsync(
-            Exchange.Default, queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
+            Exchange.Default, queue.Name, false, true, new MessageProperties(), Array.Empty<byte>(), cts.Token
         );
 
         using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
@@ -57,10 +57,10 @@ public class When_pull_messages_batch : IDisposable
             Guid.NewGuid().ToString("N"), cts.Token
         );
         await bus.Advanced.PublishAsync(
-            Exchange.Default, queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
+            Exchange.Default, queue.Name, false, true, new MessageProperties(), Array.Empty<byte>(), cts.Token
         );
         await bus.Advanced.PublishAsync(
-            Exchange.Default, queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
+            Exchange.Default, queue.Name, false, true, new MessageProperties(), Array.Empty<byte>(), cts.Token
         );
 
         using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
@@ -88,10 +88,10 @@ public class When_pull_messages_batch : IDisposable
             Guid.NewGuid().ToString("N"), cts.Token
         );
         await bus.Advanced.PublishAsync(
-            Exchange.Default, queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
+            Exchange.Default, queue.Name, false, true, new MessageProperties(), Array.Empty<byte>(), cts.Token
         );
         await bus.Advanced.PublishAsync(
-            Exchange.Default, queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
+            Exchange.Default, queue.Name, false, true, new MessageProperties(), Array.Empty<byte>(), cts.Token
         );
 
         using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
@@ -119,10 +119,10 @@ public class When_pull_messages_batch : IDisposable
             Guid.NewGuid().ToString("N"), cts.Token
         );
         await bus.Advanced.PublishAsync(
-            Exchange.Default, queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
+            Exchange.Default, queue.Name, false, true, new MessageProperties(), Array.Empty<byte>(), cts.Token
         );
         await bus.Advanced.PublishAsync(
-            Exchange.Default, queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
+            Exchange.Default, queue.Name, false, true, new MessageProperties(), Array.Empty<byte>(), cts.Token
         );
 
         using var consumer = bus.Advanced.CreatePullingConsumer(queue);

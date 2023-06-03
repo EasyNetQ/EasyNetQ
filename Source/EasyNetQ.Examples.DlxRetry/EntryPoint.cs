@@ -34,6 +34,6 @@ var eventQueue = await bus.Advanced.QueueDeclareAsync(
 
 using var eventsConsumer = bus.Advanced.Consume(eventQueue, (_, _, _) => throw new Exception("Oops"));
 
-await bus.Advanced.PublishAsync(Exchange.Default, "Events", true, new MessageProperties(), ReadOnlyMemory<byte>.Empty);
+await bus.Advanced.PublishAsync(Exchange.Default, "Events", true, false, new MessageProperties(), ReadOnlyMemory<byte>.Empty);
 
 await completionTcs.Task;

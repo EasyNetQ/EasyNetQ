@@ -28,6 +28,7 @@ while (!cts.IsCancellationRequested)
             Exchange.Default,
             "Events",
             true,
+            false,
             new MessageProperties(),
             ReadOnlyMemory<byte>.Empty,
             cts.Token

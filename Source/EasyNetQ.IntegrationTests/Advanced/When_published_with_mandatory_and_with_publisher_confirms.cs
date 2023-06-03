@@ -9,7 +9,7 @@ public class When_published_with_mandatory_and_with_publisher_confirms : IDispos
 
     public When_published_with_mandatory_and_with_publisher_confirms(RabbitMQFixture rmqFixture)
     {
-        bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=-1;publisherConfirms=True");
+        bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=-1");
     }
 
     public void Dispose() => bus.Dispose();
@@ -25,7 +25,7 @@ public class When_published_with_mandatory_and_with_publisher_confirms : IDispos
 
         await Assert.ThrowsAsync<PublishReturnedException>(
             () => bus.Advanced.PublishAsync(
-                exchange, "#", true, new MessageProperties(), Array.Empty<byte>(), cts.Token
+                exchange, "#", true, true, new MessageProperties(), Array.Empty<byte>(), cts.Token
             )
         );
     }

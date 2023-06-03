@@ -8,7 +8,7 @@ public class When_publish_to_non_existent_exchange : IDisposable
 {
     public When_publish_to_non_existent_exchange(RabbitMQFixture rmqFixture)
     {
-        bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=-1;publisherConfirms=True");
+        bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=-1");
     }
 
     public void Dispose() => bus.Dispose();
@@ -23,11 +23,11 @@ public class When_publish_to_non_existent_exchange : IDisposable
         await bus.Advanced.ExchangeDeclareAsync("existent", ExchangeType.Topic, cancellationToken: cts.Token);
         await Assert.ThrowsAsync<AlreadyClosedException>(() =>
             bus.Advanced.PublishAsync(
-                new Exchange("non-existent"), "#", false, new MessageProperties(), Array.Empty<byte>(), cts.Token
+                new Exchange("non-existent"), "#", false, true, new MessageProperties(), Array.Empty<byte>(), cts.Token
             )
         );
         await bus.Advanced.PublishAsync(
-            new Exchange("existent"), "#", false, new MessageProperties(), Array.Empty<byte>(), cts.Token
+            new Exchange("existent"), "#", false, true, new MessageProperties(), Array.Empty<byte>(), cts.Token
         );
     }
 }

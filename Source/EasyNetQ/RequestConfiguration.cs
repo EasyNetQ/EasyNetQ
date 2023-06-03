@@ -35,6 +35,13 @@ public interface IRequestConfiguration
     /// <param name="headers">Headers to set</param>
     /// <returns>Returns a reference to itself</returns>
     IRequestConfiguration WithHeaders(IDictionary<string, object?> headers);
+
+    /// <summary>
+    /// Set publisher confirms
+    /// </summary>
+    /// <param name="confirms">Publisher confirms flag to set</param>
+    /// <returns>Returns a reference to itself</returns>
+    IRequestConfiguration WithPublisherConfirms(bool confirms);
 }
 
 internal class RequestConfiguration : IRequestConfiguration
@@ -49,6 +56,7 @@ internal class RequestConfiguration : IRequestConfiguration
     public TimeSpan Expiration { get; private set; }
     public byte? Priority { get; private set; }
     public IDictionary<string, object?>? Headers { get; private set; }
+    public bool PublisherConfirms { get; private set; }
 
     public IRequestConfiguration WithPriority(byte priority)
     {
@@ -71,6 +79,12 @@ internal class RequestConfiguration : IRequestConfiguration
     public IRequestConfiguration WithHeaders(IDictionary<string, object?> headers)
     {
         Headers = headers;
+        return this;
+    }
+
+    public IRequestConfiguration WithPublisherConfirms(bool confirms)
+    {
+        PublisherConfirms = confirms;
         return this;
     }
 }

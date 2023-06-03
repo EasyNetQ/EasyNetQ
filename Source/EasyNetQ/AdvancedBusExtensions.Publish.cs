@@ -22,6 +22,7 @@ public static partial class AdvancedBusExtensions
     /// If this flag is true, the server will return an unroutable message with a Return method.
     /// If this flag is false, the server silently drops the message.
     /// </param>
+    /// <param name="confirms">todo</param>
     /// <param name="message">The message to publish</param>
     /// <param name="cancellationToken">The cancellation token</param>
     public static Task PublishAsync(
@@ -29,9 +30,10 @@ public static partial class AdvancedBusExtensions
         in Exchange exchange,
         string routingKey,
         bool? mandatory,
+        bool? confirms,
         IMessage message,
         CancellationToken cancellationToken = default
-    ) => bus.PublishAsync(exchange.Name, routingKey, mandatory, message, cancellationToken);
+    ) => bus.PublishAsync(exchange.Name, routingKey, mandatory, confirms, message, cancellationToken);
 
     /// <summary>
     /// Publish a message as a byte array.
@@ -48,6 +50,7 @@ public static partial class AdvancedBusExtensions
     /// If this flag is true, the server will return an unroutable message with a Return method.
     /// If this flag is false, the server silently drops the message.
     /// </param>
+    /// <param name="confirms">todo</param>
     /// <param name="properties">The message properties</param>
     /// <param name="body">The message body</param>
     /// <param name="cancellationToken">The cancellation token</param>
@@ -56,10 +59,11 @@ public static partial class AdvancedBusExtensions
         in Exchange exchange,
         string routingKey,
         bool? mandatory,
+        bool? confirms,
         in MessageProperties properties,
         in ReadOnlyMemory<byte> body,
         CancellationToken cancellationToken = default
-    ) => bus.PublishAsync(exchange.Name, routingKey, mandatory, properties, body, cancellationToken);
+    ) => bus.PublishAsync(exchange.Name, routingKey, mandatory, confirms, properties, body, cancellationToken);
 
     /// <summary>
     /// Publish a message as a byte array.
@@ -77,6 +81,7 @@ public static partial class AdvancedBusExtensions
     /// If this flag is true, the server will return an unroutable message with a Return method.
     /// If this flag is false, the server silently drops the message.
     /// </param>
+    /// <param name="confirms">todo</param>
     /// <param name="messageProperties">The message properties</param>
     /// <param name="body">The message body</param>
     /// <param name="cancellationToken">The cancellation token</param>
@@ -85,12 +90,13 @@ public static partial class AdvancedBusExtensions
         in Exchange exchange,
         string routingKey,
         bool? mandatory,
+        bool? confirms,
         in MessageProperties messageProperties,
         in ReadOnlyMemory<byte> body,
         CancellationToken cancellationToken = default
     )
     {
-        bus.PublishAsync(exchange, routingKey, mandatory, messageProperties, body, cancellationToken)
+        bus.PublishAsync(exchange, routingKey, mandatory, confirms, messageProperties, body, cancellationToken)
             .GetAwaiter()
             .GetResult();
     }
@@ -111,6 +117,7 @@ public static partial class AdvancedBusExtensions
     /// If this flag is true, the server will return an unroutable message with a Return method.
     /// If this flag is false, the server silently drops the message.
     /// </param>
+    /// <param name="confirms">todo</param>
     /// <param name="messageProperties">The message properties</param>
     /// <param name="body">The message body</param>
     /// <param name="cancellationToken">The cancellation token</param>
@@ -119,12 +126,13 @@ public static partial class AdvancedBusExtensions
         string exchange,
         string routingKey,
         bool? mandatory,
+        bool? confirms,
         in MessageProperties messageProperties,
         in ReadOnlyMemory<byte> body,
         CancellationToken cancellationToken = default
     )
     {
-        bus.PublishAsync(exchange, routingKey, mandatory, messageProperties, body, cancellationToken)
+        bus.PublishAsync(exchange, routingKey, mandatory, confirms, messageProperties, body, cancellationToken)
             .GetAwaiter()
             .GetResult();
     }
