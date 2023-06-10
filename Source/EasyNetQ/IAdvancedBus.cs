@@ -29,8 +29,9 @@ public interface IAdvancedBus
 
     /// <summary>
     /// Publish a message as a .NET type when the type is only known at runtime.
-    /// Task completes after publish has completed. If publisherConfirms=true is set in the connection string,
-    /// the task completes after an ACK is received. The task will throw on either NACK or timeout.
+    /// Task completes after publish has completed.
+    /// If publisher confirms enabled the task completes after an ACK is received.
+    /// The task will throw on either NACK or timeout.
     /// </summary>
     /// <param name="exchange">The exchange to publish to</param>
     /// <param name="routingKey">
@@ -41,7 +42,11 @@ public interface IAdvancedBus
     /// If this flag is true, the server will return an unroutable message with a Return method.
     /// If this flag is false, the server silently drops the message.
     /// </param>
-    /// <param name="publisherConfirms">todo</param>
+    /// <param name="publisherConfirms">
+    /// Overrides ConnectionConfiguration.PublisherConfirms per request.
+    /// If this flag is true the task completes after an ACK is received.
+    /// If this flag is null value from ConnectionConfiguration.PublisherConfirms will be used.
+    /// </param>
     /// <param name="message">The message to publish</param>
     /// <param name="cancellationToken">The cancellation token</param>
     Task PublishAsync(
@@ -54,9 +59,10 @@ public interface IAdvancedBus
     );
 
     /// <summary>
-    /// Publish a message as a byte array.
-    /// Task completes after publish has completed. If publisherConfirms=true is set in the connection string,
-    /// the task completes after an ACK is received. The task will throw on either NACK or timeout.
+    /// Publish a message as a .NET type when the type is only known at runtime.
+    /// Task completes after publish has completed.
+    /// If publisher confirms enabled the task completes after an ACK is received.
+    /// The task will throw on either NACK or timeout.
     /// </summary>
     /// <param name="exchange">The exchange to publish to</param>
     /// <param name="routingKey">
@@ -67,7 +73,11 @@ public interface IAdvancedBus
     /// If this flag is true, the server will return an unroutable message with a Return method.
     /// If this flag is false, the server silently drops the message.
     /// </param>
-    /// <param name="publisherConfirms">todo</param>
+    /// <param name="publisherConfirms">
+    /// Overrides ConnectionConfiguration.PublisherConfirms per request.
+    /// If this flag is true the task completes after an ACK is received.
+    /// If this flag is null value from ConnectionConfiguration.PublisherConfirms will be used.
+    /// </param>
     /// <param name="properties">The message properties</param>
     /// <param name="body">The message body</param>
     /// <param name="cancellationToken">The cancellation token</param>
