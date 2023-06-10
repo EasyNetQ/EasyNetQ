@@ -41,14 +41,14 @@ public interface IAdvancedBus
     /// If this flag is true, the server will return an unroutable message with a Return method.
     /// If this flag is false, the server silently drops the message.
     /// </param>
-    /// <param name="confirms">todo</param>
+    /// <param name="publisherConfirms">todo</param>
     /// <param name="message">The message to publish</param>
     /// <param name="cancellationToken">The cancellation token</param>
     Task PublishAsync(
         string exchange,
         string routingKey,
         bool? mandatory,
-        bool? confirms,
+        bool? publisherConfirms,
         IMessage message,
         CancellationToken cancellationToken = default
     );
@@ -67,7 +67,7 @@ public interface IAdvancedBus
     /// If this flag is true, the server will return an unroutable message with a Return method.
     /// If this flag is false, the server silently drops the message.
     /// </param>
-    /// <param name="confirms">todo</param>
+    /// <param name="publisherConfirms">todo</param>
     /// <param name="properties">The message properties</param>
     /// <param name="body">The message body</param>
     /// <param name="cancellationToken">The cancellation token</param>
@@ -75,7 +75,7 @@ public interface IAdvancedBus
         string exchange,
         string routingKey,
         bool? mandatory,
-        bool? confirms,
+        bool? publisherConfirms,
         MessageProperties properties,
         ReadOnlyMemory<byte> body,
         CancellationToken cancellationToken = default

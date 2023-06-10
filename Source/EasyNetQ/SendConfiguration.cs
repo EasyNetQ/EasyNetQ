@@ -24,9 +24,9 @@ public interface ISendConfiguration
     /// <summary>
     /// Set publisher confirms
     /// </summary>
-    /// <param name="confirms">Publisher confirms flag to set</param>
+    /// <param name="publisherConfirms">Publisher confirms flag to set</param>
     /// <returns>Returns a reference to itself</returns>
-    ISendConfiguration WithPublisherConfirms(bool confirms);
+    ISendConfiguration WithPublisherConfirms(bool publisherConfirms);
 }
 
 internal class SendConfiguration : ISendConfiguration
@@ -48,9 +48,9 @@ internal class SendConfiguration : ISendConfiguration
         return this;
     }
 
-    public ISendConfiguration WithPublisherConfirms(bool confirms)
+    public ISendConfiguration WithPublisherConfirms(bool publisherConfirms)
     {
-        PublisherConfirms = confirms;
+        PublisherConfirms = publisherConfirms;
         return this;
     }
 }

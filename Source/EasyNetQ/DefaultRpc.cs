@@ -230,7 +230,7 @@ public class DefaultRpc : IRpc, IDisposable
         TimeSpan expiration,
         byte? priority,
         bool? mandatory,
-        bool? confirms,
+        bool? publisherConfirms,
         IDictionary<string, object?>? headers,
         CancellationToken cancellationToken
     )
@@ -253,7 +253,7 @@ public class DefaultRpc : IRpc, IDisposable
         };
 
         var requestMessage = new Message<TRequest>(request, properties);
-        await advancedBus.PublishAsync(exchange.Name, routingKey, mandatory, confirms, requestMessage, cancellationToken)
+        await advancedBus.PublishAsync(exchange.Name, routingKey, mandatory, publisherConfirms, requestMessage, cancellationToken)
             .ConfigureAwait(false);
     }
 

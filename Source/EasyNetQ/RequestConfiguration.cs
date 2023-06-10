@@ -39,9 +39,9 @@ public interface IRequestConfiguration
     /// <summary>
     /// Set publisher confirms
     /// </summary>
-    /// <param name="confirms">Publisher confirms flag to set</param>
+    /// <param name="publisherConfirms">Publisher confirms flag to set</param>
     /// <returns>Returns a reference to itself</returns>
-    IRequestConfiguration WithPublisherConfirms(bool confirms);
+    IRequestConfiguration WithPublisherConfirms(bool publisherConfirms);
 }
 
 internal class RequestConfiguration : IRequestConfiguration
@@ -82,9 +82,9 @@ internal class RequestConfiguration : IRequestConfiguration
         return this;
     }
 
-    public IRequestConfiguration WithPublisherConfirms(bool confirms)
+    public IRequestConfiguration WithPublisherConfirms(bool publisherConfirms)
     {
-        PublisherConfirms = confirms;
+        PublisherConfirms = publisherConfirms;
         return this;
     }
 }

@@ -31,9 +31,9 @@ public interface IFuturePublishConfiguration
     /// <summary>
     /// Set publisher confirms
     /// </summary>
-    /// <param name="confirms">Publisher confirms flag to set</param>
+    /// <param name="publisherConfirms">Publisher confirms flag to set</param>
     /// <returns>Returns a reference to itself</returns>
-    IFuturePublishConfiguration WithPublisherConfirms(bool confirms);
+    IFuturePublishConfiguration WithPublisherConfirms(bool publisherConfirms);
 }
 
 internal class FuturePublishConfiguration : IFuturePublishConfiguration
@@ -66,9 +66,9 @@ internal class FuturePublishConfiguration : IFuturePublishConfiguration
         return this;
     }
 
-    public IFuturePublishConfiguration WithPublisherConfirms(bool confirms)
+    public IFuturePublishConfiguration WithPublisherConfirms(bool publisherConfirms)
     {
-        PublisherConfirms = confirms;
+        PublisherConfirms = publisherConfirms;
         return this;
     }
 }
