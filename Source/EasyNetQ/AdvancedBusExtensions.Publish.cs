@@ -9,8 +9,9 @@ public static partial class AdvancedBusExtensions
 {
     /// <summary>
     /// Publish a message as a .NET type when the type is only known at runtime.
-    /// Task completes after publish has completed. If publisherConfirms=true is set in the connection string,
-    /// the task completes after an ACK is received. The task will throw on either NACK or timeout.
+    /// Task completes after publish has completed.
+    /// If publisher confirms enabled the task completes after an ACK is received.
+    /// The task will throw on either NACK or timeout.
     /// </summary>
     /// <param name="bus">The bus instance</param>
     /// <param name="exchange">The exchange to publish to</param>
@@ -22,7 +23,11 @@ public static partial class AdvancedBusExtensions
     /// If this flag is true, the server will return an unroutable message with a Return method.
     /// If this flag is false, the server silently drops the message.
     /// </param>
-    /// <param name="publisherConfirms">todo</param>
+    /// <param name="publisherConfirms">
+    /// Overrides ConnectionConfiguration.PublisherConfirms per request.
+    /// If this flag is true the task completes after an ACK is received.
+    /// If this flag is null value from ConnectionConfiguration.PublisherConfirms will be used.
+    /// </param>
     /// <param name="message">The message to publish</param>
     /// <param name="cancellationToken">The cancellation token</param>
     public static Task PublishAsync(
@@ -36,9 +41,10 @@ public static partial class AdvancedBusExtensions
     ) => bus.PublishAsync(exchange.Name, routingKey, mandatory, publisherConfirms, message, cancellationToken);
 
     /// <summary>
-    /// Publish a message as a byte array.
-    /// Task completes after publish has completed. If publisherConfirms=true is set in the connection string,
-    /// the task completes after an ACK is received. The task will throw on either NACK or timeout.
+    /// Publish a message as a .NET type when the type is only known at runtime.
+    /// Task completes after publish has completed.
+    /// If publisher confirms enabled the task completes after an ACK is received.
+    /// The task will throw on either NACK or timeout.
     /// </summary>
     /// <param name="bus">The bus instance</param>
     /// <param name="exchange">The exchange to publish to</param>
@@ -50,7 +56,11 @@ public static partial class AdvancedBusExtensions
     /// If this flag is true, the server will return an unroutable message with a Return method.
     /// If this flag is false, the server silently drops the message.
     /// </param>
-    /// <param name="publisherConfirms">todo</param>
+    /// <param name="publisherConfirms">
+    /// Overrides ConnectionConfiguration.PublisherConfirms per request.
+    /// If this flag is true the task completes after an ACK is received.
+    /// If this flag is null value from ConnectionConfiguration.PublisherConfirms will be used.
+    /// </param>
     /// <param name="properties">The message properties</param>
     /// <param name="body">The message body</param>
     /// <param name="cancellationToken">The cancellation token</param>
@@ -66,9 +76,10 @@ public static partial class AdvancedBusExtensions
     ) => bus.PublishAsync(exchange.Name, routingKey, mandatory, publisherConfirms, properties, body, cancellationToken);
 
     /// <summary>
-    /// Publish a message as a byte array.
-    /// Task completes after publish has completed. If publisherConfirms=true is set in the connection string,
-    /// the task completes after an ACK is received. The task will throw on either NACK or timeout.
+    /// Publish a message as a .NET type when the type is only known at runtime.
+    /// Task completes after publish has completed.
+    /// If publisher confirms enabled the task completes after an ACK is received.
+    /// The task will throw on either NACK or timeout.
     /// </summary>
     /// <param name="bus">The bus instance</param>
     /// <param name="exchange">The exchange to publish to</param>
@@ -81,7 +92,11 @@ public static partial class AdvancedBusExtensions
     /// If this flag is true, the server will return an unroutable message with a Return method.
     /// If this flag is false, the server silently drops the message.
     /// </param>
-    /// <param name="publisherConfirms">todo</param>
+    /// <param name="publisherConfirms">
+    /// Overrides ConnectionConfiguration.PublisherConfirms per request.
+    /// If this flag is true the task completes after an ACK is received.
+    /// If this flag is null value from ConnectionConfiguration.PublisherConfirms will be used.
+    /// </param>
     /// <param name="messageProperties">The message properties</param>
     /// <param name="body">The message body</param>
     /// <param name="cancellationToken">The cancellation token</param>
@@ -102,9 +117,10 @@ public static partial class AdvancedBusExtensions
     }
 
     /// <summary>
-    /// Publish a message as a byte array.
-    /// Task completes after publish has completed. If publisherConfirms=true is set in the connection string,
-    /// the task completes after an ACK is received. The task will throw on either NACK or timeout.
+    /// Publish a message as a .NET type when the type is only known at runtime.
+    /// Task completes after publish has completed.
+    /// If publisher confirms enabled the task completes after an ACK is received.
+    /// The task will throw on either NACK or timeout.
     /// </summary>
     /// <param name="bus">The bus instance</param>
     /// <param name="exchange">The exchange to publish to</param>
@@ -117,7 +133,11 @@ public static partial class AdvancedBusExtensions
     /// If this flag is true, the server will return an unroutable message with a Return method.
     /// If this flag is false, the server silently drops the message.
     /// </param>
-    /// <param name="publisherConfirms">todo</param>
+    /// <param name="publisherConfirms">
+    /// Overrides ConnectionConfiguration.PublisherConfirms per request.
+    /// If this flag is true the task completes after an ACK is received.
+    /// If this flag is null value from ConnectionConfiguration.PublisherConfirms will be used.
+    /// </param>
     /// <param name="messageProperties">The message properties</param>
     /// <param name="body">The message body</param>
     /// <param name="cancellationToken">The cancellation token</param>
