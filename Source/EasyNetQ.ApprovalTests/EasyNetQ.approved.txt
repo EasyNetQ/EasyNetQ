@@ -1821,13 +1821,13 @@ namespace EasyNetQ.Producer
     }
     public readonly struct ProduceContext : System.IEquatable<EasyNetQ.Producer.ProduceContext>
     {
-        public ProduceContext(in string Exchange, in string RoutingKey, in bool Mandatory, in bool Confirms, in EasyNetQ.MessageProperties Properties, in System.ReadOnlyMemory<byte> Body, in EasyNetQ.DI.IServiceResolver ServiceResolver, in System.Threading.CancellationToken CancellationToken) { }
+        public ProduceContext(in string Exchange, in string RoutingKey, in bool Mandatory, in bool PublisherConfirms, in EasyNetQ.MessageProperties Properties, in System.ReadOnlyMemory<byte> Body, in EasyNetQ.DI.IServiceResolver ServiceResolver, in System.Threading.CancellationToken CancellationToken) { }
         public System.ReadOnlyMemory<byte> Body { get; init; }
         public System.Threading.CancellationToken CancellationToken { get; init; }
-        public bool Confirms { get; init; }
         public string Exchange { get; init; }
         public bool Mandatory { get; init; }
         public EasyNetQ.MessageProperties Properties { get; init; }
+        public bool PublisherConfirms { get; init; }
         public string RoutingKey { get; init; }
         public EasyNetQ.DI.IServiceResolver ServiceResolver { get; init; }
     }

@@ -580,7 +580,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 
     private async ValueTask PublishInternalAsync(ProduceContext context)
     {
-        if (context.Confirms)
+        if (context.PublisherConfirms)
         {
             while (true)
             {
