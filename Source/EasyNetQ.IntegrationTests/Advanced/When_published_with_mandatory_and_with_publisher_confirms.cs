@@ -25,7 +25,7 @@ public class When_published_with_mandatory_and_with_publisher_confirms : IDispos
 
         await Assert.ThrowsAsync<PublishReturnedException>(
             () => bus.Advanced.PublishAsync(
-                exchange, "#", true, true, new MessageProperties(), Array.Empty<byte>(), cts.Token
+                exchange, "#", true, true, MessageProperties.Empty, Array.Empty<byte>(), cts.Token
             )
         );
     }

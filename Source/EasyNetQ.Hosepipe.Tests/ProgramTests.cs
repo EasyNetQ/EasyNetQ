@@ -144,8 +144,8 @@ public class MockQueueRetrieval : IQueueRetrieval
 {
     public IEnumerable<HosepipeMessage> GetMessagesFromQueue(QueueParameters parameters)
     {
-        yield return new HosepipeMessage("some message", new MessageProperties(), Helper.CreateMessageReceivedInfo());
-        yield return new HosepipeMessage("some message", new MessageProperties(), Helper.CreateMessageReceivedInfo());
+        yield return new HosepipeMessage("some message", MessageProperties.Empty, Helper.CreateMessageReceivedInfo());
+        yield return new HosepipeMessage("some message", MessageProperties.Empty, Helper.CreateMessageReceivedInfo());
     }
 }
 
@@ -156,8 +156,8 @@ public class MockMessageReader : IMessageReader
     public IEnumerable<HosepipeMessage> ReadMessages(QueueParameters parameters)
     {
         Parameters = parameters;
-        yield return new HosepipeMessage("some message", new MessageProperties(), Helper.CreateMessageReceivedInfo());
-        yield return new HosepipeMessage("some message", new MessageProperties(), Helper.CreateMessageReceivedInfo());
+        yield return new HosepipeMessage("some message", MessageProperties.Empty, Helper.CreateMessageReceivedInfo());
+        yield return new HosepipeMessage("some message", MessageProperties.Empty, Helper.CreateMessageReceivedInfo());
     }
 
     public IEnumerable<HosepipeMessage> ReadMessages(QueueParameters parameters, string messageName)

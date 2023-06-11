@@ -22,8 +22,8 @@ public class QueueInsertionTests
     {
         var messages = new[]
         {
-            new HosepipeMessage("{\"Text\":\"I am message one\"}", new MessageProperties(), Helper.CreateMessageReceivedInfo()),
-            new HosepipeMessage("{\"Text\":\"I am message two\"}", new MessageProperties(), Helper.CreateMessageReceivedInfo())
+            new HosepipeMessage("{\"Text\":\"I am message one\"}", MessageProperties.Empty, Helper.CreateMessageReceivedInfo()),
+            new HosepipeMessage("{\"Text\":\"I am message two\"}", MessageProperties.Empty, Helper.CreateMessageReceivedInfo())
         };
 
         var parameters = new QueueParameters

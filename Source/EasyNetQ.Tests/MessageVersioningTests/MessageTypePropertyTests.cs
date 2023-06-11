@@ -23,7 +23,7 @@ public class MessageTypePropertyTests
     {
         var typeNameSerialiser = new DefaultTypeNameSerializer();
         var property = MessageTypeProperty.CreateForMessageType(typeof(MyMessage), typeNameSerialiser);
-        var properties = new MessageProperties();
+        var properties = MessageProperties.Empty;
 
         properties = property.AppendTo(properties);
 
@@ -46,7 +46,7 @@ public class MessageTypePropertyTests
     {
         var typeNameSerialiser = new DefaultTypeNameSerializer();
         var property = MessageTypeProperty.CreateForMessageType(typeof(MyMessageV2), typeNameSerialiser);
-        var properties = new MessageProperties();
+        var properties = MessageProperties.Empty;
 
         properties = property.AppendTo(properties);
 

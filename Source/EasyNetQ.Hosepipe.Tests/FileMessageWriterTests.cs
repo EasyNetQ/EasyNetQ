@@ -24,7 +24,7 @@ public class FileMessageWriterTests
             }
         }
 
-        var properties = new MessageProperties();
+        var properties = MessageProperties.Empty;
         var info = Helper.CreateMessageReceivedInfo();
         var writer = new FileMessageWriter();
         var messages = new List<HosepipeMessage>

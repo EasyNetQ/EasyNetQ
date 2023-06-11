@@ -38,7 +38,7 @@ public class Message<T> : IMessage<T>
     public Message(T? body)
     {
         Body = body;
-        Properties = new MessageProperties();
+        Properties = MessageProperties.Empty;
         MessageType = body != null ? body.GetType() : typeof(T);
     }
 

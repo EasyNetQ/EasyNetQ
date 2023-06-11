@@ -26,7 +26,7 @@ public class When_pull_messages : IDisposable
             Guid.NewGuid().ToString("N"), cts.Token
         );
         await bus.Advanced.PublishAsync(
-            Exchange.Default, queue.Name, false, true, new MessageProperties(), Array.Empty<byte>(), cts.Token
+            Exchange.Default, queue.Name, false, true, MessageProperties.Empty, Array.Empty<byte>(), cts.Token
         );
 
         using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
@@ -54,7 +54,7 @@ public class When_pull_messages : IDisposable
             Guid.NewGuid().ToString("N"), cts.Token
         );
         await bus.Advanced.PublishAsync(
-            Exchange.Default, queue.Name, false, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
+            Exchange.Default, queue.Name, false, false, MessageProperties.Empty, Array.Empty<byte>(), cts.Token
         );
 
         using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
@@ -82,7 +82,7 @@ public class When_pull_messages : IDisposable
             Guid.NewGuid().ToString("N"), cts.Token
         );
         await bus.Advanced.PublishAsync(
-            Exchange.Default, queue.Name, false, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
+            Exchange.Default, queue.Name, false, false, MessageProperties.Empty, Array.Empty<byte>(), cts.Token
         );
 
         using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
@@ -110,7 +110,7 @@ public class When_pull_messages : IDisposable
             Guid.NewGuid().ToString("N"), cts.Token
         );
         await bus.Advanced.PublishAsync(
-            Exchange.Default, queue.Name, false, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
+            Exchange.Default, queue.Name, false, false, MessageProperties.Empty, Array.Empty<byte>(), cts.Token
         );
 
         using var consumer = bus.Advanced.CreatePullingConsumer(queue);

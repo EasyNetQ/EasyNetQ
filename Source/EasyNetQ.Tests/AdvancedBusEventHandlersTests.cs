@@ -124,7 +124,7 @@ public class AdvancedBusEventHandlersTests : IDisposable
         var @event = new ReturnedMessageEvent(
             Substitute.For<IModel>(),
             Array.Empty<byte>(),
-            new MessageProperties(),
+            MessageProperties.Empty,
             new MessageReturnedInfo("my.exchange", "routing.key", "reason")
         );
 

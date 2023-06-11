@@ -29,7 +29,7 @@ while (!cts.IsCancellationRequested)
             "Events",
             true,
             true,
-            new MessageProperties(),
+            MessageProperties.Empty,
             ReadOnlyMemory<byte>.Empty,
             cts.Token
         );
