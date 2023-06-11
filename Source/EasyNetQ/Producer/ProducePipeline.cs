@@ -6,6 +6,7 @@ public readonly record struct ProduceContext(
     in string Exchange,
     in string RoutingKey,
     in bool Mandatory,
+    in bool PublisherConfirms,
     in MessageProperties Properties,
     in ReadOnlyMemory<byte> Body,
     in IServiceResolver ServiceResolver,

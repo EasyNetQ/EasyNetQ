@@ -69,7 +69,7 @@ public class DelayedExchangeScheduler : IScheduler
         }.WithDelay(delay);
 
         await advancedBus.PublishAsync(
-            futureExchange.Name, topic, null, new Message<T>(message, properties), cts.Token
+            futureExchange.Name, topic, null, publishConfiguration.PublisherConfirms, new Message<T>(message, properties), cts.Token
         ).ConfigureAwait(false);
     }
 }

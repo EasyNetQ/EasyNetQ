@@ -10,7 +10,7 @@ public class When_consumer_with_auto_ack : IDisposable
 
     public When_consumer_with_auto_ack(RabbitMQFixture rmqFixture)
     {
-        bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=-1;publisherConfirms=True");
+        bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=-1");
     }
 
     [Fact]
@@ -26,7 +26,7 @@ public class When_consumer_with_auto_ack : IDisposable
         for (var i = 0; i < 10; ++i)
         {
             await bus.Advanced.PublishAsync(
-                Exchange.Default, queueName, true, new MessageProperties(), ReadOnlyMemory<byte>.Empty, cts.Token
+                Exchange.Default, queueName, true, true, new MessageProperties(), ReadOnlyMemory<byte>.Empty, cts.Token
             );
             allMessagesReceived.Increment();
         }

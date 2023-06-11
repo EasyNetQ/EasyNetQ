@@ -200,13 +200,14 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         string exchange,
         string routingKey,
         bool? mandatory,
+        bool? publisherConfirms,
         IMessage message,
         CancellationToken cancellationToken
     )
     {
         using var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
         await PublishAsync(
-            exchange, routingKey, mandatory, serializedMessage.Properties, serializedMessage.Body, cancellationToken
+            exchange, routingKey, mandatory, publisherConfirms, serializedMessage.Properties, serializedMessage.Body, cancellationToken
         ).ConfigureAwait(false);
     }
 
@@ -215,6 +216,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         string exchange,
         string routingKey,
         bool? mandatory,
+        bool? publisherConfirms,
         MessageProperties properties,
         ReadOnlyMemory<byte> body,
         CancellationToken cancellationToken
@@ -222,7 +224,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-        await produceDelegate(new ProduceContext(exchange, routingKey, mandatory ?? configuration.MandatoryPublish, properties, body, serviceResolver, cts.Token)).ConfigureAwait(false);
+        await produceDelegate(new ProduceContext(exchange, routingKey, mandatory ?? configuration.MandatoryPublish, publisherConfirms ?? configuration.PublisherConfirms, properties, body, serviceResolver, cts.Token)).ConfigureAwait(false);
     }
 
     #endregion
@@ -578,7 +580,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 
     private async ValueTask PublishInternalAsync(ProduceContext context)
     {
-        if (configuration.PublisherConfirms)
+        if (context.PublisherConfirms)
         {
             while (true)
             {

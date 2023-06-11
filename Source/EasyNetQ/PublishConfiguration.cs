@@ -35,6 +35,13 @@ public interface IPublishConfiguration
     /// <param name="headers">Headers to set</param>
     /// <returns>Returns a reference to itself</returns>
     IPublishConfiguration WithHeaders(IDictionary<string, object?> headers);
+
+    /// <summary>
+    /// Set publisher confirms
+    /// </summary>
+    /// <param name="publisherConfirms">Publisher confirms flag to set</param>
+    /// <returns>Returns a reference to itself</returns>
+    IPublishConfiguration WithPublisherConfirms(bool publisherConfirms);
 }
 
 internal class PublishConfiguration : IPublishConfiguration
@@ -68,8 +75,15 @@ internal class PublishConfiguration : IPublishConfiguration
         return this;
     }
 
+    public IPublishConfiguration WithPublisherConfirms(bool publisherConfirms)
+    {
+        PublisherConfirms = publisherConfirms;
+        return this;
+    }
+
     public byte? Priority { get; private set; }
     public string Topic { get; private set; }
     public TimeSpan? Expires { get; private set; }
     public IDictionary<string, object?>? Headers { get; private set; }
+    public bool PublisherConfirms { get; private set; }
 }
