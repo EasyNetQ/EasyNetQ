@@ -414,6 +414,7 @@ public class DefaultRpc : IRpc, IDisposable
             throw;
         }
     }
+
     private async Task RespondToMessageAsync<TRequest, TResponse>(
         Func<TRequest, MessageProperties, CancellationToken, Task<TResponse>> responder,
         IMessage<TRequest> requestMessage,
