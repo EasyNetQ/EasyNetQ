@@ -172,7 +172,6 @@ public static partial class AdvancedBusExtensions
             .GetResult();
     }
 
-
     /// <summary>
     /// Publish a message as a .NET type when the type is only known at runtime.
     /// Task completes after publish has completed.
