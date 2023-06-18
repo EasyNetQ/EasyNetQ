@@ -15,7 +15,7 @@ public class ExchangeDeclareStrategyTests
         var advancedBus = Substitute.For<IAdvancedBus>();
         var exchange = new Exchange(exchangeName);
 
-        advancedBus.ExchangeDeclareAsync(exchangeName, Arg.Any<Action<IExchangeDeclareConfiguration>>()).Returns(
+        advancedBus.ExchangeDeclareAsync(exchangeName).Returns(
             _ => Task.FromException(new Exception()),
             _ =>
             {
@@ -33,7 +33,7 @@ public class ExchangeDeclareStrategyTests
         }
 
         var declaredExchange = exchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
-        advancedBus.Received(2).ExchangeDeclareAsync(exchangeName, Arg.Any<Action<IExchangeDeclareConfiguration>>());
+        advancedBus.Received(2).ExchangeDeclareAsync(exchangeName);
         declaredExchange.Should().BeEquivalentTo(exchange);
         exchangeDeclareCount.Should().Be(1);
     }
@@ -44,7 +44,7 @@ public class ExchangeDeclareStrategyTests
         var exchangeDeclareCount = 0;
         var advancedBus = Substitute.For<IAdvancedBus>();
         var exchange = new Exchange(exchangeName);
-        advancedBus.ExchangeDeclareAsync(exchangeName, Arg.Any<Action<IExchangeDeclareConfiguration>>())
+        advancedBus.ExchangeDeclareAsync(exchangeName)
             .Returns(_ =>
             {
                 exchangeDeclareCount++;
@@ -55,7 +55,7 @@ public class ExchangeDeclareStrategyTests
 
         var declaredExchange = publishExchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
 
-        advancedBus.Received().ExchangeDeclareAsync(exchangeName, Arg.Any<Action<IExchangeDeclareConfiguration>>());
+        advancedBus.Received().ExchangeDeclareAsync(exchangeName);
         declaredExchange.Should().BeEquivalentTo(exchange);
         exchangeDeclareCount.Should().Be(1);
     }
@@ -66,7 +66,7 @@ public class ExchangeDeclareStrategyTests
         var exchangeDeclareCount = 0;
         var advancedBus = Substitute.For<IAdvancedBus>();
         var exchange = new Exchange(exchangeName);
-        advancedBus.ExchangeDeclareAsync(exchangeName, Arg.Any<Action<IExchangeDeclareConfiguration>>()).Returns(_ =>
+        advancedBus.ExchangeDeclareAsync(exchangeName).Returns(_ =>
         {
             exchangeDeclareCount++;
             return Task.FromResult(exchange);
@@ -77,7 +77,7 @@ public class ExchangeDeclareStrategyTests
         var _ = exchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
         var declaredExchange = exchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
 
-        advancedBus.Received().ExchangeDeclareAsync(exchangeName, Arg.Any<Action<IExchangeDeclareConfiguration>>());
+        advancedBus.Received().ExchangeDeclareAsync(exchangeName);
         declaredExchange.Should().BeEquivalentTo(exchange);
         exchangeDeclareCount.Should().Be(1);
     }

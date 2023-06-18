@@ -1,5 +1,4 @@
 using EasyNetQ.Internals;
-using EasyNetQ.Topology;
 
 namespace EasyNetQ;
 
@@ -48,7 +47,7 @@ public class DefaultPubSub : IPubSub
         {
             Priority = publishConfiguration.Priority ?? 0,
             Expiration = publishConfiguration.Expires,
-            Headers = publishConfiguration.Headers == null ? null : new Dictionary<string, object?>(publishConfiguration.Headers),
+            Headers = publishConfiguration.MessageHeaders,
             DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType),
         };
         var advancedMessage = new Message<T>(message, advancedMessageProperties);
@@ -77,47 +76,22 @@ public class DefaultPubSub : IPubSub
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-        var subscriptionConfiguration = new SubscriptionConfiguration(configuration.PrefetchCount);
+        var subscriptionConfiguration = new SubscriptionConfiguration(configuration.PrefetchCount, conventions.QueueTypeConvention(typeof(T)));
         configure(subscriptionConfiguration);
 
-        var exchangeName = conventions.ExchangeNamingConvention(typeof(T));
         var exchange = await advancedBus.ExchangeDeclareAsync(
-            exchangeName,
-            c =>
-            {
-                c.WithType(subscriptionConfiguration.ExchangeType);
-                if (subscriptionConfiguration.AlternateExchange != null)
-                    c.WithAlternateExchange(new Exchange(subscriptionConfiguration.AlternateExchange));
-            },
-            cts.Token
+            exchange: conventions.ExchangeNamingConvention(typeof(T)),
+            type: subscriptionConfiguration.ExchangeType,
+            arguments: subscriptionConfiguration.ExchangeArguments,
+            cancellationToken: cts.Token
         ).ConfigureAwait(false);
 
-        var queueName = subscriptionConfiguration.QueueName ?? conventions.QueueNamingConvention(typeof(T), subscriptionId);
-        var queueType = conventions.QueueTypeConvention(typeof(T));
-        if (queueType != null)
-            subscriptionConfiguration.WithQueueType(queueType);
         var queue = await advancedBus.QueueDeclareAsync(
-            queueName,
-            c =>
-            {
-                c.AsDurable(subscriptionConfiguration.Durable);
-                c.AsAutoDelete(subscriptionConfiguration.AutoDelete);
-                if (subscriptionConfiguration.Expires.HasValue)
-                    c.WithExpires(TimeSpan.FromMilliseconds(subscriptionConfiguration.Expires.Value));
-                if (subscriptionConfiguration.MaxPriority.HasValue)
-                    c.WithMaxPriority(subscriptionConfiguration.MaxPriority.Value);
-                if (subscriptionConfiguration.MaxLength.HasValue)
-                    c.WithMaxLength(subscriptionConfiguration.MaxLength.Value);
-                if (subscriptionConfiguration.MaxLengthBytes.HasValue)
-                    c.WithMaxLengthBytes(subscriptionConfiguration.MaxLengthBytes.Value);
-                if (subscriptionConfiguration.QueueMode != null)
-                    c.WithQueueMode(subscriptionConfiguration.QueueMode);
-                if (subscriptionConfiguration.QueueType != null)
-                    c.WithQueueType(subscriptionConfiguration.QueueType);
-                if (subscriptionConfiguration.SingleActiveConsumer)
-                    c.WithSingleActiveConsumer();
-            },
-            cts.Token
+            queue: subscriptionConfiguration.QueueName ?? conventions.QueueNamingConvention(typeof(T), subscriptionId),
+            durable: subscriptionConfiguration.Durable,
+            autoDelete: subscriptionConfiguration.AutoDelete,
+            arguments: subscriptionConfiguration.QueueArguments,
+            cancellationToken: cts.Token
         ).ConfigureAwait(false);
 
         foreach (var topic in subscriptionConfiguration.Topics.DefaultIfEmpty("#"))

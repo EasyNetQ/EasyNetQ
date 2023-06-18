@@ -19,7 +19,7 @@ public class When_consumer_with_auto_ack : IDisposable
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
         var queueName = Guid.NewGuid().ToString();
-        var queue = await bus.Advanced.QueueDeclareAsync(queueName, cts.Token);
+        var queue = await bus.Advanced.QueueDeclareAsync(queueName, cancellationToken: cts.Token);
 
         var allMessagesReceived = new AsyncCountdownEvent();
 

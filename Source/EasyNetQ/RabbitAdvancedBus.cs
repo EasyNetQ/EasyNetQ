@@ -254,16 +254,6 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     }
 
     /// <inheritdoc />
-    public Task<Queue> QueueDeclareAsync(CancellationToken cancellationToken)
-    {
-        return QueueDeclareAsync(
-            string.Empty,
-            c => c.AsDurable(true).AsExclusive(true).AsAutoDelete(true),
-            cancellationToken
-        );
-    }
-
-    /// <inheritdoc />
     public async Task QueueDeclarePassiveAsync(string queue, CancellationToken cancellationToken = default)
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
@@ -281,21 +271,17 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     /// <inheritdoc />
     public async Task<Queue> QueueDeclareAsync(
         string queue,
-        Action<IQueueDeclareConfiguration> configure,
-        CancellationToken cancellationToken = default
+        bool durable,
+        bool exclusive,
+        bool autoDelete,
+        IDictionary<string, object>? arguments,
+        CancellationToken cancellationToken
     )
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-        var queueDeclareConfiguration = new QueueDeclareConfiguration();
-        configure(queueDeclareConfiguration);
-        var isDurable = queueDeclareConfiguration.IsDurable;
-        var isExclusive = queueDeclareConfiguration.IsExclusive;
-        var isAutoDelete = queueDeclareConfiguration.IsAutoDelete;
-        var arguments = queueDeclareConfiguration.Arguments;
-
         var queueDeclareOk = await persistentChannelDispatcher.InvokeAsync(
-            x => x.QueueDeclare(queue, isDurable, isExclusive, isAutoDelete, arguments),
+            x => x.QueueDeclare(queue, durable, exclusive, autoDelete, arguments),
             PersistentChannelDispatchOptions.ConsumerTopology,
             cts.Token
         ).ConfigureAwait(false);
@@ -305,14 +291,14 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             logger.DebugFormat(
                 "Declared queue {queue}: durable={durable}, exclusive={exclusive}, autoDelete={autoDelete}, arguments={arguments}",
                 queueDeclareOk.QueueName,
-                isDurable,
-                isExclusive,
-                isAutoDelete,
+                durable,
+                exclusive,
+                autoDelete,
                 arguments?.Stringify()
             );
         }
 
-        return new Queue(queueDeclareOk.QueueName, isDurable, isExclusive, isAutoDelete, arguments);
+        return new Queue(queueDeclareOk.QueueName, durable, exclusive, autoDelete, arguments);
     }
 
     /// <inheritdoc />
@@ -369,21 +355,17 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     /// <inheritdoc />
     public async Task<Exchange> ExchangeDeclareAsync(
         string exchange,
-        Action<IExchangeDeclareConfiguration> configure,
-        CancellationToken cancellationToken = default
+        string type,
+        bool durable,
+        bool autoDelete,
+        IDictionary<string, object>? arguments,
+        CancellationToken cancellationToken
     )
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-        var exchangeDeclareConfiguration = new ExchangeDeclareConfiguration();
-        configure(exchangeDeclareConfiguration);
-        var type = exchangeDeclareConfiguration.Type;
-        var isDurable = exchangeDeclareConfiguration.IsDurable;
-        var isAutoDelete = exchangeDeclareConfiguration.IsAutoDelete;
-        var arguments = exchangeDeclareConfiguration.Arguments;
-
         await persistentChannelDispatcher.InvokeAsync(
-            x => x.ExchangeDeclare(exchange, type, isDurable, isAutoDelete, arguments),
+            x => x.ExchangeDeclare(exchange, type, durable, autoDelete, arguments),
             PersistentChannelDispatchOptions.ProducerTopology,
             cts.Token
         ).ConfigureAwait(false);
@@ -394,13 +376,13 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
                 "Declared exchange {exchange}: type={type}, durable={durable}, autoDelete={autoDelete}, arguments={arguments}",
                 exchange,
                 type,
-                isDurable,
-                isAutoDelete,
+                durable,
+                autoDelete,
                 arguments?.Stringify()
             );
         }
 
-        return new Exchange(exchange, type, isDurable, isAutoDelete, arguments);
+        return new Exchange(exchange, type, durable, autoDelete, arguments);
     }
 
     /// <inheritdoc />

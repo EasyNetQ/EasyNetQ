@@ -14,7 +14,7 @@ public class VersionedExchangeDeclareStrategyTests
         var advancedBus = Substitute.For<IAdvancedBus>();
         var exchange = new Exchange(exchangeName);
 
-        advancedBus.ExchangeDeclareAsync(exchangeName, Arg.Any<Action<IExchangeDeclareConfiguration>>()).Returns(
+        advancedBus.ExchangeDeclareAsync(exchangeName).Returns(
             _ => Task.FromException(new Exception()),
             _ =>
             {
@@ -35,7 +35,7 @@ public class VersionedExchangeDeclareStrategyTests
         }
 
         var declaredExchange = exchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
-        advancedBus.Received(2).ExchangeDeclareAsync(exchangeName, Arg.Any<Action<IExchangeDeclareConfiguration>>());
+        advancedBus.Received(2).ExchangeDeclareAsync(exchangeName);
         declaredExchange.Should().BeEquivalentTo(exchange);
         exchangeDeclareCount.Should().Be(1);
     }
@@ -48,7 +48,7 @@ public class VersionedExchangeDeclareStrategyTests
         var exchanges = new List<Exchange>();
         var boundExchanges = new Dictionary<string, string>();
         var advancedBus = Substitute.For<IAdvancedBus>();
-        advancedBus.ExchangeDeclareAsync(Arg.Any<string>(), Arg.Any<Action<IExchangeDeclareConfiguration>>())
+        advancedBus.ExchangeDeclareAsync(Arg.Any<string>())
             .ReturnsForAnyArgs(mi =>
             {
                 var exchange = new Exchange((string)mi[0]);
@@ -83,7 +83,7 @@ public class VersionedExchangeDeclareStrategyTests
         var exchanges = new List<string>();
         var boundExchanges = new Dictionary<string, string>();
         var advancedBus = Substitute.For<IAdvancedBus>();
-        advancedBus.ExchangeDeclareAsync(Arg.Any<string>(), Arg.Any<Action<IExchangeDeclareConfiguration>>())
+        advancedBus.ExchangeDeclareAsync(Arg.Any<string>())
             .ReturnsForAnyArgs(mi =>
             {
                 var exchange = (string)mi[0];

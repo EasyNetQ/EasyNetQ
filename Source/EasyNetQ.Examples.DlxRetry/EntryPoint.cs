@@ -14,19 +14,21 @@ using var bus = RabbitHutch.CreateBus(
 );
 
 await bus.Advanced.QueueDeclareAsync(
-    "Events:Failed",
-    c => c.WithQueueType(QueueType.Quorum)
-        .WithDeadLetterExchange(Exchange.Default)
+    queue: "Events:Failed",
+    arguments: new Dictionary<string, object>()
+        .WithQueueType(QueueType.Quorum)
+        .WithDeadLetterExchange(Exchange.DefaultName)
         .WithDeadLetterRoutingKey("Events")
-        .WithMessageTtl(TimeSpan.FromSeconds(5)) // A fixed delay between retry attempts
+        .WithMessageTtl(TimeSpan.FromSeconds(5))
         .WithOverflowType(OverflowType.RejectPublish)
         .WithDeadLetterStrategy(DeadLetterStrategy.AtLeastOnce)
 );
 
 var eventQueue = await bus.Advanced.QueueDeclareAsync(
-    "Events",
-    c => c.WithQueueType(QueueType.Quorum)
-        .WithDeadLetterExchange(Exchange.Default)
+    queue: "Events",
+    arguments: new Dictionary<string, object>()
+        .WithQueueType(QueueType.Quorum)
+        .WithDeadLetterExchange(Exchange.DefaultName)
         .WithDeadLetterRoutingKey("Events:Failed")
         .WithOverflowType(OverflowType.RejectPublish)
         .WithDeadLetterStrategy(DeadLetterStrategy.AtLeastOnce)

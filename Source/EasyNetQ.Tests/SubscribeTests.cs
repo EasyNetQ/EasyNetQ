@@ -180,11 +180,10 @@ public class When_subscribe_with_configuration_is_called
             Arg.Is(false),
             Arg.Is(autoDelete),
             Arg.Is<IDictionary<string, object>>(
-                x =>
-                    (!expires.HasValue || expires.Value == (int)x["x-expires"]) &&
-                    (!maxPriority.HasValue || maxPriority.Value == (int)x["x-max-priority"]) &&
-                    (!maxLength.HasValue || maxLength.Value == (int)x["x-max-length"]) &&
-                    (!maxLengthBytes.HasValue || maxLengthBytes.Value == (int)x["x-max-length-bytes"])
+                x => (!expires.HasValue || expires.Value == (int)x["x-expires"]) &&
+                     (!maxPriority.HasValue || maxPriority.Value == (byte)x["x-max-priority"]) &&
+                     (!maxLength.HasValue || maxLength.Value == (int)x["x-max-length"]) &&
+                     (!maxLengthBytes.HasValue || maxLengthBytes.Value == (int)x["x-max-length-bytes"])
             )
         );
 
@@ -207,7 +206,8 @@ public class When_subscribe_with_configuration_is_called
             Arg.Is(queueName),
             Arg.Is("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
             Arg.Is(topic ?? "#"),
-            Arg.Is((IDictionary<string, object>)null));
+            Arg.Is((IDictionary<string, object>)null)
+        );
     }
 }
 
