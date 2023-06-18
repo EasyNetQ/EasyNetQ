@@ -18,7 +18,7 @@ public class When_delete_a_queue_with_name : IDisposable
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
         var queueName = Guid.NewGuid().ToString();
-        var queue = await bus.Advanced.QueueDeclareAsync(queueName, cts.Token);
+        var queue = await bus.Advanced.QueueDeclareAsync(queue: queueName, cancellationToken: cts.Token);
 
         await bus.Advanced.QueueDeclarePassiveAsync(queueName, cts.Token);
         await bus.Advanced.QueueDeleteAsync(queueName, cancellationToken: cts.Token);

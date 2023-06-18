@@ -39,7 +39,7 @@ public class ConnectionStringTests
     [Fact]
     public void Should_parse_seond_port()
     {
-        connectionString.Hosts.Last().Port.Should().Be((ushort)1002);
+        connectionString.Hosts.Last().Port.Should().Be(1002);
     }
 
     [Fact]

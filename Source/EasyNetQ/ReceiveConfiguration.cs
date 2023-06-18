@@ -106,15 +106,10 @@ internal class ReceiveConfiguration : IReceiveConfiguration
     public bool AutoDelete { get; private set; }
     public int Priority { get; private set; }
     public ushort PrefetchCount { get; private set; }
-    public int? Expires { get; private set; }
     public bool IsExclusive { get; private set; }
-    public byte? MaxPriority { get; private set; }
     public bool Durable { get; private set; }
-    public int? MaxLength { get; private set; }
-    public int? MaxLengthBytes { get; private set; }
-    public string? QueueMode { get; private set; }
-    public string? QueueType { get; private set; }
-    public bool SingleActiveConsumer { get; private set; }
+
+    public IDictionary<string, object>? QueueArguments { get; private set; }
 
     public ReceiveConfiguration(ushort defaultPrefetchCount)
     {
@@ -123,7 +118,6 @@ internal class ReceiveConfiguration : IReceiveConfiguration
         PrefetchCount = defaultPrefetchCount;
         IsExclusive = false;
         Durable = true;
-        SingleActiveConsumer = false;
     }
 
     public IReceiveConfiguration WithAutoDelete(bool autoDelete = true)
@@ -153,7 +147,7 @@ internal class ReceiveConfiguration : IReceiveConfiguration
 
     public IReceiveConfiguration WithExpires(int expires)
     {
-        Expires = expires;
+        InitializedQueueArguments.WithExpires(expires);
         return this;
     }
 
@@ -165,37 +159,39 @@ internal class ReceiveConfiguration : IReceiveConfiguration
 
     public IReceiveConfiguration WithMaxPriority(byte priority)
     {
-        MaxPriority = priority;
+        InitializedQueueArguments.WithMaxPriority(priority);
         return this;
     }
 
     public IReceiveConfiguration WithMaxLength(int maxLength)
     {
-        MaxLength = maxLength;
+        InitializedQueueArguments.WithMaxLength(maxLength);
         return this;
     }
 
     public IReceiveConfiguration WithMaxLengthBytes(int maxLengthBytes)
     {
-        MaxLengthBytes = maxLengthBytes;
+        InitializedQueueArguments.WithMaxLengthBytes(maxLengthBytes);
         return this;
     }
 
     public IReceiveConfiguration WithQueueMode(string queueMode)
     {
-        QueueMode = queueMode;
+        InitializedQueueArguments.WithQueueMode(queueMode);
         return this;
     }
 
-    public IReceiveConfiguration WithQueueType(string queueType = EasyNetQ.QueueType.Classic)
+    public IReceiveConfiguration WithQueueType(string queueType = QueueType.Classic)
     {
-        QueueType = queueType;
+        InitializedQueueArguments.WithQueueType(queueType);
         return this;
     }
 
     public IReceiveConfiguration WithSingleActiveConsumer(bool singleActiveConsumer = true)
     {
-        SingleActiveConsumer = singleActiveConsumer;
+        InitializedQueueArguments.WithSingleActiveConsumer(singleActiveConsumer);
         return this;
     }
+
+    private IDictionary<string, object> InitializedQueueArguments => QueueArguments ??= new Dictionary<string, object>();
 }
