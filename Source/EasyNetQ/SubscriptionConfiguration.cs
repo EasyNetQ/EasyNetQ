@@ -127,6 +127,13 @@ public interface ISubscriptionConfiguration
     /// <param name="singleActiveConsumer">Queue's single-active-consumer flag</param>
     /// <returns>Returns a reference to itself</returns>
     ISubscriptionConfiguration WithSingleActiveConsumer(bool singleActiveConsumer = true);
+
+    /// <summary>
+    ///     Sets message TTL.
+    ///     Determines how long a message published to a queue can live before it is discarded by the server.
+    /// </summary>
+    /// <param name="ttl">The message TTL to set</param>
+    ISubscriptionConfiguration WithMessageTtl(TimeSpan ttl);
 }
 
 internal class SubscriptionConfiguration : ISubscriptionConfiguration
@@ -249,6 +256,12 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
     public ISubscriptionConfiguration WithSingleActiveConsumer(bool singleActiveConsumer = true)
     {
         InitializedQueueArguments.WithSingleActiveConsumer(singleActiveConsumer);
+        return this;
+    }
+
+    public ISubscriptionConfiguration WithMessageTtl(TimeSpan ttl)
+    {
+        InitializedQueueArguments.WithMessageTtl(ttl);
         return this;
     }
 
