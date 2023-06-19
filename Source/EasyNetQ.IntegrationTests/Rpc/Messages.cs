@@ -46,16 +46,20 @@ public class RabbitRequest : Request
 
 public class Response
 {
-    public Response(int id)
+    public Response(int id, string text = "")
     {
         Id = id;
+        Text = text;
     }
 
     public int Id { get; }
 
+    public string Text { get; }
+
     protected bool Equals(Response other)
     {
-        return Id.Equals(other.Id);
+        return Id.Equals(other.Id) &&
+               Text.Equals(other.Text);
     }
 
     public override bool Equals(object obj)
@@ -68,7 +72,7 @@ public class Response
 
     public override int GetHashCode()
     {
-        return Id.GetHashCode();
+        return HashCode.Combine(Id, Text);
     }
 }
 
