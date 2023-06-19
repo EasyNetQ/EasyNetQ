@@ -1,10 +1,10 @@
-using System.Collections.Concurrent;
-using System.Text;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
 using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 using EasyNetQ.Topology;
+using System.Collections.Concurrent;
+using System.Text;
 
 namespace EasyNetQ;
 
@@ -100,23 +100,7 @@ public class DefaultRpc : IRpc, IDisposable
 
     /// <inheritdoc />
     public virtual Task<IDisposable> RespondAsync<TRequest, TResponse>(
-        Func<TRequest, CancellationToken, Task<TResponse>> responder,
-        Action<IResponderConfiguration> configure,
-        CancellationToken cancellationToken = default
-    )
-    {
-        // We're explicitly validating TResponse here because the type won't be used directly.
-        // It'll only be used when executing a successful responder, which will silently fail if TResponse serialized length exceeds the limit.
-        var serializedResponse = typeNameSerializer.Serialize(typeof(TResponse));
-        if (serializedResponse.Length > 255)
-            throw new ArgumentOutOfRangeException(nameof(TResponse), typeof(TResponse), "Must be less than or equal to 255 characters when serialized.");
-
-        return RespondAsyncInternal(responder, configure, cancellationToken);
-    }
-
-    /// <inheritdoc />
-    public virtual Task<IDisposable> RespondAsync<TRequest, TResponse>(
-        Func<TRequest, MessageProperties, CancellationToken, Task<TResponse>> responder,
+        Func<TRequest, IDictionary<string, object?>?, CancellationToken, Task<TResponse>> responder,
         Action<IResponderConfiguration> configure,
         CancellationToken cancellationToken = default
     )
@@ -274,46 +258,7 @@ public class DefaultRpc : IRpc, IDisposable
     }
 
     private async Task<IDisposable> RespondAsyncInternal<TRequest, TResponse>(
-        Func<TRequest, CancellationToken, Task<TResponse>> responder,
-        Action<IResponderConfiguration> configure,
-        CancellationToken cancellationToken
-    )
-    {
-        var requestType = typeof(TRequest);
-
-        var responderConfiguration = new ResponderConfiguration(configuration.PrefetchCount);
-        configure(responderConfiguration);
-
-        var routingKey = responderConfiguration.QueueName ?? conventions.RpcRoutingKeyNamingConvention(requestType);
-
-        var exchange = await advancedBus.ExchangeDeclareAsync(
-            conventions.RpcRequestExchangeNamingConvention(requestType),
-            ExchangeType.Direct,
-            cancellationToken: cancellationToken
-        ).ConfigureAwait(false);
-        var queue = await advancedBus.QueueDeclareAsync(
-            routingKey,
-            c =>
-            {
-                c.AsDurable(responderConfiguration.Durable);
-                if (responderConfiguration.Expires != null)
-                    c.WithExpires(responderConfiguration.Expires.Value);
-                if (responderConfiguration.MaxPriority.HasValue)
-                    c.WithMaxPriority(responderConfiguration.MaxPriority.Value);
-            },
-            cancellationToken
-        ).ConfigureAwait(false);
-        await advancedBus.BindAsync(exchange, queue, routingKey, cancellationToken).ConfigureAwait(false);
-
-        return advancedBus.Consume<TRequest>(
-            queue,
-            (message, _, cancellation) => RespondToMessageAsync(responder, message, cancellation),
-            c => c.WithPrefetchCount(responderConfiguration.PrefetchCount)
-        );
-    }
-
-    private async Task<IDisposable> RespondAsyncInternal<TRequest, TResponse>(
-        Func<TRequest, MessageProperties, CancellationToken, Task<TResponse>> responder,
+        Func<TRequest, IDictionary<string, object?>?, CancellationToken, Task<TResponse>> responder,
         Action<IResponderConfiguration> configure,
         CancellationToken cancellationToken
     )
@@ -352,7 +297,7 @@ public class DefaultRpc : IRpc, IDisposable
     }
 
     private async Task RespondToMessageAsync<TRequest, TResponse>(
-        Func<TRequest, CancellationToken, Task<TResponse>> responder,
+        Func<TRequest, IDictionary<string, object?>?, CancellationToken, Task<TResponse>> responder,
         IMessage<TRequest> requestMessage,
         CancellationToken cancellationToken
     )
@@ -369,71 +314,7 @@ public class DefaultRpc : IRpc, IDisposable
         try
         {
             var request = requestMessage.Body!;
-            var response = await responder(request, cancellationToken).ConfigureAwait(false);
-            var responseMessage = new Message<TResponse>(
-                response,
-                new MessageProperties
-                {
-                    CorrelationId = requestMessage.Properties.CorrelationId,
-                    DeliveryMode = MessageDeliveryMode.NonPersistent
-                }
-            );
-            await advancedBus.PublishAsync(
-                responseExchange.Name,
-                requestMessage.Properties.ReplyTo!,
-                false,
-                null,
-                responseMessage,
-                cancellationToken
-            ).ConfigureAwait(false);
-        }
-        catch (Exception exception)
-        {
-            var responseMessage = new Message<TResponse>(
-                default,
-                new MessageProperties
-                {
-                    CorrelationId = requestMessage.Properties.CorrelationId,
-                    DeliveryMode = MessageDeliveryMode.NonPersistent,
-                    Headers = new Dictionary<string, object?>
-                    {
-                        { IsFaultedKey, true },
-                        { ExceptionMessageKey, Encoding.UTF8.GetBytes(exception.Message) }
-                    }
-                }
-            );
-            await advancedBus.PublishAsync(
-                responseExchange.Name,
-                requestMessage.Properties.ReplyTo!,
-                false,
-                null,
-                responseMessage,
-                cancellationToken
-            ).ConfigureAwait(false);
-
-            throw;
-        }
-    }
-
-    private async Task RespondToMessageAsync<TRequest, TResponse>(
-        Func<TRequest, MessageProperties, CancellationToken, Task<TResponse>> responder,
-        IMessage<TRequest> requestMessage,
-        CancellationToken cancellationToken
-    )
-    {
-        var responseExchangeName = conventions.RpcResponseExchangeNamingConvention(typeof(TResponse));
-        var responseExchange = responseExchangeName == Exchange.Default.Name
-            ? Exchange.Default
-            : await exchangeDeclareStrategy.DeclareExchangeAsync(
-                responseExchangeName,
-                ExchangeType.Direct,
-                cancellationToken: cancellationToken
-            ).ConfigureAwait(false);
-
-        try
-        {
-            var request = requestMessage.Body!;
-            var response = await responder(request, requestMessage.Properties, cancellationToken).ConfigureAwait(false);
+            var response = await responder(request, requestMessage.Properties.Headers, cancellationToken).ConfigureAwait(false);
             var responseMessage = new Message<TResponse>(
                 response,
                 new MessageProperties
