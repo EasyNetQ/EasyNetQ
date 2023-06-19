@@ -30,7 +30,12 @@ public interface IRpc
     /// </summary>
     /// <typeparam name="TRequest">The request type</typeparam>
     /// <typeparam name="TResponse">The response type</typeparam>
-    /// <param name="responder">A function that performs the response</param>
+    /// <param name="responder">
+    ///     A function that returns the response and accepts three input parameters:
+    ///     TRequest: the request body,
+    ///     IDictionary: the request headers,
+    ///     CancellationToken: a cancellation token.
+    /// </param>
     /// <param name="configure">A function that performs the configuration</param>
     /// <param name="cancellationToken">The cancellation token</param>
     Task<IDisposable> RespondAsync<TRequest, TResponse>(
