@@ -1,5 +1,4 @@
 using EasyNetQ.AutoSubscribe;
-using EasyNetQ.Internals;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests;
 

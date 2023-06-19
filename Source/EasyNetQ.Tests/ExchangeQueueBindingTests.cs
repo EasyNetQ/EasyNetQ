@@ -1,4 +1,3 @@
-using System.Collections;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using Queue = EasyNetQ.Topology.Queue;

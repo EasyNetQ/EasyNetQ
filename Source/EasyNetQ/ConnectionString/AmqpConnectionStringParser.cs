@@ -1,6 +1,5 @@
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Security.Authentication;
 using EasyNetQ.Internals;
 
 namespace EasyNetQ.ConnectionString;

@@ -1,5 +1,3 @@
-using EasyNetQ.Internals;
-
 namespace EasyNetQ;
 
 /// <summary>
