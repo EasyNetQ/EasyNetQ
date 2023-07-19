@@ -30,7 +30,7 @@ public class WindsorAdapter : IServiceRegister
     /// </summary>
     protected virtual void ConfigureContainer(IWindsorContainer container)
     {
-        container.Kernel.Resolver.AddSubResolver(new Castle.MicroKernel.Resolvers.SpecializedResolvers.CollectionResolver(container.Kernel));
+        container.Kernel.Resolver.AddSubResolver(new Castle.MicroKernel.Resolvers.SpecializedResolvers.CollectionResolver(container.Kernel, allowEmptyCollections: true));
     }
 
     /// <inheritdoc />
