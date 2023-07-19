@@ -20,7 +20,7 @@
     <PackageReference Include="RabbitMQ.Client" Version="6.5.*" />
     <PackageReference Include="Autofac" Version="4.9.3" />
     <PackageReference Include="Castle.Core" Version="4.4.1" />
-    <PackageReference Include="Castle.Windsor" Version="5.0.0" />
+    <PackageReference Include="Castle.Windsor" Version="5.1.1" />
     <PackageReference Include="Ninject" Version="3.3.5" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.3.1" />
