@@ -6,7 +6,7 @@ public class SubscriptionConfigurationTests
     public void Defaults_are_correct()
     {
         var configuration = new SubscriptionConfiguration(99);
-        Assert.Equal(0, configuration.Topics.Count);
+        Assert.Empty(configuration.Topics);
         Assert.False(configuration.AutoDelete);
         Assert.Equal(0, configuration.Priority);
         Assert.Equal(99, configuration.PrefetchCount);
