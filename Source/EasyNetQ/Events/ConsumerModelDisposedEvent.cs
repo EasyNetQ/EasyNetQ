@@ -1,11 +1,3 @@
 namespace EasyNetQ.Events;
 
-public readonly struct ConsumerModelDisposedEvent
-{
-    public IReadOnlyCollection<string> ConsumerTags { get; }
-
-    public ConsumerModelDisposedEvent(string[] consumerTags)
-    {
-        ConsumerTags = consumerTags;
-    }
-}
+public readonly record struct ConsumerModelDisposedEvent(IReadOnlyCollection<string> ConsumerTags);

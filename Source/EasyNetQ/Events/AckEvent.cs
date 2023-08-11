@@ -3,39 +3,11 @@ namespace EasyNetQ.Events;
 /// <summary>
 ///     This event is raised after a message is acked
 /// </summary>
-public readonly struct AckEvent
-{
-    /// <summary>
-    ///     Acked message received info
-    /// </summary>
-    public MessageReceivedInfo ReceivedInfo { get; }
-
-    /// <summary>
-    ///     Acked message properties
-    /// </summary>
-    public MessageProperties Properties { get; }
-
-    /// <summary>
-    ///     Acked message body
-    /// </summary>
-    public ReadOnlyMemory<byte> Body { get; }
-
-    /// <summary>
-    ///     Ack result of message
-    /// </summary>
-    public AckResult AckResult { get; }
-
-    /// <summary>
-    ///     Creates AckEvent
-    /// </summary>
-    public AckEvent(in MessageReceivedInfo info, in MessageProperties properties, in ReadOnlyMemory<byte> body, AckResult ackResult)
-    {
-        ReceivedInfo = info;
-        Properties = properties;
-        Body = body;
-        AckResult = ackResult;
-    }
-}
+/// <param name="ReceiveInfo">Acked message received info</param>
+/// <param name="Properties">Acked message properties</param>
+/// <param name="Body">Acked message body</param>
+/// <param name="AckResult">Ack result of message</param>
+public readonly record struct AckEvent(in MessageReceivedInfo ReceiveInfo, in MessageProperties Properties, in ReadOnlyMemory<byte> Body, AckResult AckResult);
 
 
 /// <summary>
