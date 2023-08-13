@@ -84,7 +84,7 @@ public class PersistentConnection : IPersistentConnection
                 connection = initializedConnection = CreateConnection();
             }
         }
-        catch (BrokerUnreachableException exception)
+        catch (Exception exception)
         {
             status = status.SwitchToDisconnected(exception.Message);
             throw;
