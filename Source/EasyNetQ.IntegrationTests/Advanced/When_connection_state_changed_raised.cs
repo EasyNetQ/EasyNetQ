@@ -55,8 +55,7 @@ public class When_connection_state_changed_raised : IDisposable
                 new PersistentConnectionStatus(
                     Type: PersistentConnectionType.Producer,
                     State: PersistentConnectionState.Connected,
-                    ConnectedAt: DateTime.UtcNow,
-                    FailureReason: null
+                    ConnectedAt: DateTime.UtcNow
                 ),
                 c => c.Excluding(x => x.ConnectedAt)
             );
@@ -80,8 +79,7 @@ public class When_connection_state_changed_raised : IDisposable
                 new PersistentConnectionStatus(
                     Type: PersistentConnectionType.Producer,
                     State: PersistentConnectionState.Connected,
-                    ConnectedAt: DateTime.UtcNow,
-                    FailureReason: null
+                    ConnectedAt: DateTime.UtcNow
                 ),
                 c => c.Excluding(x => x.ConnectedAt)
             );
@@ -89,8 +87,7 @@ public class When_connection_state_changed_raised : IDisposable
                 new PersistentConnectionStatus(
                     Type: PersistentConnectionType.Consumer,
                     State: PersistentConnectionState.Connected,
-                    ConnectedAt: DateTime.UtcNow,
-                    FailureReason: null
+                    ConnectedAt: DateTime.UtcNow
                 ),
                 c => c.Excluding(x => x.ConnectedAt)
             );
@@ -108,7 +105,6 @@ public class When_connection_state_changed_raised : IDisposable
                 new PersistentConnectionStatus(
                     Type: PersistentConnectionType.Producer,
                     State: PersistentConnectionState.Disconnected,
-                    ConnectedAt: null,
                     FailureReason: "AMQP close-reason, initiated by Peer, code=320, text='CONNECTION_FORCED - Closed via management plugin', classId=0, methodId=0"
                 ),
                 c => c.Excluding(x => x.ConnectedAt)
@@ -117,7 +113,6 @@ public class When_connection_state_changed_raised : IDisposable
                 new PersistentConnectionStatus(
                     Type: PersistentConnectionType.Consumer,
                     State: PersistentConnectionState.Disconnected,
-                    ConnectedAt: null,
                     FailureReason: "AMQP close-reason, initiated by Peer, code=320, text='CONNECTION_FORCED - Closed via management plugin', classId=0, methodId=0"
                 ),
                 c => c.Excluding(x => x.ConnectedAt)
