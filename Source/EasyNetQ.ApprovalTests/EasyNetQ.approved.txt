@@ -19,9 +19,6 @@ namespace EasyNetQ
         public static System.Threading.Tasks.Task<EasyNetQ.Topology.Binding<EasyNetQ.Topology.Queue>> BindAsync(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Exchange source, EasyNetQ.Topology.Queue queue, string routingKey, System.Threading.CancellationToken cancellationToken = default) { }
         public static System.Threading.Tasks.Task<EasyNetQ.Topology.Binding<EasyNetQ.Topology.Queue>> BindAsync(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Exchange exchange, EasyNetQ.Topology.Queue queue, string routingKey, System.Collections.Generic.IDictionary<string, object>? arguments, System.Threading.CancellationToken cancellationToken = default) { }
         public static System.Threading.Tasks.Task<EasyNetQ.Topology.Binding<EasyNetQ.Topology.Exchange>> BindAsync(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Exchange source, EasyNetQ.Topology.Exchange destination, string routingKey, System.Collections.Generic.IDictionary<string, object>? arguments, System.Threading.CancellationToken cancellationToken = default) { }
-        [System.Obsolete("ConnectAsync is deprecated because it is misleading. Please use EnsureConnectedAs" +
-            "ync instead")]
-        public static System.Threading.Tasks.Task ConnectAsync(this EasyNetQ.IAdvancedBus bus, System.Threading.CancellationToken cancellationToken = default) { }
         public static System.IDisposable Consume(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue queue, EasyNetQ.Consumer.MessageHandler handler) { }
         public static System.IDisposable Consume(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue queue, System.Action<EasyNetQ.Consumer.IHandlerRegistration> addHandlers) { }
         public static System.IDisposable Consume(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue queue, System.Action<System.ReadOnlyMemory<byte>, EasyNetQ.MessageProperties, EasyNetQ.MessageReceivedInfo> handler) { }
@@ -356,6 +353,9 @@ namespace EasyNetQ
         event System.EventHandler<EasyNetQ.DisconnectedEventArgs> Disconnected;
         event System.EventHandler<EasyNetQ.MessageReturnedEventArgs> MessageReturned;
         event System.EventHandler<EasyNetQ.UnblockedEventArgs> Unblocked;
+        [System.Obsolete("ConnectAsync is deprecated because it is misleading. Please use EnsureConnectedAs" +
+            "ync instead")]
+        System.Threading.Tasks.Task ConnectAsync(System.Threading.CancellationToken cancellationToken = default);
         System.IDisposable Consume(System.Action<EasyNetQ.IConsumeConfiguration> configure);
         EasyNetQ.IPullingConsumer<EasyNetQ.PullResult> CreatePullingConsumer(in EasyNetQ.Topology.Queue queue, bool autoAck = true);
         EasyNetQ.IPullingConsumer<EasyNetQ.PullResult<T>> CreatePullingConsumer<T>(in EasyNetQ.Topology.Queue queue, bool autoAck = true);
@@ -888,6 +888,9 @@ namespace EasyNetQ
         public event System.EventHandler<EasyNetQ.DisconnectedEventArgs>? Disconnected;
         public event System.EventHandler<EasyNetQ.MessageReturnedEventArgs>? MessageReturned;
         public event System.EventHandler<EasyNetQ.UnblockedEventArgs>? Unblocked;
+        [System.Obsolete("IsConnected is deprecated because it is misleading. Please use GetConnectionStatu" +
+            "s instead")]
+        public System.Threading.Tasks.Task ConnectAsync(System.Threading.CancellationToken cancellationToken = default) { }
         public System.IDisposable Consume(System.Action<EasyNetQ.IConsumeConfiguration> configure) { }
         public EasyNetQ.IPullingConsumer<EasyNetQ.PullResult> CreatePullingConsumer(in EasyNetQ.Topology.Queue queue, bool autoAck = true) { }
         public EasyNetQ.IPullingConsumer<EasyNetQ.PullResult<T>> CreatePullingConsumer<T>(in EasyNetQ.Topology.Queue queue, bool autoAck = true) { }

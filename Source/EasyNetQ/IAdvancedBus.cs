@@ -17,6 +17,13 @@ public interface IAdvancedBus
     bool IsConnected { get; }
 
     /// <summary>
+    /// Initialises all connections, but does not check if they are connected currently.
+    /// </summary>>
+    /// <param name="cancellationToken">The cancellation token</param>
+    [Obsolete("ConnectAsync is deprecated because it is misleading. Please use EnsureConnectedAsync instead")]
+    Task ConnectAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
     ///     Gets a connection status for the given type
     /// </summary>
     /// <param name="type">The connection type</param>

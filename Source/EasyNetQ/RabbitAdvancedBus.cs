@@ -8,6 +8,7 @@ using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ;
 
@@ -93,6 +94,22 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     public bool IsConnected =>
         (from PersistentConnectionType type in Enum.GetValues(typeof(PersistentConnectionType)) select GetConnection(type))
         .All(connection => connection.Status.State == PersistentConnectionState.Connected);
+
+    /// <inheritdoc />
+    [Obsolete("IsConnected is deprecated because it is misleading. Please use GetConnectionStatus instead")]
+    public async Task ConnectAsync(CancellationToken cancellationToken = default)
+    {
+        foreach (PersistentConnectionType type in Enum.GetValues(typeof(PersistentConnectionType)))
+        {
+            try
+            {
+                await EnsureConnectedAsync(type, cancellationToken).ConfigureAwait(false);
+            }
+            catch (AlreadyClosedException)
+            {
+            }
+        }
+    }
 
     /// <inheritdoc />
     public PersistentConnectionStatus GetConnectionStatus(PersistentConnectionType type)

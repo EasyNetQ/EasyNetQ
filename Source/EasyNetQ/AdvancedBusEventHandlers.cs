@@ -30,7 +30,7 @@ public class AdvancedBusEventHandlers
     /// </summary>
     public EventHandler<MessageReturnedEventArgs>? MessageReturned { get; }
 
-    /// <summary>
+    /// <summary>n
     ///     Creates AdvancedBusEventHandlers
     /// </summary>
     /// <param name="connected">The connected event handler</param>
