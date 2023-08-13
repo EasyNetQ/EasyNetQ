@@ -5,28 +5,12 @@ namespace EasyNetQ.Events;
 /// <summary>
 ///     This event is raised after a message is acked or nacked
 /// </summary>
-public readonly struct MessageConfirmationEvent
+/// <param name="Channel">The channel</param>
+/// <param name="DeliveryTag">The delivery tag</param>
+/// <param name="Multiple"><see langword="true"/> if a confirmation affects all previous messages</param>
+/// <param name="IsNack"><see langword="true"/> if a message is rejected</param>
+public readonly record struct MessageConfirmationEvent(IModel Channel, ulong DeliveryTag, bool Multiple, bool IsNack)
 {
-    /// <summary>
-    ///     The channel
-    /// </summary>
-    public IModel Channel { get; }
-
-    /// <summary>
-    ///     Delivery tag of the message
-    /// </summary>
-    public ulong DeliveryTag { get; }
-
-    /// <summary>
-    ///     <see langword="true"/> if a confirmation affects all previous messages
-    /// </summary>
-    public bool Multiple { get; }
-
-    /// <summary>
-    ///     <see langword="true"/> if a message is rejected
-    /// </summary>
-    public bool IsNack { get; }
-
     /// <summary>
     ///     Creates ack event
     /// </summary>
@@ -34,10 +18,8 @@ public readonly struct MessageConfirmationEvent
     /// <param name="deliveryTag">The delivery tag</param>
     /// <param name="multiple">The multiple option</param>
     /// <returns></returns>
-    public static MessageConfirmationEvent Ack(IModel channel, ulong deliveryTag, bool multiple)
-    {
-        return new MessageConfirmationEvent(channel, deliveryTag, multiple, false);
-    }
+    public static MessageConfirmationEvent Ack(IModel channel, ulong deliveryTag, bool multiple) =>
+        new(channel, deliveryTag, multiple, false);
 
     /// <summary>
     ///     Creates nack event
@@ -46,16 +28,6 @@ public readonly struct MessageConfirmationEvent
     /// <param name="deliveryTag">The delivery tag</param>
     /// <param name="multiple">The multiple option</param>
     /// <returns></returns>
-    public static MessageConfirmationEvent Nack(IModel channel, ulong deliveryTag, bool multiple)
-    {
-        return new MessageConfirmationEvent(channel, deliveryTag, multiple, true);
-    }
-
-    private MessageConfirmationEvent(IModel channel, ulong deliveryTag, bool multiple, bool isNack)
-    {
-        Channel = channel;
-        DeliveryTag = deliveryTag;
-        Multiple = multiple;
-        IsNack = isNack;
-    }
+    public static MessageConfirmationEvent Nack(IModel channel, ulong deliveryTag, bool multiple) =>
+        new(channel, deliveryTag, multiple, true);
 }

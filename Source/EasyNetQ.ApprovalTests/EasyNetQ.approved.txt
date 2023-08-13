@@ -1398,13 +1398,13 @@ namespace EasyNetQ.DI
 }
 namespace EasyNetQ.Events
 {
-    public readonly struct AckEvent
+    public readonly struct AckEvent : System.IEquatable<EasyNetQ.Events.AckEvent>
     {
-        public AckEvent(in EasyNetQ.MessageReceivedInfo info, in EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body, EasyNetQ.Events.AckResult ackResult) { }
-        public EasyNetQ.Events.AckResult AckResult { get; }
-        public System.ReadOnlyMemory<byte> Body { get; }
-        public EasyNetQ.MessageProperties Properties { get; }
-        public EasyNetQ.MessageReceivedInfo ReceivedInfo { get; }
+        public AckEvent(in EasyNetQ.MessageReceivedInfo ReceiveInfo, in EasyNetQ.MessageProperties Properties, in System.ReadOnlyMemory<byte> Body, EasyNetQ.Events.AckResult AckResult) { }
+        public EasyNetQ.Events.AckResult AckResult { get; init; }
+        public System.ReadOnlyMemory<byte> Body { get; init; }
+        public EasyNetQ.MessageProperties Properties { get; init; }
+        public EasyNetQ.MessageReceivedInfo ReceiveInfo { get; init; }
     }
     public enum AckResult
     {
@@ -1412,99 +1412,100 @@ namespace EasyNetQ.Events
         Nack = 1,
         Exception = 2,
     }
-    public readonly struct ChannelRecoveredEvent
+    public readonly struct ChannelRecoveredEvent : System.IEquatable<EasyNetQ.Events.ChannelRecoveredEvent>
     {
-        public ChannelRecoveredEvent(RabbitMQ.Client.IModel channel) { }
-        public RabbitMQ.Client.IModel Channel { get; }
+        public ChannelRecoveredEvent(RabbitMQ.Client.IModel Channel) { }
+        public RabbitMQ.Client.IModel Channel { get; init; }
     }
-    public readonly struct ChannelShutdownEvent
+    public readonly struct ChannelShutdownEvent : System.IEquatable<EasyNetQ.Events.ChannelShutdownEvent>
     {
-        public ChannelShutdownEvent(RabbitMQ.Client.IModel channel) { }
-        public RabbitMQ.Client.IModel Channel { get; }
+        public ChannelShutdownEvent(RabbitMQ.Client.IModel Channel) { }
+        public RabbitMQ.Client.IModel Channel { get; init; }
     }
-    public readonly struct ConnectionBlockedEvent
+    public readonly struct ConnectionBlockedEvent : System.IEquatable<EasyNetQ.Events.ConnectionBlockedEvent>
     {
-        public ConnectionBlockedEvent(EasyNetQ.Persistent.PersistentConnectionType type, string reason) { }
-        public string Reason { get; }
-        public EasyNetQ.Persistent.PersistentConnectionType Type { get; }
+        public ConnectionBlockedEvent(EasyNetQ.Persistent.PersistentConnectionType Type, string Reason) { }
+        public string Reason { get; init; }
+        public EasyNetQ.Persistent.PersistentConnectionType Type { get; init; }
     }
-    public readonly struct ConnectionCreatedEvent
+    public readonly struct ConnectionCreatedEvent : System.IEquatable<EasyNetQ.Events.ConnectionCreatedEvent>
     {
-        public ConnectionCreatedEvent(EasyNetQ.Persistent.PersistentConnectionType type, RabbitMQ.Client.AmqpTcpEndpoint endpoint) { }
-        public RabbitMQ.Client.AmqpTcpEndpoint Endpoint { get; }
-        public EasyNetQ.Persistent.PersistentConnectionType Type { get; }
+        public ConnectionCreatedEvent(EasyNetQ.Persistent.PersistentConnectionType Type, RabbitMQ.Client.AmqpTcpEndpoint Endpoint) { }
+        public RabbitMQ.Client.AmqpTcpEndpoint Endpoint { get; init; }
+        public EasyNetQ.Persistent.PersistentConnectionType Type { get; init; }
     }
-    public readonly struct ConnectionDisconnectedEvent
+    public readonly struct ConnectionDisconnectedEvent : System.IEquatable<EasyNetQ.Events.ConnectionDisconnectedEvent>
     {
-        public ConnectionDisconnectedEvent(EasyNetQ.Persistent.PersistentConnectionType type, RabbitMQ.Client.AmqpTcpEndpoint endpoint, string reason) { }
-        public RabbitMQ.Client.AmqpTcpEndpoint Endpoint { get; }
-        public string Reason { get; }
-        public EasyNetQ.Persistent.PersistentConnectionType Type { get; }
+        public ConnectionDisconnectedEvent(EasyNetQ.Persistent.PersistentConnectionType Type, RabbitMQ.Client.AmqpTcpEndpoint Endpoint, string Reason) { }
+        public RabbitMQ.Client.AmqpTcpEndpoint Endpoint { get; init; }
+        public string Reason { get; init; }
+        public EasyNetQ.Persistent.PersistentConnectionType Type { get; init; }
     }
-    public readonly struct ConnectionRecoveredEvent
+    public readonly struct ConnectionRecoveredEvent : System.IEquatable<EasyNetQ.Events.ConnectionRecoveredEvent>
     {
-        public ConnectionRecoveredEvent(EasyNetQ.Persistent.PersistentConnectionType type, RabbitMQ.Client.AmqpTcpEndpoint endpoint) { }
-        public RabbitMQ.Client.AmqpTcpEndpoint Endpoint { get; }
-        public EasyNetQ.Persistent.PersistentConnectionType Type { get; }
+        public ConnectionRecoveredEvent(EasyNetQ.Persistent.PersistentConnectionType Type, RabbitMQ.Client.AmqpTcpEndpoint Endpoint) { }
+        public RabbitMQ.Client.AmqpTcpEndpoint Endpoint { get; init; }
+        public EasyNetQ.Persistent.PersistentConnectionType Type { get; init; }
     }
-    public readonly struct ConnectionUnblockedEvent
+    public readonly struct ConnectionUnblockedEvent : System.IEquatable<EasyNetQ.Events.ConnectionUnblockedEvent>
     {
-        public ConnectionUnblockedEvent(EasyNetQ.Persistent.PersistentConnectionType type) { }
-        public EasyNetQ.Persistent.PersistentConnectionType Type { get; }
+        public ConnectionUnblockedEvent(EasyNetQ.Persistent.PersistentConnectionType Type) { }
+        public EasyNetQ.Persistent.PersistentConnectionType Type { get; init; }
     }
-    public readonly struct ConsumerModelDisposedEvent
+    public readonly struct ConsumerModelDisposedEvent : System.IEquatable<EasyNetQ.Events.ConsumerModelDisposedEvent>
     {
-        public ConsumerModelDisposedEvent(string[] consumerTags) { }
-        public System.Collections.Generic.IReadOnlyCollection<string> ConsumerTags { get; }
+        public ConsumerModelDisposedEvent(System.Collections.Generic.IReadOnlyCollection<string> ConsumerTags) { }
+        public System.Collections.Generic.IReadOnlyCollection<string> ConsumerTags { get; init; }
     }
-    public readonly struct DeliveredMessageEvent
+    public readonly struct DeliveredMessageEvent : System.IEquatable<EasyNetQ.Events.DeliveredMessageEvent>
     {
-        public DeliveredMessageEvent(in EasyNetQ.MessageReceivedInfo info, in EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
-        public System.ReadOnlyMemory<byte> Body { get; }
-        public EasyNetQ.MessageProperties Properties { get; }
-        public EasyNetQ.MessageReceivedInfo ReceivedInfo { get; }
+        public DeliveredMessageEvent(in EasyNetQ.MessageReceivedInfo Info, in EasyNetQ.MessageProperties Properties, in System.ReadOnlyMemory<byte> Body) { }
+        public System.ReadOnlyMemory<byte> Body { get; init; }
+        public EasyNetQ.MessageReceivedInfo Info { get; init; }
+        public EasyNetQ.MessageProperties Properties { get; init; }
     }
-    public readonly struct MessageConfirmationEvent
+    public readonly struct MessageConfirmationEvent : System.IEquatable<EasyNetQ.Events.MessageConfirmationEvent>
     {
-        public RabbitMQ.Client.IModel Channel { get; }
-        public ulong DeliveryTag { get; }
-        public bool IsNack { get; }
-        public bool Multiple { get; }
+        public MessageConfirmationEvent(RabbitMQ.Client.IModel Channel, ulong DeliveryTag, bool Multiple, bool IsNack) { }
+        public RabbitMQ.Client.IModel Channel { get; init; }
+        public ulong DeliveryTag { get; init; }
+        public bool IsNack { get; init; }
+        public bool Multiple { get; init; }
         public static EasyNetQ.Events.MessageConfirmationEvent Ack(RabbitMQ.Client.IModel channel, ulong deliveryTag, bool multiple) { }
         public static EasyNetQ.Events.MessageConfirmationEvent Nack(RabbitMQ.Client.IModel channel, ulong deliveryTag, bool multiple) { }
     }
-    public readonly struct PublishedMessageEvent
+    public readonly struct PublishedMessageEvent : System.IEquatable<EasyNetQ.Events.PublishedMessageEvent>
     {
-        public PublishedMessageEvent(string exchange, string routingKey, in EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
-        public System.ReadOnlyMemory<byte> Body { get; }
-        public string Exchange { get; }
-        public EasyNetQ.MessageProperties Properties { get; }
-        public string RoutingKey { get; }
+        public PublishedMessageEvent(string Exchange, string RoutingKey, in EasyNetQ.MessageProperties Properties, in System.ReadOnlyMemory<byte> Body) { }
+        public System.ReadOnlyMemory<byte> Body { get; init; }
+        public string Exchange { get; init; }
+        public EasyNetQ.MessageProperties Properties { get; init; }
+        public string RoutingKey { get; init; }
     }
-    public readonly struct ReturnedMessageEvent
+    public readonly struct ReturnedMessageEvent : System.IEquatable<EasyNetQ.Events.ReturnedMessageEvent>
     {
-        public ReturnedMessageEvent(RabbitMQ.Client.IModel channel, in System.ReadOnlyMemory<byte> body, in EasyNetQ.MessageProperties properties, in EasyNetQ.MessageReturnedInfo info) { }
-        public System.ReadOnlyMemory<byte> Body { get; }
-        public RabbitMQ.Client.IModel Channel { get; }
-        public EasyNetQ.MessageReturnedInfo Info { get; }
-        public EasyNetQ.MessageProperties Properties { get; }
+        public ReturnedMessageEvent(RabbitMQ.Client.IModel Channel, in System.ReadOnlyMemory<byte> Body, in EasyNetQ.MessageProperties Properties, in EasyNetQ.MessageReturnedInfo Info) { }
+        public System.ReadOnlyMemory<byte> Body { get; init; }
+        public RabbitMQ.Client.IModel Channel { get; init; }
+        public EasyNetQ.MessageReturnedInfo Info { get; init; }
+        public EasyNetQ.MessageProperties Properties { get; init; }
     }
-    public readonly struct StartConsumingFailedEvent
+    public readonly struct StartConsumingFailedEvent : System.IEquatable<EasyNetQ.Events.StartConsumingFailedEvent>
     {
-        public StartConsumingFailedEvent(EasyNetQ.Consumer.IConsumer consumer, in EasyNetQ.Topology.Queue queue) { }
-        public EasyNetQ.Consumer.IConsumer Consumer { get; }
-        public EasyNetQ.Topology.Queue Queue { get; }
+        public StartConsumingFailedEvent(EasyNetQ.Consumer.IConsumer Consumer, in EasyNetQ.Topology.Queue Queue) { }
+        public EasyNetQ.Consumer.IConsumer Consumer { get; init; }
+        public EasyNetQ.Topology.Queue Queue { get; init; }
     }
-    public readonly struct StartConsumingSucceededEvent
+    public readonly struct StartConsumingSucceededEvent : System.IEquatable<EasyNetQ.Events.StartConsumingSucceededEvent>
     {
-        public StartConsumingSucceededEvent(EasyNetQ.Consumer.IConsumer consumer, in EasyNetQ.Topology.Queue queue) { }
-        public EasyNetQ.Consumer.IConsumer Consumer { get; }
-        public EasyNetQ.Topology.Queue Queue { get; }
+        public StartConsumingSucceededEvent(EasyNetQ.Consumer.IConsumer Consumer, in EasyNetQ.Topology.Queue Queue) { }
+        public EasyNetQ.Consumer.IConsumer Consumer { get; init; }
+        public EasyNetQ.Topology.Queue Queue { get; init; }
     }
-    public readonly struct StoppedConsumingEvent
+    public readonly struct StoppedConsumingEvent : System.IEquatable<EasyNetQ.Events.StoppedConsumingEvent>
     {
-        public StoppedConsumingEvent(EasyNetQ.Consumer.IConsumer consumer) { }
-        public EasyNetQ.Consumer.IConsumer Consumer { get; }
+        public StoppedConsumingEvent(EasyNetQ.Consumer.IConsumer Consumer) { }
+        public EasyNetQ.Consumer.IConsumer Consumer { get; init; }
     }
 }
 namespace EasyNetQ.Interception
