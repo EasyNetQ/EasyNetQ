@@ -9,6 +9,7 @@ public enum PersistentConnectionType
     ///     For publishing messages
     /// </summary>
     Producer,
+
     /// <summary>
     ///     For consuming messages
     /// </summary>

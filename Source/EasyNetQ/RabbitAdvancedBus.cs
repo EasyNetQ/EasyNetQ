@@ -88,15 +88,24 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         produceDelegate = producePipelineBuilder.Use(_ => PublishInternalAsync).Build();
     }
 
+    /// <inheritdoc />
+    [Obsolete("IsConnected is deprecated because it is misleading. Please use GetConnectionStatus instead")]
+    public bool IsConnected =>
+        (from PersistentConnectionType type in Enum.GetValues(typeof(PersistentConnectionType)) select GetConnection(type))
+        .All(connection => connection.Status.State == PersistentConnectionState.Connected);
 
     /// <inheritdoc />
-    public bool IsConnected => producerConnection.IsConnected && consumerConnection.IsConnected;
-
-    /// <inheritdoc />
-    public Task ConnectAsync(CancellationToken cancellationToken = default)
+    public PersistentConnectionStatus GetConnectionStatus(PersistentConnectionType type)
     {
-        producerConnection.Connect();
-        consumerConnection.Connect();
+        var connection = GetConnection(type);
+        return connection.Status;
+    }
+
+    /// <inheritdoc />
+    public Task EnsureConnectedAsync(PersistentConnectionType type, CancellationToken cancellationToken = default)
+    {
+        var connection = GetConnection(type);
+        connection.EnsureConnected();
         return Task.CompletedTask;
     }
 
@@ -224,7 +233,8 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-        await produceDelegate(new ProduceContext(exchange, routingKey, mandatory ?? configuration.MandatoryPublish, publisherConfirms ?? configuration.PublisherConfirms, properties, body, serviceResolver, cts.Token)).ConfigureAwait(false);
+        await produceDelegate(new ProduceContext(exchange, routingKey, mandatory ?? configuration.MandatoryPublish,
+            publisherConfirms ?? configuration.PublisherConfirms, properties, body, serviceResolver, cts.Token)).ConfigureAwait(false);
     }
 
     #endregion
@@ -520,6 +530,13 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 
     #endregion
 
+    private IPersistentConnection GetConnection(PersistentConnectionType type) =>
+        type switch
+        {
+            PersistentConnectionType.Producer => producerConnection,
+            PersistentConnectionType.Consumer => consumerConnection,
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
 
     private void OnConnectionCreated(in ConnectionCreatedEvent @event)
     {
