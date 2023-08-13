@@ -6,12 +6,7 @@ namespace EasyNetQ.Hosepipe.Tests;
 
 public class QueueInsertionTests
 {
-    private readonly IQueueInsertion queueInsertion;
-
-    public QueueInsertionTests()
-    {
-        queueInsertion = new QueueInsertion(new DefaultErrorMessageSerializer());
-    }
+    private readonly IQueueInsertion queueInsertion = new QueueInsertion(new DefaultErrorMessageSerializer());
 
     /// <summary>
     /// Create a RabbitMQ queue 'Hosepipe_test_queue' before attempting this test.
