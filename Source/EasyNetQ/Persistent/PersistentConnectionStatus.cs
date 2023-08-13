@@ -14,12 +14,12 @@ public sealed record PersistentConnectionStatus(
     string? DisconnectionReason = null
 )
 {
-    internal PersistentConnectionStatus SwitchToUnknown() =>
+    internal PersistentConnectionStatus ToUnknown() =>
         new(Type, PersistentConnectionState.Unknown);
 
-    internal PersistentConnectionStatus SwitchToConnected() =>
+    internal PersistentConnectionStatus ToConnected() =>
         new(Type, PersistentConnectionState.Connected, DateTime.UtcNow);
 
-    internal PersistentConnectionStatus SwitchToDisconnected(string? reason) =>
+    internal PersistentConnectionStatus ToDisconnected(string? reason) =>
         new(Type, PersistentConnectionState.Disconnected, null, reason);
 }

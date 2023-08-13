@@ -86,11 +86,11 @@ public class PersistentConnection : IPersistentConnection
         }
         catch (Exception exception)
         {
-            status = status.SwitchToDisconnected(exception.Message);
+            status = status.ToDisconnected(exception.Message);
             throw;
         }
 
-        status = status.SwitchToConnected();
+        status = status.ToConnected();
         logger.InfoFormat(
             "Connection {type} established to broker {broker}, port {port}",
             type,
@@ -134,12 +134,12 @@ public class PersistentConnection : IPersistentConnection
         // these events handlers (except RecoverySucceeded one) are nullified on IAutorecoveringConnection.Dispose.
         connection.RecoverySucceeded -= OnConnectionRecovered;
 
-        status = status.SwitchToUnknown();
+        status = status.ToUnknown();
     }
 
     private void OnConnectionRecovered(object? sender, EventArgs e)
     {
-        status = status.SwitchToConnected();
+        status = status.ToConnected();
         var connection = (IConnection)sender!;
         logger.InfoFormat(
             "Connection {type} recovered to broker {host}:{port}",
@@ -152,7 +152,7 @@ public class PersistentConnection : IPersistentConnection
 
     private void OnConnectionShutdown(object? sender, ShutdownEventArgs e)
     {
-        status = status.SwitchToDisconnected(e.ToString());
+        status = status.ToDisconnected(e.ToString());
         var connection = (IConnection)sender!;
         logger.InfoException(
             "Connection {type} disconnected from broker {host}:{port} because of {reason}",
