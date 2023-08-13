@@ -15,7 +15,7 @@ public sealed record PersistentConnectionStatus(
 )
 {
     internal PersistentConnectionStatus ToUnknown() =>
-        new(Type, PersistentConnectionState.Unknown);
+        new(Type, PersistentConnectionState.NotInitialised);
 
     internal PersistentConnectionStatus ToConnected() =>
         new(Type, PersistentConnectionState.Connected, DateTime.UtcNow);

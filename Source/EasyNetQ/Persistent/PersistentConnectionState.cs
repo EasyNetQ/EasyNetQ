@@ -1,11 +1,20 @@
 namespace EasyNetQ.Persistent;
 
 /// <summary>
-///     A state of connection
+/// A connection state
 /// </summary>
 public enum PersistentConnectionState
 {
-    Unknown,
+    /// <summary>
+    /// Indicates that the connection is not initialised
+    /// </summary>
+    NotInitialised,
+    /// <summary>
+    /// Indicates that the connection is initialised and connected
+    /// </summary>
     Connected,
+    /// <summary>
+    /// Indicates that the connection is initialised, but disconnected
+    /// </summary>
     Disconnected
 }

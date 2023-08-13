@@ -22,7 +22,7 @@ public class PersistentConnectionTests
             mockBuilder.EventBus
         );
 
-        connection.Status.State.Should().Be(PersistentConnectionState.Unknown);
+        connection.Status.State.Should().Be(PersistentConnectionState.NotInitialised);
 
         Assert.Throws<Exception>(() => connection.EnsureConnected());
 
@@ -42,7 +42,7 @@ public class PersistentConnectionTests
             mockBuilder.EventBus
         );
 
-        connection.Status.State.Should().Be(PersistentConnectionState.Unknown);
+        connection.Status.State.Should().Be(PersistentConnectionState.NotInitialised);
 
         connection.EnsureConnected();
 
@@ -65,7 +65,7 @@ public class PersistentConnectionTests
             mockBuilder.EventBus
         );
 
-        connection.Status.State.Should().Be(PersistentConnectionState.Unknown);
+        connection.Status.State.Should().Be(PersistentConnectionState.NotInitialised);
 
         Assert.Throws<Exception>(() => connection.CreateModel());
 
@@ -85,7 +85,7 @@ public class PersistentConnectionTests
             mockBuilder.EventBus
         );
 
-        connection.Status.State.Should().Be(PersistentConnectionState.Unknown);
+        connection.Status.State.Should().Be(PersistentConnectionState.NotInitialised);
 
         connection.CreateModel();
 

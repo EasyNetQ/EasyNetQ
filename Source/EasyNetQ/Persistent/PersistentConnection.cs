@@ -35,7 +35,7 @@ public class PersistentConnection : IPersistentConnection
         this.configuration = configuration;
         this.connectionFactory = connectionFactory;
         this.eventBus = eventBus;
-        status = new PersistentConnectionStatus(type, PersistentConnectionState.Unknown);
+        status = new PersistentConnectionStatus(type, PersistentConnectionState.NotInitialised);
     }
 
     /// <inheritdoc />
