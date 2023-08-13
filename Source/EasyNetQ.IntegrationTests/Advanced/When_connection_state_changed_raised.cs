@@ -71,7 +71,7 @@ public class When_connection_state_changed_raised : IDisposable
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
-            await advanced.EnsureConnectedAsync(PersistentConnectionType.Producer, cts.Token);
+            await advanced.EnsureConnectedAsync(PersistentConnectionType.Consumer, cts.Token);
 
             var producerStatus = advanced.GetConnectionStatus(PersistentConnectionType.Producer);
             var consumerStatus = advanced.GetConnectionStatus(PersistentConnectionType.Consumer);
