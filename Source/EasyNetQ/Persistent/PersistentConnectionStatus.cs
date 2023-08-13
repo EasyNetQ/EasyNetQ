@@ -6,12 +6,12 @@ namespace EasyNetQ.Persistent;
 /// <param name="Type">The connection type</param>
 /// <param name="State">The connection state</param>
 /// <param name="ConnectedAt">The date when a connection is established</param>
-/// <param name="DisconnectionReason">The reason why a connection is disconnected</param>
+/// <param name="FailureReason">The reason why a connection is disconnected</param>
 public sealed record PersistentConnectionStatus(
     PersistentConnectionType Type,
     PersistentConnectionState State,
     DateTime? ConnectedAt = null,
-    string? DisconnectionReason = null
+    string? FailureReason = null
 )
 {
     internal PersistentConnectionStatus ToUnknown() =>

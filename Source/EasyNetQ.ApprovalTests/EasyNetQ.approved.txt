@@ -1859,9 +1859,9 @@ namespace EasyNetQ.Persistent
     }
     public sealed class PersistentConnectionStatus : System.IEquatable<EasyNetQ.Persistent.PersistentConnectionStatus>
     {
-        public PersistentConnectionStatus(EasyNetQ.Persistent.PersistentConnectionType Type, EasyNetQ.Persistent.PersistentConnectionState State, System.DateTime? ConnectedAt = default, string? DisconnectionReason = null) { }
+        public PersistentConnectionStatus(EasyNetQ.Persistent.PersistentConnectionType Type, EasyNetQ.Persistent.PersistentConnectionState State, System.DateTime? ConnectedAt = default, string? FailureReason = null) { }
         public System.DateTime? ConnectedAt { get; init; }
-        public string? DisconnectionReason { get; init; }
+        public string? FailureReason { get; init; }
         public EasyNetQ.Persistent.PersistentConnectionState State { get; init; }
         public EasyNetQ.Persistent.PersistentConnectionType Type { get; init; }
     }
