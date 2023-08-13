@@ -97,7 +97,7 @@ public class When_connection_state_changed_raised : IDisposable
         }
 
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
             await managementClient.KillAllConnectionsAsync(cts.Token);
 
