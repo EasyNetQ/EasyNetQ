@@ -3,12 +3,7 @@ namespace EasyNetQ.Tests;
 public class NonGenericRpcExtensionsTests
 {
     private readonly Action<IRequestConfiguration> configure = _ => { };
-    private readonly IRpc rpc;
-
-    public NonGenericRpcExtensionsTests()
-    {
-        rpc = Substitute.For<IRpc>();
-    }
+    private readonly IRpc rpc = Substitute.For<IRpc>();
 
     [Fact]
     public async Task Should_be_able_to_send_struct()

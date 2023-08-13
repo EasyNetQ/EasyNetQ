@@ -8,15 +8,9 @@ public class ConnectionStringTests
         "host=192.168.1.1:1001,my.little.host:1002;virtualHost=Copa;username=Copa;" +
         "password=abc_xyz;port=12345;requestedHeartbeat=3";
 
-    private readonly ConnectionConfiguration connectionString;
+    private readonly ConnectionConfiguration connectionString = new ConnectionStringParser().Parse(connectionStringValue);
 
-    private readonly ConnectionConfiguration defaults;
-
-    public ConnectionStringTests()
-    {
-        connectionString = new ConnectionStringParser().Parse(connectionStringValue);
-        defaults = new ConnectionStringParser().Parse("host=localhost");
-    }
+    private readonly ConnectionConfiguration defaults = new ConnectionStringParser().Parse("host=localhost");
 
     [Fact]
     public void Should_parse_host()

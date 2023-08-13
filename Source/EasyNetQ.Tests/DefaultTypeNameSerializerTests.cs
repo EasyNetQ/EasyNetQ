@@ -5,12 +5,7 @@ namespace EasyNetQ.Tests;
 
 public class DefaultTypeNameSerializerTests
 {
-    private readonly ITypeNameSerializer typeNameSerializer;
-
-    public DefaultTypeNameSerializerTests()
-    {
-        typeNameSerializer = new DefaultTypeNameSerializer();
-    }
+    private readonly ITypeNameSerializer typeNameSerializer = new DefaultTypeNameSerializer();
 
     [Fact]
     public void Should_serialize_hashset_of_string_type()

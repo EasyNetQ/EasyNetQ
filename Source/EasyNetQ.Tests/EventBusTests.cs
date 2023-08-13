@@ -4,12 +4,7 @@ namespace EasyNetQ.Tests;
 
 public class EventBusTests
 {
-    private readonly IEventBus eventBus;
-
-    public EventBusTests()
-    {
-        eventBus = new EventBus(Substitute.For<ILogger<EventBus>>());
-    }
+    private readonly IEventBus eventBus = new EventBus(Substitute.For<ILogger<EventBus>>());
 
     [Fact]
     public void Should_be_able_to_get_subscribed_to_events()
