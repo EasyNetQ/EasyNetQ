@@ -1,5 +1,4 @@
 using EasyNetQ;
-using EasyNetQ.Persistent;
 using EasyNetQ.Topology;
 
 var cts = new CancellationTokenSource();
@@ -9,10 +8,8 @@ using var bus = RabbitHutch.CreateBus(
     "host=localhost;publisherConfirms=True",
     x => x.EnableNewtonsoftJson()
         .EnableAlwaysNackWithoutRequeueConsumerErrorStrategy()
+        .EnableConsoleLogger()
 );
-
-Console.WriteLine(bus.Advanced.GetConnectionStatus(PersistentConnectionType.Producer));
-Console.WriteLine(bus.Advanced.GetConnectionStatus(PersistentConnectionType.Consumer));
 
 var eventQueue = await bus.Advanced.QueueDeclareAsync(
     queue: "Events",
@@ -44,10 +41,6 @@ while (!cts.IsCancellationRequested)
     }
     catch (Exception)
     {
+        await Task.Delay(5000, cts.Token);
     }
-
-    await Task.Delay(1000, cts.Token);
-
-    Console.WriteLine(bus.Advanced.GetConnectionStatus(PersistentConnectionType.Producer));
-    Console.WriteLine(bus.Advanced.GetConnectionStatus(PersistentConnectionType.Consumer));
 }
