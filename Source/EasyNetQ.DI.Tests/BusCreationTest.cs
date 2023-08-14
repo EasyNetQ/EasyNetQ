@@ -1,32 +1,26 @@
-using Castle.Windsor;
-using FluentAssertions;
-using Xunit;
-
 namespace EasyNetQ.DI.Tests;
+
+#pragma warning disable xUnit1026 // Theory methods should use all of their parameters
 
 public class BusCreationTest
 {
-    [Fact]
-    public void ShouldCreateBusForCastleWindsor()
+    [Theory]
+    [ClassData(typeof(ContainerAdaptersData))]
+    public void ShouldCreateBus(string name, ResolverFactory resolverFactory)
     {
-        // arrange
-        var container = new WindsorContainer();
-
-        // act
-        container.RegisterEasyNetQ(
-            connectionConfigurationFactory: serviceResolver =>
-            {
-                var connection = new ConnectionConfiguration();
-                connection.Hosts.Add(new HostConfiguration("localhost", 1));
-
-                return connection;
-            },
-            services => { }
+        var resolver = resolverFactory(
+            sr => RabbitHutch.RegisterBus(
+                sr,
+                _ =>
+                {
+                    var connection = new ConnectionConfiguration();
+                    connection.Hosts.Add(new HostConfiguration("localhost", 1));
+                    return connection;
+                },
+                _ => { }
+            )
         );
 
-        var bus = container.Resolve<IBus>();
-
-        // assert
-        bus.Should().NotBeNull();
+        resolver.Resolve<IBus>().Should().NotBeNull();
     }
 }
