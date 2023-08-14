@@ -2,7 +2,6 @@ using EasyNetQ.Events;
 using EasyNetQ.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.Persistent;
 
