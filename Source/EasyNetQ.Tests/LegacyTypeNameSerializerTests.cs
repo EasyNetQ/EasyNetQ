@@ -5,12 +5,7 @@ namespace EasyNetQ.Tests;
 
 public class LegacyTypeNameSerializerTests
 {
-    private readonly ITypeNameSerializer typeNameSerializer;
-
-    public LegacyTypeNameSerializerTests()
-    {
-        typeNameSerializer = new LegacyTypeNameSerializer();
-    }
+    private readonly ITypeNameSerializer typeNameSerializer = new LegacyTypeNameSerializer();
 
     [Fact]
     public void Should_serialize_hashset_of_string_type()

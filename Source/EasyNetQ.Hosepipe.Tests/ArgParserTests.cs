@@ -4,12 +4,7 @@ namespace EasyNetQ.Hosepipe.Tests;
 
 public class ArgParserTests
 {
-    private readonly ArgParser argParser;
-
-    public ArgParserTests()
-    {
-        argParser = new ArgParser();
-    }
+    private readonly ArgParser argParser = new();
 
     [Fact]
     public void Should_be_able_to_retrieve_args_by_position()

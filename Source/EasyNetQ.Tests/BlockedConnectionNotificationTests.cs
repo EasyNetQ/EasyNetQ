@@ -5,12 +5,7 @@ namespace EasyNetQ.Tests;
 
 public class When_a_connection_becomes_blocked
 {
-    private readonly MockBuilder mockBuilder;
-
-    public When_a_connection_becomes_blocked()
-    {
-        mockBuilder = new MockBuilder();
-    }
+    private readonly MockBuilder mockBuilder = new();
 
     [Fact]
     public void Should_raise_blocked_event()
@@ -27,12 +22,7 @@ public class When_a_connection_becomes_blocked
 
 public class When_a_connection_becomes_unblocked
 {
-    private readonly MockBuilder mockBuilder;
-
-    public When_a_connection_becomes_unblocked()
-    {
-        mockBuilder = new MockBuilder();
-    }
+    private readonly MockBuilder mockBuilder = new();
 
     [Fact]
     public void Should_raise_unblocked_event()
