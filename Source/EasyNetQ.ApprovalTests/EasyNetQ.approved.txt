@@ -535,6 +535,7 @@ namespace EasyNetQ
         EasyNetQ.IResponderConfiguration WithMaxPriority(byte priority);
         EasyNetQ.IResponderConfiguration WithPrefetchCount(ushort prefetchCount);
         EasyNetQ.IResponderConfiguration WithQueueName(string queueName);
+        EasyNetQ.IResponderConfiguration WithQueueType(string queueType = "classic");
     }
     public interface IRpc
     {

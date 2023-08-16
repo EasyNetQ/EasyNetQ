@@ -267,7 +267,7 @@ public class DefaultRpc : IRpc, IDisposable
     {
         var requestType = typeof(TRequest);
 
-        var responderConfiguration = new ResponderConfiguration(configuration.PrefetchCount);
+        var responderConfiguration = new ResponderConfiguration(configuration.PrefetchCount, conventions.QueueTypeConvention(typeof(TRequest)));
         configure(responderConfiguration);
 
         var routingKey = responderConfiguration.QueueName ?? conventions.RpcRoutingKeyNamingConvention(requestType);
