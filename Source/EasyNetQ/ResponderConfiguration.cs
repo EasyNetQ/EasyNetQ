@@ -47,13 +47,23 @@ public interface IResponderConfiguration
     /// <param name="priority">Queue's maxPriority value</param>
     /// <returns>Reference to the same <see cref="IResponderConfiguration"/> to allow methods chaining</returns>
     IResponderConfiguration WithMaxPriority(byte priority);
+
+    /// <summary>
+    /// Sets the queue type. Valid types are "classic" and "quorum". Works with RabbitMQ version 3.8+.
+    /// </summary>
+    /// <param name="queueType">Desired queue type.</param>
+    /// <returns>Returns a reference to itself</returns>
+    IResponderConfiguration WithQueueType(string queueType = QueueType.Classic);
 }
 
 internal class ResponderConfiguration : IResponderConfiguration
 {
-    public ResponderConfiguration(ushort defaultPrefetchCount)
+    public ResponderConfiguration(ushort defaultPrefetchCount, string? queueType = null)
     {
         PrefetchCount = defaultPrefetchCount;
+
+        if (queueType != null)
+            QueueArguments = new Dictionary<string, object> { { Argument.QueueType, queueType } };
     }
 
     public ushort PrefetchCount { get; private set; }
@@ -89,6 +99,12 @@ internal class ResponderConfiguration : IResponderConfiguration
     public IResponderConfiguration WithMaxPriority(byte priority)
     {
         InitializedQueueArguments.WithMaxPriority(priority);
+        return this;
+    }
+
+    public IResponderConfiguration WithQueueType(string queueType = QueueType.Classic)
+    {
+        InitializedQueueArguments.WithQueueType(queueType);
         return this;
     }
 
