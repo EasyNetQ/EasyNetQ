@@ -588,12 +588,6 @@ namespace EasyNetQ
         System.Type Deserialize(string typeName);
         string Serialize(System.Type type);
     }
-    public class JsonSerializer : EasyNetQ.ISerializer
-    {
-        public JsonSerializer(object? serializerSettings = null) { }
-        public object BytesToMessage(System.Type messageType, in System.ReadOnlyMemory<byte> bytes) { }
-        public System.Buffers.IMemoryOwner<byte> MessageToBytes(System.Type messageType, object message) { }
-    }
     public class LegacyRpcConventions : EasyNetQ.Conventions
     {
         public LegacyRpcConventions(EasyNetQ.ITypeNameSerializer typeNameSerializer) { }
@@ -923,6 +917,12 @@ namespace EasyNetQ
     {
         public static EasyNetQ.IReceiveRegistration Add<T>(this EasyNetQ.IReceiveRegistration receiveRegistration, System.Action<T> onMessage) { }
         public static EasyNetQ.IReceiveRegistration Add<T>(this EasyNetQ.IReceiveRegistration receiveRegistration, System.Func<T, System.Threading.Tasks.Task> onMessage) { }
+    }
+    public sealed class ReflectionBasedNewtonsoftJsonSerializer : EasyNetQ.ISerializer
+    {
+        public ReflectionBasedNewtonsoftJsonSerializer(object? serializerSettings = null) { }
+        public object BytesToMessage(System.Type messageType, in System.ReadOnlyMemory<byte> bytes) { }
+        public System.Buffers.IMemoryOwner<byte> MessageToBytes(System.Type messageType, object message) { }
     }
     public delegate string RpcExchangeNameConvention(System.Type messageType);
     public static class RpcExtensions

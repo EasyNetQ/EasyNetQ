@@ -9,7 +9,7 @@ namespace EasyNetQ;
 /// <summary>
 ///     JsonSerializer based on Newtonsoft.Json which uses it dynamically
 /// </summary>
-public class JsonSerializer : ISerializer
+public sealed class ReflectionBasedNewtonsoftJsonSerializer : ISerializer
 {
     private static readonly Encoding Encoding = new UTF8Encoding(false);
 
@@ -23,7 +23,7 @@ public class JsonSerializer : ISerializer
     /// <summary>
     ///     Creates JsonSerializer
     /// </summary>
-    public JsonSerializer(object? serializerSettings = null)
+    public ReflectionBasedNewtonsoftJsonSerializer(object? serializerSettings = null)
     {
         var jsonSerializerType = TryGetType("Newtonsoft.Json.JsonSerializer", "Newtonsoft.Json");
         if (jsonSerializerType == null)

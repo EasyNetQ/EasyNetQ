@@ -63,7 +63,7 @@ public class DefaultMessageSerializationStrategyTests
     public void When_using_the_default_serialization_strategy_messages_are_correctly_round_tripped()
     {
         var typeNameSerializer = new DefaultTypeNameSerializer();
-        var serializer = new JsonSerializer();
+        var serializer = new ReflectionBasedNewtonsoftJsonSerializer();
         const string correlationId = "CorrelationId";
 
         var serializationStrategy =
@@ -82,7 +82,7 @@ public class DefaultMessageSerializationStrategyTests
     public void When_using_the_default_serialization_strategy_messages_are_correctly_round_tripped_when_null()
     {
         var typeNameSerializer = new DefaultTypeNameSerializer();
-        var serializer = new JsonSerializer();
+        var serializer = new ReflectionBasedNewtonsoftJsonSerializer();
         const string correlationId = "CorrelationId";
 
         var serializationStrategy =
