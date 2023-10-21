@@ -236,7 +236,7 @@ public class When_a_message_is_delivered : IDisposable
         const string text = "Hello there, I am the text!";
         originalMessage = new MyMessage { Text = text };
 
-        using var serializedMessage = new JsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
+        using var serializedMessage = new ReflectionBasedNewtonsoftJsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
 
         // deliver a message
         mockBuilder.Consumers[0].HandleBasicDeliver(
@@ -322,7 +322,7 @@ public class When_the_handler_throws_an_exception : IDisposable
         const string text = "Hello there, I am the text!";
         originalMessage = new MyMessage { Text = text };
 
-        using var serializedMessage = new JsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
+        using var serializedMessage = new ReflectionBasedNewtonsoftJsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
 
         // deliver a message
         mockBuilder.Consumers[0].HandleBasicDeliver(

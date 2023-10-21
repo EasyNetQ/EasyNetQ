@@ -17,7 +17,7 @@ public class When_a_polymorphic_message_is_delivered_to_the_consumer : IDisposab
         mockBuilder.Bus.Advanced.Consume<ITestMessageInterface>(queue, (message, _) => receivedMessage = message.Body);
 
         var publishedMessage = new Implementation { Text = "Hello Polymorphs!" };
-        var serializedMessage = new JsonSerializer().MessageToBytes(typeof(Implementation), publishedMessage);
+        var serializedMessage = new ReflectionBasedNewtonsoftJsonSerializer().MessageToBytes(typeof(Implementation), publishedMessage);
         var properties = new BasicProperties
         {
             Type = new DefaultTypeNameSerializer().Serialize(typeof(Implementation))
