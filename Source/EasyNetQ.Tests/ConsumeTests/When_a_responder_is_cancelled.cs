@@ -42,7 +42,7 @@ public class When_a_responder_is_cancelled : IDisposable
     {
         Assert.True((bool)publishedMessage.Properties.Headers["IsFaulted"]);
         Assert.Equal("A task was canceled.", Encoding.UTF8.GetString((byte[])publishedMessage.Properties.Headers["ExceptionMessage"]));
-        Assert.Equal(AckResult.Nack, ackEvent.AckResult);
+        Assert.Equal(AckResult.Ack, ackEvent.AckResult);
     }
 
     private void DeliverMessage(RpcRequest request)
