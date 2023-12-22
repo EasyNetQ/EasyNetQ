@@ -2,13 +2,13 @@ using EasyNetQ.Consumer;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 
-public class When_an_error_occurs_in_the_message_handler : ConsumerTestBase
+public class When_a_cancellation_error_occurs_in_the_message_handler : ConsumerTestBase
 {
     private Exception exception;
 
     protected override void AdditionalSetUp()
     {
-        exception = new Exception("I've had a bad day :(");
+        exception = new OperationCanceledException("I've had a bad day :(");
 
         ConsumeErrorStrategy.HandleErrorAsync(default, exception)
             .ReturnsForAnyArgs(new ValueTask<AckStrategy>(AckStrategies.Ack));
