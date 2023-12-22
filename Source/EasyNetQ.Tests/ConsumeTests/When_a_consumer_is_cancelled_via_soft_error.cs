@@ -32,7 +32,7 @@ public class When_a_consumer_is_cancelled_via_soft_error : IDisposable
         );
         mockBuilder.Consumers[0].HandleBasicCancel("consumer_tag").GetAwaiter().GetResult();
         // Wait for a periodic consumer restart
-        Task.Delay(TimeSpan.FromSeconds(5)).GetAwaiter().GetResult();
+        Task.Delay(TimeSpan.FromSeconds(5 + 1)).GetAwaiter().GetResult();
     }
 
     public void Dispose()
