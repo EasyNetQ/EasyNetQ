@@ -64,7 +64,7 @@ public sealed class AsyncCountdownEvent : IDisposable
         TaskCompletionSource<bool> waiter;
         lock (mutex)
         {
-            if (count <= 0)  return Task.CompletedTask;
+            if (count <= 0) return Task.CompletedTask;
 
             waiter = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             waiters.Enqueue(waiter);
