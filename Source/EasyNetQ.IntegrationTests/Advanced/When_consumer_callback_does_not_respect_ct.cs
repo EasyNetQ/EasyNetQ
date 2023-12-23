@@ -10,7 +10,7 @@ public class When_consumer_callback_does_not_respect_ct : IDisposable
 
     public When_consumer_callback_does_not_respect_ct(RabbitMQFixture rmqFixture)
     {
-        bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1");
+        bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=-1");
     }
 
     [Fact]
@@ -35,7 +35,7 @@ public class When_consumer_callback_does_not_respect_ct : IDisposable
                 return Task.Delay(-1, CancellationToken.None);
             })
         )
-            allMessagesReceived.Wait();
+            await allMessagesReceived.WaitAsync(cts.Token);
     }
 
     public void Dispose() => bus.Dispose();
