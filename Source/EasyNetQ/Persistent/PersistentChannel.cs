@@ -54,8 +54,6 @@ public class PersistentChannel : IPersistentChannel
         if (disposed)
             throw new ObjectDisposedException(nameof(PersistentChannel));
 
-        cancellationToken.ThrowIfCancellationRequested();
-
         return TryInvokeChannelActionFast<TResult, TChannelAction>(channelAction, out var result)
             ? new ValueTask<TResult>(result)
             : new ValueTask<TResult>(InvokeChannelActionSlowAsync<TResult, TChannelAction>(channelAction, cancellationToken));
