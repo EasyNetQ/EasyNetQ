@@ -12,6 +12,14 @@ public sealed class AsyncCountdownEvent : IDisposable
     private readonly Queue<TaskCompletionSource<bool>> waiters = new();
     private long count;
 
+    public AsyncCountdownEvent(long initialCount = 0)
+    {
+        if (initialCount < 0)
+            throw new ArgumentOutOfRangeException(nameof(initialCount), "Initial count cannot be negative");
+
+        count = initialCount;
+    }
+
     /// <inheritdoc />
     public void Dispose()
     {
@@ -69,6 +77,7 @@ public sealed class AsyncCountdownEvent : IDisposable
             waiter = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             waiters.Enqueue(waiter);
         }
+
         waiter.AttachCancellation(cancellationToken);
         return waiter.Task;
     }
