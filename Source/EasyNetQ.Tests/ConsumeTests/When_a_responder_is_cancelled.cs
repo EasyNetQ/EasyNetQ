@@ -33,7 +33,7 @@ public class When_a_responder_is_cancelled : IDisposable
     public void Dispose() => mockBuilder.Dispose();
 
     [Fact]
-    public void Should_NACK_with_cancelled_response()
+    public void Should_NACK_with_requeue()
     {
         mockBuilder.Channels[2].Received().BasicNack(0, false, true);
     }
