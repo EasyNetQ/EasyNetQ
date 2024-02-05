@@ -139,6 +139,9 @@ public class DefaultPubSub : IPubSub
                     c.WithQueueType(subscriptionConfiguration.QueueType);
                 if (subscriptionConfiguration.SingleActiveConsumer)
                     c.WithSingleActiveConsumer();
+                if (subscriptionConfiguration.PerQueueMessageTTl.HasValue)
+                    c.WithArgument("x-message-ttl",
+                        (int)subscriptionConfiguration.PerQueueMessageTTl.Value.TotalMilliseconds);
             },
             cts.Token
         ).ConfigureAwait(false);

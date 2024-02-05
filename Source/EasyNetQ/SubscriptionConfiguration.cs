@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace EasyNetQ;
@@ -129,6 +130,15 @@ public interface ISubscriptionConfiguration
     /// <param name="singleActiveConsumer">Queue's single-active-consumer flag</param>
     /// <returns>Returns a reference to itself</returns>
     ISubscriptionConfiguration WithSingleActiveConsumer(bool singleActiveConsumer = true);
+
+
+    /// <summary>
+    /// Configure the message TTL for the queue.
+    /// A message that has been in the queue for longer than the configured TTL is said to be dead.
+    /// </summary>
+    /// <param name="ttl">The message ttl</param>
+    /// <returns>Returns a reference to itself</returns>
+    ISubscriptionConfiguration WithPerQueueMessageTTl(TimeSpan ttl);
 }
 
 internal class SubscriptionConfiguration : ISubscriptionConfiguration
@@ -149,7 +159,7 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
     public string ExchangeType { get; private set; } = Topology.ExchangeType.Topic;
     public string AlternateExchange { get; private set; }
     public bool SingleActiveConsumer { get; private set; }
-
+    public TimeSpan? PerQueueMessageTTl { get; set; }
     public SubscriptionConfiguration(ushort defaultPrefetchCount)
     {
         Topics = new List<string>();
@@ -256,6 +266,12 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
     public ISubscriptionConfiguration WithSingleActiveConsumer(bool singleActiveConsumer = true)
     {
         SingleActiveConsumer = singleActiveConsumer;
+        return this;
+    }
+
+    public ISubscriptionConfiguration WithPerQueueMessageTTl(TimeSpan ttl)
+    {
+        PerQueueMessageTTl = ttl;
         return this;
     }
 }

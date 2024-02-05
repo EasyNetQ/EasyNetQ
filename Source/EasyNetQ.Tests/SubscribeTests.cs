@@ -124,8 +124,8 @@ public class When_subscribe_is_called : IDisposable
 
 public class When_subscribe_with_configuration_is_called
 {
-    [InlineData("ttt", true, 99, 999, 10, true, (byte)11, false, "qqq", 1001, 10001)]
-    [InlineData(null, false, 0, 0, null, false, null, true, "qqq", null, null)]
+    [InlineData("ttt", true, 99, 999, 10, true, (byte)11, false, "qqq", 1001, 10001, 6000)]
+    [InlineData(null, false, 0, 0, null, false, null, true, "qqq", null, null, null)]
     [Theory]
     public void Queue_should_be_declared_with_correct_options(
         string topic,
@@ -138,7 +138,8 @@ public class When_subscribe_with_configuration_is_called
         bool durable,
         string queueName,
         int? maxLength,
-        int? maxLengthBytes
+        int? maxLengthBytes,
+        int? perQueueMessageTtlInMs
     )
     {
         var mockBuilder = new MockBuilder();
@@ -181,6 +182,11 @@ public class When_subscribe_with_configuration_is_called
                     {
                         c.WithMaxLengthBytes(maxLengthBytes.Value);
                     }
+
+                    if (perQueueMessageTtlInMs.HasValue)
+                    {
+                        c.WithPerQueueMessageTTl(TimeSpan.FromMilliseconds(perQueueMessageTtlInMs.Value));
+                    }
                 }
             );
         }
@@ -196,9 +202,11 @@ public class When_subscribe_with_configuration_is_called
                     (!expires.HasValue || expires.Value == (int)x["x-expires"]) &&
                     (!maxPriority.HasValue || maxPriority.Value == (int)x["x-max-priority"]) &&
                     (!maxLength.HasValue || maxLength.Value == (int)x["x-max-length"]) &&
-                    (!maxLengthBytes.HasValue || maxLengthBytes.Value == (int)x["x-max-length-bytes"])
+                    (!maxLengthBytes.HasValue || maxLengthBytes.Value == (int)x["x-max-length-bytes"]) &&
+                    (!perQueueMessageTtlInMs.HasValue || perQueueMessageTtlInMs.Value == (int)x["x-message-ttl"])
             )
         );
+
 
         // Assert that consumer was created correctly
         mockBuilder.Channels[2].Received().BasicConsume(
