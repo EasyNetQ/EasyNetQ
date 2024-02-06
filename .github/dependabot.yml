@@ -38,17 +38,13 @@ updates:
     versions:
     - ">= 6.a"
     - "< 8"
-  - dependency-name: Microsoft.Extensions.Configuration
-    versions:
-    - ">= 5.a"
-    - "< 8"
   - dependency-name: Microsoft.Extensions.DependencyInjection
     versions:
-    - ">= 5.a"
+    - ">= 6.a"
     - "< 8"
   - dependency-name: Microsoft.Extensions.Logging.Abstractions
     versions:
-    - ">= 5.a"
+    - ">= 6.a"
     - "< 8"
   - dependency-name: Serilog
     versions:
