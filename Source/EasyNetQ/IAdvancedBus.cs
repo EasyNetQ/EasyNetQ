@@ -95,23 +95,20 @@ public interface IAdvancedBus
     /// Declare a queue. If the queue already exists this method does nothing
     /// </summary>
     /// <param name="queue">The name of the queue</param>
-    /// <param name="configure">Delegate to configure queue declaration</param>
+    /// <param name="durable"></param>
+    /// <param name="exclusive"></param>
+    /// <param name="autoDelete"></param>
+    /// <param name="arguments"></param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>The queue</returns>
     Task<Queue> QueueDeclareAsync(
         string queue,
-        Action<IQueueDeclareConfiguration> configure,
+        bool durable = true,
+        bool exclusive = false,
+        bool autoDelete = false,
+        IDictionary<string, object>? arguments = null,
         CancellationToken cancellationToken = default
     );
-
-    /// <summary>
-    /// Declare a transient server named queue. Note, this queue will only last for duration of the
-    /// connection. If there is a connection outage, EasyNetQ will not attempt to recreate
-    /// consumers.
-    /// </summary>
-    /// <param name="cancellationToken">The cancellation token</param>
-    /// <returns>The queue</returns>
-    Task<Queue> QueueDeclareAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Declare a queue passively. Throw an exception rather than create the queue if it doesn't exist
@@ -152,12 +149,18 @@ public interface IAdvancedBus
     /// Declare an exchange
     /// </summary>
     /// <param name="exchange">The exchange name</param>
-    /// <param name="configure">Delegate to configure exchange declaration</param>
+    /// <param name="arguments"></param>
     /// <param name="cancellationToken">The cancellation token</param>
+    /// <param name="type"></param>
+    /// <param name="durable"></param>
+    /// <param name="autoDelete"></param>
     /// <returns>The exchange</returns>
     Task<Exchange> ExchangeDeclareAsync(
         string exchange,
-        Action<IExchangeDeclareConfiguration> configure,
+        string type = ExchangeType.Topic,
+        bool durable = true,
+        bool autoDelete = false,
+        IDictionary<string, object>? arguments = null,
         CancellationToken cancellationToken = default
     );
 
@@ -180,7 +183,7 @@ public interface IAdvancedBus
         string queue,
         string exchange,
         string routingKey,
-        IDictionary<string, object>? arguments,
+        IDictionary<string, object>? arguments = null,
         CancellationToken cancellationToken = default
     );
 
@@ -191,7 +194,7 @@ public interface IAdvancedBus
         string queue,
         string exchange,
         string routingKey,
-        IDictionary<string, object>? arguments,
+        IDictionary<string, object>? arguments = null,
         CancellationToken cancellationToken = default
     );
 
@@ -202,7 +205,7 @@ public interface IAdvancedBus
         string destinationExchange,
         string sourceExchange,
         string routingKey,
-        IDictionary<string, object>? arguments,
+        IDictionary<string, object>? arguments = null,
         CancellationToken cancellationToken = default
     );
 
@@ -213,7 +216,7 @@ public interface IAdvancedBus
         string destinationExchange,
         string sourceExchange,
         string routingKey,
-        IDictionary<string, object>? arguments,
+        IDictionary<string, object>? arguments = null,
         CancellationToken cancellationToken = default
     );
 

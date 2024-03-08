@@ -1,4 +1,3 @@
-using System.Security.Cryptography.X509Certificates;
 using EasyNetQ.Events;
 using EasyNetQ.Logging;
 using RabbitMQ.Client;

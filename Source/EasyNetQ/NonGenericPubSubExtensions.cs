@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
-using EasyNetQ.Internals;
 
 namespace EasyNetQ;
 

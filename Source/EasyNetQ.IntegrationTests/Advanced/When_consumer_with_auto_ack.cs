@@ -19,7 +19,7 @@ public class When_consumer_with_auto_ack : IDisposable
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
         var queueName = Guid.NewGuid().ToString();
-        var queue = await bus.Advanced.QueueDeclareAsync(queueName, cts.Token);
+        var queue = await bus.Advanced.QueueDeclareAsync(queueName, cancellationToken: cts.Token);
 
         var allMessagesReceived = new AsyncCountdownEvent();
 
@@ -31,26 +31,14 @@ public class When_consumer_with_auto_ack : IDisposable
             allMessagesReceived.Increment();
         }
 
-        var initialStats = await bus.Advanced.GetQueueStatsAsync(queue.Name, cts.Token);
-        initialStats.MessagesCount.Should().Be(10);
-
         using (
             bus.Advanced.Consume(
                 queue,
-                (_, _, _) =>
-                {
-                    allMessagesReceived.Decrement();
-                    throw new Exception("Oops");
-                },
+                (_, _, _) => allMessagesReceived.Decrement(),
                 c => c.WithAutoAck()
             )
         )
-        {
-            allMessagesReceived.Wait();
-        }
-
-        var finalStats = await bus.Advanced.GetQueueStatsAsync(queue.Name, cts.Token);
-        finalStats.MessagesCount.Should().Be(0);
+            await allMessagesReceived.WaitAsync(cts.Token);
     }
 
     public void Dispose() => bus.Dispose();

@@ -1,5 +1,4 @@
 using EasyNetQ.AutoSubscribe;
-using EasyNetQ.Internals;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests;
 
@@ -47,9 +46,9 @@ public class When_auto_subscribing_async_with_subscription_configuration_attribu
         capturedAction(subscriptionConfiguration);
 
         subscriptionConfiguration.AutoDelete.Should().BeTrue();
-        subscriptionConfiguration.Expires.Should().Be(10);
-        subscriptionConfiguration.PrefetchCount.Should().Be((ushort)10);
+        subscriptionConfiguration.PrefetchCount.Should().Be(10);
         subscriptionConfiguration.Priority.Should().Be(10);
+        subscriptionConfiguration.QueueArguments.Should().BeEquivalentTo(new Dictionary<string, object> { { "x-expires", 10 } });
     }
 
     // Discovered by reflection over test assembly, do not remove.
@@ -112,9 +111,9 @@ public class When_auto_subscribing_async_explicit_implementation_with_subscripti
         capturedAction(subscriptionConfiguration);
 
         subscriptionConfiguration.AutoDelete.Should().BeTrue();
-        subscriptionConfiguration.Expires.Should().Be(10);
         subscriptionConfiguration.PrefetchCount.Should().Be(10);
         subscriptionConfiguration.Priority.Should().Be(10);
+        subscriptionConfiguration.QueueArguments.Should().BeEquivalentTo(new Dictionary<string, object> { { "x-expires", 10 } });
     }
 
     // Discovered by reflection over test assembly, do not remove.

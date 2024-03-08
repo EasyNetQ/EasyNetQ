@@ -3,8 +3,12 @@ updates:
 - package-ecosystem: nuget
   directory: "/Source"
   schedule:
-    interval: daily
+    interval: monthly
   open-pull-requests-limit: 10
+  groups:
+    nuget-packages:
+      patterns:
+        - "*"
   ignore:
   - dependency-name: Autofac
     versions:
@@ -34,17 +38,13 @@ updates:
     versions:
     - ">= 6.a"
     - "< 8"
-  - dependency-name: Microsoft.Extensions.Configuration
-    versions:
-    - ">= 5.a"
-    - "< 8"
   - dependency-name: Microsoft.Extensions.DependencyInjection
     versions:
-    - ">= 5.a"
+    - ">= 6.a"
     - "< 8"
   - dependency-name: Microsoft.Extensions.Logging.Abstractions
     versions:
-    - ">= 5.a"
+    - ">= 6.a"
     - "< 8"
   - dependency-name: Serilog
     versions:
@@ -53,5 +53,5 @@ updates:
 - package-ecosystem: "github-actions"
   directory: "/"
   schedule:
-    interval: daily
+    interval: monthly
   open-pull-requests-limit: 10

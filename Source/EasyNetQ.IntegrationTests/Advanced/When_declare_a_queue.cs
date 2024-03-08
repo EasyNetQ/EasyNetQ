@@ -21,7 +21,9 @@ public class When_declare_a_queue : IDisposable
         foreach (var queueMode in queuesModes)
         {
             await bus.Advanced.QueueDeclareAsync(
-                Guid.NewGuid().ToString("N"), c => c.WithQueueMode(queueMode), cts.Token
+                queue: Guid.NewGuid().ToString("N"),
+                arguments: new Dictionary<string, object>().WithQueueMode(queueMode),
+                cancellationToken: cts.Token
             );
         }
 
@@ -29,7 +31,9 @@ public class When_declare_a_queue : IDisposable
         foreach (var queueType in queuesTypes)
         {
             await bus.Advanced.QueueDeclareAsync(
-                Guid.NewGuid().ToString("N"), c => c.WithQueueType(queueType), cts.Token
+                queue: Guid.NewGuid().ToString("N"),
+                arguments: new Dictionary<string, object>().WithQueueType(queueType),
+                cancellationToken: cts.Token
             );
         }
     }

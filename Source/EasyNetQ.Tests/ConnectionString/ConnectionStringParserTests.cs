@@ -4,12 +4,7 @@ namespace EasyNetQ.Tests.ConnectionString;
 
 public class ConnectionStringParserTests
 {
-    public ConnectionStringParserTests()
-    {
-        connectionStringParser = new ConnectionStringParser();
-    }
-
-    private readonly ConnectionStringParser connectionStringParser;
+    private readonly ConnectionStringParser connectionStringParser = new();
 
     private const string ConnectionString =
         "virtualHost=Copa;username=Copa;host=192.168.1.1;password=abc_xyz;port=12345;" +

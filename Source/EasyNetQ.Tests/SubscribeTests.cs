@@ -180,11 +180,10 @@ public class When_subscribe_with_configuration_is_called
             Arg.Is(false),
             Arg.Is(autoDelete),
             Arg.Is<IDictionary<string, object>>(
-                x =>
-                    (!expires.HasValue || expires.Value == (int)x["x-expires"]) &&
-                    (!maxPriority.HasValue || maxPriority.Value == (int)x["x-max-priority"]) &&
-                    (!maxLength.HasValue || maxLength.Value == (int)x["x-max-length"]) &&
-                    (!maxLengthBytes.HasValue || maxLengthBytes.Value == (int)x["x-max-length-bytes"])
+                x => (!expires.HasValue || expires.Value == (int)x["x-expires"]) &&
+                     (!maxPriority.HasValue || maxPriority.Value == (byte)x["x-max-priority"]) &&
+                     (!maxLength.HasValue || maxLength.Value == (int)x["x-max-length"]) &&
+                     (!maxLengthBytes.HasValue || maxLengthBytes.Value == (int)x["x-max-length-bytes"])
             )
         );
 
@@ -207,7 +206,8 @@ public class When_subscribe_with_configuration_is_called
             Arg.Is(queueName),
             Arg.Is("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
             Arg.Is(topic ?? "#"),
-            Arg.Is((IDictionary<string, object>)null));
+            Arg.Is((IDictionary<string, object>)null)
+        );
     }
 }
 
@@ -236,7 +236,7 @@ public class When_a_message_is_delivered : IDisposable
         const string text = "Hello there, I am the text!";
         originalMessage = new MyMessage { Text = text };
 
-        using var serializedMessage = new JsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
+        using var serializedMessage = new ReflectionBasedNewtonsoftJsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
 
         // deliver a message
         mockBuilder.Consumers[0].HandleBasicDeliver(
@@ -322,7 +322,7 @@ public class When_the_handler_throws_an_exception : IDisposable
         const string text = "Hello there, I am the text!";
         originalMessage = new MyMessage { Text = text };
 
-        using var serializedMessage = new JsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
+        using var serializedMessage = new ReflectionBasedNewtonsoftJsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
 
         // deliver a message
         mockBuilder.Consumers[0].HandleBasicDeliver(

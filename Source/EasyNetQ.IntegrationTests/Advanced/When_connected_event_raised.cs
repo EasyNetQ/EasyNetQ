@@ -20,9 +20,7 @@ public class When_connected_event_raised : IDisposable
         var mre = new ManualResetEventSlim(false);
         bus.Advanced.Connected += (_, _) => mre.Set();
 
-        await bus.Advanced.ExchangeDeclareAsync(
-            Guid.NewGuid().ToString("N"), c => c.WithType(ExchangeType.Topic), cts.Token
-        );
+        await bus.Advanced.ExchangeDeclareAsync(Guid.NewGuid().ToString("N"), cancellationToken: cts.Token);
 
         mre.Wait(cts.Token);
     }

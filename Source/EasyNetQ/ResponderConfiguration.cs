@@ -39,7 +39,7 @@ public interface IResponderConfiguration
     /// </summary>
     /// <param name="expires">The value of the x-expires argument or expires policy describes the expiration period and is subject to the same constraints as x-message-ttl and cannot be zero. Thus a value of 1 means a queue which is unused for 1 second will be deleted.</param>
     /// <returns>Reference to the same <see cref="IResponderConfiguration"/> to allow methods chaining</returns>
-    IResponderConfiguration WithExpires(TimeSpan expires);
+    IResponderConfiguration WithExpires(int expires);
 
     /// <summary>
     /// Configures the queue's maxPriority
@@ -47,20 +47,30 @@ public interface IResponderConfiguration
     /// <param name="priority">Queue's maxPriority value</param>
     /// <returns>Reference to the same <see cref="IResponderConfiguration"/> to allow methods chaining</returns>
     IResponderConfiguration WithMaxPriority(byte priority);
+
+    /// <summary>
+    /// Sets the queue type. Valid types are "classic" and "quorum". Works with RabbitMQ version 3.8+.
+    /// </summary>
+    /// <param name="queueType">Desired queue type.</param>
+    /// <returns>Returns a reference to itself</returns>
+    IResponderConfiguration WithQueueType(string queueType = QueueType.Classic);
 }
 
 internal class ResponderConfiguration : IResponderConfiguration
 {
-    public ResponderConfiguration(ushort defaultPrefetchCount)
+    public ResponderConfiguration(ushort defaultPrefetchCount, string? queueType = null)
     {
         PrefetchCount = defaultPrefetchCount;
+
+        if (queueType != null)
+            QueueArguments = new Dictionary<string, object> { { Argument.QueueType, queueType } };
     }
 
     public ushort PrefetchCount { get; private set; }
     public string? QueueName { get; private set; }
     public bool Durable { get; private set; } = true;
-    public TimeSpan? Expires { get; private set; }
-    public byte? MaxPriority { get; private set; }
+
+    public IDictionary<string, object>? QueueArguments { get; private set; }
 
     public IResponderConfiguration WithPrefetchCount(ushort prefetchCount)
     {
@@ -80,15 +90,23 @@ internal class ResponderConfiguration : IResponderConfiguration
         return this;
     }
 
-    public IResponderConfiguration WithExpires(TimeSpan expires)
+    public IResponderConfiguration WithExpires(int expires)
     {
-        Expires = expires;
+        InitializedQueueArguments.WithExpires(expires);
         return this;
     }
 
     public IResponderConfiguration WithMaxPriority(byte priority)
     {
-        MaxPriority = priority;
+        InitializedQueueArguments.WithMaxPriority(priority);
         return this;
     }
+
+    public IResponderConfiguration WithQueueType(string queueType = QueueType.Classic)
+    {
+        InitializedQueueArguments.WithQueueType(queueType);
+        return this;
+    }
+
+    private IDictionary<string, object> InitializedQueueArguments => QueueArguments ??= new Dictionary<string, object>();
 }

@@ -5,17 +5,12 @@ namespace EasyNetQ.Tests.ProducerTests;
 
 public class When_a_request_is_sent_but_the_connection_closes_before_a_reply_is_received : IDisposable
 {
-    public When_a_request_is_sent_but_the_connection_closes_before_a_reply_is_received()
-    {
-        mockBuilder = new MockBuilder();
-    }
-
     public void Dispose()
     {
         mockBuilder.Dispose();
     }
 
-    private readonly MockBuilder mockBuilder;
+    private readonly MockBuilder mockBuilder = new();
 
     [Fact]
     public Task Should_throw_an_EasyNetQException()

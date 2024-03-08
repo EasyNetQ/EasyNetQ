@@ -68,7 +68,7 @@ public class Program
             new FileMessageWriter(),
             new MessageReader(),
             new QueueInsertion(errorMessageSerializer),
-            new ErrorRetry(new JsonSerializer(), errorMessageSerializer),
+            new ErrorRetry(new ReflectionBasedNewtonsoftJsonSerializer(), errorMessageSerializer),
             new Conventions(typeNameSerializer)
         );
         program.Start(args);

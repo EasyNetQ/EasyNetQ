@@ -16,14 +16,9 @@ public class RabbitMQFixture : IAsyncLifetime, IDisposable
     private const string Password = "guest";
 
 
-    private readonly DockerProxy dockerProxy;
+    private readonly DockerProxy dockerProxy = new();
     private OSPlatform dockerEngineOsPlatform;
     private string dockerNetworkName;
-
-    public RabbitMQFixture()
-    {
-        dockerProxy = new DockerProxy();
-    }
 
     public string Host { get; private set; } = "localhost";
 
