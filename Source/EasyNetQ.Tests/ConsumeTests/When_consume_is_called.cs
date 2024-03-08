@@ -6,7 +6,7 @@ public class When_consume_is_called : ConsumerTestBase
 {
     protected override void AdditionalSetUp()
     {
-        StartConsumer((_, _, _) => AckStrategies.Ack);
+        StartConsumer((_, _, _, _) => AckStrategies.Ack);
     }
 
     [Fact]

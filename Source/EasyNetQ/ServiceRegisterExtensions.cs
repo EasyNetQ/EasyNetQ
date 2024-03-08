@@ -35,7 +35,7 @@ public static class ServiceRegisterExtensions
             .TryRegister<IConnectionStringParser>(
                 _ => new CompositeConnectionStringParser(new AmqpConnectionStringParser(), new ConnectionStringParser())
             )
-            .TryRegister<ISerializer>(_ => new JsonSerializer())
+            .TryRegister<ISerializer>(_ => new ReflectionBasedNewtonsoftJsonSerializer())
             .TryRegister<IConventions, Conventions>()
             .TryRegister<IEventBus, EventBus>()
             .TryRegister<ITypeNameSerializer, DefaultTypeNameSerializer>()
@@ -209,7 +209,7 @@ public static class ServiceRegisterExtensions
                 {
                     return await next(ctx).ConfigureAwait(false);
                 }
-                catch (OperationCanceledException)
+                catch (OperationCanceledException) when (ctx.CancellationToken.IsCancellationRequested)
                 {
                     return await errorStrategy.HandleCancelledAsync(ctx).ConfigureAwait(false);
                 }

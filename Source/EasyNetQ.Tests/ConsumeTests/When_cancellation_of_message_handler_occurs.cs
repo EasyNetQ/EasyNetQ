@@ -7,15 +7,19 @@ public class When_cancellation_of_message_handler_occurs : ConsumerTestBase
     protected override void AdditionalSetUp()
     {
         ConsumeErrorStrategy.HandleCancelledAsync(default)
-            .ReturnsForAnyArgs(new ValueTask<AckStrategy>(AckStrategies.Ack));
+            .ReturnsForAnyArgs(new ValueTask<AckStrategy>(AckStrategies.NackWithRequeue));
 
-        StartConsumer((_, _, _) =>
+        var are = new AutoResetEvent(false);
+        var consumer = StartConsumer((_, _, _, ct) =>
         {
-            Cancellation.Cancel();
-            Cancellation.Token.ThrowIfCancellationRequested();
+            are.Set();
+            Task.Delay(-1, ct).GetAwaiter().GetResult();
             return AckStrategies.Ack;
         });
-        DeliverMessage();
+        var deliverTask = DeliverMessageAsync();
+        are.WaitOne();
+        consumer.Dispose();
+        deliverTask.GetAwaiter().GetResult();
     }
 
     [Fact]
@@ -32,8 +36,8 @@ public class When_cancellation_of_message_handler_occurs : ConsumerTestBase
     }
 
     [Fact]
-    public void Should_ack()
+    public void Should_nack_with_requeue()
     {
-        MockBuilder.Channels[0].Received().BasicAck(DeliverTag, false);
+        MockBuilder.Channels[0].Received().BasicNack(DeliverTag, false, true);
     }
 }

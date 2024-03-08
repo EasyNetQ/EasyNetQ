@@ -19,7 +19,7 @@ public class RemovableNamingSubSystem : DefaultNamingSubSystem
         var invalidate = false;
         using (@lock.ForWriting())
         {
-            if (name2Handler.ContainsKey(serviceType.FullName))
+            if (serviceType.FullName is not null && name2Handler.ContainsKey(serviceType.FullName))
             {
                 invalidate = true;
                 name2Handler.Remove(serviceType.FullName);

@@ -10,7 +10,6 @@ public abstract class ConsumerTestBase : IDisposable
 {
     protected const string ConsumerTag = "the_consumer_tag";
     protected const ulong DeliverTag = 10101;
-    protected readonly CancellationTokenSource Cancellation;
     protected readonly IConsumeErrorStrategy ConsumeErrorStrategy;
     protected readonly MockBuilder MockBuilder;
     protected bool ConsumerWasInvoked;
@@ -24,8 +23,6 @@ public abstract class ConsumerTestBase : IDisposable
 
     public ConsumerTestBase()
     {
-        Cancellation = new CancellationTokenSource();
-
         ConsumeErrorStrategy = Substitute.For<IConsumeErrorStrategy>();
         MockBuilder = new MockBuilder(x => x.Register(ConsumeErrorStrategy));
         AdditionalSetUp();
@@ -38,16 +35,16 @@ public abstract class ConsumerTestBase : IDisposable
 
     protected abstract void AdditionalSetUp();
 
-    protected void StartConsumer(
-        Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, AckStrategy> handler,
+    protected IDisposable StartConsumer(
+        Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, CancellationToken, AckStrategy> handler,
         bool autoAck = false
     )
     {
         ConsumerWasInvoked = false;
         var queue = new Queue("my_queue", false);
-        MockBuilder.Bus.Advanced.Consume(
+        return MockBuilder.Bus.Advanced.Consume(
             queue,
-            (body, properties, messageInfo) =>
+            (body, properties, messageInfo, ct) =>
             {
                 return Task.Run(() =>
                 {
@@ -55,20 +52,26 @@ public abstract class ConsumerTestBase : IDisposable
                     DeliveredMessageProperties = properties;
                     DeliveredMessageInfo = messageInfo;
 
-                    var ackStrategy = handler(body, properties, messageInfo);
+                    var ackStrategy = handler(body, properties, messageInfo, ct);
                     ConsumerWasInvoked = true;
                     return ackStrategy;
-                }, Cancellation.Token);
+                }, CancellationToken.None);
             },
             c =>
             {
                 if (autoAck)
                     c.WithAutoAck();
                 c.WithConsumerTag(ConsumerTag);
-            });
+            }
+        );
     }
 
     protected void DeliverMessage()
+    {
+        DeliverMessageAsync().GetAwaiter().GetResult();
+    }
+
+    protected Task DeliverMessageAsync()
     {
         OriginalProperties = new BasicProperties
         {
@@ -77,7 +80,7 @@ public abstract class ConsumerTestBase : IDisposable
         };
         OriginalBody = "Hello World"u8.ToArray();
 
-        MockBuilder.Consumers[0].HandleBasicDeliver(
+        return MockBuilder.Consumers[0].HandleBasicDeliver(
             ConsumerTag,
             DeliverTag,
             false,
@@ -85,6 +88,6 @@ public abstract class ConsumerTestBase : IDisposable
             "the_routing_key",
             OriginalProperties,
             OriginalBody
-        ).GetAwaiter().GetResult();
+        );
     }
 }
