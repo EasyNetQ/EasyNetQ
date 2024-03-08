@@ -198,6 +198,6 @@ csharp_preserve_single_line_statements = false
 # C# formatting settings - Namespace options
 csharp_style_namespace_declarations = file_scoped:warning
 
-# Sealed classes
 [*.{cs,vb}]
+# Sealed classes https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1852
 dotnet_diagnostic.CA1852.severity = warning
