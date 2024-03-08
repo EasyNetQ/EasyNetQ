@@ -76,7 +76,7 @@ public class ProgramIntegrationTests
         bus.Dispose();
     }
 
-    private class TestMessage
+    private sealed class TestMessage
     {
         public string Text { get; set; }
     }

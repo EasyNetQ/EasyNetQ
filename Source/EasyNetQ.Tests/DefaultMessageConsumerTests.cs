@@ -18,7 +18,7 @@ public class DefaultMessageConsumerTests
     }
 
     // Discovered by reflection over test assembly, do not remove.
-    private class MyMessageConsumer : IConsume<MyMessage>
+    private sealed class MyMessageConsumer : IConsume<MyMessage>
     {
         public static Action<MyMessage> ConsumedMessageFunc { get; set; }
 

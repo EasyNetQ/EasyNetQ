@@ -141,16 +141,16 @@ public class SerializerTests
     {
     }
 
-    private class B : A
+    private sealed class B : A
     {
     }
 
-    private class PolyMessage
+    private sealed class PolyMessage
     {
         public A AorB { get; set; }
     }
 
-    private class Message
+    private sealed class Message
     {
         public string Text { get; set; }
     }

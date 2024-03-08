@@ -60,7 +60,7 @@ public sealed class NewtonsoftJsonSerializer : ISerializer
         return jsonSerializer.Deserialize(reader, messageType)!;
     }
 
-    private class JsonSerializerArrayPool<T> : Newtonsoft.Json.IArrayPool<T>
+    private sealed class JsonSerializerArrayPool<T> : Newtonsoft.Json.IArrayPool<T>
     {
         public static JsonSerializerArrayPool<T> Instance { get; } = new();
 

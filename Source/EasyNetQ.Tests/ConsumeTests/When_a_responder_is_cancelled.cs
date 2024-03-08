@@ -60,7 +60,7 @@ public class When_a_responder_is_cancelled : IDisposable
         );
     }
 
-    private record RpcRequest;
+    private sealed record RpcRequest;
 
-    private record RpcResponse;
+    private sealed record RpcResponse;
 }

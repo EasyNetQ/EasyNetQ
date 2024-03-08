@@ -71,7 +71,7 @@ public class When_auto_subscribing_async : IDisposable
     }
 
     //Discovered by reflection over test assembly, do not remove.
-    private class MyAsyncConsumer : IConsumeAsync<MessageA>, IConsumeAsync<MessageB>, IConsumeAsync<MessageC>
+    private sealed class MyAsyncConsumer : IConsumeAsync<MessageA>, IConsumeAsync<MessageB>, IConsumeAsync<MessageC>
     {
         public Task ConsumeAsync(MessageA message, CancellationToken cancellationToken)
         {
@@ -91,15 +91,15 @@ public class When_auto_subscribing_async : IDisposable
         }
     }
 
-    private class MessageA
+    private sealed class MessageA
     {
     }
 
-    private class MessageB
+    private sealed class MessageB
     {
     }
 
-    private class MessageC
+    private sealed class MessageC
     {
     }
 }

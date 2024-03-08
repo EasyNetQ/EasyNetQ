@@ -61,7 +61,7 @@ public class When_auto_subscribing_async_with_subscription_configuration_action
 
     // Discovered by reflection over test assembly, do not remove.
     // ReSharper disable once UnusedMember.Local
-    private class MyConsumerWithAction : IConsumeAsync<MessageA>
+    private sealed class MyConsumerWithAction : IConsumeAsync<MessageA>
     {
         [AutoSubscriberConsumer(SubscriptionId = "MyActionTest")]
         public Task ConsumeAsync(MessageA message, CancellationToken cancellationToken)
@@ -70,7 +70,7 @@ public class When_auto_subscribing_async_with_subscription_configuration_action
         }
     }
 
-    private class MessageA
+    private sealed class MessageA
     {
     }
 }
