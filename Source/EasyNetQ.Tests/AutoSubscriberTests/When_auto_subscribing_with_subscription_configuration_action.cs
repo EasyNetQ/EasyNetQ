@@ -58,7 +58,7 @@ public class When_auto_subscribing_with_subscription_configuration_action
     }
 
     // Discovered by reflection over test assembly, do not remove.
-    private class MyConsumerWithAction : IConsume<MessageA>
+    private sealed class MyConsumerWithAction : IConsume<MessageA>
     {
         [AutoSubscriberConsumer(SubscriptionId = "MyActionTest")]
         public void Consume(MessageA message, CancellationToken cancellationToken)
@@ -66,7 +66,7 @@ public class When_auto_subscribing_with_subscription_configuration_action
         }
     }
 
-    private class MessageA
+    private sealed class MessageA
     {
     }
 }
