@@ -72,7 +72,7 @@ public class When_auto_subscribing : IDisposable
     }
 
     // Discovered by reflection over test assembly, do not remove.
-    private class MyConsumer : IConsume<MessageA>, IConsume<MessageB>, IConsume<MessageC>
+    private sealed class MyConsumer : IConsume<MessageA>, IConsume<MessageB>, IConsume<MessageC>
     {
         public void Consume(MessageA message, CancellationToken cancellationToken)
         {
@@ -99,15 +99,15 @@ public class When_auto_subscribing : IDisposable
         }
     }
 
-    private class MessageA
+    private sealed class MessageA
     {
     }
 
-    private class MessageB
+    private sealed class MessageB
     {
     }
 
-    private class MessageC
+    private sealed class MessageC
     {
     }
 }

@@ -12,7 +12,7 @@ using System.Collections;
 
 namespace EasyNetQ.DI.Tests;
 
-internal class ContainerAdaptersData : IEnumerable<object[]>
+internal sealed class ContainerAdaptersData : IEnumerable<object[]>
 {
     public IEnumerator<object[]> GetEnumerator()
     {

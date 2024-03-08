@@ -51,7 +51,7 @@ public class When_auto_subscribing_with_subscription_configuration_attribute_no_
     }
 
     // Discovered by reflection over test assembly, do not remove.
-    private class MyConsumerWithAttr : IConsume<MessageA>
+    private sealed class MyConsumerWithAttr : IConsume<MessageA>
     {
         [AutoSubscriberConsumer(SubscriptionId = "MyAttrTest")]
         [SubscriptionConfiguration(AutoDelete = true, PrefetchCount = 10, Priority = 10)]
@@ -60,7 +60,7 @@ public class When_auto_subscribing_with_subscription_configuration_attribute_no_
         }
     }
 
-    private class MessageA
+    private sealed class MessageA
     {
     }
 }
