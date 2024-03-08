@@ -27,12 +27,22 @@ public class DefaultAutoSubscriberMessageDispatcher : IAutoSubscriberMessageDisp
         where TMessage : class
         where TAsyncConsumer : class, IConsumeAsync<TMessage>
     {
-        using var scope = resolver.CreateScope();
-        var asyncConsumer = scope.Resolve<TAsyncConsumer>();
-        await asyncConsumer.ConsumeAsync(message, cancellationToken).ConfigureAwait(false);
+        var scope = resolver.CreateScope();
+        try
+        {
+            var asyncConsumer = scope.Resolve<TAsyncConsumer>();
+            await asyncConsumer.ConsumeAsync(message, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            if (scope is IAsyncDisposable ad)
+                await ad.DisposeAsync().ConfigureAwait(false);
+            else
+                scope.Dispose();
+        }
     }
 
-    private class ActivatorBasedResolver : IServiceResolver
+    private sealed class ActivatorBasedResolver : IServiceResolver
     {
         public TService Resolve<TService>() where TService : class => Activator.CreateInstance<TService>();
 
