@@ -345,21 +345,27 @@ namespace EasyNetQ
     }
     public interface IAdvancedBus
     {
+        [System.Obsolete("IsConnected is deprecated because it is misleading. Please use GetConnectionStatu" +
+            "s instead")]
         bool IsConnected { get; }
         event System.EventHandler<EasyNetQ.BlockedEventArgs> Blocked;
         event System.EventHandler<EasyNetQ.ConnectedEventArgs> Connected;
         event System.EventHandler<EasyNetQ.DisconnectedEventArgs> Disconnected;
         event System.EventHandler<EasyNetQ.MessageReturnedEventArgs> MessageReturned;
         event System.EventHandler<EasyNetQ.UnblockedEventArgs> Unblocked;
+        [System.Obsolete("ConnectAsync is deprecated because it is misleading. Please use EnsureConnectedAs" +
+            "ync instead")]
         System.Threading.Tasks.Task ConnectAsync(System.Threading.CancellationToken cancellationToken = default);
         System.IDisposable Consume(System.Action<EasyNetQ.IConsumeConfiguration> configure);
         EasyNetQ.IPullingConsumer<EasyNetQ.PullResult> CreatePullingConsumer(in EasyNetQ.Topology.Queue queue, bool autoAck = true);
         EasyNetQ.IPullingConsumer<EasyNetQ.PullResult<T>> CreatePullingConsumer<T>(in EasyNetQ.Topology.Queue queue, bool autoAck = true);
+        System.Threading.Tasks.Task EnsureConnectedAsync(EasyNetQ.Persistent.PersistentConnectionType type, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task ExchangeBindAsync(string destinationExchange, string sourceExchange, string routingKey, System.Collections.Generic.IDictionary<string, object>? arguments = null, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task<EasyNetQ.Topology.Exchange> ExchangeDeclareAsync(string exchange, string type = "topic", bool durable = true, bool autoDelete = false, System.Collections.Generic.IDictionary<string, object>? arguments = null, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task ExchangeDeclarePassiveAsync(string exchange, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task ExchangeDeleteAsync(string exchange, bool ifUnused = false, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task ExchangeUnbindAsync(string destinationExchange, string sourceExchange, string routingKey, System.Collections.Generic.IDictionary<string, object>? arguments = null, System.Threading.CancellationToken cancellationToken = default);
+        EasyNetQ.Persistent.PersistentConnectionStatus GetConnectionStatus(EasyNetQ.Persistent.PersistentConnectionType type);
         System.Threading.Tasks.Task<EasyNetQ.QueueStats> GetQueueStatsAsync(string queue, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task PublishAsync(string exchange, string routingKey, bool? mandatory, bool? publisherConfirms, EasyNetQ.IMessage message, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task PublishAsync(string exchange, string routingKey, bool? mandatory, bool? publisherConfirms, EasyNetQ.MessageProperties properties, System.ReadOnlyMemory<byte> body, System.Threading.CancellationToken cancellationToken = default);
@@ -869,22 +875,28 @@ namespace EasyNetQ
     public class RabbitAdvancedBus : EasyNetQ.IAdvancedBus, System.IDisposable
     {
         public RabbitAdvancedBus(EasyNetQ.Logging.ILogger<EasyNetQ.RabbitAdvancedBus> logger, EasyNetQ.Producer.IProducerConnection producerConnection, EasyNetQ.Consumer.IConsumerConnection consumerConnection, EasyNetQ.Consumer.IConsumerFactory consumerFactory, EasyNetQ.ChannelDispatcher.IPersistentChannelDispatcher persistentChannelDispatcher, EasyNetQ.Producer.IPublishConfirmationListener confirmationListener, EasyNetQ.IEventBus eventBus, EasyNetQ.Consumer.IHandlerCollectionFactory handlerCollectionFactory, EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.Producer.ProducePipelineBuilder producePipelineBuilder, EasyNetQ.Consumer.ConsumePipelineBuilder consumePipelineBuilder, EasyNetQ.DI.IServiceResolver serviceResolver, EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy, EasyNetQ.IPullingConsumerFactory pullingConsumerFactory, EasyNetQ.AdvancedBusEventHandlers advancedBusEventHandlers) { }
+        [System.Obsolete("IsConnected is deprecated because it is misleading. Please use GetConnectionStatu" +
+            "s instead")]
         public bool IsConnected { get; }
         public event System.EventHandler<EasyNetQ.BlockedEventArgs>? Blocked;
         public event System.EventHandler<EasyNetQ.ConnectedEventArgs>? Connected;
         public event System.EventHandler<EasyNetQ.DisconnectedEventArgs>? Disconnected;
         public event System.EventHandler<EasyNetQ.MessageReturnedEventArgs>? MessageReturned;
         public event System.EventHandler<EasyNetQ.UnblockedEventArgs>? Unblocked;
+        [System.Obsolete("IsConnected is deprecated because it is misleading. Please use GetConnectionStatu" +
+            "s instead")]
         public System.Threading.Tasks.Task ConnectAsync(System.Threading.CancellationToken cancellationToken = default) { }
         public System.IDisposable Consume(System.Action<EasyNetQ.IConsumeConfiguration> configure) { }
         public EasyNetQ.IPullingConsumer<EasyNetQ.PullResult> CreatePullingConsumer(in EasyNetQ.Topology.Queue queue, bool autoAck = true) { }
         public EasyNetQ.IPullingConsumer<EasyNetQ.PullResult<T>> CreatePullingConsumer<T>(in EasyNetQ.Topology.Queue queue, bool autoAck = true) { }
         public virtual void Dispose() { }
+        public System.Threading.Tasks.Task EnsureConnectedAsync(EasyNetQ.Persistent.PersistentConnectionType type, System.Threading.CancellationToken cancellationToken = default) { }
         public virtual System.Threading.Tasks.Task ExchangeBindAsync(string destinationExchange, string sourceExchange, string routingKey, System.Collections.Generic.IDictionary<string, object>? arguments, System.Threading.CancellationToken cancellationToken) { }
         public System.Threading.Tasks.Task<EasyNetQ.Topology.Exchange> ExchangeDeclareAsync(string exchange, string type, bool durable, bool autoDelete, System.Collections.Generic.IDictionary<string, object>? arguments, System.Threading.CancellationToken cancellationToken) { }
         public System.Threading.Tasks.Task ExchangeDeclarePassiveAsync(string exchange, System.Threading.CancellationToken cancellationToken = default) { }
         public virtual System.Threading.Tasks.Task ExchangeDeleteAsync(string exchange, bool ifUnused = false, System.Threading.CancellationToken cancellationToken = default) { }
         public virtual System.Threading.Tasks.Task ExchangeUnbindAsync(string destinationExchange, string sourceExchange, string routingKey, System.Collections.Generic.IDictionary<string, object>? arguments, System.Threading.CancellationToken cancellationToken) { }
+        public EasyNetQ.Persistent.PersistentConnectionStatus GetConnectionStatus(EasyNetQ.Persistent.PersistentConnectionType type) { }
         public System.Threading.Tasks.Task<EasyNetQ.QueueStats> GetQueueStatsAsync(string queue, System.Threading.CancellationToken cancellationToken) { }
         public virtual System.Threading.Tasks.Task PublishAsync(string exchange, string routingKey, bool? mandatory, bool? publisherConfirms, EasyNetQ.IMessage message, System.Threading.CancellationToken cancellationToken) { }
         public virtual System.Threading.Tasks.Task PublishAsync(string exchange, string routingKey, bool? mandatory, bool? publisherConfirms, EasyNetQ.MessageProperties properties, System.ReadOnlyMemory<byte> body, System.Threading.CancellationToken cancellationToken) { }
@@ -1814,9 +1826,9 @@ namespace EasyNetQ.Persistent
     }
     public interface IPersistentConnection : System.IDisposable
     {
-        bool IsConnected { get; }
-        void Connect();
+        EasyNetQ.Persistent.PersistentConnectionStatus Status { get; }
         RabbitMQ.Client.IModel CreateModel();
+        void EnsureConnected();
     }
     public class PersistentChannel : EasyNetQ.Persistent.IPersistentChannel, System.IDisposable
     {
@@ -1838,10 +1850,24 @@ namespace EasyNetQ.Persistent
     public class PersistentConnection : EasyNetQ.Persistent.IPersistentConnection, System.IDisposable
     {
         public PersistentConnection(EasyNetQ.Persistent.PersistentConnectionType type, EasyNetQ.Logging.ILogger<EasyNetQ.Persistent.IPersistentConnection> logger, EasyNetQ.ConnectionConfiguration configuration, RabbitMQ.Client.IConnectionFactory connectionFactory, EasyNetQ.IEventBus eventBus) { }
-        public bool IsConnected { get; }
-        public void Connect() { }
+        public EasyNetQ.Persistent.PersistentConnectionStatus Status { get; }
         public RabbitMQ.Client.IModel CreateModel() { }
         public void Dispose() { }
+        public void EnsureConnected() { }
+    }
+    public enum PersistentConnectionState
+    {
+        NotInitialised = 0,
+        Connected = 1,
+        Disconnected = 2,
+    }
+    public sealed class PersistentConnectionStatus : System.IEquatable<EasyNetQ.Persistent.PersistentConnectionStatus>
+    {
+        public PersistentConnectionStatus(EasyNetQ.Persistent.PersistentConnectionType Type, EasyNetQ.Persistent.PersistentConnectionState State, System.DateTime? ConnectedAt = default, string? FailureReason = null) { }
+        public System.DateTime? ConnectedAt { get; init; }
+        public string? FailureReason { get; init; }
+        public EasyNetQ.Persistent.PersistentConnectionState State { get; init; }
+        public EasyNetQ.Persistent.PersistentConnectionType Type { get; init; }
     }
     public enum PersistentConnectionType
     {

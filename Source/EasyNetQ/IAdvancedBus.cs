@@ -1,3 +1,4 @@
+using EasyNetQ.Persistent;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ;
@@ -12,12 +13,28 @@ public interface IAdvancedBus
     /// <summary>
     /// <see langword="true"/> if a connection of the given type is established.
     /// </summary>
+    [Obsolete("IsConnected is deprecated because it is misleading. Please use GetConnectionStatus instead")]
     bool IsConnected { get; }
 
     /// <summary>
-    /// Establish a connection of the given type.
-    /// </summary>
+    /// Initialises all connections, but does not check if they are connected currently.
+    /// </summary>>
+    /// <param name="cancellationToken">The cancellation token</param>
+    [Obsolete("ConnectAsync is deprecated because it is misleading. Please use EnsureConnectedAsync instead")]
     Task ConnectAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    ///     Gets a connection status for the given type
+    /// </summary>
+    /// <param name="type">The connection type</param>
+    PersistentConnectionStatus GetConnectionStatus(PersistentConnectionType type);
+
+    /// <summary>
+    /// Ensures a connection of the given type is initialised and connected
+    /// </summary>
+    /// <param name="type">The connection type</param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    Task EnsureConnectedAsync(PersistentConnectionType type, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Consume a stream of messages. Dispatch them to the given handlers
