@@ -207,6 +207,12 @@ public class AutoSubscriber
             if (configSettings.Expires > 0)
                 configuration.WithExpires(configSettings.Expires);
 
+            if (configSettings.SingleActiveConsumer)
+                configuration.WithSingleActiveConsumer();
+
+            if (configSettings.AsExclusive)
+                configuration.AsExclusive();
+
             configuration
                 .WithAutoDelete(configSettings.AutoDelete)
                 .WithPriority(configSettings.Priority);
