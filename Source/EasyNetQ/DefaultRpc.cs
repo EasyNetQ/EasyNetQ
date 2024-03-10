@@ -1,10 +1,10 @@
-using System.Collections.Concurrent;
-using System.Text;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
 using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 using EasyNetQ.Topology;
+using System.Collections.Concurrent;
+using System.Text;
 
 namespace EasyNetQ;
 
@@ -100,7 +100,7 @@ public class DefaultRpc : IRpc, IDisposable
 
     /// <inheritdoc />
     public virtual Task<IDisposable> RespondAsync<TRequest, TResponse>(
-        Func<TRequest, CancellationToken, Task<TResponse>> responder,
+        Func<TRequest, IDictionary<string, object?>?, CancellationToken, Task<TResponse>> responder,
         Action<IResponderConfiguration> configure,
         CancellationToken cancellationToken = default
     )
@@ -260,7 +260,7 @@ public class DefaultRpc : IRpc, IDisposable
     }
 
     private async Task<IDisposable> RespondAsyncInternal<TRequest, TResponse>(
-        Func<TRequest, CancellationToken, Task<TResponse>> responder,
+        Func<TRequest, IDictionary<string, object?>?, CancellationToken, Task<TResponse>> responder,
         Action<IResponderConfiguration> configure,
         CancellationToken cancellationToken
     )
@@ -295,7 +295,7 @@ public class DefaultRpc : IRpc, IDisposable
     }
 
     private async Task RespondToMessageAsync<TRequest, TResponse>(
-        Func<TRequest, CancellationToken, Task<TResponse>> responder,
+        Func<TRequest, IDictionary<string, object?>?, CancellationToken, Task<TResponse>> responder,
         IMessage<TRequest> requestMessage,
         CancellationToken cancellationToken
     )
@@ -312,7 +312,7 @@ public class DefaultRpc : IRpc, IDisposable
         try
         {
             var request = requestMessage.Body!;
-            var response = await responder(request, cancellationToken).ConfigureAwait(false);
+            var response = await responder(request, requestMessage.Properties.Headers, cancellationToken).ConfigureAwait(false);
             var responseMessage = new Message<TResponse>(
                 response,
                 new MessageProperties

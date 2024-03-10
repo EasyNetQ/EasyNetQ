@@ -1,3 +1,6 @@
+using EasyNetQ.Internals;
+using RabbitMQ.Client;
+
 namespace EasyNetQ;
 
 /// <summary>
@@ -23,15 +26,20 @@ public interface IRpc
     );
 
     /// <summary>
-    ///     Set up a responder for an RPC service.
+    ///     Set up a responder for an RPC service that uses the message headers.
     /// </summary>
     /// <typeparam name="TRequest">The request type</typeparam>
     /// <typeparam name="TResponse">The response type</typeparam>
-    /// <param name="responder">A function that performs the response</param>
+    /// <param name="responder">
+    ///     A function that returns the response and accepts three input parameters:
+    ///     TRequest: the request body,
+    ///     IDictionary: the request headers,
+    ///     CancellationToken: a cancellation token.
+    /// </param>
     /// <param name="configure">A function that performs the configuration</param>
     /// <param name="cancellationToken">The cancellation token</param>
     Task<IDisposable> RespondAsync<TRequest, TResponse>(
-        Func<TRequest, CancellationToken, Task<TResponse>> responder,
+        Func<TRequest, IDictionary<string, object?>?, CancellationToken, Task<TResponse>> responder,
         Action<IResponderConfiguration> configure,
         CancellationToken cancellationToken = default
     );
