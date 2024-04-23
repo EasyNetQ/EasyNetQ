@@ -1574,11 +1574,11 @@ namespace EasyNetQ.Internals
     }
     public sealed class AsyncCountdownEvent : System.IDisposable
     {
-        public AsyncCountdownEvent() { }
+        public AsyncCountdownEvent(long initialCount = 0) { }
         public void Decrement() { }
         public void Dispose() { }
         public void Increment() { }
-        public void Wait() { }
+        public System.Threading.Tasks.Task WaitAsync(System.Threading.CancellationToken cancellationToken = default) { }
     }
     public readonly struct AsyncLock : System.IDisposable
     {

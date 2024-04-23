@@ -330,6 +330,10 @@ public class DefaultRpc : IRpc, IDisposable
                 cancellationToken
             ).ConfigureAwait(false);
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
         catch (Exception exception)
         {
             var responseMessage = new Message<TResponse>(

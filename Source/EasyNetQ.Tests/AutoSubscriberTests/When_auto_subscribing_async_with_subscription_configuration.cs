@@ -52,7 +52,7 @@ public class When_auto_subscribing_async_with_subscription_configuration_attribu
     }
 
     // Discovered by reflection over test assembly, do not remove.
-    private class MyConsumerWithAttr : IConsumeAsync<MessageA>
+    private sealed class MyConsumerWithAttr : IConsumeAsync<MessageA>
     {
         [AutoSubscriberConsumer(SubscriptionId = "MyAttrTest")]
         [SubscriptionConfiguration(AutoDelete = true, Expires = 10, PrefetchCount = 10, Priority = 10)]
@@ -62,7 +62,7 @@ public class When_auto_subscribing_async_with_subscription_configuration_attribu
         }
     }
 
-    private class MessageA
+    private sealed class MessageA
     {
     }
 }
@@ -117,7 +117,7 @@ public class When_auto_subscribing_async_explicit_implementation_with_subscripti
     }
 
     // Discovered by reflection over test assembly, do not remove.
-    private class MyConsumerWithAttr : IConsumeAsync<MessageA>
+    private sealed class MyConsumerWithAttr : IConsumeAsync<MessageA>
     {
         [AutoSubscriberConsumer(SubscriptionId = "MyAttrTest")]
         [SubscriptionConfiguration(AutoDelete = true, Expires = 10, PrefetchCount = 10, Priority = 10)]
@@ -127,7 +127,7 @@ public class When_auto_subscribing_async_explicit_implementation_with_subscripti
         }
     }
 
-    private class MessageA
+    private sealed class MessageA
     {
     }
 }

@@ -36,7 +36,7 @@ public class MicrosoftDependencyScopeTests
         bool Disposed { get; set; }
     }
 
-    private class Service : IService
+    private sealed class Service : IService
     {
         public bool Disposed { get; set; }
 

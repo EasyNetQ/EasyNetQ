@@ -209,7 +209,7 @@ public static class ServiceRegisterExtensions
                 {
                     return await next(ctx).ConfigureAwait(false);
                 }
-                catch (OperationCanceledException)
+                catch (OperationCanceledException) when (ctx.CancellationToken.IsCancellationRequested)
                 {
                     return await errorStrategy.HandleCancelledAsync(ctx).ConfigureAwait(false);
                 }
