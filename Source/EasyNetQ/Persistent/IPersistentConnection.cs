@@ -10,12 +10,12 @@ public interface IPersistentConnection : IDisposable
     /// <summary>
     ///     <see langword="true"/> if a connection is connected
     /// </summary>
-    bool IsConnected { get; }
+    PersistentConnectionStatus Status { get; }
 
     /// <summary>
     ///     Establish a connection
     /// </summary>
-    void Connect();
+    void EnsureConnected();
 
     /// <summary>
     ///     Creates a new channel
