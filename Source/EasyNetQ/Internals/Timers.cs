@@ -1,4 +1,5 @@
-using EasyNetQ.Logging;
+using MS = Microsoft.Extensions.Logging;
+using MSExtensions = Microsoft.Extensions.Logging.LoggerExtensions;
 
 namespace EasyNetQ.Internals;
 
@@ -16,7 +17,7 @@ public static class Timers
     ///     any release. You should only use it directly in your code with extreme caution and knowing that
     ///     doing so can result in application failures when updating to a new EasyNetQ release.
     /// </summary>
-    public static IDisposable Start(Action callback, TimeSpan dueTime, TimeSpan period, ILogger logger)
+    public static IDisposable Start(Action callback, TimeSpan dueTime, TimeSpan period, MS.ILogger logger)
     {
         var callbackLock = new object();
         var timer = new Timer(_ =>
@@ -28,7 +29,7 @@ public static class Timers
             }
             catch (Exception exception)
             {
-                logger.Error(exception, "Error from timer callback");
+                MSExtensions.LogError(logger, exception, "Error from timer callback");
             }
             finally
             {

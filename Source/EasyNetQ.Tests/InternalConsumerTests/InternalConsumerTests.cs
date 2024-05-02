@@ -1,6 +1,6 @@
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;
-using EasyNetQ.Logging;
+using MS = Microsoft.Extensions.Logging;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 
@@ -20,7 +20,7 @@ public class InternalConsumerTests : IDisposable
 
         internalConsumer = new InternalConsumer(
             Substitute.For<IServiceResolver>(),
-            Substitute.For<ILogger<InternalConsumer>>(),
+            Substitute.For<MS.ILogger<InternalConsumer>>(),
             new ConsumerConfiguration(
                 42,
                 new Dictionary<Queue, PerQueueConsumerConfiguration>

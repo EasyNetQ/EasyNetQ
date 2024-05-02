@@ -1,6 +1,5 @@
 using EasyNetQ.DI;
-using EasyNetQ.Logging;
-
+using MS = Microsoft.Extensions.Logging;
 namespace EasyNetQ.Consumer;
 
 public interface IInternalConsumerFactory
@@ -17,7 +16,7 @@ public interface IInternalConsumerFactory
 public class InternalConsumerFactory : IInternalConsumerFactory
 {
     private readonly IServiceResolver serviceResolver;
-    private readonly ILogger<InternalConsumer> logger;
+    private readonly MS.ILogger<InternalConsumer> logger;
     private readonly IConsumerConnection connection;
     private readonly IEventBus eventBus;
 
@@ -26,7 +25,7 @@ public class InternalConsumerFactory : IInternalConsumerFactory
     /// </summary>
     public InternalConsumerFactory(
         IServiceResolver serviceResolver,
-        ILogger<InternalConsumer> logger,
+        MS.ILogger<InternalConsumer> logger,
         IConsumerConnection connection,
         IEventBus eventBus
     )

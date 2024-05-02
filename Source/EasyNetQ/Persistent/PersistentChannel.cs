@@ -1,7 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
-using EasyNetQ.Logging;
+using MS = Microsoft.Extensions.Logging;
+using MSExtensions = Microsoft.Extensions.Logging.LoggerExtensions;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
@@ -21,7 +22,7 @@ public class PersistentChannel : IPersistentChannel
     private readonly IEventBus eventBus;
     private readonly AsyncLock mutex = new();
     private readonly PersistentChannelOptions options;
-    private readonly ILogger<PersistentChannel> logger;
+    private readonly MS.ILogger<PersistentChannel> logger;
 
     private volatile IModel? initializedChannel;
     private volatile bool disposed;
@@ -35,7 +36,7 @@ public class PersistentChannel : IPersistentChannel
     /// <param name="eventBus">The event bus</param>
     public PersistentChannel(
         in PersistentChannelOptions options,
-        ILogger<PersistentChannel> logger,
+        MS.ILogger<PersistentChannel> logger,
         IPersistentConnection connection,
         IEventBus eventBus
     )
@@ -94,7 +95,7 @@ public class PersistentChannel : IPersistentChannel
                 if (exceptionVerdict.Rethrow)
                     throw;
 
-                logger.Error(exception, "Failed to fast invoke channel action, invocation will be retried");
+                MSExtensions.LogError(logger, exception, "Failed to fast invoke channel action, invocation will be retried");
             }
             finally
             {
@@ -133,7 +134,7 @@ public class PersistentChannel : IPersistentChannel
                 if (exceptionVerdict.Rethrow)
                     throw;
 
-                logger.Error(exception, "Failed to invoke channel action, invocation will be retried");
+                MSExtensions.LogError(logger, exception, "Failed to invoke channel action, invocation will be retried");
             }
 
             await Task.Delay(retryTimeoutMs, cts.Token).ConfigureAwait(false);

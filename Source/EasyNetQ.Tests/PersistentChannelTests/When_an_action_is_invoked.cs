@@ -1,4 +1,4 @@
-using EasyNetQ.Logging;
+using MS = Microsoft.Extensions.Logging;
 using EasyNetQ.Persistent;
 using RabbitMQ.Client;
 
@@ -14,7 +14,7 @@ public class When_an_action_is_invoked : IDisposable
         persistentConnection.CreateModel().Returns(channel);
 
         persistentChannel = new PersistentChannel(
-            new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, Substitute.For<IEventBus>()
+            new PersistentChannelOptions(), Substitute.For<MS.ILogger<PersistentChannel>>(), persistentConnection, Substitute.For<IEventBus>()
         );
 
         persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));

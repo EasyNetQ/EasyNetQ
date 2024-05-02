@@ -1,4 +1,4 @@
-using EasyNetQ.Logging;
+using MS = Microsoft.Extensions.Logging;
 using EasyNetQ.Persistent;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
@@ -69,7 +69,7 @@ public class When_an_action_is_performed_and_channel_reopens
         persistentConnection.CreateModel().Returns(_ => brokenChannel, _ => channel);
 
         using var persistentChannel = new PersistentChannel(
-            new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, Substitute.For<IEventBus>()
+            new PersistentChannelOptions(), Substitute.For<MS.ILogger<PersistentChannel>>(), persistentConnection, Substitute.For<IEventBus>()
         );
 
         persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));
@@ -93,7 +93,7 @@ public class When_an_action_is_performed_and_channel_reopens
         persistentConnection.CreateModel().Returns(_ => brokenChannel);
 
         using var persistentChannel = new PersistentChannel(
-            new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, Substitute.For<IEventBus>()
+            new PersistentChannelOptions(), Substitute.For<MS.ILogger<PersistentChannel>>(), persistentConnection, Substitute.For<IEventBus>()
         );
 
         Assert.Throws(
@@ -119,7 +119,7 @@ public class When_an_action_is_performed_and_channel_reopens
             );
 
         using var persistentChannel = new PersistentChannel(
-            new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, Substitute.For<IEventBus>()
+            new PersistentChannelOptions(), Substitute.For<MS.ILogger<PersistentChannel>>(), persistentConnection, Substitute.For<IEventBus>()
         );
 
         persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));
@@ -139,7 +139,7 @@ public class When_an_action_is_performed_and_channel_reopens
             );
 
         using var persistentChannel = new PersistentChannel(
-            new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, Substitute.For<IEventBus>()
+            new PersistentChannelOptions(), Substitute.For<MS.ILogger<PersistentChannel>>(), persistentConnection, Substitute.For<IEventBus>()
         );
 
         Assert.Throws<BrokerUnreachableException>(

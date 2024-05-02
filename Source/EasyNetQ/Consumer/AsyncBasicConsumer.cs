@@ -1,6 +1,7 @@
 using EasyNetQ.DI;
 using EasyNetQ.Events;
-using EasyNetQ.Logging;
+using MS = Microsoft.Extensions.Logging;
+using MSExtensions = Microsoft.Extensions.Logging.LoggerExtensions;
 using EasyNetQ.Topology;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
@@ -13,7 +14,7 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
     private readonly IEventBus eventBus;
     private readonly ConsumeDelegate consumeDelegate;
     private readonly IServiceResolver serviceResolver;
-    private readonly ILogger logger;
+    private readonly MS.ILogger logger;
     private readonly Queue queue;
     private readonly bool autoAck;
 
@@ -21,7 +22,7 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
 
     public AsyncBasicConsumer(
         IServiceResolver serviceResolver,
-        ILogger logger,
+        MS.ILogger logger,
         IModel model,
         Queue queue,
         bool autoAck,
@@ -44,9 +45,10 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
     {
         await base.OnCancel(consumerTags).ConfigureAwait(false);
 
-        if (logger.IsInfoEnabled())
+        if (logger.IsEnabled(MS.LogLevel.Information))
         {
-            logger.InfoFormat(
+            MSExtensions.LogInformation(
+                logger,
                 "Consumer with consumerTags {consumerTags} has cancelled",
                 string.Join(", ", consumerTags)
             );
@@ -66,9 +68,10 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
         if (cts.IsCancellationRequested)
             return;
 
-        if (logger.IsDebugEnabled())
+        if (logger.IsEnabled(MS.LogLevel.Debug))
         {
-            logger.DebugFormat(
+            MSExtensions.LogDebug(
+                logger,
                 "Message delivered to consumer {consumerTag} with deliveryTag {deliveryTag}",
                 consumerTag,
                 deliveryTag
@@ -109,7 +112,8 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
         }
         catch (AlreadyClosedException alreadyClosedException)
         {
-            logger.Info(
+            MSExtensions.LogInformation(
+                logger,
                 alreadyClosedException,
                 "Failed to ACK or NACK, message will be retried, receivedInfo={receivedInfo}",
                 receivedInfo
@@ -117,7 +121,8 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
         }
         catch (IOException ioException)
         {
-            logger.Info(
+            MSExtensions.LogInformation(
+                logger,
                 ioException,
                 "Failed to ACK or NACK, message will be retried, receivedInfo={receivedInfo}",
                 receivedInfo
@@ -125,7 +130,8 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
         }
         catch (Exception exception)
         {
-            logger.Error(
+            MSExtensions.LogError(
+                logger,
                 exception,
                 "Unexpected exception when attempting to ACK or NACK, receivedInfo={receivedInfo}",
                 receivedInfo

@@ -1,6 +1,7 @@
 using System.Buffers;
 using System.Collections.Concurrent;
-using EasyNetQ.Logging;
+using MS = Microsoft.Extensions.Logging;
+using MSExtensions = Microsoft.Extensions.Logging.LoggerExtensions;
 using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
@@ -21,7 +22,7 @@ namespace EasyNetQ.Consumer;
 /// </summary>
 public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
 {
-    private readonly ILogger<DefaultConsumeErrorStrategy> logger;
+    private readonly MS.ILogger<DefaultConsumeErrorStrategy> logger;
     private readonly IConsumerConnection connection;
     private readonly IConventions conventions;
     private readonly IErrorMessageSerializer errorMessageSerializer;
@@ -34,7 +35,7 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
     ///     Creates DefaultConsumerErrorStrategy
     /// </summary>
     public DefaultConsumeErrorStrategy(
-        ILogger<DefaultConsumeErrorStrategy> logger,
+        MS.ILogger<DefaultConsumeErrorStrategy> logger,
         IConsumerConnection connection,
         ISerializer serializer,
         IConventions conventions,
@@ -59,7 +60,8 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
         var properties = context.Properties;
         var body = context.Body.ToArray();
 
-        logger.Error(
+        MSExtensions.LogError(
+            logger,
             exception,
             "Exception thrown by subscription callback, receivedInfo={receivedInfo}, properties={properties}, message={message}",
             receivedInfo,
@@ -91,7 +93,8 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
         catch (BrokerUnreachableException unreachableException)
         {
             // thrown if the broker is unreachable during initial creation.
-            logger.Error(
+            MSExtensions.LogError(
+                logger,
                 unreachableException,
                 "Cannot connect to broker while attempting to publish error message"
             );
@@ -99,7 +102,8 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
         catch (OperationInterruptedException interruptedException)
         {
             // thrown if the broker connection is broken during declare or publish.
-            logger.Error(
+            MSExtensions.LogError(
+                logger,
                 interruptedException,
                 "Broker connection was closed while attempting to publish error message"
             );
@@ -107,7 +111,7 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
         catch (Exception unexpectedException)
         {
             // Something else unexpected has gone wrong :(
-            logger.Error(unexpectedException, "Failed to publish error message");
+            MSExtensions.LogError(logger, unexpectedException, "Failed to publish error message");
         }
 
         return new ValueTask<AckStrategy>(AckStrategies.NackWithRequeue);

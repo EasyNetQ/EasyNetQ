@@ -2,7 +2,8 @@ using System.Collections.Concurrent;
 using System.Text;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
-using EasyNetQ.Logging;
+using MS = Microsoft.Extensions.Logging;
+using MSExtensions = Microsoft.Extensions.Logging.LoggerExtensions;
 using EasyNetQ.Persistent;
 using EasyNetQ.Topology;
 
@@ -16,7 +17,7 @@ public class DefaultRpc : IRpc, IDisposable
     protected const string IsFaultedKey = "IsFaulted";
     protected const string ExceptionMessageKey = "ExceptionMessage";
     protected readonly IAdvancedBus advancedBus;
-    private readonly ILogger<DefaultRpc> logger;
+    private readonly MS.ILogger<DefaultRpc> logger;
     private readonly ConnectionConfiguration configuration;
     protected readonly IConventions conventions;
     private readonly ICorrelationIdGenerationStrategy correlationIdGenerationStrategy;
@@ -33,7 +34,7 @@ public class DefaultRpc : IRpc, IDisposable
     private readonly ITypeNameSerializer typeNameSerializer;
 
     public DefaultRpc(
-        ILogger<DefaultRpc> logger,
+        MS.ILogger<DefaultRpc> logger,
         ConnectionConfiguration configuration,
         IAdvancedBus advancedBus,
         IEventBus eventBus,
@@ -185,7 +186,7 @@ public class DefaultRpc : IRpc, IDisposable
         if (responseSubscriptions.TryGetValue(rpcKey, out var responseSubscription))
             return responseSubscription.QueueName;
 
-        logger.Debug("Subscribing for {requestType}/{responseType}", requestType, responseType);
+        MSExtensions.LogDebug(logger, "Subscribing for {requestType}/{responseType}", requestType, responseType);
 
         using var _ = await responseSubscriptionsLock.AcquireAsync(cancellationToken).ConfigureAwait(false);
 
@@ -219,7 +220,7 @@ public class DefaultRpc : IRpc, IDisposable
         );
         responseSubscriptions.TryAdd(rpcKey, new ResponseSubscription(queue.Name, subscription));
 
-        logger.Debug("Subscription for {requestType}/{responseType} is created", requestType, responseType);
+        MSExtensions.LogDebug(logger, "Subscription for {requestType}/{responseType} is created", requestType, responseType);
 
         return queue.Name;
     }

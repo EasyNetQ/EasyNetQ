@@ -1,5 +1,4 @@
-using EasyNetQ.Logging;
-
+using MS = Microsoft.Extensions.Logging;
 namespace EasyNetQ.DI.Tests;
 
 #pragma warning disable xUnit1026 // Theory methods should use all of their parameters
@@ -228,15 +227,15 @@ public class ContainerAdapterTests
     [ClassData(typeof(ContainerAdaptersData))]
     public void Should_resolve_singleton_generic(string name, ResolverFactory resolverFactory)
     {
-        var resolver = resolverFactory(c => c.Register(typeof(ILogger<>), typeof(NoopLogger<>)));
-        var intLogger = resolver.Resolve<ILogger<int>>();
-        var floatLogger = resolver.Resolve<ILogger<float>>();
+        var resolver = resolverFactory(c => c.Register(typeof(MS.ILogger<>), typeof(MS.Logger<>)));
+        var intLogger = resolver.Resolve<MS.ILogger<int>>();
+        var floatLogger = resolver.Resolve<MS.ILogger<float>>();
 
-        intLogger.Should().BeOfType<NoopLogger<int>>();
-        floatLogger.Should().BeOfType<NoopLogger<float>>();
+        intLogger.Should().BeOfType<MS.Logger<int>>();
+        floatLogger.Should().BeOfType<MS.Logger<float>>();
 
-        resolver.Resolve<ILogger<int>>().Should().Be(intLogger);
-        resolver.Resolve<ILogger<float>>().Should().Be(floatLogger);
+        resolver.Resolve<MS.ILogger<int>>().Should().Be(intLogger);
+        resolver.Resolve<MS.ILogger<float>>().Should().Be(floatLogger);
     }
 
     [Theory]
@@ -244,17 +243,17 @@ public class ContainerAdapterTests
     public void Should_resolve_transient_generic(string name, ResolverFactory resolverFactory)
     {
         var resolver = resolverFactory(
-            c => c.Register(typeof(ILogger<>), typeof(NoopLogger<>), Lifetime.Transient)
+            c => c.Register(typeof(MS.ILogger<>), typeof(MS.Logger<>), Lifetime.Transient)
         );
 
-        var intLogger = resolver.Resolve<ILogger<int>>();
-        var floatLogger = resolver.Resolve<ILogger<float>>();
+        var intLogger = resolver.Resolve<MS.ILogger<int>>();
+        var floatLogger = resolver.Resolve<MS.ILogger<float>>();
 
-        intLogger.Should().BeOfType<NoopLogger<int>>();
-        floatLogger.Should().BeOfType<NoopLogger<float>>();
+        intLogger.Should().BeOfType<MS.Logger<int>>();
+        floatLogger.Should().BeOfType<MS.Logger<float>>();
 
-        resolver.Resolve<ILogger<int>>().Should().NotBe(intLogger);
-        resolver.Resolve<ILogger<float>>().Should().NotBe(floatLogger);
+        resolver.Resolve<MS.ILogger<int>>().Should().NotBe(intLogger);
+        resolver.Resolve<MS.ILogger<float>>().Should().NotBe(floatLogger);
     }
 
     public interface IService
