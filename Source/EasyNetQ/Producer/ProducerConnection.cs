@@ -1,5 +1,5 @@
-using MS = Microsoft.Extensions.Logging;
 using EasyNetQ.Persistent;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Producer;
@@ -18,7 +18,7 @@ public sealed class ProducerConnection : PersistentConnection, IProducerConnecti
     ///     Creates ProducerConnection
     /// </summary>
     public ProducerConnection(
-        MS.ILogger<ProducerConnection> logger,
+        ILogger<ProducerConnection> logger,
         ConnectionConfiguration configuration,
         IConnectionFactory connectionFactory,
         IEventBus eventBus

@@ -1,7 +1,7 @@
 using System.Text;
 using EasyNetQ.Events;
-using MS = Microsoft.Extensions.Logging;
 using EasyNetQ.Producer;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.ProducerTests;
@@ -10,7 +10,7 @@ public class PublishConfirmationListenerTest
 {
     public PublishConfirmationListenerTest()
     {
-        eventBus = new EventBus(Substitute.For<MS.ILogger<EventBus>>());
+        eventBus = new EventBus(Substitute.For<ILogger<EventBus>>());
         model = Substitute.For<IModel, IRecoverable>();
         publishConfirmationListener = new PublishConfirmationListener(eventBus);
     }

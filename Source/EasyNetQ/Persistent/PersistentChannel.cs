@@ -1,8 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
-using MS = Microsoft.Extensions.Logging;
-using MSExtensions = Microsoft.Extensions.Logging.LoggerExtensions;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
@@ -22,7 +21,7 @@ public class PersistentChannel : IPersistentChannel
     private readonly IEventBus eventBus;
     private readonly AsyncLock mutex = new();
     private readonly PersistentChannelOptions options;
-    private readonly MS.ILogger<PersistentChannel> logger;
+    private readonly ILogger<PersistentChannel> logger;
 
     private volatile IModel? initializedChannel;
     private volatile bool disposed;
@@ -36,7 +35,7 @@ public class PersistentChannel : IPersistentChannel
     /// <param name="eventBus">The event bus</param>
     public PersistentChannel(
         in PersistentChannelOptions options,
-        MS.ILogger<PersistentChannel> logger,
+        ILogger<PersistentChannel> logger,
         IPersistentConnection connection,
         IEventBus eventBus
     )
@@ -95,7 +94,7 @@ public class PersistentChannel : IPersistentChannel
                 if (exceptionVerdict.Rethrow)
                     throw;
 
-                MSExtensions.LogError(logger, exception, "Failed to fast invoke channel action, invocation will be retried");
+                logger.LogError(exception, "Failed to fast invoke channel action, invocation will be retried");
             }
             finally
             {
@@ -134,7 +133,7 @@ public class PersistentChannel : IPersistentChannel
                 if (exceptionVerdict.Rethrow)
                     throw;
 
-                MSExtensions.LogError(logger, exception, "Failed to invoke channel action, invocation will be retried");
+                logger.LogError(exception, "Failed to invoke channel action, invocation will be retried");
             }
 
             await Task.Delay(retryTimeoutMs, cts.Token).ConfigureAwait(false);

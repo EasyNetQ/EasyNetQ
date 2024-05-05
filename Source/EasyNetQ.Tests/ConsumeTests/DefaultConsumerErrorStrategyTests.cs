@@ -1,8 +1,8 @@
 using System.Text;
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
-using MS = Microsoft.Extensions.Logging;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 
@@ -67,7 +67,7 @@ public class DefaultConsumerErrorStrategyTests
     )
     {
         var consumerErrorStrategy = new DefaultConsumeErrorStrategy(
-            Substitute.For<MS.ILogger<DefaultConsumeErrorStrategy>>(),
+            Substitute.For<ILogger<DefaultConsumeErrorStrategy>>(),
             connectionMock,
             Substitute.For<ISerializer>(),
             Substitute.For<IConventions>(),

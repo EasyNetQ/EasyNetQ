@@ -1,6 +1,5 @@
 using EasyNetQ.Events;
-using MS = Microsoft.Extensions.Logging;
-using MSExtensions = Microsoft.Extensions.Logging.LoggerExtensions;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -11,7 +10,7 @@ public class PersistentConnection : IPersistentConnection
 {
     private readonly object mutex = new();
     private readonly PersistentConnectionType type;
-    private readonly MS.ILogger logger;
+    private readonly ILogger logger;
     private readonly ConnectionConfiguration configuration;
     private readonly IConnectionFactory connectionFactory;
     private readonly IEventBus eventBus;
@@ -24,7 +23,7 @@ public class PersistentConnection : IPersistentConnection
     /// </summary>
     public PersistentConnection(
         PersistentConnectionType type,
-        MS.ILogger<IPersistentConnection> logger,
+        ILogger<IPersistentConnection> logger,
         ConnectionConfiguration configuration,
         IConnectionFactory connectionFactory,
         IEventBus eventBus
@@ -91,8 +90,7 @@ public class PersistentConnection : IPersistentConnection
         }
 
         status = status.ToConnected();
-        MSExtensions.LogInformation(
-            logger,
+        logger.LogInformation(
             "Connection {type} established to broker {broker}, port {port}",
             type,
             connection.Endpoint.HostName,
@@ -142,8 +140,7 @@ public class PersistentConnection : IPersistentConnection
     {
         status = status.ToConnected();
         var connection = (IConnection)sender!;
-        MSExtensions.LogInformation(
-            logger,
+        logger.LogInformation(
             "Connection {type} recovered to broker {host}:{port}",
             type,
             connection.Endpoint.HostName,
@@ -156,8 +153,7 @@ public class PersistentConnection : IPersistentConnection
     {
         status = status.ToDisconnected(e.ToString());
         var connection = (IConnection)sender!;
-        MSExtensions.LogDebug(
-            logger,
+        logger.LogDebug(
             e.Cause as Exception,
             "Connection {type} disconnected from broker {host}:{port} because of {reason}",
             type,
@@ -170,13 +166,13 @@ public class PersistentConnection : IPersistentConnection
 
     private void OnConnectionBlocked(object? sender, ConnectionBlockedEventArgs e)
     {
-        MSExtensions.LogInformation(logger, "Connection {type} blocked with reason {reason}", type, e.Reason);
+        logger.LogInformation("Connection {type} blocked with reason {reason}", type, e.Reason);
         eventBus.Publish(new ConnectionBlockedEvent(type, e.Reason ?? "Unknown reason"));
     }
 
     private void OnConnectionUnblocked(object? sender, EventArgs e)
     {
-        MSExtensions.LogInformation(logger, "Connection {type} unblocked", type);
+        logger.LogInformation("Connection {type} unblocked", type);
         eventBus.Publish(new ConnectionUnblockedEvent(type));
     }
 

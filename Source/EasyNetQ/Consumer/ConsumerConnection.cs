@@ -1,5 +1,5 @@
-using MS = Microsoft.Extensions.Logging;
 using EasyNetQ.Persistent;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Consumer;
@@ -14,7 +14,7 @@ public sealed class ConsumerConnection : PersistentConnection, IConsumerConnecti
 {
     /// <inheritdoc />
     public ConsumerConnection(
-        MS.ILogger<ConsumerConnection> logger,
+        ILogger<ConsumerConnection> logger,
         ConnectionConfiguration configuration,
         IConnectionFactory connectionFactory,
         IEventBus eventBus

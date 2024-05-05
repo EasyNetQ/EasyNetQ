@@ -2,9 +2,9 @@ using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;
 using EasyNetQ.Events;
-using MS = Microsoft.Extensions.Logging;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests;
@@ -37,10 +37,10 @@ public class AdvancedBusEventHandlersTests : IDisposable
             }
         );
 
-        eventBus = new EventBus(Substitute.For<MS.ILogger<EventBus>>());
+        eventBus = new EventBus(Substitute.For<ILogger<EventBus>>());
 
         advancedBus = new RabbitAdvancedBus(
-            Substitute.For<MS.ILogger<RabbitAdvancedBus>>(),
+            Substitute.For<ILogger<RabbitAdvancedBus>>(),
             Substitute.For<IProducerConnection>(),
             Substitute.For<IConsumerConnection>(),
             Substitute.For<IConsumerFactory>(),

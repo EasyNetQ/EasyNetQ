@@ -1,16 +1,17 @@
-using MS = Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
+
 namespace EasyNetQ.Persistent;
 
 /// <inheritdoc />
 public class PersistentChannelFactory : IPersistentChannelFactory
 {
-    private readonly MS.ILogger<PersistentChannel> logger;
+    private readonly ILogger<PersistentChannel> logger;
     private readonly IEventBus eventBus;
 
     /// <summary>
     ///    Creates PersistentChannelFactory
     /// </summary>
-    public PersistentChannelFactory(MS.ILogger<PersistentChannel> logger, IEventBus eventBus)
+    public PersistentChannelFactory(ILogger<PersistentChannel> logger, IEventBus eventBus)
     {
         this.logger = logger;
         this.eventBus = eventBus;

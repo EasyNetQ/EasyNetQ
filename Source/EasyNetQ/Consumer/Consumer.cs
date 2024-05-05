@@ -1,8 +1,8 @@
 using EasyNetQ.Events;
 using EasyNetQ.Topology;
 using EasyNetQ.Internals;
-using MS = Microsoft.Extensions.Logging;
 using EasyNetQ.Persistent;
+using Microsoft.Extensions.Logging;
 
 namespace EasyNetQ.Consumer;
 
@@ -118,7 +118,7 @@ public class Consumer : IConsumer
     ///     Creates Consumer
     /// </summary>
     public Consumer(
-        MS.ILogger<Consumer> logger,
+        ILogger<Consumer> logger,
         ConsumerConfiguration configuration,
         IInternalConsumerFactory internalConsumerFactory,
         IEventBus eventBus

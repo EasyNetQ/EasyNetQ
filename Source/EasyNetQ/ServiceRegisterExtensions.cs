@@ -3,12 +3,11 @@ using EasyNetQ.ConnectionString;
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;
 using EasyNetQ.Interception;
-using MS = Microsoft.Extensions.Logging;
-using MSExtensions = Microsoft.Extensions.Logging.LoggerExtensions;
 using EasyNetQ.MessageVersioning;
 using EasyNetQ.MultipleExchange;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
+using Microsoft.Extensions.Logging;
 
 namespace EasyNetQ;
 
@@ -32,7 +31,7 @@ public static class ServiceRegisterExtensions
                 configuration.SetDefaultProperties();
                 return configuration;
             })
-            .TryRegister(typeof(MS.ILogger<>), typeof(MS.Logger<>))
+            .TryRegister(typeof(ILogger<>), typeof(Logger<>))
             .TryRegister<IConnectionStringParser>(
                 _ => new CompositeConnectionStringParser(new AmqpConnectionStringParser(), new ConnectionStringParser())
             )
@@ -144,7 +143,7 @@ public static class ServiceRegisterExtensions
     /// </summary>
     /// <param name="serviceRegister">The register</param>
     public static IServiceRegister EnableConsoleLogger(this IServiceRegister serviceRegister)
-        => serviceRegister.Register(typeof(MS.ILogger<>), typeof(MS.Logger<>));
+        => serviceRegister.Register(typeof(ILogger<>), typeof(Logger<>));
 
     /// <summary>
     ///     Enables a consumer error strategy which acks failed messages
@@ -202,7 +201,7 @@ public static class ServiceRegisterExtensions
         return pipelineBuilder.Use(next => async ctx =>
         {
             var errorStrategy = ctx.ServiceResolver.Resolve<IConsumeErrorStrategy>();
-            var logger = ctx.ServiceResolver.Resolve<MS.ILogger<IConsumeErrorStrategy>>();
+            var logger = ctx.ServiceResolver.Resolve<ILogger<IConsumeErrorStrategy>>();
 
             try
             {
@@ -221,7 +220,7 @@ public static class ServiceRegisterExtensions
             }
             catch (Exception exception)
             {
-                MSExtensions.LogError(logger, exception, "Consume error strategy has failed");
+                logger.LogError(exception, "Consume error strategy has failed");
 
                 return AckStrategies.NackWithRequeue;
             }

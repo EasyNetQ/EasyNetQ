@@ -1,7 +1,7 @@
-using MS = Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
+using Microsoft.Extensions.Logging;
 
 namespace EasyNetQ.Consumer;
 
@@ -21,7 +21,7 @@ public class ConsumerFactory : IConsumerFactory
 {
     private readonly ConcurrentDictionary<Guid, IConsumer> consumers = new();
     private readonly IEventBus eventBus;
-    private readonly MS.ILogger<Consumer> logger;
+    private readonly ILogger<Consumer> logger;
     private readonly IInternalConsumerFactory internalConsumerFactory;
     private readonly IDisposable unsubscribeFromStoppedConsumerEvent;
 
@@ -29,7 +29,7 @@ public class ConsumerFactory : IConsumerFactory
     ///     Creates ConsumerFactory
     /// </summary>
     public ConsumerFactory(
-        MS.ILogger<Consumer> logger,
+        ILogger<Consumer> logger,
         IEventBus eventBus,
         IInternalConsumerFactory internalConsumerFactory
     )

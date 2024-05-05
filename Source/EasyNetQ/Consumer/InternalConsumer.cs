@@ -1,9 +1,8 @@
 using EasyNetQ.DI;
 using EasyNetQ.Internals;
-using MS = Microsoft.Extensions.Logging;
-using MSExtensions = Microsoft.Extensions.Logging.LoggerExtensions;
 using EasyNetQ.Persistent;
 using EasyNetQ.Topology;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
@@ -95,7 +94,7 @@ public class InternalConsumer : IInternalConsumer
     private readonly IConsumerConnection connection;
     private readonly IEventBus eventBus;
     private readonly IServiceResolver serviceResolver;
-    private readonly MS.ILogger logger;
+    private readonly ILogger logger;
 
     private volatile bool disposed;
     private IModel? model;
@@ -105,7 +104,7 @@ public class InternalConsumer : IInternalConsumer
     /// </summary>
     public InternalConsumer(
         IServiceResolver serviceResolver,
-        MS.ILogger<InternalConsumer> logger,
+        ILogger<InternalConsumer> logger,
         ConsumerConfiguration configuration,
         IConsumerConnection connection,
         IEventBus eventBus
@@ -127,7 +126,7 @@ public class InternalConsumer : IInternalConsumer
 
         if (IsModelClosedWithSoftError(model))
         {
-            MSExtensions.LogInformation(logger, "Model has shutdown with soft error and will be recreated");
+            logger.LogInformation("Model has shutdown with soft error and will be recreated");
 
             foreach (var consumer in consumers.Values)
             {
@@ -154,7 +153,7 @@ public class InternalConsumer : IInternalConsumer
                 model?.Dispose();
                 model = null;
 
-                MSExtensions.LogError(logger, exception, "Failed to create model");
+                logger.LogError(exception, "Failed to create model");
                 return new InternalConsumerStatus(Array.Empty<Queue>(), Array.Empty<Queue>(), Array.Empty<Queue>());
             }
         }
@@ -206,8 +205,7 @@ public class InternalConsumer : IInternalConsumer
                 );
                 consumers.Add(queue.Name, consumer);
 
-                MSExtensions.LogInformation(
-                    logger,
+                logger.LogInformation(
                     "Declared consumer with consumerTag {consumerTag} on queue {queue}",
                     consumerTag,
                     queue.Name
@@ -218,8 +216,7 @@ public class InternalConsumer : IInternalConsumer
             }
             catch (Exception exception)
             {
-                MSExtensions.LogError(
-                    logger,
+                logger.LogError(
                     exception,
                     "Failed to declare consumer on queue {queue}",
                     queue.Name

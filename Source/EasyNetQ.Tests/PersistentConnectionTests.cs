@@ -1,6 +1,6 @@
-using MS = Microsoft.Extensions.Logging;
 using EasyNetQ.Persistent;
 using EasyNetQ.Tests.Mocking;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests;
@@ -16,7 +16,7 @@ public class PersistentConnectionTests
 
         using var connection = new PersistentConnection(
             PersistentConnectionType.Producer,
-            Substitute.For<MS.ILogger<IPersistentConnection>>(),
+            Substitute.For<ILogger<IPersistentConnection>>(),
             new ConnectionConfiguration(),
             mockBuilder.ConnectionFactory,
             mockBuilder.EventBus
@@ -36,7 +36,7 @@ public class PersistentConnectionTests
         var mockBuilder = new MockBuilder();
         using var connection = new PersistentConnection(
             PersistentConnectionType.Producer,
-            Substitute.For<MS.ILogger<IPersistentConnection>>(),
+            Substitute.For<ILogger<IPersistentConnection>>(),
             new ConnectionConfiguration(),
             mockBuilder.ConnectionFactory,
             mockBuilder.EventBus
@@ -59,7 +59,7 @@ public class PersistentConnectionTests
 
         using var connection = new PersistentConnection(
             PersistentConnectionType.Producer,
-            Substitute.For<MS.ILogger<IPersistentConnection>>(),
+            Substitute.For<ILogger<IPersistentConnection>>(),
             new ConnectionConfiguration(),
             mockBuilder.ConnectionFactory,
             mockBuilder.EventBus
@@ -79,7 +79,7 @@ public class PersistentConnectionTests
         var mockBuilder = new MockBuilder();
         using var connection = new PersistentConnection(
             PersistentConnectionType.Producer,
-            Substitute.For<MS.ILogger<IPersistentConnection>>(),
+            Substitute.For<ILogger<IPersistentConnection>>(),
             new ConnectionConfiguration(),
             mockBuilder.ConnectionFactory,
             mockBuilder.EventBus

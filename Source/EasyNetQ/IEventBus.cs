@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
-using MS = Microsoft.Extensions.Logging;
-using MSExtensions = Microsoft.Extensions.Logging.LoggerExtensions;
+using Microsoft.Extensions.Logging;
 
 namespace EasyNetQ;
 
@@ -31,11 +30,11 @@ public interface IEventBus
 /// <inheritdoc />
 public sealed class EventBus : IEventBus
 {
-    private readonly MS.ILogger<EventBus> logger;
+    private readonly ILogger<EventBus> logger;
     private readonly ConcurrentDictionary<Type, object> subscriptions = new();
     private readonly object subscriptionLock = new();
 
-    public EventBus(MS.ILogger<EventBus> logger)
+    public EventBus(ILogger<EventBus> logger)
     {
         this.logger = logger;
     }
@@ -69,11 +68,11 @@ public sealed class EventBus : IEventBus
 
     private sealed class Handlers<TEvent> where TEvent : struct
     {
-        private readonly MS.ILogger logger;
+        private readonly ILogger logger;
         private readonly object mutex = new();
         private volatile List<TEventHandler<TEvent>> handlers = new();
 
-        public Handlers(MS.ILogger logger)
+        public Handlers(ILogger logger)
         {
             this.logger = logger;
         }
@@ -108,7 +107,7 @@ public sealed class EventBus : IEventBus
                 }
                 catch (Exception exception)
                 {
-                    MSExtensions.LogError(logger, exception, "Failed to handle event {@Event}", @event);
+                    logger.LogError(exception, "Failed to handle event {@Event}", @event);
                 }
         }
     }
