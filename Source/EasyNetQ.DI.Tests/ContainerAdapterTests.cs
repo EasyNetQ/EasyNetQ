@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace EasyNetQ.DI.Tests;
 
@@ -228,7 +229,10 @@ public class ContainerAdapterTests
     [ClassData(typeof(ContainerAdaptersData))]
     public void Should_resolve_singleton_generic(string name, ResolverFactory resolverFactory)
     {
-        var resolver = resolverFactory(c => c.Register(typeof(ILogger<>), typeof(Logger<>)));
+        var resolver = resolverFactory(c => c
+            .Register(typeof(ILogger<>), typeof(Logger<>), Lifetime.Singleton)
+            .Register(typeof(ILoggerFactory), typeof(NullLoggerFactory))
+        );
         var intLogger = resolver.Resolve<ILogger<int>>();
         var floatLogger = resolver.Resolve<ILogger<float>>();
 
@@ -243,8 +247,9 @@ public class ContainerAdapterTests
     [ClassData(typeof(ContainerAdaptersData))]
     public void Should_resolve_transient_generic(string name, ResolverFactory resolverFactory)
     {
-        var resolver = resolverFactory(
-            c => c.Register(typeof(ILogger<>), typeof(Logger<>), Lifetime.Transient)
+        var resolver = resolverFactory(c => c
+            .Register(typeof(ILogger<>), typeof(Logger<>), Lifetime.Transient)
+            .Register(typeof(ILoggerFactory), typeof(NullLoggerFactory))
         );
 
         var intLogger = resolver.Resolve<ILogger<int>>();
