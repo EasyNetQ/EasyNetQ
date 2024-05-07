@@ -1,6 +1,7 @@
 using EasyNetQ.ConnectionString;
 using EasyNetQ.DI;
 using EasyNetQ.LightInject;
+using Microsoft.Extensions.Logging;
 
 namespace EasyNetQ;
 
@@ -134,7 +135,9 @@ public static class RabbitHutch
     public static SelfHostedBus CreateBus(Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory, Action<IServiceRegister> registerServices)
     {
         var container = new ServiceContainer(c => c.EnablePropertyInjection = false);
+
         var adapter = new LightInjectAdapter(container);
+
         RegisterBus(adapter, connectionConfigurationFactory, registerServices);
         return new SelfHostedBus(container);
     }

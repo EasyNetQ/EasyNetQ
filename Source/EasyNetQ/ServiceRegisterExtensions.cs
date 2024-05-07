@@ -8,6 +8,7 @@ using EasyNetQ.MultipleExchange;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace EasyNetQ;
 
@@ -40,7 +41,8 @@ public static class ServiceRegisterExtensions
             .TryRegister<IEventBus, EventBus>()
             .TryRegister<ITypeNameSerializer, DefaultTypeNameSerializer>()
             .TryRegister<ProducePipelineBuilder>(_ => new ProducePipelineBuilder().UseProduceInterceptors())
-            .TryRegister<ConsumePipelineBuilder>(_ => new ConsumePipelineBuilder().UseConsumeErrorStrategy().UseConsumeInterceptors())
+            .TryRegister<ConsumePipelineBuilder>(_ =>
+                new ConsumePipelineBuilder().UseConsumeErrorStrategy().UseConsumeInterceptors())
             .TryRegister<ICorrelationIdGenerationStrategy, DefaultCorrelationIdGenerationStrategy>()
             .TryRegister<IMessageSerializationStrategy, DefaultMessageSerializationStrategy>()
             .TryRegister<IMessageDeliveryModeStrategy, MessageDeliveryModeStrategy>()
@@ -63,7 +65,9 @@ public static class ServiceRegisterExtensions
             .TryRegister<IRpc, DefaultRpc>()
             .TryRegister<ISendReceive, DefaultSendReceive>()
             .TryRegister<IScheduler, DeadLetterExchangeAndMessageTtlScheduler>()
-            .TryRegister<IBus, RabbitBus>();
+            .TryRegister<IBus, RabbitBus>()
+            .TryRegister(typeof(ILogger<>), typeof(Logger<>))
+            .TryRegister<ILoggerFactory>(new NullLoggerFactory());
     }
 
     /// <summary>
