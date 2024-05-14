@@ -187,7 +187,7 @@ public class PersistentConnection : IPersistentConnection
             CertificateValidationCallback = option.CertificateValidationCallback,
             CheckCertificateRevocation = option.CheckCertificateRevocation,
             Enabled = option.Enabled,
-            ServerName = host,
+            ServerName = option.ServerName ?? host,
             Version = option.Version,
         };
 }
