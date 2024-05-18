@@ -1,8 +1,8 @@
 using EasyNetQ.DI;
 using EasyNetQ.Internals;
-using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 using EasyNetQ.Topology;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
@@ -126,7 +126,7 @@ public class InternalConsumer : IInternalConsumer
 
         if (IsModelClosedWithSoftError(model))
         {
-            logger.Info("Model has shutdown with soft error and will be recreated");
+            logger.LogInformation("Model has shutdown with soft error and will be recreated");
 
             foreach (var consumer in consumers.Values)
             {
@@ -153,7 +153,7 @@ public class InternalConsumer : IInternalConsumer
                 model?.Dispose();
                 model = null;
 
-                logger.Error(exception, "Failed to create model");
+                logger.LogError(exception, "Failed to create model");
                 return new InternalConsumerStatus(Array.Empty<Queue>(), Array.Empty<Queue>(), Array.Empty<Queue>());
             }
         }
@@ -205,7 +205,7 @@ public class InternalConsumer : IInternalConsumer
                 );
                 consumers.Add(queue.Name, consumer);
 
-                logger.InfoFormat(
+                logger.LogInformation(
                     "Declared consumer with consumerTag {consumerTag} on queue {queue}",
                     consumerTag,
                     queue.Name
@@ -216,7 +216,7 @@ public class InternalConsumer : IInternalConsumer
             }
             catch (Exception exception)
             {
-                logger.Error(
+                logger.LogError(
                     exception,
                     "Failed to declare consumer on queue {queue}",
                     queue.Name

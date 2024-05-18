@@ -1,6 +1,7 @@
 using EasyNetQ.ConnectionString;
 using EasyNetQ.DI;
 using EasyNetQ.LightInject;
+using Microsoft.Extensions.Logging;
 
 namespace EasyNetQ;
 

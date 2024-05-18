@@ -1,5 +1,5 @@
 using EasyNetQ.Events;
-using EasyNetQ.Logging;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -90,7 +90,7 @@ public class PersistentConnection : IPersistentConnection
         }
 
         status = status.ToConnected();
-        logger.InfoFormat(
+        logger.LogInformation(
             "Connection {type} established to broker {broker}, port {port}",
             type,
             connection.Endpoint.HostName,
@@ -140,7 +140,7 @@ public class PersistentConnection : IPersistentConnection
     {
         status = status.ToConnected();
         var connection = (IConnection)sender!;
-        logger.InfoFormat(
+        logger.LogInformation(
             "Connection {type} recovered to broker {host}:{port}",
             type,
             connection.Endpoint.HostName,
@@ -153,9 +153,9 @@ public class PersistentConnection : IPersistentConnection
     {
         status = status.ToDisconnected(e.ToString());
         var connection = (IConnection)sender!;
-        logger.InfoException(
-            "Connection {type} disconnected from broker {host}:{port} because of {reason}",
+        logger.LogDebug(
             e.Cause as Exception,
+            "Connection {type} disconnected from broker {host}:{port} because of {reason}",
             type,
             connection.Endpoint.HostName,
             connection.Endpoint.Port,
@@ -166,13 +166,13 @@ public class PersistentConnection : IPersistentConnection
 
     private void OnConnectionBlocked(object? sender, ConnectionBlockedEventArgs e)
     {
-        logger.InfoFormat("Connection {type} blocked with reason {reason}", type, e.Reason);
+        logger.LogInformation("Connection {type} blocked with reason {reason}", type, e.Reason);
         eventBus.Publish(new ConnectionBlockedEvent(type, e.Reason ?? "Unknown reason"));
     }
 
     private void OnConnectionUnblocked(object? sender, EventArgs e)
     {
-        logger.InfoFormat("Connection {type} unblocked", type);
+        logger.LogInformation("Connection {type} unblocked", type);
         eventBus.Publish(new ConnectionUnblockedEvent(type));
     }
 
