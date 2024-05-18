@@ -107,7 +107,7 @@ public sealed class EventBus : IEventBus
                 }
                 catch (Exception exception)
                 {
-                    logger.LogError(exception, "Failed to handle event {@Event}", @event);
+                    logger.LogError(exception, "Failed to handle event {event}", @event);
                 }
         }
     }
