@@ -1,6 +1,6 @@
-using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 using EasyNetQ.Tests.Mocking;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests;

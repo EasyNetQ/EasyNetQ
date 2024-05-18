@@ -1,8 +1,8 @@
 using EasyNetQ.Events;
 using EasyNetQ.Topology;
 using EasyNetQ.Internals;
-using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
+using Microsoft.Extensions.Logging;
 
 namespace EasyNetQ.Consumer;
 

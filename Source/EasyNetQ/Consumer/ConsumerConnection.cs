@@ -1,5 +1,5 @@
-using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Consumer;

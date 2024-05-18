@@ -1,6 +1,6 @@
 using EasyNetQ.Consumer;
-using EasyNetQ.Logging;
 using EasyNetQ.Topology;
+using Microsoft.Extensions.Logging;
 
 namespace EasyNetQ.Tests.ConsumerTests;
 

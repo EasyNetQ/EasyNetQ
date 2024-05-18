@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
-using EasyNetQ.Logging;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
@@ -94,7 +94,7 @@ public class PersistentChannel : IPersistentChannel
                 if (exceptionVerdict.Rethrow)
                     throw;
 
-                logger.Error(exception, "Failed to fast invoke channel action, invocation will be retried");
+                logger.LogError(exception, "Failed to fast invoke channel action, invocation will be retried");
             }
             finally
             {
@@ -133,7 +133,7 @@ public class PersistentChannel : IPersistentChannel
                 if (exceptionVerdict.Rethrow)
                     throw;
 
-                logger.Error(exception, "Failed to invoke channel action, invocation will be retried");
+                logger.LogError(exception, "Failed to invoke channel action, invocation will be retried");
             }
 
             await Task.Delay(retryTimeoutMs, cts.Token).ConfigureAwait(false);
