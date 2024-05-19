@@ -1,7 +1,7 @@
 using System.Text;
 using EasyNetQ.Events;
-using EasyNetQ.Logging;
 using EasyNetQ.Producer;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.ProducerTests;

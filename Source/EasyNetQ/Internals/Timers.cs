@@ -1,4 +1,4 @@
-using EasyNetQ.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace EasyNetQ.Internals;
 
@@ -28,7 +28,7 @@ public static class Timers
             }
             catch (Exception exception)
             {
-                logger.Error(exception, "Error from timer callback");
+                logger.LogError(exception, "Error from timer callback");
             }
             finally
             {

@@ -46,10 +46,6 @@ updates:
     versions:
     - ">= 6.a"
     - "< 8"
-  - dependency-name: Serilog
-    versions:
-    - ">= 2.8"
-    - "< 3"
 - package-ecosystem: "github-actions"
   directory: "/"
   schedule:

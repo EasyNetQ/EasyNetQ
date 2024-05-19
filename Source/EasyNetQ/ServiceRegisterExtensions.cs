@@ -3,11 +3,12 @@ using EasyNetQ.ConnectionString;
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;
 using EasyNetQ.Interception;
-using EasyNetQ.Logging;
 using EasyNetQ.MessageVersioning;
 using EasyNetQ.MultipleExchange;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace EasyNetQ;
 
@@ -31,7 +32,7 @@ public static class ServiceRegisterExtensions
                 configuration.SetDefaultProperties();
                 return configuration;
             })
-            .TryRegister(typeof(ILogger<>), typeof(NoopLogger<>))
+            .TryRegister(typeof(ILogger<>), typeof(Logger<>))
             .TryRegister<IConnectionStringParser>(
                 _ => new CompositeConnectionStringParser(new AmqpConnectionStringParser(), new ConnectionStringParser())
             )
@@ -40,7 +41,8 @@ public static class ServiceRegisterExtensions
             .TryRegister<IEventBus, EventBus>()
             .TryRegister<ITypeNameSerializer, DefaultTypeNameSerializer>()
             .TryRegister<ProducePipelineBuilder>(_ => new ProducePipelineBuilder().UseProduceInterceptors())
-            .TryRegister<ConsumePipelineBuilder>(_ => new ConsumePipelineBuilder().UseConsumeErrorStrategy().UseConsumeInterceptors())
+            .TryRegister<ConsumePipelineBuilder>(_ =>
+                new ConsumePipelineBuilder().UseConsumeErrorStrategy().UseConsumeInterceptors())
             .TryRegister<ICorrelationIdGenerationStrategy, DefaultCorrelationIdGenerationStrategy>()
             .TryRegister<IMessageSerializationStrategy, DefaultMessageSerializationStrategy>()
             .TryRegister<IMessageDeliveryModeStrategy, MessageDeliveryModeStrategy>()
@@ -63,7 +65,9 @@ public static class ServiceRegisterExtensions
             .TryRegister<IRpc, DefaultRpc>()
             .TryRegister<ISendReceive, DefaultSendReceive>()
             .TryRegister<IScheduler, DeadLetterExchangeAndMessageTtlScheduler>()
-            .TryRegister<IBus, RabbitBus>();
+            .TryRegister<IBus, RabbitBus>()
+            .TryRegister(typeof(ILogger<>), typeof(Logger<>))
+            .TryRegister<ILoggerFactory>(new NullLoggerFactory());
     }
 
     /// <summary>
@@ -143,7 +147,7 @@ public static class ServiceRegisterExtensions
     /// </summary>
     /// <param name="serviceRegister">The register</param>
     public static IServiceRegister EnableConsoleLogger(this IServiceRegister serviceRegister)
-        => serviceRegister.Register(typeof(ILogger<>), typeof(ConsoleLogger<>));
+        => serviceRegister.Register(typeof(ILogger<>), typeof(Logger<>));
 
     /// <summary>
     ///     Enables a consumer error strategy which acks failed messages
@@ -220,7 +224,7 @@ public static class ServiceRegisterExtensions
             }
             catch (Exception exception)
             {
-                logger.Error(exception, "Consume error strategy has failed");
+                logger.LogError(exception, "Consume error strategy has failed");
 
                 return AckStrategies.NackWithRequeue;
             }
