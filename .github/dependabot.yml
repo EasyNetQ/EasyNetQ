@@ -10,10 +10,6 @@ updates:
       patterns:
         - "*"
   ignore:
-  - dependency-name: Castle.Windsor
-    versions:
-    - "> 5.0.0"
-    - "< 6"
   - dependency-name: Castle.Core
     versions:
     - "> 4.5.1"

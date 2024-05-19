@@ -1,6 +1,4 @@
-using Castle.Windsor;
 using EasyNetQ.DI.Microsoft;
-using EasyNetQ.DI.Windsor;
 using EasyNetQ.LightInject;
 using LightInject;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,18 +31,6 @@ internal sealed class ContainerAdaptersData : IEnumerable<object[]>
                 var adapter = new LightInject.LightInjectAdapter(container);
                 c(adapter);
                 return container.GetInstance<IServiceResolver>();
-            })
-        };
-
-        yield return new object[]
-        {
-            "Windsor",
-            (ResolverFactory)(c =>
-            {
-                var container = new WindsorContainer();
-                var adapter = new WindsorAdapter(container);
-                c(adapter);
-                return container.Resolve<IServiceResolver>();
             })
         };
 
