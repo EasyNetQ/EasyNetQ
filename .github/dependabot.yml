@@ -10,10 +10,6 @@ updates:
       patterns:
         - "*"
   ignore:
-  - dependency-name: Autofac
-    versions:
-    - ">= 6.a"
-    - "< 7"
   - dependency-name: Castle.Windsor
     versions:
     - "> 5.0.0"
@@ -26,10 +22,6 @@ updates:
     versions:
     - ">= 6.a"
     - "< 7"
-  - dependency-name: Ninject
-    versions:
-    - ">= 3.3.5"
-    - "< 4"
   - dependency-name: NSubstitute
     versions:
     - ">= 4.3.0"

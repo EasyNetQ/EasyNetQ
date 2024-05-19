@@ -6,10 +6,8 @@ public class ApprovalTests
 {
     [Theory]
     [InlineData(typeof(RabbitBus))]
-    [InlineData(typeof(DI.Autofac.AutofacAdapter))]
     [InlineData(typeof(DI.LightInject.LightInjectAdapter))]
     [InlineData(typeof(DI.Microsoft.ServiceCollectionAdapter))]
-    [InlineData(typeof(DI.Ninject.NinjectAdapter))]
     [InlineData(typeof(DI.Windsor.WindsorAdapter))]
     [InlineData(typeof(Serialization.NewtonsoftJson.NewtonsoftJsonSerializer))]
     [InlineData(typeof(Serialization.SystemTextJson.SystemTextJsonSerializer))]

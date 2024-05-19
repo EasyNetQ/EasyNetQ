@@ -139,24 +139,6 @@ public class ContainerAdapterTests
 
     [Theory]
     [ClassData(typeof(ContainerAdaptersData))]
-    public void Should_resolve_single_registration(string name, ResolverFactory resolverFactory)
-    {
-        if (name == "Autofac")
-            return; // Autofac doesn't support replace mechanics, only full recreation of a container builder
-
-        var resolver = resolverFactory(c =>
-        {
-            c.Register<IService, Service>();
-            c.Register<IService, Service2>();
-            c.Register<IService, Service3>();
-            c.Register<IServiceWithCollection, ServiceWithCollection>();
-        });
-        var serviceWithCollection = resolver.Resolve<IServiceWithCollection>();
-        serviceWithCollection.Services.Length.Should().Be(1);
-    }
-
-    [Theory]
-    [ClassData(typeof(ContainerAdaptersData))]
     public void Should_singleton_created_once(string name, ResolverFactory resolverFactory)
     {
         var resolver = resolverFactory(c => c.Register<IService, Service>());

@@ -1,13 +1,9 @@
-using Autofac;
 using Castle.Windsor;
-using EasyNetQ.DI.Autofac;
 using EasyNetQ.DI.Microsoft;
-using EasyNetQ.DI.Ninject;
 using EasyNetQ.DI.Windsor;
 using EasyNetQ.LightInject;
 using LightInject;
 using Microsoft.Extensions.DependencyInjection;
-using Ninject;
 using System.Collections;
 
 namespace EasyNetQ.DI.Tests;
@@ -42,19 +38,6 @@ internal sealed class ContainerAdaptersData : IEnumerable<object[]>
 
         yield return new object[]
         {
-            "Autofac",
-            (ResolverFactory)(c =>
-            {
-                var containerBuilder = new ContainerBuilder();
-                var adapter = new AutofacAdapter(containerBuilder);
-                c(adapter);
-                var container = containerBuilder.Build();
-                return container.Resolve<IServiceResolver>();
-            })
-        };
-
-        yield return new object[]
-        {
             "Windsor",
             (ResolverFactory)(c =>
             {
@@ -62,18 +45,6 @@ internal sealed class ContainerAdaptersData : IEnumerable<object[]>
                 var adapter = new WindsorAdapter(container);
                 c(adapter);
                 return container.Resolve<IServiceResolver>();
-            })
-        };
-
-        yield return new object[]
-        {
-            "Ninject",
-            (ResolverFactory)(c =>
-            {
-                var container = new StandardKernel();
-                var adapter = new NinjectAdapter(container);
-                c(adapter);
-                return container.Get<IServiceResolver>();
             })
         };
 
