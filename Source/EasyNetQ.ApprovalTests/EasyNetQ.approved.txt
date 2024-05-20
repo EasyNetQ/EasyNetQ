@@ -919,11 +919,11 @@ namespace EasyNetQ
     public static class RabbitHutch
     {
         public static EasyNetQ.SelfHostedBus CreateBus(string connectionString) { }
-        public static EasyNetQ.SelfHostedBus CreateBus(EasyNetQ.ConnectionConfiguration connectionConfiguration, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
-        public static EasyNetQ.SelfHostedBus CreateBus(System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
-        public static EasyNetQ.SelfHostedBus CreateBus(string connectionString, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
-        public static EasyNetQ.SelfHostedBus CreateBus(string hostName, ushort hostPort, string virtualHost, string username, string password, System.TimeSpan requestedHeartbeat, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
-        public static void RegisterBus(EasyNetQ.DI.IServiceRegister serviceRegister, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<EasyNetQ.DI.IServiceRegister> registerServices) { }
+        public static EasyNetQ.SelfHostedBus CreateBus(EasyNetQ.ConnectionConfiguration connectionConfiguration, System.Action<Microsoft.Extensions.DependencyInjection.IServiceCollection> registerServices) { }
+        public static EasyNetQ.SelfHostedBus CreateBus(System.Func<System.IServiceProvider, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<Microsoft.Extensions.DependencyInjection.IServiceCollection> registerServices) { }
+        public static EasyNetQ.SelfHostedBus CreateBus(string connectionString, System.Action<Microsoft.Extensions.DependencyInjection.IServiceCollection> registerServices) { }
+        public static EasyNetQ.SelfHostedBus CreateBus(string hostName, ushort hostPort, string virtualHost, string username, string password, System.TimeSpan requestedHeartbeat, System.Action<Microsoft.Extensions.DependencyInjection.IServiceCollection> registerServices) { }
+        public static void RegisterBus(Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Func<System.IServiceProvider, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<Microsoft.Extensions.DependencyInjection.IServiceCollection> registerServices) { }
     }
     public static class ReceiveRegistrationExtensions
     {
@@ -995,18 +995,18 @@ namespace EasyNetQ
     }
     public static class ServiceRegisterExtensions
     {
-        public static EasyNetQ.DI.IServiceRegister EnableAdvancedMessagePolymorphism(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
-        public static EasyNetQ.DI.IServiceRegister EnableAlwaysAckConsumerErrorStrategy(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
-        public static EasyNetQ.DI.IServiceRegister EnableAlwaysNackWithRequeueConsumerErrorStrategy(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
-        public static EasyNetQ.DI.IServiceRegister EnableAlwaysNackWithoutRequeueConsumerErrorStrategy(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
-        public static EasyNetQ.DI.IServiceRegister EnableConsoleLogger(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
-        public static EasyNetQ.DI.IServiceRegister EnableDelayedExchangeScheduler(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
-        public static EasyNetQ.DI.IServiceRegister EnableLegacyConventions(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
-        public static EasyNetQ.DI.IServiceRegister EnableLegacyRpcConventions(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
-        public static EasyNetQ.DI.IServiceRegister EnableLegacyTypeNaming(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
-        public static EasyNetQ.DI.IServiceRegister EnableMessageVersioning(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
-        public static EasyNetQ.DI.IServiceRegister EnableMultiChannelClientCommandDispatcher(this EasyNetQ.DI.IServiceRegister serviceRegister, int channelsCount) { }
-        public static void RegisterDefaultServices(this EasyNetQ.DI.IServiceRegister serviceRegister, System.Func<EasyNetQ.DI.IServiceResolver, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory) { }
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableAdvancedMessagePolymorphism(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableAlwaysAckConsumerErrorStrategy(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableAlwaysNackWithRequeueConsumerErrorStrategy(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableAlwaysNackWithoutRequeueConsumerErrorStrategy(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableConsoleLogger(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableDelayedExchangeScheduler(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableLegacyConventions(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableLegacyRpcConventions(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableLegacyTypeNaming(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableMessageVersioning(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableMultiChannelClientCommandDispatcher(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, int channelsCount) { }
+        public static void RegisterDefaultServices(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Func<System.IServiceProvider, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory) { }
         public static EasyNetQ.Consumer.ConsumePipelineBuilder UseConsumeErrorStrategy(this EasyNetQ.Consumer.ConsumePipelineBuilder pipelineBuilder) { }
         public static EasyNetQ.Consumer.ConsumePipelineBuilder UseConsumeInterceptors(this EasyNetQ.Consumer.ConsumePipelineBuilder pipelineBuilder) { }
         public static EasyNetQ.Producer.ProducePipelineBuilder UseProduceInterceptors(this EasyNetQ.Producer.ProducePipelineBuilder pipelineBuilder) { }
@@ -1355,15 +1355,6 @@ namespace EasyNetQ.DI
         public TService Resolve<TService>()
             where TService :  class { }
     }
-    public interface IServiceRegister
-    {
-        EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, object implementationInstance);
-        EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Func<EasyNetQ.DI.IServiceResolver, object> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1);
-        EasyNetQ.DI.IServiceRegister Register(System.Type serviceType, System.Type implementationType, EasyNetQ.DI.Lifetime lifetime = 1);
-        EasyNetQ.DI.IServiceRegister TryRegister(System.Type serviceType, object implementationInstance);
-        EasyNetQ.DI.IServiceRegister TryRegister(System.Type serviceType, System.Func<EasyNetQ.DI.IServiceResolver, object> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1);
-        EasyNetQ.DI.IServiceRegister TryRegister(System.Type serviceType, System.Type implementationType, EasyNetQ.DI.Lifetime lifetime = 1);
-    }
     public interface IServiceResolver
     {
         EasyNetQ.DI.IServiceResolverScope CreateScope();
@@ -1375,30 +1366,6 @@ namespace EasyNetQ.DI
     {
         Transient = 0,
         Singleton = 1,
-    }
-    public static class ServiceRegisterExtensions
-    {
-        public static EasyNetQ.DI.IServiceRegister Register<TService>(this EasyNetQ.DI.IServiceRegister services, EasyNetQ.DI.Lifetime lifetime = 1)
-            where TService :  class { }
-        public static EasyNetQ.DI.IServiceRegister Register<TService>(this EasyNetQ.DI.IServiceRegister services, TService implementationInstance)
-            where TService :  class { }
-        public static EasyNetQ.DI.IServiceRegister Register<TService>(this EasyNetQ.DI.IServiceRegister services, System.Func<EasyNetQ.DI.IServiceResolver, TService> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1)
-            where TService :  class { }
-        public static EasyNetQ.DI.IServiceRegister Register<TService, TImplementation>(this EasyNetQ.DI.IServiceRegister services, EasyNetQ.DI.Lifetime lifetime = 1)
-            where TService :  class
-            where TImplementation :  class, TService { }
-        public static EasyNetQ.DI.IServiceRegister Register<TService, TImplementation>(this EasyNetQ.DI.IServiceRegister services, System.Func<EasyNetQ.DI.IServiceResolver, TImplementation> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1)
-            where TService :  class
-            where TImplementation :  class, TService { }
-        public static EasyNetQ.DI.IServiceRegister TryRegister<TService>(this EasyNetQ.DI.IServiceRegister services, TService implementationInstance)
-            where TService :  class { }
-        public static EasyNetQ.DI.IServiceRegister TryRegister<TService>(this EasyNetQ.DI.IServiceRegister services, System.Func<EasyNetQ.DI.IServiceResolver, TService> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1)
-            where TService :  class { }
-        public static EasyNetQ.DI.IServiceRegister TryRegister<TService, TImplementation>(this EasyNetQ.DI.IServiceRegister services, EasyNetQ.DI.Lifetime lifetime = 1)
-            where TService :  class { }
-        public static EasyNetQ.DI.IServiceRegister TryRegister<TService, TImplementation>(this EasyNetQ.DI.IServiceRegister services, System.Func<EasyNetQ.DI.IServiceResolver, TImplementation> implementationFactory, EasyNetQ.DI.Lifetime lifetime = 1)
-            where TService :  class
-            where TImplementation :  class, TService { }
     }
     public class ServiceResolverScope : EasyNetQ.DI.IServiceResolver, EasyNetQ.DI.IServiceResolverScope, System.IDisposable
     {

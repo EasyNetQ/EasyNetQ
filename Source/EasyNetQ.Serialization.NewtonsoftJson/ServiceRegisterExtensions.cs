@@ -1,32 +1,36 @@
-using EasyNetQ.DI;
 using EasyNetQ.Serialization.NewtonsoftJson;
+using Microsoft.Extensions.DependencyInjection;
 
-// ReSharper disable once CheckNamespace
-namespace EasyNetQ;
-
-/// <summary>
-///     Register serializer based on Newtonsoft.Json
-/// </summary>
-public static class ServiceRegisterExtensions
+namespace EasyNetQ
 {
     /// <summary>
-    ///     Enables serializer based on Newtonsoft.Json
+    ///     Register serializer based on Newtonsoft.Json
     /// </summary>
-    /// <param name="serviceRegister">The register</param>
-    public static IServiceRegister EnableNewtonsoftJson(this IServiceRegister serviceRegister)
+    public static class ServiceRegisterExtensions
     {
-        return serviceRegister.Register<ISerializer, NewtonsoftJsonSerializer>();
-    }
+        /// <summary>
+        ///     Enables serializer based on Newtonsoft.Json
+        /// </summary>
+        /// <param name="services">The service collection</param>
+        /// <returns>The modified service collection</returns>
+        public static IServiceCollection EnableNewtonsoftJson(this IServiceCollection services)
+        {
+            services.AddSingleton<ISerializer, NewtonsoftJsonSerializer>();
+            return services;
+        }
 
-    /// <summary>
-    ///     Enables serializer based on Newtonsoft.Json
-    /// </summary>
-    /// <param name="serviceRegister">The register</param>
-    /// <param name="settings">The custom settings</param>
-    public static IServiceRegister EnableNewtonsoftJson(
-        this IServiceRegister serviceRegister, Newtonsoft.Json.JsonSerializerSettings settings
-    )
-    {
-        return serviceRegister.Register<ISerializer>(_ => new NewtonsoftJsonSerializer(settings));
+        /// <summary>
+        ///     Enables serializer based on Newtonsoft.Json with custom settings
+        /// </summary>
+        /// <param name="services">The service collection</param>
+        /// <param name="settings">The custom settings</param>
+        /// <returns>The modified service collection</returns>
+        public static IServiceCollection EnableNewtonsoftJson(
+            this IServiceCollection services, Newtonsoft.Json.JsonSerializerSettings settings
+        )
+        {
+            services.AddSingleton<ISerializer>(_ => new NewtonsoftJsonSerializer(settings));
+            return services;
+        }
     }
 }

@@ -1,123 +1,124 @@
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Consumer;
-using EasyNetQ.DI;
-using EasyNetQ.LightInject;
 using EasyNetQ.Producer;
+using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 
-namespace EasyNetQ.Tests.Mocking;
-
-public class MockBuilder : IDisposable
+namespace EasyNetQ.Tests.Mocking
 {
-    private readonly ServiceContainer container;
-    private readonly IBus bus;
-
-    private readonly IBasicProperties basicProperties = new BasicProperties();
-    private readonly Stack<IModel> channelPool = new();
-    private readonly List<IModel> channels = new();
-    private readonly IConnection connection = Substitute.For<IAutorecoveringConnection>();
-    private readonly IConnectionFactory connectionFactory = Substitute.For<IConnectionFactory>();
-    private readonly List<AsyncDefaultBasicConsumer> consumers = new();
-
-    public MockBuilder() : this(_ => { })
+    public class MockBuilder : IDisposable
     {
-    }
+        private readonly IServiceProvider serviceProvider;
+        private readonly IBus bus;
 
-    public MockBuilder(Action<IServiceRegister> registerServices) : this("host=localhost", registerServices)
-    {
-    }
+        private readonly IBasicProperties basicProperties = new BasicProperties();
+        private readonly Stack<IModel> channelPool = new();
+        private readonly List<IModel> channels = new();
+        private readonly IConnection connection = Substitute.For<IAutorecoveringConnection>();
+        private readonly IConnectionFactory connectionFactory = Substitute.For<IConnectionFactory>();
+        private readonly List<AsyncDefaultBasicConsumer> consumers = new();
 
-    public MockBuilder(string connectionString) : this(connectionString, _ => { })
-    {
-    }
-
-    public MockBuilder(string connectionString, Action<IServiceRegister> registerServices)
-    {
-        for (var i = 0; i < 10; i++)
-            channelPool.Push(Substitute.For<IModel, IRecoverable>());
-
-        connectionFactory.CreateConnection(Arg.Any<IList<AmqpTcpEndpoint>>()).Returns(connection);
-        connection.IsOpen.Returns(true);
-        connection.Endpoint.Returns(new AmqpTcpEndpoint("localhost"));
-
-        connection.CreateModel().Returns(_ =>
+        public MockBuilder() : this(_ => { })
         {
-            var channel = channelPool.Pop();
-            channels.Add(channel);
-            channel.CreateBasicProperties().Returns(basicProperties);
-            channel.IsOpen.Returns(true);
-            channel.BasicConsume(null, false, null, true, false, null, null)
-                .ReturnsForAnyArgs(consumeInvocation =>
-                {
-                    var queueName = (string)consumeInvocation[0];
-                    var consumerTag = (string)consumeInvocation[2];
-                    var consumer = (AsyncDefaultBasicConsumer)consumeInvocation[6];
+        }
 
-                    ConsumerQueueNames.Add(queueName);
-                    consumer.HandleBasicConsumeOk(consumerTag)
-                        .GetAwaiter()
-                        .GetResult();
-                    consumers.Add(consumer);
-                    return string.Empty;
-                });
-            channel.QueueDeclare(null, true, false, false, null)
-                .ReturnsForAnyArgs(queueDeclareInvocation =>
-                {
-                    var queueName = (string)queueDeclareInvocation[0];
-                    return new QueueDeclareOk(queueName, 0, 0);
-                });
-            channel.WaitForConfirms(default).ReturnsForAnyArgs(true);
+        public MockBuilder(Action<IServiceCollection> registerServices) : this("host=localhost", registerServices)
+        {
+        }
 
-            return channel;
-        });
+        public MockBuilder(string connectionString) : this(connectionString, _ => { })
+        {
+        }
 
-        container = new ServiceContainer(c => c.EnablePropertyInjection = false);
-        var adapter = new LightInjectAdapter(container);
-        adapter.Register(connectionFactory);
+        public MockBuilder(string connectionString, Action<IServiceCollection> registerServices)
+        {
+            for (var i = 0; i < 10; i++)
+                channelPool.Push(Substitute.For<IModel, IRecoverable>());
 
-        RabbitHutch.RegisterBus(
-            adapter,
-            x => x.Resolve<IConnectionStringParser>().Parse(connectionString),
-            registerServices
-        );
+            connectionFactory.CreateConnection(Arg.Any<IList<AmqpTcpEndpoint>>()).Returns(connection);
+            connection.IsOpen.Returns(true);
+            connection.Endpoint.Returns(new AmqpTcpEndpoint("localhost"));
 
-        bus = container.GetInstance<IBus>();
+            connection.CreateModel().Returns(_ =>
+            {
+                var channel = channelPool.Pop();
+                channels.Add(channel);
+                channel.CreateBasicProperties().Returns(basicProperties);
+                channel.IsOpen.Returns(true);
+                channel.BasicConsume(null, false, null, true, false, null, null)
+                    .ReturnsForAnyArgs(consumeInvocation =>
+                    {
+                        var queueName = (string)consumeInvocation[0];
+                        var consumerTag = (string)consumeInvocation[2];
+                        var consumer = (AsyncDefaultBasicConsumer)consumeInvocation[6];
+
+                        ConsumerQueueNames.Add(queueName);
+                        consumer.HandleBasicConsumeOk(consumerTag)
+                            .GetAwaiter()
+                            .GetResult();
+                        consumers.Add(consumer);
+                        return string.Empty;
+                    });
+                channel.QueueDeclare(null, true, false, false, null)
+                    .ReturnsForAnyArgs(queueDeclareInvocation =>
+                    {
+                        var queueName = (string)queueDeclareInvocation[0];
+                        return new QueueDeclareOk(queueName, 0, 0);
+                    });
+                channel.WaitForConfirms(default).ReturnsForAnyArgs(true);
+
+                return channel;
+            });
+
+            var services = new ServiceCollection();
+            services.AddSingleton(connectionFactory);
+
+            RabbitHutch.RegisterBus(
+                services,
+                x => x.GetRequiredService<IConnectionStringParser>().Parse(connectionString),
+                registerServices
+            );
+
+            serviceProvider = services.BuildServiceProvider();
+            bus = serviceProvider.GetRequiredService<IBus>();
+        }
+
+        public IBus Bus => bus;
+
+        public IConnectionFactory ConnectionFactory => connectionFactory;
+
+        public IConnection Connection => connection;
+
+        public List<IModel> Channels => channels;
+
+        public List<AsyncDefaultBasicConsumer> Consumers => consumers;
+
+        public IModel NextModel => channelPool.Peek();
+
+        public IPubSub PubSub => serviceProvider.GetRequiredService<IPubSub>();
+
+        public IRpc Rpc => serviceProvider.GetRequiredService<IRpc>();
+
+        public ISendReceive SendReceive => serviceProvider.GetRequiredService<ISendReceive>();
+
+        public IScheduler Scheduler => serviceProvider.GetRequiredService<IScheduler>();
+
+        public IEventBus EventBus => serviceProvider.GetRequiredService<IEventBus>();
+
+        public IConventions Conventions => serviceProvider.GetRequiredService<IConventions>();
+
+        public ITypeNameSerializer TypeNameSerializer => serviceProvider.GetRequiredService<ITypeNameSerializer>();
+
+        public ISerializer Serializer => serviceProvider.GetRequiredService<ISerializer>();
+
+        public IProducerConnection ProducerConnection => serviceProvider.GetRequiredService<IProducerConnection>();
+
+        public IConsumerConnection ConsumerConnection => serviceProvider.GetRequiredService<IConsumerConnection>();
+
+        public IConsumeErrorStrategy ConsumeErrorStrategy => serviceProvider.GetRequiredService<IConsumeErrorStrategy>();
+
+        public List<string> ConsumerQueueNames { get; } = new();
+
+        public void Dispose() => (serviceProvider as IDisposable)?.Dispose();
     }
-
-    public IBus Bus => bus;
-
-    public IConnectionFactory ConnectionFactory => connectionFactory;
-
-    public IConnection Connection => connection;
-
-    public List<IModel> Channels => channels;
-
-    public List<AsyncDefaultBasicConsumer> Consumers => consumers;
-
-    public IModel NextModel => channelPool.Peek();
-
-    public IPubSub PubSub => container.GetInstance<IPubSub>();
-
-    public IRpc Rpc => container.GetInstance<IRpc>();
-
-    public ISendReceive SendReceive => container.GetInstance<ISendReceive>();
-
-    public IScheduler Scheduler => container.GetInstance<IScheduler>();
-
-    public IEventBus EventBus => container.GetInstance<IEventBus>();
-
-    public IConventions Conventions => container.GetInstance<IConventions>();
-
-    public ITypeNameSerializer TypeNameSerializer => container.GetInstance<ITypeNameSerializer>();
-
-    public ISerializer Serializer => container.GetInstance<ISerializer>();
-
-    public IProducerConnection ProducerConnection => container.GetInstance<IProducerConnection>();
-    public IConsumerConnection ConsumerConnection => container.GetInstance<IConsumerConnection>();
-
-    public IConsumeErrorStrategy ConsumeErrorStrategy => container.GetInstance<IConsumeErrorStrategy>();
-
-    public List<string> ConsumerQueueNames { get; } = new();
-
-    public void Dispose() => container.Dispose();
 }

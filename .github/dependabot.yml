@@ -14,10 +14,6 @@ updates:
     versions:
     - "> 4.5.1"
     - "< 6"
-  - dependency-name: LightInject
-    versions:
-    - ">= 6.a"
-    - "< 7"
   - dependency-name: NSubstitute
     versions:
     - ">= 4.3.0"

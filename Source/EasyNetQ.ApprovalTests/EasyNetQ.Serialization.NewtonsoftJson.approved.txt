@@ -12,7 +12,7 @@ namespace EasyNetQ
 {
     public static class ServiceRegisterExtensions
     {
-        public static EasyNetQ.DI.IServiceRegister EnableNewtonsoftJson(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
-        public static EasyNetQ.DI.IServiceRegister EnableNewtonsoftJson(this EasyNetQ.DI.IServiceRegister serviceRegister, Newtonsoft.Json.JsonSerializerSettings settings) { }
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableNewtonsoftJson(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableNewtonsoftJson(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, Newtonsoft.Json.JsonSerializerSettings settings) { }
     }
 }

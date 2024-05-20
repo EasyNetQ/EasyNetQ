@@ -1,6 +1,7 @@
 using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
+using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.ProducerTests;
@@ -11,7 +12,7 @@ public class When_a_request_is_sent : IDisposable
     {
         var correlationId = Guid.NewGuid().ToString();
         mockBuilder = new MockBuilder(
-            c => c.Register<ICorrelationIdGenerationStrategy>(
+            c => c.AddSingleton<ICorrelationIdGenerationStrategy>(
                 _ => new StaticCorrelationIdGenerationStrategy(correlationId)
             )
         );

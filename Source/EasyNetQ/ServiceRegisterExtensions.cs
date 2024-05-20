@@ -7,227 +7,180 @@ using EasyNetQ.MessageVersioning;
 using EasyNetQ.MultipleExchange;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using RabbitMQ.Client;
 
-namespace EasyNetQ;
-
-/// <summary>
-///     Registers the EasyNetQ components
-/// </summary>
-public static class ServiceRegisterExtensions
+namespace EasyNetQ
 {
-    /// <summary>
-    /// Registers the default EasyNetQ components if needed services have not yet been registered.
-    /// </summary>
-    public static void RegisterDefaultServices(
-        this IServiceRegister serviceRegister,
-        Func<IServiceResolver, ConnectionConfiguration> connectionConfigurationFactory
-    )
+    public static class ServiceRegisterExtensions
     {
-        serviceRegister
-            .TryRegister(resolver =>
+        public static void RegisterDefaultServices(
+            this IServiceCollection services,
+            Func<IServiceProvider, ConnectionConfiguration> connectionConfigurationFactory
+        )
+        {
+            services.TryAddSingleton(resolver =>
             {
                 var configuration = connectionConfigurationFactory(resolver);
                 configuration.SetDefaultProperties();
                 return configuration;
-            })
-            .TryRegister(typeof(ILogger<>), typeof(Logger<>))
-            .TryRegister<IConnectionStringParser>(
+            });
+
+            services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
+            services.TryAddSingleton<IConnectionStringParser>(
                 _ => new CompositeConnectionStringParser(new AmqpConnectionStringParser(), new ConnectionStringParser())
-            )
-            .TryRegister<ISerializer>(_ => new ReflectionBasedNewtonsoftJsonSerializer())
-            .TryRegister<IConventions, Conventions>()
-            .TryRegister<IEventBus, EventBus>()
-            .TryRegister<ITypeNameSerializer, DefaultTypeNameSerializer>()
-            .TryRegister<ProducePipelineBuilder>(_ => new ProducePipelineBuilder().UseProduceInterceptors())
-            .TryRegister<ConsumePipelineBuilder>(_ =>
-                new ConsumePipelineBuilder().UseConsumeErrorStrategy().UseConsumeInterceptors())
-            .TryRegister<ICorrelationIdGenerationStrategy, DefaultCorrelationIdGenerationStrategy>()
-            .TryRegister<IMessageSerializationStrategy, DefaultMessageSerializationStrategy>()
-            .TryRegister<IMessageDeliveryModeStrategy, MessageDeliveryModeStrategy>()
-            .TryRegister<AdvancedBusEventHandlers>(_ => new AdvancedBusEventHandlers())
-            .TryRegister<IExchangeDeclareStrategy, DefaultExchangeDeclareStrategy>()
-            .TryRegister<IConsumeErrorStrategy, DefaultConsumeErrorStrategy>()
-            .TryRegister<IErrorMessageSerializer, DefaultErrorMessageSerializer>()
-            .TryRegister<IInternalConsumerFactory, InternalConsumerFactory>()
-            .TryRegister<IConsumerFactory, ConsumerFactory>()
-            .TryRegister(c => ConnectionFactoryFactory.CreateConnectionFactory(c.Resolve<ConnectionConfiguration>()))
-            .TryRegister<IPersistentChannelDispatcher, SinglePersistentChannelDispatcher>()
-            .TryRegister<IProducerConnection, ProducerConnection>()
-            .TryRegister<IConsumerConnection, ConsumerConnection>()
-            .TryRegister<IPersistentChannelFactory, PersistentChannelFactory>()
-            .TryRegister<IPublishConfirmationListener, PublishConfirmationListener>()
-            .TryRegister<IHandlerCollectionFactory, HandlerCollectionFactory>()
-            .TryRegister<IPullingConsumerFactory, PullingConsumerFactory>()
-            .TryRegister<IAdvancedBus, RabbitAdvancedBus>()
-            .TryRegister<IPubSub, DefaultPubSub>()
-            .TryRegister<IRpc, DefaultRpc>()
-            .TryRegister<ISendReceive, DefaultSendReceive>()
-            .TryRegister<IScheduler, DeadLetterExchangeAndMessageTtlScheduler>()
-            .TryRegister<IBus, RabbitBus>()
-            .TryRegister(typeof(ILogger<>), typeof(Logger<>))
-            .TryRegister<ILoggerFactory>(new NullLoggerFactory());
-    }
-
-    /// <summary>
-    ///     Enables support of using multiple channels for clients operations
-    /// </summary>
-    /// <param name="serviceRegister">The register</param>
-    /// <param name="channelsCount">Max count of channels</param>
-    public static IServiceRegister EnableMultiChannelClientCommandDispatcher(
-        this IServiceRegister serviceRegister, int channelsCount
-    )
-    {
-        return serviceRegister.Register<IPersistentChannelDispatcher>(
-            x => new MultiPersistentChannelDispatcher(
-                channelsCount,
-                x.Resolve<IProducerConnection>(),
-                x.Resolve<IConsumerConnection>(),
-                x.Resolve<IPersistentChannelFactory>()
-            )
-        );
-    }
-
-    /// <summary>
-    ///     Enables legacy type naming. See <see cref="LegacyTypeNameSerializer"/> for more details
-    /// </summary>
-    /// <param name="serviceRegister">The register</param>
-    public static IServiceRegister EnableLegacyTypeNaming(this IServiceRegister serviceRegister)
-        => serviceRegister.Register<ITypeNameSerializer, LegacyTypeNameSerializer>();
-
-    /// <summary>
-    ///     Enables legacy rpc conventions. See <see cref="LegacyRpcConventions"/> for more details
-    /// </summary>
-    /// <param name="serviceRegister">The register</param>
-    public static IServiceRegister EnableLegacyRpcConventions(this IServiceRegister serviceRegister)
-        => serviceRegister.Register<IConventions, LegacyRpcConventions>();
-
-    /// <summary>
-    ///     Enables all legacy conventions
-    /// </summary>
-    /// <param name="serviceRegister">The register</param>
-    public static IServiceRegister EnableLegacyConventions(this IServiceRegister serviceRegister)
-    {
-        return serviceRegister
-            .EnableLegacyTypeNaming()
-            .EnableLegacyRpcConventions();
-    }
-
-    /// <summary>
-    ///     Enables support of scheduling messages using delayed exchange plugin.
-    ///     See <see cref="DelayedExchangeScheduler"/> for more details
-    /// </summary>
-    /// <param name="serviceRegister">The register</param>
-    public static IServiceRegister EnableDelayedExchangeScheduler(this IServiceRegister serviceRegister)
-        => serviceRegister.Register<IScheduler, DelayedExchangeScheduler>();
-
-    /// <summary>
-    ///     Enables AdvancedMessagePolymorphism. See <see cref="MultipleExchangeDeclareStrategy"/> for more details
-    /// </summary>
-    /// <param name="serviceRegister">The register</param>
-    public static IServiceRegister EnableAdvancedMessagePolymorphism(this IServiceRegister serviceRegister)
-        => serviceRegister.Register<IExchangeDeclareStrategy, MultipleExchangeDeclareStrategy>();
-
-    /// <summary>
-    ///     Enables versioning of messages.
-    ///     See <see cref="VersionedExchangeDeclareStrategy"/> and
-    ///     <see cref="VersionedMessageSerializationStrategy"/> for more details
-    /// </summary>
-    /// <param name="serviceRegister">The register</param>
-    public static IServiceRegister EnableMessageVersioning(this IServiceRegister serviceRegister)
-    {
-        return serviceRegister
-            .Register<IExchangeDeclareStrategy, VersionedExchangeDeclareStrategy>()
-            .Register<IMessageSerializationStrategy, VersionedMessageSerializationStrategy>();
-    }
-
-    /// <summary>
-    ///     Enables console logger
-    /// </summary>
-    /// <param name="serviceRegister">The register</param>
-    public static IServiceRegister EnableConsoleLogger(this IServiceRegister serviceRegister)
-        => serviceRegister.Register(typeof(ILogger<>), typeof(Logger<>));
-
-    /// <summary>
-    ///     Enables a consumer error strategy which acks failed messages
-    /// </summary>
-    /// <param name="serviceRegister">The register</param>
-    public static IServiceRegister EnableAlwaysAckConsumerErrorStrategy(this IServiceRegister serviceRegister)
-        => serviceRegister.Register<IConsumeErrorStrategy>(SimpleConsumeErrorStrategy.Ack);
-
-    /// <summary>
-    ///     Enables a consumer error strategy which nacks failed messages with requeue
-    /// </summary>
-    /// <param name="serviceRegister">The register</param>
-    public static IServiceRegister EnableAlwaysNackWithRequeueConsumerErrorStrategy(this IServiceRegister serviceRegister)
-        => serviceRegister.Register<IConsumeErrorStrategy>(SimpleConsumeErrorStrategy.NackWithRequeue);
-
-    /// <summary>
-    ///     Enables a consumer error strategy which nacks failed messages without requeue
-    /// </summary>
-    /// <param name="serviceRegister">The register</param>
-    public static IServiceRegister EnableAlwaysNackWithoutRequeueConsumerErrorStrategy(this IServiceRegister serviceRegister)
-        => serviceRegister.Register<IConsumeErrorStrategy>(SimpleConsumeErrorStrategy.NackWithoutRequeue);
-
-    public static ProducePipelineBuilder UseProduceInterceptors(this ProducePipelineBuilder pipelineBuilder)
-    {
-        return pipelineBuilder.Use(next => ctx =>
-        {
-            var interceptors = ctx.ServiceResolver.Resolve<IEnumerable<IProduceConsumeInterceptor>>().ToArray();
-            var producedMessage = interceptors.OnProduce(new ProducedMessage(ctx.Properties, ctx.Body));
-            return next(ctx with { Properties = producedMessage.Properties, Body = producedMessage.Body });
-        });
-    }
-
-    public static ConsumePipelineBuilder UseConsumeInterceptors(this ConsumePipelineBuilder pipelineBuilder)
-    {
-        return pipelineBuilder.Use(next => ctx =>
-        {
-            var interceptors = ctx.ServiceResolver.Resolve<IEnumerable<IProduceConsumeInterceptor>>().ToArray();
-            var consumedMessage = interceptors.OnConsume(new ConsumedMessage(ctx.ReceivedInfo, ctx.Properties, ctx.Body));
-            return next(ctx with { ReceivedInfo = consumedMessage.ReceivedInfo, Properties = consumedMessage.Properties, Body = consumedMessage.Body });
-        });
-    }
-
-    public static ConsumePipelineBuilder UseScope(this ConsumePipelineBuilder pipelineBuilder)
-    {
-        return pipelineBuilder.Use(next => async ctx =>
-        {
-            var scope = ctx.ServiceResolver.CreateScope();
-            await using var asyncScope = new AsyncServiceResolverScope(scope);
-            return await next(ctx with { ServiceResolver = scope }).ConfigureAwait(false);
-        });
-    }
-
-    public static ConsumePipelineBuilder UseConsumeErrorStrategy(this ConsumePipelineBuilder pipelineBuilder)
-    {
-        return pipelineBuilder.Use(next => async ctx =>
-        {
-            var errorStrategy = ctx.ServiceResolver.Resolve<IConsumeErrorStrategy>();
-            var logger = ctx.ServiceResolver.Resolve<ILogger<IConsumeErrorStrategy>>();
-
-            try
+            );
+            services.TryAddSingleton<ISerializer>(_ => new ReflectionBasedNewtonsoftJsonSerializer());
+            services.TryAddSingleton<IConventions, Conventions>();
+            services.TryAddSingleton<IEventBus, EventBus>();
+            services.TryAddSingleton<ITypeNameSerializer, DefaultTypeNameSerializer>();
+            services.TryAddSingleton<ProducePipelineBuilder>(_ => new ProducePipelineBuilder().UseProduceInterceptors());
+            services.TryAddSingleton<ConsumePipelineBuilder>(_ =>
+                new ConsumePipelineBuilder().UseConsumeErrorStrategy().UseConsumeInterceptors());
+            services.TryAddSingleton<ICorrelationIdGenerationStrategy, DefaultCorrelationIdGenerationStrategy>();
+            services.TryAddSingleton<IMessageSerializationStrategy, DefaultMessageSerializationStrategy>();
+            services.TryAddSingleton<IMessageDeliveryModeStrategy, MessageDeliveryModeStrategy>();
+            services.TryAddSingleton<AdvancedBusEventHandlers>(_ => new AdvancedBusEventHandlers());
+            services.TryAddSingleton<IExchangeDeclareStrategy, DefaultExchangeDeclareStrategy>();
+            services.TryAddSingleton<IConsumeErrorStrategy, DefaultConsumeErrorStrategy>();
+            services.TryAddSingleton<IErrorMessageSerializer, DefaultErrorMessageSerializer>();
+            services.TryAddSingleton<IInternalConsumerFactory, InternalConsumerFactory>();
+            services.TryAddSingleton<IConsumerFactory, ConsumerFactory>();
+            services.TryAddSingleton<IConnectionFactory>(serviceProvider =>
             {
+                var connectionConfiguration = serviceProvider.GetRequiredService<ConnectionConfiguration>();
+                return ConnectionFactoryFactory.CreateConnectionFactory(connectionConfiguration);
+            });
+            services.TryAddSingleton<IPersistentChannelDispatcher, SinglePersistentChannelDispatcher>();
+            services.TryAddSingleton<IProducerConnection, ProducerConnection>();
+            services.TryAddSingleton<IConsumerConnection, ConsumerConnection>();
+            services.TryAddSingleton<IPersistentChannelFactory, PersistentChannelFactory>();
+            services.TryAddSingleton<IPublishConfirmationListener, PublishConfirmationListener>();
+            services.TryAddSingleton<IHandlerCollectionFactory, HandlerCollectionFactory>();
+            services.TryAddSingleton<IPullingConsumerFactory, PullingConsumerFactory>();
+            services.TryAddSingleton<IAdvancedBus, RabbitAdvancedBus>();
+            services.TryAddSingleton<IPubSub, DefaultPubSub>();
+            services.TryAddSingleton<IRpc, DefaultRpc>();
+            services.TryAddSingleton<ISendReceive, DefaultSendReceive>();
+            services.TryAddSingleton<IScheduler, DeadLetterExchangeAndMessageTtlScheduler>();
+            services.TryAddSingleton<IBus, RabbitBus>();
+            services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
+            services.TryAddSingleton<ILoggerFactory>(new NullLoggerFactory());
+        }
+
+        public static IServiceCollection EnableMultiChannelClientCommandDispatcher(
+            this IServiceCollection services, int channelsCount
+        )
+        {
+            return services.AddSingleton<IPersistentChannelDispatcher>(
+                x => new MultiPersistentChannelDispatcher(
+                    channelsCount,
+                    x.GetRequiredService<IProducerConnection>(),
+                    x.GetRequiredService<IConsumerConnection>(),
+                    x.GetRequiredService<IPersistentChannelFactory>()
+                )
+            );
+        }
+
+        public static IServiceCollection EnableLegacyTypeNaming(this IServiceCollection services)
+            => services.AddSingleton<ITypeNameSerializer, LegacyTypeNameSerializer>();
+
+        public static IServiceCollection EnableLegacyRpcConventions(this IServiceCollection services)
+            => services.AddSingleton<IConventions, LegacyRpcConventions>();
+
+        public static IServiceCollection EnableLegacyConventions(this IServiceCollection services)
+        {
+            return services
+                .EnableLegacyTypeNaming()
+                .EnableLegacyRpcConventions();
+        }
+
+        public static IServiceCollection EnableDelayedExchangeScheduler(this IServiceCollection services)
+            => services.AddSingleton<IScheduler, DelayedExchangeScheduler>();
+
+        public static IServiceCollection EnableAdvancedMessagePolymorphism(this IServiceCollection services)
+            => services.AddSingleton<IExchangeDeclareStrategy, MultipleExchangeDeclareStrategy>();
+
+        public static IServiceCollection EnableMessageVersioning(this IServiceCollection services)
+        {
+            return services
+                .AddSingleton<IExchangeDeclareStrategy, VersionedExchangeDeclareStrategy>()
+                .AddSingleton<IMessageSerializationStrategy, VersionedMessageSerializationStrategy>();
+        }
+
+        public static IServiceCollection EnableConsoleLogger(this IServiceCollection services)
+            => services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
+
+        public static IServiceCollection EnableAlwaysAckConsumerErrorStrategy(this IServiceCollection services)
+            => services.AddSingleton<IConsumeErrorStrategy>(SimpleConsumeErrorStrategy.Ack);
+
+        public static IServiceCollection EnableAlwaysNackWithRequeueConsumerErrorStrategy(this IServiceCollection services)
+            => services.AddSingleton<IConsumeErrorStrategy>(SimpleConsumeErrorStrategy.NackWithRequeue);
+
+        public static IServiceCollection EnableAlwaysNackWithoutRequeueConsumerErrorStrategy(this IServiceCollection services)
+            => services.AddSingleton<IConsumeErrorStrategy>(SimpleConsumeErrorStrategy.NackWithoutRequeue);
+
+        public static ProducePipelineBuilder UseProduceInterceptors(this ProducePipelineBuilder pipelineBuilder)
+        {
+            return pipelineBuilder.Use(next => ctx =>
+            {
+                var interceptors = ctx.ServiceResolver.Resolve<IEnumerable<IProduceConsumeInterceptor>>().ToArray();
+                var producedMessage = interceptors.OnProduce(new ProducedMessage(ctx.Properties, ctx.Body));
+                return next(ctx with { Properties = producedMessage.Properties, Body = producedMessage.Body });
+            });
+        }
+
+        public static ConsumePipelineBuilder UseConsumeInterceptors(this ConsumePipelineBuilder pipelineBuilder)
+        {
+            return pipelineBuilder.Use(next => ctx =>
+            {
+                var interceptors = ctx.ServiceResolver.Resolve<IEnumerable<IProduceConsumeInterceptor>>().ToArray();
+                var consumedMessage = interceptors.OnConsume(new ConsumedMessage(ctx.ReceivedInfo, ctx.Properties, ctx.Body));
+                return next(ctx with { ReceivedInfo = consumedMessage.ReceivedInfo, Properties = consumedMessage.Properties, Body = consumedMessage.Body });
+            });
+        }
+
+        public static ConsumePipelineBuilder UseScope(this ConsumePipelineBuilder pipelineBuilder)
+        {
+            return pipelineBuilder.Use(next => async ctx =>
+            {
+                var scopedResolver = ctx.ServiceResolver.CreateScope();
+                return await next(ctx with { ServiceResolver = scopedResolver }).ConfigureAwait(false);
+            });
+        }
+
+        public static ConsumePipelineBuilder UseConsumeErrorStrategy(this ConsumePipelineBuilder pipelineBuilder)
+        {
+            return pipelineBuilder.Use(next => async ctx =>
+            {
+                var errorStrategy = ctx.ServiceResolver.Resolve<IConsumeErrorStrategy>();
+                var logger = ctx.ServiceResolver.Resolve<ILogger<IConsumeErrorStrategy>>();
+
                 try
                 {
-                    return await next(ctx).ConfigureAwait(false);
-                }
-                catch (OperationCanceledException) when (ctx.CancellationToken.IsCancellationRequested)
-                {
-                    return await errorStrategy.HandleCancelledAsync(ctx).ConfigureAwait(false);
+                    try
+                    {
+                        return await next(ctx).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException) when (ctx.CancellationToken.IsCancellationRequested)
+                    {
+                        return await errorStrategy.HandleCancelledAsync(ctx).ConfigureAwait(false);
+                    }
+                    catch (Exception exception)
+                    {
+                        return await errorStrategy.HandleErrorAsync(ctx, exception).ConfigureAwait(false);
+                    }
                 }
                 catch (Exception exception)
                 {
-                    return await errorStrategy.HandleErrorAsync(ctx, exception).ConfigureAwait(false);
-                }
-            }
-            catch (Exception exception)
-            {
-                logger.LogError(exception, "Consume error strategy has failed");
+                    logger.LogError(exception, "Consume error strategy has failed");
 
-                return AckStrategies.NackWithRequeue;
-            }
-        });
+                    return AckStrategies.NackWithRequeue;
+                }
+            });
+        }
     }
 }

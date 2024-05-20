@@ -2,6 +2,7 @@ using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using System.Text;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Tests.ProducerTests;
 
@@ -15,7 +16,7 @@ public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : ID
     {
         correlationId = Guid.NewGuid().ToString();
         mockBuilder = new MockBuilder(
-            c => c.Register<ICorrelationIdGenerationStrategy>(
+            c => c.AddSingleton<ICorrelationIdGenerationStrategy>(
                 _ => new StaticCorrelationIdGenerationStrategy(correlationId)
             )
         );
