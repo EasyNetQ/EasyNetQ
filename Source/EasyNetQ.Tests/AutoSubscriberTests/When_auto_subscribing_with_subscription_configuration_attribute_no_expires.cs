@@ -17,7 +17,7 @@ public class When_auto_subscribing_with_subscription_configuration_attribute_no_
 
         var provider = new ServiceCollection().BuildServiceProvider();
 
-        var autoSubscriber = new AutoSubscriber(bus, provider,"my_app");
+        var autoSubscriber = new AutoSubscriber(bus, provider, "my_app");
 
         pubSub.SubscribeAsync(
                 Arg.Is("MyAttrTest"),

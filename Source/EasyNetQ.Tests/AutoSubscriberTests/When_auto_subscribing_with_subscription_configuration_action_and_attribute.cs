@@ -17,7 +17,7 @@ public class When_auto_subscribing_with_subscription_configuration_action_and_at
 
 
 
-        var autoSubscriber = new AutoSubscriber(bus, new ServiceCollection().BuildServiceProvider(),"my_app")
+        var autoSubscriber = new AutoSubscriber(bus, new ServiceCollection().BuildServiceProvider(), "my_app")
         {
             ConfigureSubscriptionConfiguration =
                 c => c.WithAutoDelete(false)

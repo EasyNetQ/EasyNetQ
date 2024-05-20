@@ -15,7 +15,7 @@ public class When_auto_subscribing_async_with_subscription_configuration_attribu
         bus = Substitute.For<IBus>();
         bus.PubSub.Returns(pubSub);
 
-        var autoSubscriber = new AutoSubscriber(bus, new ServiceCollection().BuildServiceProvider(),"my_app");
+        var autoSubscriber = new AutoSubscriber(bus, new ServiceCollection().BuildServiceProvider(), "my_app");
 
         pubSub.SubscribeAsync(
                 Arg.Is("MyAttrTest"),

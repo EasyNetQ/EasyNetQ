@@ -15,7 +15,7 @@ public class When_auto_subscribing_async_with_subscription_configuration_action
         bus = Substitute.For<IBus>();
         bus.PubSub.Returns(pubSub);
 
-        var autoSubscriber = new AutoSubscriber(bus, new ServiceCollection().BuildServiceProvider(),"my_app")
+        var autoSubscriber = new AutoSubscriber(bus, new ServiceCollection().BuildServiceProvider(), "my_app")
         {
             ConfigureSubscriptionConfiguration =
                 c => c.WithAutoDelete()

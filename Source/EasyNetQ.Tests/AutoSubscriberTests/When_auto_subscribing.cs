@@ -22,7 +22,7 @@ public class When_auto_subscribing : IDisposable
         mockBuilder = new MockBuilder();
         var provider = new ServiceCollection().BuildServiceProvider();
 
-        var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, provider,"my_app");
+        var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, provider, "my_app");
         autoSubscriber.Subscribe(new[] { typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>) });
     }
 
