@@ -88,7 +88,7 @@ public class DefaultConsumerErrorStrategyTests
                 AppId = "456"
             },
             originalMessageBody,
-            Substitute.For<IServiceResolver>(),
+            Substitute.For<IServiceProvider>(),
             CancellationToken.None
         );
     }

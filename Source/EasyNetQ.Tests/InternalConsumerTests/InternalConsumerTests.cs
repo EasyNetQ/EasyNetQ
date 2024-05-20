@@ -19,7 +19,7 @@ public class InternalConsumerTests : IDisposable
         mockBuilder = new MockBuilder();
 
         internalConsumer = new InternalConsumer(
-            Substitute.For<IServiceResolver>(),
+            Substitute.For<IServiceProvider>(),
             Substitute.For<ILogger<InternalConsumer>>(),
             new ConsumerConfiguration(
                 42,

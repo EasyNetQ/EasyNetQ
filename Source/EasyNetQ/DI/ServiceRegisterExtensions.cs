@@ -5,7 +5,7 @@
 // /// </summary>
 // public static class ServiceRegisterExtensions
 // {
-//     /// <inheritdoc cref="Register{TService}(IServiceRegister, Func{IServiceResolver, TService}, Lifetime)"/>
+//     /// <inheritdoc cref="Register{TService}(IServiceRegister, Func{IServiceProvider, TService}, Lifetime)"/>
 //     public static IServiceRegister Register<TService>(
 //         this IServiceRegister services, Lifetime lifetime = Lifetime.Singleton
 //     ) where TService : class
@@ -25,7 +25,7 @@
 //     /// Registers the service of type <typeparamref name="TService"/> with the dependency injection provider.
 //     /// Optionally removes any existing implementation of the same service type.
 //     /// </summary>
-//     public static IServiceRegister Register<TService>(this IServiceRegister services, Func<IServiceResolver, TService> implementationFactory,
+//     public static IServiceRegister Register<TService>(this IServiceRegister services, Func<IServiceProvider, TService> implementationFactory,
 //         Lifetime lifetime = Lifetime.Singleton)
 //         where TService : class
 //         => services.Register(typeof(TService), implementationFactory ?? throw new ArgumentNullException(nameof(implementationFactory)), lifetime);
@@ -36,7 +36,7 @@
 //     /// </summary>
 //     public static IServiceRegister Register<TService, TImplementation>(
 //         this IServiceRegister services,
-//         Func<IServiceResolver, TImplementation> implementationFactory,
+//         Func<IServiceProvider, TImplementation> implementationFactory,
 //         Lifetime lifetime = Lifetime.Singleton
 //     )
 //         where TService : class
@@ -53,7 +53,7 @@
 //     ) where TService : class
 //         => services.Register(typeof(TService), implementationInstance ?? throw new ArgumentNullException(nameof(implementationInstance)));
 
-//     /// <inheritdoc cref="TryRegister{TService}(IServiceRegister, Func{IServiceResolver, TService}, Lifetime)"/>
+//     /// <inheritdoc cref="TryRegister{TService}(IServiceRegister, Func{IServiceProvider, TService}, Lifetime)"/>
 //     public static IServiceRegister TryRegister<TService, TImplementation>(
 //         this IServiceRegister services,
 //         Lifetime lifetime = Lifetime.Singleton
@@ -66,7 +66,7 @@
 //     /// </summary>
 //     public static IServiceRegister TryRegister<TService, TImplementation>(
 //         this IServiceRegister services,
-//         Func<IServiceResolver, TImplementation> implementationFactory,
+//         Func<IServiceProvider, TImplementation> implementationFactory,
 //         Lifetime lifetime = Lifetime.Singleton
 //     ) where TService : class
 //         where TImplementation : class, TService
@@ -78,7 +78,7 @@
 //     /// </summary>
 //     public static IServiceRegister TryRegister<TService>(
 //         this IServiceRegister services,
-//         Func<IServiceResolver, TService> implementationFactory,
+//         Func<IServiceProvider, TService> implementationFactory,
 //         Lifetime lifetime = Lifetime.Singleton
 //     ) where TService : class
 //         => services.TryRegister(typeof(TService), implementationFactory, lifetime);

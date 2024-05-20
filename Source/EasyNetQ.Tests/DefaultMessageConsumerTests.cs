@@ -1,4 +1,6 @@
 using EasyNetQ.AutoSubscribe;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace EasyNetQ.Tests;
 
@@ -7,7 +9,12 @@ public class DefaultMessageConsumerTests
     [Fact]
     public void Should_create_consumer_instance_and_consume_message()
     {
-        var consumer = new DefaultAutoSubscriberMessageDispatcher();
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.TryAddSingleton<MyMessageConsumer>();
+
+        var buildServiceProvider = serviceCollection.BuildServiceProvider();
+
+        var consumer = new DefaultAutoSubscriberMessageDispatcher(buildServiceProvider);
         var message = new MyMessage();
         var consumedMessage = (MyMessage)null;
 

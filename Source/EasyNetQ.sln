@@ -35,8 +35,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Serialization.Newt
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasyNetQ.Serialization.Tests", "EasyNetQ.Serialization.Tests\EasyNetQ.Serialization.Tests.csproj", "{7A2CA6A8-FB25-46AB-B1F9-716C719AE016}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DI", "DI", "{FE6CCC8B-63DD-46D4-83EB-0798319612B6}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Serialization", "Serialization", "{0BF00E29-CFEB-43C0-B8A7-98425AD7C303}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{01EFEA5D-6086-4951-A606-57F1E685D836}"

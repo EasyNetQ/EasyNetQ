@@ -6,6 +6,7 @@ namespace EasyNetQ
     /// <summary>
     /// Static methods to create EasyNetQ core APIs.
     /// </summary>
+    //[Obsolete("Use Dependency Injection to create instances of IBus.")]
     public static class RabbitHutch
     {
         /// <summary>
@@ -157,6 +158,7 @@ namespace EasyNetQ
             registerServices(services);
 
             // Then register default services
+            services.RegisterDefaultServices(connectionConfigurationFactory);
             services.AddSingleton<IConnectionStringParser, ConnectionStringParser>();
             services.AddSingleton(connectionConfigurationFactory);
         }

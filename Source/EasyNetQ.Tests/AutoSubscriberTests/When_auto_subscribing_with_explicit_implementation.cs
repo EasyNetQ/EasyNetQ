@@ -1,5 +1,6 @@
 using EasyNetQ.AutoSubscribe;
 using EasyNetQ.Tests.Mocking;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests;
 
@@ -20,7 +21,7 @@ public class When_auto_subscribing_with_explicit_implementation : IDisposable
     {
         mockBuilder = new MockBuilder();
 
-        var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, "my_app");
+        var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, new ServiceCollection().BuildServiceProvider(),"my_app");
         autoSubscriber.Subscribe(new[] { typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>) });
     }
 

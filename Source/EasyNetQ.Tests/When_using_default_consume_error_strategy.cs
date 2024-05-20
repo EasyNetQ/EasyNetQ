@@ -31,7 +31,7 @@ public class When_using_default_consume_error_strategy
                 AppId = string.Empty
             },
             originalMessageBody,
-            Substitute.For<IServiceResolver>(),
+            Substitute.For<IServiceProvider>(),
             CancellationToken.None
         );
     }

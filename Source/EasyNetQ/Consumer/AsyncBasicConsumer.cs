@@ -12,7 +12,7 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
     private readonly CancellationTokenSource cts = new();
     private readonly IEventBus eventBus;
     private readonly ConsumeDelegate consumeDelegate;
-    private readonly IServiceResolver serviceResolver;
+    private readonly IServiceProvider serviceResolver;
     private readonly ILogger logger;
     private readonly Queue queue;
     private readonly bool autoAck;
@@ -20,7 +20,7 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
     private volatile bool disposed;
 
     public AsyncBasicConsumer(
-        IServiceResolver serviceResolver,
+        IServiceProvider serviceResolver,
         ILogger logger,
         IModel model,
         Queue queue,

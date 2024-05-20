@@ -127,7 +127,7 @@ namespace EasyNetQ
         {
             return pipelineBuilder.Use(next => ctx =>
             {
-                var interceptors = ctx.ServiceResolver.Resolve<IEnumerable<IProduceConsumeInterceptor>>().ToArray();
+                var interceptors = ctx.ServiceResolver.GetRequiredService<IEnumerable<IProduceConsumeInterceptor>>().ToArray();
                 var producedMessage = interceptors.OnProduce(new ProducedMessage(ctx.Properties, ctx.Body));
                 return next(ctx with { Properties = producedMessage.Properties, Body = producedMessage.Body });
             });
@@ -137,7 +137,7 @@ namespace EasyNetQ
         {
             return pipelineBuilder.Use(next => ctx =>
             {
-                var interceptors = ctx.ServiceResolver.Resolve<IEnumerable<IProduceConsumeInterceptor>>().ToArray();
+                var interceptors = ctx.ServiceResolver.GetRequiredService<IEnumerable<IProduceConsumeInterceptor>>().ToArray();
                 var consumedMessage = interceptors.OnConsume(new ConsumedMessage(ctx.ReceivedInfo, ctx.Properties, ctx.Body));
                 return next(ctx with { ReceivedInfo = consumedMessage.ReceivedInfo, Properties = consumedMessage.Properties, Body = consumedMessage.Body });
             });
@@ -148,7 +148,7 @@ namespace EasyNetQ
             return pipelineBuilder.Use(next => async ctx =>
             {
                 var scopedResolver = ctx.ServiceResolver.CreateScope();
-                return await next(ctx with { ServiceResolver = scopedResolver }).ConfigureAwait(false);
+                return await next(ctx with { ServiceResolver = scopedResolver.ServiceProvider }).ConfigureAwait(false);
             });
         }
 
@@ -156,8 +156,8 @@ namespace EasyNetQ
         {
             return pipelineBuilder.Use(next => async ctx =>
             {
-                var errorStrategy = ctx.ServiceResolver.Resolve<IConsumeErrorStrategy>();
-                var logger = ctx.ServiceResolver.Resolve<ILogger<IConsumeErrorStrategy>>();
+                var errorStrategy = ctx.ServiceResolver.GetRequiredService<IConsumeErrorStrategy>();
+                var logger = ctx.ServiceResolver.GetRequiredService<ILogger<IConsumeErrorStrategy>>();
 
                 try
                 {

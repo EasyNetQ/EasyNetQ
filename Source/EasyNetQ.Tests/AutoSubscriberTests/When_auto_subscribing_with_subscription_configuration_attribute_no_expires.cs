@@ -1,4 +1,5 @@
 using EasyNetQ.AutoSubscribe;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests;
 
@@ -14,7 +15,9 @@ public class When_auto_subscribing_with_subscription_configuration_attribute_no_
         bus = Substitute.For<IBus>();
         bus.PubSub.Returns(pubSub);
 
-        var autoSubscriber = new AutoSubscriber(bus, "my_app");
+        var provider = new ServiceCollection().BuildServiceProvider();
+
+        var autoSubscriber = new AutoSubscriber(bus, provider,"my_app");
 
         pubSub.SubscribeAsync(
                 Arg.Is("MyAttrTest"),

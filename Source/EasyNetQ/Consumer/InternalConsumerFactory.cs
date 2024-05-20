@@ -15,7 +15,7 @@ public interface IInternalConsumerFactory
 /// <inheritdoc />
 public class InternalConsumerFactory : IInternalConsumerFactory
 {
-    private readonly IServiceResolver serviceResolver;
+    private readonly IServiceProvider serviceResolver;
     private readonly ILogger<InternalConsumer> logger;
     private readonly IConsumerConnection connection;
     private readonly IEventBus eventBus;
@@ -24,7 +24,7 @@ public class InternalConsumerFactory : IInternalConsumerFactory
     ///     Creates InternalConsumerFactory
     /// </summary>
     public InternalConsumerFactory(
-        IServiceResolver serviceResolver,
+        IServiceProvider serviceResolver,
         ILogger<InternalConsumer> logger,
         IConsumerConnection connection,
         IEventBus eventBus

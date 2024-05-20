@@ -50,11 +50,11 @@ public class AutoSubscriber
     /// </summary>
     public Action<ISubscriptionConfiguration> ConfigureSubscriptionConfiguration { protected get; set; }
 
-    public AutoSubscriber(IBus bus, string subscriptionIdPrefix)
+    public AutoSubscriber(IBus bus, IServiceProvider serviceProvider, string subscriptionIdPrefix)
     {
         Bus = bus;
         SubscriptionIdPrefix = subscriptionIdPrefix;
-        AutoSubscriberMessageDispatcher = new DefaultAutoSubscriberMessageDispatcher();
+        AutoSubscriberMessageDispatcher = new DefaultAutoSubscriberMessageDispatcher(serviceProvider);
         GenerateSubscriptionId = DefaultSubscriptionIdGenerator;
         ConfigureSubscriptionConfiguration = _ => { };
     }

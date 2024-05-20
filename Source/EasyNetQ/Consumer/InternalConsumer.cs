@@ -93,7 +93,7 @@ public class InternalConsumer : IInternalConsumer
     private readonly ConsumerConfiguration configuration;
     private readonly IConsumerConnection connection;
     private readonly IEventBus eventBus;
-    private readonly IServiceResolver serviceResolver;
+    private readonly IServiceProvider serviceResolver;
     private readonly ILogger logger;
 
     private volatile bool disposed;
@@ -103,7 +103,7 @@ public class InternalConsumer : IInternalConsumer
     ///     Creates InternalConsumer
     /// </summary>
     public InternalConsumer(
-        IServiceResolver serviceResolver,
+        IServiceProvider serviceResolver,
         ILogger<InternalConsumer> logger,
         ConsumerConfiguration configuration,
         IConsumerConnection connection,
