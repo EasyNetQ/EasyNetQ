@@ -70,16 +70,17 @@ namespace EasyNetQ.Tests.Mocking
                 return channel;
             });
 
-            var services = new ServiceCollection();
-            services.AddSingleton(connectionFactory);
+            var serviceCollection = new ServiceCollection();
+            serviceCollection.AddSingleton(connectionFactory);
 
             RabbitHutch.RegisterBus(
-                services,
+                serviceCollection,
                 x => x.GetRequiredService<IConnectionStringParser>().Parse(connectionString),
                 registerServices
             );
 
-            serviceProvider = services.BuildServiceProvider();
+            registerServices(serviceCollection);
+            serviceProvider = serviceCollection.BuildServiceProvider();
             bus = serviceProvider.GetRequiredService<IBus>();
         }
 
@@ -112,7 +113,6 @@ namespace EasyNetQ.Tests.Mocking
         public ISerializer Serializer => serviceProvider.GetRequiredService<ISerializer>();
 
         public IProducerConnection ProducerConnection => serviceProvider.GetRequiredService<IProducerConnection>();
-
         public IConsumerConnection ConsumerConnection => serviceProvider.GetRequiredService<IConsumerConnection>();
 
         public IConsumeErrorStrategy ConsumeErrorStrategy => serviceProvider.GetRequiredService<IConsumeErrorStrategy>();

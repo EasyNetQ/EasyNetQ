@@ -90,23 +90,25 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     }
 
     /// <inheritdoc />
-    [Obsolete("IsConnected is deprecated because it is misleading. Please use GetConnectionStatus instead")]
     public bool IsConnected =>
-        (from PersistentConnectionType type in Enum.GetValues(typeof(PersistentConnectionType)) select GetConnection(type))
-        .All(connection => connection.Status.State == PersistentConnectionState.Connected);
+        (from PersistentConnectionType type in Enum.GetValues(typeof(PersistentConnectionType)) select GetConnectionStatus(type))
+        .All(status => status.State == PersistentConnectionState.Connected);
 
     /// <inheritdoc />
-    [Obsolete("IsConnected is deprecated because it is misleading. Please use GetConnectionStatus instead")]
     public async Task ConnectAsync(CancellationToken cancellationToken = default)
     {
         foreach (PersistentConnectionType type in Enum.GetValues(typeof(PersistentConnectionType)))
         {
-            try
+            var connectionStatus = GetConnectionStatus(type);
+            if (connectionStatus.State != PersistentConnectionState.Connected)
             {
-                await EnsureConnectedAsync(type, cancellationToken).ConfigureAwait(false);
-            }
-            catch (AlreadyClosedException)
-            {
+                try
+                {
+                    await EnsureConnectedAsync(type, cancellationToken).ConfigureAwait(false);
+                }
+                catch (AlreadyClosedException)
+                {
+                }
             }
         }
     }
