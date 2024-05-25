@@ -272,7 +272,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         if (logger.IsEnabled(LogLevel.Debug))
         {
             logger.LogDebug(
-                "{Queue} has {MessagesCount} messages and {ConsumersCount} consumers.",
+                "{queue} has {messagesCount} messages and {consumersCount} consumers.",
                 queue,
                 declareResult.MessageCount,
                 declareResult.ConsumerCount
