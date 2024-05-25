@@ -1,4 +1,3 @@
-using System;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ
@@ -9,16 +8,16 @@ namespace EasyNetQ
     public sealed class SelfHostedBus : IBus, IDisposable
     {
         private readonly IBus bus;
-        private readonly IServiceProvider serviceProvider;
+        private readonly ServiceProvider serviceProvider;
 
-        internal SelfHostedBus(IServiceProvider serviceProvider)
+        internal SelfHostedBus(ServiceProvider serviceProvider)
         {
             this.serviceProvider = serviceProvider;
-            this.bus = serviceProvider.GetRequiredService<IBus>();
+            bus = serviceProvider.GetRequiredService<IBus>();
         }
 
         /// <inheritdoc />
-        public void Dispose() => (serviceProvider as IDisposable)?.Dispose();
+        public void Dispose() => serviceProvider.Dispose();
 
         /// <inheritdoc />
         public IPubSub PubSub => bus.PubSub;
