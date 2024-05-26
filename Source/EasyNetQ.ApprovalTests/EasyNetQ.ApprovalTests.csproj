@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net7</TargetFramework>
+    <TargetFramework>net8</TargetFramework>
     <RootNamespace>EasyNetQ.Approval.Tests</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
