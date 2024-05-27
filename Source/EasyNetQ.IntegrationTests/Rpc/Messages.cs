@@ -1,5 +1,3 @@
-using System.Runtime.Serialization;
-
 namespace EasyNetQ.IntegrationTests.Rpc;
 
 public class Request
@@ -99,12 +97,6 @@ public class RequestFailedException : Exception
     }
 
     public RequestFailedException(string message, Exception inner) : base(message, inner)
-    {
-    }
-
-    protected RequestFailedException(
-        SerializationInfo info,
-        StreamingContext context) : base(info, context)
     {
     }
 }

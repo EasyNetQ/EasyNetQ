@@ -13,7 +13,7 @@ public class LegacyTypeNameSerializerTests
         var typeName = typeNameSerializer.Serialize(typeof(HashSet<string>));
         typeName.Should()
             .Be(
-                "System.Collections.Generic.HashSet`1[[System.String, System.Private.CoreLib, Version=7.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]:System.Private.CoreLib");
+                "System.Collections.Generic.HashSet`1[[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]:System.Private.CoreLib");
     }
 
     [Fact]
@@ -48,7 +48,7 @@ public class LegacyTypeNameSerializerTests
     public void Should_deserialize_hashset_of_string_type()
     {
         var type = typeNameSerializer.Deserialize(
-            "System.Collections.Generic.HashSet`1[[System.String, System.Private.CoreLib, Version=7.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]:System.Collections");
+            "System.Collections.Generic.HashSet`1[[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]:System.Collections");
         type.Should().Be(typeof(HashSet<string>));
     }
 
