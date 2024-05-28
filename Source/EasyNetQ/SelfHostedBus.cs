@@ -1,37 +1,36 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace EasyNetQ
+namespace EasyNetQ;
+
+/// <summary>
+/// Bus (in fact wrapper around IBus) with an internal DI container so the caller should dispose it.
+/// </summary>
+public sealed class SelfHostedBus : IBus, IDisposable
 {
-    /// <summary>
-    /// Bus (in fact wrapper around IBus) with an internal DI container so the caller should dispose it.
-    /// </summary>
-    public sealed class SelfHostedBus : IBus, IDisposable
+    private readonly IBus bus;
+    private readonly ServiceProvider serviceProvider;
+
+    internal SelfHostedBus(ServiceProvider serviceProvider)
     {
-        private readonly IBus bus;
-        private readonly ServiceProvider serviceProvider;
-
-        internal SelfHostedBus(ServiceProvider serviceProvider)
-        {
-            this.serviceProvider = serviceProvider;
-            bus = serviceProvider.GetRequiredService<IBus>();
-        }
-
-        /// <inheritdoc />
-        public void Dispose() => serviceProvider.Dispose();
-
-        /// <inheritdoc />
-        public IPubSub PubSub => bus.PubSub;
-
-        /// <inheritdoc />
-        public IRpc Rpc => bus.Rpc;
-
-        /// <inheritdoc />
-        public ISendReceive SendReceive => bus.SendReceive;
-
-        /// <inheritdoc />
-        public IScheduler Scheduler => bus.Scheduler;
-
-        /// <inheritdoc />
-        public IAdvancedBus Advanced => bus.Advanced;
+        this.serviceProvider = serviceProvider;
+        bus = serviceProvider.GetRequiredService<IBus>();
     }
+
+    /// <inheritdoc />
+    public void Dispose() => serviceProvider.Dispose();
+
+    /// <inheritdoc />
+    public IPubSub PubSub => bus.PubSub;
+
+    /// <inheritdoc />
+    public IRpc Rpc => bus.Rpc;
+
+    /// <inheritdoc />
+    public ISendReceive SendReceive => bus.SendReceive;
+
+    /// <inheritdoc />
+    public IScheduler Scheduler => bus.Scheduler;
+
+    /// <inheritdoc />
+    public IAdvancedBus Advanced => bus.Advanced;
 }
