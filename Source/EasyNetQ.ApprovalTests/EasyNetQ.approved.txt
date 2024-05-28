@@ -875,12 +875,16 @@ namespace EasyNetQ
     public class RabbitAdvancedBus : EasyNetQ.IAdvancedBus, System.IDisposable
     {
         public RabbitAdvancedBus(Microsoft.Extensions.Logging.ILogger<EasyNetQ.RabbitAdvancedBus> logger, EasyNetQ.Producer.IProducerConnection producerConnection, EasyNetQ.Consumer.IConsumerConnection consumerConnection, EasyNetQ.Consumer.IConsumerFactory consumerFactory, EasyNetQ.ChannelDispatcher.IPersistentChannelDispatcher persistentChannelDispatcher, EasyNetQ.Producer.IPublishConfirmationListener confirmationListener, EasyNetQ.IEventBus eventBus, EasyNetQ.Consumer.IHandlerCollectionFactory handlerCollectionFactory, EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.Producer.ProducePipelineBuilder producePipelineBuilder, EasyNetQ.Consumer.ConsumePipelineBuilder consumePipelineBuilder, System.IServiceProvider serviceResolver, EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy, EasyNetQ.IPullingConsumerFactory pullingConsumerFactory, EasyNetQ.AdvancedBusEventHandlers advancedBusEventHandlers) { }
+        [System.Obsolete("IsConnected is deprecated because it is misleading. Please use GetConnectionStatu" +
+            "s instead")]
         public bool IsConnected { get; }
         public event System.EventHandler<EasyNetQ.BlockedEventArgs>? Blocked;
         public event System.EventHandler<EasyNetQ.ConnectedEventArgs>? Connected;
         public event System.EventHandler<EasyNetQ.DisconnectedEventArgs>? Disconnected;
         public event System.EventHandler<EasyNetQ.MessageReturnedEventArgs>? MessageReturned;
         public event System.EventHandler<EasyNetQ.UnblockedEventArgs>? Unblocked;
+        [System.Obsolete("IsConnected is deprecated because it is misleading. Please use GetConnectionStatu" +
+            "s instead")]
         public System.Threading.Tasks.Task ConnectAsync(System.Threading.CancellationToken cancellationToken = default) { }
         public System.IDisposable Consume(System.Action<EasyNetQ.IConsumeConfiguration> configure) { }
         public EasyNetQ.IPullingConsumer<EasyNetQ.PullResult> CreatePullingConsumer(in EasyNetQ.Topology.Queue queue, bool autoAck = true) { }

@@ -1,6 +1,5 @@
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
-using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
 using EasyNetQ.Persistent;
@@ -90,25 +89,23 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     }
 
     /// <inheritdoc />
+    [Obsolete("IsConnected is deprecated because it is misleading. Please use GetConnectionStatus instead")]
     public bool IsConnected =>
-        (from PersistentConnectionType type in Enum.GetValues(typeof(PersistentConnectionType)) select GetConnectionStatus(type))
-        .All(status => status.State == PersistentConnectionState.Connected);
+        (from PersistentConnectionType type in Enum.GetValues(typeof(PersistentConnectionType)) select GetConnection(type))
+        .All(connection => connection.Status.State == PersistentConnectionState.Connected);
 
     /// <inheritdoc />
+    [Obsolete("IsConnected is deprecated because it is misleading. Please use GetConnectionStatus instead")]
     public async Task ConnectAsync(CancellationToken cancellationToken = default)
     {
         foreach (PersistentConnectionType type in Enum.GetValues(typeof(PersistentConnectionType)))
         {
-            var connectionStatus = GetConnectionStatus(type);
-            if (connectionStatus.State != PersistentConnectionState.Connected)
+            try
             {
-                try
-                {
-                    await EnsureConnectedAsync(type, cancellationToken).ConfigureAwait(false);
-                }
-                catch (AlreadyClosedException)
-                {
-                }
+                await EnsureConnectedAsync(type, cancellationToken).ConfigureAwait(false);
+            }
+            catch (AlreadyClosedException)
+            {
             }
         }
     }
