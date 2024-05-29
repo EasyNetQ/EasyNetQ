@@ -28,8 +28,6 @@ public static class ServiceRegisterExtensions
             configuration.SetDefaultProperties();
             return configuration;
         });
-
-        services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
         services.TryAddSingleton<IConnectionStringParser>(
             _ => new CompositeConnectionStringParser(new AmqpConnectionStringParser(), new ConnectionStringParser())
         );
