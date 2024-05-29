@@ -84,7 +84,8 @@ public static class RabbitHutch
         string username,
         string password,
         TimeSpan requestedHeartbeat,
-        Action<IServiceCollection> registerServices)
+        Action<IServiceCollection> registerServices
+    )
     {
         var connectionConfiguration = new ConnectionConfiguration
         {
@@ -152,14 +153,13 @@ public static class RabbitHutch
     public static void RegisterBus(
         IServiceCollection services,
         Func<IServiceProvider, ConnectionConfiguration> connectionConfigurationFactory,
-        Action<IServiceCollection> registerServices)
+        Action<IServiceCollection> registerServices
+    )
     {
         // First call delegate to register user-supplied services
         registerServices(services);
 
         // Then register default services
         services.RegisterDefaultServices(connectionConfigurationFactory);
-        services.AddSingleton<IConnectionStringParser, ConnectionStringParser>();
-        services.AddSingleton(connectionConfigurationFactory);
     }
 }
