@@ -8,7 +8,7 @@ namespace EasyNetQ.Tests.Mocking;
 
 public class MockBuilder : IDisposable
 {
-    private readonly IServiceProvider serviceProvider;
+    private readonly ServiceProvider serviceProvider;
     private readonly IBus bus;
 
     private readonly IBasicProperties basicProperties = new BasicProperties();
@@ -119,5 +119,5 @@ public class MockBuilder : IDisposable
 
     public List<string> ConsumerQueueNames { get; } = new();
 
-    public void Dispose() => (serviceProvider as IDisposable)?.Dispose();
+    public void Dispose() => serviceProvider.Dispose();
 }
