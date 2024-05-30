@@ -8,16 +8,16 @@ namespace EasyNetQ;
 public sealed class SelfHostedBus : IBus, IDisposable
 {
     private readonly IBus bus;
-    private readonly ServiceProvider serviceProvider;
+    private readonly IServiceProvider serviceProvider;
 
-    internal SelfHostedBus(ServiceProvider serviceProvider)
+    internal SelfHostedBus(IServiceProvider serviceProvider)
     {
         this.serviceProvider = serviceProvider;
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
     /// <inheritdoc />
-    public void Dispose() => serviceProvider.Dispose();
+    public void Dispose() => (serviceProvider as IDisposable)?.Dispose();
 
     /// <inheritdoc />
     public IPubSub PubSub => bus.PubSub;

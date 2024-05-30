@@ -17,17 +17,8 @@ namespace EasyNetQ;
 
 public static class ServiceRegisterExtensions
 {
-    public static void RegisterDefaultServices(
-        this IServiceCollection services,
-        Func<IServiceProvider, ConnectionConfiguration> connectionConfigurationFactory
-    )
+    public static IServiceCollection RegisterDefaultServices(this IServiceCollection services)
     {
-        services.TryAddSingleton(resolver =>
-        {
-            var configuration = connectionConfigurationFactory(resolver);
-            configuration.SetDefaultProperties();
-            return configuration;
-        });
         services.TryAddSingleton<IConnectionStringParser>(
             _ => new CompositeConnectionStringParser(new AmqpConnectionStringParser(), new ConnectionStringParser())
         );
@@ -67,6 +58,8 @@ public static class ServiceRegisterExtensions
         services.TryAddSingleton<IBus, RabbitBus>();
         services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
         services.TryAddSingleton<ILoggerFactory>(new NullLoggerFactory());
+        services.TryAddSingleton<SelfHostedBus>();
+        return services;
     }
 
     public static IServiceCollection EnableMultiChannelClientCommandDispatcher(
@@ -109,8 +102,9 @@ public static class ServiceRegisterExtensions
             .AddSingleton<IMessageSerializationStrategy, VersionedMessageSerializationStrategy>();
     }
 
+    [Obsolete("use serviceCollection.AddLogging(builder => builder.AddConsole()))")]
     public static IServiceCollection EnableConsoleLogger(this IServiceCollection services)
-        => services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
+        => throw new NotImplementedException("use serviceCollection.AddLogging(builder => builder.AddConsole()))");
 
     public static IServiceCollection EnableAlwaysAckConsumerErrorStrategy(this IServiceCollection services)
         => services.AddSingleton<IConsumeErrorStrategy>(SimpleConsumeErrorStrategy.Ack);
