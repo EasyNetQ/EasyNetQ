@@ -58,7 +58,6 @@ public static class ServiceRegisterExtensions
         services.TryAddSingleton<IBus, RabbitBus>();
         services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
         services.TryAddSingleton<ILoggerFactory>(new NullLoggerFactory());
-        services.TryAddSingleton<SelfHostedBus>();
         return services;
     }
 

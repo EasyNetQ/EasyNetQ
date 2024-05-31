@@ -1,3 +1,5 @@
+using Microsoft.Extensions.DependencyInjection;
+
 namespace EasyNetQ.Hosepipe.Tests;
 
 [Traits.Explicit(@"Requires a RabbitMQ broker on localhost and access to C:\Temp\MessageOutput")]
@@ -55,25 +57,35 @@ public class ProgramIntegrationTests
 
     public void PublishSomeMessages()
     {
-        var bus = RabbitHutch.CreateBus("host=localhost");
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddEasyNetQ("host=localhost");
+
+        var provider = serviceCollection.BuildServiceProvider();
+
+        var bus = provider.GetRequiredService<IBus>();
 
         for (var i = 0; i < 10; i++)
         {
             bus.PubSub.Publish(new TestMessage { Text = string.Format("\n>>>>>> Message {0}\n", i) });
         }
 
-        bus.Dispose();
+
+        (bus as IDisposable)?.Dispose();
     }
 
     public void ConsumeMessages()
     {
-        var bus = RabbitHutch.CreateBus("host=localhost");
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddEasyNetQ("host=localhost");
 
+        var provider = serviceCollection.BuildServiceProvider();
+
+        var bus = provider.GetRequiredService<IBus>();
         bus.PubSub.Subscribe<TestMessage>("hosepipe", message => Console.WriteLine(message.Text));
 
         Thread.Sleep(1000);
 
-        bus.Dispose();
+        (bus as IDisposable)?.Dispose();
     }
 
     private sealed class TestMessage

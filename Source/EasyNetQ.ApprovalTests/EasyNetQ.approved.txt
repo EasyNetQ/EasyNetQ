@@ -918,12 +918,9 @@ namespace EasyNetQ
     }
     public static class RabbitHutch
     {
-        public static EasyNetQ.SelfHostedBus CreateBus(string connectionString) { }
-        public static EasyNetQ.SelfHostedBus CreateBus(EasyNetQ.ConnectionConfiguration connectionConfiguration, System.Action<Microsoft.Extensions.DependencyInjection.IServiceCollection> registerServices) { }
-        public static EasyNetQ.SelfHostedBus CreateBus(System.Func<System.IServiceProvider, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<Microsoft.Extensions.DependencyInjection.IServiceCollection> registerServices) { }
-        public static EasyNetQ.SelfHostedBus CreateBus(string connectionString, System.Action<Microsoft.Extensions.DependencyInjection.IServiceCollection> registerServices) { }
-        public static EasyNetQ.SelfHostedBus CreateBus(string hostName, ushort hostPort, string virtualHost, string username, string password, System.TimeSpan requestedHeartbeat, System.Action<Microsoft.Extensions.DependencyInjection.IServiceCollection> registerServices) { }
-        public static void RegisterBus(Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Func<System.IServiceProvider, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory, System.Action<Microsoft.Extensions.DependencyInjection.IServiceCollection> registerServices) { }
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection AddEasyNetQ(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection AddEasyNetQ(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Action<EasyNetQ.ConnectionConfiguration> configurator) { }
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection AddEasyNetQ(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, string connectionString) { }
     }
     public static class ReceiveRegistrationExtensions
     {
@@ -999,6 +996,7 @@ namespace EasyNetQ
         public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableAlwaysAckConsumerErrorStrategy(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
         public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableAlwaysNackWithRequeueConsumerErrorStrategy(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
         public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableAlwaysNackWithoutRequeueConsumerErrorStrategy(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
+        [System.Obsolete("use serviceCollection.AddLogging(builder => builder.AddConsole()))")]
         public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableConsoleLogger(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
         public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableDelayedExchangeScheduler(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
         public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableLegacyConventions(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
@@ -1006,7 +1004,7 @@ namespace EasyNetQ
         public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableLegacyTypeNaming(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
         public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableMessageVersioning(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
         public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableMultiChannelClientCommandDispatcher(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, int channelsCount) { }
-        public static void RegisterDefaultServices(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Func<System.IServiceProvider, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory) { }
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection RegisterDefaultServices(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
         public static EasyNetQ.Consumer.ConsumePipelineBuilder UseConsumeErrorStrategy(this EasyNetQ.Consumer.ConsumePipelineBuilder pipelineBuilder) { }
         public static EasyNetQ.Consumer.ConsumePipelineBuilder UseConsumeInterceptors(this EasyNetQ.Consumer.ConsumePipelineBuilder pipelineBuilder) { }
         public static EasyNetQ.Producer.ProducePipelineBuilder UseProduceInterceptors(this EasyNetQ.Producer.ProducePipelineBuilder pipelineBuilder) { }

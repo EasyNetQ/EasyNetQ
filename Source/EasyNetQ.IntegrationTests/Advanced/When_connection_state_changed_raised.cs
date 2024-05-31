@@ -1,21 +1,31 @@
 using EasyNetQ.IntegrationTests.Utils;
 using EasyNetQ.Management.Client;
 using EasyNetQ.Persistent;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.IntegrationTests.Advanced;
 
 [Collection("RabbitMQ")]
 public class When_connection_state_changed_raised : IDisposable
 {
+    private readonly ServiceProvider serviceProvider;
+    private readonly IBus bus;
+
     public When_connection_state_changed_raised(RabbitMQFixture rmqFixture)
     {
-        bus = RabbitHutch.CreateBus($"host={rmqFixture.Host}");
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddEasyNetQ($"host={rmqFixture.Host}");
         managementClient = rmqFixture.ManagementClient;
+
+        serviceProvider = serviceCollection.BuildServiceProvider();
+        bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public void Dispose() => bus.Dispose();
+    public void Dispose()
+    {
+        serviceProvider.Dispose();
+    }
 
-    private readonly SelfHostedBus bus;
     private readonly IManagementClient managementClient;
 
     [Fact]

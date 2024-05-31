@@ -10,7 +10,7 @@ namespace EasyNetQ;
 public static class RabbitHutch
 {
     /// <summary>
-    /// Registers a new instance of <see cref="SelfHostedBus"/>.
+    /// Registers a new instance of <see cref="RabbitBus"/>.
     /// </summary>
     /// <param name="services">
     /// the service collection to register the bus in.
@@ -29,7 +29,7 @@ public static class RabbitHutch
     }
 
     /// <summary>
-    /// Registers a new instance of <see cref="SelfHostedBus"/> using all default dependencies.
+    /// Registers a new instance of <see cref="RabbitBus"/> using all default dependencies.
     /// </summary>
     public static IServiceCollection AddEasyNetQ(this IServiceCollection services)
     {
@@ -38,7 +38,7 @@ public static class RabbitHutch
 
 
     /// <summary>
-    /// Registers a new instance of <see cref="SelfHostedBus"/> using the specified connection configuration in the service collection.
+    /// Registers a new instance of <see cref="RabbitBus"/> using the specified connection configuration in the service collection.
     /// </summary>
     /// <param name="configurator">
     /// </param>

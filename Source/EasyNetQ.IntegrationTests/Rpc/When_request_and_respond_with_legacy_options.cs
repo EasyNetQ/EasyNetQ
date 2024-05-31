@@ -1,22 +1,27 @@
+using Microsoft.Extensions.DependencyInjection;
+
 namespace EasyNetQ.IntegrationTests.Rpc;
 
 [Collection("RabbitMQ")]
 public class When_request_and_respond_with_legacy_options : IDisposable
 {
+    private readonly ServiceProvider serviceProvider;
+    private readonly IBus bus;
+
     public When_request_and_respond_with_legacy_options(RabbitMQFixture fixture)
     {
-        bus = RabbitHutch.CreateBus(
-            $"host={fixture.Host};prefetchCount=1;timeout=-1",
-            c => c.EnableLegacyConventions()
-        );
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddEasyNetQ($"host={fixture.Host};prefetchCount=1;timeout=-1");
+        serviceCollection.EnableLegacyConventions();
+
+        serviceProvider = serviceCollection.BuildServiceProvider();
+        bus = serviceProvider.GetRequiredService<IBus>();
     }
 
     public void Dispose()
     {
-        bus.Dispose();
+        serviceProvider.Dispose();
     }
-
-    private readonly SelfHostedBus bus;
 
     [Fact]
     public async Task Should_receive_exception()

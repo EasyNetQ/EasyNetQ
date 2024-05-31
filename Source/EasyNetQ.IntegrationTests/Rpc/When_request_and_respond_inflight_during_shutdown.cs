@@ -1,13 +1,20 @@
+using Microsoft.Extensions.DependencyInjection;
+
 namespace EasyNetQ.IntegrationTests.Rpc;
 
 [Collection("RabbitMQ")]
 public class When_request_and_respond_in_flight_during_shutdown : IDisposable
 {
-    private readonly SelfHostedBus bus;
+    private readonly ServiceProvider serviceProvider;
+    private readonly IBus bus;
 
     public When_request_and_respond_in_flight_during_shutdown(RabbitMQFixture fixture)
     {
-        bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;timeout=-1");
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddEasyNetQ($"host={fixture.Host};prefetchCount=1;timeout=-1");
+
+        serviceProvider = serviceCollection.BuildServiceProvider();
+        bus = serviceProvider.GetRequiredService<IBus>();
     }
 
     [Fact]
@@ -36,5 +43,8 @@ public class When_request_and_respond_in_flight_during_shutdown : IDisposable
         cts.IsCancellationRequested.Should().BeTrue();
     }
 
-    public void Dispose() => bus.Dispose();
+    public void Dispose()
+    {
+        serviceProvider.Dispose();
+    }
 }

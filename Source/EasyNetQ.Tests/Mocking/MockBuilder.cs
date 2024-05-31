@@ -1,4 +1,3 @@
-using EasyNetQ.ConnectionString;
 using EasyNetQ.Consumer;
 using EasyNetQ.Producer;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,7 +7,7 @@ namespace EasyNetQ.Tests.Mocking;
 
 public class MockBuilder : IDisposable
 {
-    private readonly ServiceProvider serviceProvider;
+    private readonly IServiceProvider serviceProvider;
     private readonly IBus bus;
 
     private readonly IBasicProperties basicProperties = new BasicProperties();
@@ -73,12 +72,7 @@ public class MockBuilder : IDisposable
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddSingleton(connectionFactory);
 
-        RabbitHutch.RegisterBus(
-            serviceCollection,
-            x => x.GetRequiredService<IConnectionStringParser>().Parse(connectionString),
-            registerServices
-        );
-
+        serviceCollection.AddEasyNetQ(connectionString);
         registerServices(serviceCollection);
         serviceProvider = serviceCollection.BuildServiceProvider();
         bus = serviceProvider.GetRequiredService<IBus>();
@@ -119,5 +113,5 @@ public class MockBuilder : IDisposable
 
     public List<string> ConsumerQueueNames { get; } = new();
 
-    public void Dispose() => serviceProvider.Dispose();
+    public void Dispose() => (serviceProvider as IDisposable)?.Dispose();
 }
