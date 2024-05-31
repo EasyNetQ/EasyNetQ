@@ -24,7 +24,7 @@ public static class RabbitHutch
     /// </param>
     public static IServiceCollection AddEasyNetQ(this IServiceCollection services, string connectionString)
     {
-        services.TryAddSingleton<ConnectionConfiguration>( sp => sp.GetRequiredService<IConnectionStringParser>().Parse(connectionString));
+        services.TryAddSingleton<ConnectionConfiguration>(sp => sp.GetRequiredService<IConnectionStringParser>().Parse(connectionString));
         return services.AddEasyNetQ();
     }
 
