@@ -101,10 +101,6 @@ public static class ServiceRegisterExtensions
             .AddSingleton<IMessageSerializationStrategy, VersionedMessageSerializationStrategy>();
     }
 
-    [Obsolete("use serviceCollection.AddLogging(builder => builder.AddConsole()))")]
-    public static IServiceCollection EnableConsoleLogger(this IServiceCollection services)
-        => throw new NotImplementedException("use serviceCollection.AddLogging(builder => builder.AddConsole()))");
-
     public static IServiceCollection EnableAlwaysAckConsumerErrorStrategy(this IServiceCollection services)
         => services.AddSingleton<IConsumeErrorStrategy>(SimpleConsumeErrorStrategy.Ack);
 
