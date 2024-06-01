@@ -10,7 +10,7 @@ namespace EasyNetQ.Serialization.NewtonsoftJson
 }
 namespace EasyNetQ
 {
-    public static class ServiceRegisterExtensions
+    public static class ServiceCollectionSerializerExtensions
     {
         public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableNewtonsoftJson(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
         public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableNewtonsoftJson(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, Newtonsoft.Json.JsonSerializerSettings settings) { }

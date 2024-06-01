@@ -955,15 +955,6 @@ namespace EasyNetQ
         public static void FuturePublish<T>(this EasyNetQ.IScheduler scheduler, T message, System.TimeSpan delay, string topic, System.Threading.CancellationToken cancellationToken = default) { }
         public static System.Threading.Tasks.Task FuturePublishAsync<T>(this EasyNetQ.IScheduler scheduler, T message, System.TimeSpan delay, System.Threading.CancellationToken cancellationToken = default) { }
     }
-    public sealed class SelfHostedBus : EasyNetQ.IBus, System.IDisposable
-    {
-        public EasyNetQ.IAdvancedBus Advanced { get; }
-        public EasyNetQ.IPubSub PubSub { get; }
-        public EasyNetQ.IRpc Rpc { get; }
-        public EasyNetQ.IScheduler Scheduler { get; }
-        public EasyNetQ.ISendReceive SendReceive { get; }
-        public void Dispose() { }
-    }
     public static class SendReceiveExtensions
     {
         public static System.IDisposable Receive(this EasyNetQ.ISendReceive sendReceive, string queue, System.Action<EasyNetQ.IReceiveRegistration> addHandlers, System.Threading.CancellationToken cancellationToken = default) { }
@@ -990,14 +981,12 @@ namespace EasyNetQ
         public EasyNetQ.MessageProperties Properties { get; }
         public void Dispose() { }
     }
-    public static class ServiceRegisterExtensions
+    public static class ServiceCollectionExtensions
     {
         public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableAdvancedMessagePolymorphism(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
         public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableAlwaysAckConsumerErrorStrategy(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
         public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableAlwaysNackWithRequeueConsumerErrorStrategy(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
         public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableAlwaysNackWithoutRequeueConsumerErrorStrategy(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
-        [System.Obsolete("use serviceCollection.AddLogging(builder => builder.AddConsole()))")]
-        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableConsoleLogger(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
         public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableDelayedExchangeScheduler(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
         public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableLegacyConventions(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
         public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableLegacyRpcConventions(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
