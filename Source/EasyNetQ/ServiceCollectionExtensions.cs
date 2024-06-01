@@ -15,7 +15,7 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ;
 
-public static class ServiceRegisterExtensions
+public static class ServiceCollectionExtensions
 {
     public static IServiceCollection RegisterDefaultServices(this IServiceCollection services)
     {

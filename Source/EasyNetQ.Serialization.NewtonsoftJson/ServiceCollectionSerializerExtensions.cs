@@ -6,7 +6,7 @@ namespace EasyNetQ;
 /// <summary>
 ///     Register serializer based on Newtonsoft.Json
 /// </summary>
-public static class ServiceRegisterExtensions
+public static class ServiceCollectionSerializerExtensions
 {
     /// <summary>
     ///     Enables serializer based on Newtonsoft.Json

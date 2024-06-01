@@ -5,7 +5,7 @@ using EasyNetQ.Extensions;
 
 namespace EasyNetQ.Serialization.Tests;
 
-public class ServiceRegisterExtensionsTests
+public class ServiceCollectionExtensionsTests
 {
     [Theory]
     [MemberData(nameof(GetSerializerRegisterActions))]
