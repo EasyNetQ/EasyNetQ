@@ -1,5 +1,3 @@
-using EasyNetQ.DI;
-
 namespace EasyNetQ.Producer;
 
 public readonly record struct ProduceContext(

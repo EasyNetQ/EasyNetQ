@@ -1,4 +1,3 @@
-using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using Microsoft.Extensions.DependencyInjection;

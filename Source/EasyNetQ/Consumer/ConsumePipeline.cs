@@ -1,5 +1,3 @@
-using EasyNetQ.DI;
-
 namespace EasyNetQ.Consumer;
 
 public readonly record struct ConsumeContext(

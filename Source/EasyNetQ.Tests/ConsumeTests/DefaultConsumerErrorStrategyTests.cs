@@ -1,6 +1,5 @@
 using System.Text;
 using EasyNetQ.Consumer;
-using EasyNetQ.DI;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 

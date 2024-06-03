@@ -1,4 +1,3 @@
-using EasyNetQ.DI;
 using Microsoft.Extensions.Logging;
 namespace EasyNetQ.Consumer;
 

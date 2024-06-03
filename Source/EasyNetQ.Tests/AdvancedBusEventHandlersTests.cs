@@ -1,6 +1,5 @@
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
-using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;

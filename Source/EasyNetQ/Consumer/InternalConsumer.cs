@@ -1,4 +1,3 @@
-using EasyNetQ.DI;
 using EasyNetQ.Internals;
 using EasyNetQ.Persistent;
 using EasyNetQ.Topology;

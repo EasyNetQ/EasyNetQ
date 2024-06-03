@@ -1,5 +1,4 @@
 using EasyNetQ.Consumer;
-using EasyNetQ.DI;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using Microsoft.Extensions.Logging;
