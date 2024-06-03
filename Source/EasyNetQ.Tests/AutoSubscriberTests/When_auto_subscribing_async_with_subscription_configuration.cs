@@ -87,7 +87,7 @@ public class When_auto_subscribing_async_explicit_implementation_with_subscripti
         bus.PubSub.Returns(pubSub);
 
         var services = new ServiceCollection();
-        serviceProvider = services.BuildServiceProvider(); 
+        serviceProvider = services.BuildServiceProvider();
         bus = serviceProvider.GetRequiredService<IBus>();
 
         var autoSubscriber = new AutoSubscriber(bus, serviceProvider, "my_app");
