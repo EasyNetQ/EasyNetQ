@@ -18,7 +18,6 @@ public class When_auto_subscribing_async_with_subscription_configuration_action_
 
         var services = new ServiceCollection();
         serviceProvider = services.BuildServiceProvider();
-        bus = serviceProvider.GetRequiredService<IBus>();
 
         var autoSubscriber = new AutoSubscriber(bus, serviceProvider, "my_app")
         {
