@@ -6,6 +6,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests;
 public class When_auto_subscribing_with_subscription_configuration_attribute_no_expires
 {
     private readonly IBus bus;
+    private readonly ServiceProvider serviceProvider;
     private Action<ISubscriptionConfiguration> capturedAction;
     private readonly IPubSub pubSub;
 
@@ -15,9 +16,11 @@ public class When_auto_subscribing_with_subscription_configuration_attribute_no_
         bus = Substitute.For<IBus>();
         bus.PubSub.Returns(pubSub);
 
-        var provider = new ServiceCollection().BuildServiceProvider();
+        var services = new ServiceCollection();
+        serviceProvider = services.BuildServiceProvider();
+        bus = serviceProvider.GetRequiredService<IBus>();
 
-        var autoSubscriber = new AutoSubscriber(bus, provider, "my_app");
+        var autoSubscriber = new AutoSubscriber(bus, serviceProvider, "my_app");
 
         pubSub.SubscribeAsync(
                 Arg.Is("MyAttrTest"),

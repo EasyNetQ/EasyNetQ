@@ -7,6 +7,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests;
 public class When_auto_subscribing : IDisposable
 {
     private readonly MockBuilder mockBuilder;
+    private readonly ServiceProvider serviceProvider;
 
     private const string expectedQueueName1 =
         "EasyNetQ.Tests.AutoSubscriberTests.When_auto_subscribing+MessageA, EasyNetQ.Tests_my_app:835d4f0895343085408382191aee841c";
@@ -20,9 +21,11 @@ public class When_auto_subscribing : IDisposable
     public When_auto_subscribing()
     {
         mockBuilder = new MockBuilder();
-        var provider = new ServiceCollection().BuildServiceProvider();
 
-        var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, provider, "my_app");
+        var services = new ServiceCollection();
+        serviceProvider = services.BuildServiceProvider();
+
+        var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, serviceProvider, "my_app");
         autoSubscriber.Subscribe(new[] { typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>) });
     }
 

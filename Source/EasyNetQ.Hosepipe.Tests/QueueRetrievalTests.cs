@@ -45,7 +45,7 @@ public class QueueRetrievalTests
             bus.PubSub.Publish(new TestMessage { Text = string.Format("\n>>>>>> Message {0}\n", i) });
         }
 
-        (bus as IDisposable)?.Dispose();
+        provider.Dispose();
     }
 
     [Fact]
@@ -63,7 +63,7 @@ public class QueueRetrievalTests
 
         Thread.Sleep(1000);
 
-        (bus as IDisposable)?.Dispose();
+        provider.Dispose();
     }
 
     private sealed class TestMessage

@@ -6,6 +6,7 @@ namespace EasyNetQ.Tests.AutoSubscriberTests;
 public class When_auto_subscribing_async_with_subscription_configuration_attribute
 {
     private readonly IBus bus;
+    private readonly ServiceProvider serviceProvider;
     private Action<ISubscriptionConfiguration> capturedAction;
     private readonly IPubSub pubSub;
 
@@ -15,7 +16,11 @@ public class When_auto_subscribing_async_with_subscription_configuration_attribu
         bus = Substitute.For<IBus>();
         bus.PubSub.Returns(pubSub);
 
-        var autoSubscriber = new AutoSubscriber(bus, new ServiceCollection().BuildServiceProvider(), "my_app");
+        var services = new ServiceCollection();
+        serviceProvider = services.BuildServiceProvider();
+        bus = serviceProvider.GetRequiredService<IBus>();
+
+        var autoSubscriber = new AutoSubscriber(bus, serviceProvider, "my_app");
 
         pubSub.SubscribeAsync(
                 Arg.Is("MyAttrTest"),
@@ -71,6 +76,7 @@ public class When_auto_subscribing_async_with_subscription_configuration_attribu
 public class When_auto_subscribing_async_explicit_implementation_with_subscription_configuration_attribute
 {
     private readonly IBus bus;
+    private readonly ServiceProvider serviceProvider;
     private Action<ISubscriptionConfiguration> capturedAction;
     private readonly IPubSub pubSub;
 
@@ -80,7 +86,11 @@ public class When_auto_subscribing_async_explicit_implementation_with_subscripti
         bus = Substitute.For<IBus>();
         bus.PubSub.Returns(pubSub);
 
-        var autoSubscriber = new AutoSubscriber(bus, new ServiceCollection().BuildServiceProvider(), "my_app");
+        var services = new ServiceCollection();
+        serviceProvider = services.BuildServiceProvider(); 
+        bus = serviceProvider.GetRequiredService<IBus>();
+
+        var autoSubscriber = new AutoSubscriber(bus, serviceProvider, "my_app");
 
         pubSub.SubscribeAsync(
                 Arg.Is("MyAttrTest"),
