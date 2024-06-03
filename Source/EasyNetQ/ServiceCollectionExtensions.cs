@@ -17,8 +17,17 @@ namespace EasyNetQ;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection RegisterDefaultServices(this IServiceCollection services)
+    public static IServiceCollection RegisterDefaultServices(
+        this IServiceCollection services,
+        Func<IServiceProvider, ConnectionConfiguration> connectionConfigurationFactory
+    )
     {
+        services.TryAddSingleton(s =>
+        {
+            var configuration = connectionConfigurationFactory(s);
+            configuration.SetDefaultProperties();
+            return configuration;
+        });
         services.TryAddSingleton<IConnectionStringParser>(
             _ => new CompositeConnectionStringParser(new AmqpConnectionStringParser(), new ConnectionStringParser())
         );

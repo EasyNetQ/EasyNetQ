@@ -24,8 +24,13 @@ public static class RabbitHutch
     /// </param>
     public static IServiceCollection AddEasyNetQ(this IServiceCollection services, string connectionString)
     {
-        services.TryAddSingleton<ConnectionConfiguration>(sp => sp.GetRequiredService<IConnectionStringParser>().Parse(connectionString));
-        return services.AddEasyNetQ();
+        return services.RegisterDefaultServices(
+            s =>
+            {
+                var connectionStringParser = s.GetRequiredService<IConnectionStringParser>();
+                return connectionStringParser.Parse(connectionString);
+            }
+        );
     }
 
     /// <summary>
@@ -33,9 +38,8 @@ public static class RabbitHutch
     /// </summary>
     public static IServiceCollection AddEasyNetQ(this IServiceCollection services)
     {
-        return services.RegisterDefaultServices();
+        return services.RegisterDefaultServices(_ => new ConnectionConfiguration());
     }
-
 
     /// <summary>
     /// Registers a new instance of <see cref="RabbitBus"/> using the specified connection configuration in the service collection.
@@ -46,14 +50,13 @@ public static class RabbitHutch
     /// </param>
     public static IServiceCollection AddEasyNetQ(this IServiceCollection services, Action<ConnectionConfiguration> configurator)
     {
-        var connectionConfiguration = new ConnectionConfiguration();
-        connectionConfiguration.SetDefaultProperties();
-
-        configurator(connectionConfiguration);
-
-        services.TryAddSingleton(resolver => connectionConfiguration);
-        services.RegisterDefaultServices();
-
-        return services;
+        return services.RegisterDefaultServices(
+            _ =>
+            {
+                var configuration = new ConnectionConfiguration();
+                configurator(configuration);
+                return configuration;
+            }
+        );
     }
 }
