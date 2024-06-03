@@ -10,10 +10,10 @@ Console.CancelKeyPress += (_, _) => completionTcs.TrySetResult(true);
 
 var serviceCollection = new ServiceCollection();
 
-serviceCollection.AddEasyNetQ("host=localhost");
 serviceCollection.AddLogging(builder => builder.AddConsole());
-serviceCollection.EnableNewtonsoftJson();
-serviceCollection.EnableAlwaysAckConsumerErrorStrategy();
+serviceCollection.AddEasyNetQ("host=localhost")
+    .EnableNewtonsoftJson()
+    .EnableAlwaysAckConsumerErrorStrategy();
 
 var provider = serviceCollection.BuildServiceProvider();
 

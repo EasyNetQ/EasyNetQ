@@ -11,8 +11,8 @@ public class When_request_and_respond_with_legacy_options : IDisposable
     public When_request_and_respond_with_legacy_options(RabbitMQFixture fixture)
     {
         var serviceCollection = new ServiceCollection();
-        serviceCollection.AddEasyNetQ($"host={fixture.Host};prefetchCount=1;timeout=-1");
-        serviceCollection.EnableLegacyConventions();
+        serviceCollection.AddEasyNetQ($"host={fixture.Host};prefetchCount=1;timeout=-1")
+            .EnableLegacyConventions();
 
         serviceProvider = serviceCollection.BuildServiceProvider();
         bus = serviceProvider.GetRequiredService<IBus>();

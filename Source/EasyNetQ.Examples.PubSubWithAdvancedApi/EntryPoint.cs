@@ -8,10 +8,10 @@ Console.CancelKeyPress += (_, _) => cts.Cancel();
 
 var serviceCollection = new ServiceCollection();
 
-serviceCollection.AddEasyNetQ("host=localhost;publisherConfirms=True");
 serviceCollection.AddLogging(builder => builder.AddConsole());
-serviceCollection.EnableNewtonsoftJson();
-serviceCollection.EnableAlwaysNackWithoutRequeueConsumerErrorStrategy();
+serviceCollection.AddEasyNetQ("host=localhost;publisherConfirms=True")
+    .EnableNewtonsoftJson()
+    .EnableAlwaysNackWithoutRequeueConsumerErrorStrategy();
 
 var provider = serviceCollection.BuildServiceProvider();
 

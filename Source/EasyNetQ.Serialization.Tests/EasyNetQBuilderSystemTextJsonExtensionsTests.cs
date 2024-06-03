@@ -1,18 +1,19 @@
 using EasyNetQ.Serialization.NewtonsoftJson;
 using EasyNetQ.Serialization.SystemTextJson;
 using Microsoft.Extensions.DependencyInjection;
-using EasyNetQ.Extensions;
 
 namespace EasyNetQ.Serialization.Tests;
 
-public class ServiceCollectionExtensionsTests
+public class EasyNetQBuilderSystemTextJsonExtensionsTests
 {
     [Theory]
     [MemberData(nameof(GetSerializerRegisterActions))]
-    public void Should_register_serializer(Action<IServiceCollection> register, Type serializerType)
+    public void Should_register_serializer(Action<IEasyNetQBuilder> register, Type serializerType)
     {
         var serviceCollection = new ServiceCollection();
-        register(serviceCollection);
+        var easyNetQBuilder = new EasyNetQBuilder(serviceCollection);
+
+        register(easyNetQBuilder);
 
         var serviceProvider = serviceCollection.BuildServiceProvider();
         var registeredServiceDescriptor = serviceProvider.GetService<ISerializer>();
@@ -27,5 +28,5 @@ public class ServiceCollectionExtensionsTests
         yield return new object[] { GetRegisterAction(x => x.EnableSystemTextJson()), typeof(SystemTextJsonSerializer) };
     }
 
-    private static Action<IServiceCollection> GetRegisterAction(Action<IServiceCollection> action) => action;
+    private static Action<IEasyNetQBuilder> GetRegisterAction(Action<IEasyNetQBuilder> action) => action;
 }
