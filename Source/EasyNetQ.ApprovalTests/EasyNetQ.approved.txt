@@ -286,6 +286,23 @@ namespace EasyNetQ
         public string Reason { get; }
         public EasyNetQ.Persistent.PersistentConnectionType Type { get; }
     }
+    public static class EasyNetQBuilderExtensions
+    {
+        public static EasyNetQ.IEasyNetQBuilder EnableAdvancedMessagePolymorphism(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder EnableAlwaysAckConsumerErrorStrategy(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder EnableAlwaysNackWithRequeueConsumerErrorStrategy(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder EnableAlwaysNackWithoutRequeueConsumerErrorStrategy(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder EnableDelayedExchangeScheduler(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder EnableLegacyConventions(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder EnableLegacyRpcConventions(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder EnableLegacyTypeNaming(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder EnableMessageVersioning(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder EnableMultiChannelClientCommandDispatcher(this EasyNetQ.IEasyNetQBuilder builder, int channelsCount) { }
+        public static EasyNetQ.Consumer.ConsumePipelineBuilder UseConsumeErrorStrategy(this EasyNetQ.Consumer.ConsumePipelineBuilder pipelineBuilder) { }
+        public static EasyNetQ.Consumer.ConsumePipelineBuilder UseConsumeInterceptors(this EasyNetQ.Consumer.ConsumePipelineBuilder pipelineBuilder) { }
+        public static EasyNetQ.Producer.ProducePipelineBuilder UseProduceInterceptors(this EasyNetQ.Producer.ProducePipelineBuilder pipelineBuilder) { }
+        public static EasyNetQ.Consumer.ConsumePipelineBuilder UseScope(this EasyNetQ.Consumer.ConsumePipelineBuilder pipelineBuilder) { }
+    }
     [System.Serializable]
     public class EasyNetQException : System.Exception
     {
@@ -410,6 +427,10 @@ namespace EasyNetQ
     public interface ICorrelationIdGenerationStrategy
     {
         string GetCorrelationId();
+    }
+    public interface IEasyNetQBuilder
+    {
+        Microsoft.Extensions.DependencyInjection.IServiceCollection Services { get; }
     }
     public interface IEventBus
     {
@@ -918,9 +939,9 @@ namespace EasyNetQ
     }
     public static class RabbitHutch
     {
-        public static Microsoft.Extensions.DependencyInjection.IServiceCollection AddEasyNetQ(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
-        public static Microsoft.Extensions.DependencyInjection.IServiceCollection AddEasyNetQ(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Action<EasyNetQ.ConnectionConfiguration> configurator) { }
-        public static Microsoft.Extensions.DependencyInjection.IServiceCollection AddEasyNetQ(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, string connectionString) { }
+        public static EasyNetQ.IEasyNetQBuilder AddEasyNetQ(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
+        public static EasyNetQ.IEasyNetQBuilder AddEasyNetQ(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Action<EasyNetQ.ConnectionConfiguration> configurator) { }
+        public static EasyNetQ.IEasyNetQBuilder AddEasyNetQ(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, string connectionString) { }
     }
     public static class ReceiveRegistrationExtensions
     {
@@ -983,21 +1004,7 @@ namespace EasyNetQ
     }
     public static class ServiceCollectionExtensions
     {
-        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableAdvancedMessagePolymorphism(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
-        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableAlwaysAckConsumerErrorStrategy(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
-        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableAlwaysNackWithRequeueConsumerErrorStrategy(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
-        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableAlwaysNackWithoutRequeueConsumerErrorStrategy(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
-        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableDelayedExchangeScheduler(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
-        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableLegacyConventions(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
-        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableLegacyRpcConventions(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
-        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableLegacyTypeNaming(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
-        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableMessageVersioning(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
-        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableMultiChannelClientCommandDispatcher(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, int channelsCount) { }
         public static Microsoft.Extensions.DependencyInjection.IServiceCollection RegisterDefaultServices(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Func<System.IServiceProvider, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory) { }
-        public static EasyNetQ.Consumer.ConsumePipelineBuilder UseConsumeErrorStrategy(this EasyNetQ.Consumer.ConsumePipelineBuilder pipelineBuilder) { }
-        public static EasyNetQ.Consumer.ConsumePipelineBuilder UseConsumeInterceptors(this EasyNetQ.Consumer.ConsumePipelineBuilder pipelineBuilder) { }
-        public static EasyNetQ.Producer.ProducePipelineBuilder UseProduceInterceptors(this EasyNetQ.Producer.ProducePipelineBuilder pipelineBuilder) { }
-        public static EasyNetQ.Consumer.ConsumePipelineBuilder UseScope(this EasyNetQ.Consumer.ConsumePipelineBuilder pipelineBuilder) { }
     }
     public static class SimpleConsumeConfigurationExtensions
     {

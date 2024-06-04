@@ -1,11 +1,11 @@
-namespace EasyNetQ.Extensions
+namespace EasyNetQ
 {
-    public static class ServiceCollectionExtensions
+    public static class EasyNetQBuilderSystemTextJsonExtensions
     {
-        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableSystemTextJson(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
-        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableSystemTextJson(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Text.Json.JsonSerializerOptions options) { }
-        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableSystemTextJsonV2(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
-        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableSystemTextJsonV2(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Text.Json.JsonSerializerOptions options) { }
+        public static EasyNetQ.IEasyNetQBuilder EnableSystemTextJson(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder EnableSystemTextJson(this EasyNetQ.IEasyNetQBuilder builder, System.Text.Json.JsonSerializerOptions options) { }
+        public static EasyNetQ.IEasyNetQBuilder EnableSystemTextJsonV2(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder EnableSystemTextJsonV2(this EasyNetQ.IEasyNetQBuilder builder, System.Text.Json.JsonSerializerOptions options) { }
     }
 }
 namespace EasyNetQ.Serialization.SystemTextJson

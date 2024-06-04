@@ -1,3 +1,11 @@
+namespace EasyNetQ
+{
+    public static class EasyNetQBuilderNewtonsoftExtensions
+    {
+        public static EasyNetQ.IEasyNetQBuilder EnableNewtonsoftJson(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder EnableNewtonsoftJson(this EasyNetQ.IEasyNetQBuilder builder, Newtonsoft.Json.JsonSerializerSettings settings) { }
+    }
+}
 namespace EasyNetQ.Serialization.NewtonsoftJson
 {
     public sealed class NewtonsoftJsonSerializer : EasyNetQ.ISerializer
@@ -6,13 +14,5 @@ namespace EasyNetQ.Serialization.NewtonsoftJson
         public NewtonsoftJsonSerializer(Newtonsoft.Json.JsonSerializerSettings settings) { }
         public object BytesToMessage(System.Type messageType, in System.ReadOnlyMemory<byte> bytes) { }
         public System.Buffers.IMemoryOwner<byte> MessageToBytes(System.Type messageType, object message) { }
-    }
-}
-namespace EasyNetQ
-{
-    public static class ServiceCollectionSerializerExtensions
-    {
-        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableNewtonsoftJson(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
-        public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableNewtonsoftJson(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, Newtonsoft.Json.JsonSerializerSettings settings) { }
     }
 }
