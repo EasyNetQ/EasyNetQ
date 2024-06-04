@@ -12,8 +12,8 @@ public class When_publish_and_subscribe_with_delay_using_delay_exchange : IDispo
     public When_publish_and_subscribe_with_delay_using_delay_exchange(RabbitMQFixture fixture)
     {
         var serviceCollection = new ServiceCollection();
-        serviceCollection.AddEasyNetQ($"host={fixture.Host};prefetchCount=1;timeout=-1");
-        serviceCollection.EnableDelayedExchangeScheduler();
+        serviceCollection.AddEasyNetQ($"host={fixture.Host};prefetchCount=1;timeout=-1")
+            .EnableDelayedExchangeScheduler();
 
         serviceProvider = serviceCollection.BuildServiceProvider();
         bus = serviceProvider.GetRequiredService<IBus>();

@@ -1,6 +1,5 @@
 using EasyNetQ.ConnectionString;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace EasyNetQ;
 
@@ -22,23 +21,25 @@ public static class RabbitHutch
     /// The following default values will be used if not specified:
     /// host=localhost;port=5672;virtualHost=/;username=guest;password=guest;requestedHeartbeat=10
     /// </param>
-    public static IServiceCollection AddEasyNetQ(this IServiceCollection services, string connectionString)
+    public static IEasyNetQBuilder AddEasyNetQ(this IServiceCollection services, string connectionString)
     {
-        return services.RegisterDefaultServices(
+        services.RegisterDefaultServices(
             s =>
             {
                 var connectionStringParser = s.GetRequiredService<IConnectionStringParser>();
                 return connectionStringParser.Parse(connectionString);
             }
         );
+        return new EasyNetQBuilder(services);
     }
 
     /// <summary>
     /// Registers a new instance of <see cref="RabbitBus"/> using all default dependencies.
     /// </summary>
-    public static IServiceCollection AddEasyNetQ(this IServiceCollection services)
+    public static IEasyNetQBuilder AddEasyNetQ(this IServiceCollection services)
     {
-        return services.RegisterDefaultServices(_ => new ConnectionConfiguration());
+        services.RegisterDefaultServices(_ => new ConnectionConfiguration());
+        return new EasyNetQBuilder(services);
     }
 
     /// <summary>
@@ -48,9 +49,9 @@ public static class RabbitHutch
     /// </param>
     /// <param name="services">
     /// </param>
-    public static IServiceCollection AddEasyNetQ(this IServiceCollection services, Action<ConnectionConfiguration> configurator)
+    public static IEasyNetQBuilder AddEasyNetQ(this IServiceCollection services, Action<ConnectionConfiguration> configurator)
     {
-        return services.RegisterDefaultServices(
+        services.RegisterDefaultServices(
             _ =>
             {
                 var configuration = new ConnectionConfiguration();
@@ -58,5 +59,6 @@ public static class RabbitHutch
                 return configuration;
             }
         );
+        return new EasyNetQBuilder(services);
     }
 }

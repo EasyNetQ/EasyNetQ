@@ -2,9 +2,6 @@ using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;
-using EasyNetQ.Interception;
-using EasyNetQ.MessageVersioning;
-using EasyNetQ.MultipleExchange;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 using Microsoft.Extensions.DependencyInjection;
@@ -68,114 +65,5 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
         services.TryAddSingleton<ILoggerFactory>(new NullLoggerFactory());
         return services;
-    }
-
-    public static IServiceCollection EnableMultiChannelClientCommandDispatcher(
-        this IServiceCollection services, int channelsCount
-    )
-    {
-        return services.AddSingleton<IPersistentChannelDispatcher>(
-            x => new MultiPersistentChannelDispatcher(
-                channelsCount,
-                x.GetRequiredService<IProducerConnection>(),
-                x.GetRequiredService<IConsumerConnection>(),
-                x.GetRequiredService<IPersistentChannelFactory>()
-            )
-        );
-    }
-
-    public static IServiceCollection EnableLegacyTypeNaming(this IServiceCollection services)
-        => services.AddSingleton<ITypeNameSerializer, LegacyTypeNameSerializer>();
-
-    public static IServiceCollection EnableLegacyRpcConventions(this IServiceCollection services)
-        => services.AddSingleton<IConventions, LegacyRpcConventions>();
-
-    public static IServiceCollection EnableLegacyConventions(this IServiceCollection services)
-    {
-        return services
-            .EnableLegacyTypeNaming()
-            .EnableLegacyRpcConventions();
-    }
-
-    public static IServiceCollection EnableDelayedExchangeScheduler(this IServiceCollection services)
-        => services.AddSingleton<IScheduler, DelayedExchangeScheduler>();
-
-    public static IServiceCollection EnableAdvancedMessagePolymorphism(this IServiceCollection services)
-        => services.AddSingleton<IExchangeDeclareStrategy, MultipleExchangeDeclareStrategy>();
-
-    public static IServiceCollection EnableMessageVersioning(this IServiceCollection services)
-    {
-        return services
-            .AddSingleton<IExchangeDeclareStrategy, VersionedExchangeDeclareStrategy>()
-            .AddSingleton<IMessageSerializationStrategy, VersionedMessageSerializationStrategy>();
-    }
-
-    public static IServiceCollection EnableAlwaysAckConsumerErrorStrategy(this IServiceCollection services)
-        => services.AddSingleton<IConsumeErrorStrategy>(SimpleConsumeErrorStrategy.Ack);
-
-    public static IServiceCollection EnableAlwaysNackWithRequeueConsumerErrorStrategy(this IServiceCollection services)
-        => services.AddSingleton<IConsumeErrorStrategy>(SimpleConsumeErrorStrategy.NackWithRequeue);
-
-    public static IServiceCollection EnableAlwaysNackWithoutRequeueConsumerErrorStrategy(this IServiceCollection services)
-        => services.AddSingleton<IConsumeErrorStrategy>(SimpleConsumeErrorStrategy.NackWithoutRequeue);
-
-    public static ProducePipelineBuilder UseProduceInterceptors(this ProducePipelineBuilder pipelineBuilder)
-    {
-        return pipelineBuilder.Use(next => ctx =>
-        {
-            var interceptors = ctx.ServiceResolver.GetRequiredService<IEnumerable<IProduceConsumeInterceptor>>().ToArray();
-            var producedMessage = interceptors.OnProduce(new ProducedMessage(ctx.Properties, ctx.Body));
-            return next(ctx with { Properties = producedMessage.Properties, Body = producedMessage.Body });
-        });
-    }
-
-    public static ConsumePipelineBuilder UseConsumeInterceptors(this ConsumePipelineBuilder pipelineBuilder)
-    {
-        return pipelineBuilder.Use(next => ctx =>
-        {
-            var interceptors = ctx.ServiceResolver.GetRequiredService<IEnumerable<IProduceConsumeInterceptor>>().ToArray();
-            var consumedMessage = interceptors.OnConsume(new ConsumedMessage(ctx.ReceivedInfo, ctx.Properties, ctx.Body));
-            return next(ctx with { ReceivedInfo = consumedMessage.ReceivedInfo, Properties = consumedMessage.Properties, Body = consumedMessage.Body });
-        });
-    }
-
-    public static ConsumePipelineBuilder UseScope(this ConsumePipelineBuilder pipelineBuilder)
-    {
-        return pipelineBuilder.Use(next => async ctx =>
-        {
-            var scopedResolver = ctx.ServiceResolver.CreateScope();
-            return await next(ctx with { ServiceResolver = scopedResolver.ServiceProvider }).ConfigureAwait(false);
-        });
-    }
-
-    public static ConsumePipelineBuilder UseConsumeErrorStrategy(this ConsumePipelineBuilder pipelineBuilder)
-    {
-        return pipelineBuilder.Use(next => async ctx =>
-        {
-            var errorStrategy = ctx.ServiceResolver.GetRequiredService<IConsumeErrorStrategy>();
-            var logger = ctx.ServiceResolver.GetRequiredService<ILogger<IConsumeErrorStrategy>>();
-
-            try
-            {
-                try
-                {
-                    return await next(ctx).ConfigureAwait(false);
-                }
-                catch (OperationCanceledException) when (ctx.CancellationToken.IsCancellationRequested)
-                {
-                    return await errorStrategy.HandleCancelledAsync(ctx).ConfigureAwait(false);
-                }
-                catch (Exception exception)
-                {
-                    return await errorStrategy.HandleErrorAsync(ctx, exception).ConfigureAwait(false);
-                }
-            }
-            catch (Exception exception)
-            {
-                logger.LogError(exception, "Consume error strategy has failed");
-
-                return AckStrategies.NackWithRequeue;
-            }
-        });
     }
 }

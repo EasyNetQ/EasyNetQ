@@ -7,10 +7,10 @@ Console.CancelKeyPress += (_, _) => cts.Cancel();
 
 var serviceCollection = new ServiceCollection();
 
-serviceCollection.AddEasyNetQ("host=localhost");
 serviceCollection.AddLogging(builder => builder.AddConsole());
-serviceCollection.EnableNewtonsoftJson();
-serviceCollection.EnableLegacyRpcConventions();
+serviceCollection.AddEasyNetQ("host=localhost")
+    .EnableNewtonsoftJson()
+    .EnableLegacyConventions();
 
 var provider = serviceCollection.BuildServiceProvider();
 
