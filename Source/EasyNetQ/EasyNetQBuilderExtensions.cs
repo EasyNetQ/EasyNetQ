@@ -105,7 +105,8 @@ public static class EasyNetQBuilderExtensions
                 interceptors.OnConsume(new ConsumedMessage(ctx.ReceivedInfo, ctx.Properties, ctx.Body));
             return next(ctx with
             {
-                ReceivedInfo = consumedMessage.ReceivedInfo, Properties = consumedMessage.Properties,
+                ReceivedInfo = consumedMessage.ReceivedInfo,
+                Properties = consumedMessage.Properties,
                 Body = consumedMessage.Body
             });
         });
