@@ -21,15 +21,12 @@ updates:
   - dependency-name: Microsoft.Bcl.AsyncInterfaces
     versions:
     - ">= 6.a"
-    - "< 8"
   - dependency-name: Microsoft.Extensions.DependencyInjection
     versions:
     - ">= 6.a"
-    - "< 8"
   - dependency-name: Microsoft.Extensions.Logging.Abstractions
     versions:
     - ">= 6.a"
-    - "< 8"
 - package-ecosystem: "github-actions"
   directory: "/"
   schedule:
