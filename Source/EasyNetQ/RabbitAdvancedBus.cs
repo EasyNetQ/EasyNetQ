@@ -1,6 +1,5 @@
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
-using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
 using EasyNetQ.Persistent;
@@ -18,7 +17,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     private readonly IPersistentChannelDispatcher persistentChannelDispatcher;
     private readonly ConnectionConfiguration configuration;
     private readonly ConsumePipelineBuilder consumePipelineBuilder;
-    private readonly IServiceResolver serviceResolver;
+    private readonly IServiceProvider serviceResolver;
     private readonly IPublishConfirmationListener confirmationListener;
     private readonly ILogger logger;
     private readonly IProducerConnection producerConnection;
@@ -49,7 +48,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         ConnectionConfiguration configuration,
         ProducePipelineBuilder producePipelineBuilder,
         ConsumePipelineBuilder consumePipelineBuilder,
-        IServiceResolver serviceResolver,
+        IServiceProvider serviceResolver,
         IMessageSerializationStrategy messageSerializationStrategy,
         IPullingConsumerFactory pullingConsumerFactory,
         AdvancedBusEventHandlers advancedBusEventHandlers

@@ -10,10 +10,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="LightInject.Source" Version="6.6.4">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
     <PackageReference Include="MinVer" Version="5.0.0">
       <PrivateAssets>all</PrivateAssets>
@@ -26,7 +24,6 @@
     </PackageReference>
     <PackageReference Include="RabbitMQ.Client" Version="6.8.*" />
     <InternalsVisibleTo Include="EasyNetQ.Tests" />
-    <InternalsVisibleTo Include="EasyNetQ.DI.Tests" />
     <InternalsVisibleTo Include="EasyNetQ.Hosepipe" />
     <InternalsVisibleTo Include="EasyNetQ.Hosepipe.Tests" />
     <InternalsVisibleTo Include="EasyNetQ.Serialization.Tests" />

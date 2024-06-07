@@ -1,6 +1,5 @@
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
-using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
@@ -51,7 +50,7 @@ public class AdvancedBusEventHandlersTests : IDisposable
             Substitute.For<ConnectionConfiguration>(),
             new ProducePipelineBuilder(),
             new ConsumePipelineBuilder(),
-            Substitute.For<IServiceResolver>(),
+            Substitute.For<IServiceProvider>(),
             Substitute.For<IMessageSerializationStrategy>(),
             Substitute.For<IPullingConsumerFactory>(),
             advancedBusEventHandlers

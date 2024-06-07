@@ -1,12 +1,20 @@
 using EasyNetQ;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 var cts = new CancellationTokenSource();
 Console.CancelKeyPress += (_, _) => cts.Cancel();
 
-using var bus = RabbitHutch.CreateBus(
-    "host=localhost",
-    x => x.EnableNewtonsoftJson().EnableConsoleLogger().EnableLegacyRpcConventions()
-);
+var serviceCollection = new ServiceCollection();
+
+serviceCollection.AddLogging(builder => builder.AddConsole());
+serviceCollection.AddEasyNetQ("host=localhost")
+    .EnableNewtonsoftJson()
+    .EnableLegacyConventions();
+
+var provider = serviceCollection.BuildServiceProvider();
+
+var bus = provider.GetRequiredService<IBus>();
 
 using var _ = await bus.Rpc.RespondAsync<Request, Response>(r => new Response(r.Id), cts.Token);
 

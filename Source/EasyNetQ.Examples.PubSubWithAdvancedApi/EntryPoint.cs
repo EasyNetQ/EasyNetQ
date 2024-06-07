@@ -1,16 +1,21 @@
 using EasyNetQ;
 using EasyNetQ.Topology;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 var cts = new CancellationTokenSource();
 Console.CancelKeyPress += (_, _) => cts.Cancel();
 
-using var bus = RabbitHutch.CreateBus(
-    "host=localhost;publisherConfirms=True",
-    x => x.EnableNewtonsoftJson()
-        .EnableAlwaysNackWithoutRequeueConsumerErrorStrategy()
-        .EnableConsoleLogger()
-);
+var serviceCollection = new ServiceCollection();
 
+serviceCollection.AddLogging(builder => builder.AddConsole());
+serviceCollection.AddEasyNetQ("host=localhost;publisherConfirms=True")
+    .EnableNewtonsoftJson()
+    .EnableAlwaysNackWithoutRequeueConsumerErrorStrategy();
+
+var provider = serviceCollection.BuildServiceProvider();
+
+var bus = provider.GetRequiredService<IBus>();
 var eventQueue = await bus.Advanced.QueueDeclareAsync(
     queue: "Events",
     arguments: new Dictionary<string, object>()

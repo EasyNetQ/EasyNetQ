@@ -1,10 +1,12 @@
 using EasyNetQ.AutoSubscribe;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests;
 
 public class When_auto_subscribing_with_subscription_configuration_action
 {
     private readonly IBus bus;
+    private readonly ServiceProvider serviceProvider;
     private Action<ISubscriptionConfiguration> capturedAction;
     private readonly IPubSub pubSub;
 
@@ -14,7 +16,10 @@ public class When_auto_subscribing_with_subscription_configuration_action
         bus = Substitute.For<IBus>();
         bus.PubSub.Returns(pubSub);
 
-        var autoSubscriber = new AutoSubscriber(bus, "my_app")
+        var services = new ServiceCollection();
+        serviceProvider = services.BuildServiceProvider();
+
+        var autoSubscriber = new AutoSubscriber(bus, serviceProvider, "my_app")
         {
             ConfigureSubscriptionConfiguration =
                 c => c.WithAutoDelete()

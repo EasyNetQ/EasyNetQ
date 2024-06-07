@@ -1,7 +1,7 @@
 using System.Text;
 using EasyNetQ.Consumer;
-using EasyNetQ.DI;
 using EasyNetQ.Tests.Mocking;
+using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests;
@@ -30,7 +30,7 @@ public class When_using_default_consume_error_strategy
                 AppId = string.Empty
             },
             originalMessageBody,
-            Substitute.For<IServiceResolver>(),
+            Substitute.For<IServiceProvider>(),
             CancellationToken.None
         );
     }
@@ -41,7 +41,7 @@ public class When_using_default_consume_error_strategy
     [Fact]
     public async Task Should_Ack_canceled_message()
     {
-        using var mockBuilder = new MockBuilder(x => x.Register<IConventions>(customConventions));
+        using var mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(customConventions));
 
         var cancelAckStrategy = await mockBuilder.ConsumeErrorStrategy.HandleCancelledAsync(consumerExecutionContext);
 
@@ -51,7 +51,7 @@ public class When_using_default_consume_error_strategy
     [Fact]
     public async Task Should_Ack_failed_message_When_publish_confirms_off()
     {
-        using var mockBuilder = new MockBuilder(x => x.Register<IConventions>(customConventions));
+        using var mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(customConventions));
 
         var errorAckStrategy = await mockBuilder.ConsumeErrorStrategy.HandleErrorAsync(consumerExecutionContext, new Exception());
 
@@ -84,8 +84,8 @@ public class When_using_default_consume_error_strategy
     public async Task Should_Ack_failed_message_When_publish_confirms_on()
     {
         using var mockBuilder = new MockBuilder(
-            x => x.Register<IConventions>(customConventions)
-                .Register(_ => new ConnectionConfiguration { PublisherConfirms = true })
+            x => x.AddSingleton<IConventions>(customConventions)
+                .AddSingleton(_ => new ConnectionConfiguration { PublisherConfirms = true })
         );
 
         var errorAckStrategy = await mockBuilder.ConsumeErrorStrategy.HandleErrorAsync(consumerExecutionContext, new Exception());

@@ -1,7 +1,7 @@
 using EasyNetQ.Consumer;
-using EasyNetQ.DI;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
+using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.ConsumeTests;
@@ -24,7 +24,7 @@ public abstract class ConsumerTestBase : IDisposable
     public ConsumerTestBase()
     {
         ConsumeErrorStrategy = Substitute.For<IConsumeErrorStrategy>();
-        MockBuilder = new MockBuilder(x => x.Register(ConsumeErrorStrategy));
+        MockBuilder = new MockBuilder(x => x.AddSingleton(ConsumeErrorStrategy));
         AdditionalSetUp();
     }
 

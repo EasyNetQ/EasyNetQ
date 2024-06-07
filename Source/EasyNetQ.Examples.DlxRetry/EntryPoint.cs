@@ -1,18 +1,23 @@
 using EasyNetQ;
 using EasyNetQ.Topology;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 // https://www.rabbitmq.com/quorum-queues.html#dead-lettering
 
 var completionTcs = new TaskCompletionSource<bool>();
 Console.CancelKeyPress += (_, _) => completionTcs.TrySetResult(true);
 
-using var bus = RabbitHutch.CreateBus(
-    "host=localhost",
-    x => x.EnableConsoleLogger()
-        .EnableNewtonsoftJson()
-        .EnableAlwaysNackWithoutRequeueConsumerErrorStrategy()
-);
+var serviceCollection = new ServiceCollection();
 
+serviceCollection.AddLogging(builder => builder.AddConsole());
+serviceCollection.AddEasyNetQ("host=localhost")
+    .EnableNewtonsoftJson()
+    .EnableAlwaysAckConsumerErrorStrategy();
+
+var provider = serviceCollection.BuildServiceProvider();
+
+var bus = provider.GetRequiredService<IBus>();
 await bus.Advanced.QueueDeclareAsync(
     queue: "Events:Failed",
     arguments: new Dictionary<string, object>()

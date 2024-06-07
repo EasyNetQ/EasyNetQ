@@ -1,6 +1,5 @@
 using System.Text;
 using EasyNetQ.Consumer;
-using EasyNetQ.DI;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 
@@ -88,7 +87,7 @@ public class DefaultConsumerErrorStrategyTests
                 AppId = "456"
             },
             originalMessageBody,
-            Substitute.For<IServiceResolver>(),
+            Substitute.For<IServiceProvider>(),
             CancellationToken.None
         );
     }

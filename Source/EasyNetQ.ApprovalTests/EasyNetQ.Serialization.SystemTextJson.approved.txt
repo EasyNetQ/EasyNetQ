@@ -1,3 +1,13 @@
+namespace EasyNetQ
+{
+    public static class EasyNetQBuilderSystemTextJsonExtensions
+    {
+        public static EasyNetQ.IEasyNetQBuilder EnableSystemTextJson(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder EnableSystemTextJson(this EasyNetQ.IEasyNetQBuilder builder, System.Text.Json.JsonSerializerOptions options) { }
+        public static EasyNetQ.IEasyNetQBuilder EnableSystemTextJsonV2(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder EnableSystemTextJsonV2(this EasyNetQ.IEasyNetQBuilder builder, System.Text.Json.JsonSerializerOptions options) { }
+    }
+}
 namespace EasyNetQ.Serialization.SystemTextJson
 {
     public class MessagePropertiesConverter : System.Text.Json.Serialization.JsonConverter<EasyNetQ.MessageProperties>
@@ -25,15 +35,5 @@ namespace EasyNetQ.Serialization.SystemTextJson
         public SystemTextJsonSerializerV2(System.Text.Json.JsonSerializerOptions options) { }
         public object BytesToMessage(System.Type messageType, in System.ReadOnlyMemory<byte> bytes) { }
         public System.Buffers.IMemoryOwner<byte> MessageToBytes(System.Type messageType, object message) { }
-    }
-}
-namespace EasyNetQ
-{
-    public static class ServiceRegisterExtensions
-    {
-        public static EasyNetQ.DI.IServiceRegister EnableSystemTextJson(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
-        public static EasyNetQ.DI.IServiceRegister EnableSystemTextJson(this EasyNetQ.DI.IServiceRegister serviceRegister, System.Text.Json.JsonSerializerOptions options) { }
-        public static EasyNetQ.DI.IServiceRegister EnableSystemTextJsonV2(this EasyNetQ.DI.IServiceRegister serviceRegister) { }
-        public static EasyNetQ.DI.IServiceRegister EnableSystemTextJsonV2(this EasyNetQ.DI.IServiceRegister serviceRegister, System.Text.Json.JsonSerializerOptions options) { }
     }
 }

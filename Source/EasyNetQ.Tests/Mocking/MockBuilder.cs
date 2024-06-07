@@ -1,15 +1,13 @@
-using EasyNetQ.ConnectionString;
 using EasyNetQ.Consumer;
-using EasyNetQ.DI;
-using EasyNetQ.LightInject;
 using EasyNetQ.Producer;
+using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.Mocking;
 
 public class MockBuilder : IDisposable
 {
-    private readonly ServiceContainer container;
+    private readonly IServiceProvider serviceProvider;
     private readonly IBus bus;
 
     private readonly IBasicProperties basicProperties = new BasicProperties();
@@ -23,7 +21,7 @@ public class MockBuilder : IDisposable
     {
     }
 
-    public MockBuilder(Action<IServiceRegister> registerServices) : this("host=localhost", registerServices)
+    public MockBuilder(Action<IServiceCollection> registerServices) : this("host=localhost", registerServices)
     {
     }
 
@@ -31,7 +29,7 @@ public class MockBuilder : IDisposable
     {
     }
 
-    public MockBuilder(string connectionString, Action<IServiceRegister> registerServices)
+    public MockBuilder(string connectionString, Action<IServiceCollection> registerServices)
     {
         for (var i = 0; i < 10; i++)
             channelPool.Push(Substitute.For<IModel, IRecoverable>());
@@ -71,17 +69,13 @@ public class MockBuilder : IDisposable
             return channel;
         });
 
-        container = new ServiceContainer(c => c.EnablePropertyInjection = false);
-        var adapter = new LightInjectAdapter(container);
-        adapter.Register(connectionFactory);
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddSingleton(connectionFactory);
 
-        RabbitHutch.RegisterBus(
-            adapter,
-            x => x.Resolve<IConnectionStringParser>().Parse(connectionString),
-            registerServices
-        );
-
-        bus = container.GetInstance<IBus>();
+        serviceCollection.AddEasyNetQ(connectionString);
+        registerServices(serviceCollection);
+        serviceProvider = serviceCollection.BuildServiceProvider();
+        bus = serviceProvider.GetRequiredService<IBus>();
     }
 
     public IBus Bus => bus;
@@ -96,28 +90,28 @@ public class MockBuilder : IDisposable
 
     public IModel NextModel => channelPool.Peek();
 
-    public IPubSub PubSub => container.GetInstance<IPubSub>();
+    public IPubSub PubSub => serviceProvider.GetRequiredService<IPubSub>();
 
-    public IRpc Rpc => container.GetInstance<IRpc>();
+    public IRpc Rpc => serviceProvider.GetRequiredService<IRpc>();
 
-    public ISendReceive SendReceive => container.GetInstance<ISendReceive>();
+    public ISendReceive SendReceive => serviceProvider.GetRequiredService<ISendReceive>();
 
-    public IScheduler Scheduler => container.GetInstance<IScheduler>();
+    public IScheduler Scheduler => serviceProvider.GetRequiredService<IScheduler>();
 
-    public IEventBus EventBus => container.GetInstance<IEventBus>();
+    public IEventBus EventBus => serviceProvider.GetRequiredService<IEventBus>();
 
-    public IConventions Conventions => container.GetInstance<IConventions>();
+    public IConventions Conventions => serviceProvider.GetRequiredService<IConventions>();
 
-    public ITypeNameSerializer TypeNameSerializer => container.GetInstance<ITypeNameSerializer>();
+    public ITypeNameSerializer TypeNameSerializer => serviceProvider.GetRequiredService<ITypeNameSerializer>();
 
-    public ISerializer Serializer => container.GetInstance<ISerializer>();
+    public ISerializer Serializer => serviceProvider.GetRequiredService<ISerializer>();
 
-    public IProducerConnection ProducerConnection => container.GetInstance<IProducerConnection>();
-    public IConsumerConnection ConsumerConnection => container.GetInstance<IConsumerConnection>();
+    public IProducerConnection ProducerConnection => serviceProvider.GetRequiredService<IProducerConnection>();
+    public IConsumerConnection ConsumerConnection => serviceProvider.GetRequiredService<IConsumerConnection>();
 
-    public IConsumeErrorStrategy ConsumeErrorStrategy => container.GetInstance<IConsumeErrorStrategy>();
+    public IConsumeErrorStrategy ConsumeErrorStrategy => serviceProvider.GetRequiredService<IConsumeErrorStrategy>();
 
     public List<string> ConsumerQueueNames { get; } = new();
 
-    public void Dispose() => container.Dispose();
+    public void Dispose() => (serviceProvider as IDisposable)?.Dispose();
 }

@@ -1,5 +1,5 @@
-using EasyNetQ.DI;
 using EasyNetQ.Tests.Mocking;
+using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests;
@@ -156,7 +156,7 @@ public class When_publishing_a_message : IDisposable
             TopicNamingConvention = _ => "CustomTopicNamingConvention"
         };
 
-        mockBuilder = new MockBuilder(x => x.Register<IConventions>(customConventions));
+        mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(customConventions));
         mockBuilder.PubSub.Publish(new TestMessage());
     }
 
@@ -215,7 +215,7 @@ public class When_registering_response_handler : IDisposable
             RpcRoutingKeyNamingConvention = _ => "CustomRpcRoutingKeyName"
         };
 
-        mockBuilder = new MockBuilder(x => x.Register<IConventions>(customConventions));
+        mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(customConventions));
 
         mockBuilder.Rpc.Respond<TestMessage, TestMessage>(_ => new TestMessage());
     }
