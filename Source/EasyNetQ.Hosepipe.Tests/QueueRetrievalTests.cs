@@ -36,7 +36,7 @@ public class QueueRetrievalTests
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddEasyNetQ("host=localhost");
 
-        var provider = serviceCollection.BuildServiceProvider();
+        using var provider = serviceCollection.BuildServiceProvider();
 
         var bus = provider.GetRequiredService<IBus>();
 
@@ -44,8 +44,6 @@ public class QueueRetrievalTests
         {
             bus.PubSub.Publish(new TestMessage { Text = string.Format("\n>>>>>> Message {0}\n", i) });
         }
-
-        provider.Dispose();
     }
 
     [Fact]

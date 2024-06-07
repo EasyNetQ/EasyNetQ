@@ -35,6 +35,6 @@ public class When_delete_a_queue_with_name : IDisposable
 
     public void Dispose()
     {
-        serviceProvider.Dispose();
+        serviceProvider?.Dispose();
     }
 }

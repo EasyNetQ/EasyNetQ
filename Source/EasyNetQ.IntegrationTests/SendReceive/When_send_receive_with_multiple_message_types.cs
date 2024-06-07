@@ -20,7 +20,7 @@ public class When_send_receive_multiple_message_types : IDisposable
 
     public void Dispose()
     {
-        serviceProvider.Dispose();
+        serviceProvider?.Dispose();
     }
 
     private const int MessagesCount = 10;

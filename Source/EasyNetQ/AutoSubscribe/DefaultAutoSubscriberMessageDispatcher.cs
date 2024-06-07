@@ -2,12 +2,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.AutoSubscribe;
 
-public class DefaultAutoSubscriberMessageDispatcher : IAutoSubscriberMessageDispatcher
+public class DefaultAutoSubscriberMessageDispatcher(IServiceProvider resolver) : IAutoSubscriberMessageDispatcher
 {
-    private readonly IServiceProvider resolver;
-
-    public DefaultAutoSubscriberMessageDispatcher(IServiceProvider resolver) => this.resolver = resolver;
-
     /// <inheritdoc />
     public void Dispatch<TMessage, TConsumer>(TMessage message, CancellationToken cancellationToken = default)
         where TMessage : class

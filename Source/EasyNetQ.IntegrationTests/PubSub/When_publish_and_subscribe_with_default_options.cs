@@ -23,7 +23,7 @@ public class When_publish_and_subscribe_with_default_options : IDisposable
 
     public void Dispose()
     {
-        serviceProvider.Dispose();
+        serviceProvider?.Dispose();
     }
 
     private const int MessagesCount = 10;

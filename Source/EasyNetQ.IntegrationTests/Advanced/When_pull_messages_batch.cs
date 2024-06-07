@@ -20,7 +20,7 @@ public class When_pull_messages_batch : IDisposable
 
     public void Dispose()
     {
-        serviceProvider.Dispose();
+        serviceProvider?.Dispose();
     }
 
     [Fact]

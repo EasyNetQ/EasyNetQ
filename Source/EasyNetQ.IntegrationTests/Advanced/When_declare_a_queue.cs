@@ -19,7 +19,7 @@ public class When_declare_a_queue : IDisposable
 
     public void Dispose()
     {
-        serviceProvider.Dispose();
+        serviceProvider?.Dispose();
     }
 
     [Fact]

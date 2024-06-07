@@ -19,7 +19,7 @@ public class When_request_and_respond_polymorphic : IDisposable
 
     public void Dispose()
     {
-        serviceProvider.Dispose();
+        serviceProvider?.Dispose();
     }
 
     [Fact]

@@ -24,7 +24,7 @@ public class When_send_receive_with_default_options : IDisposable
 
     public void Dispose()
     {
-        serviceProvider.Dispose();
+        serviceProvider?.Dispose();
     }
 
 

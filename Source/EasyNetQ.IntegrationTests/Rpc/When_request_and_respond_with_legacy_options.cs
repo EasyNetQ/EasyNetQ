@@ -20,7 +20,7 @@ public class When_request_and_respond_with_legacy_options : IDisposable
 
     public void Dispose()
     {
-        serviceProvider.Dispose();
+        serviceProvider?.Dispose();
     }
 
     [Fact]

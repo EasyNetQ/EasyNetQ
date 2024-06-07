@@ -20,7 +20,7 @@ public class When_publish_and_subscribe_with_topic : IDisposable
 
     public void Dispose()
     {
-        serviceProvider.Dispose();
+        serviceProvider?.Dispose();
     }
 
     private const int MessagesCount = 10;

@@ -21,7 +21,7 @@ public class When_publish_to_non_existent_exchange : IDisposable
 
     public void Dispose()
     {
-        serviceProvider.Dispose();
+        serviceProvider?.Dispose();
     }
 
     [Fact]

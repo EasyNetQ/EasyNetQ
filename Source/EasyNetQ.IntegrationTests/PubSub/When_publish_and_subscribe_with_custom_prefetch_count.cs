@@ -21,7 +21,7 @@ public class When_publish_and_subscribe_with_custom_prefetch_count : IDisposable
 
     public void Dispose()
     {
-        serviceProvider.Dispose();
+        serviceProvider?.Dispose();
     }
 
     private const int MessagesCount = 10;

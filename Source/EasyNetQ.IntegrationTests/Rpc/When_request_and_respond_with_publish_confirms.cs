@@ -19,7 +19,7 @@ public class When_request_and_respond_with_publish_confirms : IDisposable
 
     public void Dispose()
     {
-        serviceProvider.Dispose();
+        serviceProvider?.Dispose();
     }
 
     [Fact]

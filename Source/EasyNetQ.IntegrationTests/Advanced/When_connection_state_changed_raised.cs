@@ -23,7 +23,7 @@ public class When_connection_state_changed_raised : IDisposable
 
     public void Dispose()
     {
-        serviceProvider.Dispose();
+        serviceProvider?.Dispose();
     }
 
     private readonly IManagementClient managementClient;

@@ -49,6 +49,6 @@ public class When_consumer_with_auto_ack : IDisposable
 
     public void Dispose()
     {
-        serviceProvider.Dispose();
+        serviceProvider?.Dispose();
     }
 }

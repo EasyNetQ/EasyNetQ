@@ -19,7 +19,7 @@ public class When_connected_event_raised : IDisposable
 
     public void Dispose()
     {
-        serviceProvider.Dispose();
+        serviceProvider?.Dispose();
     }
 
     [Fact]

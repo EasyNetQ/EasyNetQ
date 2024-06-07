@@ -20,7 +20,7 @@ public class When_published_with_mandatory_and_with_publisher_confirms : IDispos
 
     public void Dispose()
     {
-        serviceProvider.Dispose();
+        serviceProvider?.Dispose();
     }
 
     [Fact]

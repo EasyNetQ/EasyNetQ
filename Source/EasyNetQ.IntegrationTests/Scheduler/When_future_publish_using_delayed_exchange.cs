@@ -21,7 +21,7 @@ public class When_publish_and_subscribe_with_delay_using_delay_exchange : IDispo
 
     public void Dispose()
     {
-        serviceProvider.Dispose();
+        serviceProvider?.Dispose();
     }
 
     private const int MessagesCount = 10;

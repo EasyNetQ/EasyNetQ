@@ -45,6 +45,6 @@ public class When_request_and_respond_in_flight_during_shutdown : IDisposable
 
     public void Dispose()
     {
-        serviceProvider.Dispose();
+        serviceProvider?.Dispose();
     }
 }

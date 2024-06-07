@@ -46,6 +46,6 @@ public class When_consumer_callback_does_not_respect_ct : IDisposable
 
     public void Dispose()
     {
-        serviceProvider.Dispose();
+        serviceProvider?.Dispose();
     }
 }

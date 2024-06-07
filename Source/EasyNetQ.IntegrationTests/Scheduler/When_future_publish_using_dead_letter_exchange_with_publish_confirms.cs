@@ -24,7 +24,7 @@ public class When_publish_and_subscribe_using_delay_using_dead_letter_exchange_w
 
     public void Dispose()
     {
-        serviceProvider.Dispose();
+        serviceProvider?.Dispose();
     }
 
     private const int MessagesCount = 10;

@@ -60,7 +60,7 @@ public class ProgramIntegrationTests
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddEasyNetQ("host=localhost");
 
-        var provider = serviceCollection.BuildServiceProvider();
+        using var provider = serviceCollection.BuildServiceProvider();
 
         var bus = provider.GetRequiredService<IBus>();
 
@@ -68,8 +68,6 @@ public class ProgramIntegrationTests
         {
             bus.PubSub.Publish(new TestMessage { Text = string.Format("\n>>>>>> Message {0}\n", i) });
         }
-
-        provider.Dispose();
     }
 
     public void ConsumeMessages()
@@ -77,14 +75,11 @@ public class ProgramIntegrationTests
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddEasyNetQ("host=localhost");
 
-        var provider = serviceCollection.BuildServiceProvider();
-
+        using var provider = serviceCollection.BuildServiceProvider();
         var bus = provider.GetRequiredService<IBus>();
         bus.PubSub.Subscribe<TestMessage>("hosepipe", message => Console.WriteLine(message.Text));
 
         Thread.Sleep(1000);
-
-        provider.Dispose();
     }
 
     private sealed class TestMessage

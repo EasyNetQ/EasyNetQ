@@ -20,7 +20,7 @@ public class When_declare_an_exchange_with_different_properties : IDisposable
 
     public void Dispose()
     {
-        serviceProvider.Dispose();
+        serviceProvider?.Dispose();
     }
 
     [Fact]

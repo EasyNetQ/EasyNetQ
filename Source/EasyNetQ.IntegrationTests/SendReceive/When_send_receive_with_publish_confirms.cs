@@ -20,7 +20,7 @@ public class When_send_receive_with_publish_confirms : IDisposable
 
     public void Dispose()
     {
-        serviceProvider.Dispose();
+        serviceProvider?.Dispose();
     }
 
     private const int MessagesCount = 10;
