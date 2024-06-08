@@ -99,7 +99,7 @@ public class SerializerTests
                 { "Bytes", new byte[] { 12 } },
                 { "List", new[] { "13" } },
                 { "Dictionary", new Dictionary<string, object> { { "14", 15 } } },
-                { "BinaryTable", new BinaryTableValue(new byte[] {16})}
+                { "BinaryTable", new BinaryTableValue([16])}
             }
         };
 
@@ -131,10 +131,10 @@ public class SerializerTests
 
     public static IEnumerable<object[]> GetSerializers()
     {
-        yield return new object[] { "Newtonsoft", new NewtonsoftJsonSerializer() };
-        yield return new object[] { "Default", new ReflectionBasedNewtonsoftJsonSerializer() };
-        yield return new object[] { "SystemTextJson", new SystemTextJsonSerializer() };
-        yield return new object[] { "SystemTextJsonV2", new SystemTextJsonSerializerV2() };
+        yield return ["Newtonsoft", new NewtonsoftJsonSerializer()];
+        yield return ["Default", new ReflectionBasedNewtonsoftJsonSerializer()];
+        yield return ["SystemTextJson", new SystemTextJsonSerializer()];
+        yield return ["SystemTextJsonV2", new SystemTextJsonSerializerV2()];
     }
 
     private class A

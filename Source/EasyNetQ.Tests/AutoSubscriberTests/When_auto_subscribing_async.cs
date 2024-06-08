@@ -26,7 +26,7 @@ public class When_auto_subscribing_async : IDisposable
         serviceProvider = services.BuildServiceProvider();
 
         var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, serviceProvider, "my_app");
-        autoSubscriber.Subscribe(new[] { typeof(MyAsyncConsumer) });
+        autoSubscriber.Subscribe([typeof(MyAsyncConsumer)]);
     }
 
     public void Dispose()

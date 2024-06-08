@@ -13,8 +13,8 @@ public class ApprovalTests
         var publicApi = type?.Assembly.GeneratePublicApi(new ApiGeneratorOptions
         {
             IncludeAssemblyAttributes = false,
-            AllowNamespacePrefixes = new[] { "Microsoft.Extensions.DependencyInjection" },
-            ExcludeAttributes = new[] { "System.Diagnostics.DebuggerDisplayAttribute" },
+            AllowNamespacePrefixes = ["Microsoft.Extensions.DependencyInjection"],
+            ExcludeAttributes = ["System.Diagnostics.DebuggerDisplayAttribute"],
         });
 
         publicApi.ShouldMatchApproved(options => options.WithFilenameGenerator((_, _, fileType, fileExtension) => $"{type.Assembly.GetName().Name}.{fileType}.{fileExtension}"));

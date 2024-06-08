@@ -36,7 +36,7 @@ public class When_auto_subscribing_async_with_subscription_configuration_action_
             .Returns(Task.FromResult(new SubscriptionResult()))
             .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
 
-        autoSubscriber.Subscribe(new[] { typeof(MyConsumerWithActionAndAttribute) });
+        autoSubscriber.Subscribe([typeof(MyConsumerWithActionAndAttribute)]);
     }
 
     [Fact]

@@ -75,15 +75,15 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         Unblocked += advancedBusEventHandlers.Unblocked;
         MessageReturned += advancedBusEventHandlers.MessageReturned;
 
-        eventSubscriptions = new[]
-        {
+        eventSubscriptions =
+        [
             this.eventBus.Subscribe<ConnectionCreatedEvent>(OnConnectionCreated),
             this.eventBus.Subscribe<ConnectionRecoveredEvent>(OnConnectionRecovered),
             this.eventBus.Subscribe<ConnectionDisconnectedEvent>(OnConnectionDisconnected),
             this.eventBus.Subscribe<ConnectionBlockedEvent>(OnConnectionBlocked),
             this.eventBus.Subscribe<ConnectionUnblockedEvent>(OnConnectionUnblocked),
-            this.eventBus.Subscribe<ReturnedMessageEvent>(OnMessageReturned),
-        };
+            this.eventBus.Subscribe<ReturnedMessageEvent>(OnMessageReturned)
+        ];
 
         produceDelegate = producePipelineBuilder.Use(_ => PublishInternalAsync).Build();
     }

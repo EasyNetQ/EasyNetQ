@@ -29,7 +29,7 @@ public class When_auto_subscribing_with_subscription_configuration_attribute_no_
             .Returns(Task.FromResult(new SubscriptionResult()))
             .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
 
-        autoSubscriber.Subscribe(new[] { typeof(MyConsumerWithAttr) });
+        autoSubscriber.Subscribe([typeof(MyConsumerWithAttr)]);
     }
 
     [Fact]

@@ -75,7 +75,7 @@ public class AutoSubscriber
         {
             var awaitableSubscriptionResult = (Task<SubscriptionResult>)AutoSubscribeAsyncConsumerMethodInfo
                 .MakeGenericMethod(subscriberConsumerInfo.MessageType, subscriberConsumerInfo.ConcreteType)
-                .Invoke(this, new object[] { subscriberConsumerInfo, cancellationToken })!;
+                .Invoke(this, [subscriberConsumerInfo, cancellationToken])!;
 
             subscriptions.Add(await awaitableSubscriptionResult.ConfigureAwait(false));
         }
@@ -84,7 +84,7 @@ public class AutoSubscriber
         {
             var awaitableSubscriptionResult = (Task<SubscriptionResult>)AutoSubscribeConsumerMethodInfo
                 .MakeGenericMethod(subscriberConsumerInfo.MessageType, subscriberConsumerInfo.ConcreteType)
-                .Invoke(this, new object[] { subscriberConsumerInfo, cancellationToken })!;
+                .Invoke(this, [subscriberConsumerInfo, cancellationToken])!;
 
             subscriptions.Add(await awaitableSubscriptionResult.ConfigureAwait(false));
         }

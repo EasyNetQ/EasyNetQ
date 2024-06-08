@@ -18,7 +18,7 @@ public class MessageFactoryTests
 
     public static IEnumerable<object[]> GetSerializers()
     {
-        yield return new object[] { new MyMessage { Text = "Hello World" } };
-        yield return new object[] { Guid.NewGuid() };
+        yield return [new MyMessage { Text = "Hello World" }];
+        yield return [Guid.NewGuid()];
     }
 }

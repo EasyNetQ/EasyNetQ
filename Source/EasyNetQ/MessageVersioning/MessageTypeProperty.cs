@@ -30,7 +30,7 @@ public class MessageTypeProperty
         this.typeNameSerializer = typeNameSerializer;
         this.firstAlternativeMessageType = firstAlternativeMessageType;
         alternativeTypes = (alternativeTypesHeader ?? "")
-            .Split(new[] { AlternativeMessageTypeSeparator }, StringSplitOptions.RemoveEmptyEntries)
+            .Split([AlternativeMessageTypeSeparator], StringSplitOptions.RemoveEmptyEntries)
             .ToList();
     }
 
