@@ -12,8 +12,8 @@ var serviceCollection = new ServiceCollection();
 
 serviceCollection.AddLogging(builder => builder.AddConsole());
 serviceCollection.AddEasyNetQ("host=localhost")
-    .EnableNewtonsoftJson()
-    .EnableAlwaysAckConsumerErrorStrategy();
+    .UseNewtonsoftJson()
+    .UseAlwaysAckConsumerErrorStrategy();
 
 var provider = serviceCollection.BuildServiceProvider();
 

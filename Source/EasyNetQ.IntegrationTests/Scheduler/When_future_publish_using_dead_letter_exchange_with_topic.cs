@@ -14,7 +14,7 @@ public class When_publish_and_subscribe_with_delay_using_dead_letter_exchange_wi
         var connectionString = $"host={fixture.Host};prefetchCount=1;timeout=5";
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddEasyNetQ(connectionString)
-            .EnableDelayedExchangeScheduler();
+            .UseDelayedExchangeScheduler();
 
         serviceProvider = serviceCollection.BuildServiceProvider();
         bus = serviceProvider.GetRequiredService<IBus>();

@@ -2,8 +2,8 @@ namespace EasyNetQ
 {
     public static class EasyNetQBuilderNewtonsoftExtensions
     {
-        public static EasyNetQ.IEasyNetQBuilder EnableNewtonsoftJson(this EasyNetQ.IEasyNetQBuilder builder) { }
-        public static EasyNetQ.IEasyNetQBuilder EnableNewtonsoftJson(this EasyNetQ.IEasyNetQBuilder builder, Newtonsoft.Json.JsonSerializerSettings settings) { }
+        public static EasyNetQ.IEasyNetQBuilder UseNewtonsoftJson(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder UseNewtonsoftJson(this EasyNetQ.IEasyNetQBuilder builder, Newtonsoft.Json.JsonSerializerSettings settings) { }
     }
 }
 namespace EasyNetQ.Serialization.NewtonsoftJson

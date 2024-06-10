@@ -13,7 +13,7 @@ public class When_publish_and_subscribe_with_delay_using_delay_exchange : IDispo
     {
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddEasyNetQ($"host={fixture.Host};prefetchCount=1;timeout=-1")
-            .EnableDelayedExchangeScheduler();
+            .UseDelayedExchangeScheduler();
 
         serviceProvider = serviceCollection.BuildServiceProvider();
         bus = serviceProvider.GetRequiredService<IBus>();

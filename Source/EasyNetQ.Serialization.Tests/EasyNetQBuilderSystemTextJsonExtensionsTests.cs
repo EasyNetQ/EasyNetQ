@@ -24,8 +24,8 @@ public class EasyNetQBuilderSystemTextJsonExtensionsTests
 
     public static IEnumerable<object[]> GetSerializerRegisterActions()
     {
-        yield return [GetRegisterAction(x => x.EnableNewtonsoftJson()), typeof(NewtonsoftJsonSerializer)];
-        yield return [GetRegisterAction(x => x.EnableSystemTextJson()), typeof(SystemTextJsonSerializer)];
+        yield return [GetRegisterAction(x => x.UseNewtonsoftJson()), typeof(NewtonsoftJsonSerializer)];
+        yield return [GetRegisterAction(x => x.UseSystemTextJson()), typeof(SystemTextJsonSerializer)];
     }
 
     private static Action<IEasyNetQBuilder> GetRegisterAction(Action<IEasyNetQBuilder> action) => action;

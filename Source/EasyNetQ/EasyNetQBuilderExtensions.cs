@@ -12,7 +12,7 @@ namespace EasyNetQ;
 
 public static class EasyNetQBuilderExtensions
 {
-    public static IEasyNetQBuilder EnableMultiChannelClientCommandDispatcher(
+    public static IEasyNetQBuilder UseMultiChannelClientCommandDispatcher(
         this IEasyNetQBuilder builder, int channelsCount
     )
     {
@@ -27,38 +27,38 @@ public static class EasyNetQBuilderExtensions
         return builder;
     }
 
-    public static IEasyNetQBuilder EnableLegacyTypeNaming(this IEasyNetQBuilder builder)
+    public static IEasyNetQBuilder UseLegacyTypeNaming(this IEasyNetQBuilder builder)
     {
         builder.Services.AddSingleton<ITypeNameSerializer, LegacyTypeNameSerializer>();
         return builder;
     }
 
-    public static IEasyNetQBuilder EnableLegacyRpcConventions(this IEasyNetQBuilder builder)
+    public static IEasyNetQBuilder UseLegacyRpcConventions(this IEasyNetQBuilder builder)
     {
         builder.Services.AddSingleton<IConventions, LegacyRpcConventions>();
         return builder;
     }
 
-    public static IEasyNetQBuilder EnableLegacyConventions(this IEasyNetQBuilder builder)
+    public static IEasyNetQBuilder UseLegacyConventions(this IEasyNetQBuilder builder)
     {
         return builder
-            .EnableLegacyTypeNaming()
-            .EnableLegacyRpcConventions();
+            .UseLegacyTypeNaming()
+            .UseLegacyRpcConventions();
     }
 
-    public static IEasyNetQBuilder EnableDelayedExchangeScheduler(this IEasyNetQBuilder builder)
+    public static IEasyNetQBuilder UseDelayedExchangeScheduler(this IEasyNetQBuilder builder)
     {
         builder.Services.AddSingleton<IScheduler, DelayedExchangeScheduler>();
         return builder;
     }
 
-    public static IEasyNetQBuilder EnableAdvancedMessagePolymorphism(this IEasyNetQBuilder builder)
+    public static IEasyNetQBuilder UseAdvancedMessagePolymorphism(this IEasyNetQBuilder builder)
     {
         builder.Services.AddSingleton<IExchangeDeclareStrategy, MultipleExchangeDeclareStrategy>();
         return builder;
     }
 
-    public static IEasyNetQBuilder EnableMessageVersioning(this IEasyNetQBuilder builder)
+    public static IEasyNetQBuilder UseVersionedMessage(this IEasyNetQBuilder builder)
     {
         builder.Services
             .AddSingleton<IExchangeDeclareStrategy, VersionedExchangeDeclareStrategy>()
@@ -66,19 +66,19 @@ public static class EasyNetQBuilderExtensions
         return builder;
     }
 
-    public static IEasyNetQBuilder EnableAlwaysAckConsumerErrorStrategy(this IEasyNetQBuilder builder)
+    public static IEasyNetQBuilder UseAlwaysAckConsumerErrorStrategy(this IEasyNetQBuilder builder)
     {
         builder.Services.AddSingleton<IConsumeErrorStrategy>(SimpleConsumeErrorStrategy.Ack);
         return builder;
     }
 
-    public static IEasyNetQBuilder EnableAlwaysNackWithRequeueConsumerErrorStrategy(this IEasyNetQBuilder builder)
+    public static IEasyNetQBuilder UseAlwaysNackWithRequeueConsumerErrorStrategy(this IEasyNetQBuilder builder)
     {
         builder.Services.AddSingleton<IConsumeErrorStrategy>(SimpleConsumeErrorStrategy.NackWithRequeue);
         return builder;
     }
 
-    public static IEasyNetQBuilder EnableAlwaysNackWithoutRequeueConsumerErrorStrategy(this IEasyNetQBuilder builder)
+    public static IEasyNetQBuilder UseAlwaysNackWithoutRequeueConsumerErrorStrategy(this IEasyNetQBuilder builder)
     {
         builder.Services.AddSingleton<IConsumeErrorStrategy>(SimpleConsumeErrorStrategy.NackWithoutRequeue);
         return builder;

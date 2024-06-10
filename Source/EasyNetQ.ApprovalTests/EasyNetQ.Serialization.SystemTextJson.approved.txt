@@ -2,10 +2,10 @@ namespace EasyNetQ
 {
     public static class EasyNetQBuilderSystemTextJsonExtensions
     {
-        public static EasyNetQ.IEasyNetQBuilder EnableSystemTextJson(this EasyNetQ.IEasyNetQBuilder builder) { }
-        public static EasyNetQ.IEasyNetQBuilder EnableSystemTextJson(this EasyNetQ.IEasyNetQBuilder builder, System.Text.Json.JsonSerializerOptions options) { }
-        public static EasyNetQ.IEasyNetQBuilder EnableSystemTextJsonV2(this EasyNetQ.IEasyNetQBuilder builder) { }
-        public static EasyNetQ.IEasyNetQBuilder EnableSystemTextJsonV2(this EasyNetQ.IEasyNetQBuilder builder, System.Text.Json.JsonSerializerOptions options) { }
+        public static EasyNetQ.IEasyNetQBuilder UseSystemTextJson(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder UseSystemTextJson(this EasyNetQ.IEasyNetQBuilder builder, System.Text.Json.JsonSerializerOptions options) { }
+        public static EasyNetQ.IEasyNetQBuilder UseSystemTextJsonV2(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder UseSystemTextJsonV2(this EasyNetQ.IEasyNetQBuilder builder, System.Text.Json.JsonSerializerOptions options) { }
     }
 }
 namespace EasyNetQ.Serialization.SystemTextJson

@@ -12,7 +12,7 @@ public class When_request_and_respond_with_legacy_options : IDisposable
     {
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddEasyNetQ($"host={fixture.Host};prefetchCount=1;timeout=-1")
-            .EnableLegacyConventions();
+            .UseLegacyConventions();
 
         serviceProvider = serviceCollection.BuildServiceProvider();
         bus = serviceProvider.GetRequiredService<IBus>();
