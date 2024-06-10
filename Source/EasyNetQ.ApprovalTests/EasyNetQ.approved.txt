@@ -288,20 +288,20 @@ namespace EasyNetQ
     }
     public static class EasyNetQBuilderExtensions
     {
-        public static EasyNetQ.IEasyNetQBuilder EnableAdvancedMessagePolymorphism(this EasyNetQ.IEasyNetQBuilder builder) { }
-        public static EasyNetQ.IEasyNetQBuilder EnableAlwaysAckConsumerErrorStrategy(this EasyNetQ.IEasyNetQBuilder builder) { }
-        public static EasyNetQ.IEasyNetQBuilder EnableAlwaysNackWithRequeueConsumerErrorStrategy(this EasyNetQ.IEasyNetQBuilder builder) { }
-        public static EasyNetQ.IEasyNetQBuilder EnableAlwaysNackWithoutRequeueConsumerErrorStrategy(this EasyNetQ.IEasyNetQBuilder builder) { }
-        public static EasyNetQ.IEasyNetQBuilder EnableDelayedExchangeScheduler(this EasyNetQ.IEasyNetQBuilder builder) { }
-        public static EasyNetQ.IEasyNetQBuilder EnableLegacyConventions(this EasyNetQ.IEasyNetQBuilder builder) { }
-        public static EasyNetQ.IEasyNetQBuilder EnableLegacyRpcConventions(this EasyNetQ.IEasyNetQBuilder builder) { }
-        public static EasyNetQ.IEasyNetQBuilder EnableLegacyTypeNaming(this EasyNetQ.IEasyNetQBuilder builder) { }
-        public static EasyNetQ.IEasyNetQBuilder EnableMessageVersioning(this EasyNetQ.IEasyNetQBuilder builder) { }
-        public static EasyNetQ.IEasyNetQBuilder EnableMultiChannelClientCommandDispatcher(this EasyNetQ.IEasyNetQBuilder builder, int channelsCount) { }
+        public static EasyNetQ.IEasyNetQBuilder UseAdvancedMessagePolymorphism(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder UseAlwaysAckConsumerErrorStrategy(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder UseAlwaysNackWithRequeueConsumerErrorStrategy(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder UseAlwaysNackWithoutRequeueConsumerErrorStrategy(this EasyNetQ.IEasyNetQBuilder builder) { }
         public static EasyNetQ.Consumer.ConsumePipelineBuilder UseConsumeErrorStrategy(this EasyNetQ.Consumer.ConsumePipelineBuilder pipelineBuilder) { }
         public static EasyNetQ.Consumer.ConsumePipelineBuilder UseConsumeInterceptors(this EasyNetQ.Consumer.ConsumePipelineBuilder pipelineBuilder) { }
+        public static EasyNetQ.IEasyNetQBuilder UseDelayedExchangeScheduler(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder UseLegacyConventions(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder UseLegacyRpcConventions(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder UseLegacyTypeNaming(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder UseMultiChannelClientCommandDispatcher(this EasyNetQ.IEasyNetQBuilder builder, int channelsCount) { }
         public static EasyNetQ.Producer.ProducePipelineBuilder UseProduceInterceptors(this EasyNetQ.Producer.ProducePipelineBuilder pipelineBuilder) { }
         public static EasyNetQ.Consumer.ConsumePipelineBuilder UseScope(this EasyNetQ.Consumer.ConsumePipelineBuilder pipelineBuilder) { }
+        public static EasyNetQ.IEasyNetQBuilder UseVersionedMessage(this EasyNetQ.IEasyNetQBuilder builder) { }
     }
     [System.Serializable]
     public class EasyNetQException : System.Exception

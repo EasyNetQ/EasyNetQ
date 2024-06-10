@@ -10,8 +10,8 @@ var serviceCollection = new ServiceCollection();
 
 serviceCollection.AddLogging(builder => builder.AddConsole());
 serviceCollection.AddEasyNetQ("host=localhost;publisherConfirms=True")
-    .EnableNewtonsoftJson()
-    .EnableAlwaysNackWithoutRequeueConsumerErrorStrategy();
+    .UseNewtonsoftJson()
+    .UseAlwaysNackWithoutRequeueConsumerErrorStrategy();
 
 var provider = serviceCollection.BuildServiceProvider();
 

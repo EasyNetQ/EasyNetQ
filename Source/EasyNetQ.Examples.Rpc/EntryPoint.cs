@@ -9,8 +9,8 @@ var serviceCollection = new ServiceCollection();
 
 serviceCollection.AddLogging(builder => builder.AddConsole());
 serviceCollection.AddEasyNetQ("host=localhost")
-    .EnableNewtonsoftJson()
-    .EnableLegacyConventions();
+    .UseNewtonsoftJson()
+    .UseLegacyConventions();
 
 var provider = serviceCollection.BuildServiceProvider();
 

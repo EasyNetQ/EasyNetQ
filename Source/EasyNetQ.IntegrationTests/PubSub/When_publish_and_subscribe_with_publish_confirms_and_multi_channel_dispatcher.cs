@@ -13,7 +13,7 @@ public class When_publish_and_subscribe_with_publish_confirms_and_multi_channel_
     {
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddEasyNetQ($"host={fixture.Host};prefetchCount=1;publisherConfirms=True")
-            .EnableMultiChannelClientCommandDispatcher(2);
+            .UseMultiChannelClientCommandDispatcher(2);
 
         serviceProvider = serviceCollection.BuildServiceProvider();
         bus = serviceProvider.GetRequiredService<IBus>();

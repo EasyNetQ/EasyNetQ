@@ -9,7 +9,7 @@ public class MessageVersioningExtensionsTests
     public void When_using_EnableMessageVersioning_extension_method_required_services_are_registered()
     {
         var serviceCollection = new ServiceCollection();
-        new EasyNetQBuilder(serviceCollection).EnableMessageVersioning();
+        new EasyNetQBuilder(serviceCollection).UseVersionedMessage();
 
         Assert.Contains(serviceCollection, descriptor =>
             descriptor.ServiceType == typeof(IExchangeDeclareStrategy) &&
