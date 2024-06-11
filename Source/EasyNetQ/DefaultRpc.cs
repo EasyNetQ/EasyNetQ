@@ -78,7 +78,7 @@ public class DefaultRpc : IRpc, IDisposable
         using var callback = DisposableAction.Create(DeRegisterResponseActions, correlationId);
 
         var queueName = await SubscribeToResponseAsync<TRequest, TResponse>(cts.Token).ConfigureAwait(false);
-        var routingKey = requestConfiguration.QueueName;
+        var routingKey = requestConfiguration.RoutingKey;
         var expiration = requestConfiguration.Expiration;
         var priority = requestConfiguration.Priority;
         var headers = requestConfiguration.MessageHeaders;
@@ -270,7 +270,8 @@ public class DefaultRpc : IRpc, IDisposable
         var responderConfiguration = new ResponderConfiguration(configuration.PrefetchCount, conventions.QueueTypeConvention(typeof(TRequest)));
         configure(responderConfiguration);
 
-        var routingKey = responderConfiguration.QueueName ?? conventions.RpcRoutingKeyNamingConvention(requestType);
+        var routingKey = responderConfiguration.RoutingKey ?? conventions.RpcRoutingKeyNamingConvention(requestType);
+        var queueName = responderConfiguration.QueueName ?? conventions.RpcRequestQueueNamingConvention(requestType, responderConfiguration.RoutingKey);
 
         var exchange = await advancedBus.ExchangeDeclareAsync(
             exchange: conventions.RpcRequestExchangeNamingConvention(requestType),
@@ -279,7 +280,7 @@ public class DefaultRpc : IRpc, IDisposable
         ).ConfigureAwait(false);
 
         var queue = await advancedBus.QueueDeclareAsync(
-            queue: routingKey,
+            queue: queueName,
             durable: responderConfiguration.Durable,
             arguments: responderConfiguration.QueueArguments,
             cancellationToken: cancellationToken

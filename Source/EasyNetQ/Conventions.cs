@@ -54,6 +54,11 @@ public delegate string ErrorExchangeRoutingKeyConvention(MessageReceivedInfo rec
 public delegate string RpcRoutingKeyNamingConvention(Type messageType);
 
 /// <summary>
+///     Convention for rpc routing key naming
+/// </summary>
+public delegate string RpcRequestQueueNameNamingConvention(Type messageType, string? routingKey);
+
+/// <summary>
 ///     Convention for RPC exchange naming
 /// </summary>
 public delegate string RpcExchangeNameConvention(Type messageType);
@@ -97,6 +102,11 @@ public interface IConventions
     ///     Convention for RPC routing key naming
     /// </summary>
     RpcRoutingKeyNamingConvention RpcRoutingKeyNamingConvention { get; }
+
+    /// <summary>
+    ///     Convention for RPC request queue naming
+    /// </summary>
+    RpcRequestQueueNameNamingConvention RpcRequestQueueNamingConvention { get; }
 
     /// <summary>
     ///     Convention for RPC request exchange naming
@@ -184,6 +194,14 @@ public class Conventions : IConventions
                 : $"{attr.Name}_{subscriptionId}";
         };
         RpcRoutingKeyNamingConvention = typeNameSerializer.Serialize;
+        RpcRequestQueueNamingConvention = (type, routingKey) =>
+        {
+            var typeName = typeNameSerializer.Serialize(type);
+
+            return string.IsNullOrEmpty(routingKey)
+                ? typeName
+                : $"{typeName}_{routingKey}";
+        };
 
         ErrorQueueNamingConvention = _ => "EasyNetQ_Default_Error_Queue";
         ErrorExchangeNamingConvention = receivedInfo => "ErrorExchange_" + receivedInfo.RoutingKey;
@@ -222,6 +240,8 @@ public class Conventions : IConventions
 
     /// <inheritdoc />
     public RpcRoutingKeyNamingConvention RpcRoutingKeyNamingConvention { get; set; }
+
+    public RpcRequestQueueNameNamingConvention RpcRequestQueueNamingConvention { get; set; }
 
     /// <inheritdoc />
     public ErrorQueueNameConvention ErrorQueueNamingConvention { get; set; }
