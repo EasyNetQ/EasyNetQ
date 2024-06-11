@@ -14,7 +14,8 @@ public sealed class NewtonsoftJsonSerializer : ISerializer
     private static readonly Newtonsoft.Json.JsonSerializerSettings DefaultSerializerSettings =
         new()
         {
-            TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Auto
+            TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Auto,
+            SerializationBinder = new NetCoreSerializationBinder()
         };
 
     private const int DefaultBufferSize = 1024;
