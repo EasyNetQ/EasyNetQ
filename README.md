@@ -1,7 +1,7 @@
 [![Build status](https://github.com/EasyNetQ/EasyNetQ/workflows/CI/badge.svg)](https://github.com/EasyNetQ/EasyNetQ/actions?query=workflow%3ACI)
 
 [![NuGet Status](https://img.shields.io/nuget/v/EasyNetQ)](https://www.nuget.org/packages/EasyNetQ)
-[![Nuget Status](https://img.shields.io/nuget/vpre/EasyNetQ)](https://www.nuget.org/packages/EasyNetQ)
+[![Nuget Status](https://img.shields.io/nuget/vpre/EasyNetQ)](https://www.nuget.org/packages/EasyNetQ/absoluteLatest)
 [![Nuget Status](https://img.shields.io/nuget/dt/EasyNetQ)](https://www.nuget.org/packages/EasyNetQ)
 
 ![Activity](https://img.shields.io/github/commit-activity/w/EasyNetQ/easynetq)
