@@ -177,6 +177,7 @@ namespace EasyNetQ
         public EasyNetQ.QueueNameConvention QueueNamingConvention { get; set; }
         public EasyNetQ.QueueTypeConvention QueueTypeConvention { get; set; }
         public EasyNetQ.RpcExchangeNameConvention RpcRequestExchangeNamingConvention { get; set; }
+        public EasyNetQ.RpcRequestQueueNameNamingConvention RpcRequestQueueNamingConvention { get; set; }
         public EasyNetQ.RpcExchangeNameConvention RpcResponseExchangeNamingConvention { get; set; }
         public EasyNetQ.RpcReturnQueueNamingConvention RpcReturnQueueNamingConvention { get; set; }
         public EasyNetQ.RpcRoutingKeyNamingConvention RpcRoutingKeyNamingConvention { get; set; }
@@ -419,6 +420,7 @@ namespace EasyNetQ
         EasyNetQ.QueueNameConvention QueueNamingConvention { get; }
         EasyNetQ.QueueTypeConvention QueueTypeConvention { get; }
         EasyNetQ.RpcExchangeNameConvention RpcRequestExchangeNamingConvention { get; }
+        EasyNetQ.RpcRequestQueueNameNamingConvention RpcRequestQueueNamingConvention { get; }
         EasyNetQ.RpcExchangeNameConvention RpcResponseExchangeNamingConvention { get; }
         EasyNetQ.RpcReturnQueueNamingConvention RpcReturnQueueNamingConvention { get; }
         EasyNetQ.RpcRoutingKeyNamingConvention RpcRoutingKeyNamingConvention { get; }
@@ -547,7 +549,7 @@ namespace EasyNetQ
         EasyNetQ.IRequestConfiguration WithHeaders(System.Collections.Generic.IDictionary<string, object?> headers);
         EasyNetQ.IRequestConfiguration WithPriority(byte priority);
         EasyNetQ.IRequestConfiguration WithPublisherConfirms(bool publisherConfirms);
-        EasyNetQ.IRequestConfiguration WithQueueName(string queueName);
+        EasyNetQ.IRequestConfiguration WithRoutingKey(string routingKey);
     }
     public interface IResponderConfiguration
     {
@@ -557,6 +559,7 @@ namespace EasyNetQ
         EasyNetQ.IResponderConfiguration WithPrefetchCount(ushort prefetchCount);
         EasyNetQ.IResponderConfiguration WithQueueName(string queueName);
         EasyNetQ.IResponderConfiguration WithQueueType(string queueType = "classic");
+        EasyNetQ.IResponderConfiguration WithRoutingKey(string routingKey);
     }
     public interface IRpc
     {
@@ -968,6 +971,7 @@ namespace EasyNetQ
         public static System.Threading.Tasks.Task<System.IDisposable> RespondAsync<TRequest, TResponse>(this EasyNetQ.IRpc rpc, System.Func<TRequest, System.Threading.Tasks.Task<TResponse>> responder, System.Threading.CancellationToken cancellationToken = default) { }
         public static System.Threading.Tasks.Task<System.IDisposable> RespondAsync<TRequest, TResponse>(this EasyNetQ.IRpc rpc, System.Func<TRequest, TResponse> responder, System.Threading.CancellationToken cancellationToken = default) { }
     }
+    public delegate string RpcRequestQueueNameNamingConvention(System.Type messageType, string? routingKey);
     public delegate string RpcReturnQueueNamingConvention(System.Type messageType);
     public delegate string RpcRoutingKeyNamingConvention(System.Type messageType);
     public static class SchedulerExtensions

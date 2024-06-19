@@ -212,7 +212,8 @@ public class When_registering_response_handler : IDisposable
         var customConventions = new Conventions(new DefaultTypeNameSerializer())
         {
             RpcRequestExchangeNamingConvention = _ => "CustomRpcExchangeName",
-            RpcRoutingKeyNamingConvention = _ => "CustomRpcRoutingKeyName"
+            RpcRoutingKeyNamingConvention = _ => "CustomRpcRoutingKeyName",
+            RpcRequestQueueNamingConvention = (_,_) => "CustomRpcRoutingKeyName",
         };
 
         mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(customConventions));
