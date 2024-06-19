@@ -8,20 +8,7 @@
     <ItemGroup>
       <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
     </ItemGroup>
-    <ItemGroup>
-      <PackageReference Include="Fody" Version="6.8.1">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
-      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
-      <PackageReference Include="MinVer" Version="5.0.0">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
-      <PackageReference Include="NullGuard.Fody" Version="3.1.1" PrivateAssets="All" />
-    </ItemGroup>
-
     <ItemGroup Condition="'$(TargetFramework)'== 'netstandard2.0'">
-      <PackageReference Include="System.Text.Json" Version="[6.0.0,)" />
+      <PackageReference Include="System.Text.Json" />
     </ItemGroup>
 </Project>
