@@ -1165,7 +1165,8 @@ namespace EasyNetQ.Consumer
         public static readonly EasyNetQ.Consumer.AckStrategy NackWithRequeue;
         public static readonly EasyNetQ.Consumer.AckStrategy NackWithoutRequeue;
     }
-    public delegate EasyNetQ.Events.AckResult AckStrategy(RabbitMQ.Client.IModel model, ulong deliveryTag);
+    public delegate System.Threading.Tasks.Task<EasyNetQ.Events.AckResult> AckStrategy(RabbitMQ.Client.IChannel model, ulong deliveryTag);
+    public delegate System.Threading.Tasks.Task AsyncEventHandler<TEventArgs>(object? sender, TEventArgs e);
     public class Base64ErrorMessageSerializer : EasyNetQ.Consumer.IErrorMessageSerializer
     {
         public Base64ErrorMessageSerializer() { }
@@ -1282,7 +1283,7 @@ namespace EasyNetQ.Consumer
     }
     public interface IInternalConsumer : System.IDisposable
     {
-        event System.EventHandler<EasyNetQ.Consumer.InternalConsumerCancelledEventArgs>? Cancelled;
+        event EasyNetQ.Consumer.AsyncEventHandler<EasyNetQ.Consumer.InternalConsumerCancelledEventArgs>? CancelledAsync;
         EasyNetQ.Consumer.InternalConsumerStatus StartConsuming(bool firstStart = true);
         void StopConsuming();
     }
@@ -1295,14 +1296,14 @@ namespace EasyNetQ.Consumer
     public class InternalConsumer : EasyNetQ.Consumer.IInternalConsumer, System.IDisposable
     {
         public InternalConsumer(System.IServiceProvider serviceResolver, Microsoft.Extensions.Logging.ILogger<EasyNetQ.Consumer.InternalConsumer> logger, EasyNetQ.Consumer.ConsumerConfiguration configuration, EasyNetQ.Consumer.IConsumerConnection connection, EasyNetQ.IEventBus eventBus) { }
-        public event System.EventHandler<EasyNetQ.Consumer.InternalConsumerCancelledEventArgs>? Cancelled;
+        public event EasyNetQ.Consumer.AsyncEventHandler<EasyNetQ.Consumer.InternalConsumerCancelledEventArgs>? CancelledAsync;
         public void Dispose() { }
         public EasyNetQ.Consumer.InternalConsumerStatus StartConsuming(bool firstStart) { }
         public void StopConsuming() { }
     }
     public class InternalConsumerCancelledEventArgs : System.EventArgs
     {
-        public InternalConsumerCancelledEventArgs(in EasyNetQ.Topology.Queue cancelled, System.Collections.Generic.IReadOnlyCollection<EasyNetQ.Topology.Queue> active) { }
+        public InternalConsumerCancelledEventArgs(EasyNetQ.Topology.Queue cancelled, System.Collections.Generic.IReadOnlyCollection<EasyNetQ.Topology.Queue> active) { }
         public System.Collections.Generic.IReadOnlyCollection<EasyNetQ.Topology.Queue> Active { get; }
         public EasyNetQ.Topology.Queue Cancelled { get; }
     }
@@ -1355,13 +1356,13 @@ namespace EasyNetQ.Events
     }
     public readonly struct ChannelRecoveredEvent : System.IEquatable<EasyNetQ.Events.ChannelRecoveredEvent>
     {
-        public ChannelRecoveredEvent(RabbitMQ.Client.IModel Channel) { }
-        public RabbitMQ.Client.IModel Channel { get; init; }
+        public ChannelRecoveredEvent(RabbitMQ.Client.IChannel Channel) { }
+        public RabbitMQ.Client.IChannel Channel { get; init; }
     }
     public readonly struct ChannelShutdownEvent : System.IEquatable<EasyNetQ.Events.ChannelShutdownEvent>
     {
-        public ChannelShutdownEvent(RabbitMQ.Client.IModel Channel) { }
-        public RabbitMQ.Client.IModel Channel { get; init; }
+        public ChannelShutdownEvent(RabbitMQ.Client.IChannel Channel) { }
+        public RabbitMQ.Client.IChannel Channel { get; init; }
     }
     public readonly struct ConnectionBlockedEvent : System.IEquatable<EasyNetQ.Events.ConnectionBlockedEvent>
     {
@@ -1393,9 +1394,9 @@ namespace EasyNetQ.Events
         public ConnectionUnblockedEvent(EasyNetQ.Persistent.PersistentConnectionType Type) { }
         public EasyNetQ.Persistent.PersistentConnectionType Type { get; init; }
     }
-    public readonly struct ConsumerModelDisposedEvent : System.IEquatable<EasyNetQ.Events.ConsumerModelDisposedEvent>
+    public readonly struct ConsumerChannelDisposedEvent : System.IEquatable<EasyNetQ.Events.ConsumerChannelDisposedEvent>
     {
-        public ConsumerModelDisposedEvent(System.Collections.Generic.IReadOnlyCollection<string> ConsumerTags) { }
+        public ConsumerChannelDisposedEvent(System.Collections.Generic.IReadOnlyCollection<string> ConsumerTags) { }
         public System.Collections.Generic.IReadOnlyCollection<string> ConsumerTags { get; init; }
     }
     public readonly struct DeliveredMessageEvent : System.IEquatable<EasyNetQ.Events.DeliveredMessageEvent>
@@ -1407,13 +1408,13 @@ namespace EasyNetQ.Events
     }
     public readonly struct MessageConfirmationEvent : System.IEquatable<EasyNetQ.Events.MessageConfirmationEvent>
     {
-        public MessageConfirmationEvent(RabbitMQ.Client.IModel Channel, ulong DeliveryTag, bool Multiple, bool IsNack) { }
-        public RabbitMQ.Client.IModel Channel { get; init; }
+        public MessageConfirmationEvent(RabbitMQ.Client.IChannel Channel, ulong DeliveryTag, bool Multiple, bool IsNack) { }
+        public RabbitMQ.Client.IChannel Channel { get; init; }
         public ulong DeliveryTag { get; init; }
         public bool IsNack { get; init; }
         public bool Multiple { get; init; }
-        public static EasyNetQ.Events.MessageConfirmationEvent Ack(RabbitMQ.Client.IModel channel, ulong deliveryTag, bool multiple) { }
-        public static EasyNetQ.Events.MessageConfirmationEvent Nack(RabbitMQ.Client.IModel channel, ulong deliveryTag, bool multiple) { }
+        public static EasyNetQ.Events.MessageConfirmationEvent Ack(RabbitMQ.Client.IChannel channel, ulong deliveryTag, bool multiple) { }
+        public static EasyNetQ.Events.MessageConfirmationEvent Nack(RabbitMQ.Client.IChannel channel, ulong deliveryTag, bool multiple) { }
     }
     public readonly struct PublishedMessageEvent : System.IEquatable<EasyNetQ.Events.PublishedMessageEvent>
     {
@@ -1425,9 +1426,9 @@ namespace EasyNetQ.Events
     }
     public readonly struct ReturnedMessageEvent : System.IEquatable<EasyNetQ.Events.ReturnedMessageEvent>
     {
-        public ReturnedMessageEvent(RabbitMQ.Client.IModel Channel, in System.ReadOnlyMemory<byte> Body, in EasyNetQ.MessageProperties Properties, in EasyNetQ.MessageReturnedInfo Info) { }
+        public ReturnedMessageEvent(RabbitMQ.Client.IChannel Channel, in System.ReadOnlyMemory<byte> Body, in EasyNetQ.MessageProperties Properties, in EasyNetQ.MessageReturnedInfo Info) { }
         public System.ReadOnlyMemory<byte> Body { get; init; }
-        public RabbitMQ.Client.IModel Channel { get; init; }
+        public RabbitMQ.Client.IChannel Channel { get; init; }
         public EasyNetQ.MessageReturnedInfo Info { get; init; }
         public EasyNetQ.MessageProperties Properties { get; init; }
     }
@@ -1658,13 +1659,13 @@ namespace EasyNetQ.Persistent
 {
     public readonly struct ActionBasedPersistentChannelAction : EasyNetQ.Persistent.IPersistentChannelAction<bool>
     {
-        public ActionBasedPersistentChannelAction(System.Action<RabbitMQ.Client.IModel> action) { }
-        public bool Invoke(RabbitMQ.Client.IModel model) { }
+        public ActionBasedPersistentChannelAction(System.Action<RabbitMQ.Client.IChannel> action) { }
+        public bool Invoke(RabbitMQ.Client.IChannel channel) { }
     }
     public readonly struct FuncBasedPersistentChannelAction<TResult> : EasyNetQ.Persistent.IPersistentChannelAction<TResult>
     {
-        public FuncBasedPersistentChannelAction(System.Func<RabbitMQ.Client.IModel, TResult> func) { }
-        public TResult Invoke(RabbitMQ.Client.IModel model) { }
+        public FuncBasedPersistentChannelAction(System.Func<RabbitMQ.Client.IChannel, TResult> func) { }
+        public TResult Invoke(RabbitMQ.Client.IChannel channel) { }
     }
     public interface IPersistentChannel : System.IDisposable
     {
@@ -1673,7 +1674,7 @@ namespace EasyNetQ.Persistent
     }
     public interface IPersistentChannelAction<out TResult>
     {
-        TResult Invoke(RabbitMQ.Client.IModel model);
+        TResult Invoke(RabbitMQ.Client.IChannel channel);
     }
     public interface IPersistentChannelFactory
     {
@@ -1682,7 +1683,7 @@ namespace EasyNetQ.Persistent
     public interface IPersistentConnection : System.IDisposable
     {
         EasyNetQ.Persistent.PersistentConnectionStatus Status { get; }
-        RabbitMQ.Client.IModel CreateModel();
+        System.Threading.Tasks.Task<RabbitMQ.Client.IChannel> CreateChannelAsync();
         void EnsureConnected();
     }
     public class PersistentChannel : EasyNetQ.Persistent.IPersistentChannel, System.IDisposable
@@ -1706,7 +1707,7 @@ namespace EasyNetQ.Persistent
     {
         public PersistentConnection(EasyNetQ.Persistent.PersistentConnectionType type, Microsoft.Extensions.Logging.ILogger<EasyNetQ.Persistent.IPersistentConnection> logger, EasyNetQ.ConnectionConfiguration configuration, RabbitMQ.Client.IConnectionFactory connectionFactory, EasyNetQ.IEventBus eventBus) { }
         public EasyNetQ.Persistent.PersistentConnectionStatus Status { get; }
-        public RabbitMQ.Client.IModel CreateModel() { }
+        public System.Threading.Tasks.Task<RabbitMQ.Client.IChannel> CreateChannelAsync() { }
         public void Dispose() { }
         public void EnsureConnected() { }
     }
@@ -1735,7 +1736,7 @@ namespace EasyNetQ.Producer
     public interface IProducerConnection : EasyNetQ.Persistent.IPersistentConnection, System.IDisposable { }
     public interface IPublishConfirmationListener : System.IDisposable
     {
-        EasyNetQ.Producer.IPublishPendingConfirmation CreatePendingConfirmation(RabbitMQ.Client.IModel model);
+        EasyNetQ.Producer.IPublishPendingConfirmation CreatePendingConfirmation(RabbitMQ.Client.IChannel chennel);
     }
     public interface IPublishPendingConfirmation
     {
@@ -1769,7 +1770,7 @@ namespace EasyNetQ.Producer
     public class PublishConfirmationListener : EasyNetQ.Producer.IPublishConfirmationListener, System.IDisposable
     {
         public PublishConfirmationListener(EasyNetQ.IEventBus eventBus) { }
-        public EasyNetQ.Producer.IPublishPendingConfirmation CreatePendingConfirmation(RabbitMQ.Client.IModel model) { }
+        public EasyNetQ.Producer.IPublishPendingConfirmation CreatePendingConfirmation(RabbitMQ.Client.IChannel channel) { }
         public void Dispose() { }
     }
     [System.Serializable]
