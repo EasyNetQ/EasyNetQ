@@ -16,7 +16,7 @@ public class When_an_action_is_invoked_that_throws_using_multi_channel : IDispos
         var producerConnection = Substitute.For<IProducerConnection>();
         var consumerConnection = Substitute.For<IConsumerConnection>();
         var channel = Substitute.For<IPersistentChannel>();
-        var model = Substitute.For<IModel>();
+        var model = Substitute.For<IChannel>();
 
         channelFactory.CreatePersistentChannel(producerConnection, new PersistentChannelOptions()).Returns(channel);
         channel.InvokeChannelActionAsync<int, FuncBasedPersistentChannelAction<int>>(default)

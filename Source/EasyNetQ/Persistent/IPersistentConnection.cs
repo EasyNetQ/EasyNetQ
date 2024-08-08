@@ -21,5 +21,5 @@ public interface IPersistentConnection : IDisposable
     ///     Creates a new channel
     /// </summary>
     /// <returns>New channel</returns>
-    IModel CreateModel();
+    Task<IChannel> CreateChannelAsync();
 }

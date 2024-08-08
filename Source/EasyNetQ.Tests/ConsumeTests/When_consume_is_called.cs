@@ -22,9 +22,9 @@ public class When_consume_is_called : ConsumerTestBase
     }
 
     [Fact]
-    public void Should_invoke_basic_consume_on_channel()
+    public async Task Should_invoke_basic_consume_on_channel()
     {
-        MockBuilder.Channels[0].Received().BasicConsume(
+        await MockBuilder.Channels[0].Received().BasicConsumeAsync(
             Arg.Is("my_queue"),
             Arg.Is(false),
             Arg.Is(ConsumerTag),

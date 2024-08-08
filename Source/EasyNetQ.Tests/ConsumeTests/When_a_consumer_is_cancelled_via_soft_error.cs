@@ -21,10 +21,10 @@ public class When_a_consumer_is_cancelled_via_soft_error : IDisposable
             c => c.WithConsumerTag("consumer_tag")
         );
 
-        mockBuilder.Consumers[0].Model.CloseReason.Returns(
+        mockBuilder.Consumers[0].Channel.CloseReason.Returns(
             new ShutdownEventArgs(ShutdownInitiator.Application, AmqpErrorCodes.PreconditionFailed, "Oops")
         );
-        mockBuilder.Consumers[0].HandleBasicCancel("consumer_tag").GetAwaiter().GetResult();
+        mockBuilder.Consumers[0].HandleBasicCancelAsync("consumer_tag").GetAwaiter().GetResult();
         // Wait for a periodic consumer restart
         Task.Delay(TimeSpan.FromSeconds(10)).GetAwaiter().GetResult();
     }
@@ -37,7 +37,7 @@ public class When_a_consumer_is_cancelled_via_soft_error : IDisposable
     [Fact]
     public void Should_recreate_model_and_consumer()
     {
-        mockBuilder.Consumers[0].Model.Received().Dispose();
-        mockBuilder.Consumers[1].Model.DidNotReceive().Dispose();
+        mockBuilder.Consumers[0].Channel.Received().Dispose();
+        mockBuilder.Consumers[1].Channel.DidNotReceive().Dispose();
     }
 }

@@ -5,7 +5,7 @@ namespace EasyNetQ.Hosepipe;
 
 public static class HosepipeConnection
 {
-    public static IConnection FromParameters(QueueParameters parameters)
+    public static async Task<IConnection> FromParametersAsync(QueueParameters parameters)
     {
         var connectionFactory = new ConnectionFactory
         {
@@ -27,7 +27,7 @@ public static class HosepipeConnection
 
         try
         {
-            return connectionFactory.CreateConnection();
+            return await connectionFactory.CreateConnectionAsync();
         }
         catch (BrokerUnreachableException)
         {

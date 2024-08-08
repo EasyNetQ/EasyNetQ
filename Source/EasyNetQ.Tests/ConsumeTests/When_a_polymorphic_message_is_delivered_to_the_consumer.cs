@@ -23,7 +23,7 @@ public class When_a_polymorphic_message_is_delivered_to_the_consumer : IDisposab
             Type = new DefaultTypeNameSerializer().Serialize(typeof(Implementation))
         };
 
-        mockBuilder.Consumers[0].HandleBasicDeliver(
+        mockBuilder.Consumers[0].HandleBasicDeliverAsync(
             "consumer_tag",
             0,
             false,

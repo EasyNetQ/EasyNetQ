@@ -31,9 +31,9 @@ public class When_a_queue_is_declared : IDisposable
     private readonly Queue queue;
 
     [Fact]
-    public void Should_declare_the_queue()
+    public async Task Should_declare_the_queue()
     {
-        mockBuilder.Channels[0].Received().QueueDeclare(
+        await mockBuilder.Channels[0].Received().QueueDeclareAsync(
             Arg.Is("my_queue"),
             Arg.Is(false),
             Arg.Is(true),
@@ -84,9 +84,9 @@ public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange : IDisposa
     private readonly Queue queue;
 
     [Fact]
-    public void Should_declare_the_queue()
+    public async Task Should_declare_the_queue()
     {
-        mockBuilder.Channels[0].Received().QueueDeclare(
+        await mockBuilder.Channels[0].Received().QueueDeclareAsync(
             Arg.Is("my_queue"),
             Arg.Is(false),
             Arg.Is(true),
@@ -138,9 +138,9 @@ public class When_a_queue_is_declared_With_EmptyDeadLetterExchange : IDisposable
     private readonly Queue queue;
 
     [Fact]
-    public void Should_declare_the_queue()
+    public async Task Should_declare_the_queue()
     {
-        mockBuilder.Channels[0].Received().QueueDeclare(
+        await mockBuilder.Channels[0].Received().QueueDeclareAsync(
             Arg.Is("my_queue"),
             Arg.Is(false),
             Arg.Is(true),
@@ -180,9 +180,9 @@ public class When_a_queue_is_deleted : IDisposable
     private readonly MockBuilder mockBuilder;
 
     [Fact]
-    public void Should_delete_the_queue()
+    public async Task Should_delete_the_queue()
     {
-        mockBuilder.Channels[0].Received().QueueDelete("my_queue", false, false);
+        await mockBuilder.Channels[0].Received().QueueDeleteAsync("my_queue", false, false);
     }
 }
 
@@ -203,9 +203,9 @@ public class When_a_queue_is_deleted_with_name : IDisposable
     private readonly MockBuilder mockBuilder;
 
     [Fact]
-    public void Should_delete_the_queue()
+    public async Task Should_delete_the_queue()
     {
-        mockBuilder.Channels[0].Received().QueueDelete("my_queue", false, false);
+        await mockBuilder.Channels[0].Received().QueueDeleteAsync("my_queue", false, false);
     }
 }
 
@@ -233,9 +233,9 @@ public class When_an_exchange_is_declared : IDisposable
     private readonly Exchange exchange;
 
     [Fact]
-    public void Should_declare_an_exchange()
+    public async Task Should_declare_an_exchange()
     {
-        mockBuilder.Channels[0].Received().ExchangeDeclare(
+        await mockBuilder.Channels[0].Received().ExchangeDeclareAsync(
             Arg.Is("my_exchange"),
             Arg.Is("direct"),
             Arg.Is(false),
@@ -269,10 +269,10 @@ public class When_an_exchange_is_declared_passively : IDisposable
     private readonly MockBuilder mockBuilder;
 
     [Fact]
-    public void Should_passively_declare_exchange()
+    public async Task Should_passively_declare_exchange()
     {
         mockBuilder.Channels.Count.Should().Be(1);
-        mockBuilder.Channels[0].Received().ExchangeDeclarePassive(Arg.Is("my_exchange"));
+        await mockBuilder.Channels[0].Received().ExchangeDeclarePassiveAsync(Arg.Is("my_exchange"));
     }
 }
 
@@ -294,9 +294,9 @@ public class When_an_exchange_is_deleted : IDisposable
     private readonly MockBuilder mockBuilder;
 
     [Fact]
-    public void Should_delete_the_queue()
+    public async Task Should_delete_the_queue()
     {
-        mockBuilder.Channels[0].Received().ExchangeDelete("my_exchange", false);
+        await mockBuilder.Channels[0].Received().ExchangeDeleteAsync("my_exchange", false);
     }
 }
 
@@ -333,9 +333,9 @@ public class When_a_queue_is_bound_to_an_exchange : IDisposable
     }
 
     [Fact]
-    public void Should_declare_a_binding()
+    public async Task Should_declare_a_binding()
     {
-        mockBuilder.Channels[0].Received().QueueBind(
+        await mockBuilder.Channels[0].Received().QueueBindAsync(
             Arg.Is("my_queue"),
             Arg.Is("my_exchange"),
             Arg.Is("my_routing_key"),
@@ -378,11 +378,11 @@ public class When_a_queue_is_bound_to_an_exchange_with_headers : IDisposable
     }
 
     [Fact]
-    public void Should_declare_a_binding()
+    public async Task Should_declare_a_binding()
     {
         var expectedHeaders = new Dictionary<string, object> { ["header1"] = "value1" };
 
-        mockBuilder.Channels[0].Received().QueueBind(
+        await mockBuilder.Channels[0].Received().QueueBindAsync(
             Arg.Is("my_queue"),
             Arg.Is("my_exchange"),
             Arg.Is("my_routing_key"),
@@ -413,8 +413,8 @@ public class When_a_queue_is_unbound_from_an_exchange : IDisposable
     private readonly Binding<Queue> binding;
 
     [Fact]
-    public void Should_unbind_the_exchange()
+    public async Task Should_unbind_the_exchange()
     {
-        mockBuilder.Channels[0].Received().QueueUnbind("my_queue", "my_exchange", "my_routing_key", null);
+        await mockBuilder.Channels[0].Received().QueueUnbindAsync("my_queue", "my_exchange", "my_routing_key", null);
     }
 }

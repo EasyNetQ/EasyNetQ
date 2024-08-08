@@ -33,7 +33,7 @@ public class SerializerTests
             ContentEncoding = "content encoding",
             ContentType = "content type",
             CorrelationId = "correlation id",
-            DeliveryMode = 4,
+            DeliveryMode = (DeliveryModes)4,
             Expiration = "1",
             MessageId = "message id",
             Priority = 1,
@@ -54,7 +54,7 @@ public class SerializerTests
             typeof(MessageProperties), serializedMessage.Memory
         );
 
-        var newProperties = new EasyNetQ.Tests.BasicProperties();
+        var newProperties = new BasicProperties();
         deserializedMessageBasicProperties.CopyTo(newProperties);
 
         originalProperties.Should().BeEquivalentTo(newProperties);
@@ -67,14 +67,14 @@ public class SerializerTests
     {
         if (name != "SystemTextJsonV2") return;
 
-        var originalProperties = new EasyNetQ.Tests.BasicProperties
+        var originalProperties = new BasicProperties
         {
             AppId = "some app id",
             ClusterId = "cluster id",
             ContentEncoding = "content encoding",
             ContentType = "content type",
             CorrelationId = "correlation id",
-            DeliveryMode = 4,
+            DeliveryMode = (DeliveryModes)4,
             Expiration = "1",
             MessageId = "message id",
             Priority = 1,
@@ -110,7 +110,7 @@ public class SerializerTests
             typeof(MessageProperties), serializedMessage.Memory
         );
 
-        var newProperties = new EasyNetQ.Tests.BasicProperties();
+        var newProperties = new BasicProperties();
         deserializedMessageBasicProperties.CopyTo(newProperties);
 
         originalProperties.Should().BeEquivalentTo(newProperties);

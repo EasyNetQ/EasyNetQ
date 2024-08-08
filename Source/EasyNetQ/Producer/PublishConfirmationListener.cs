@@ -31,14 +31,14 @@ public class PublishConfirmationListener : IPublishConfirmationListener
     }
 
     /// <inheritdoc />
-    public IPublishPendingConfirmation CreatePendingConfirmation(IModel model)
+    public IPublishPendingConfirmation CreatePendingConfirmation(IChannel channel)
     {
-        var sequenceNumber = model.NextPublishSeqNo;
+        var sequenceNumber = channel.NextPublishSeqNo;
 
         if (sequenceNumber == 0UL)
             throw new InvalidOperationException("Confirms not selected");
 
-        var requests = unconfirmedChannelRequests.GetOrAdd(model.ChannelNumber, _ => new UnconfirmedRequests());
+        var requests = unconfirmedChannelRequests.GetOrAdd(channel.ChannelNumber, _ => new UnconfirmedRequests());
         var confirmationTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         if (!requests.TryAdd(sequenceNumber, confirmationTcs))
             throw new InvalidOperationException($"Confirmation {sequenceNumber} already exists");

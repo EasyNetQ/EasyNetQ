@@ -4,9 +4,9 @@ namespace EasyNetQ.Persistent;
 
 public readonly struct FuncBasedPersistentChannelAction<TResult> : IPersistentChannelAction<TResult>
 {
-    private readonly Func<IModel, TResult> func;
+    private readonly Func<IChannel, TResult> func;
 
-    public FuncBasedPersistentChannelAction(Func<IModel, TResult> func) => this.func = func;
+    public FuncBasedPersistentChannelAction(Func<IChannel, TResult> func) => this.func = func;
 
-    public TResult Invoke(IModel model) => func(model);
+    public TResult Invoke(IChannel channel) => func(channel);
 }

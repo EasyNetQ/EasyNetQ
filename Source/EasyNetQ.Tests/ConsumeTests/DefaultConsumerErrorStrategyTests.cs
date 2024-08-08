@@ -11,9 +11,10 @@ public class DefaultConsumerErrorStrategyTests
     public async Task Should_enable_publisher_confirm_when_configured_and_return_ack_when_confirm_received()
     {
         var persistedConnectionMock = Substitute.For<IConsumerConnection>();
-        var modelMock = Substitute.For<IModel>();
-        modelMock.WaitForConfirms(Arg.Any<TimeSpan>()).Returns(true);
-        persistedConnectionMock.CreateModel().Returns(modelMock);
+        var modelMock = Substitute.For<IChannel>();
+        using var cts = new CancellationTokenSource(Arg.Any<TimeSpan>());
+        modelMock.WaitForConfirmsAsync(cts.Token).Returns(true);
+        persistedConnectionMock.CreateChannelAsync().Returns(modelMock);
         var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock, true);
 
         var ackStrategy = await consumerErrorStrategy.HandleErrorAsync(
@@ -21,8 +22,8 @@ public class DefaultConsumerErrorStrategyTests
         );
 
         Assert.Equal(AckStrategies.Ack, ackStrategy);
-        modelMock.Received().WaitForConfirms(Arg.Any<TimeSpan>());
-        modelMock.Received().ConfirmSelect();
+        await modelMock.Received().WaitForConfirmsAsync(cts.Token);
+        await modelMock.Received().ConfirmSelectAsync();
     }
 
     [Fact]
@@ -30,9 +31,10 @@ public class DefaultConsumerErrorStrategyTests
         Should_enable_publisher_confirm_when_configured_and_return_nack_with_requeue_when_no_confirm_received()
     {
         var persistedConnectionMock = Substitute.For<IConsumerConnection>();
-        var modelMock = Substitute.For<IModel>();
-        modelMock.WaitForConfirms(Arg.Any<TimeSpan>()).Returns(false);
-        persistedConnectionMock.CreateModel().Returns(modelMock);
+        var modelMock = Substitute.For<IChannel>();
+        using var cts = new CancellationTokenSource(Arg.Any<TimeSpan>());
+        modelMock.WaitForConfirmsAsync(cts.Token).Returns(false);
+        persistedConnectionMock.CreateChannelAsync().Returns(modelMock);
         var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock, true);
 
         var ackStrategy = await consumerErrorStrategy.HandleErrorAsync(
@@ -40,17 +42,18 @@ public class DefaultConsumerErrorStrategyTests
         );
 
         Assert.Equal(AckStrategies.NackWithRequeue, ackStrategy);
-        modelMock.Received().WaitForConfirms(Arg.Any<TimeSpan>());
-        modelMock.Received().ConfirmSelect();
+        await modelMock.Received().WaitForConfirmsAsync(cts.Token);
+        await modelMock.Received().ConfirmSelectAsync();
     }
 
     [Fact]
     public async Task Should_not_enable_publisher_confirm_when_not_configured_and_return_ack_when_no_confirm_received()
     {
         var persistedConnectionMock = Substitute.For<IConsumerConnection>();
-        var modelMock = Substitute.For<IModel>();
-        modelMock.WaitForConfirms(Arg.Any<TimeSpan>()).Returns(false);
-        persistedConnectionMock.CreateModel().Returns(modelMock);
+        var modelMock = Substitute.For<IChannel>();
+        using var cts = new CancellationTokenSource(Arg.Any<TimeSpan>());
+        modelMock.WaitForConfirmsAsync(cts.Token).Returns(false);
+        persistedConnectionMock.CreateChannelAsync().Returns(modelMock);
         var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock);
 
         var ackStrategy = await consumerErrorStrategy.HandleErrorAsync(
@@ -58,7 +61,7 @@ public class DefaultConsumerErrorStrategyTests
         );
 
         Assert.Equal(AckStrategies.Ack, ackStrategy);
-        modelMock.DidNotReceive().WaitForConfirms(Arg.Any<TimeSpan>());
+        await modelMock.DidNotReceive().WaitForConfirmsAsync(cts.Token);
     }
 
     private static DefaultConsumeErrorStrategy CreateConsumerErrorStrategy(

@@ -2,6 +2,7 @@ using EasyNetQ.Events;
 using EasyNetQ.Topology;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.Consumer;
@@ -21,12 +22,12 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
     public AsyncBasicConsumer(
         IServiceProvider serviceResolver,
         ILogger logger,
-        IModel model,
+        IChannel channel,
         Queue queue,
         bool autoAck,
         IEventBus eventBus,
         ConsumeDelegate consumeDelegate
-    ) : base(model)
+    ) : base(channel)
     {
         this.serviceResolver = serviceResolver;
         this.logger = logger;
@@ -37,6 +38,8 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
     }
 
     public Queue Queue => queue;
+
+    public event EventHandler<ConsumerEventArgs>? ConsumerCancelled;
 
     /// <inheritdoc />
     public override async Task OnCancel(params string[] consumerTags)
@@ -50,15 +53,17 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
                 string.Join(", ", consumerTags)
             );
         }
+
+        ConsumerCancelled?.Invoke(this, new ConsumerEventArgs(consumerTags));
     }
 
-    public override async Task HandleBasicDeliver(
+    public override async Task HandleBasicDeliverAsync(
         string consumerTag,
         ulong deliveryTag,
         bool redelivered,
         string exchange,
         string routingKey,
-        IBasicProperties properties,
+        IReadOnlyBasicProperties properties,
         ReadOnlyMemory<byte> body
     )
     {
@@ -83,7 +88,7 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
         var ackStrategy = await consumeDelegate(new ConsumeContext(messageReceivedInfo, messageProperties, messageBody, serviceResolver, cts.Token)).ConfigureAwait(false);
         if (!autoAck)
         {
-            var ackResult = Ack(ackStrategy, messageReceivedInfo);
+            var ackResult = await AckAsync(ackStrategy, messageReceivedInfo);
             eventBus.Publish(new AckEvent(messageReceivedInfo, messageProperties, messageBody, ackResult));
         }
     }
@@ -97,14 +102,14 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
         disposed = true;
         cts.Cancel();
         cts.Dispose();
-        eventBus.Publish(new ConsumerModelDisposedEvent(ConsumerTags));
+        eventBus.Publish(new ConsumerChannelDisposedEvent(ConsumerTags));
     }
 
-    private AckResult Ack(AckStrategy ackStrategy, in MessageReceivedInfo receivedInfo)
+    private async Task<AckResult> AckAsync(AckStrategy ackStrategy, MessageReceivedInfo receivedInfo)
     {
         try
         {
-            return ackStrategy(Model, receivedInfo.DeliveryTag);
+            return await ackStrategy(Channel!, receivedInfo.DeliveryTag);
         }
         catch (AlreadyClosedException alreadyClosedException)
         {

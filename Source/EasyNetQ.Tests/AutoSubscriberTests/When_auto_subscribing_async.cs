@@ -26,7 +26,7 @@ public class When_auto_subscribing_async : IDisposable
         serviceProvider = services.BuildServiceProvider();
 
         var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, serviceProvider, "my_app");
-        autoSubscriber.Subscribe([typeof(MyAsyncConsumer)]);
+        autoSubscriber.SubscribeAsync([typeof(MyAsyncConsumer)]).GetAwaiter().GetResult();
     }
 
     public void Dispose()
@@ -35,10 +35,10 @@ public class When_auto_subscribing_async : IDisposable
     }
 
     [Fact]
-    public void Should_have_declared_the_queues()
+    public async Task Should_have_declared_the_queues()
     {
-        void VerifyQueueDeclared(string queueName) =>
-            mockBuilder.Channels[1].Received().QueueDeclare(
+        async Task VerifyQueueDeclared(string queueName) =>
+            await mockBuilder.Channels[1].Received().QueueDeclareAsync(
                 Arg.Is(queueName),
                 Arg.Is(true),
                 Arg.Is(false),
@@ -46,25 +46,25 @@ public class When_auto_subscribing_async : IDisposable
                 Arg.Is((IDictionary<string, object>)null)
             );
 
-        VerifyQueueDeclared(expectedQueueName1);
-        VerifyQueueDeclared(expectedQueueName2);
-        VerifyQueueDeclared(expectedQueueName3);
+        await VerifyQueueDeclared(expectedQueueName1);
+        await VerifyQueueDeclared(expectedQueueName2);
+        await VerifyQueueDeclared(expectedQueueName3);
     }
 
     [Fact]
-    public void Should_have_bound_to_queues()
+    public async Task Should_have_bound_to_queues()
     {
-        void ConsumerStarted(int channelIndex, string queueName, string topicName) =>
-            mockBuilder.Channels[1].Received().QueueBind(
+        async Task ConsumerStarted(int channelIndex, string queueName, string topicName) =>
+            await mockBuilder.Channels[channelIndex].Received().QueueBindAsync(
                 Arg.Is(queueName),
                 Arg.Any<string>(),
                 Arg.Is(topicName),
                 Arg.Is((IDictionary<string, object>)null)
             );
 
-        ConsumerStarted(1, expectedQueueName1, "#");
-        ConsumerStarted(2, expectedQueueName2, "#");
-        ConsumerStarted(3, expectedQueueName3, "Important");
+        await ConsumerStarted(1, expectedQueueName1, "#");
+        await ConsumerStarted(2, expectedQueueName2, "#");
+        await ConsumerStarted(3, expectedQueueName3, "Important");
     }
 
     [Fact]

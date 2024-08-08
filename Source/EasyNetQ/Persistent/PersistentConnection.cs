@@ -14,7 +14,7 @@ public class PersistentConnection : IPersistentConnection
     private readonly ConnectionConfiguration configuration;
     private readonly IConnectionFactory connectionFactory;
     private readonly IEventBus eventBus;
-    private volatile IAutorecoveringConnection? initializedConnection;
+    private volatile IConnection? initializedConnection;
     private volatile bool disposed;
     private volatile PersistentConnectionStatus status;
 
@@ -50,13 +50,13 @@ public class PersistentConnection : IPersistentConnection
     }
 
     /// <inheritdoc />
-    public IModel CreateModel()
+    public async Task<IChannel> CreateChannelAsync()
     {
         if (disposed) throw new ObjectDisposedException(nameof(PersistentConnection));
 
         var connection = InitializeConnection();
         connection.EnsureIsOpen();
-        return connection.CreateModel();
+        return await connection.CreateChannelAsync();
     }
 
     /// <inheritdoc />
@@ -68,7 +68,7 @@ public class PersistentConnection : IPersistentConnection
         disposed = true;
     }
 
-    private IAutorecoveringConnection InitializeConnection()
+    private IConnection InitializeConnection()
     {
         var connection = initializedConnection;
         if (connection is not null) return connection;
@@ -100,7 +100,7 @@ public class PersistentConnection : IPersistentConnection
         return connection;
     }
 
-    private IAutorecoveringConnection CreateConnection()
+    private IConnection CreateConnection()
     {
         var endpoints = configuration.Hosts.Select(x =>
         {
@@ -110,7 +110,7 @@ public class PersistentConnection : IPersistentConnection
             return new AmqpTcpEndpoint(x.Host, x.Port, ssl);
         }).ToList();
 
-        if (connectionFactory.CreateConnection(endpoints) is not IAutorecoveringConnection connection)
+        if (connectionFactory.CreateConnectionAsync(endpoints) is not IConnection connection)
             throw new NotSupportedException("Non-recoverable connection is not supported");
 
         connection.ConnectionShutdown += OnConnectionShutdown;
@@ -130,7 +130,7 @@ public class PersistentConnection : IPersistentConnection
         // We previously agreed to dispose firstly and then unsubscribe from events so as not to lose logs.
         // These works only for connection.RecoverySucceeded -= OnConnectionRecovered;, for other events
         // it's prohibited to unsubscribe from them after a connection disposal. There are good news though:
-        // these events handlers (except RecoverySucceeded one) are nullified on IAutorecoveringConnection.Dispose.
+        // these events handlers (except RecoverySucceeded one) are nullified on IConnection.Dispose.
         connection.RecoverySucceeded -= OnConnectionRecovered;
 
         status = status.ToUnknown();

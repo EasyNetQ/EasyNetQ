@@ -44,9 +44,9 @@ public class When_subscribe_is_called : IDisposable
     }
 
     [Fact]
-    public void Should_declare_the_queue()
+    public async Task Should_declare_the_queue()
     {
-        mockBuilder.Channels[1].Received().QueueDeclare(
+        await mockBuilder.Channels[1].Received().QueueDeclareAsync(
             Arg.Is(queueName),
             Arg.Is(true), // durable
             Arg.Is(false), // exclusive
@@ -56,9 +56,9 @@ public class When_subscribe_is_called : IDisposable
     }
 
     [Fact]
-    public void Should_declare_the_exchange()
+    public async Task Should_declare_the_exchange()
     {
-        mockBuilder.Channels[0].Received().ExchangeDeclare(
+        await mockBuilder.Channels[0].Received().ExchangeDeclareAsync(
             Arg.Is(typeName),
             Arg.Is("topic"),
             Arg.Is(true),
@@ -68,9 +68,9 @@ public class When_subscribe_is_called : IDisposable
     }
 
     [Fact]
-    public void Should_bind_the_queue_and_exchange()
+    public async Task Should_bind_the_queue_and_exchange()
     {
-        mockBuilder.Channels[1].Received().QueueBind(
+        await mockBuilder.Channels[1].Received().QueueBindAsync(
             Arg.Is(queueName),
             Arg.Is(typeName),
             Arg.Is("#"),
@@ -79,23 +79,23 @@ public class When_subscribe_is_called : IDisposable
     }
 
     [Fact]
-    public void Should_set_configured_prefetch_count()
+    public async Task Should_set_configured_prefetch_count()
     {
         var connectionConfiguration = new ConnectionConfiguration();
-        mockBuilder.Channels[2].Received().BasicQos(0, connectionConfiguration.PrefetchCount, false);
+        await mockBuilder.Channels[2].Received().BasicQosAsync(0, connectionConfiguration.PrefetchCount, false);
     }
 
     [Fact]
-    public void Should_start_consuming()
+    public async Task Should_start_consuming()
     {
-        mockBuilder.Channels[2].Received().BasicConsume(
+        await mockBuilder.Channels[2].Received().BasicConsumeAsync(
             Arg.Is(queueName),
             Arg.Is(false),
             Arg.Any<string>(),
             Arg.Is(true),
             Arg.Is(false),
             Arg.Any<IDictionary<string, object>>(),
-            Arg.Any<IBasicConsumer>()
+            Arg.Any<IAsyncBasicConsumer>()
         );
     }
 
@@ -118,7 +118,7 @@ public class When_subscribe_with_configuration_is_called
     [InlineData("ttt", true, 99, 999, 10, true, (byte)11, false, "qqq", 1001, 10001)]
     [InlineData(null, false, 0, 0, null, false, null, true, "qqq", null, null)]
     [Theory]
-    public void Queue_should_be_declared_with_correct_options(
+    public async Task Queue_should_be_declared_with_correct_options(
         string topic,
         bool autoDelete,
         int priority,
@@ -134,7 +134,7 @@ public class When_subscribe_with_configuration_is_called
     {
         var mockBuilder = new MockBuilder();
         // Configure subscription
-        mockBuilder.PubSub.Subscribe<MyMessage>(
+        await mockBuilder.PubSub.SubscribeAsync<MyMessage>(
             "x",
             _ => { },
             c =>
@@ -174,7 +174,7 @@ public class When_subscribe_with_configuration_is_called
         );
 
         // Assert that queue got declared correctly
-        mockBuilder.Channels[1].Received().QueueDeclare(
+        await mockBuilder.Channels[1].Received().QueueDeclareAsync(
             Arg.Is(queueName ?? "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests_x"),
             Arg.Is(durable),
             Arg.Is(false),
@@ -188,21 +188,21 @@ public class When_subscribe_with_configuration_is_called
         );
 
         // Assert that consumer was created correctly
-        mockBuilder.Channels[2].Received().BasicConsume(
+        await mockBuilder.Channels[2].Received().BasicConsumeAsync(
             Arg.Is(queueName ?? "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests_x"),
             Arg.Is(false),
             Arg.Any<string>(),
             Arg.Is(true),
             Arg.Is(isExclusive),
             Arg.Is<IDictionary<string, object>>(x => priority == (int)x["x-priority"]),
-            Arg.Any<IBasicConsumer>()
+            Arg.Any<IAsyncBasicConsumer>()
         );
 
         // Assert that QoS got configured correctly
-        mockBuilder.Channels[2].Received().BasicQos(0, prefetchCount, false);
+        await mockBuilder.Channels[2].Received().BasicQosAsync(0, prefetchCount, false);
 
         // Assert that binding got configured correctly
-        mockBuilder.Channels[1].Received().QueueBind(
+        await mockBuilder.Channels[1].Received().QueueBindAsync(
             Arg.Is(queueName),
             Arg.Is("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
             Arg.Is(topic ?? "#"),
@@ -231,7 +231,8 @@ public class When_a_message_is_delivered : IDisposable
 
         mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(conventions));
 
-        mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, message => { deliveredMessage = message; });
+        mockBuilder.PubSub.SubscribeAsync<MyMessage>(subscriptionId, message => { deliveredMessage = message; })
+            .GetAwaiter().GetResult();
 
         const string text = "Hello there, I am the text!";
         originalMessage = new MyMessage { Text = text };
@@ -239,7 +240,7 @@ public class When_a_message_is_delivered : IDisposable
         using var serializedMessage = new ReflectionBasedNewtonsoftJsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
 
         // deliver a message
-        mockBuilder.Consumers[0].HandleBasicDeliver(
+        mockBuilder.Consumers[0].HandleBasicDeliverAsync(
             consumerTag,
             deliveryTag,
             false, // redelivered
@@ -273,9 +274,9 @@ public class When_a_message_is_delivered : IDisposable
     }
 
     [Fact]
-    public void Should_ack_the_message()
+    public async Task Should_ack_the_message()
     {
-        mockBuilder.Channels[2].Received().BasicAck(deliveryTag, false);
+        await mockBuilder.Channels[2].Received().BasicAckAsync(deliveryTag, false);
     }
 }
 
@@ -317,7 +318,8 @@ public class When_the_handler_throws_an_exception : IDisposable
             .AddSingleton(consumeErrorStrategy)
         );
 
-        mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, _ => throw originalException);
+        mockBuilder.PubSub.SubscribeAsync<MyMessage>(subscriptionId, _ => throw originalException)
+            .GetAwaiter().GetResult();
 
         const string text = "Hello there, I am the text!";
         originalMessage = new MyMessage { Text = text };
@@ -325,7 +327,7 @@ public class When_the_handler_throws_an_exception : IDisposable
         using var serializedMessage = new ReflectionBasedNewtonsoftJsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
 
         // deliver a message
-        mockBuilder.Consumers[0].HandleBasicDeliver(
+        mockBuilder.Consumers[0].HandleBasicDeliverAsync(
             consumerTag,
             deliveryTag,
             false, // redelivered
@@ -346,9 +348,9 @@ public class When_the_handler_throws_an_exception : IDisposable
     }
 
     [Fact]
-    public void Should_ack()
+    public async Task Should_ack()
     {
-        mockBuilder.Channels[2].Received().BasicAck(deliveryTag, false);
+        await mockBuilder.Channels[2].Received().BasicAckAsync(deliveryTag, false);
     }
 
     [Fact]
@@ -390,7 +392,7 @@ public class When_a_subscription_is_cancelled_by_the_user : IDisposable
         mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(conventions));
         var subscriptionResult = mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, _ => { });
         var are = new AutoResetEvent(false);
-        mockBuilder.EventBus.Subscribe((in ConsumerModelDisposedEvent _) => are.Set());
+        mockBuilder.EventBus.Subscribe((in ConsumerChannelDisposedEvent _) => are.Set());
         subscriptionResult.Dispose();
         are.WaitOne(500);
     }
@@ -403,6 +405,6 @@ public class When_a_subscription_is_cancelled_by_the_user : IDisposable
     [Fact]
     public void Should_dispose_the_model()
     {
-        mockBuilder.Consumers[0].Model.Received().Dispose();
+        mockBuilder.Consumers[0].Channel.Received().Dispose();
     }
 }

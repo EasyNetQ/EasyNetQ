@@ -30,8 +30,8 @@ public class When_a_cancellation_error_occurs_in_the_message_handler : ConsumerT
     }
 
     [Fact]
-    public void Should_ack()
+    public async Task Should_ack()
     {
-        MockBuilder.Channels[0].Received().BasicAck(DeliverTag, false);
+        await MockBuilder.Channels[0].Received().BasicAckAsync(DeliverTag, false);
     }
 }

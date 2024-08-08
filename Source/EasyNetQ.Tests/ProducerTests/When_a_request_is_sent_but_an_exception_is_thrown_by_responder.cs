@@ -42,7 +42,7 @@ public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : ID
             if (!waiter.Wait(5000))
                 throw new TimeoutException();
 
-            DeliverMessage(null);
+            DeliverMessage(null).GetAwaiter().GetResult();
             await task;
         });
     }
@@ -61,13 +61,13 @@ public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : ID
             if (!waiter.Wait(5000))
                 throw new TimeoutException();
 
-            DeliverMessage("Why you are so bad with me?");
+            DeliverMessage("Why you are so bad with me?").GetAwaiter().GetResult();
 
             await task;
         }); // ,"Why you are so bad with me?"
     }
 
-    private void DeliverMessage(string exceptionMessage)
+    private async Task DeliverMessage(string exceptionMessage)
     {
         var properties = new BasicProperties
         {
@@ -89,7 +89,7 @@ public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : ID
 
         var body = "{}"u8.ToArray();
 
-        mockBuilder.Consumers[0].HandleBasicDeliver(
+        await mockBuilder.Consumers[0].HandleBasicDeliverAsync(
             "consumer_tag",
             0,
             false,
@@ -97,6 +97,6 @@ public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : ID
             "the_routing_key",
             properties,
             body
-        ).GetAwaiter().GetResult();
+        );
     }
 }

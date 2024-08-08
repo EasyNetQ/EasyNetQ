@@ -36,8 +36,8 @@ public class When_cancellation_of_message_handler_occurs : ConsumerTestBase
     }
 
     [Fact]
-    public void Should_nack_with_requeue()
+    public async Task Should_nack_with_requeue()
     {
-        MockBuilder.Channels[0].Received().BasicNack(DeliverTag, false, true);
+        await MockBuilder.Channels[0].Received().BasicNackAsync(DeliverTag, false, true);
     }
 }

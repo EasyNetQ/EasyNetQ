@@ -21,14 +21,15 @@ public class When_a_message_is_sent : IDisposable
     }
 
     [Fact]
-    public void Should_publish_the_message()
+    public async Task Should_publish_the_message()
     {
-        mockBuilder.Channels[0].Received().BasicPublish(
+        await mockBuilder.Channels[0].Received().BasicPublishAsync(
             Arg.Is(""),
             Arg.Is(queueName),
+            Arg.Any<RabbitMQ.Client.BasicProperties>(),
+            Arg.Any<ReadOnlyMemory<byte>>(),
             Arg.Is(false),
-            Arg.Any<IBasicProperties>(),
-            Arg.Any<ReadOnlyMemory<byte>>()
+            Arg.Any<CancellationToken>()
         );
     }
 }

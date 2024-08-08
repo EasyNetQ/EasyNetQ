@@ -18,7 +18,7 @@ public class When_a_consumer_is_cancelled_by_the_user : IDisposable
             .Consume(queue, (_, _, _) => Task.Run(() => { }));
 
         var are = new AutoResetEvent(false);
-        mockBuilder.EventBus.Subscribe((in ConsumerModelDisposedEvent _) => are.Set());
+        mockBuilder.EventBus.Subscribe((in ConsumerChannelDisposedEvent _) => are.Set());
 
         cancelSubscription.Dispose();
 
@@ -36,6 +36,6 @@ public class When_a_consumer_is_cancelled_by_the_user : IDisposable
     [Fact]
     public void Should_dispose_the_model()
     {
-        mockBuilder.Consumers[0].Model.Received().Dispose();
+        mockBuilder.Consumers[0].Channel.Received().Dispose();
     }
 }

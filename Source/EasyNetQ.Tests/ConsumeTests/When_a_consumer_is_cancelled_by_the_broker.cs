@@ -21,9 +21,9 @@ public class When_a_consumer_is_cancelled_by_the_broker : IDisposable
         );
 
         var are = new AutoResetEvent(false);
-        mockBuilder.EventBus.Subscribe((in ConsumerModelDisposedEvent _) => are.Set());
+        mockBuilder.EventBus.Subscribe((in ConsumerChannelDisposedEvent _) => are.Set());
 
-        mockBuilder.Consumers[0].HandleBasicCancel("consumer_tag").GetAwaiter().GetResult();
+        mockBuilder.Consumers[0].HandleBasicCancelAsync("consumer_tag").GetAwaiter().GetResult();
 
         if (!are.WaitOne(5000))
         {
@@ -39,6 +39,6 @@ public class When_a_consumer_is_cancelled_by_the_broker : IDisposable
     [Fact]
     public void Should_dispose_of_the_model()
     {
-        mockBuilder.Consumers[0].Model.Received().Dispose();
+        mockBuilder.Consumers[0].Channel.Received().Dispose();
     }
 }

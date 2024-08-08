@@ -38,6 +38,6 @@ public class When_a_consumer_is_started_on_exclusive_queue_and_connection_is_dro
     [Fact]
     public void Should_dispose_the_model()
     {
-        mockBuilder.Consumers[0].Model.Received().Dispose();
+        mockBuilder.Consumers[0].Channel.Received().Dispose();
     }
 }

@@ -36,7 +36,7 @@ public class ProgramTests
         $"2 messages from queue 'EasyNetQ_Default_Error_Queue' were dumped to directory '{Directory.GetCurrentDirectory()}'{Environment.NewLine}";
 
     [Fact]
-    public void Should_output_messages_to_directory_with_dump()
+    public async Task Should_output_messages_to_directory_with_dump()
     {
         var args = new[]
         {
@@ -48,7 +48,7 @@ public class ProgramTests
         var writer = new StringWriter();
         Console.SetOut(writer);
 
-        program.Start(args);
+        await program.Start(args);
 
         var actualOutput = writer.GetStringBuilder().ToString();
         actualOutput.ShouldEqual(expectedDumpOutput);
@@ -61,7 +61,7 @@ public class ProgramTests
         $"{2} messages from directory '{Directory.GetCurrentDirectory()}' were inserted into queue ''{Environment.NewLine}";
 
     [Fact]
-    public void Should_insert_messages_with_insert()
+    public async Task Should_insert_messages_with_insert()
     {
         var args = new[]
         {
@@ -72,7 +72,7 @@ public class ProgramTests
         var writer = new StringWriter();
         Console.SetOut(writer);
 
-        program.Start(args);
+        await program.Start(args);
 
         var actualInsertOutput = writer.GetStringBuilder().ToString();
         actualInsertOutput.ShouldEqual(expectedInsertOutput);
@@ -84,7 +84,7 @@ public class ProgramTests
         $"{2} messages from directory '{Directory.GetCurrentDirectory()}' were inserted into queue 'queue'{Environment.NewLine}";
 
     [Fact]
-    public void Should_insert_messages_with_insert_and_queue()
+    public async Task Should_insert_messages_with_insert_and_queue()
     {
         var args = new[]
         {
@@ -96,7 +96,7 @@ public class ProgramTests
         var writer = new StringWriter();
         Console.SetOut(writer);
 
-        program.Start(args);
+        await program.Start(args);
 
         var actualInsertOutput = writer.GetStringBuilder().ToString();
         actualInsertOutput.ShouldEqual(expectedInsertOutputWithQueue);
@@ -108,7 +108,7 @@ public class ProgramTests
         $"2 error messages from directory '{Directory.GetCurrentDirectory()}' were republished{Environment.NewLine}";
 
     [Fact]
-    public void Should_retry_errors_with_retry()
+    public async Task Should_retry_errors_with_retry()
     {
         var args = new[]
         {
@@ -119,7 +119,7 @@ public class ProgramTests
         var writer = new StringWriter();
         Console.SetOut(writer);
 
-        program.Start(args);
+        await program.Start(args);
 
         writer.GetStringBuilder().ToString().ShouldEqual(expectedRetryOutput);
 
@@ -131,10 +131,10 @@ public class MockMessageWriter : IMessageWriter
 {
     public QueueParameters Parameters { get; set; }
 
-    public void Write(IEnumerable<HosepipeMessage> messages, QueueParameters queueParameters)
+    public async Task WriteAsync(IAsyncEnumerable<HosepipeMessage> messages, QueueParameters queueParameters)
     {
         Parameters = queueParameters;
-        foreach (var _ in messages)
+        await foreach (var _ in messages)
         {
         }
     }
@@ -142,8 +142,9 @@ public class MockMessageWriter : IMessageWriter
 
 public class MockQueueRetrieval : IQueueRetrieval
 {
-    public IEnumerable<HosepipeMessage> GetMessagesFromQueue(QueueParameters parameters)
+    public async IAsyncEnumerable<HosepipeMessage> GetMessagesFromQueueAsync(QueueParameters parameters)
     {
+        await Task.CompletedTask;
         yield return new HosepipeMessage("some message", MessageProperties.Empty, Helper.CreateMessageReceivedInfo());
         yield return new HosepipeMessage("some message", MessageProperties.Empty, Helper.CreateMessageReceivedInfo());
     }
@@ -153,24 +154,25 @@ public class MockMessageReader : IMessageReader
 {
     public QueueParameters Parameters { get; set; }
 
-    public IEnumerable<HosepipeMessage> ReadMessages(QueueParameters parameters)
+    public async IAsyncEnumerable<HosepipeMessage> ReadMessagesAsync(QueueParameters parameters)
     {
         Parameters = parameters;
+        await Task.CompletedTask;
         yield return new HosepipeMessage("some message", MessageProperties.Empty, Helper.CreateMessageReceivedInfo());
         yield return new HosepipeMessage("some message", MessageProperties.Empty, Helper.CreateMessageReceivedInfo());
     }
 
-    public IEnumerable<HosepipeMessage> ReadMessages(QueueParameters parameters, string messageName)
+    public IAsyncEnumerable<HosepipeMessage> ReadMessagesAsync(QueueParameters parameters, string messageName)
     {
-        return ReadMessages(parameters);
+        return ReadMessagesAsync(parameters);
     }
 }
 
 public class MockQueueInsertion : IQueueInsertion
 {
-    public void PublishMessagesToQueue(IEnumerable<HosepipeMessage> messages, QueueParameters parameters)
+    public async Task PublishMessagesToQueueAsync(IAsyncEnumerable<HosepipeMessage> messages, QueueParameters parameters)
     {
-        foreach (var _ in messages)
+        await foreach (var _ in messages)
         {
         }
     }
@@ -178,9 +180,9 @@ public class MockQueueInsertion : IQueueInsertion
 
 public class MockErrorRetry : IErrorRetry
 {
-    public void RetryErrors(IEnumerable<HosepipeMessage> rawErrorMessages, QueueParameters parameters)
+    public async Task RetryErrorsAsync(IAsyncEnumerable<HosepipeMessage> rawErrorMessages, QueueParameters parameters)
     {
-        foreach (var _ in rawErrorMessages)
+        await foreach (var _ in rawErrorMessages)
         {
         }
     }

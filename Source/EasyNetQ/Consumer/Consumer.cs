@@ -150,7 +150,7 @@ public class Consumer : IConsumer
                 throw new InvalidOperationException("Consumer has already started");
 
             consumer = internalConsumerFactory.CreateConsumer(configuration);
-            consumer.Cancelled += InternalConsumerOnCancelled;
+            consumer.CancelledAsync += InternalConsumerOnCancelled;
 
             var status = consumer.StartConsuming();
             foreach (var queue in status.Started)
@@ -178,10 +178,12 @@ public class Consumer : IConsumer
         eventBus.Publish(new StoppedConsumingEvent(this));
     }
 
-    private void InternalConsumerOnCancelled(object? sender, InternalConsumerCancelledEventArgs e)
+    private Task InternalConsumerOnCancelled(object? sender, InternalConsumerCancelledEventArgs e)
     {
         if (e.Active.Count == 0)
             Dispose();
+
+        return Task.CompletedTask;
     }
 
     private void OnConnectionDisconnected(in ConnectionDisconnectedEvent @event)

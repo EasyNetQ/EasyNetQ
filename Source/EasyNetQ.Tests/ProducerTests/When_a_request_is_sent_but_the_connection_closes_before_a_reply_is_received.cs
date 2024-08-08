@@ -19,7 +19,7 @@ public class When_a_request_is_sent_but_the_connection_closes_before_a_reply_is_
         {
             var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
             mockBuilder.Connection.ConnectionShutdown += Raise.EventWith(null, new ShutdownEventArgs(ShutdownInitiator.Application, 0, "replyText", "cause"));
-            (mockBuilder.Connection as IAutorecoveringConnection).RecoverySucceeded += Raise.EventWith(null, EventArgs.Empty);
+            mockBuilder.Connection.RecoverySucceeded += Raise.EventWith(null, EventArgs.Empty);
             return task;
         });
     }

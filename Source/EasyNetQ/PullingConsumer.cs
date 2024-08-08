@@ -409,7 +409,10 @@ public class PullingConsumer : IPullingConsumer<PullResult>
             this.autoAck = autoAck;
         }
 
-        public BasicGetResult? Invoke(IModel model) => model.BasicGet(queue.Name, autoAck);
+        public BasicGetResult? Invoke(IChannel channel)
+        {
+            return channel.BasicGetAsync(queue.Name, autoAck).GetAwaiter().GetResult();
+        }
     }
 
     private readonly struct BasicAckAction : IPersistentChannelAction<bool>
@@ -423,9 +426,9 @@ public class PullingConsumer : IPullingConsumer<PullResult>
             this.multiple = multiple;
         }
 
-        public bool Invoke(IModel model)
+        public bool Invoke(IChannel channel)
         {
-            model.BasicAck(deliveryTag, multiple);
+            channel.BasicAckAsync(deliveryTag, multiple);
             return true;
         }
     }
@@ -443,9 +446,9 @@ public class PullingConsumer : IPullingConsumer<PullResult>
             this.requeue = requeue;
         }
 
-        public bool Invoke(IModel model)
+        public bool Invoke(IChannel channel)
         {
-            model.BasicNack(deliveryTag, multiple, requeue);
+            channel.BasicNackAsync(deliveryTag, multiple, requeue);
             return true;
         }
     }

@@ -16,7 +16,8 @@
     <PackageVersion Include="NSubstitute" Version="4.3.0" />
     <PackageVersion Include="NullGuard.Fody" Version="3.1.1" />
     <PackageVersion Include="PublicApiGenerator" Version="11.1.0" />
-    <PackageVersion Include="RabbitMQ.Client" Version="6.8.*" />
+    <!-- <PackageVersion Include="RabbitMQ.Client" Version="6.8.*" /> -->
+    <PackageVersion Include="RabbitMQ.Client" Version="7.0.0-rc.7" />
     <PackageVersion Include="Shouldly" Version="4.2.1" />
     <PackageVersion Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />

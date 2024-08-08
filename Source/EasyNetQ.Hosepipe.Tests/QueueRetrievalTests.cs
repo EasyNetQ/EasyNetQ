@@ -9,7 +9,7 @@ public class QueueRetrievalTests
 {
     [Fact]
     [Traits.Explicit("Requires a RabbitMQ server on localhost")]
-    public void TryGetMessagesFromQueue()
+    public async Task TryGetMessagesFromQueue()
     {
         const string queue = "EasyNetQ_Hosepipe_Tests_QueueRetrievalTests+TestMessage:EasyNetQ_Hosepipe_Tests_hosepipe";
 
@@ -20,7 +20,7 @@ public class QueueRetrievalTests
             Purge = false
         };
 
-        foreach (var message in queueRetrieval.GetMessagesFromQueue(parameters))
+        await foreach (var message in queueRetrieval.GetMessagesFromQueueAsync(parameters))
         {
             Console.Out.WriteLine("message:\n{0}", message.Body);
             Console.Out.WriteLine("properties correlation id:\n{0}", message.Properties.CorrelationId);

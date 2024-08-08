@@ -8,19 +8,19 @@ public class Ack_strategy
 {
     public Ack_strategy()
     {
-        model = Substitute.For<IModel, IRecoverable>();
+        channel = Substitute.For<IChannel, IRecoverable>();
 
-        result = AckStrategies.Ack(model, deliveryTag);
+        result = AckStrategies.Ack(channel, deliveryTag).GetAwaiter().GetResult();
     }
 
-    private readonly IModel model;
+    private readonly IChannel channel;
     private readonly AckResult result;
     private const ulong deliveryTag = 1234;
 
     [Fact]
-    public void Should_ack_message()
+    public async Task Should_ack_message()
     {
-        model.Received().BasicAck(deliveryTag, false);
+        await channel.Received().BasicAckAsync(deliveryTag, false);
     }
 
     [Fact]
@@ -34,19 +34,19 @@ public class NackWithoutRequeue_strategy
 {
     public NackWithoutRequeue_strategy()
     {
-        model = Substitute.For<IModel, IRecoverable>();
+        channel = Substitute.For<IChannel, IRecoverable>();
 
-        result = AckStrategies.NackWithoutRequeue(model, deliveryTag);
+        result = AckStrategies.NackWithoutRequeue(channel, deliveryTag).GetAwaiter().GetResult();
     }
 
-    private readonly IModel model;
+    private readonly IChannel channel;
     private readonly AckResult result;
     private const ulong deliveryTag = 1234;
 
     [Fact]
-    public void Should_nack_message_and_not_requeue()
+    public async Task Should_nack_message_and_not_requeue()
     {
-        model.Received().BasicNack(deliveryTag, false, false);
+        await channel.Received().BasicNackAsync(deliveryTag, false, false);
     }
 
     [Fact]
@@ -60,19 +60,19 @@ public class NackWithRequeue_strategy
 {
     public NackWithRequeue_strategy()
     {
-        model = Substitute.For<IModel, IRecoverable>();
+        channel = Substitute.For<IChannel, IRecoverable>();
 
-        result = AckStrategies.NackWithRequeue(model, deliveryTag);
+        result = AckStrategies.NackWithRequeue(channel, deliveryTag).GetAwaiter().GetResult();
     }
 
-    private readonly IModel model;
+    private readonly IChannel channel;
     private readonly AckResult result;
     private const ulong deliveryTag = 1234;
 
     [Fact]
-    public void Should_nack_message_and_requeue()
+    public async Task Should_nack_message_and_requeue()
     {
-        model.Received().BasicNack(deliveryTag, false, true);
+        await channel.Received().BasicNackAsync(deliveryTag, false, true);
     }
 
     [Fact]

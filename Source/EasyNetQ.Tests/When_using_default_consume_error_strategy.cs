@@ -57,26 +57,28 @@ public class When_using_default_consume_error_strategy
 
         Assert.Same(AckStrategies.Ack, errorAckStrategy);
 
-        mockBuilder.Channels[0].Received().ExchangeDeclare("CustomErrorExchangePrefixName.originalRoutingKey", "topic", true);
-        mockBuilder.Channels[0].Received().QueueDeclare(
+        await mockBuilder.Channels[0].Received().ExchangeDeclareAsync("CustomErrorExchangePrefixName.originalRoutingKey", "topic", true);
+        await mockBuilder.Channels[0].Received().QueueDeclareAsync(
             "CustomEasyNetQErrorQueueName",
             true,
             false,
             false,
             Arg.Is<IDictionary<string, object>>(x => x.ContainsKey("x-queue-type") && x["x-queue-type"].Equals(QueueType.Quorum))
         );
-        mockBuilder.Channels[0].Received().QueueBind(
+        await mockBuilder.Channels[0].Received().QueueBindAsync(
             "CustomEasyNetQErrorQueueName",
             "CustomErrorExchangePrefixName.originalRoutingKey",
             "CustomRoutingKey",
             null
         );
-        mockBuilder.Channels[0].Received().BasicPublish(
+
+        await mockBuilder.Channels[0].Received().BasicPublishAsync(
             "CustomErrorExchangePrefixName.originalRoutingKey",
             "originalRoutingKey",
+            Arg.Any<RabbitMQ.Client.BasicProperties>(),
+            Arg.Any<ReadOnlyMemory<byte>>(),
             false,
-            Arg.Any<IBasicProperties>(),
-            Arg.Any<ReadOnlyMemory<byte>>()
+            Arg.Any<CancellationToken>()
         );
     }
 
@@ -92,28 +94,32 @@ public class When_using_default_consume_error_strategy
 
         Assert.Same(AckStrategies.Ack, errorAckStrategy);
 
-        mockBuilder.Channels[0].Received().ConfirmSelect();
-        mockBuilder.Channels[0].Received().ExchangeDeclare("CustomErrorExchangePrefixName.originalRoutingKey", "topic", true);
-        mockBuilder.Channels[0].Received().QueueDeclare(
+        await mockBuilder.Channels[0].Received().ConfirmSelectAsync();
+        await mockBuilder.Channels[0].Received().ExchangeDeclareAsync("CustomErrorExchangePrefixName.originalRoutingKey", "topic", true);
+        await mockBuilder.Channels[0].Received().QueueDeclareAsync(
             "CustomEasyNetQErrorQueueName",
             true,
             false,
             false,
             Arg.Is<IDictionary<string, object>>(x => x.ContainsKey("x-queue-type") && x["x-queue-type"].Equals(QueueType.Quorum))
         );
-        mockBuilder.Channels[0].Received().QueueBind(
+        await mockBuilder.Channels[0].Received().QueueBindAsync(
             "CustomEasyNetQErrorQueueName",
             "CustomErrorExchangePrefixName.originalRoutingKey",
             "CustomRoutingKey",
             null
         );
-        mockBuilder.Channels[0].Received().BasicPublish(
+
+        await mockBuilder.Channels[0].Received().BasicPublishAsync(
             "CustomErrorExchangePrefixName.originalRoutingKey",
             "originalRoutingKey",
+            Arg.Any<RabbitMQ.Client.BasicProperties>(),
+            Arg.Any<ReadOnlyMemory<byte>>(),
             false,
-            Arg.Any<IBasicProperties>(),
-            Arg.Any<ReadOnlyMemory<byte>>()
+            Arg.Any<CancellationToken>()
         );
-        mockBuilder.Channels[0].Received().WaitForConfirms(TimeSpan.FromSeconds(10));
+
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        await mockBuilder.Channels[0].Received().WaitForConfirmsAsync(cts.Token);
     }
 }

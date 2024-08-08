@@ -45,7 +45,7 @@ public readonly struct InternalConsumerStatus
 public class InternalConsumerCancelledEventArgs : EventArgs
 {
     /// <inheritdoc />
-    public InternalConsumerCancelledEventArgs(in Queue cancelled, IReadOnlyCollection<Queue> active)
+    public InternalConsumerCancelledEventArgs(Queue cancelled, IReadOnlyCollection<Queue> active)
     {
         Cancelled = cancelled;
         Active = active;
@@ -61,6 +61,11 @@ public class InternalConsumerCancelledEventArgs : EventArgs
     /// </summary>
     public IReadOnlyCollection<Queue> Active { get; }
 }
+
+/// <summary>
+///     Asynchronous event handler delegate
+/// </summary>
+public delegate Task AsyncEventHandler<TEventArgs>(object? sender, TEventArgs e) where TEventArgs : EventArgs;
 
 /// <summary>
 ///     Consumer which starts/stops raw consumers
@@ -80,7 +85,7 @@ public interface IInternalConsumer : IDisposable
     /// <summary>
     ///     Raised when consumer is cancelled
     /// </summary>
-    event EventHandler<InternalConsumerCancelledEventArgs>? Cancelled;
+    event AsyncEventHandler<InternalConsumerCancelledEventArgs>? CancelledAsync;
 }
 
 /// <inheritdoc />
@@ -96,7 +101,7 @@ public class InternalConsumer : IInternalConsumer
     private readonly ILogger logger;
 
     private volatile bool disposed;
-    private IModel? model;
+    private IChannel? channel;
 
     /// <summary>
     ///     Creates InternalConsumer
@@ -123,9 +128,9 @@ public class InternalConsumer : IInternalConsumer
 
         using var _ = mutex.Acquire();
 
-        if (IsModelClosedWithSoftError(model))
+        if (IsChannelClosedWithSoftError(channel))
         {
-            logger.LogInformation("Model has shutdown with soft error and will be recreated");
+            logger.LogInformation("Channel has shutdown with soft error and will be recreated");
 
             foreach (var consumer in consumers.Values)
             {
@@ -134,25 +139,23 @@ public class InternalConsumer : IInternalConsumer
             }
 
             consumers.Clear();
-
-            model?.Dispose();
-            model = null;
+            channel?.Dispose();
+            channel = null;
         }
 
-        if (model == null)
+        if (channel == null)
         {
             try
             {
-                model = connection.CreateModel();
-                model.DefaultConsumer = NoopDefaultConsumer.Instance;
-                model.BasicQos(0, configuration.PrefetchCount, false);
+                channel = connection.CreateChannelAsync().GetAwaiter().GetResult();
+                channel.BasicQosAsync(0, configuration.PrefetchCount, false).GetAwaiter().GetResult();
             }
             catch (Exception exception)
             {
-                model?.Dispose();
-                model = null;
+                channel?.Dispose();
+                channel = null;
 
-                logger.LogError(exception, "Failed to create model");
+                logger.LogError(exception, "Failed to create channel");
                 return new InternalConsumerStatus(Array.Empty<Queue>(), Array.Empty<Queue>(), Array.Empty<Queue>());
             }
         }
@@ -186,22 +189,23 @@ public class InternalConsumer : IInternalConsumer
                 var consumer = new AsyncBasicConsumer(
                     serviceResolver,
                     logger,
-                    model,
+                    channel,
                     queue,
                     perQueueConfiguration.AutoAck,
                     eventBus,
                     perQueueConfiguration.ConsumeDelegate
                 );
-                consumer.ConsumerCancelled += AsyncBasicConsumerOnConsumerCancelled;
-                var consumerTag = model.BasicConsume(
+                var arguments = perQueueConfiguration.Arguments as IDictionary<string, object?> ?? new Dictionary<string, object?>();
+                consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
+                var consumerTag = channel.BasicConsumeAsync(
                     queue.Name, // queue
                     perQueueConfiguration.AutoAck, // noAck
                     perQueueConfiguration.ConsumerTag, // consumerTag
                     true, // noLocal
                     perQueueConfiguration.IsExclusive, // exclusive
-                    perQueueConfiguration.Arguments, // arguments
+                    arguments, // arguments
                     consumer // consumer
-                );
+                ).GetAwaiter().GetResult();
                 consumers.Add(queue.Name, consumer);
 
                 logger.LogInformation(
@@ -242,7 +246,7 @@ public class InternalConsumer : IInternalConsumer
             {
                 try
                 {
-                    model?.BasicCancelNoWait(consumerTag);
+                    channel?.BasicCancelAsync(consumerTag).GetAwaiter().GetResult();
                 }
                 catch (AlreadyClosedException)
                 {
@@ -256,7 +260,7 @@ public class InternalConsumer : IInternalConsumer
     }
 
     /// <inheritdoc />
-    public event EventHandler<InternalConsumerCancelledEventArgs>? Cancelled;
+    public event AsyncEventHandler<InternalConsumerCancelledEventArgs>? CancelledAsync;
 
     /// <inheritdoc />
     public void Dispose()
@@ -274,7 +278,7 @@ public class InternalConsumer : IInternalConsumer
             {
                 try
                 {
-                    model?.BasicCancelNoWait(consumerTag);
+                    channel?.BasicCancelAsync(consumerTag).GetAwaiter().GetResult();
                 }
                 catch (AlreadyClosedException)
                 {
@@ -285,10 +289,15 @@ public class InternalConsumer : IInternalConsumer
         }
 
         consumers.Clear();
-        model?.Dispose();
+        channel?.Dispose();
     }
 
-    private async Task AsyncBasicConsumerOnConsumerCancelled(object sender, ConsumerEventArgs @event)
+    private void AsyncBasicConsumerOnConsumerCancelled(object? sender, ConsumerEventArgs @event)
+    {
+        _ = HandleConsumerCancelledAsync(sender, @event);
+    }
+
+    private async Task HandleConsumerCancelledAsync(object? sender, ConsumerEventArgs @event)
     {
         Queue cancelled;
         IReadOnlyCollection<Queue> active;
@@ -301,7 +310,7 @@ public class InternalConsumer : IInternalConsumer
                 cancelled = consumer.Queue;
                 active = consumers.Select(x => x.Value.Queue).ToList();
 
-                if (IsModelClosedWithSoftError(model)) return;
+                if (IsChannelClosedWithSoftError(channel)) return;
             }
             else
             {
@@ -309,12 +318,15 @@ public class InternalConsumer : IInternalConsumer
             }
         }
 
-        Cancelled?.Invoke(this, new InternalConsumerCancelledEventArgs(cancelled, active));
+        if (CancelledAsync != null)
+        {
+            await CancelledAsync.Invoke(this, new InternalConsumerCancelledEventArgs(cancelled, active)).ConfigureAwait(false);
+        }
     }
 
-    private static bool IsModelClosedWithSoftError(IModel? model)
+    private static bool IsChannelClosedWithSoftError(IChannel? channel)
     {
-        var closeReason = model?.CloseReason;
+        var closeReason = channel?.CloseReason;
         if (closeReason == null) return false;
 
         return closeReason.ReplyCode switch

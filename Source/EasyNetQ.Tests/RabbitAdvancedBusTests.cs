@@ -22,12 +22,13 @@ public class RabbitAdvancedBusTests
 
         await mockBuilder.Bus.Advanced.PublishAsync("", "", mandatoryPerRequest, null, new Message<object>(null));
 
-        mockBuilder.Channels[0].Received().BasicPublish(
+        await mockBuilder.Channels[0].Received().BasicPublishAsync(
             Arg.Any<string>(),
             Arg.Any<string>(),
+            Arg.Any<RabbitMQ.Client.BasicProperties>(),
+            Arg.Any<ReadOnlyMemory<byte>>(),
             Arg.Is(expected),
-            Arg.Any<IBasicProperties>(),
-            Arg.Any<ReadOnlyMemory<byte>>()
+            Arg.Any<CancellationToken>()
         );
     }
 
@@ -50,13 +51,14 @@ public class RabbitAdvancedBusTests
 
         await mockBuilder.Bus.Advanced.PublishAsync("", "", null, confirmsPerRequest, new Message<object>(null));
 
-        xxx.Received(expected).CreatePendingConfirmation(Arg.Any<IModel>());
-        mockBuilder.Channels[0].Received().BasicPublish(
+        xxx.Received(expected).CreatePendingConfirmation(Arg.Any<IChannel>());
+        await mockBuilder.Channels[0].Received().BasicPublishAsync(
             Arg.Any<string>(),
             Arg.Any<string>(),
+            Arg.Any<RabbitMQ.Client.BasicProperties>(),
+            Arg.Any<ReadOnlyMemory<byte>>(),
             Arg.Any<bool>(),
-            Arg.Any<IBasicProperties>(),
-            Arg.Any<ReadOnlyMemory<byte>>()
+            Arg.Any<CancellationToken>()
         );
     }
 }

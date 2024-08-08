@@ -11,8 +11,8 @@ public class When_a_nack_received_from_the_message_handler : ConsumerTestBase
     }
 
     [Fact]
-    public void Should_nack()
+    public async Task Should_nack()
     {
-        MockBuilder.Channels[0].Received().BasicNack(DeliverTag, false, true);
+        await MockBuilder.Channels[0].Received().BasicNackAsync(DeliverTag, false, true);
     }
 }

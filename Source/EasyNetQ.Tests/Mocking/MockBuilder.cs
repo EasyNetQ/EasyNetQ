@@ -10,10 +10,10 @@ public class MockBuilder : IDisposable
     private readonly IServiceProvider serviceProvider;
     private readonly IBus bus;
 
-    private readonly IBasicProperties basicProperties = new BasicProperties();
-    private readonly Stack<IModel> channelPool = new();
-    private readonly List<IModel> channels = new();
-    private readonly IConnection connection = Substitute.For<IAutorecoveringConnection>();
+    private readonly IBasicProperties basicProperties = new RabbitMQ.Client.BasicProperties();
+    private readonly Stack<IChannel> channelPool = new();
+    private readonly List<IChannel> channels = new();
+    private readonly IConnection connection = Substitute.For<IConnection>();
     private readonly IConnectionFactory connectionFactory = Substitute.For<IConnectionFactory>();
     private readonly List<AsyncDefaultBasicConsumer> consumers = new();
 
@@ -32,19 +32,19 @@ public class MockBuilder : IDisposable
     public MockBuilder(string connectionString, Action<IServiceCollection> registerServices)
     {
         for (var i = 0; i < 10; i++)
-            channelPool.Push(Substitute.For<IModel, IRecoverable>());
+            channelPool.Push(Substitute.For<IChannel, IRecoverable>());
 
-        connectionFactory.CreateConnection(Arg.Any<IList<AmqpTcpEndpoint>>()).Returns(connection);
+        connectionFactory.CreateConnectionAsync(Arg.Any<IList<AmqpTcpEndpoint>>()).Returns(connection);
         connection.IsOpen.Returns(true);
         connection.Endpoint.Returns(new AmqpTcpEndpoint("localhost"));
 
-        connection.CreateModel().Returns(_ =>
+        connection.CreateChannelAsync().Returns(_ =>
         {
             var channel = channelPool.Pop();
             channels.Add(channel);
-            channel.CreateBasicProperties().Returns(basicProperties);
+            new RabbitMQ.Client.BasicProperties().Returns(basicProperties);
             channel.IsOpen.Returns(true);
-            channel.BasicConsume(null, false, null, true, false, null, null)
+            channel.BasicConsumeAsync(null, false, null, true, false, null, null)
                 .ReturnsForAnyArgs(consumeInvocation =>
                 {
                     var queueName = (string)consumeInvocation[0];
@@ -52,19 +52,19 @@ public class MockBuilder : IDisposable
                     var consumer = (AsyncDefaultBasicConsumer)consumeInvocation[6];
 
                     ConsumerQueueNames.Add(queueName);
-                    consumer.HandleBasicConsumeOk(consumerTag)
+                    consumer.HandleBasicConsumeOkAsync(consumerTag)
                         .GetAwaiter()
                         .GetResult();
                     consumers.Add(consumer);
                     return string.Empty;
                 });
-            channel.QueueDeclare(null, true, false, false, null)
+            channel.QueueDeclareAsync(null, true, false, false, null)
                 .ReturnsForAnyArgs(queueDeclareInvocation =>
                 {
                     var queueName = (string)queueDeclareInvocation[0];
                     return new QueueDeclareOk(queueName, 0, 0);
                 });
-            channel.WaitForConfirms(default).ReturnsForAnyArgs(true);
+            channel.WaitForConfirmsAsync(default).ReturnsForAnyArgs(true);
 
             return channel;
         });
@@ -84,11 +84,11 @@ public class MockBuilder : IDisposable
 
     public IConnection Connection => connection;
 
-    public List<IModel> Channels => channels;
+    public List<IChannel> Channels => channels;
 
     public List<AsyncDefaultBasicConsumer> Consumers => consumers;
 
-    public IModel NextModel => channelPool.Peek();
+    public IChannel NextModel => channelPool.Peek();
 
     public IPubSub PubSub => serviceProvider.GetRequiredService<IPubSub>();
 

@@ -13,13 +13,13 @@ public class When_a_message_is_received : IDisposable
     {
         mockBuilder = new MockBuilder();
 
-        mockBuilder.SendReceive.Receive("the_queue", x => x
-            .Add<MyMessage>(message => deliveredMyMessage = message)
-            .Add<MyOtherMessage>(message => deliveredMyOtherMessage = message));
+        mockBuilder.SendReceive.ReceiveAsync("the_queue", x => x
+           .Add<MyMessage>(message => deliveredMyMessage = message)
+           .Add<MyOtherMessage>(message => deliveredMyOtherMessage = message));
 
-        DeliverMessage("{ Text: \"Hello World :)\" }", "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests");
-        DeliverMessage("{ Text: \"Goodbye Cruel World!\" }", "EasyNetQ.Tests.MyOtherMessage, EasyNetQ.Tests");
-        DeliverMessage("{ Text: \"Shouldn't get this\" }", "EasyNetQ.Tests.Unknown, EasyNetQ.Tests");
+        DeliverMessage("{ Text: \"Hello World :)\" }", "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests").GetAwaiter().GetResult();
+        DeliverMessage("{ Text: \"Goodbye Cruel World!\" }", "EasyNetQ.Tests.MyOtherMessage, EasyNetQ.Tests").GetAwaiter().GetResult();
+        DeliverMessage("{ Text: \"Shouldn't get this\" }", "EasyNetQ.Tests.Unknown, EasyNetQ.Tests").GetAwaiter().GetResult();
     }
 
     public void Dispose()
@@ -41,7 +41,7 @@ public class When_a_message_is_received : IDisposable
         deliveredMyOtherMessage.Text.Should().Be("Goodbye Cruel World!");
     }
 
-    private void DeliverMessage(string message, string type)
+    private async Task DeliverMessage(string message, string type)
     {
         var properties = new BasicProperties
         {
@@ -50,7 +50,7 @@ public class When_a_message_is_received : IDisposable
         };
         var body = Encoding.UTF8.GetBytes(message);
 
-        mockBuilder.Consumers[0].HandleBasicDeliver(
+        await mockBuilder.Consumers[0].HandleBasicDeliverAsync(
             "consumer tag",
             0,
             false,
@@ -58,6 +58,6 @@ public class When_a_message_is_received : IDisposable
             "the_routing_key",
             properties,
             body
-        ).GetAwaiter().GetResult();
+        );
     }
 }

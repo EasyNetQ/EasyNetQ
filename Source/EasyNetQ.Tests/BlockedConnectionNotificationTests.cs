@@ -8,9 +8,9 @@ public class When_a_connection_becomes_blocked
     private readonly MockBuilder mockBuilder = new();
 
     [Fact]
-    public void Should_raise_blocked_event()
+    public async Task Should_raise_blocked_event()
     {
-        using var _ = mockBuilder.ProducerConnection.CreateModel();
+        using var _ = await mockBuilder.ProducerConnection.CreateChannelAsync();
 
         var blocked = false;
         mockBuilder.Bus.Advanced.Blocked += (_, _) => blocked = true;
@@ -25,9 +25,9 @@ public class When_a_connection_becomes_unblocked
     private readonly MockBuilder mockBuilder = new();
 
     [Fact]
-    public void Should_raise_unblocked_event()
+    public async Task Should_raise_unblocked_event()
     {
-        using var _ = mockBuilder.ProducerConnection.CreateModel();
+        using var _ = await mockBuilder.ProducerConnection.CreateChannelAsync();
 
         var blocked = true;
         mockBuilder.Bus.Advanced.Unblocked += (_, _) => blocked = false;

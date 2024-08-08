@@ -1,13 +1,15 @@
+using Newtonsoft.Json;
+
 namespace EasyNetQ.Hosepipe;
 
 public class MessageReader : IMessageReader
 {
-    public IEnumerable<HosepipeMessage> ReadMessages(QueueParameters parameters)
+    public IAsyncEnumerable<HosepipeMessage> ReadMessagesAsync(QueueParameters parameters)
     {
-        return ReadMessages(parameters, null);
+        return ReadMessagesAsync(parameters, null);
     }
 
-    public IEnumerable<HosepipeMessage> ReadMessages(QueueParameters parameters, string messageName)
+    public async IAsyncEnumerable<HosepipeMessage> ReadMessagesAsync(QueueParameters parameters, string messageName)
     {
         if (!Directory.Exists(parameters.MessagesOutputDirectory))
         {
@@ -22,16 +24,16 @@ public class MessageReader : IMessageReader
             const string messageTag = ".message.";
             var directoryName = Path.GetDirectoryName(file);
             var fileName = Path.GetFileName(file);
-            var propertiesFileName = Path.Combine(directoryName, fileName.Replace(messageTag, ".properties."));
-            var infoFileName = Path.Combine(directoryName, fileName.Replace(messageTag, ".info."));
+            var propertiesFileName = Path.Combine(directoryName!, fileName.Replace(messageTag, ".properties."));
+            var infoFileName = Path.Combine(directoryName!, fileName.Replace(messageTag, ".info."));
 
-            var body = File.ReadAllText(file);
+            var body = await File.ReadAllTextAsync(file);
 
-            var propertiesJson = File.ReadAllText(propertiesFileName);
-            var properties = Newtonsoft.Json.JsonConvert.DeserializeObject<MessageProperties>(propertiesJson);
+            var propertiesJson = await File.ReadAllTextAsync(propertiesFileName);
+            var properties = JsonConvert.DeserializeObject<MessageProperties>(propertiesJson);
 
-            var infoJson = File.ReadAllText(infoFileName);
-            var info = Newtonsoft.Json.JsonConvert.DeserializeObject<MessageReceivedInfo>(infoJson);
+            var infoJson = await File.ReadAllTextAsync(infoFileName);
+            var info = JsonConvert.DeserializeObject<MessageReceivedInfo>(infoJson);
 
             yield return new HosepipeMessage(body, properties, info);
         }

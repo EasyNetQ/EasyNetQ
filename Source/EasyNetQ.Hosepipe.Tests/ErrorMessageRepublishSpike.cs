@@ -28,7 +28,7 @@ public class ErrorMessageRepublishSpike
 
     [Fact]
     [Traits.Explicit("Requires a localhost instance of RabbitMQ to run")]
-    public void Should_be_able_to_republish_message()
+    public async Task Should_be_able_to_republish_message()
     {
         var error = (Error)serializer.BytesToMessage(typeof(Error), Encoding.UTF8.GetBytes(errorMessage));
 
@@ -39,18 +39,18 @@ public class ErrorMessageRepublishSpike
             Password = "guest"
         };
 
-        using var connection = connectionFactory.CreateConnection();
-        using var model = connection.CreateModel();
+        using var connection = await connectionFactory.CreateConnectionAsync();
+        using var channel = await connection.CreateChannelAsync();
         try
         {
-            model.ExchangeDeclarePassive(error.Exchange);
+            await channel.ExchangeDeclarePassiveAsync(error.Exchange);
 
-            var properties = model.CreateBasicProperties();
+            var properties = new BasicProperties();
             error.BasicProperties.CopyTo(properties);
 
             var body = Encoding.UTF8.GetBytes(error.Message);
 
-            model.BasicPublish(error.Exchange, error.RoutingKey, properties, body);
+            await channel.BasicPublishAsync(error.Exchange, error.RoutingKey, properties, body);
         }
         catch (OperationInterruptedException)
         {

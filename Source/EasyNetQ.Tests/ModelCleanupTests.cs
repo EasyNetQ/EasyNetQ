@@ -16,10 +16,10 @@ public class ModelCleanupTests
         waitTime = TimeSpan.FromSeconds(10);
     }
 
-    private AutoResetEvent WaitForConsumerModelDisposedMessage()
+    private AutoResetEvent WaitForConsumerChannelDisposedMessage()
     {
         var are = new AutoResetEvent(false);
-        mockBuilder.EventBus.Subscribe((in ConsumerModelDisposedEvent _) => are.Set());
+        mockBuilder.EventBus.Subscribe((in ConsumerChannelDisposedEvent _) => are.Set());
         return are;
     }
 
@@ -44,7 +44,7 @@ public class ModelCleanupTests
         if (!waiter.Wait(5000))
             throw new TimeoutException();
 
-        var are = WaitForConsumerModelDisposedMessage();
+        var are = WaitForConsumerChannelDisposedMessage();
 
         mockBuilder.Dispose();
 
@@ -65,7 +65,7 @@ public class ModelCleanupTests
         if (!waiter.Wait(5000))
             throw new TimeoutException();
 
-        var are = WaitForConsumerModelDisposedMessage();
+        var are = WaitForConsumerChannelDisposedMessage();
 
         mockBuilder.Dispose();
 
@@ -80,7 +80,7 @@ public class ModelCleanupTests
     public void Should_cleanup_subscribe_async_model()
     {
         bus.PubSub.Subscribe<TestMessage>("abc", _ => { });
-        var are = WaitForConsumerModelDisposedMessage();
+        var are = WaitForConsumerChannelDisposedMessage();
 
         mockBuilder.Dispose();
 
@@ -95,7 +95,7 @@ public class ModelCleanupTests
     public void Should_cleanup_subscribe_model()
     {
         bus.PubSub.Subscribe<TestMessage>("abc", _ => { });
-        var are = WaitForConsumerModelDisposedMessage();
+        var are = WaitForConsumerChannelDisposedMessage();
 
         mockBuilder.Dispose();
 

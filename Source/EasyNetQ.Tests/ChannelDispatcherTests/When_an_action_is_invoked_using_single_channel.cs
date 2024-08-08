@@ -20,7 +20,7 @@ public class When_an_action_is_invoked_using_single_channel : IDisposable
         producerConnection = Substitute.For<IProducerConnection>();
         var consumerConnection = Substitute.For<IConsumerConnection>();
         var channel = Substitute.For<IPersistentChannel>();
-        var action = Substitute.For<Func<IModel, int>>();
+        var action = Substitute.For<Func<IChannel, int>>();
         channelFactory.CreatePersistentChannel(producerConnection, new PersistentChannelOptions()).Returns(channel);
         channel.InvokeChannelActionAsync(action).Returns(42);
 

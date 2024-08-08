@@ -18,7 +18,7 @@ public class When_an_action_is_performed_on_a_closed_channel_that_doesnt_open_ag
         );
         var exception = new OperationInterruptedException(shutdownArgs);
 
-        persistentConnection.When(x => x.CreateModel()).Do(_ => throw exception);
+        persistentConnection.When(x => x.CreateChannelAsync()).Do(_ => throw exception);
         persistentChannel = new PersistentChannel(new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, eventBus);
     }
 
@@ -30,7 +30,7 @@ public class When_an_action_is_performed_on_a_closed_channel_that_doesnt_open_ag
         Assert.Throws<TaskCanceledException>(() =>
         {
             using var cts = new CancellationTokenSource(1000);
-            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"), cts.Token);
+            persistentChannel.InvokeChannelAction(x => x.ExchangeDeclareAsync("MyExchange", "direct"), cts.Token);
         });
     }
 

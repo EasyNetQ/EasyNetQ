@@ -33,9 +33,9 @@ public class When_a_responder_is_cancelled : IDisposable
     public void Dispose() => mockBuilder.Dispose();
 
     [Fact]
-    public void Should_NACK_with_requeue()
+    public async Task Should_NACK_with_requeue()
     {
-        mockBuilder.Channels[2].Received().BasicNack(0, false, true);
+        await mockBuilder.Channels[2].Received().BasicNackAsync(0, false, true);
     }
 
     private Task DeliverMessageAsync(RpcRequest request)
@@ -49,7 +49,7 @@ public class When_a_responder_is_cancelled : IDisposable
 
         var serializedMessage = mockBuilder.Serializer.MessageToBytes(typeof(RpcRequest), request);
 
-        return mockBuilder.Consumers[0].HandleBasicDeliver(
+        return mockBuilder.Consumers[0].HandleBasicDeliverAsync(
             "consumer tag",
             0,
             false,

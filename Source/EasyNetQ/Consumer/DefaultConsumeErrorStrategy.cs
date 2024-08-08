@@ -53,7 +53,7 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
     }
 
     /// <inheritdoc />
-    public virtual ValueTask<AckStrategy> HandleErrorAsync(ConsumeContext context, Exception exception)
+    public virtual async ValueTask<AckStrategy> HandleErrorAsync(ConsumeContext context, Exception exception)
     {
         var receivedInfo = context.ReceivedInfo;
         var properties = context.Properties;
@@ -69,24 +69,31 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
 
         try
         {
-            using var model = connection.CreateModel();
-            if (configuration.PublisherConfirms) model.ConfirmSelect();
+            var channel = await connection.CreateChannelAsync();
+            if (configuration.PublisherConfirms) await channel.ConfirmSelectAsync();
 
-            var errorExchange = DeclareErrorExchangeWithQueue(model, receivedInfo);
+            var errorExchange = DeclareErrorExchangeWithQueue(channel, receivedInfo);
 
             using var message = CreateErrorMessage(receivedInfo, properties, body, exception);
 
-            var errorProperties = model.CreateBasicProperties();
-            errorProperties.Persistent = true;
-            errorProperties.Type = typeNameSerializer.Serialize(typeof(Error));
+            var errorProperties = new BasicProperties
+            {
+                Persistent = true,
+                Type = typeNameSerializer.Serialize(typeof(Error))
+            };
 
-            model.BasicPublish(errorExchange, receivedInfo.RoutingKey, errorProperties, message.Memory);
+            await channel.BasicPublishAsync(errorExchange, receivedInfo.RoutingKey, errorProperties, message.Memory).ConfigureAwait(false);
 
-            return new ValueTask<AckStrategy>(
-                configuration.PublisherConfirms
-                    ? model.WaitForConfirms(configuration.Timeout) ? AckStrategies.Ack : AckStrategies.NackWithRequeue
-                    : AckStrategies.Ack
-            );
+            if (configuration.PublisherConfirms)
+            {
+                using var cts = new CancellationTokenSource(configuration.Timeout);
+                var waitForConfirmsResult = await channel.WaitForConfirmsAsync(cts.Token);
+                return waitForConfirmsResult ? AckStrategies.Ack : AckStrategies.NackWithRequeue;
+            }
+            else
+            {
+                return AckStrategies.Ack;
+            }
         }
         catch (BrokerUnreachableException unreachableException)
         {
@@ -110,33 +117,32 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
             logger.LogError(unexpectedException, "Failed to publish error message");
         }
 
-        return new ValueTask<AckStrategy>(AckStrategies.NackWithRequeue);
+        return AckStrategies.NackWithRequeue;
     }
 
     /// <inheritdoc />
     public virtual ValueTask<AckStrategy> HandleCancelledAsync(ConsumeContext context) => new(AckStrategies.NackWithRequeue);
 
-    private static void DeclareAndBindErrorExchangeWithErrorQueue(
-        IModel model,
+    private static async Task DeclareAndBindErrorExchangeWithErrorQueueAsync(
+        IChannel channel,
         string exchangeName,
         string exchangeType,
         string queueName,
         string? queueType,
-        string routingKey
+        string routingKey,
+        CancellationToken cancellationToken
     )
     {
-        Dictionary<string, object>? queueArgs = null;
-        if (queueType != null)
-        {
-            queueArgs = new Dictionary<string, object> { { "x-queue-type", queueType } };
-        }
+        var queueArgs = queueType != null
+            ? new Dictionary<string, object?> { { "x-queue-type", queueType } }
+            : null;
 
-        model.QueueDeclare(queueName, true, false, false, queueArgs);
-        model.ExchangeDeclare(exchangeName, exchangeType, true);
-        model.QueueBind(queueName, exchangeName, routingKey);
+        await channel.QueueDeclareAsync(queueName, true, false, false, queueArgs, cancellationToken: cancellationToken);
+        await channel.ExchangeDeclareAsync(exchangeName, exchangeType, true, cancellationToken: cancellationToken);
+        await channel.QueueBindAsync(queueName, exchangeName, routingKey, cancellationToken: cancellationToken);
     }
 
-    private string DeclareErrorExchangeWithQueue(IModel model, MessageReceivedInfo receivedInfo)
+    private string DeclareErrorExchangeWithQueue(IChannel channel, MessageReceivedInfo receivedInfo)
     {
         var errorExchangeName = conventions.ErrorExchangeNamingConvention(receivedInfo);
         var errorExchangeType = conventions.ErrorExchangeTypeConvention();
@@ -146,11 +152,20 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
 
         var errorTopologyIdentifier = $"{errorExchangeName}-{errorQueueName}-{routingKey}";
 
-        existingErrorExchangesWithQueues.GetOrAdd(errorTopologyIdentifier, _ =>
+        if (existingErrorExchangesWithQueues.TryAdd(errorTopologyIdentifier, true))
         {
-            DeclareAndBindErrorExchangeWithErrorQueue(model, errorExchangeName, errorExchangeType, errorQueueName, errorQueueType, routingKey);
-            return true;
-        });
+            Task.Run(async () =>
+            {
+                try
+                {
+                    await DeclareAndBindErrorExchangeWithErrorQueueAsync(channel, errorExchangeName, errorExchangeType, errorQueueName, errorQueueType, routingKey, CancellationToken.None).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Failed to declare and bind error exchange with error queue.");
+                }
+            }).Wait();
+        }
 
         return errorExchangeName;
     }

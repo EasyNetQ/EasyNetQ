@@ -263,20 +263,22 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         var declareResult = await persistentChannelDispatcher.InvokeAsync(
-            x => x.QueueDeclarePassive(queue), PersistentChannelDispatchOptions.ConsumerTopology, cts.Token
+            x => x.QueueDeclarePassiveAsync(queue), PersistentChannelDispatchOptions.ConsumerTopology, cts.Token
         ).ConfigureAwait(false);
+
+        var queueDeclareOk = await declareResult; // Await the Task to get the result
 
         if (logger.IsEnabled(LogLevel.Debug))
         {
             logger.LogDebug(
                 "{queue} has {messagesCount} messages and {consumersCount} consumers.",
                 queue,
-                declareResult.MessageCount,
-                declareResult.ConsumerCount
+                queueDeclareOk.MessageCount,
+                queueDeclareOk.ConsumerCount
             );
         }
 
-        return new QueueStats(declareResult.MessageCount, declareResult.ConsumerCount);
+        return new QueueStats(queueDeclareOk.MessageCount, queueDeclareOk.ConsumerCount);
     }
 
     /// <inheritdoc />
@@ -285,7 +287,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         await persistentChannelDispatcher.InvokeAsync(
-            x => x.QueueDeclarePassive(queue), PersistentChannelDispatchOptions.ConsumerTopology, cts.Token
+            x => x.QueueDeclarePassiveAsync(queue), PersistentChannelDispatchOptions.ConsumerTopology, cts.Token
         ).ConfigureAwait(false);
 
         if (logger.IsEnabled(LogLevel.Debug))
@@ -306,11 +308,15 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-        var queueDeclareOk = await persistentChannelDispatcher.InvokeAsync(
-            x => x.QueueDeclare(queue, durable, exclusive, autoDelete, arguments),
+        IDictionary<string, object?>? nullableArguments = arguments?.ToDictionary(kvp => kvp.Key, kvp => (object?)kvp.Value);
+
+        var declareResult = await persistentChannelDispatcher.InvokeAsync(
+            x => x.QueueDeclareAsync(queue, durable, exclusive, autoDelete, nullableArguments),
             PersistentChannelDispatchOptions.ConsumerTopology,
             cts.Token
         ).ConfigureAwait(false);
+
+        var queueDeclareOk = await declareResult;
 
         if (logger.IsEnabled(LogLevel.Debug))
         {
@@ -335,7 +341,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         await persistentChannelDispatcher.InvokeAsync(
-            x => x.QueueDelete(queue, ifUnused, ifEmpty),
+            x => x.QueueDeleteAsync(queue, ifUnused, ifEmpty),
             PersistentChannelDispatchOptions.ConsumerTopology,
             cts.Token
         ).ConfigureAwait(false);
@@ -352,7 +358,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         await persistentChannelDispatcher.InvokeAsync(
-            x => x.QueuePurge(queue),
+            x => x.QueuePurgeAsync(queue),
             PersistentChannelDispatchOptions.ConsumerTopology,
             cts.Token
         ).ConfigureAwait(false);
@@ -369,7 +375,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         await persistentChannelDispatcher.InvokeAsync(
-            x => x.ExchangeDeclarePassive(exchange), PersistentChannelDispatchOptions.ProducerTopology, cts.Token
+            x => x.ExchangeDeclarePassiveAsync(exchange), PersistentChannelDispatchOptions.ProducerTopology, cts.Token
         ).ConfigureAwait(false);
 
         if (logger.IsEnabled(LogLevel.Debug))
@@ -390,8 +396,10 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
+        IDictionary<string, object?>? nullableArguments = arguments?.ToDictionary(kvp => kvp.Key, kvp => (object?)kvp.Value);
+
         await persistentChannelDispatcher.InvokeAsync(
-            x => x.ExchangeDeclare(exchange, type, durable, autoDelete, arguments),
+            x => x.ExchangeDeclareAsync(exchange, type, durable, autoDelete, nullableArguments),
             PersistentChannelDispatchOptions.ProducerTopology,
             cts.Token
         ).ConfigureAwait(false);
@@ -419,7 +427,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         await persistentChannelDispatcher.InvokeAsync(
-            x => x.ExchangeDelete(exchange, ifUnused), PersistentChannelDispatchOptions.ProducerTopology, cts.Token
+            x => x.ExchangeDeleteAsync(exchange, ifUnused), PersistentChannelDispatchOptions.ProducerTopology, cts.Token
         ).ConfigureAwait(false);
 
         if (logger.IsEnabled(LogLevel.Debug))
@@ -439,8 +447,10 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
+        IDictionary<string, object?>? nullableArguments = arguments?.ToDictionary(kvp => kvp.Key, kvp => (object?)kvp.Value);
+
         await persistentChannelDispatcher.InvokeAsync(
-            x => x.QueueBind(queue, exchange, routingKey, arguments),
+            x => x.QueueBindAsync(queue, exchange, routingKey, nullableArguments),
             PersistentChannelDispatchOptions.ConsumerTopology,
             cts.Token
         ).ConfigureAwait(false);
@@ -468,8 +478,10 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
+        IDictionary<string, object?>? nullableArguments = arguments?.ToDictionary(kvp => kvp.Key, kvp => (object?)kvp.Value);
+
         await persistentChannelDispatcher.InvokeAsync(
-            x => x.QueueUnbind(queue, exchange, routingKey, arguments),
+            x => x.QueueUnbindAsync(queue, exchange, routingKey, nullableArguments),
             PersistentChannelDispatchOptions.ConsumerTopology,
             cts.Token
         ).ConfigureAwait(false);
@@ -497,8 +509,10 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
+        IDictionary<string, object?>? nullableArguments = arguments?.ToDictionary(kvp => kvp.Key, kvp => (object?)kvp.Value);
+
         await persistentChannelDispatcher.InvokeAsync(
-            x => x.ExchangeBind(destinationExchange, sourceExchange, routingKey, arguments),
+            x => x.ExchangeBindAsync(destinationExchange, sourceExchange, routingKey, nullableArguments),
             PersistentChannelDispatchOptions.ProducerTopology,
             cts.Token
         ).ConfigureAwait(false);
@@ -526,8 +540,10 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
+        IDictionary<string, object?>? nullableArguments = arguments?.ToDictionary(kvp => kvp.Key, kvp => (object?)kvp.Value);
+
         await persistentChannelDispatcher.InvokeAsync(
-            x => x.ExchangeUnbind(destinationExchange, sourceExchange, routingKey, arguments),
+            x => x.ExchangeUnbindAsync(destinationExchange, sourceExchange, routingKey, nullableArguments),
             PersistentChannelDispatchOptions.ProducerTopology,
             cts.Token
         ).ConfigureAwait(false);
@@ -664,11 +680,11 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             this.body = body;
         }
 
-        public bool Invoke(IModel model)
+        public bool Invoke(IChannel channel)
         {
-            var basicProperties = model.CreateBasicProperties();
+            var basicProperties = new BasicProperties();
             properties.CopyTo(basicProperties);
-            model.BasicPublish(exchange, routingKey, mandatory, basicProperties, body);
+            channel.BasicPublishAsync(exchange, routingKey, basicProperties, body, mandatory);
             return true;
         }
     }
@@ -699,14 +715,15 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             this.body = body;
         }
 
-        public IPublishPendingConfirmation Invoke(IModel model)
+        public IPublishPendingConfirmation Invoke(IChannel channel)
         {
-            var confirmation = confirmationListener.CreatePendingConfirmation(model);
-            var basicProperties = model.CreateBasicProperties();
+            var confirmation = confirmationListener.CreatePendingConfirmation(channel);
+            var basicProperties = new BasicProperties();
             properties.SetConfirmationId(confirmation.Id).CopyTo(basicProperties);
+
             try
             {
-                model.BasicPublish(exchange, routingKey, mandatory, basicProperties, body);
+                channel.BasicPublishAsync(exchange, routingKey, basicProperties, body, mandatory);
             }
             catch (Exception)
             {

@@ -1,6 +1,5 @@
 using System.Reflection;
 using System.Text;
-
 using EasyNetQ.Consumer;
 
 namespace EasyNetQ.Hosepipe;
@@ -41,7 +40,7 @@ public class Program
         this.conventions = conventions;
     }
 
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var typeNameSerializer = new LegacyTypeNameSerializer();
         var argParser = new ArgParser();
@@ -71,10 +70,10 @@ public class Program
             new ErrorRetry(new ReflectionBasedNewtonsoftJsonSerializer(), errorMessageSerializer),
             new Conventions(typeNameSerializer)
         );
-        program.Start(args);
+        await program.Start(args);
     }
 
-    public void Start(string[] args)
+    public async Task Start(string[] args)
     {
         var arguments = argParser.Parse(args);
 
@@ -95,17 +94,22 @@ public class Program
 
         try
         {
-            arguments.At(0, "dump", () => arguments.WithKey("q", a =>
+            if (arguments.At(0, "dump", () =>
+                {
+                    arguments.WithKey("q", a =>
+                    {
+                        parameters.QueueName = a.Value;
+                    }).FailWith(Message("No Queue Name given"));
+                }) != null)
             {
-                parameters.QueueName = a.Value;
-                Dump(parameters);
-            }).FailWith(Message("No Queue Name given")));
+                await DumpAsync(parameters);
+            }
 
-            arguments.At(0, "insert", () => Insert(parameters));
+            arguments.At(0, "insert", async () => await Insert(parameters));
 
-            arguments.At(0, "err", () => ErrorDump(parameters));
+            arguments.At(0, "err", async () => await ErrorDumpAsync(parameters));
 
-            arguments.At(0, "retry", () => Retry(parameters));
+            arguments.At(0, "retry", async () => await Retry(parameters));
 
             arguments.At(0, "?", PrintUsage);
 
@@ -127,10 +131,10 @@ public class Program
         }
     }
 
-    private void Dump(QueueParameters parameters)
+    private async Task DumpAsync(QueueParameters parameters)
     {
         var count = 0;
-        messageWriter.Write(WithEach(queueRetrieval.GetMessagesFromQueue(parameters), () => count++), parameters);
+        await messageWriter.WriteAsync(WithEachAsync(queueRetrieval.GetMessagesFromQueueAsync(parameters), () => count++), parameters);
 
         Console.WriteLine(
             "{0} messages from queue '{1}' were dumped to directory '{2}'",
@@ -138,11 +142,11 @@ public class Program
         );
     }
 
-    private void Insert(QueueParameters parameters)
+    private async Task Insert(QueueParameters parameters)
     {
         var count = 0;
-        queueInsertion.PublishMessagesToQueue(
-            WithEach(messageReader.ReadMessages(parameters), () => count++), parameters
+        await queueInsertion.PublishMessagesToQueueAsync(
+            WithEachAsync(messageReader.ReadMessagesAsync(parameters), () => count++), parameters
         );
 
         Console.WriteLine(
@@ -151,20 +155,20 @@ public class Program
         );
     }
 
-    private void ErrorDump(QueueParameters parameters)
+    private async Task ErrorDumpAsync(QueueParameters parameters)
     {
         if (parameters.QueueName == null)
             parameters.QueueName = conventions.ErrorQueueNamingConvention(default);
-        Dump(parameters);
+        await DumpAsync(parameters);
     }
 
-    private void Retry(QueueParameters parameters)
+    private async Task Retry(QueueParameters parameters)
     {
         var count = 0;
         var queueName = parameters.QueueName ?? conventions.ErrorQueueNamingConvention(default);
 
-        errorRetry.RetryErrors(
-            WithEach(messageReader.ReadMessages(parameters, queueName), () => count++), parameters
+        await errorRetry.RetryErrorsAsync(
+            WithEachAsync(messageReader.ReadMessagesAsync(parameters, queueName), () => count++), parameters
         );
 
         Console.WriteLine(
@@ -172,9 +176,9 @@ public class Program
         );
     }
 
-    private static IEnumerable<HosepipeMessage> WithEach(IEnumerable<HosepipeMessage> messages, Action action)
+    private static async IAsyncEnumerable<HosepipeMessage> WithEachAsync(IAsyncEnumerable<HosepipeMessage> messages, Action action)
     {
-        foreach (var message in messages)
+        await foreach (var message in messages)
         {
             action();
             yield return message;

@@ -11,22 +11,22 @@ public class PublishConfirmationListenerTest
     public PublishConfirmationListenerTest()
     {
         eventBus = new EventBus(Substitute.For<ILogger<EventBus>>());
-        model = Substitute.For<IModel, IRecoverable>();
+        channel = Substitute.For<IChannel, IRecoverable>();
         publishConfirmationListener = new PublishConfirmationListener(eventBus);
     }
 
     private readonly EventBus eventBus;
     private readonly PublishConfirmationListener publishConfirmationListener;
-    private readonly IModel model;
+    private readonly IChannel channel;
     private const ulong DeliveryTag = 42;
 
     [Fact]
     public async Task Should_fail_with_multiple_nack_confirmation_event()
     {
-        model.NextPublishSeqNo.Returns(DeliveryTag - 1, DeliveryTag);
-        var confirmation1 = publishConfirmationListener.CreatePendingConfirmation(model);
-        var confirmation2 = publishConfirmationListener.CreatePendingConfirmation(model);
-        eventBus.Publish(MessageConfirmationEvent.Nack(model, DeliveryTag, true));
+        channel.NextPublishSeqNo.Returns(DeliveryTag - 1, DeliveryTag);
+        var confirmation1 = publishConfirmationListener.CreatePendingConfirmation(channel);
+        var confirmation2 = publishConfirmationListener.CreatePendingConfirmation(channel);
+        eventBus.Publish(MessageConfirmationEvent.Nack(channel, DeliveryTag, true));
         await Assert.ThrowsAsync<PublishNackedException>(
             () => confirmation1.WaitAsync()
         );
@@ -38,9 +38,9 @@ public class PublishConfirmationListenerTest
     [Fact]
     public async Task Should_fail_with_nack_confirmation_event()
     {
-        model.NextPublishSeqNo.Returns(DeliveryTag);
-        var confirmation = publishConfirmationListener.CreatePendingConfirmation(model);
-        eventBus.Publish(MessageConfirmationEvent.Nack(model, DeliveryTag, false));
+        channel.NextPublishSeqNo.Returns(DeliveryTag);
+        var confirmation = publishConfirmationListener.CreatePendingConfirmation(channel);
+        eventBus.Publish(MessageConfirmationEvent.Nack(channel, DeliveryTag, false));
         await Assert.ThrowsAsync<PublishNackedException>(
             () => confirmation.WaitAsync()
         );
@@ -49,19 +49,19 @@ public class PublishConfirmationListenerTest
     [Fact]
     public async Task Should_success_with_ack_confirmation_event()
     {
-        model.NextPublishSeqNo.Returns(DeliveryTag);
-        var confirmation = publishConfirmationListener.CreatePendingConfirmation(model);
-        eventBus.Publish(MessageConfirmationEvent.Ack(model, DeliveryTag, false));
+        channel.NextPublishSeqNo.Returns(DeliveryTag);
+        var confirmation = publishConfirmationListener.CreatePendingConfirmation(channel);
+        eventBus.Publish(MessageConfirmationEvent.Ack(channel, DeliveryTag, false));
         await confirmation.WaitAsync();
     }
 
     [Fact]
     public async Task Should_success_with_multiple_ack_confirmation_event()
     {
-        model.NextPublishSeqNo.Returns(DeliveryTag - 1, DeliveryTag);
-        var confirmation1 = publishConfirmationListener.CreatePendingConfirmation(model);
-        var confirmation2 = publishConfirmationListener.CreatePendingConfirmation(model);
-        eventBus.Publish(MessageConfirmationEvent.Ack(model, DeliveryTag, true));
+        channel.NextPublishSeqNo.Returns(DeliveryTag - 1, DeliveryTag);
+        var confirmation1 = publishConfirmationListener.CreatePendingConfirmation(channel);
+        var confirmation2 = publishConfirmationListener.CreatePendingConfirmation(channel);
+        eventBus.Publish(MessageConfirmationEvent.Ack(channel, DeliveryTag, true));
         await confirmation1.WaitAsync();
         await confirmation2.WaitAsync();
     }
@@ -69,8 +69,8 @@ public class PublishConfirmationListenerTest
     [Fact]
     public async Task Should_cancel_without_confirmation_event()
     {
-        model.NextPublishSeqNo.Returns(DeliveryTag);
-        var confirmation = publishConfirmationListener.CreatePendingConfirmation(model);
+        channel.NextPublishSeqNo.Returns(DeliveryTag);
+        var confirmation = publishConfirmationListener.CreatePendingConfirmation(channel);
         using var cts = new CancellationTokenSource(1000);
         await Assert.ThrowsAsync<TaskCanceledException>(
             () => confirmation.WaitAsync(cts.Token)
@@ -80,23 +80,23 @@ public class PublishConfirmationListenerTest
     [Fact]
     public async Task Should_work_after_reconnection()
     {
-        model.NextPublishSeqNo.Returns(DeliveryTag);
-        var confirmation1 = publishConfirmationListener.CreatePendingConfirmation(model);
-        eventBus.Publish(new ChannelRecoveredEvent(model));
+        channel.NextPublishSeqNo.Returns(DeliveryTag);
+        var confirmation1 = publishConfirmationListener.CreatePendingConfirmation(channel);
+        eventBus.Publish(new ChannelRecoveredEvent(channel));
         await Assert.ThrowsAsync<PublishInterruptedException>(
             () => confirmation1.WaitAsync()
         );
 
-        var confirmation2 = publishConfirmationListener.CreatePendingConfirmation(model);
-        eventBus.Publish(MessageConfirmationEvent.Ack(model, DeliveryTag, false));
+        var confirmation2 = publishConfirmationListener.CreatePendingConfirmation(channel);
+        eventBus.Publish(MessageConfirmationEvent.Ack(channel, DeliveryTag, false));
         await confirmation2.WaitAsync();
     }
 
     [Fact]
     public async Task Should_fail_with_returned_message_event()
     {
-        model.NextPublishSeqNo.Returns(DeliveryTag);
-        var confirmation1 = publishConfirmationListener.CreatePendingConfirmation(model);
+        channel.NextPublishSeqNo.Returns(DeliveryTag);
+        var confirmation1 = publishConfirmationListener.CreatePendingConfirmation(channel);
         var properties = new MessageProperties
         {
             Headers = new Dictionary<string, object>
@@ -106,7 +106,7 @@ public class PublishConfirmationListenerTest
         };
         eventBus.Publish(
             new ReturnedMessageEvent(
-                model,
+                channel,
                 Array.Empty<byte>(),
                 properties,
                 new MessageReturnedInfo("exchange", "routingKey", "returnReason")
