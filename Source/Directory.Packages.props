@@ -3,6 +3,14 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <CentralPackageFloatingVersionsEnabled>true</CentralPackageFloatingVersionsEnabled>
   </PropertyGroup>
+
+    <ItemGroup>
+        <GlobalPackageReference Include="IDisposableAnalyzers" Version="4.0.8" >
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </GlobalPackageReference>
+    </ItemGroup>
+
   <ItemGroup>
     <PackageVersion Include="docker.dotnet" Version="3.125.15" />
     <PackageVersion Include="EasyNetQ.Management.Client" Version="2.1.0" />
@@ -12,11 +20,10 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
-    <PackageVersion Include="Newtonsoft.Json" Version="13.0.*" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="NSubstitute" Version="4.3.0" />
     <PackageVersion Include="NullGuard.Fody" Version="3.1.1" />
     <PackageVersion Include="PublicApiGenerator" Version="11.1.0" />
-    <!-- <PackageVersion Include="RabbitMQ.Client" Version="6.8.*" /> -->
     <PackageVersion Include="RabbitMQ.Client" Version="7.0.0-rc.7" />
     <PackageVersion Include="Shouldly" Version="4.2.1" />
     <PackageVersion Include="System.ComponentModel.TypeConverter" Version="4.3.0" />

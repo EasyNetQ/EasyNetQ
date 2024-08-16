@@ -1,14 +1,16 @@
+using System;
 using EasyNetQ.Internals;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ.MessageVersioning;
 
 /// <inheritdoc />
-public class VersionedExchangeDeclareStrategy : IExchangeDeclareStrategy
+public class VersionedExchangeDeclareStrategy : IExchangeDeclareStrategy, IDisposable
 {
     private readonly IAdvancedBus advancedBus;
     private readonly IConventions conventions;
     private readonly AsyncCache<ExchangeKey, Exchange> declaredExchanges;
+    private bool disposed;
 
     public VersionedExchangeDeclareStrategy(IConventions conventions, IAdvancedBus advancedBus)
     {
@@ -31,6 +33,15 @@ public class VersionedExchangeDeclareStrategy : IExchangeDeclareStrategy
         return DeclareVersionedExchangesAsync(messageVersions, exchangeType, cancellationToken);
     }
 
+    public virtual void Dispose()
+    {
+        if (disposed)
+            return;
+
+        disposed = true;
+        declaredExchanges.Dispose();
+    }
+    
     private async Task<Exchange> DeclareVersionedExchangesAsync(MessageVersionStack messageVersions, string exchangeType, CancellationToken cancellationToken)
     {
         Exchange? destinationExchange = null;

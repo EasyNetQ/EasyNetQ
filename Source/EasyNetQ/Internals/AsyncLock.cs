@@ -9,7 +9,9 @@ namespace EasyNetQ.Internals;
 public readonly struct AsyncLock : IDisposable
 {
     private readonly SemaphoreSlim semaphore;
+#pragma warning disable IDISP002
     private readonly Releaser releaser;
+#pragma warning restore IDISP002
     private readonly Task<Releaser> releaserTask;
 
     /// <summary>
