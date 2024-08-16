@@ -10,7 +10,7 @@ public interface IPersistentChannelAction<out TResult>
     /// <summary>
     /// Runs an abstract action
     /// </summary>
-    TResult Invoke(IChannel channel);
+    Task<BasicGetResult?> Invoke(IChannel channel);
 }
 
 /// <summary>

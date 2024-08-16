@@ -8,7 +8,7 @@ public readonly struct ActionBasedPersistentChannelAction : IPersistentChannelAc
 
     public ActionBasedPersistentChannelAction(Action<IChannel> action) => this.action = action;
 
-    public bool Invoke(IChannel channel)
+    public Task<BasicGetResult?> Invoke(IChannel channel)
     {
         action(channel);
         return true;

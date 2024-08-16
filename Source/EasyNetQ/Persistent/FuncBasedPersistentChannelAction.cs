@@ -8,5 +8,5 @@ public readonly struct FuncBasedPersistentChannelAction<TResult> : IPersistentCh
 
     public FuncBasedPersistentChannelAction(Func<IChannel, TResult> func) => this.func = func;
 
-    public TResult Invoke(IChannel channel) => func(channel);
+    public Task<BasicGetResult?> Invoke(IChannel channel) => func(channel);
 }

@@ -409,9 +409,9 @@ public class PullingConsumer : IPullingConsumer<PullResult>
             this.autoAck = autoAck;
         }
 
-        public BasicGetResult? Invoke(IChannel channel)
+        public async Task<BasicGetResult?> Invoke(IChannel channel)
         {
-            return channel.BasicGetAsync(queue.Name, autoAck).GetAwaiter().GetResult();
+            return await channel.BasicGetAsync(queue.Name, autoAck);
         }
     }
 
@@ -426,7 +426,7 @@ public class PullingConsumer : IPullingConsumer<PullResult>
             this.multiple = multiple;
         }
 
-        public bool Invoke(IChannel channel)
+        public Task<BasicGetResult?> Invoke(IChannel channel)
         {
             channel.BasicAckAsync(deliveryTag, multiple);
             return true;
@@ -446,7 +446,7 @@ public class PullingConsumer : IPullingConsumer<PullResult>
             this.requeue = requeue;
         }
 
-        public bool Invoke(IChannel channel)
+        public Task<BasicGetResult?> Invoke(IChannel channel)
         {
             channel.BasicNackAsync(deliveryTag, multiple, requeue);
             return true;
