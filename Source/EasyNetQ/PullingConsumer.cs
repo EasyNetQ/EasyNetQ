@@ -393,7 +393,7 @@ public class PullingConsumer : IPullingConsumer<PullResult>
     }
 
     /// <inheritdoc />
-    public void Dispose()
+    public virtual void Dispose()
     {
         channel.Dispose();
     }
@@ -509,8 +509,10 @@ public class PullingConsumer<T> : IPullingConsumer<PullResult<T>>
     }
 
     /// <inheritdoc />
-    public void Dispose()
+    public virtual void Dispose()
     {
+#pragma warning disable IDISP007 // the injected here is created in the calling method so it should be disposed
         consumer.Dispose();
+#pragma warning restore IDISP007
     }
 }

@@ -1,11 +1,10 @@
-using System;
 using EasyNetQ.Internals;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ;
 
 /// <inheritdoc />
-public sealed class DefaultExchangeDeclareStrategy : IExchangeDeclareStrategy, IDisposable
+public class DefaultExchangeDeclareStrategy : IExchangeDeclareStrategy, IDisposable
 {
     private readonly IConventions conventions;
     private readonly AsyncCache<ExchangeKey, Exchange> declaredExchanges;
@@ -30,7 +29,7 @@ public sealed class DefaultExchangeDeclareStrategy : IExchangeDeclareStrategy, I
         return DeclareExchangeAsync(exchangeName, exchangeType, cancellationToken);
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         if (disposed)
             return;

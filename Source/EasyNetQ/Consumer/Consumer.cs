@@ -161,7 +161,7 @@ public class Consumer : IConsumer
     }
 
     /// <inheritdoc />
-    public void Dispose()
+    public virtual void Dispose()
     {
         if (disposed) return;
 

@@ -47,7 +47,7 @@ public class PublishConfirmationListener : IPublishConfirmationListener
     }
 
     /// <inheritdoc />
-    public void Dispose()
+    public virtual void Dispose()
     {
         foreach (var subscription in subscriptions)
             subscription.Dispose();

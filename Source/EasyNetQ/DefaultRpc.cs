@@ -115,7 +115,7 @@ public class DefaultRpc : IRpc, IDisposable
     }
 
     /// <inheritdoc />
-    public void Dispose()
+    public virtual void Dispose()
     {
         eventSubscription.Dispose();
         foreach (var responseSubscription in responseSubscriptions.Values)

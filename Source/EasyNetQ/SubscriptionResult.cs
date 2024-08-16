@@ -35,5 +35,7 @@ public readonly struct SubscriptionResult : IDisposable
     private IDisposable ConsumerCancellation { get; }
 
     /// <inheritdoc />
+#pragma warning disable IDISP007
     public void Dispose() => ConsumerCancellation.Dispose();
+#pragma warning restore IDISP007
 }

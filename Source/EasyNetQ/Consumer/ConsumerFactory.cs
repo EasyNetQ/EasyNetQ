@@ -52,7 +52,7 @@ public class ConsumerFactory : IConsumerFactory
     }
 
     /// <inheritdoc />
-    public void Dispose()
+    public virtual void Dispose()
     {
         unsubscribeFromStoppedConsumerEvent.Dispose();
         consumers.ClearAndDispose();

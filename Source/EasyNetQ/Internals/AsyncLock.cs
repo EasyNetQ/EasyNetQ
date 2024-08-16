@@ -9,9 +9,7 @@ namespace EasyNetQ.Internals;
 public readonly struct AsyncLock : IDisposable
 {
     private readonly SemaphoreSlim semaphore;
-#pragma warning disable IDISP002
     private readonly Releaser releaser;
-#pragma warning restore IDISP002
     private readonly Task<Releaser> releaserTask;
 
     /// <summary>
@@ -78,7 +76,11 @@ public readonly struct AsyncLock : IDisposable
     }
 
     /// <inheritdoc />
-    public void Dispose() => semaphore.Dispose();
+    public void Dispose()
+    {
+        semaphore.Dispose();
+        releaser.Dispose();
+    }
 
     private async Task<Releaser> WaitForAcquireAsync(Task acquireAsync)
     {

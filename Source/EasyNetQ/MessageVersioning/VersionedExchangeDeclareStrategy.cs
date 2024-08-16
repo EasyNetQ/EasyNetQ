@@ -1,4 +1,3 @@
-using System;
 using EasyNetQ.Internals;
 using EasyNetQ.Topology;
 
@@ -41,7 +40,7 @@ public class VersionedExchangeDeclareStrategy : IExchangeDeclareStrategy, IDispo
         disposed = true;
         declaredExchanges.Dispose();
     }
-    
+
     private async Task<Exchange> DeclareVersionedExchangesAsync(MessageVersionStack messageVersions, string exchangeType, CancellationToken cancellationToken)
     {
         Exchange? destinationExchange = null;

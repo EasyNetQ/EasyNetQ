@@ -80,7 +80,7 @@ public interface IInternalConsumer : IDisposable
     /// <summary>
     ///     Stops consuming
     /// </summary>
-    void StopConsuming();
+    Task StopConsuming();
 
     /// <summary>
     ///     Raised when consumer is cancelled
@@ -233,11 +233,11 @@ public class InternalConsumer : IInternalConsumer
     }
 
     /// <inheritdoc />
-    public void StopConsuming()
+    public async Task StopConsuming()
     {
         if (disposed) throw new ObjectDisposedException(nameof(InternalConsumer));
 
-        using var _ = mutex.Acquire();
+        using var _ = await mutex.AcquireAsync();
 
         foreach (var consumer in consumers.Values)
         {
@@ -246,7 +246,8 @@ public class InternalConsumer : IInternalConsumer
             {
                 try
                 {
-                    channel?.BasicCancelAsync(consumerTag).GetAwaiter().GetResult();
+                    if(channel != null)
+                        await channel.BasicCancelAsync(consumerTag);
                 }
                 catch (AlreadyClosedException)
                 {
@@ -263,7 +264,7 @@ public class InternalConsumer : IInternalConsumer
     public event AsyncEventHandler<InternalConsumerCancelledEventArgs>? CancelledAsync;
 
     /// <inheritdoc />
-    public void Dispose()
+    public virtual void Dispose()
     {
         if (disposed) return;
 
