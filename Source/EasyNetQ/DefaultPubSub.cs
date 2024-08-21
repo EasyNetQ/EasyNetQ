@@ -42,7 +42,7 @@ public class DefaultPubSub : IPubSub
         var publishConfiguration = new PublishConfiguration(conventions.TopicNamingConvention(typeof(T)));
         configure(publishConfiguration);
 
-        var messageType = typeof(T);
+        var messageType = message.GetType();
         var advancedMessageProperties = new MessageProperties
         {
             Priority = publishConfiguration.Priority ?? 0,
