@@ -246,7 +246,7 @@ public class InternalConsumer : IInternalConsumer
             {
                 try
                 {
-                    if(channel != null)
+                    if (channel != null)
                         await channel.BasicCancelAsync(consumerTag);
                 }
                 catch (AlreadyClosedException)
@@ -307,11 +307,13 @@ public class InternalConsumer : IInternalConsumer
             if (sender is AsyncBasicConsumer consumer && consumers.Remove(consumer.Queue.Name))
             {
                 consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
-                consumer.Dispose();
                 cancelled = consumer.Queue;
                 active = consumers.Select(x => x.Value.Queue).ToList();
 
                 if (IsChannelClosedWithSoftError(channel)) return;
+#pragma warning disable IDISP007 // the injected here is created in the calling method so it should be disposed
+                consumer.Dispose();
+#pragma warning restore IDISP007
             }
             else
             {

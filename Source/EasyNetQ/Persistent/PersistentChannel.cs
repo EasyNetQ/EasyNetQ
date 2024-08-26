@@ -73,7 +73,8 @@ public class PersistentChannel : IPersistentChannel
     }
 
     private async Task<(bool Success, TResult? Result)> TryInvokeChannelActionFastAsync<TResult, TChannelAction>(
-       TChannelAction channelAction
+    TChannelAction channelAction,
+    CancellationToken cancellationToken = default
     ) where TChannelAction : struct, IPersistentChannelAction<TResult>
     {
         TResult? result = default;
@@ -84,7 +85,7 @@ public class PersistentChannel : IPersistentChannel
             {
                 var channel = initializedChannel ?? await CreateChannelAsync().ConfigureAwait(false);
                 // ReSharper disable once PossiblyImpureMethodCallOnReadonlyVariable
-                result = channelAction.Invoke(channel);
+                result = await channelAction.InvokeAsync(channel, cancellationToken);
                 return (true, result);
             }
             catch (Exception exception)
@@ -107,6 +108,7 @@ public class PersistentChannel : IPersistentChannel
         return (false, result);
     }
 
+
     private async Task<TResult> InvokeChannelActionSlowAsync<TResult, TChannelAction>(
     TChannelAction channelAction, CancellationToken cancellationToken = default
     ) where TChannelAction : struct, IPersistentChannelAction<TResult>
@@ -123,7 +125,7 @@ public class PersistentChannel : IPersistentChannel
             try
             {
                 initializedChannel ??= await CreateChannelAsync().ConfigureAwait(false);
-                return channelAction.Invoke(initializedChannel);
+                return await channelAction.InvokeAsync(initializedChannel, cancellationToken);
             }
             catch (Exception exception)
             {

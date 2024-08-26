@@ -145,7 +145,9 @@ public readonly struct PullResult : IPullResult
     /// <inheritdoc />
     public void Dispose()
     {
+#pragma warning disable IDISP007 // the injected here is created in the calling method so it should be disposed
         disposable?.Dispose();
+#pragma warning restore IDISP007
     }
 }
 
@@ -395,7 +397,9 @@ public class PullingConsumer : IPullingConsumer<PullResult>
     /// <inheritdoc />
     public virtual void Dispose()
     {
+#pragma warning disable IDISP007 // the injected here is created in the calling method so it should be disposed
         channel.Dispose();
+#pragma warning restore IDISP007
     }
 
     private readonly struct BasicGetAction : IPersistentChannelAction<BasicGetResult?>
@@ -409,9 +413,9 @@ public class PullingConsumer : IPullingConsumer<PullResult>
             this.autoAck = autoAck;
         }
 
-        public async Task<BasicGetResult?> Invoke(IChannel channel)
+        public async Task<BasicGetResult?> InvokeAsync(IChannel channel, CancellationToken cancellationToken = default)
         {
-            return await channel.BasicGetAsync(queue.Name, autoAck);
+            return await channel.BasicGetAsync(queue.Name, autoAck, cancellationToken);
         }
     }
 
@@ -426,9 +430,9 @@ public class PullingConsumer : IPullingConsumer<PullResult>
             this.multiple = multiple;
         }
 
-        public Task<BasicGetResult?> Invoke(IChannel channel)
+        public async Task<bool> InvokeAsync(IChannel channel, CancellationToken cancellationToken = default)
         {
-            channel.BasicAckAsync(deliveryTag, multiple);
+            await channel.BasicAckAsync(deliveryTag, multiple, cancellationToken);
             return true;
         }
     }
@@ -446,9 +450,9 @@ public class PullingConsumer : IPullingConsumer<PullResult>
             this.requeue = requeue;
         }
 
-        public Task<BasicGetResult?> Invoke(IChannel channel)
+        public async Task<bool> InvokeAsync(IChannel channel, CancellationToken cancellationToken = default)
         {
-            channel.BasicNackAsync(deliveryTag, multiple, requeue);
+            await channel.BasicNackAsync(deliveryTag, multiple, requeue, cancellationToken);
             return true;
         }
     }

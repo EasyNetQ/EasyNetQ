@@ -125,13 +125,12 @@ public class PersistentConnection : IPersistentConnection
     {
         var connection = Interlocked.Exchange(ref initializedConnection, null);
         if (connection is null) return;
-
-        connection.Dispose();
         // We previously agreed to dispose firstly and then unsubscribe from events so as not to lose logs.
         // These works only for connection.RecoverySucceeded -= OnConnectionRecovered;, for other events
         // it's prohibited to unsubscribe from them after a connection disposal. There are good news though:
         // these events handlers (except RecoverySucceeded one) are nullified on IConnection.Dispose.
         connection.RecoverySucceeded -= OnConnectionRecovered;
+        connection.Dispose();
 
         status = status.ToUnknown();
     }

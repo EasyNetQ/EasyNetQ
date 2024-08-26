@@ -7,7 +7,7 @@ internal static class PersistentChannelDispatcherExtensions
 {
     public static ValueTask<bool> InvokeAsync(
         this IPersistentChannelDispatcher dispatcher,
-        Action<IChannel> channelAction,
+        Func<IChannel, Task> channelAction,
         PersistentChannelDispatchOptions options,
         CancellationToken cancellationToken = default
     )
@@ -19,7 +19,7 @@ internal static class PersistentChannelDispatcherExtensions
 
     public static ValueTask<TResult> InvokeAsync<TResult>(
         this IPersistentChannelDispatcher dispatcher,
-        Func<IChannel, TResult> channelAction,
+        Func<IChannel, Task<TResult>> channelAction,
         PersistentChannelDispatchOptions options,
         CancellationToken cancellationToken = default
     )

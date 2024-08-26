@@ -5,12 +5,12 @@ namespace EasyNetQ.Persistent;
 /// <summary>
 /// An abstract action to run on top of the channel
 /// </summary>
-public interface IPersistentChannelAction<out TResult>
+public interface IPersistentChannelAction<TResult>
 {
     /// <summary>
     /// Runs an abstract action
     /// </summary>
-    Task<BasicGetResult?> Invoke(IChannel channel);
+    Task<TResult> InvokeAsync(IChannel channel, CancellationToken cancellationToken = default);
 }
 
 /// <summary>

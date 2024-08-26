@@ -116,7 +116,7 @@ public static class EasyNetQBuilderExtensions
     {
         return pipelineBuilder.Use(next => async ctx =>
         {
-            var scopedResolver = ctx.ServiceResolver.CreateScope();
+            using var scopedResolver = ctx.ServiceResolver.CreateScope();
             return await next(ctx with { ServiceResolver = scopedResolver.ServiceProvider }).ConfigureAwait(false);
         });
     }

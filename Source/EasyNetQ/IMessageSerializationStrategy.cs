@@ -51,5 +51,11 @@ public readonly struct SerializedMessage : IDisposable
     public ReadOnlyMemory<byte> Body { get; }
 
     /// <inheritdoc />
-    public void Dispose() => owner?.Dispose();
+
+    public void Dispose()
+    {
+#pragma warning disable IDISP007 // the injected here is created in the calling method so it should be disposed
+        owner?.Dispose();
+#pragma warning restore IDISP007
+    }
 }
