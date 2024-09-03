@@ -53,7 +53,10 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
     }
 
     /// <inheritdoc />
-    public virtual async ValueTask<AckStrategy> HandleErrorAsync(ConsumeContext context, Exception exception)
+    public virtual async ValueTask<AckStrategyAsync> HandleErrorAsync(
+        ConsumeContext context,
+        Exception exception,
+        CancellationToken cancellationToken = default)
     {
         var receivedInfo = context.ReceivedInfo;
         var properties = context.Properties;
@@ -69,10 +72,10 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
 
         try
         {
-            var channel = await connection.CreateChannelAsync();
-            if (configuration.PublisherConfirms) await channel.ConfirmSelectAsync();
+            var channel = await connection.CreateChannelAsync(cancellationToken);
+            if (configuration.PublisherConfirms) await channel.ConfirmSelectAsync(cancellationToken);
 
-            var errorExchange = DeclareErrorExchangeWithQueue(channel, receivedInfo);
+            var errorExchange = await DeclareErrorExchangeWithQueueAsync(channel, receivedInfo, cancellationToken);
 
             using var message = CreateErrorMessage(receivedInfo, properties, body, exception);
 
@@ -82,7 +85,7 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
                 Type = typeNameSerializer.Serialize(typeof(Error))
             };
 
-            await channel.BasicPublishAsync(errorExchange, receivedInfo.RoutingKey, errorProperties, message.Memory).ConfigureAwait(false);
+            await channel.BasicPublishAsync(errorExchange, receivedInfo.RoutingKey, errorProperties, message.Memory, cancellationToken: cancellationToken).ConfigureAwait(false);
 
             if (configuration.PublisherConfirms)
             {
@@ -121,7 +124,10 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
     }
 
     /// <inheritdoc />
-    public virtual ValueTask<AckStrategy> HandleCancelledAsync(ConsumeContext context) => new(AckStrategies.NackWithRequeue);
+    public virtual ValueTask<AckStrategyAsync> HandleCancelledAsync(ConsumeContext context, CancellationToken cancellationToken = default)
+    {
+        return new(AckStrategies.NackWithRequeue);
+    }
 
     private static async Task DeclareAndBindErrorExchangeWithErrorQueueAsync(
         IChannel channel,
@@ -142,7 +148,7 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
         await channel.QueueBindAsync(queueName, exchangeName, routingKey, cancellationToken: cancellationToken);
     }
 
-    private string DeclareErrorExchangeWithQueue(IChannel channel, MessageReceivedInfo receivedInfo)
+    private async Task<string> DeclareErrorExchangeWithQueueAsync(IChannel channel, MessageReceivedInfo receivedInfo, CancellationToken cancellationToken = default)
     {
         var errorExchangeName = conventions.ErrorExchangeNamingConvention(receivedInfo);
         var errorExchangeType = conventions.ErrorExchangeTypeConvention();
@@ -152,19 +158,10 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
 
         var errorTopologyIdentifier = $"{errorExchangeName}-{errorQueueName}-{routingKey}";
 
-        if (existingErrorExchangesWithQueues.TryAdd(errorTopologyIdentifier, true))
+        if (!existingErrorExchangesWithQueues.ContainsKey(errorTopologyIdentifier))
         {
-            Task.Run(async () =>
-            {
-                try
-                {
-                    await DeclareAndBindErrorExchangeWithErrorQueueAsync(channel, errorExchangeName, errorExchangeType, errorQueueName, errorQueueType, routingKey, CancellationToken.None).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "Failed to declare and bind error exchange with error queue.");
-                }
-            }).Wait();
+            await DeclareAndBindErrorExchangeWithErrorQueueAsync(channel, errorExchangeName, errorExchangeType, errorQueueName, errorQueueType, routingKey, cancellationToken);
+            existingErrorExchangesWithQueues.GetOrAdd(errorTopologyIdentifier, true);
         }
 
         return errorExchangeName;

@@ -31,7 +31,7 @@ public class InternalConsumerTests : IDisposable
                             "exclusiveConsumerTag",
                             false,
                             new Dictionary<string, object>(),
-                            _ => new ValueTask<AckStrategy>(AckStrategies.Ack)
+                            _ => new ValueTask<AckStrategyAsync>(AckStrategies.Ack)
                         )
                     },
                     {
@@ -41,7 +41,7 @@ public class InternalConsumerTests : IDisposable
                             "nonExclusiveConsumerTag",
                             false,
                             new Dictionary<string, object>(),
-                            _ => new ValueTask<AckStrategy>(AckStrategies.Ack)
+                            _ => new ValueTask<AckStrategyAsync>(AckStrategies.Ack)
                         )
                     }
                 }

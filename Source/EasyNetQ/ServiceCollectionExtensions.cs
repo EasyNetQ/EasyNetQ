@@ -63,7 +63,7 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<IScheduler, DeadLetterExchangeAndMessageTtlScheduler>();
         services.TryAddSingleton<IBus, RabbitBus>();
         services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
-        services.TryAddSingleton<ILoggerFactory>(x=> new NullLoggerFactory());
+        services.TryAddSingleton<ILoggerFactory>(x => new NullLoggerFactory());
         return services;
     }
 }

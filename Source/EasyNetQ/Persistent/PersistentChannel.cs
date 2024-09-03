@@ -53,10 +53,10 @@ public class PersistentChannel : IPersistentChannel
         if (disposed)
             throw new ObjectDisposedException(nameof(PersistentChannel));
 
-        var (success, result) = await TryInvokeChannelActionFastAsync<TResult, TChannelAction>(channelAction).ConfigureAwait(false);
+        var (success, result) = await TryInvokeChannelActionFastAsync<TResult, TChannelAction>(channelAction, cancellationToken);
         return success
             ? result!
-            : await InvokeChannelActionSlowAsync<TResult, TChannelAction>(channelAction, cancellationToken).ConfigureAwait(false);
+            : await InvokeChannelActionSlowAsync<TResult, TChannelAction>(channelAction, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -83,7 +83,7 @@ public class PersistentChannel : IPersistentChannel
         {
             try
             {
-                var channel = initializedChannel ?? await CreateChannelAsync().ConfigureAwait(false);
+                var channel = initializedChannel ?? await CreateChannelAsync(cancellationToken).ConfigureAwait(false);
                 // ReSharper disable once PossiblyImpureMethodCallOnReadonlyVariable
                 result = await channelAction.InvokeAsync(channel, cancellationToken);
                 return (true, result);
@@ -92,7 +92,7 @@ public class PersistentChannel : IPersistentChannel
             {
                 var exceptionVerdict = GetExceptionVerdict(exception);
                 if (exceptionVerdict.CloseChannel)
-                    CloseChannel();
+                    CloseChannel(cancellationToken);
 
                 if (exceptionVerdict.Rethrow)
                     throw;
@@ -124,14 +124,14 @@ public class PersistentChannel : IPersistentChannel
 
             try
             {
-                initializedChannel ??= await CreateChannelAsync().ConfigureAwait(false);
+                initializedChannel ??= await CreateChannelAsync(cancellationToken).ConfigureAwait(false);
                 return await channelAction.InvokeAsync(initializedChannel, cancellationToken);
             }
             catch (Exception exception)
             {
                 var exceptionVerdict = GetExceptionVerdict(exception);
                 if (exceptionVerdict.CloseChannel)
-                    CloseChannel();
+                    CloseChannel(cancellationToken);
 
                 if (exceptionVerdict.Rethrow)
                     throw;
@@ -144,20 +144,20 @@ public class PersistentChannel : IPersistentChannel
         }
     }
 
-    private async Task<IChannel> CreateChannelAsync()
+    private async Task<IChannel> CreateChannelAsync(CancellationToken cancellationToken = default)
     {
-        var channel = await connection.CreateChannelAsync().ConfigureAwait(false);
+        var channel = await connection.CreateChannelAsync(cancellationToken).ConfigureAwait(false);
         AttachChannelEvents(channel);
         return channel;
     }
 
-    private void CloseChannel()
+    private void CloseChannel(CancellationToken cancellationToken = default)
     {
         var channel = Interlocked.Exchange(ref initializedChannel, null);
         if (channel == null)
             return;
 
-        channel.CloseAsync();
+        channel.CloseAsync(cancellationToken: cancellationToken);
         DetachChannelEvents(channel);
         channel.Dispose();
     }

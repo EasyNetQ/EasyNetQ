@@ -42,7 +42,7 @@ public static class HandlerRegistrationExtensions
     /// <returns></returns>
     public static IHandlerRegistration Add<T>(
         this IHandlerRegistration handlerRegistration,
-        Func<IMessage<T>, MessageReceivedInfo, Task<AckStrategy>> handler
+        Func<IMessage<T>, MessageReceivedInfo, Task<AckStrategyAsync>> handler
     ) => handlerRegistration.Add<T>((m, i, _) => handler(m, i));
 
     /// <summary>

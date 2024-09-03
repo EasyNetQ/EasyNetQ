@@ -36,7 +36,7 @@ public abstract class ConsumerTestBase : IDisposable
     protected abstract void AdditionalSetUp();
 
     protected IDisposable StartConsumer(
-        Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, CancellationToken, AckStrategy> handler,
+        Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, CancellationToken, AckStrategyAsync> handler,
         bool autoAck = false
     )
     {

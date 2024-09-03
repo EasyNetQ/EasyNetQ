@@ -50,13 +50,13 @@ public class PersistentConnection : IPersistentConnection
     }
 
     /// <inheritdoc />
-    public async Task<IChannel> CreateChannelAsync()
+    public async Task<IChannel> CreateChannelAsync(CancellationToken cancellationToken = default)
     {
         if (disposed) throw new ObjectDisposedException(nameof(PersistentConnection));
 
         var connection = InitializeConnection();
         connection.EnsureIsOpen();
-        return await connection.CreateChannelAsync();
+        return await connection.CreateChannelAsync(cancellationToken);
     }
 
     /// <inheritdoc />
@@ -82,7 +82,7 @@ public class PersistentConnection : IPersistentConnection
                 if (connection is not null) return connection;
 
                 // TODO: this needs to be replaced with an async mutex
-                connection = initializedConnection = CreateConnection(CancellationToken.None).GetAwaiter().GetResult();
+                connection = initializedConnection = CreateConnectionAsync(CancellationToken.None).GetAwaiter().GetResult();
             }
         }
         catch (Exception exception)
@@ -102,7 +102,7 @@ public class PersistentConnection : IPersistentConnection
         return connection;
     }
 
-    private async Task<IConnection> CreateConnection(CancellationToken cancellationToken)
+    private async Task<IConnection> CreateConnectionAsync(CancellationToken cancellationToken)
     {
         var endpoints = configuration.Hosts.Select(x =>
         {

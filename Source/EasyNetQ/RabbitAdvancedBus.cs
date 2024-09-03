@@ -143,7 +143,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
                     x.Item3.IsExclusive,
                     x.Item3.Arguments,
                     consumePipelineBuilder.Use(
-                        _ => ctx => new ValueTask<AckStrategy>(x.Item2(ctx.Body, ctx.Properties, ctx.ReceivedInfo, ctx.CancellationToken))
+                        _ => ctx => new ValueTask<AckStrategyAsync>(x.Item2(ctx.Body, ctx.Properties, ctx.ReceivedInfo, ctx.CancellationToken))
                     ).Build()
                 )).Union(
                 consumeConfiguration.PerQueueTypedConsumeConfigurations.ToDictionary(
@@ -158,7 +158,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
                             {
                                 var deserializedMessage = messageSerializationStrategy.DeserializeMessage(ctx.Properties, ctx.Body);
                                 var handler = x.Item2.GetHandler(deserializedMessage.MessageType);
-                                return new ValueTask<AckStrategy>(handler(deserializedMessage, ctx.ReceivedInfo, ctx.CancellationToken));
+                                return new ValueTask<AckStrategyAsync>(handler(deserializedMessage, ctx.ReceivedInfo, ctx.CancellationToken));
                             }
                         ).Build()
                     )

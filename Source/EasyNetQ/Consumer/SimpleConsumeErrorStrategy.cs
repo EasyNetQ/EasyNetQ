@@ -20,13 +20,19 @@ public sealed class SimpleConsumeErrorStrategy : IConsumeErrorStrategy
     /// </summary>
     public static readonly SimpleConsumeErrorStrategy NackWithoutRequeue = new(AckStrategies.NackWithoutRequeue);
 
-    private readonly AckStrategy errorStrategy;
+    private readonly AckStrategyAsync errorStrategy;
 
-    private SimpleConsumeErrorStrategy(AckStrategy errorStrategy) => this.errorStrategy = errorStrategy;
-
-    /// <inheritdoc />
-    public ValueTask<AckStrategy> HandleErrorAsync(ConsumeContext context, Exception exception) => new(errorStrategy);
+    private SimpleConsumeErrorStrategy(AckStrategyAsync errorStrategy) => this.errorStrategy = errorStrategy;
 
     /// <inheritdoc />
-    public ValueTask<AckStrategy> HandleCancelledAsync(ConsumeContext context) => new(AckStrategies.NackWithRequeue);
+    public ValueTask<AckStrategyAsync> HandleErrorAsync(
+        ConsumeContext context,
+        Exception exception,
+        CancellationToken cancellationToken = default) => new(errorStrategy);
+
+    /// <inheritdoc />
+    public ValueTask<AckStrategyAsync> HandleCancelledAsync(
+        ConsumeContext context,
+        CancellationToken
+        cancellationToken = default) => new(AckStrategies.NackWithRequeue);
 }

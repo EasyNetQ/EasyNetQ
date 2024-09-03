@@ -105,11 +105,15 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
         eventBus.Publish(new ConsumerChannelDisposedEvent(ConsumerTags));
     }
 
-    private async Task<AckResult> AckAsync(AckStrategy ackStrategy, MessageReceivedInfo receivedInfo)
+    private async Task<AckResult> AckAsync(
+        AckStrategyAsync ackStrategy,
+        MessageReceivedInfo receivedInfo,
+        CancellationToken cancellationToken = default)
     {
         try
         {
-            return await ackStrategy(Channel!, receivedInfo.DeliveryTag);
+            if (Channel != null)
+                return await ackStrategy(Channel, receivedInfo.DeliveryTag, cancellationToken);
         }
         catch (AlreadyClosedException alreadyClosedException)
         {

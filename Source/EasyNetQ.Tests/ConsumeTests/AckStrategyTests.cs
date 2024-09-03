@@ -10,7 +10,7 @@ public class Ack_strategy
     {
         channel = Substitute.For<IChannel, IRecoverable>();
 
-        result = AckStrategies.Ack(channel, deliveryTag).GetAwaiter().GetResult();
+        result = AckStrategies.Ack(channel, deliveryTag, CancellationToken.None).GetAwaiter().GetResult();
     }
 
     private readonly IChannel channel;
@@ -36,7 +36,7 @@ public class NackWithoutRequeue_strategy
     {
         channel = Substitute.For<IChannel, IRecoverable>();
 
-        result = AckStrategies.NackWithoutRequeue(channel, deliveryTag).GetAwaiter().GetResult();
+        result = AckStrategies.NackWithoutRequeue(channel, deliveryTag, CancellationToken.None).GetAwaiter().GetResult();
     }
 
     private readonly IChannel channel;
@@ -62,7 +62,7 @@ public class NackWithRequeue_strategy
     {
         channel = Substitute.For<IChannel, IRecoverable>();
 
-        result = AckStrategies.NackWithRequeue(channel, deliveryTag).GetAwaiter().GetResult();
+        result = AckStrategies.NackWithRequeue(channel, deliveryTag, CancellationToken.None).GetAwaiter().GetResult();
     }
 
     private readonly IChannel channel;

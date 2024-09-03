@@ -4,7 +4,7 @@ public class When_disposed : Given_a_сonsumer
 {
     public When_disposed()
     {
-        consumer.StartConsumingAsync().GetAwaiter().GetResult();;
+        consumer.StartConsumingAsync().GetAwaiter().GetResult(); ;
         consumer.Dispose();
     }
 

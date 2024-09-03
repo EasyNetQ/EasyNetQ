@@ -147,7 +147,7 @@ public class InternalConsumer : IInternalConsumer
             {
                 try
                 {
-                    channel = await connection.CreateChannelAsync();
+                    channel = await connection.CreateChannelAsync(cancellationToken);
                     await channel.BasicQosAsync(0, configuration.PrefetchCount, false, cancellationToken);
                 }
                 catch (Exception exception)
@@ -314,7 +314,7 @@ public class InternalConsumer : IInternalConsumer
                 cancelled = consumer.Queue;
                 active = consumers.Select(x => x.Value.Queue).ToList();
 
-#pragma warning disable IDISP007 // the injected here is created in the calling method so it should be disposed
+#pragma warning disable IDISP007
                 consumer.Dispose();
 #pragma warning restore IDISP007
                 if (IsChannelClosedWithSoftError(channel)) return;
@@ -327,7 +327,7 @@ public class InternalConsumer : IInternalConsumer
 
         if (CancelledAsync != null)
         {
-            await CancelledAsync.Invoke(this, new InternalConsumerCancelledEventArgs(cancelled, active)).ConfigureAwait(false);
+            await CancelledAsync.Invoke(this, new InternalConsumerCancelledEventArgs(cancelled, active));
         }
     }
 

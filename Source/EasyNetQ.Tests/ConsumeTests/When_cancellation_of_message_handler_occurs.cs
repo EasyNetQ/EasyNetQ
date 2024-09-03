@@ -7,7 +7,7 @@ public class When_cancellation_of_message_handler_occurs : ConsumerTestBase
     protected override void AdditionalSetUp()
     {
         ConsumeErrorStrategy.HandleCancelledAsync(default)
-            .ReturnsForAnyArgs(new ValueTask<AckStrategy>(AckStrategies.NackWithRequeue));
+            .ReturnsForAnyArgs(new ValueTask<AckStrategyAsync>(AckStrategies.NackWithRequeue));
 
         using var are = new AutoResetEvent(false);
         using var consumer = StartConsumer((_, _, _, ct) =>

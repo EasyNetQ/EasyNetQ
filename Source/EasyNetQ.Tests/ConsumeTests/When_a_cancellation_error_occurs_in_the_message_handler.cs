@@ -11,7 +11,7 @@ public class When_a_cancellation_error_occurs_in_the_message_handler : ConsumerT
         exception = new OperationCanceledException("I've had a bad day :(");
 
         ConsumeErrorStrategy.HandleErrorAsync(default, exception)
-            .ReturnsForAnyArgs(new ValueTask<AckStrategy>(AckStrategies.Ack));
+            .ReturnsForAnyArgs(new ValueTask<AckStrategyAsync>(AckStrategies.Ack));
 
 #pragma warning disable IDISP004
         StartConsumer((_, _, _, _) => throw exception);

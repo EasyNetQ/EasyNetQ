@@ -256,7 +256,7 @@ public static partial class AdvancedBusExtensions
     public static IDisposable Consume(
         this IAdvancedBus bus,
         Queue queue,
-        Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, Task<AckStrategy>> handler
+        Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, Task<AckStrategyAsync>> handler
     ) => bus.Consume(queue, handler, _ => { });
 
     /// <summary>
@@ -295,7 +295,7 @@ public static partial class AdvancedBusExtensions
     public static IDisposable Consume(
         this IAdvancedBus bus,
         Queue queue,
-        Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, Task<AckStrategy>> handler,
+        Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, Task<AckStrategyAsync>> handler,
         Action<ISimpleConsumeConfiguration> configure
     ) => bus.Consume(queue, (m, p, i, _) => handler(m, p, i), configure);
 

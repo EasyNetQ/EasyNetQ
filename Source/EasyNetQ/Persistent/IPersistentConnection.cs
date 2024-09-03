@@ -21,5 +21,5 @@ public interface IPersistentConnection : IDisposable
     ///     Creates a new channel
     /// </summary>
     /// <returns>New channel</returns>
-    Task<IChannel> CreateChannelAsync();
+    Task<IChannel> CreateChannelAsync(CancellationToken cancellationToken = default);
 }
