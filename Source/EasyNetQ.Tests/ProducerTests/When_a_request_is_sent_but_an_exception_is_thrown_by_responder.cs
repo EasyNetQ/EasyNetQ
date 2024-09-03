@@ -44,7 +44,7 @@ public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : ID
             if (!waiter.Wait(5000))
                 throw new TimeoutException();
 
-            DeliverMessage(null).GetAwaiter().GetResult();
+            DeliverMessageAsync(null).GetAwaiter().GetResult();
             await task;
         });
     }
@@ -65,13 +65,13 @@ public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : ID
             if (!waiter.Wait(5000))
                 throw new TimeoutException();
 
-            DeliverMessage("Why you are so bad with me?").GetAwaiter().GetResult();
+            DeliverMessageAsync("Why you are so bad with me?").GetAwaiter().GetResult();
 
             await task;
         }); // ,"Why you are so bad with me?"
     }
 
-    private async Task DeliverMessage(string exceptionMessage)
+    private async Task DeliverMessageAsync(string exceptionMessage)
     {
         var properties = new BasicProperties
         {

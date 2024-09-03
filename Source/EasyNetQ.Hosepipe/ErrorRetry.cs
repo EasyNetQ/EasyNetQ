@@ -16,12 +16,15 @@ public class ErrorRetry : IErrorRetry
         this.errorMessageSerializer = errorMessageSerializer;
     }
 
-    public async Task RetryErrorsAsync(IAsyncEnumerable<HosepipeMessage> rawErrorMessages, QueueParameters parameters)
+    public async Task RetryErrorsAsync(
+        IAsyncEnumerable<HosepipeMessage> rawErrorMessages,
+        QueueParameters parameters,
+        CancellationToken cancellationToken = default)
     {
-        using var connection = await HosepipeConnection.FromParametersAsync(parameters);
-        using var channel = await connection.CreateChannelAsync();
+        using var connection = await HosepipeConnection.FromParametersAsync(parameters, cancellationToken);
+        using var channel = await connection.CreateChannelAsync(cancellationToken);
 
-        await channel.ConfirmSelectAsync();
+        await channel.ConfirmSelectAsync(cancellationToken);
 
         await foreach (var rawErrorMessage in rawErrorMessages)
         {
@@ -35,10 +38,11 @@ public class ErrorRetry : IErrorRetry
                 routingKey: error.Queue,
                 mandatory: true,
                 basicProperties: properties,
-                body: body
+                body: body,
+                cancellationToken: cancellationToken
             );
 
-            await channel.WaitForConfirmsOrDieAsync();
+            await channel.WaitForConfirmsOrDieAsync(cancellationToken);
         }
     }
 }

@@ -70,10 +70,12 @@ public class Program
             new ErrorRetry(new ReflectionBasedNewtonsoftJsonSerializer(), errorMessageSerializer),
             new Conventions(typeNameSerializer)
         );
-        await program.Start(args);
+
+        using var cts = new CancellationTokenSource();
+        await program.StartAsync(args, cts.Token);
     }
 
-    public async Task Start(string[] args)
+    public async Task StartAsync(string[] args, CancellationToken cancellationToken)
     {
         var arguments = argParser.Parse(args);
 
@@ -102,18 +104,17 @@ public class Program
                     }).FailWith(Message("No Queue Name given"));
                 }) != null)
             {
-                await DumpAsync(parameters);
+                await DumpAsync(parameters, cancellationToken);
             }
 
-            arguments.At(0, "insert", async () => await Insert(parameters));
+            arguments.At(0, "insert", async () => await InsertAsync(parameters, cancellationToken));
 
-            arguments.At(0, "err", async () => await ErrorDumpAsync(parameters));
+            arguments.At(0, "err", async () => await ErrorDumpAsync(parameters, cancellationToken));
 
-            arguments.At(0, "retry", async () => await Retry(parameters));
+            arguments.At(0, "retry", async () => await RetryAsync(parameters, cancellationToken));
 
             arguments.At(0, "?", PrintUsage);
 
-            // print usage if there are no arguments
             arguments.At(0, _ => { }).FailWith(PrintUsage);
         }
         catch (EasyNetQHosepipeException easyNetQHosepipeException)
@@ -131,10 +132,10 @@ public class Program
         }
     }
 
-    private async Task DumpAsync(QueueParameters parameters)
+    private async Task DumpAsync(QueueParameters parameters, CancellationToken cancellationToken = default)
     {
         var count = 0;
-        await messageWriter.WriteAsync(WithEachAsync(queueRetrieval.GetMessagesFromQueueAsync(parameters), () => count++), parameters);
+        await messageWriter.WriteAsync(WithEachAsync(queueRetrieval.GetMessagesFromQueueAsync(parameters, cancellationToken), () => count++), parameters, cancellationToken);
 
         Console.WriteLine(
             "{0} messages from queue '{1}' were dumped to directory '{2}'",
@@ -142,11 +143,11 @@ public class Program
         );
     }
 
-    private async Task Insert(QueueParameters parameters)
+    private async Task InsertAsync(QueueParameters parameters, CancellationToken cancellationToken)
     {
         var count = 0;
         await queueInsertion.PublishMessagesToQueueAsync(
-            WithEachAsync(messageReader.ReadMessagesAsync(parameters), () => count++), parameters
+            WithEachAsync(messageReader.ReadMessagesAsync(parameters, cancellationToken), () => count++), parameters, cancellationToken
         );
 
         Console.WriteLine(
@@ -155,20 +156,20 @@ public class Program
         );
     }
 
-    private async Task ErrorDumpAsync(QueueParameters parameters)
+    private async Task ErrorDumpAsync(QueueParameters parameters, CancellationToken cancellationToken)
     {
         if (parameters.QueueName == null)
             parameters.QueueName = conventions.ErrorQueueNamingConvention(default);
-        await DumpAsync(parameters);
+        await DumpAsync(parameters, cancellationToken);
     }
 
-    private async Task Retry(QueueParameters parameters)
+    private async Task RetryAsync(QueueParameters parameters, CancellationToken cancellationToken)
     {
         var count = 0;
         var queueName = parameters.QueueName ?? conventions.ErrorQueueNamingConvention(default);
 
         await errorRetry.RetryErrorsAsync(
-            WithEachAsync(messageReader.ReadMessagesAsync(parameters, queueName), () => count++), parameters
+            WithEachAsync(messageReader.ReadMessagesAsync(parameters, queueName, cancellationToken), () => count++), parameters, cancellationToken
         );
 
         Console.WriteLine(

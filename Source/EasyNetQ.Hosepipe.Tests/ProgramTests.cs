@@ -1,5 +1,7 @@
 // ReSharper disable InconsistentNaming
 
+using System.Runtime.CompilerServices;
+
 namespace EasyNetQ.Hosepipe.Tests;
 
 public class ProgramTests
@@ -48,7 +50,7 @@ public class ProgramTests
         using var writer = new StringWriter();
         Console.SetOut(writer);
 
-        await program.Start(args);
+        await program.StartAsync(args, CancellationToken.None);
 
         var actualOutput = writer.GetStringBuilder().ToString();
         actualOutput.ShouldEqual(expectedDumpOutput);
@@ -72,7 +74,7 @@ public class ProgramTests
         using var writer = new StringWriter();
         Console.SetOut(writer);
 
-        await program.Start(args);
+        await program.StartAsync(args, CancellationToken.None);
 
         var actualInsertOutput = writer.GetStringBuilder().ToString();
         actualInsertOutput.ShouldEqual(expectedInsertOutput);
@@ -96,7 +98,7 @@ public class ProgramTests
         using var writer = new StringWriter();
         Console.SetOut(writer);
 
-        await program.Start(args);
+        await program.StartAsync(args, CancellationToken.None);
 
         var actualInsertOutput = writer.GetStringBuilder().ToString();
         actualInsertOutput.ShouldEqual(expectedInsertOutputWithQueue);
@@ -119,7 +121,7 @@ public class ProgramTests
         using var writer = new StringWriter();
         Console.SetOut(writer);
 
-        await program.Start(args);
+        await program.StartAsync(args, CancellationToken.None);
 
         writer.GetStringBuilder().ToString().ShouldEqual(expectedRetryOutput);
 
@@ -131,7 +133,10 @@ public class MockMessageWriter : IMessageWriter
 {
     public QueueParameters Parameters { get; set; }
 
-    public async Task WriteAsync(IAsyncEnumerable<HosepipeMessage> messages, QueueParameters queueParameters)
+    public async Task WriteAsync(
+        IAsyncEnumerable<HosepipeMessage> messages,
+        QueueParameters queueParameters,
+        CancellationToken cancellationToken = default)
     {
         Parameters = queueParameters;
         await foreach (var _ in messages)
@@ -142,7 +147,9 @@ public class MockMessageWriter : IMessageWriter
 
 public class MockQueueRetrieval : IQueueRetrieval
 {
-    public async IAsyncEnumerable<HosepipeMessage> GetMessagesFromQueueAsync(QueueParameters parameters)
+    public async IAsyncEnumerable<HosepipeMessage> GetMessagesFromQueueAsync(
+        QueueParameters parameters,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         await Task.CompletedTask;
         yield return new HosepipeMessage("some message", MessageProperties.Empty, Helper.CreateMessageReceivedInfo());
@@ -154,23 +161,27 @@ public class MockMessageReader : IMessageReader
 {
     public QueueParameters Parameters { get; set; }
 
-    public async IAsyncEnumerable<HosepipeMessage> ReadMessagesAsync(QueueParameters parameters)
+    public async IAsyncEnumerable<HosepipeMessage> ReadMessagesAsync(QueueParameters parameters, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         Parameters = parameters;
         await Task.CompletedTask;
+
         yield return new HosepipeMessage("some message", MessageProperties.Empty, Helper.CreateMessageReceivedInfo());
         yield return new HosepipeMessage("some message", MessageProperties.Empty, Helper.CreateMessageReceivedInfo());
     }
 
-    public IAsyncEnumerable<HosepipeMessage> ReadMessagesAsync(QueueParameters parameters, string messageName)
+    public IAsyncEnumerable<HosepipeMessage> ReadMessagesAsync(QueueParameters parameters, string messageName, CancellationToken cancellationToken = default)
     {
-        return ReadMessagesAsync(parameters);
+        return ReadMessagesAsync(parameters, cancellationToken);
     }
 }
 
 public class MockQueueInsertion : IQueueInsertion
 {
-    public async Task PublishMessagesToQueueAsync(IAsyncEnumerable<HosepipeMessage> messages, QueueParameters parameters)
+    public async Task PublishMessagesToQueueAsync(
+        IAsyncEnumerable<HosepipeMessage> messages,
+        QueueParameters parameters,
+        CancellationToken cancellationToken = default)
     {
         await foreach (var _ in messages)
         {
@@ -180,7 +191,10 @@ public class MockQueueInsertion : IQueueInsertion
 
 public class MockErrorRetry : IErrorRetry
 {
-    public async Task RetryErrorsAsync(IAsyncEnumerable<HosepipeMessage> rawErrorMessages, QueueParameters parameters)
+    public async Task RetryErrorsAsync(
+        IAsyncEnumerable<HosepipeMessage> rawErrorMessages,
+        QueueParameters parameters,
+        CancellationToken cancellationToken = default)
     {
         await foreach (var _ in rawErrorMessages)
         {

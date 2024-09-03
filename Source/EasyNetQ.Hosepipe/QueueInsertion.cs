@@ -12,12 +12,15 @@ public class QueueInsertion : IQueueInsertion
         this.errorMessageSerializer = errorMessageSerializer;
     }
 
-    public async Task PublishMessagesToQueueAsync(IAsyncEnumerable<HosepipeMessage> messages, QueueParameters parameters)
+    public async Task PublishMessagesToQueueAsync(
+        IAsyncEnumerable<HosepipeMessage> messages,
+        QueueParameters parameters,
+        CancellationToken cancellationToken = default)
     {
-        using var connection = await HosepipeConnection.FromParametersAsync(parameters);
-        using var channel = await connection.CreateChannelAsync();
+        using var connection = await HosepipeConnection.FromParametersAsync(parameters, cancellationToken);
+        using var channel = await connection.CreateChannelAsync(cancellationToken);
 
-        await channel.ConfirmSelectAsync();
+        await channel.ConfirmSelectAsync(cancellationToken);
 
         await foreach (var message in messages)
         {
@@ -35,7 +38,8 @@ public class QueueInsertion : IQueueInsertion
                 routingKey: queueName,
                 mandatory: true,
                 basicProperties: properties,
-                body: body
+                body: body,
+                cancellationToken: cancellationToken
             );
 
             using var cts = new CancellationTokenSource(parameters.ConfirmsTimeout);

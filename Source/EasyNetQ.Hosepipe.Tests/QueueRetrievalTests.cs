@@ -9,7 +9,7 @@ public class QueueRetrievalTests
 {
     [Fact]
     [Traits.Explicit("Requires a RabbitMQ server on localhost")]
-    public async Task TryGetMessagesFromQueue()
+    public async Task TryGetMessagesFromQueueAsync()
     {
         const string queue = "EasyNetQ_Hosepipe_Tests_QueueRetrievalTests+TestMessage:EasyNetQ_Hosepipe_Tests_hosepipe";
 

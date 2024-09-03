@@ -27,7 +27,7 @@ public class When_auto_subscribing : IDisposable
 
         var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, serviceProvider, "my_app");
 #pragma warning disable IDISP004
-        autoSubscriber.SubscribeAsync(new[] { typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>) }).GetAwaiter().GetResult();
+        autoSubscriber.SubscribeAsync([typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>)]).GetAwaiter().GetResult();
 #pragma warning restore IDISP004
     }
 
@@ -47,7 +47,10 @@ public class When_auto_subscribing : IDisposable
                 Arg.Is(true),
                 Arg.Is(false),
                 Arg.Is(false),
-                Arg.Is((IDictionary<string, object>)null)
+                Arg.Is((IDictionary<string, object>)null),
+                Arg.Any<bool>(),
+                Arg.Any<bool>(),
+                Arg.Any<CancellationToken>()
             );
         }
 
@@ -65,7 +68,9 @@ public class When_auto_subscribing : IDisposable
                 Arg.Is(queueName),
                 Arg.Any<string>(),
                 Arg.Is(topicName),
-                Arg.Is((IDictionary<string, object>)null)
+                Arg.Is((IDictionary<string, object>)null),
+                Arg.Any<bool>(),
+                Arg.Any<CancellationToken>()
             );
         }
 

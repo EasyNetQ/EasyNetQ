@@ -19,9 +19,9 @@ public class When_a_message_is_received : IDisposable
            .Add<MyMessage>(message => deliveredMyMessage = message)
            .Add<MyOtherMessage>(message => deliveredMyOtherMessage = message));
 
-        DeliverMessage("{ Text: \"Hello World :)\" }", "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests").GetAwaiter().GetResult();
-        DeliverMessage("{ Text: \"Goodbye Cruel World!\" }", "EasyNetQ.Tests.MyOtherMessage, EasyNetQ.Tests").GetAwaiter().GetResult();
-        DeliverMessage("{ Text: \"Shouldn't get this\" }", "EasyNetQ.Tests.Unknown, EasyNetQ.Tests").GetAwaiter().GetResult();
+        DeliverMessageAsync("{ Text: \"Hello World :)\" }", "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests").GetAwaiter().GetResult();
+        DeliverMessageAsync("{ Text: \"Goodbye Cruel World!\" }", "EasyNetQ.Tests.MyOtherMessage, EasyNetQ.Tests").GetAwaiter().GetResult();
+        DeliverMessageAsync("{ Text: \"Shouldn't get this\" }", "EasyNetQ.Tests.Unknown, EasyNetQ.Tests").GetAwaiter().GetResult();
     }
 
     public virtual void Dispose()
@@ -43,7 +43,7 @@ public class When_a_message_is_received : IDisposable
         deliveredMyOtherMessage.Text.Should().Be("Goodbye Cruel World!");
     }
 
-    private async Task DeliverMessage(string message, string type)
+    private async Task DeliverMessageAsync(string message, string type)
     {
         var properties = new BasicProperties
         {

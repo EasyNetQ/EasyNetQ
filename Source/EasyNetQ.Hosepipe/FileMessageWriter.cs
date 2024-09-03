@@ -7,7 +7,10 @@ public class FileMessageWriter : IMessageWriter
 {
     private static readonly Regex InvalidCharRegex = new(@"[\\\/:\*\?\""\<\>|]", RegexOptions.Compiled);
 
-    public async Task WriteAsync(IAsyncEnumerable<HosepipeMessage> messages, QueueParameters parameters)
+    public async Task WriteAsync(
+        IAsyncEnumerable<HosepipeMessage> messages,
+        QueueParameters parameters,
+        CancellationToken cancellationToken = default)
     {
         if (!Directory.Exists(parameters.MessagesOutputDirectory))
         {
@@ -29,9 +32,9 @@ public class FileMessageWriter : IMessageWriter
                 Console.WriteLine("Overwriting existing message file: {0}", bodyPath);
             }
 
-            await File.WriteAllTextAsync(bodyPath, message.Body);
-            await File.WriteAllTextAsync(propertiesPath, JsonConvert.SerializeObject(message.Properties));
-            await File.WriteAllTextAsync(infoPath, JsonConvert.SerializeObject(message.Info));
+            await File.WriteAllTextAsync(bodyPath, message.Body, cancellationToken);
+            await File.WriteAllTextAsync(propertiesPath, JsonConvert.SerializeObject(message.Properties), cancellationToken);
+            await File.WriteAllTextAsync(infoPath, JsonConvert.SerializeObject(message.Info), cancellationToken);
 
             count++;
         }

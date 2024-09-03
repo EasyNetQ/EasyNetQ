@@ -101,7 +101,9 @@ public class When_using_default_consume_error_strategy
             true,
             false,
             false,
-            Arg.Is<IDictionary<string, object>>(x => x.ContainsKey("x-queue-type") && x["x-queue-type"].Equals(QueueType.Quorum))
+            Arg.Is<IDictionary<string, object>>(x => x.ContainsKey("x-queue-type") && x["x-queue-type"].Equals(QueueType.Quorum)),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>()
         );
         await mockBuilder.Channels[0].Received().QueueBindAsync(
             "CustomEasyNetQErrorQueueName",

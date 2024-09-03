@@ -41,9 +41,9 @@ public class When_a_consumer_has_multiple_handlers : IDisposable
                 })
         );
 
-        Deliver(new MyMessage { Text = "Hello Polymorphs!" }).GetAwaiter().GetResult();
-        Deliver(new MyOtherMessage { Text = "Hello Isomorphs!" }).GetAwaiter().GetResult();
-        Deliver(new Dog()).GetAwaiter().GetResult();
+        DeliverAsync(new MyMessage { Text = "Hello Polymorphs!" }).GetAwaiter().GetResult();
+        DeliverAsync(new MyOtherMessage { Text = "Hello Isomorphs!" }).GetAwaiter().GetResult();
+        DeliverAsync(new Dog()).GetAwaiter().GetResult();
 
         if (!countdownEvent.Wait(5000)) throw new TimeoutException();
     }
@@ -53,7 +53,7 @@ public class When_a_consumer_has_multiple_handlers : IDisposable
         mockBuilder.Dispose();
     }
 
-    private async Task Deliver<T>(T message) where T : class
+    private async Task DeliverAsync<T>(T message) where T : class
     {
         using var serializedMessage = new ReflectionBasedNewtonsoftJsonSerializer().MessageToBytes(typeof(T), message);
         var properties = new BasicProperties

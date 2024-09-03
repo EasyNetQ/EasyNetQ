@@ -189,7 +189,10 @@ public class When_publishing_a_message : IDisposable
             Arg.Is("topic"),
             Arg.Is(true),
             Arg.Is(false),
-            Arg.Is((IDictionary<string, object>)null)
+            Arg.Is((IDictionary<string, object>)null),
+            Arg.Any<bool>(),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>()
         );
     }
 
@@ -238,7 +241,9 @@ public class When_registering_response_handler : IDisposable
             Arg.Is("CustomRpcRoutingKeyName"),
             Arg.Is("CustomRpcExchangeName"),
             Arg.Is("CustomRpcRoutingKeyName"),
-            Arg.Is((IDictionary<string, object>)null)
+            Arg.Is((IDictionary<string, object>)null),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>()
         );
     }
 
@@ -250,7 +255,10 @@ public class When_registering_response_handler : IDisposable
             Arg.Is("direct"),
             Arg.Is(true),
             Arg.Is(false),
-            Arg.Is((IDictionary<string, object>)null)
+            Arg.Is((IDictionary<string, object>)null),
+            Arg.Any<bool>(),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>()
         );
     }
 }

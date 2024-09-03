@@ -42,7 +42,10 @@ public class When_a_queue_is_declared : IDisposable
                 args => (int)args["x-message-ttl"] == 1000 &&
                         (int)args["x-expires"] == 2000 &&
                         (byte)args["x-max-priority"] == 10
-            )
+            ),
+            Arg.Any<bool>(),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>()
         );
     }
 
@@ -97,7 +100,10 @@ public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange : IDisposa
                         (byte)args["x-max-priority"] == 10 &&
                         (string)args["x-dead-letter-exchange"] == "my_exchange" &&
                         (string)args["x-dead-letter-routing-key"] == "my_routing_key"
-            )
+            ),
+            Arg.Any<bool>(),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>()
         );
     }
 
@@ -151,7 +157,10 @@ public class When_a_queue_is_declared_With_EmptyDeadLetterExchange : IDisposable
                         (byte)args["x-max-priority"] == 10 &&
                         (string)args["x-dead-letter-exchange"] == "" &&
                         (string)args["x-dead-letter-routing-key"] == "my_queue2"
-            )
+            ),
+            Arg.Any<bool>(),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>()
         );
     }
 
@@ -240,7 +249,10 @@ public class When_an_exchange_is_declared : IDisposable
             Arg.Is("direct"),
             Arg.Is(false),
             Arg.Is(true),
-            Arg.Is<IDictionary<string, object>>(c => (string)c["alternate-exchange"] == "my.alternate.exchange")
+            Arg.Is<IDictionary<string, object>>(c => (string)c["alternate-exchange"] == "my.alternate.exchange"),
+            Arg.Any<bool>(),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>()
         );
     }
 
@@ -339,7 +351,9 @@ public class When_a_queue_is_bound_to_an_exchange : IDisposable
             Arg.Is("my_queue"),
             Arg.Is("my_exchange"),
             Arg.Is("my_routing_key"),
-            Arg.Is((IDictionary<string, object>)null)
+            Arg.Is((IDictionary<string, object>)null),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>()
         );
     }
 }
@@ -386,7 +400,10 @@ public class When_a_queue_is_bound_to_an_exchange_with_headers : IDisposable
             Arg.Is("my_queue"),
             Arg.Is("my_exchange"),
             Arg.Is("my_routing_key"),
-            Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(expectedHeaders)));
+            Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(expectedHeaders)),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>()
+        );
     }
 }
 

@@ -52,7 +52,9 @@ public class When_subscribe_is_called : IDisposable
             Arg.Is(true), // durable
             Arg.Is(false), // exclusive
             Arg.Is(false), // autoDelete
-            Arg.Any<IDictionary<string, object>>()
+            Arg.Any<IDictionary<string, object>>(),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>()
         );
     }
 
@@ -64,7 +66,9 @@ public class When_subscribe_is_called : IDisposable
             Arg.Is("topic"),
             Arg.Is(true),
             Arg.Is(false),
-            Arg.Is((IDictionary<string, object>)null)
+            Arg.Is((IDictionary<string, object>)null),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>()
         );
     }
 
@@ -75,7 +79,9 @@ public class When_subscribe_is_called : IDisposable
             Arg.Is(queueName),
             Arg.Is(typeName),
             Arg.Is("#"),
-            Arg.Is((IDictionary<string, object>)null)
+            Arg.Is((IDictionary<string, object>)null),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>()
         );
     }
 
@@ -96,7 +102,8 @@ public class When_subscribe_is_called : IDisposable
             Arg.Is(true),
             Arg.Is(false),
             Arg.Any<IDictionary<string, object>>(),
-            Arg.Any<IAsyncBasicConsumer>()
+            Arg.Any<IAsyncBasicConsumer>(),
+            Arg.Any<CancellationToken>()
         );
     }
 
@@ -185,7 +192,9 @@ public class When_subscribe_with_configuration_is_called
                      (!maxPriority.HasValue || maxPriority.Value == (byte)x["x-max-priority"]) &&
                      (!maxLength.HasValue || maxLength.Value == (int)x["x-max-length"]) &&
                      (!maxLengthBytes.HasValue || maxLengthBytes.Value == (int)x["x-max-length-bytes"])
-            )
+            ),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>()
         );
 
         // Assert that consumer was created correctly
@@ -196,7 +205,8 @@ public class When_subscribe_with_configuration_is_called
             Arg.Is(true),
             Arg.Is(isExclusive),
             Arg.Is<IDictionary<string, object>>(x => priority == (int)x["x-priority"]),
-            Arg.Any<IAsyncBasicConsumer>()
+            Arg.Any<IAsyncBasicConsumer>(),
+            Arg.Any<CancellationToken>()
         );
 
         // Assert that QoS got configured correctly
@@ -207,7 +217,9 @@ public class When_subscribe_with_configuration_is_called
             Arg.Is(queueName),
             Arg.Is("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
             Arg.Is(topic ?? "#"),
-            Arg.Is((IDictionary<string, object>)null)
+            Arg.Is((IDictionary<string, object>)null),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>()
         );
     }
 }

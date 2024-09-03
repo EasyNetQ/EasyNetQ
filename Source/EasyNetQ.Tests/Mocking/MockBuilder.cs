@@ -6,7 +6,7 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.Mocking;
 
-[SuppressMessage("IDisposableAnalyzers.Correctness", "IDISP004:Don\'t ignore created IDisposable")]
+[SuppressMessage("IDisposableAnalyzers.Correctness", "IDISP004:Don't ignore created IDisposable")]
 public class MockBuilder : IDisposable
 {
     private readonly IServiceProvider serviceProvider;
@@ -36,35 +36,35 @@ public class MockBuilder : IDisposable
         for (var i = 0; i < 10; i++)
             channelPool.Push(Substitute.For<IChannel, IRecoverable>());
 
-        connectionFactory.CreateConnectionAsync(Arg.Any<IList<AmqpTcpEndpoint>>()).Returns(connection);
+        connectionFactory.CreateConnectionAsync(Arg.Any<IList<AmqpTcpEndpoint>>()).Returns(Task.FromResult(connection));
 
         connection.IsOpen.Returns(true);
         connection.Endpoint.Returns(new AmqpTcpEndpoint("localhost"));
-        connection.CreateChannelAsync().Returns(_ =>
+        connection.CreateChannelAsync().Returns(async _ =>
         {
+            await Task.Yield();
+
             var channel = channelPool.Pop();
             channels.Add(channel);
             new RabbitMQ.Client.BasicProperties().Returns(basicProperties);
             channel.IsOpen.Returns(true);
             channel.BasicConsumeAsync(null, false, null, true, false, null, null)
-                .ReturnsForAnyArgs(consumeInvocation =>
+                .Returns(async consumeInvocation =>
                 {
                     var queueName = (string)consumeInvocation[0];
                     var consumerTag = (string)consumeInvocation[2];
                     var consumer = (AsyncDefaultBasicConsumer)consumeInvocation[6];
 
                     ConsumerQueueNames.Add(queueName);
-                    consumer.HandleBasicConsumeOkAsync(consumerTag)
-                        .GetAwaiter()
-                        .GetResult();
+                    await consumer.HandleBasicConsumeOkAsync(consumerTag);
                     consumers.Add(consumer);
                     return string.Empty;
                 });
             channel.QueueDeclareAsync(null, true, false, false, null)
-                .ReturnsForAnyArgs(queueDeclareInvocation =>
+                .Returns(async queueDeclareInvocation =>
                 {
                     var queueName = (string)queueDeclareInvocation[0];
-                    return new QueueDeclareOk(queueName, 0, 0);
+                    return await Task.FromResult(new QueueDeclareOk(queueName, 0, 0));
                 });
             channel.WaitForConfirmsAsync(default).ReturnsForAnyArgs(true);
 

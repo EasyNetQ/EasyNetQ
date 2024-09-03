@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using EasyNetQ.Consumer;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
@@ -6,7 +7,7 @@ namespace EasyNetQ.Hosepipe;
 
 public interface IQueueRetrieval
 {
-    IAsyncEnumerable<HosepipeMessage> GetMessagesFromQueueAsync(QueueParameters parameters);
+    IAsyncEnumerable<HosepipeMessage> GetMessagesFromQueueAsync(QueueParameters parameters, CancellationToken cancellationToken = default);
 }
 
 public class QueueRetrieval : IQueueRetrieval
@@ -18,14 +19,14 @@ public class QueueRetrieval : IQueueRetrieval
         this.errorMessageSerializer = errorMessageSerializer;
     }
 
-    public async IAsyncEnumerable<HosepipeMessage> GetMessagesFromQueueAsync(QueueParameters parameters)
+    public async IAsyncEnumerable<HosepipeMessage> GetMessagesFromQueueAsync(QueueParameters parameters, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        using var connection = await HosepipeConnection.FromParametersAsync(parameters);
-        using var channel = await connection.CreateChannelAsync();
+        using var connection = await HosepipeConnection.FromParametersAsync(parameters, cancellationToken);
+        using var channel = await connection.CreateChannelAsync(cancellationToken);
 
         try
         {
-            await channel.QueueDeclarePassiveAsync(parameters.QueueName);
+            await channel.QueueDeclarePassiveAsync(parameters.QueueName, cancellationToken);
         }
         catch (OperationInterruptedException exception)
         {
@@ -39,12 +40,12 @@ public class QueueRetrieval : IQueueRetrieval
             BasicGetResult basicGetResult;
             try
             {
-                basicGetResult = await channel.BasicGetAsync(parameters.QueueName, false);
+                basicGetResult = await channel.BasicGetAsync(parameters.QueueName, false, cancellationToken);
                 if (basicGetResult == null) break; // no more messages on the queue
 
                 if (parameters.Purge)
                 {
-                    await channel.BasicAckAsync(basicGetResult.DeliveryTag, false);
+                    await channel.BasicAckAsync(basicGetResult.DeliveryTag, false, cancellationToken);
                 }
             }
             catch (Exception exception)

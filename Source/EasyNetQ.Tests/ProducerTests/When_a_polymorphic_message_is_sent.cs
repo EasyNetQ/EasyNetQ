@@ -36,7 +36,9 @@ public class When_a_polymorphic_message_is_sent : IDisposable
             Arg.Is("topic"),
             Arg.Is(true),
             Arg.Is(false),
-            Arg.Any<IDictionary<string, object>>()
+            Arg.Any<IDictionary<string, object>>(),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>()
         );
     }
 

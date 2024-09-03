@@ -27,7 +27,7 @@ public class When_a_request_is_sent : IDisposable
         if (!waiter.Wait(5000))
             throw new TimeoutException();
 
-        DeliverMessage(correlationId).GetAwaiter().GetResult();
+        DeliverMessageAsync(correlationId).GetAwaiter().GetResult();
 
         responseMessage = task.GetAwaiter().GetResult();
     }
@@ -40,7 +40,7 @@ public class When_a_request_is_sent : IDisposable
     private readonly MockBuilder mockBuilder;
     private readonly TestResponseMessage responseMessage;
 
-    private async Task DeliverMessage(string correlationId)
+    private async Task DeliverMessageAsync(string correlationId)
     {
         var properties = new BasicProperties
         {
@@ -68,7 +68,9 @@ public class When_a_request_is_sent : IDisposable
             Arg.Is("direct"),
             Arg.Is(true),
             Arg.Is(false),
-            Arg.Any<IDictionary<string, object>>()
+            Arg.Any<IDictionary<string, object>>(),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>()
         );
     }
     [Fact]
@@ -79,7 +81,9 @@ public class When_a_request_is_sent : IDisposable
             Arg.Is(false),
             Arg.Is(true),
             Arg.Is(true),
-            Arg.Any<IDictionary<string, object>>()
+            Arg.Any<IDictionary<string, object>>(),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>()
         );
     }
 
