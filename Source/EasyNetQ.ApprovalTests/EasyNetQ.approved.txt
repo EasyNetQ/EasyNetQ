@@ -197,7 +197,7 @@ namespace EasyNetQ
         public DefaultCorrelationIdGenerationStrategy() { }
         public string GetCorrelationId() { }
     }
-    public class DefaultExchangeDeclareStrategy : EasyNetQ.IExchangeDeclareStrategy
+rs    public class DefaultExchangeDeclareStrategy : EasyNetQ.IExchangeDeclareStrategy
     {
         public DefaultExchangeDeclareStrategy(EasyNetQ.IConventions conventions, EasyNetQ.IAdvancedBus advancedBus) { }
         public System.Threading.Tasks.Task<EasyNetQ.Topology.Exchange> DeclareExchangeAsync(string exchangeName, string exchangeType, System.Threading.CancellationToken cancellationToken) { }

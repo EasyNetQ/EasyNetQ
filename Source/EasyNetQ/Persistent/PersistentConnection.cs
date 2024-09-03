@@ -75,12 +75,14 @@ public class PersistentConnection : IPersistentConnection
 
         try
         {
+            // TODO: this needs to be replaced with an async mutex
             lock (mutex)
             {
                 connection = initializedConnection;
                 if (connection is not null) return connection;
 
-                connection = initializedConnection = CreateConnection();
+                // TODO: this needs to be replaced with an async mutex
+                connection = initializedConnection = CreateConnection(CancellationToken.None).GetAwaiter().GetResult();
             }
         }
         catch (Exception exception)
@@ -100,7 +102,7 @@ public class PersistentConnection : IPersistentConnection
         return connection;
     }
 
-    private IConnection CreateConnection()
+    private async Task<IConnection> CreateConnection(CancellationToken cancellationToken)
     {
         var endpoints = configuration.Hosts.Select(x =>
         {
@@ -110,7 +112,8 @@ public class PersistentConnection : IPersistentConnection
             return new AmqpTcpEndpoint(x.Host, x.Port, ssl);
         }).ToList();
 
-        if (connectionFactory.CreateConnectionAsync(endpoints) is not IConnection connection)
+        if (await connectionFactory.CreateConnectionAsync(endpoints, cancellationToken) is not IConnection connection)
+            // review this: the return type is IConnection, so this code is practically unreachable, check with pliner
             throw new NotSupportedException("Non-recoverable connection is not supported");
 
         connection.ConnectionShutdown += OnConnectionShutdown;
