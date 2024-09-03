@@ -23,7 +23,7 @@ public class ExchangeDeclareStrategyTests
                 return Task.FromResult(exchange);
             });
 
-        var exchangeDeclareStrategy = new VersionedExchangeDeclareStrategy(Substitute.For<IConventions>(), advancedBus);
+        using var exchangeDeclareStrategy = new VersionedExchangeDeclareStrategy(Substitute.For<IConventions>(), advancedBus);
         try
         {
             exchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
@@ -51,7 +51,7 @@ public class ExchangeDeclareStrategyTests
                 return Task.FromResult(exchange);
             });
 
-        var publishExchangeDeclareStrategy = new DefaultExchangeDeclareStrategy(Substitute.For<IConventions>(), advancedBus);
+        using var publishExchangeDeclareStrategy = new DefaultExchangeDeclareStrategy(Substitute.For<IConventions>(), advancedBus);
 
         var declaredExchange = publishExchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
 
@@ -72,7 +72,7 @@ public class ExchangeDeclareStrategyTests
             return Task.FromResult(exchange);
         });
 
-        var exchangeDeclareStrategy = new DefaultExchangeDeclareStrategy(Substitute.For<IConventions>(), advancedBus);
+        using var exchangeDeclareStrategy = new DefaultExchangeDeclareStrategy(Substitute.For<IConventions>(), advancedBus);
 
         var _ = exchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
         var declaredExchange = exchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);

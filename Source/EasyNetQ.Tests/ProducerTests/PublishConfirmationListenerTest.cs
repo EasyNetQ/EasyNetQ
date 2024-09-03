@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using EasyNetQ.Events;
 using EasyNetQ.Producer;
@@ -6,8 +7,10 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.ProducerTests;
 
-public class PublishConfirmationListenerTest
+public class PublishConfirmationListenerTest : IDisposable
 {
+    private bool disposed;
+
     public PublishConfirmationListenerTest()
     {
         eventBus = new EventBus(Substitute.For<ILogger<EventBus>>());
@@ -115,5 +118,14 @@ public class PublishConfirmationListenerTest
         await Assert.ThrowsAsync<PublishReturnedException>(
             () => confirmation1.WaitAsync()
         );
+    }
+
+    public virtual void Dispose()
+    {
+        if (disposed)
+            return;
+
+        disposed = true;
+        publishConfirmationListener.Dispose();
     }
 }

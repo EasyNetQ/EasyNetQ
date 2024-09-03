@@ -28,7 +28,7 @@ public abstract class ConsumerTestBase : IDisposable
         AdditionalSetUp();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         MockBuilder.Dispose();
     }

@@ -120,10 +120,12 @@ public class DefaultMessageSerializationStrategyTests
         typeNameSerializer.Serialize(message.MessageType).Returns(messageType);
 
         var serializer = Substitute.For<ISerializer>();
-        var serializedMessage = Substitute.For<IMemoryOwner<byte>>();
+        using var serializedMessage = Substitute.For<IMemoryOwner<byte>>();
         serializedMessage.Memory.Returns(messageBody);
 
+#pragma warning disable IDISP004
         serializer.MessageToBytes(message.MessageType, message.GetBody()).Returns(serializedMessage);
+#pragma warning restore IDISP004
 
         return new DefaultMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
     }

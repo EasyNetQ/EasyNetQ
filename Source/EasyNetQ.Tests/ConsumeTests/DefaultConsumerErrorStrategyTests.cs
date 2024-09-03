@@ -10,11 +10,13 @@ public class DefaultConsumerErrorStrategyTests
     [Fact]
     public async Task Should_enable_publisher_confirm_when_configured_and_return_ack_when_confirm_received()
     {
-        var persistedConnectionMock = Substitute.For<IConsumerConnection>();
+        using var persistedConnectionMock = Substitute.For<IConsumerConnection>();
         var modelMock = Substitute.For<IChannel>();
         using var cts = new CancellationTokenSource(Arg.Any<TimeSpan>());
         modelMock.WaitForConfirmsAsync(cts.Token).Returns(true);
+#pragma warning disable IDISP004
         persistedConnectionMock.CreateChannelAsync().Returns(modelMock);
+#pragma warning restore IDISP004
         var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock, true);
 
         var ackStrategy = await consumerErrorStrategy.HandleErrorAsync(
@@ -30,11 +32,13 @@ public class DefaultConsumerErrorStrategyTests
     public async Task
         Should_enable_publisher_confirm_when_configured_and_return_nack_with_requeue_when_no_confirm_received()
     {
-        var persistedConnectionMock = Substitute.For<IConsumerConnection>();
+        using var persistedConnectionMock = Substitute.For<IConsumerConnection>();
         var modelMock = Substitute.For<IChannel>();
         using var cts = new CancellationTokenSource(Arg.Any<TimeSpan>());
         modelMock.WaitForConfirmsAsync(cts.Token).Returns(false);
+#pragma warning disable IDISP004
         persistedConnectionMock.CreateChannelAsync().Returns(modelMock);
+#pragma warning restore IDISP004
         var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock, true);
 
         var ackStrategy = await consumerErrorStrategy.HandleErrorAsync(
@@ -49,11 +53,13 @@ public class DefaultConsumerErrorStrategyTests
     [Fact]
     public async Task Should_not_enable_publisher_confirm_when_not_configured_and_return_ack_when_no_confirm_received()
     {
-        var persistedConnectionMock = Substitute.For<IConsumerConnection>();
+        using var persistedConnectionMock = Substitute.For<IConsumerConnection>();
         var modelMock = Substitute.For<IChannel>();
         using var cts = new CancellationTokenSource(Arg.Any<TimeSpan>());
         modelMock.WaitForConfirmsAsync(cts.Token).Returns(false);
+#pragma warning disable IDISP004
         persistedConnectionMock.CreateChannelAsync().Returns(modelMock);
+#pragma warning restore IDISP004
         var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock);
 
         var ackStrategy = await consumerErrorStrategy.HandleErrorAsync(

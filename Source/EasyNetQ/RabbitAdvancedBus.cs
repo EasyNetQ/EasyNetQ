@@ -166,7 +166,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             ).ToDictionary(x => x.Key, x => x.Value)
         );
         var consumer = consumerFactory.CreateConsumer(consumerConfiguration);
-        consumer.StartConsuming();
+        consumer.StartConsumingAsync().GetAwaiter().GetResult();
         return consumer;
     }
 
@@ -263,8 +263,8 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         var declareResult = await persistentChannelDispatcher.InvokeAsync(
-            async x => await x.QueueDeclarePassiveAsync(queue, cancellationToken), 
-            PersistentChannelDispatchOptions.ConsumerTopology, 
+            async x => await x.QueueDeclarePassiveAsync(queue, cancellationToken),
+            PersistentChannelDispatchOptions.ConsumerTopology,
             cts.Token
         ).ConfigureAwait(false);
 
@@ -287,8 +287,8 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         await persistentChannelDispatcher.InvokeAsync(
-            async x => await x.QueueDeclarePassiveAsync(queue, cancellationToken), 
-            PersistentChannelDispatchOptions.ConsumerTopology, 
+            async x => await x.QueueDeclarePassiveAsync(queue, cancellationToken),
+            PersistentChannelDispatchOptions.ConsumerTopology,
             cts.Token
         ).ConfigureAwait(false);
 
@@ -429,8 +429,8 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         await persistentChannelDispatcher.InvokeAsync(
-            async x => await x.ExchangeDeleteAsync(exchange, ifUnused, cancellationToken: cancellationToken), 
-            PersistentChannelDispatchOptions.ProducerTopology, 
+            async x => await x.ExchangeDeleteAsync(exchange, ifUnused, cancellationToken: cancellationToken),
+            PersistentChannelDispatchOptions.ProducerTopology,
             cts.Token
         ).ConfigureAwait(false);
 

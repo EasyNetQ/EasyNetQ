@@ -13,7 +13,9 @@ public class When_a_message_is_received : IDisposable
     {
         mockBuilder = new MockBuilder();
 
+#pragma warning disable IDISP004
         mockBuilder.SendReceive.ReceiveAsync("the_queue", x => x
+#pragma warning restore IDISP004
            .Add<MyMessage>(message => deliveredMyMessage = message)
            .Add<MyOtherMessage>(message => deliveredMyOtherMessage = message));
 
@@ -22,7 +24,7 @@ public class When_a_message_is_received : IDisposable
         DeliverMessage("{ Text: \"Shouldn't get this\" }", "EasyNetQ.Tests.Unknown, EasyNetQ.Tests").GetAwaiter().GetResult();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }

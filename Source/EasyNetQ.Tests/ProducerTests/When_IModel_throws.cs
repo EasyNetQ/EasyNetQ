@@ -20,7 +20,7 @@ public class When_IModel_throws_because_of_closed_connection : IDisposable
             });
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }

@@ -160,7 +160,7 @@ public class When_publishing_a_message : IDisposable
         mockBuilder.PubSub.Publish(new TestMessage());
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }
@@ -219,10 +219,12 @@ public class When_registering_response_handler : IDisposable
 
         mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(customConventions));
 
+#pragma warning disable IDISP004
         mockBuilder.Rpc.Respond<TestMessage, TestMessage>(_ => new TestMessage());
+#pragma warning restore IDISP004
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }

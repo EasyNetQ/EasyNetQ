@@ -45,7 +45,7 @@ public class ProgramTests
             "q:EasyNetQ_Default_Error_Queue"
         };
 
-        var writer = new StringWriter();
+        using var writer = new StringWriter();
         Console.SetOut(writer);
 
         await program.Start(args);
@@ -69,7 +69,7 @@ public class ProgramTests
             "s:localhost"
         };
 
-        var writer = new StringWriter();
+        using var writer = new StringWriter();
         Console.SetOut(writer);
 
         await program.Start(args);
@@ -93,7 +93,7 @@ public class ProgramTests
             "q:queue"
         };
 
-        var writer = new StringWriter();
+        using var writer = new StringWriter();
         Console.SetOut(writer);
 
         await program.Start(args);
@@ -116,7 +116,7 @@ public class ProgramTests
             "s:localhost"
         };
 
-        var writer = new StringWriter();
+        using var writer = new StringWriter();
         Console.SetOut(writer);
 
         await program.Start(args);

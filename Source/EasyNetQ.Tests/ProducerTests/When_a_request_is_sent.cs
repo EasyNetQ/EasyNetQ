@@ -16,10 +16,12 @@ public class When_a_request_is_sent : IDisposable
             )
         );
 
-        var waiter = new CountdownEvent(2);
+        using var waiter = new CountdownEvent(2);
 
+#pragma warning disable IDISP004
         mockBuilder.EventBus.Subscribe((in PublishedMessageEvent _) => waiter.Signal());
         mockBuilder.EventBus.Subscribe((in StartConsumingSucceededEvent _) => waiter.Signal());
+#pragma warning restore IDISP004
 
         var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
         if (!waiter.Wait(5000))
@@ -30,7 +32,7 @@ public class When_a_request_is_sent : IDisposable
         responseMessage = task.GetAwaiter().GetResult();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }

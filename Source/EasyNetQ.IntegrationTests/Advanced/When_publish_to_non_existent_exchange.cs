@@ -19,7 +19,7 @@ public class When_publish_to_non_existent_exchange : IDisposable
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         serviceProvider?.Dispose();
     }

@@ -23,7 +23,7 @@ public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : ID
         requestMessage = new TestRequestMessage();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }
@@ -33,10 +33,12 @@ public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : ID
     {
         await Assert.ThrowsAsync<EasyNetQResponderException>(async () =>
         {
-            var waiter = new CountdownEvent(2);
+            using var waiter = new CountdownEvent(2);
 
+#pragma warning disable IDISP004
             mockBuilder.EventBus.Subscribe((in PublishedMessageEvent _) => waiter.Signal());
             mockBuilder.EventBus.Subscribe((in StartConsumingSucceededEvent _) => waiter.Signal());
+#pragma warning restore IDISP004
 
             var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage);
             if (!waiter.Wait(5000))
@@ -52,10 +54,12 @@ public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : ID
     {
         await Assert.ThrowsAsync<EasyNetQResponderException>(async () =>
         {
-            var waiter = new CountdownEvent(2);
+            using var waiter = new CountdownEvent(2);
 
+#pragma warning disable IDISP004
             mockBuilder.EventBus.Subscribe((in PublishedMessageEvent _) => waiter.Signal());
             mockBuilder.EventBus.Subscribe((in StartConsumingSucceededEvent _) => waiter.Signal());
+#pragma warning restore IDISP004
 
             var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage);
             if (!waiter.Wait(5000))

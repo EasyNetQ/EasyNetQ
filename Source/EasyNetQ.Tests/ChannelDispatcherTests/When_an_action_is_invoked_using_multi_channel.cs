@@ -19,8 +19,10 @@ public class When_an_action_is_invoked_using_multi_channel : IDisposable
         producerConnection = Substitute.For<IProducerConnection>();
         var consumerConnection = Substitute.For<IConsumerConnection>();
         var channel = Substitute.For<IPersistentChannel>();
-        var action = Substitute.For<Func<IChannel, int>>();
+        var action = Substitute.For<Func<IChannel, Task<int>>>();
+#pragma warning disable IDISP004
         channelFactory.CreatePersistentChannel(producerConnection, new PersistentChannelOptions()).Returns(channel);
+#pragma warning restore IDISP004
         channel.InvokeChannelActionAsync(action).Returns(42);
 
         dispatcher = new MultiPersistentChannelDispatcher(1, producerConnection, consumerConnection, channelFactory);
@@ -29,7 +31,7 @@ public class When_an_action_is_invoked_using_multi_channel : IDisposable
             .GetResult();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         dispatcher.Dispose();
     }
@@ -37,7 +39,9 @@ public class When_an_action_is_invoked_using_multi_channel : IDisposable
     [Fact]
     public void Should_create_a_persistent_channel()
     {
+#pragma warning disable IDISP004
         channelFactory.Received().CreatePersistentChannel(producerConnection, new PersistentChannelOptions());
+#pragma warning restore IDISP004
     }
 
     [Fact]

@@ -16,10 +16,12 @@ public class When_a_consumer_is_started_on_exclusive_queue_and_connection_is_dro
 
         var queue = new Queue("my_queue", false, true);
         using var cancelSubscription = mockBuilder.Bus.Advanced
-            .Consume(queue, (_, _, _) => Task.Run(() => { }));
+            .Consume(queue, async (_, _, _) => await Task.Run(() => { }));
 
-        var stopped = new AutoResetEvent(false);
+        using var stopped = new AutoResetEvent(false);
+#pragma warning disable IDISP004
         mockBuilder.EventBus.Subscribe((in StoppedConsumingEvent _) => stopped.Set());
+#pragma warning restore IDISP004
 
         mockBuilder.EventBus.Publish(new ConnectionDisconnectedEvent(PersistentConnectionType.Consumer, Substitute.For<AmqpTcpEndpoint>(), "Unknown"));
         mockBuilder.EventBus.Publish(new ConnectionRecoveredEvent(PersistentConnectionType.Consumer, Substitute.For<AmqpTcpEndpoint>()));
@@ -30,7 +32,7 @@ public class When_a_consumer_is_started_on_exclusive_queue_and_connection_is_dro
         }
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }

@@ -18,7 +18,7 @@ public class When_published_with_mandatory_and_with_publisher_confirms : IDispos
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         serviceProvider?.Dispose();
     }

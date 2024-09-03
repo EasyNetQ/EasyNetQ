@@ -18,9 +18,11 @@ public class When_a_consumer_has_multiple_handlers : IDisposable
 
         var queue = new Queue("test_queue", false);
 
-        var countdownEvent = new CountdownEvent(3);
+        using var countdownEvent = new CountdownEvent(3);
 
+#pragma warning disable IDISP004
         mockBuilder.Bus.Advanced.Consume(
+#pragma warning restore IDISP004
             queue,
             x => x.Add<MyMessage>((message, _) =>
                 {
@@ -46,7 +48,7 @@ public class When_a_consumer_has_multiple_handlers : IDisposable
         if (!countdownEvent.Wait(5000)) throw new TimeoutException();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }

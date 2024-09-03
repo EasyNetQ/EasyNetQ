@@ -57,7 +57,7 @@ public class AdvancedBusEventHandlersTests : IDisposable
         );
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         advancedBus.Dispose();
     }

@@ -8,7 +8,7 @@ public class ProgramIntegrationTests
     private const string outputPath = @"C:\Temp\MessageOutput";
     private const string queue = "EasyNetQ_Hosepipe_Tests_ProgramIntegrationTests+TestMessage:EasyNetQ_Hosepipe_Tests_hosepipe";
 
-    public void DumpMessages()
+    public async void DumpMessages()
     {
         ClearDirectory();
 
@@ -20,12 +20,12 @@ public class ProgramIntegrationTests
             string.Format("o:{0}", outputPath)
         };
 
-        Program.Main(args);
+        await Program.Main(args);
 
         ListDirectory();
     }
 
-    public void InsertMessages()
+    public async void InsertMessages()
     {
         var args = new[]
         {
@@ -34,7 +34,7 @@ public class ProgramIntegrationTests
             string.Format("o:{0}", outputPath)
         };
 
-        Program.Main(args);
+        await Program.Main(args);
     }
 
     public void ListDirectory()
@@ -77,7 +77,9 @@ public class ProgramIntegrationTests
 
         using var provider = serviceCollection.BuildServiceProvider();
         var bus = provider.GetRequiredService<IBus>();
+#pragma warning disable IDISP004
         bus.PubSub.Subscribe<TestMessage>("hosepipe", message => Console.WriteLine(message.Text));
+#pragma warning restore IDISP004
 
         Thread.Sleep(1000);
     }

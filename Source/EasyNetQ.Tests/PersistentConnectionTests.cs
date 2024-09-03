@@ -10,8 +10,10 @@ public class PersistentConnectionTests
     [Fact]
     public async Task Should_fail_if_connect_failed()
     {
-        var mockBuilder = new MockBuilder();
+        using var mockBuilder = new MockBuilder();
+#pragma warning disable IDISP004
         mockBuilder.ConnectionFactory.CreateConnectionAsync(Arg.Any<IList<AmqpTcpEndpoint>>())
+#pragma warning restore IDISP004
             .Returns(Task.FromException<IConnection>(new Exception("Test")));
 
         using var connection = new PersistentConnection(
@@ -33,7 +35,7 @@ public class PersistentConnectionTests
     [Fact]
     public async Task Should_connect()
     {
-        var mockBuilder = new MockBuilder();
+        using var mockBuilder = new MockBuilder();
         using var connection = new PersistentConnection(
             PersistentConnectionType.Producer,
             Substitute.For<ILogger<IPersistentConnection>>(),
@@ -53,8 +55,10 @@ public class PersistentConnectionTests
     [Fact]
     public async Task Should_be_not_connected_if_connection_not_established()
     {
-        var mockBuilder = new MockBuilder();
+        using var mockBuilder = new MockBuilder();
+#pragma warning disable IDISP004 // Don't ignore created IDisposable
         mockBuilder.ConnectionFactory.CreateConnectionAsync(Arg.Any<IList<AmqpTcpEndpoint>>())
+#pragma warning restore IDISP004 // Don't ignore created IDisposable
             .Returns(Task.FromException<IConnection>(new Exception("Test")));
 
         using var connection = new PersistentConnection(
@@ -67,7 +71,10 @@ public class PersistentConnectionTests
 
         connection.Status.State.Should().Be(PersistentConnectionState.NotInitialised);
 
-        await Assert.ThrowsAsync<Exception>(() => connection.CreateChannelAsync());
+        await Assert.ThrowsAsync<Exception>(async () =>
+           {
+               using var channel = await connection.CreateChannelAsync();
+           });
 
         connection.Status.State.Should().Be(PersistentConnectionState.Disconnected);
         await mockBuilder.ConnectionFactory.Received().CreateConnectionAsync(Arg.Any<IList<AmqpTcpEndpoint>>());
@@ -76,7 +83,7 @@ public class PersistentConnectionTests
     [Fact]
     public async Task Should_establish_connection_when_persistent_connection_created()
     {
-        var mockBuilder = new MockBuilder();
+        using var mockBuilder = new MockBuilder();
         using var connection = new PersistentConnection(
             PersistentConnectionType.Producer,
             Substitute.For<ILogger<IPersistentConnection>>(),

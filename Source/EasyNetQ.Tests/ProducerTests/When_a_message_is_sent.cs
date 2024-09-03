@@ -15,7 +15,7 @@ public class When_a_message_is_sent : IDisposable
         mockBuilder.SendReceive.Send(queueName, new MyMessage { Text = "Hello World" });
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }

@@ -9,7 +9,7 @@ public class When_an_action_is_performed_on_a_closed_channel_that_then_opens
 {
     public When_an_action_is_performed_on_a_closed_channel_that_then_opens()
     {
-        var persistentConnection = Substitute.For<IPersistentConnection>();
+        using var persistentConnection = Substitute.For<IPersistentConnection>();
         channel = Substitute.For<IChannel, IRecoverable>();
         var eventBus = new EventBus(Substitute.For<ILogger<EventBus>>());
 
@@ -20,14 +20,16 @@ public class When_an_action_is_performed_on_a_closed_channel_that_then_opens
         );
         var exception = new OperationInterruptedException(shutdownArgs);
 
+#pragma warning disable IDISP004
         persistentConnection.CreateChannelAsync().Returns(
+#pragma warning restore IDISP004
             _ => throw exception, _ => channel, _ => channel
         );
 
-        var persistentChannel = new PersistentChannel(
+        using var persistentChannel = new PersistentChannel(
             new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, eventBus
         );
-        persistentChannel.InvokeChannelAction(x => x.ExchangeDeclareAsync("MyExchange", "direct"));
+        persistentChannel.InvokeChannelAction(async x => await x.ExchangeDeclareAsync("MyExchange", "direct"));
     }
 
     private readonly IChannel channel;

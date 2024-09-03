@@ -52,42 +52,40 @@ public class InternalConsumerTests : IDisposable
     }
 
     [Fact]
-    public void Should_follow_reconnection_lifecycle()
+    public async Task Should_follow_reconnection_lifecycle_async()
     {
-        var status = internalConsumer.StartConsuming(true);
+        var status = await internalConsumer.StartConsumingAsync(true);
         status.Started.Should().BeEquivalentTo(new[] { exclusiveQueue, nonExclusiveQueue });
         status.Active.Should().BeEquivalentTo(new[] { exclusiveQueue, nonExclusiveQueue });
         status.Failed.Should().BeEmpty();
 
-        internalConsumer.StopConsuming();
+        await internalConsumer.StopConsumingAsync();
 
-        status = internalConsumer.StartConsuming(false);
-
+        status = await internalConsumer.StartConsumingAsync(false);
         status.Started.Should().BeEquivalentTo(new[] { nonExclusiveQueue });
         status.Active.Should().BeEquivalentTo(new[] { nonExclusiveQueue });
         status.Failed.Should().BeEquivalentTo(new[] { exclusiveQueue });
 
-        internalConsumer.StopConsuming();
+        await internalConsumer.StopConsumingAsync();
     }
 
     [Fact]
-    public void Should_follow_lifecycle_without_reconnections()
+    public async Task Should_follow_lifecycle_without_reconnections_async()
     {
-        var status = internalConsumer.StartConsuming(true);
-
+        var status = await internalConsumer.StartConsumingAsync(true);
         status.Started.Should().BeEquivalentTo(new[] { exclusiveQueue, nonExclusiveQueue });
         status.Active.Should().BeEquivalentTo(new[] { exclusiveQueue, nonExclusiveQueue });
         status.Failed.Should().BeEmpty();
 
-        status = internalConsumer.StartConsuming(false);
+        status = await internalConsumer.StartConsumingAsync(false);
         status.Started.Should().BeEmpty();
         status.Active.Should().BeEquivalentTo(new[] { exclusiveQueue, nonExclusiveQueue });
         status.Failed.Should().BeEmpty();
 
-        internalConsumer.StopConsuming();
+        await internalConsumer.StopConsumingAsync();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder?.Dispose();
         internalConsumer?.Dispose();

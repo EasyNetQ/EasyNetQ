@@ -13,7 +13,9 @@ public class When_a_cancellation_error_occurs_in_the_message_handler : ConsumerT
         ConsumeErrorStrategy.HandleErrorAsync(default, exception)
             .ReturnsForAnyArgs(new ValueTask<AckStrategy>(AckStrategies.Ack));
 
+#pragma warning disable IDISP004
         StartConsumer((_, _, _, _) => throw exception);
+#pragma warning restore IDISP004
         DeliverMessage();
     }
 

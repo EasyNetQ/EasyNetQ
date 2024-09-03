@@ -23,7 +23,7 @@ public class When_a_polymorphic_message_is_sent : IDisposable
         mockBuilder.PubSub.Publish<IMyMessageInterface>(message);
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }

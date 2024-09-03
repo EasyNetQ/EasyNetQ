@@ -24,7 +24,7 @@ public class When_consumer_callback_does_not_respect_ct : IDisposable
     {
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
-        var allMessagesReceived = new AsyncCountdownEvent();
+        using var allMessagesReceived = new AsyncCountdownEvent();
 
         var queueName = Guid.NewGuid().ToString();
         var queue = await bus.Advanced.QueueDeclareAsync(queueName, cancellationToken: cts.Token);
@@ -44,7 +44,7 @@ public class When_consumer_callback_does_not_respect_ct : IDisposable
             await allMessagesReceived.WaitAsync(cts.Token);
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         serviceProvider?.Dispose();
     }

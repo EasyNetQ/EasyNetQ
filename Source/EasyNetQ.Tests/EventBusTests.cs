@@ -11,7 +11,9 @@ public class EventBusTests
     {
         Event1? capturedEvent = null;
 
+#pragma warning disable IDISP004
         eventBus.Subscribe((in Event1 @event) => capturedEvent = @event);
+#pragma warning restore IDISP004
 
         var publishedEvent = new Event1
         {
@@ -28,7 +30,9 @@ public class EventBusTests
     {
         Event1? capturedEvent = null;
 
+#pragma warning disable IDISP004
         eventBus.Subscribe((in Event1 @event) => capturedEvent = @event);
+#pragma warning restore IDISP004
 
         var publishedEvent = new Event2
         {
@@ -45,13 +49,12 @@ public class EventBusTests
     {
         var published = new List<Event1>();
 
-        var subscription = eventBus.Subscribe((in Event1 s) => published.Add(s));
+        using var subscription = eventBus.Subscribe((in Event1 s) => published.Add(s));
         subscription.Should().NotBeNull();
 
         var publishedEvent = new Event1 { Text = "Before cancellation" };
         eventBus.Publish(publishedEvent);
 
-        subscription.Dispose();
 
         eventBus.Publish(new Event1 { Text = "Hello World" });
 
@@ -64,10 +67,14 @@ public class EventBusTests
     {
         Event1? eventFromSubscription = null;
 
+#pragma warning disable IDISP004
         eventBus.Subscribe((in Event1 @event) =>
+#pragma warning restore IDISP004
         {
             eventFromSubscription = @event;
+#pragma warning disable IDISP004
             eventBus.Subscribe((in Event1 _) => { });
+#pragma warning restore IDISP004
         });
 
         var publishedEvent1 = new Event1

@@ -9,8 +9,8 @@ public class When_cancellation_of_message_handler_occurs : ConsumerTestBase
         ConsumeErrorStrategy.HandleCancelledAsync(default)
             .ReturnsForAnyArgs(new ValueTask<AckStrategy>(AckStrategies.NackWithRequeue));
 
-        var are = new AutoResetEvent(false);
-        var consumer = StartConsumer((_, _, _, ct) =>
+        using var are = new AutoResetEvent(false);
+        using var consumer = StartConsumer((_, _, _, ct) =>
         {
             are.Set();
             Task.Delay(-1, ct).GetAwaiter().GetResult();
@@ -18,7 +18,6 @@ public class When_cancellation_of_message_handler_occurs : ConsumerTestBase
         });
         var deliverTask = DeliverMessageAsync();
         are.WaitOne();
-        consumer.Dispose();
         deliverTask.GetAwaiter().GetResult();
     }
 

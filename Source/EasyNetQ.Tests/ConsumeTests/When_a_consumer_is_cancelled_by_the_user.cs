@@ -14,13 +14,13 @@ public class When_a_consumer_is_cancelled_by_the_user : IDisposable
 
         var queue = new Queue("my_queue", false);
 
-        var cancelSubscription = mockBuilder.Bus.Advanced
-            .Consume(queue, (_, _, _) => Task.Run(() => { }));
+        using var cancelSubscription = mockBuilder.Bus.Advanced
+            .Consume(queue, async (_, _, _) => await Task.Run(() => { }));
 
-        var are = new AutoResetEvent(false);
+        using var are = new AutoResetEvent(false);
+#pragma warning disable IDISP004
         mockBuilder.EventBus.Subscribe((in ConsumerChannelDisposedEvent _) => are.Set());
-
-        cancelSubscription.Dispose();
+#pragma warning restore IDISP004
 
         if (!are.WaitOne(5000))
         {
@@ -28,7 +28,7 @@ public class When_a_consumer_is_cancelled_by_the_user : IDisposable
         }
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }

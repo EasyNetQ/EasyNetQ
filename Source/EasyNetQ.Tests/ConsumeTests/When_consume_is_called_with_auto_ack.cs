@@ -6,7 +6,9 @@ public class When_consume_is_called_with_auto_ack : ConsumerTestBase
 {
     protected override void AdditionalSetUp()
     {
+#pragma warning disable IDISP004
         StartConsumer((_, _, _, _) => AckStrategies.Ack, true);
+#pragma warning restore IDISP004
     }
 
     [Fact]

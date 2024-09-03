@@ -30,8 +30,9 @@ public class When_subscribe_is_called : IDisposable
         subscriptionResult = mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, _ => { });
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
+        subscriptionResult.Dispose();
         mockBuilder.Dispose();
     }
 
@@ -132,7 +133,7 @@ public class When_subscribe_with_configuration_is_called
         int? maxLengthBytes
     )
     {
-        var mockBuilder = new MockBuilder();
+        using var mockBuilder = new MockBuilder();
         // Configure subscription
         await mockBuilder.PubSub.SubscribeAsync<MyMessage>(
             "x",
@@ -231,7 +232,9 @@ public class When_a_message_is_delivered : IDisposable
 
         mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(conventions));
 
+#pragma warning disable IDISP004
         mockBuilder.PubSub.SubscribeAsync<MyMessage>(subscriptionId, message => { deliveredMessage = message; })
+#pragma warning restore IDISP004
             .GetAwaiter().GetResult();
 
         const string text = "Hello there, I am the text!";
@@ -255,7 +258,7 @@ public class When_a_message_is_delivered : IDisposable
         ).GetAwaiter().GetResult();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }
@@ -318,7 +321,9 @@ public class When_the_handler_throws_an_exception : IDisposable
             .AddSingleton(consumeErrorStrategy)
         );
 
+#pragma warning disable IDISP004
         mockBuilder.PubSub.SubscribeAsync<MyMessage>(subscriptionId, _ => throw originalException)
+#pragma warning restore IDISP004
             .GetAwaiter().GetResult();
 
         const string text = "Hello there, I am the text!";
@@ -342,7 +347,7 @@ public class When_the_handler_throws_an_exception : IDisposable
         ).GetAwaiter().GetResult();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }
@@ -390,14 +395,15 @@ public class When_a_subscription_is_cancelled_by_the_user : IDisposable
         };
 
         mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(conventions));
-        var subscriptionResult = mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, _ => { });
-        var are = new AutoResetEvent(false);
+        using var subscriptionResult = mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, _ => { });
+        using var are = new AutoResetEvent(false);
+#pragma warning disable IDISP004
         mockBuilder.EventBus.Subscribe((in ConsumerChannelDisposedEvent _) => are.Set());
-        subscriptionResult.Dispose();
+#pragma warning restore IDISP004
         are.WaitOne(500);
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }

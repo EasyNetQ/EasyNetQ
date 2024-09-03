@@ -35,6 +35,7 @@ public class RabbitMQFixture : IAsyncLifetime, IDisposable
         var containerId = await RunNewContainerAsync(cts.Token);
         if (dockerEngineOsPlatform == OSPlatform.Windows)
             Host = await dockerProxy.GetContainerIpAsync(containerId, cts.Token);
+        ((IDisposable)ManagementClient)?.Dispose();
         ManagementClient = new ManagementClient(new Uri($"http://{Host}:15672"), User, Password);
         await WaitForRabbitMqReadyAsync(cts.Token);
     }
@@ -44,13 +45,15 @@ public class RabbitMQFixture : IAsyncLifetime, IDisposable
         await DisposeAsync(default);
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
+        ManagementClient?.Dispose();
         dockerProxy.Dispose();
     }
 
     private async Task DisposeAsync(CancellationToken cancellationToken)
     {
+        ManagementClient?.Dispose();
         await dockerProxy.StopContainerAsync(ContainerName, cancellationToken);
         await dockerProxy.RemoveContainerAsync(ContainerName, cancellationToken);
         if (dockerEngineOsPlatform == OSPlatform.Linux || dockerEngineOsPlatform == OSPlatform.OSX)

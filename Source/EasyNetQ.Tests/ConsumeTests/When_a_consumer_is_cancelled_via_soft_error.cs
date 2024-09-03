@@ -15,7 +15,9 @@ public class When_a_consumer_is_cancelled_via_soft_error : IDisposable
 
         var queue = new Queue("my_queue", false);
 
+#pragma warning disable IDISP004
         mockBuilder.Bus.Advanced.Consume(
+#pragma warning restore IDISP004
             queue,
             (_, _, _) => Task.Run(() => { }),
             c => c.WithConsumerTag("consumer_tag")
@@ -29,7 +31,7 @@ public class When_a_consumer_is_cancelled_via_soft_error : IDisposable
         Task.Delay(TimeSpan.FromSeconds(10)).GetAwaiter().GetResult();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }

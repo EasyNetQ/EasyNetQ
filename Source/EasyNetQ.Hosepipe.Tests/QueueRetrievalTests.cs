@@ -53,15 +53,15 @@ public class QueueRetrievalTests
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddEasyNetQ("host=localhost");
 
-        var provider = serviceCollection.BuildServiceProvider();
+        using var provider = serviceCollection.BuildServiceProvider();
 
         var bus = provider.GetRequiredService<IBus>();
-
+#pragma warning disable IDISP004
         bus.PubSub.Subscribe<TestMessage>("hosepipe", message => Console.WriteLine(message.Text));
+#pragma warning disable IDISP004
+
 
         Thread.Sleep(1000);
-
-        provider.Dispose();
     }
 
     private sealed class TestMessage

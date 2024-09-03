@@ -34,11 +34,15 @@ public class MockBuilder : IDisposable
         for (var i = 0; i < 10; i++)
             channelPool.Push(Substitute.For<IChannel, IRecoverable>());
 
+#pragma warning disable IDISP004 // Don't ignore created IDisposable
         connectionFactory.CreateConnectionAsync(Arg.Any<IList<AmqpTcpEndpoint>>()).Returns(connection);
+#pragma warning restore IDISP004 // Don't ignore created IDisposable
+
         connection.IsOpen.Returns(true);
         connection.Endpoint.Returns(new AmqpTcpEndpoint("localhost"));
-
+#pragma warning disable IDISP004
         connection.CreateChannelAsync().Returns(_ =>
+#pragma warning restore IDISP004
         {
             var channel = channelPool.Pop();
             channels.Add(channel);
@@ -113,5 +117,5 @@ public class MockBuilder : IDisposable
 
     public List<string> ConsumerQueueNames { get; } = new();
 
-    public void Dispose() => (serviceProvider as IDisposable)?.Dispose();
+    public virtual void Dispose() => (serviceProvider as IDisposable)?.Dispose();
 }

@@ -22,7 +22,7 @@ public class When_a_queue_is_declared : IDisposable
         );
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }
@@ -75,7 +75,7 @@ public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange : IDisposa
         );
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }
@@ -129,7 +129,7 @@ public class When_a_queue_is_declared_With_EmptyDeadLetterExchange : IDisposable
         );
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }
@@ -172,7 +172,7 @@ public class When_a_queue_is_deleted : IDisposable
         mockBuilder.Bus.Advanced.QueueDelete("my_queue");
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }
@@ -195,7 +195,7 @@ public class When_a_queue_is_deleted_with_name : IDisposable
         mockBuilder.Bus.Advanced.QueueDelete("my_queue");
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }
@@ -224,7 +224,7 @@ public class When_an_exchange_is_declared : IDisposable
         );
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }
@@ -261,7 +261,7 @@ public class When_an_exchange_is_declared_passively : IDisposable
         mockBuilder.Bus.Advanced.ExchangeDeclarePassive("my_exchange");
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }
@@ -286,7 +286,7 @@ public class When_an_exchange_is_deleted : IDisposable
         mockBuilder.Bus.Advanced.ExchangeDelete(exchange);
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }
@@ -313,7 +313,7 @@ public class When_a_queue_is_bound_to_an_exchange : IDisposable
         binding = advancedBus.Bind(exchange, queue, "my_routing_key");
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }
@@ -357,7 +357,7 @@ public class When_a_queue_is_bound_to_an_exchange_with_headers : IDisposable
         binding = advancedBus.Bind(exchange, queue, "my_routing_key", new Dictionary<string, object> { ["header1"] = "value1" });
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }
@@ -403,7 +403,7 @@ public class When_a_queue_is_unbound_from_an_exchange : IDisposable
         advancedBus.Unbind(binding);
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }

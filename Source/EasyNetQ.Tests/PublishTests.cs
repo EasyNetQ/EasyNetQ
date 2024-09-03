@@ -23,15 +23,17 @@ public class When_publish_is_called : IDisposable
         WaitForMessageToPublish();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }
 
     private void WaitForMessageToPublish()
     {
-        var autoResetEvent = new AutoResetEvent(false);
+        using var autoResetEvent = new AutoResetEvent(false);
+#pragma warning disable IDISP004
         mockBuilder.EventBus.Subscribe((in PublishedMessageEvent _) => autoResetEvent.Set());
+#pragma warning restore IDISP004
         autoResetEvent.WaitOne(1000);
     }
 
@@ -87,15 +89,17 @@ public class When_publish_with_topic_is_called : IDisposable
         WaitForMessageToPublish();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }
 
     private void WaitForMessageToPublish()
     {
-        var autoResetEvent = new AutoResetEvent(false);
+        using var autoResetEvent = new AutoResetEvent(false);
+#pragma warning disable IDISP004
         mockBuilder.EventBus.Subscribe((in PublishedMessageEvent _) => autoResetEvent.Set());
+#pragma warning restore IDISP004
         autoResetEvent.WaitOne(1000);
     }
 
