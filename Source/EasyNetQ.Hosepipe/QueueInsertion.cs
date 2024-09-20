@@ -20,7 +20,7 @@ public class QueueInsertion : IQueueInsertion
         using var connection = await HosepipeConnection.FromParametersAsync(parameters, cancellationToken);
         using var channel = await connection.CreateChannelAsync(cancellationToken);
 
-        await channel.ConfirmSelectAsync(cancellationToken);
+        await channel.ConfirmSelectAsync(false, cancellationToken);
 
         await foreach (var message in messages)
         {

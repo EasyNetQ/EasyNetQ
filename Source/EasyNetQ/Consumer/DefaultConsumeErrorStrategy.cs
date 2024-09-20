@@ -73,7 +73,7 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
         try
         {
             var channel = await connection.CreateChannelAsync(cancellationToken);
-            if (configuration.PublisherConfirms) await channel.ConfirmSelectAsync(cancellationToken);
+            if (configuration.PublisherConfirms) await channel.ConfirmSelectAsync(false, cancellationToken);
 
             var errorExchange = await DeclareErrorExchangeWithQueueAsync(channel, receivedInfo, cancellationToken);
 
@@ -85,7 +85,7 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
                 Type = typeNameSerializer.Serialize(typeof(Error))
             };
 
-            await channel.BasicPublishAsync(errorExchange, receivedInfo.RoutingKey, errorProperties, message.Memory, cancellationToken: cancellationToken).ConfigureAwait(false);
+            await channel.BasicPublishAsync(errorExchange, receivedInfo.RoutingKey, false, errorProperties, message.Memory, cancellationToken: cancellationToken).ConfigureAwait(false);
 
             if (configuration.PublisherConfirms)
             {

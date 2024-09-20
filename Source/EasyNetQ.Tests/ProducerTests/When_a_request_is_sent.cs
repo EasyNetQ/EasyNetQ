@@ -93,9 +93,9 @@ public class When_a_request_is_sent : IDisposable
         await mockBuilder.Channels[3].Received().BasicPublishAsync(
             Arg.Is("easy_net_q_rpc"),
             Arg.Is("EasyNetQ.Tests.TestRequestMessage, EasyNetQ.Tests"),
+            Arg.Is(false),
             Arg.Any<RabbitMQ.Client.BasicProperties>(),
             Arg.Any<ReadOnlyMemory<byte>>(),
-            Arg.Is(false),
             Arg.Any<CancellationToken>()
         );
     }

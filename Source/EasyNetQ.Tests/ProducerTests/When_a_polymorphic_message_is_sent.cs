@@ -48,13 +48,13 @@ public class When_a_polymorphic_message_is_sent : IDisposable
         await mockBuilder.Channels[1].Received().BasicPublishAsync(
             Arg.Is(interfaceTypeName),
             Arg.Is(""),
+            Arg.Is(false),
             Arg.Is<RabbitMQ.Client.BasicProperties>(x => x.Type == implementationTypeName),
             Arg.Is<ReadOnlyMemory<byte>>(
                 x => x.ToArray().SequenceEqual(
                     Encoding.UTF8.GetBytes("{\"Text\":\"Hello Polymorphs!\",\"NotInInterface\":\"Hi\"}")
                 )
             ),
-            Arg.Is(false),
             Arg.Any<CancellationToken>()
         );
     }

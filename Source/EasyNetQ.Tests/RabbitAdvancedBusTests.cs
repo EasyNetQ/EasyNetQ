@@ -25,9 +25,9 @@ public class RabbitAdvancedBusTests
         await mockBuilder.Channels[0].Received().BasicPublishAsync(
             Arg.Any<string>(),
             Arg.Any<string>(),
+            Arg.Is(expected),
             Arg.Any<RabbitMQ.Client.BasicProperties>(),
             Arg.Any<ReadOnlyMemory<byte>>(),
-            Arg.Is(expected),
             Arg.Any<CancellationToken>()
         );
     }
@@ -55,9 +55,9 @@ public class RabbitAdvancedBusTests
         await mockBuilder.Channels[0].Received().BasicPublishAsync(
             Arg.Any<string>(),
             Arg.Any<string>(),
+            Arg.Any<bool>(),
             Arg.Any<RabbitMQ.Client.BasicProperties>(),
             Arg.Any<ReadOnlyMemory<byte>>(),
-            Arg.Any<bool>(),
             Arg.Any<CancellationToken>()
         );
     }

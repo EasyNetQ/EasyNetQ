@@ -75,9 +75,9 @@ public class When_using_default_consume_error_strategy
         await mockBuilder.Channels[0].Received().BasicPublishAsync(
             "CustomErrorExchangePrefixName.originalRoutingKey",
             "originalRoutingKey",
+            false,
             Arg.Any<RabbitMQ.Client.BasicProperties>(),
             Arg.Any<ReadOnlyMemory<byte>>(),
-            false,
             Arg.Any<CancellationToken>()
         );
     }
@@ -115,9 +115,9 @@ public class When_using_default_consume_error_strategy
         await mockBuilder.Channels[0].Received().BasicPublishAsync(
             "CustomErrorExchangePrefixName.originalRoutingKey",
             "originalRoutingKey",
+            false,
             Arg.Any<RabbitMQ.Client.BasicProperties>(),
             Arg.Any<ReadOnlyMemory<byte>>(),
-            false,
             Arg.Any<CancellationToken>()
         );
 

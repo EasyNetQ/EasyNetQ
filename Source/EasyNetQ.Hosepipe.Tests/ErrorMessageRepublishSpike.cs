@@ -50,7 +50,7 @@ public class ErrorMessageRepublishSpike
 
             var body = Encoding.UTF8.GetBytes(error.Message);
 
-            await channel.BasicPublishAsync(error.Exchange, error.RoutingKey, properties, body);
+            await channel.BasicPublishAsync(error.Exchange, error.RoutingKey, false, properties, body);
         }
         catch (OperationInterruptedException)
         {

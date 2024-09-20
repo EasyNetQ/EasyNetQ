@@ -688,7 +688,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         {
             var basicProperties = new BasicProperties();
             properties.CopyTo(basicProperties);
-            await channel.BasicPublishAsync(exchange, routingKey, basicProperties, body, mandatory, cancellationToken);
+            await channel.BasicPublishAsync(exchange, routingKey, mandatory, basicProperties, body, cancellationToken);
             return true;
         }
     }
@@ -727,7 +727,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 
             try
             {
-                await channel.BasicPublishAsync(exchange, routingKey, basicProperties, body, mandatory, cancellationToken);
+                await channel.BasicPublishAsync(exchange, routingKey, mandatory, basicProperties, body, cancellationToken);
             }
             catch (Exception)
             {

@@ -174,9 +174,9 @@ public class When_publishing_a_message : IDisposable
         await mockBuilder.Channels[1].Received().BasicPublishAsync(
             Arg.Is("CustomExchangeNamingConvention"),
             Arg.Any<string>(),
+            Arg.Is(false),
             Arg.Any<RabbitMQ.Client.BasicProperties>(),
             Arg.Any<ReadOnlyMemory<byte>>(),
-            Arg.Is(false),
             Arg.Any<CancellationToken>()
         );
     }
@@ -202,9 +202,9 @@ public class When_publishing_a_message : IDisposable
         await mockBuilder.Channels[1].Received().BasicPublishAsync(
             Arg.Any<string>(),
             Arg.Is("CustomTopicNamingConvention"),
+            Arg.Is(false),
             Arg.Any<RabbitMQ.Client.BasicProperties>(),
             Arg.Any<ReadOnlyMemory<byte>>(),
-            Arg.Is(false),
             Arg.Any<CancellationToken>()
         );
     }

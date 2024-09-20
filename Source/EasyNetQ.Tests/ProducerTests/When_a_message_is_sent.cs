@@ -26,9 +26,9 @@ public class When_a_message_is_sent : IDisposable
         await mockBuilder.Channels[0].Received().BasicPublishAsync(
             Arg.Is(""),
             Arg.Is(queueName),
+            Arg.Is(false),
             Arg.Any<RabbitMQ.Client.BasicProperties>(),
             Arg.Any<ReadOnlyMemory<byte>>(),
-            Arg.Is(false),
             Arg.Any<CancellationToken>()
         );
     }

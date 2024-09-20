@@ -50,6 +50,7 @@ public class When_publish_is_called : IDisposable
         await mockBuilder.Channels[1].Received().BasicPublishAsync(
             Arg.Is("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
             Arg.Is(""),
+            Arg.Is(false),
             Arg.Is<RabbitMQ.Client.BasicProperties>(
                 x => x.CorrelationId == correlationId
                      && x.Type == "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"
@@ -58,7 +59,6 @@ public class When_publish_is_called : IDisposable
             Arg.Is<ReadOnlyMemory<byte>>(
                 x => x.ToArray().SequenceEqual(Encoding.UTF8.GetBytes("{\"Text\":\"Hiya!\"}"))
             ),
-            Arg.Is(false),
             Arg.Any<CancellationToken>()
         );
     }
@@ -109,9 +109,9 @@ public class When_publish_with_topic_is_called : IDisposable
         await mockBuilder.Channels[1].Received().BasicPublishAsync(
             Arg.Is("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
             Arg.Is("X.A"),
+            Arg.Is(false),
             Arg.Any<RabbitMQ.Client.BasicProperties>(),
             Arg.Any<ReadOnlyMemory<byte>>(),
-            Arg.Is(false),
             Arg.Any<CancellationToken>()
         );
     }
