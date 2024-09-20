@@ -60,7 +60,7 @@ public static class HandlerRegistrationExtensions
         return handlerRegistration.Add<T>(async (m, i, c) =>
         {
             await handler(m, i, c).ConfigureAwait(false);
-            return AckStrategies.Ack;
+            return AckStrategies.AckAsync;
         });
     }
 }

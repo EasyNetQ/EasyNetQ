@@ -21,14 +21,8 @@ public class When_auto_subscribing : IDisposable
     public When_auto_subscribing()
     {
         mockBuilder = new MockBuilder();
-
         var services = new ServiceCollection();
         serviceProvider = services.BuildServiceProvider();
-
-        var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, serviceProvider, "my_app");
-#pragma warning disable IDISP004
-        autoSubscriber.SubscribeAsync([typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>)]).GetAwaiter().GetResult();
-#pragma warning restore IDISP004
     }
 
     public virtual void Dispose()
@@ -54,6 +48,9 @@ public class When_auto_subscribing : IDisposable
             );
         }
 
+        var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, serviceProvider, "my_app");
+        await autoSubscriber.SubscribeAsync([typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>)]);
+
         await AssertQueueDeclared(expectedQueueName1);
         await AssertQueueDeclared(expectedQueueName2);
         await AssertQueueDeclared(expectedQueueName3);
@@ -73,6 +70,9 @@ public class When_auto_subscribing : IDisposable
                 Arg.Any<CancellationToken>()
             );
         }
+
+        var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, serviceProvider, "my_app");
+        await autoSubscriber.SubscribeAsync([typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>)]);
 
         await AssertConsumerStarted(1, expectedQueueName1, "#");
         await AssertConsumerStarted(2, expectedQueueName2, "#");

@@ -93,7 +93,7 @@ public static partial class AdvancedBusExtensions
         return bus.Consume<T>(queue, async (m, i, c) =>
         {
             await handler(m, i, c).ConfigureAwait(false);
-            return AckStrategies.Ack;
+            return AckStrategies.AckAsync;
         }, configure);
     }
 
@@ -335,7 +335,7 @@ public static partial class AdvancedBusExtensions
         return bus.Consume(queue, async (m, p, i, c) =>
         {
             await handler(m, p, i, c).ConfigureAwait(false);
-            return AckStrategies.Ack;
+            return AckStrategies.AckAsync;
         }, configure);
     }
 

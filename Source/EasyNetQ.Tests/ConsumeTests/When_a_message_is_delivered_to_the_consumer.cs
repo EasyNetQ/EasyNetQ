@@ -7,7 +7,7 @@ public class When_a_message_is_delivered_to_the_consumer : ConsumerTestBase
     protected override void AdditionalSetUp()
     {
 #pragma warning disable IDISP004
-        StartConsumer((_, _, _, _) => AckStrategies.Ack);
+        StartConsumer((_, _, _, _) => AckStrategies.AckAsync);
 #pragma warning restore IDISP004
         DeliverMessage();
     }

@@ -91,11 +91,11 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
             {
                 using var cts = new CancellationTokenSource(configuration.Timeout);
                 var waitForConfirmsResult = await channel.WaitForConfirmsAsync(cts.Token);
-                return waitForConfirmsResult ? AckStrategies.Ack : AckStrategies.NackWithRequeue;
+                return waitForConfirmsResult ? AckStrategies.AckAsync : AckStrategies.NackWithRequeueAsync;
             }
             else
             {
-                return AckStrategies.Ack;
+                return AckStrategies.AckAsync;
             }
         }
         catch (BrokerUnreachableException unreachableException)
@@ -120,13 +120,13 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
             logger.LogError(unexpectedException, "Failed to publish error message");
         }
 
-        return AckStrategies.NackWithRequeue;
+        return AckStrategies.NackWithRequeueAsync;
     }
 
     /// <inheritdoc />
     public virtual ValueTask<AckStrategyAsync> HandleCancelledAsync(ConsumeContext context, CancellationToken cancellationToken = default)
     {
-        return new(AckStrategies.NackWithRequeue);
+        return new(AckStrategies.NackWithRequeueAsync);
     }
 
     private static async Task DeclareAndBindErrorExchangeWithErrorQueueAsync(

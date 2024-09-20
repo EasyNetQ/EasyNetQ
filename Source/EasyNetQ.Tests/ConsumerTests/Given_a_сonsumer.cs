@@ -42,7 +42,7 @@ public abstract class Given_a_сonsumer : IDisposable
                     {
                         queue,
                         new PerQueueConsumerConfiguration(
-                            false, "", false, null, _ => new(AckStrategies.Ack)
+                            false, "", false, null, _ => new(AckStrategies.AckAsync)
                         )
                     }
                 }

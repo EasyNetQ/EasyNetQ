@@ -45,7 +45,7 @@ public class When_using_default_consume_error_strategy
 
         var cancelAckStrategy = await mockBuilder.ConsumeErrorStrategy.HandleCancelledAsync(consumerExecutionContext);
 
-        Assert.Same(AckStrategies.NackWithRequeue, cancelAckStrategy);
+        Assert.Same(AckStrategies.NackWithRequeueAsync, cancelAckStrategy);
     }
 
     [Fact]
@@ -55,7 +55,7 @@ public class When_using_default_consume_error_strategy
 
         var errorAckStrategy = await mockBuilder.ConsumeErrorStrategy.HandleErrorAsync(consumerExecutionContext, new Exception());
 
-        Assert.Same(AckStrategies.Ack, errorAckStrategy);
+        Assert.Same(AckStrategies.AckAsync, errorAckStrategy);
 
         await mockBuilder.Channels[0].Received().ExchangeDeclareAsync("CustomErrorExchangePrefixName.originalRoutingKey", "topic", true);
         await mockBuilder.Channels[0].Received().QueueDeclareAsync(
@@ -92,7 +92,7 @@ public class When_using_default_consume_error_strategy
 
         var errorAckStrategy = await mockBuilder.ConsumeErrorStrategy.HandleErrorAsync(consumerExecutionContext, new Exception());
 
-        Assert.Same(AckStrategies.Ack, errorAckStrategy);
+        Assert.Same(AckStrategies.AckAsync, errorAckStrategy);
 
         await mockBuilder.Channels[0].Received().ConfirmSelectAsync();
         await mockBuilder.Channels[0].Received().ExchangeDeclareAsync("CustomErrorExchangePrefixName.originalRoutingKey", "topic", true);

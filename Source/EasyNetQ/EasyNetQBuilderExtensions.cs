@@ -147,7 +147,7 @@ public static class EasyNetQBuilderExtensions
             {
                 logger.LogError(exception, "Consume error strategy has failed");
 
-                return AckStrategies.NackWithRequeue;
+                return AckStrategies.NackWithRequeueAsync;
             }
         });
     }

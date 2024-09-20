@@ -9,8 +9,8 @@ public class When_disposed : Given_a_сonsumer
     }
 
     [Fact]
-    public void Should_dispose_the_internal_consumer()
+    public async Task Should_dispose_the_internal_consumer()
     {
-        internalConsumers[0].Received().Dispose();
+        await internalConsumers[0].Received().DisposeAsync();
     }
 }

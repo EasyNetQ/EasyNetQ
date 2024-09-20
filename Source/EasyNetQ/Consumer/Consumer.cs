@@ -161,7 +161,7 @@ public class Consumer : IConsumer
     }
 
     /// <inheritdoc />
-    public virtual void Dispose()
+    public virtual async void Dispose()
     {
         if (disposed) return;
 
@@ -173,7 +173,7 @@ public class Consumer : IConsumer
         foreach (var disposable in disposables)
             disposable.Dispose();
 
-        consumerToDispose.Dispose();
+        await consumerToDispose.DisposeAsync();
 
         eventBus.Publish(new StoppedConsumingEvent(this));
     }

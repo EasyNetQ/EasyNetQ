@@ -34,7 +34,7 @@ public sealed class ConsumePipelineBuilder
 
     public ConsumeDelegate Build()
     {
-        ConsumeDelegate result = _ => new ValueTask<AckStrategyAsync>(AckStrategies.NackWithRequeue);
+        ConsumeDelegate result = _ => new ValueTask<AckStrategyAsync>(AckStrategies.NackWithRequeueAsync);
         for (var i = middlewares.Count - 1; i >= 0; i--)
             result = middlewares[i](result);
         return result;

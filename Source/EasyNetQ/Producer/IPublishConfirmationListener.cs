@@ -10,7 +10,7 @@ public interface IPublishConfirmationListener : IDisposable
     /// <summary>
     /// Creates pending confirmation for a next publish
     /// </summary>
-    /// <param name="chennel"></param>
+    /// <param name="channel"></param>
     /// <returns>Pending confirmation to wait</returns>
-    IPublishPendingConfirmation CreatePendingConfirmation(IChannel chennel);
+    IPublishPendingConfirmation CreatePendingConfirmation(IChannel channel);
 }

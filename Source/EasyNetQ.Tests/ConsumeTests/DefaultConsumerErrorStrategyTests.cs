@@ -23,7 +23,7 @@ public class DefaultConsumerErrorStrategyTests
             CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!")
         );
 
-        Assert.Equal(AckStrategies.Ack, ackStrategy);
+        Assert.Equal(AckStrategies.AckAsync, ackStrategy);
         await modelMock.Received().WaitForConfirmsAsync(cts.Token);
         await modelMock.Received().ConfirmSelectAsync();
     }
@@ -45,7 +45,7 @@ public class DefaultConsumerErrorStrategyTests
             CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!")
         );
 
-        Assert.Equal(AckStrategies.NackWithRequeue, ackStrategy);
+        Assert.Equal(AckStrategies.NackWithRequeueAsync, ackStrategy);
         await modelMock.Received().WaitForConfirmsAsync(cts.Token);
         await modelMock.Received().ConfirmSelectAsync();
     }
@@ -66,7 +66,7 @@ public class DefaultConsumerErrorStrategyTests
             CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!")
         );
 
-        Assert.Equal(AckStrategies.Ack, ackStrategy);
+        Assert.Equal(AckStrategies.AckAsync, ackStrategy);
         await modelMock.DidNotReceive().WaitForConfirmsAsync(cts.Token);
     }
 

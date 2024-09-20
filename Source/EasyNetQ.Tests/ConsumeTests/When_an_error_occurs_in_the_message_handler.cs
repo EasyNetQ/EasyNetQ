@@ -11,7 +11,7 @@ public class When_an_error_occurs_in_the_message_handler : ConsumerTestBase
         exception = new Exception("I've had a bad day :(");
 
         ConsumeErrorStrategy.HandleErrorAsync(default, exception)
-            .ReturnsForAnyArgs(new ValueTask<AckStrategyAsync>(AckStrategies.Ack));
+            .ReturnsForAnyArgs(new ValueTask<AckStrategyAsync>(AckStrategies.AckAsync));
 
 #pragma warning disable IDISP004
         StartConsumer((_, _, _, _) => throw exception);

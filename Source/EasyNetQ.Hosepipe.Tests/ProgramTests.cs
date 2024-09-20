@@ -151,9 +151,9 @@ public class MockQueueRetrieval : IQueueRetrieval
         QueueParameters parameters,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        await Task.CompletedTask;
         yield return new HosepipeMessage("some message", MessageProperties.Empty, Helper.CreateMessageReceivedInfo());
         yield return new HosepipeMessage("some message", MessageProperties.Empty, Helper.CreateMessageReceivedInfo());
+        await Task.Yield();
     }
 }
 
@@ -164,10 +164,10 @@ public class MockMessageReader : IMessageReader
     public async IAsyncEnumerable<HosepipeMessage> ReadMessagesAsync(QueueParameters parameters, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         Parameters = parameters;
-        await Task.CompletedTask;
 
         yield return new HosepipeMessage("some message", MessageProperties.Empty, Helper.CreateMessageReceivedInfo());
         yield return new HosepipeMessage("some message", MessageProperties.Empty, Helper.CreateMessageReceivedInfo());
+        await Task.Yield();
     }
 
     public IAsyncEnumerable<HosepipeMessage> ReadMessagesAsync(QueueParameters parameters, string messageName, CancellationToken cancellationToken = default)

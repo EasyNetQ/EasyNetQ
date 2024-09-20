@@ -70,7 +70,7 @@ public delegate Task AsyncEventHandler<TEventArgs>(object? sender, TEventArgs e)
 /// <summary>
 ///     Consumer which starts/stops raw consumers
 /// </summary>
-public interface IInternalConsumer : IDisposable
+public interface IInternalConsumer : IAsyncDisposable
 {
     /// <summary>
     ///     Starts consuming
@@ -89,7 +89,9 @@ public interface IInternalConsumer : IDisposable
 }
 
 /// <inheritdoc />
+#pragma warning disable IDISP026
 public class InternalConsumer : IInternalConsumer
+#pragma warning restore IDISP026
 {
     private readonly Dictionary<string, AsyncBasicConsumer> consumers = new();
     private readonly AsyncLock mutex = new();
@@ -135,7 +137,7 @@ public class InternalConsumer : IInternalConsumer
                 foreach (var consumer in consumers.Values)
                 {
                     consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
-                    consumer.Dispose();
+                    await consumer.DisposeAsync();
                 }
 
                 consumers.Clear();
@@ -256,7 +258,7 @@ public class InternalConsumer : IInternalConsumer
                     }
                 }
 
-                consumer.Dispose();
+                await consumer.DisposeAsync();
             }
 
             consumers.Clear();
@@ -266,7 +268,7 @@ public class InternalConsumer : IInternalConsumer
     /// <inheritdoc />
     public event AsyncEventHandler<InternalConsumerCancelledEventArgs>? CancelledAsync;
 
-    public virtual async void Dispose()
+    public virtual async ValueTask DisposeAsync()
     {
         if (disposed) return;
 
@@ -289,7 +291,7 @@ public class InternalConsumer : IInternalConsumer
                     }
                 }
 
-                consumer.Dispose();
+                await consumer.DisposeAsync();
             }
 
             consumers.Clear();
@@ -315,7 +317,7 @@ public class InternalConsumer : IInternalConsumer
                 active = consumers.Select(x => x.Value.Queue).ToList();
 
 #pragma warning disable IDISP007
-                consumer.Dispose();
+                await consumer.DisposeAsync();
 #pragma warning restore IDISP007
                 if (IsChannelClosedWithSoftError(channel)) return;
             }

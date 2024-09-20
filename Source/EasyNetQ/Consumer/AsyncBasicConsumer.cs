@@ -7,7 +7,7 @@ using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.Consumer;
 
-internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
+internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisposable
 {
     private readonly CancellationTokenSource cts = new();
     private readonly IEventBus eventBus;
@@ -94,7 +94,8 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
     }
 
     /// <inheritdoc />
-    public virtual void Dispose()
+#pragma warning disable CS1998
+    public async ValueTask DisposeAsync()
     {
         if (disposed)
             return;
@@ -104,6 +105,7 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
         cts.Dispose();
         eventBus.Publish(new ConsumerChannelDisposedEvent(ConsumerTags));
     }
+#pragma warning restore CS1998
 
     private async Task<AckResult> AckAsync(
         AckStrategyAsync ackStrategy,

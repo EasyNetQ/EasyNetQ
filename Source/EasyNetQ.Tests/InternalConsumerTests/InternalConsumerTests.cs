@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace EasyNetQ.Tests.InternalConsumerTests;
 
-public class InternalConsumerTests : IDisposable
+public sealed class InternalConsumerTests : IAsyncDisposable
 {
     private readonly Queue exclusiveQueue = new("exclusive", isExclusive: true);
     private readonly Queue nonExclusiveQueue = new("non-exclusive", isExclusive: false);
@@ -31,7 +31,7 @@ public class InternalConsumerTests : IDisposable
                             "exclusiveConsumerTag",
                             false,
                             new Dictionary<string, object>(),
-                            _ => new ValueTask<AckStrategyAsync>(AckStrategies.Ack)
+                            _ => new ValueTask<AckStrategyAsync>(AckStrategies.AckAsync)
                         )
                     },
                     {
@@ -41,7 +41,7 @@ public class InternalConsumerTests : IDisposable
                             "nonExclusiveConsumerTag",
                             false,
                             new Dictionary<string, object>(),
-                            _ => new ValueTask<AckStrategyAsync>(AckStrategies.Ack)
+                            _ => new ValueTask<AckStrategyAsync>(AckStrategies.AckAsync)
                         )
                     }
                 }
@@ -85,9 +85,9 @@ public class InternalConsumerTests : IDisposable
         await internalConsumer.StopConsumingAsync();
     }
 
-    public virtual void Dispose()
+    public async ValueTask DisposeAsync()
     {
         mockBuilder?.Dispose();
-        internalConsumer?.Dispose();
+        await internalConsumer.DisposeAsync();
     }
 }

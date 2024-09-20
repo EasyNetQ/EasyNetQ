@@ -324,7 +324,7 @@ public class When_the_handler_throws_an_exception : IDisposable
                 {
                     basicDeliverEventArgs = (ConsumeContext)i[0];
                     raisedException = (Exception)i[1];
-                    return new ValueTask<AckStrategyAsync>(AckStrategies.Ack);
+                    return new ValueTask<AckStrategyAsync>(AckStrategies.AckAsync);
                 }
             );
 
