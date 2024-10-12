@@ -1,10 +1,12 @@
 using EasyNetQ.AutoSubscribe;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests;
 
 public class When_auto_subscribing_async_with_subscription_configuration_attribute
 {
     private readonly IBus bus;
+    private readonly ServiceProvider serviceProvider;
     private Action<ISubscriptionConfiguration> capturedAction;
     private readonly IPubSub pubSub;
 
@@ -14,7 +16,10 @@ public class When_auto_subscribing_async_with_subscription_configuration_attribu
         bus = Substitute.For<IBus>();
         bus.PubSub.Returns(pubSub);
 
-        var autoSubscriber = new AutoSubscriber(bus, "my_app");
+        var services = new ServiceCollection();
+        serviceProvider = services.BuildServiceProvider();
+
+        var autoSubscriber = new AutoSubscriber(bus, serviceProvider, "my_app");
 
         pubSub.SubscribeAsync(
                 Arg.Is("MyAttrTest"),
@@ -24,7 +29,7 @@ public class When_auto_subscribing_async_with_subscription_configuration_attribu
             .Returns(Task.FromResult(new SubscriptionResult()))
             .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
 
-        autoSubscriber.Subscribe(new[] { typeof(MyConsumerWithAttr) });
+        autoSubscriber.Subscribe([typeof(MyConsumerWithAttr)]);
     }
 
     [Fact]
@@ -52,7 +57,7 @@ public class When_auto_subscribing_async_with_subscription_configuration_attribu
     }
 
     // Discovered by reflection over test assembly, do not remove.
-    private class MyConsumerWithAttr : IConsumeAsync<MessageA>
+    private sealed class MyConsumerWithAttr : IConsumeAsync<MessageA>
     {
         [AutoSubscriberConsumer(SubscriptionId = "MyAttrTest")]
         [SubscriptionConfiguration(AutoDelete = true, Expires = 10, PrefetchCount = 10, Priority = 10)]
@@ -62,7 +67,7 @@ public class When_auto_subscribing_async_with_subscription_configuration_attribu
         }
     }
 
-    private class MessageA
+    private sealed class MessageA
     {
     }
 }
@@ -70,6 +75,7 @@ public class When_auto_subscribing_async_with_subscription_configuration_attribu
 public class When_auto_subscribing_async_explicit_implementation_with_subscription_configuration_attribute
 {
     private readonly IBus bus;
+    private readonly ServiceProvider serviceProvider;
     private Action<ISubscriptionConfiguration> capturedAction;
     private readonly IPubSub pubSub;
 
@@ -79,7 +85,10 @@ public class When_auto_subscribing_async_explicit_implementation_with_subscripti
         bus = Substitute.For<IBus>();
         bus.PubSub.Returns(pubSub);
 
-        var autoSubscriber = new AutoSubscriber(bus, "my_app");
+        var services = new ServiceCollection();
+        serviceProvider = services.BuildServiceProvider();
+
+        var autoSubscriber = new AutoSubscriber(bus, serviceProvider, "my_app");
 
         pubSub.SubscribeAsync(
                 Arg.Is("MyAttrTest"),
@@ -89,7 +98,7 @@ public class When_auto_subscribing_async_explicit_implementation_with_subscripti
             .Returns(Task.FromResult(new SubscriptionResult()))
             .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
 
-        autoSubscriber.Subscribe(new[] { typeof(MyConsumerWithAttr) });
+        autoSubscriber.Subscribe([typeof(MyConsumerWithAttr)]);
     }
 
     [Fact]
@@ -117,7 +126,7 @@ public class When_auto_subscribing_async_explicit_implementation_with_subscripti
     }
 
     // Discovered by reflection over test assembly, do not remove.
-    private class MyConsumerWithAttr : IConsumeAsync<MessageA>
+    private sealed class MyConsumerWithAttr : IConsumeAsync<MessageA>
     {
         [AutoSubscriberConsumer(SubscriptionId = "MyAttrTest")]
         [SubscriptionConfiguration(AutoDelete = true, Expires = 10, PrefetchCount = 10, Priority = 10)]
@@ -127,7 +136,7 @@ public class When_auto_subscribing_async_explicit_implementation_with_subscripti
         }
     }
 
-    private class MessageA
+    private sealed class MessageA
     {
     }
 }

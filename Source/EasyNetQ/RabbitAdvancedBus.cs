@@ -1,13 +1,13 @@
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
-using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
-using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ;
 
@@ -17,7 +17,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     private readonly IPersistentChannelDispatcher persistentChannelDispatcher;
     private readonly ConnectionConfiguration configuration;
     private readonly ConsumePipelineBuilder consumePipelineBuilder;
-    private readonly IServiceResolver serviceResolver;
+    private readonly IServiceProvider serviceResolver;
     private readonly IPublishConfirmationListener confirmationListener;
     private readonly ILogger logger;
     private readonly IProducerConnection producerConnection;
@@ -48,7 +48,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         ConnectionConfiguration configuration,
         ProducePipelineBuilder producePipelineBuilder,
         ConsumePipelineBuilder consumePipelineBuilder,
-        IServiceResolver serviceResolver,
+        IServiceProvider serviceResolver,
         IMessageSerializationStrategy messageSerializationStrategy,
         IPullingConsumerFactory pullingConsumerFactory,
         AdvancedBusEventHandlers advancedBusEventHandlers
@@ -75,28 +75,53 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         Unblocked += advancedBusEventHandlers.Unblocked;
         MessageReturned += advancedBusEventHandlers.MessageReturned;
 
-        eventSubscriptions = new[]
-        {
+        eventSubscriptions =
+        [
             this.eventBus.Subscribe<ConnectionCreatedEvent>(OnConnectionCreated),
             this.eventBus.Subscribe<ConnectionRecoveredEvent>(OnConnectionRecovered),
             this.eventBus.Subscribe<ConnectionDisconnectedEvent>(OnConnectionDisconnected),
             this.eventBus.Subscribe<ConnectionBlockedEvent>(OnConnectionBlocked),
             this.eventBus.Subscribe<ConnectionUnblockedEvent>(OnConnectionUnblocked),
-            this.eventBus.Subscribe<ReturnedMessageEvent>(OnMessageReturned),
-        };
+            this.eventBus.Subscribe<ReturnedMessageEvent>(OnMessageReturned)
+        ];
 
         produceDelegate = producePipelineBuilder.Use(_ => PublishInternalAsync).Build();
     }
 
+    /// <inheritdoc />
+    [Obsolete("IsConnected is deprecated because it is misleading. Please use GetConnectionStatus instead")]
+    public bool IsConnected =>
+        (from PersistentConnectionType type in Enum.GetValues(typeof(PersistentConnectionType)) select GetConnection(type))
+        .All(connection => connection.Status.State == PersistentConnectionState.Connected);
 
     /// <inheritdoc />
-    public bool IsConnected => producerConnection.IsConnected && consumerConnection.IsConnected;
-
-    /// <inheritdoc />
-    public Task ConnectAsync(CancellationToken cancellationToken = default)
+    [Obsolete("IsConnected is deprecated because it is misleading. Please use GetConnectionStatus instead")]
+    public async Task ConnectAsync(CancellationToken cancellationToken = default)
     {
-        producerConnection.Connect();
-        consumerConnection.Connect();
+        foreach (PersistentConnectionType type in Enum.GetValues(typeof(PersistentConnectionType)))
+        {
+            try
+            {
+                await EnsureConnectedAsync(type, cancellationToken).ConfigureAwait(false);
+            }
+            catch (AlreadyClosedException)
+            {
+            }
+        }
+    }
+
+    /// <inheritdoc />
+    public PersistentConnectionStatus GetConnectionStatus(PersistentConnectionType type)
+    {
+        var connection = GetConnection(type);
+        return connection.Status;
+    }
+
+    /// <inheritdoc />
+    public Task EnsureConnectedAsync(PersistentConnectionType type, CancellationToken cancellationToken = default)
+    {
+        var connection = GetConnection(type);
+        connection.EnsureConnected();
         return Task.CompletedTask;
     }
 
@@ -224,7 +249,8 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-        await produceDelegate(new ProduceContext(exchange, routingKey, mandatory ?? configuration.MandatoryPublish, publisherConfirms ?? configuration.PublisherConfirms, properties, body, serviceResolver, cts.Token)).ConfigureAwait(false);
+        await produceDelegate(new ProduceContext(exchange, routingKey, mandatory ?? configuration.MandatoryPublish,
+            publisherConfirms ?? configuration.PublisherConfirms, properties, body, serviceResolver, cts.Token)).ConfigureAwait(false);
     }
 
     #endregion
@@ -240,13 +266,13 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             x => x.QueueDeclarePassive(queue), PersistentChannelDispatchOptions.ConsumerTopology, cts.Token
         ).ConfigureAwait(false);
 
-        if (logger.IsDebugEnabled())
+        if (logger.IsEnabled(LogLevel.Debug))
         {
-            logger.DebugFormat(
-                "{messagesCount} messages, {consumersCount} consumers in queue {queue}",
+            logger.LogDebug(
+                "{queue} has {messagesCount} messages and {consumersCount} consumers.",
+                queue,
                 declareResult.MessageCount,
-                declareResult.ConsumerCount,
-                queue
+                declareResult.ConsumerCount
             );
         }
 
@@ -262,9 +288,9 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             x => x.QueueDeclarePassive(queue), PersistentChannelDispatchOptions.ConsumerTopology, cts.Token
         ).ConfigureAwait(false);
 
-        if (logger.IsDebugEnabled())
+        if (logger.IsEnabled(LogLevel.Debug))
         {
-            logger.DebugFormat("Passive declared queue {queue}", queue);
+            logger.LogDebug("Passive declared queue {queue}", queue);
         }
     }
 
@@ -286,9 +312,9 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             cts.Token
         ).ConfigureAwait(false);
 
-        if (logger.IsDebugEnabled())
+        if (logger.IsEnabled(LogLevel.Debug))
         {
-            logger.DebugFormat(
+            logger.LogDebug(
                 "Declared queue {queue}: durable={durable}, exclusive={exclusive}, autoDelete={autoDelete}, arguments={arguments}",
                 queueDeclareOk.QueueName,
                 durable,
@@ -314,9 +340,9 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             cts.Token
         ).ConfigureAwait(false);
 
-        if (logger.IsDebugEnabled())
+        if (logger.IsEnabled(LogLevel.Debug))
         {
-            logger.DebugFormat("Deleted queue {queue}", queue);
+            logger.LogDebug("Deleted queue {queue}", queue);
         }
     }
 
@@ -331,9 +357,9 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             cts.Token
         ).ConfigureAwait(false);
 
-        if (logger.IsDebugEnabled())
+        if (logger.IsEnabled(LogLevel.Debug))
         {
-            logger.DebugFormat("Purged queue {queue}", queue);
+            logger.LogDebug("Purged queue {queue}", queue);
         }
     }
 
@@ -346,9 +372,9 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             x => x.ExchangeDeclarePassive(exchange), PersistentChannelDispatchOptions.ProducerTopology, cts.Token
         ).ConfigureAwait(false);
 
-        if (logger.IsDebugEnabled())
+        if (logger.IsEnabled(LogLevel.Debug))
         {
-            logger.DebugFormat("Passive declared exchange {exchange}", exchange);
+            logger.LogDebug("Passive declared exchange {exchange}", exchange);
         }
     }
 
@@ -370,9 +396,9 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             cts.Token
         ).ConfigureAwait(false);
 
-        if (logger.IsDebugEnabled())
+        if (logger.IsEnabled(LogLevel.Debug))
         {
-            logger.DebugFormat(
+            logger.LogDebug(
                 "Declared exchange {exchange}: type={type}, durable={durable}, autoDelete={autoDelete}, arguments={arguments}",
                 exchange,
                 type,
@@ -396,9 +422,9 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             x => x.ExchangeDelete(exchange, ifUnused), PersistentChannelDispatchOptions.ProducerTopology, cts.Token
         ).ConfigureAwait(false);
 
-        if (logger.IsDebugEnabled())
+        if (logger.IsEnabled(LogLevel.Debug))
         {
-            logger.DebugFormat("Deleted exchange {exchange}", exchange);
+            logger.LogDebug("Deleted exchange {exchange}", exchange);
         }
     }
 
@@ -419,9 +445,9 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             cts.Token
         ).ConfigureAwait(false);
 
-        if (logger.IsDebugEnabled())
+        if (logger.IsEnabled(LogLevel.Debug))
         {
-            logger.DebugFormat(
+            logger.LogDebug(
                 "Bound queue {queue} to exchange {exchange} with routing key {routingKey} and arguments {arguments}",
                 queue,
                 exchange,
@@ -448,9 +474,9 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             cts.Token
         ).ConfigureAwait(false);
 
-        if (logger.IsDebugEnabled())
+        if (logger.IsEnabled(LogLevel.Debug))
         {
-            logger.DebugFormat(
+            logger.LogDebug(
                 "Unbound queue {queue} from exchange {exchange} with routing key {routingKey} and arguments {arguments}",
                 queue,
                 exchange,
@@ -477,9 +503,9 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             cts.Token
         ).ConfigureAwait(false);
 
-        if (logger.IsDebugEnabled())
+        if (logger.IsEnabled(LogLevel.Debug))
         {
-            logger.DebugFormat(
+            logger.LogDebug(
                 "Bound destination exchange {destinationExchange} to source exchange {sourceExchange} with routing key {routingKey} and arguments {arguments}",
                 destinationExchange,
                 sourceExchange,
@@ -506,9 +532,9 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             cts.Token
         ).ConfigureAwait(false);
 
-        if (logger.IsDebugEnabled())
+        if (logger.IsEnabled(LogLevel.Debug))
         {
-            logger.DebugFormat(
+            logger.LogDebug(
                 "Unbound destination exchange {destinationExchange} from source exchange {sourceExchange} with routing key {routingKey} and arguments {arguments}",
                 destinationExchange,
                 sourceExchange,
@@ -520,6 +546,13 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 
     #endregion
 
+    private IPersistentConnection GetConnection(PersistentConnectionType type) =>
+        type switch
+        {
+            PersistentConnectionType.Producer => producerConnection,
+            PersistentConnectionType.Consumer => consumerConnection,
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
 
     private void OnConnectionCreated(in ConnectionCreatedEvent @event)
     {
@@ -593,9 +626,9 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             ).ConfigureAwait(false);
         }
 
-        if (logger.IsDebugEnabled())
+        if (logger.IsEnabled(LogLevel.Debug))
         {
-            logger.DebugFormat(
+            logger.LogDebug(
                 "Published to exchange {exchange} with routingKey={routingKey} and correlationId={correlationId}",
                 context.Exchange,
                 context.RoutingKey,

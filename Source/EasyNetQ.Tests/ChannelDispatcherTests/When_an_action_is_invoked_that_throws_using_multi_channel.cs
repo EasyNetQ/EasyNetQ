@@ -49,7 +49,7 @@ public class When_an_action_is_invoked_that_throws_using_multi_channel : IDispos
         result.Should().Be(42);
     }
 
-    private class CrazyTestOnlyException : Exception
+    private sealed class CrazyTestOnlyException : Exception
     {
     }
 }

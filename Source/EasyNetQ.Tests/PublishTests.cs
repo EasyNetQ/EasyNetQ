@@ -1,8 +1,8 @@
-using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using RabbitMQ.Client;
 using System.Text;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Tests;
 
@@ -15,7 +15,7 @@ public class When_publish_is_called : IDisposable
     public When_publish_is_called()
     {
         mockBuilder = new MockBuilder(x =>
-            x.Register<ICorrelationIdGenerationStrategy>(new StaticCorrelationIdGenerationStrategy(correlationId))
+            x.AddSingleton<ICorrelationIdGenerationStrategy>(new StaticCorrelationIdGenerationStrategy(correlationId))
         );
 
         var message = new MyMessage { Text = "Hiya!" };

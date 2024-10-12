@@ -1,25 +1,30 @@
 using EasyNetQ.IntegrationTests.Utils;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.IntegrationTests.Scheduler;
 
 [Collection("RabbitMQ")]
 public class When_publish_and_subscribe_with_delay_using_delay_exchange : IDisposable
 {
+    private readonly ServiceProvider serviceProvider;
+    private readonly IBus bus;
+
     public When_publish_and_subscribe_with_delay_using_delay_exchange(RabbitMQFixture fixture)
     {
-        bus = RabbitHutch.CreateBus(
-            $"host={fixture.Host};prefetchCount=1;timeout=-1", c => c.EnableDelayedExchangeScheduler()
-        );
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddEasyNetQ($"host={fixture.Host};prefetchCount=1;timeout=-1")
+            .UseDelayedExchangeScheduler();
+
+        serviceProvider = serviceCollection.BuildServiceProvider();
+        bus = serviceProvider.GetRequiredService<IBus>();
     }
 
     public void Dispose()
     {
-        bus.Dispose();
+        serviceProvider?.Dispose();
     }
 
     private const int MessagesCount = 10;
-
-    private readonly SelfHostedBus bus;
 
     [Fact]
     public async Task Test()

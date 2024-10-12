@@ -200,7 +200,7 @@ public static class NonGenericPubSubExtensions
                     Expression.Convert(messageParameter, typeof(object)),
                     Expression.Call(
                         Expression.Convert(messageParameter, typeof(object)),
-                        typeof(object).GetMethod("GetType", Array.Empty<Type>()) ?? throw new InvalidOperationException()
+                        typeof(object).GetMethod("GetType", []) ?? throw new InvalidOperationException()
                     ),
                     cancellationTokenParameter
                 ),

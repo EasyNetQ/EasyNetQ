@@ -1,16 +1,26 @@
+using Microsoft.Extensions.DependencyInjection;
+
 namespace EasyNetQ.IntegrationTests.Advanced;
 
 [Collection("RabbitMQ")]
 public class When_declare_a_queue : IDisposable
 {
+    private readonly ServiceProvider serviceProvider;
+    private readonly IBus bus;
+
     public When_declare_a_queue(RabbitMQFixture rmqFixture)
     {
-        bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=-1");
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddEasyNetQ($"host={rmqFixture.Host};prefetchCount=1;timeout=-1");
+
+        serviceProvider = serviceCollection.BuildServiceProvider();
+        bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public void Dispose() => bus.Dispose();
-
-    private readonly SelfHostedBus bus;
+    public void Dispose()
+    {
+        serviceProvider?.Dispose();
+    }
 
     [Fact]
     public async Task Should_declare_queue_with_different_modes_and_types()

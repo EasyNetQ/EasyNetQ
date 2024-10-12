@@ -1,5 +1,5 @@
 using EasyNetQ.Events;
-using EasyNetQ.Logging;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -16,6 +16,7 @@ public class PersistentConnection : IPersistentConnection
     private readonly IEventBus eventBus;
     private volatile IAutorecoveringConnection? initializedConnection;
     private volatile bool disposed;
+    private volatile PersistentConnectionStatus status;
 
     /// <summary>
     ///     Creates PersistentConnection
@@ -33,27 +34,28 @@ public class PersistentConnection : IPersistentConnection
         this.configuration = configuration;
         this.connectionFactory = connectionFactory;
         this.eventBus = eventBus;
+        status = new PersistentConnectionStatus(type, PersistentConnectionState.NotInitialised);
     }
 
     /// <inheritdoc />
-    public bool IsConnected => initializedConnection is { IsOpen: true };
+    public PersistentConnectionStatus Status => status;
 
     /// <inheritdoc />
-    public void Connect()
+    public void EnsureConnected()
     {
-        if (disposed)
-            throw new ObjectDisposedException(nameof(PersistentConnection));
+        if (disposed) throw new ObjectDisposedException(nameof(PersistentConnection));
 
-        InitializeConnection();
+        var connection = InitializeConnection();
+        connection.EnsureIsOpen();
     }
 
     /// <inheritdoc />
     public IModel CreateModel()
     {
-        if (disposed)
-            throw new ObjectDisposedException(nameof(PersistentConnection));
+        if (disposed) throw new ObjectDisposedException(nameof(PersistentConnection));
 
         var connection = InitializeConnection();
+        connection.EnsureIsOpen();
         return connection.CreateModel();
     }
 
@@ -62,25 +64,33 @@ public class PersistentConnection : IPersistentConnection
     {
         if (disposed) return;
 
-        disposed = true;
-
         DisposeConnection();
+        disposed = true;
     }
 
     private IAutorecoveringConnection InitializeConnection()
     {
         var connection = initializedConnection;
-        if (connection != null) return connection;
+        if (connection is not null) return connection;
 
-        lock (mutex)
+        try
         {
-            connection = initializedConnection;
-            if (connection != null) return connection;
+            lock (mutex)
+            {
+                connection = initializedConnection;
+                if (connection is not null) return connection;
 
-            connection = initializedConnection = CreateConnection();
+                connection = initializedConnection = CreateConnection();
+            }
+        }
+        catch (Exception exception)
+        {
+            status = status.ToDisconnected(exception.Message);
+            throw;
         }
 
-        logger.InfoFormat(
+        status = status.ToConnected();
+        logger.LogInformation(
             "Connection {type} established to broker {broker}, port {port}",
             type,
             connection.Endpoint.HostName,
@@ -114,20 +124,23 @@ public class PersistentConnection : IPersistentConnection
     private void DisposeConnection()
     {
         var connection = Interlocked.Exchange(ref initializedConnection, null);
-        if (connection == null) return;
+        if (connection is null) return;
 
         connection.Dispose();
         // We previously agreed to dispose firstly and then unsubscribe from events so as not to lose logs.
         // These works only for connection.RecoverySucceeded -= OnConnectionRecovered;, for other events
-        // it's prohibited to unsubscribe from them after a connection disposal. There are a good news though:
-        // these events handlers (except RecoverySucceeded one) are nullified on AutorecoveringConnection.Dispose.
+        // it's prohibited to unsubscribe from them after a connection disposal. There are good news though:
+        // these events handlers (except RecoverySucceeded one) are nullified on IAutorecoveringConnection.Dispose.
         connection.RecoverySucceeded -= OnConnectionRecovered;
+
+        status = status.ToUnknown();
     }
 
     private void OnConnectionRecovered(object? sender, EventArgs e)
     {
+        status = status.ToConnected();
         var connection = (IConnection)sender!;
-        logger.InfoFormat(
+        logger.LogInformation(
             "Connection {type} recovered to broker {host}:{port}",
             type,
             connection.Endpoint.HostName,
@@ -138,10 +151,11 @@ public class PersistentConnection : IPersistentConnection
 
     private void OnConnectionShutdown(object? sender, ShutdownEventArgs e)
     {
+        status = status.ToDisconnected(e.ToString());
         var connection = (IConnection)sender!;
-        logger.InfoException(
-            "Connection {type} disconnected from broker {host}:{port} because of {reason}",
+        logger.LogDebug(
             e.Cause as Exception,
+            "Connection {type} disconnected from broker {host}:{port} because of {reason}",
             type,
             connection.Endpoint.HostName,
             connection.Endpoint.Port,
@@ -152,13 +166,13 @@ public class PersistentConnection : IPersistentConnection
 
     private void OnConnectionBlocked(object? sender, ConnectionBlockedEventArgs e)
     {
-        logger.InfoFormat("Connection {type} blocked with reason {reason}", type, e.Reason);
+        logger.LogInformation("Connection {type} blocked with reason {reason}", type, e.Reason);
         eventBus.Publish(new ConnectionBlockedEvent(type, e.Reason ?? "Unknown reason"));
     }
 
     private void OnConnectionUnblocked(object? sender, EventArgs e)
     {
-        logger.InfoFormat("Connection {type} unblocked", type);
+        logger.LogInformation("Connection {type} unblocked", type);
         eventBus.Publish(new ConnectionUnblockedEvent(type));
     }
 
@@ -173,7 +187,7 @@ public class PersistentConnection : IPersistentConnection
             CertificateValidationCallback = option.CertificateValidationCallback,
             CheckCertificateRevocation = option.CheckCertificateRevocation,
             Enabled = option.Enabled,
-            ServerName = host,
+            ServerName = option.ServerName ?? host,
             Version = option.Version,
         };
 }

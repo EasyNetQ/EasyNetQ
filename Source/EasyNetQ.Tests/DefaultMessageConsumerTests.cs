@@ -1,4 +1,6 @@
 using EasyNetQ.AutoSubscribe;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace EasyNetQ.Tests;
 
@@ -7,7 +9,11 @@ public class DefaultMessageConsumerTests
     [Fact]
     public void Should_create_consumer_instance_and_consume_message()
     {
-        var consumer = new DefaultAutoSubscriberMessageDispatcher();
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.TryAddSingleton<MyMessageConsumer>();
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+
+        var consumer = new DefaultAutoSubscriberMessageDispatcher(serviceProvider);
         var message = new MyMessage();
         var consumedMessage = (MyMessage)null;
 
@@ -18,7 +24,7 @@ public class DefaultMessageConsumerTests
     }
 
     // Discovered by reflection over test assembly, do not remove.
-    private class MyMessageConsumer : IConsume<MyMessage>
+    private sealed class MyMessageConsumer : IConsume<MyMessage>
     {
         public static Action<MyMessage> ConsumedMessageFunc { get; set; }
 

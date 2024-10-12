@@ -11,8 +11,8 @@ public class AmqpConnectionStringParser : IConnectionStringParser
 {
     private static readonly IReadOnlyCollection<string> SupportedSchemes = new[] { "amqp", "amqps" };
 
-    private static readonly List<UpdateConfiguration> Parsers = new()
-    {
+    private static readonly List<UpdateConfiguration> Parsers =
+    [
         BuildKeyValueParser("requestedHeartbeat", c => TimeSpan.FromSeconds(int.Parse(c)), c => c.RequestedHeartbeat),
         BuildKeyValueParser("prefetchCount", ushort.Parse, c => c.PrefetchCount),
         BuildKeyValueParser("consumerDispatcherConcurrency", x => int.Parse(x), c => c.ConsumerDispatcherConcurrency),
@@ -24,7 +24,7 @@ public class AmqpConnectionStringParser : IConnectionStringParser
         BuildKeyValueParser("platform", c => c, c => c.Platform),
         BuildKeyValueParser("name", c => c, c => c.Name),
         BuildKeyValueParser("mandatoryPublish", bool.Parse, c => c.MandatoryPublish)
-    };
+    ];
 
     /// <inheritdoc />
     public ConnectionConfiguration Parse(string connectionString)

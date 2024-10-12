@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using EasyNetQ.Events;
 using RabbitMQ.Client;
 

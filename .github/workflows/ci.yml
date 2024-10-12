@@ -21,7 +21,7 @@ jobs:
     timeout-minutes: 15
     strategy:
       matrix:
-        dotnet: ['7.*']
+        dotnet: ['8.*']
       fail-fast: true
     steps:
     - name: Checkout
@@ -46,11 +46,6 @@ jobs:
     - name: Tests
       run: |
         cd ${{ github.workspace }}/Source/EasyNetQ.Tests
-        dotnet test --configuration Release --no-build
-
-    - name: DI.Tests
-      run: |
-        cd ${{ github.workspace }}/Source/EasyNetQ.DI.Tests
         dotnet test --configuration Release --no-build
 
     - name: Serialization.Tests
@@ -86,7 +81,7 @@ jobs:
       - name: Setup .NET Core ${{ matrix.dotnet }}
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '7.*'
+          dotnet-version: '8.*'
       - name: Install dependencies
         run: dotnet restore ${{ github.workspace }}/Source/EasyNetQ.sln
       - name: Build

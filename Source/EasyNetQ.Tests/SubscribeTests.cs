@@ -1,7 +1,7 @@
 using EasyNetQ.Consumer;
-using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
+using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests;
@@ -24,7 +24,7 @@ public class When_subscribe_is_called : IDisposable
         };
 
         mockBuilder = new MockBuilder(x => x
-            .Register<IConventions>(conventions)
+            .AddSingleton<IConventions>(conventions)
         );
 
         subscriptionResult = mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, _ => { });
@@ -229,7 +229,7 @@ public class When_a_message_is_delivered : IDisposable
             ConsumerTagConvention = () => consumerTag
         };
 
-        mockBuilder = new MockBuilder(x => x.Register<IConventions>(conventions));
+        mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(conventions));
 
         mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, message => { deliveredMessage = message; });
 
@@ -313,8 +313,8 @@ public class When_the_handler_throws_an_exception : IDisposable
             );
 
         mockBuilder = new MockBuilder(x => x
-            .Register<IConventions>(conventions)
-            .Register(consumeErrorStrategy)
+            .AddSingleton<IConventions>(conventions)
+            .AddSingleton(consumeErrorStrategy)
         );
 
         mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, _ => throw originalException);
@@ -387,7 +387,7 @@ public class When_a_subscription_is_cancelled_by_the_user : IDisposable
             ConsumerTagConvention = () => consumerTag
         };
 
-        mockBuilder = new MockBuilder(x => x.Register<IConventions>(conventions));
+        mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(conventions));
         var subscriptionResult = mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, _ => { });
         var are = new AutoResetEvent(false);
         mockBuilder.EventBus.Subscribe((in ConsumerModelDisposedEvent _) => are.Set());

@@ -1,6 +1,7 @@
 // ReSharper disable InconsistentNaming
 
 using EasyNetQ.Consumer;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Hosepipe.Tests;
 
@@ -32,30 +33,38 @@ public class QueueRetrievalTests
     [Traits.Explicit("Requires a RabbitMQ server on localhost")]
     public void PublishSomeMessages()
     {
-        var bus = RabbitHutch.CreateBus("host=localhost");
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddEasyNetQ("host=localhost");
+
+        using var provider = serviceCollection.BuildServiceProvider();
+
+        var bus = provider.GetRequiredService<IBus>();
 
         for (var i = 0; i < 10; i++)
         {
             bus.PubSub.Publish(new TestMessage { Text = string.Format("\n>>>>>> Message {0}\n", i) });
         }
-
-        bus.Dispose();
     }
 
     [Fact]
     [Traits.Explicit("Requires a RabbitMQ server on localhost")]
     public void ConsumeMessages()
     {
-        var bus = RabbitHutch.CreateBus("host=localhost");
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddEasyNetQ("host=localhost");
+
+        var provider = serviceCollection.BuildServiceProvider();
+
+        var bus = provider.GetRequiredService<IBus>();
 
         bus.PubSub.Subscribe<TestMessage>("hosepipe", message => Console.WriteLine(message.Text));
 
         Thread.Sleep(1000);
 
-        bus.Dispose();
+        provider.Dispose();
     }
 
-    private class TestMessage
+    private sealed class TestMessage
     {
         public string Text { get; set; }
     }

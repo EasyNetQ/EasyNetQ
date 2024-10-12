@@ -1,11 +1,13 @@
 using EasyNetQ.AutoSubscribe;
 using EasyNetQ.Tests.Mocking;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests;
 
 public class When_auto_subscribing_async : IDisposable
 {
     private readonly MockBuilder mockBuilder;
+    private readonly ServiceProvider serviceProvider;
 
     private const string expectedQueueName1 =
         "EasyNetQ.Tests.AutoSubscriberTests.When_auto_subscribing_async+MessageA, EasyNetQ.Tests_my_app:a0ebdb4503cc0df2295d8d8d99c1faf8";
@@ -20,8 +22,11 @@ public class When_auto_subscribing_async : IDisposable
     {
         mockBuilder = new MockBuilder();
 
-        var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, "my_app");
-        autoSubscriber.Subscribe(new[] { typeof(MyAsyncConsumer) });
+        var services = new ServiceCollection();
+        serviceProvider = services.BuildServiceProvider();
+
+        var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, serviceProvider, "my_app");
+        autoSubscriber.Subscribe([typeof(MyAsyncConsumer)]);
     }
 
     public void Dispose()
@@ -71,7 +76,7 @@ public class When_auto_subscribing_async : IDisposable
     }
 
     //Discovered by reflection over test assembly, do not remove.
-    private class MyAsyncConsumer : IConsumeAsync<MessageA>, IConsumeAsync<MessageB>, IConsumeAsync<MessageC>
+    private sealed class MyAsyncConsumer : IConsumeAsync<MessageA>, IConsumeAsync<MessageB>, IConsumeAsync<MessageC>
     {
         public Task ConsumeAsync(MessageA message, CancellationToken cancellationToken)
         {
@@ -91,15 +96,15 @@ public class When_auto_subscribing_async : IDisposable
         }
     }
 
-    private class MessageA
+    private sealed class MessageA
     {
     }
 
-    private class MessageB
+    private sealed class MessageB
     {
     }
 
-    private class MessageC
+    private sealed class MessageC
     {
     }
 }

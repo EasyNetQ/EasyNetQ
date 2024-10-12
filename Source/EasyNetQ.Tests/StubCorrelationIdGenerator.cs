@@ -1,6 +1,6 @@
 namespace EasyNetQ.Tests;
 
-internal class StaticCorrelationIdGenerationStrategy : ICorrelationIdGenerationStrategy
+internal sealed class StaticCorrelationIdGenerationStrategy : ICorrelationIdGenerationStrategy
 {
     private readonly string correlationId;
 

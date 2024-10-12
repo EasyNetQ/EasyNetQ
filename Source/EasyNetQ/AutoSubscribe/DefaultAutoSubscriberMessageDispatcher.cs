@@ -1,24 +1,16 @@
-using EasyNetQ.DI;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.AutoSubscribe;
 
-public class DefaultAutoSubscriberMessageDispatcher : IAutoSubscriberMessageDispatcher
+public class DefaultAutoSubscriberMessageDispatcher(IServiceProvider resolver) : IAutoSubscriberMessageDispatcher
 {
-    private readonly IServiceResolver resolver;
-
-    public DefaultAutoSubscriberMessageDispatcher(IServiceResolver resolver) => this.resolver = resolver;
-
-    public DefaultAutoSubscriberMessageDispatcher() : this(new ActivatorBasedResolver())
-    {
-    }
-
     /// <inheritdoc />
     public void Dispatch<TMessage, TConsumer>(TMessage message, CancellationToken cancellationToken = default)
         where TMessage : class
         where TConsumer : class, IConsume<TMessage>
     {
         using var scope = resolver.CreateScope();
-        var consumer = scope.Resolve<TConsumer>();
+        var consumer = scope.ServiceProvider.GetRequiredService<TConsumer>();
         consumer.Consume(message, cancellationToken);
     }
 
@@ -27,15 +19,18 @@ public class DefaultAutoSubscriberMessageDispatcher : IAutoSubscriberMessageDisp
         where TMessage : class
         where TAsyncConsumer : class, IConsumeAsync<TMessage>
     {
-        using var scope = resolver.CreateScope();
-        var asyncConsumer = scope.Resolve<TAsyncConsumer>();
-        await asyncConsumer.ConsumeAsync(message, cancellationToken).ConfigureAwait(false);
-    }
-
-    private class ActivatorBasedResolver : IServiceResolver
-    {
-        public TService Resolve<TService>() where TService : class => Activator.CreateInstance<TService>();
-
-        public IServiceResolverScope CreateScope() => new ServiceResolverScope(this);
+        var scope = resolver.CreateScope();
+        try
+        {
+            var asyncConsumer = scope.ServiceProvider.GetRequiredService<TAsyncConsumer>();
+            await asyncConsumer.ConsumeAsync(message, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            if (scope is IAsyncDisposable ad)
+                await ad.DisposeAsync().ConfigureAwait(false);
+            else
+                scope.Dispose();
+        }
     }
 }

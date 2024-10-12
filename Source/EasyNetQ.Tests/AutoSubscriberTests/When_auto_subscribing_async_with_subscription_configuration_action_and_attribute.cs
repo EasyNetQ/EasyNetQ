@@ -1,10 +1,12 @@
 using EasyNetQ.AutoSubscribe;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests;
 
 public class When_auto_subscribing_async_with_subscription_configuration_action_and_attribute
 {
     private readonly IBus bus;
+    private readonly ServiceProvider serviceProvider;
     private Action<ISubscriptionConfiguration> capturedAction;
     private readonly IPubSub pubSub;
 
@@ -14,7 +16,10 @@ public class When_auto_subscribing_async_with_subscription_configuration_action_
         bus = Substitute.For<IBus>();
         bus.PubSub.Returns(pubSub);
 
-        var autoSubscriber = new AutoSubscriber(bus, "my_app")
+        var services = new ServiceCollection();
+        serviceProvider = services.BuildServiceProvider();
+
+        var autoSubscriber = new AutoSubscriber(bus, serviceProvider, "my_app")
         {
             ConfigureSubscriptionConfiguration =
                 c => c.WithAutoDelete(false)
@@ -31,7 +36,7 @@ public class When_auto_subscribing_async_with_subscription_configuration_action_
             .Returns(Task.FromResult(new SubscriptionResult()))
             .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
 
-        autoSubscriber.Subscribe(new[] { typeof(MyConsumerWithActionAndAttribute) });
+        autoSubscriber.Subscribe([typeof(MyConsumerWithActionAndAttribute)]);
     }
 
     [Fact]
@@ -61,7 +66,7 @@ public class When_auto_subscribing_async_with_subscription_configuration_action_
 
     // Discovered by reflection over test assembly, do not remove.
     // ReSharper disable once UnusedMember.Local
-    private class MyConsumerWithActionAndAttribute : IConsumeAsync<MessageA>
+    private sealed class MyConsumerWithActionAndAttribute : IConsumeAsync<MessageA>
     {
         [AutoSubscriberConsumer(SubscriptionId = "MyActionAndAttributeTest")]
         [SubscriptionConfiguration(AutoDelete = true, Expires = 10, PrefetchCount = 10, Priority = 10)]
@@ -71,7 +76,7 @@ public class When_auto_subscribing_async_with_subscription_configuration_action_
         }
     }
 
-    private class MessageA
+    private sealed class MessageA
     {
     }
 }

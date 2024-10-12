@@ -1,7 +1,7 @@
-using EasyNetQ.DI;
 using EasyNetQ.Tests.Mocking;
 using RabbitMQ.Client;
 using EasyNetQ.Producer;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Tests;
 
@@ -17,7 +17,7 @@ public class RabbitAdvancedBusTests
     public async Task Should_use_mandatory_per_request_if_not_null_else_from_settings(bool mandatoryFromSettings, bool? mandatoryPerRequest, bool expected)
     {
         var mockBuilder = new MockBuilder(
-            x => x.Register(new ConnectionConfiguration { MandatoryPublish = mandatoryFromSettings })
+            x => x.AddSingleton(new ConnectionConfiguration { MandatoryPublish = mandatoryFromSettings })
         );
 
         await mockBuilder.Bus.Advanced.PublishAsync("", "", mandatoryPerRequest, null, new Message<object>(null));
@@ -44,8 +44,8 @@ public class RabbitAdvancedBusTests
         var mockBuilder = new MockBuilder(
             x =>
             {
-                x.Register(new ConnectionConfiguration { PublisherConfirms = confirmsFromSettings });
-                x.Register(xxx);
+                x.AddSingleton(new ConnectionConfiguration { PublisherConfirms = confirmsFromSettings });
+                x.AddSingleton(xxx);
             });
 
         await mockBuilder.Bus.Advanced.PublishAsync("", "", null, confirmsPerRequest, new Message<object>(null));

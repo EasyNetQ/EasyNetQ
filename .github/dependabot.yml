@@ -10,26 +10,10 @@ updates:
       patterns:
         - "*"
   ignore:
-  - dependency-name: Autofac
-    versions:
-    - ">= 6.a"
-    - "< 7"
-  - dependency-name: Castle.Windsor
-    versions:
-    - "> 5.0.0"
-    - "< 6"
   - dependency-name: Castle.Core
     versions:
     - "> 4.5.1"
     - "< 6"
-  - dependency-name: LightInject
-    versions:
-    - ">= 6.a"
-    - "< 7"
-  - dependency-name: Ninject
-    versions:
-    - ">= 3.3.5"
-    - "< 4"
   - dependency-name: NSubstitute
     versions:
     - ">= 4.3.0"
@@ -37,19 +21,12 @@ updates:
   - dependency-name: Microsoft.Bcl.AsyncInterfaces
     versions:
     - ">= 6.a"
-    - "< 8"
   - dependency-name: Microsoft.Extensions.DependencyInjection
     versions:
     - ">= 6.a"
-    - "< 8"
   - dependency-name: Microsoft.Extensions.Logging.Abstractions
     versions:
     - ">= 6.a"
-    - "< 8"
-  - dependency-name: Serilog
-    versions:
-    - ">= 2.8"
-    - "< 3"
 - package-ecosystem: "github-actions"
   directory: "/"
   schedule:

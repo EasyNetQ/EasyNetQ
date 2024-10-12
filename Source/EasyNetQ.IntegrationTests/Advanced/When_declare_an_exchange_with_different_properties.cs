@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.IntegrationTests.Advanced;
@@ -5,14 +6,22 @@ namespace EasyNetQ.IntegrationTests.Advanced;
 [Collection("RabbitMQ")]
 public class When_declare_an_exchange_with_different_properties : IDisposable
 {
+    private readonly ServiceProvider serviceProvider;
+    private readonly IBus bus;
+
     public When_declare_an_exchange_with_different_properties(RabbitMQFixture rmqFixture)
     {
-        bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=-1;publisherConfirms=True");
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddEasyNetQ($"host={rmqFixture.Host};prefetchCount=1;timeout=-1;publisherConfirms=True");
+
+        serviceProvider = serviceCollection.BuildServiceProvider();
+        bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public void Dispose() => bus.Dispose();
-
-    private readonly SelfHostedBus bus;
+    public void Dispose()
+    {
+        serviceProvider?.Dispose();
+    }
 
     [Fact]
     public async Task Should_not_affect_correct_declares()

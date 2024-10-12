@@ -49,8 +49,8 @@ public sealed class ReflectionBasedNewtonsoftJsonSerializer : ISerializer
             throw new InvalidOperationException("Incorrect settings type. Settings must be of Newtonsoft.Json.JsonSerializerSettings or derived type.");
         }
 
-        jsonSerializer = GetMethod(jsonSerializerType, "Create", new[] { serializerSettingsType })
-            .Invoke(null, new[] { serializerSettings })!;
+        jsonSerializer = GetMethod(jsonSerializerType, "Create", [serializerSettingsType])
+            .Invoke(null, [serializerSettings])!;
 
         {
             var streamWriterParameter = Expression.Parameter(typeof(StreamWriter), "streamWriter");
@@ -63,7 +63,7 @@ public sealed class ReflectionBasedNewtonsoftJsonSerializer : ISerializer
                     Expression.Assign(
                         jsonTextWriterParameter,
                         Expression.New(
-                            GetConstructor(textWriterType, new[] { typeof(StreamWriter) }),
+                            GetConstructor(textWriterType, [typeof(StreamWriter)]),
                             streamWriterParameter
                         )
                     ),
@@ -95,7 +95,7 @@ public sealed class ReflectionBasedNewtonsoftJsonSerializer : ISerializer
                     GetMethod(
                         jsonSerializerType,
                         "Serialize",
-                        new[] { textWriterType, typeof(object), typeof(Type) }
+                        [textWriterType, typeof(object), typeof(Type)]
                     )!,
                     Expression.Convert(jsonTextWriterParameter, textWriterType),
                     messageParameter,
@@ -113,7 +113,7 @@ public sealed class ReflectionBasedNewtonsoftJsonSerializer : ISerializer
             var streamReaderParameter = Expression.Parameter(typeof(StreamReader), "streamReader");
             var createJsonReaderLambda = Expression.Lambda<Func<StreamReader, IDisposable>>(
                 Expression.New(
-                    GetConstructor(textReaderType, new[] { typeof(StreamReader) }), streamReaderParameter
+                    GetConstructor(textReaderType, [typeof(StreamReader)]), streamReaderParameter
                 ),
                 streamReaderParameter
             );
@@ -127,7 +127,7 @@ public sealed class ReflectionBasedNewtonsoftJsonSerializer : ISerializer
             var serializeLambda = Expression.Lambda<Func<object, object, Type, object>>(
                 Expression.Call(
                     Expression.Convert(jsonSerializerParameter, jsonSerializerType),
-                    GetMethod(jsonSerializerType, "Deserialize", new[] { textReaderType, typeof(Type) }),
+                    GetMethod(jsonSerializerType, "Deserialize", [textReaderType, typeof(Type)]),
                     Expression.Convert(jsonTextReaderParameter, textReaderType),
                     messageTypeParameter
                 ),

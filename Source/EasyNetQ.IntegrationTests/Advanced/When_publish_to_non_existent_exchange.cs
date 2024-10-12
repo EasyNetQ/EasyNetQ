@@ -1,4 +1,5 @@
 using EasyNetQ.Topology;
+using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.IntegrationTests.Advanced;
@@ -6,14 +7,22 @@ namespace EasyNetQ.IntegrationTests.Advanced;
 [Collection("RabbitMQ")]
 public class When_publish_to_non_existent_exchange : IDisposable
 {
+    private readonly ServiceProvider serviceProvider;
+    private readonly IBus bus;
+
     public When_publish_to_non_existent_exchange(RabbitMQFixture rmqFixture)
     {
-        bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=-1");
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddEasyNetQ($"host={rmqFixture.Host};prefetchCount=1;timeout=-1");
+
+        serviceProvider = serviceCollection.BuildServiceProvider();
+        bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public void Dispose() => bus.Dispose();
-
-    private readonly SelfHostedBus bus;
+    public void Dispose()
+    {
+        serviceProvider?.Dispose();
+    }
 
     [Fact]
     public async Task Should_not_affect_publish_to_existent_exchange()

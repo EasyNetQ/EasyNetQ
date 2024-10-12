@@ -21,13 +21,13 @@ public class PublishConfirmationListener : IPublishConfirmationListener
     public PublishConfirmationListener(IEventBus eventBus)
     {
         unconfirmedChannelRequests = new ConcurrentDictionary<int, UnconfirmedRequests>();
-        subscriptions = new[]
-        {
+        subscriptions =
+        [
             eventBus.Subscribe<MessageConfirmationEvent>(OnMessageConfirmation),
             eventBus.Subscribe<ChannelRecoveredEvent>(OnChannelRecovered),
             eventBus.Subscribe<ChannelShutdownEvent>(OnChannelShutdown),
             eventBus.Subscribe<ReturnedMessageEvent>(OnReturnedMessage)
-        };
+        ];
     }
 
     /// <inheritdoc />

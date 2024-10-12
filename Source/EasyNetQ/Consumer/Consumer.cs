@@ -1,8 +1,8 @@
 using EasyNetQ.Events;
 using EasyNetQ.Topology;
 using EasyNetQ.Internals;
-using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
+using Microsoft.Extensions.Logging;
 
 namespace EasyNetQ.Consumer;
 
@@ -127,12 +127,12 @@ public class Consumer : IConsumer
         this.configuration = configuration;
         this.internalConsumerFactory = internalConsumerFactory;
         this.eventBus = eventBus;
-        disposables = new[]
-        {
+        disposables =
+        [
             eventBus.Subscribe<ConnectionRecoveredEvent>(OnConnectionRecovered),
             eventBus.Subscribe<ConnectionDisconnectedEvent>(OnConnectionDisconnected),
             Timers.Start(RestartConsumingPeriodically, RestartConsumingPeriod, RestartConsumingPeriod, logger)
-        };
+        ];
     }
 
     /// <inheritdoc />

@@ -19,7 +19,7 @@ public class AmqpConnectionStringParserTests
     {
         object[] Spec(string uri, ConnectionConfiguration configuration)
         {
-            return new[] { new AmqpSpecification(uri, configuration) };
+            return [new AmqpSpecification(uri, configuration)];
         }
 
         yield return Spec(

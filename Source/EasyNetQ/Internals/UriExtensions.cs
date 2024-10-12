@@ -23,10 +23,10 @@ public static class UriExtensions
             queryString = queryString.Substring(1);
 
         var query = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
-        var keyValues = queryString.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries);
+        var keyValues = queryString.Split(['&'], StringSplitOptions.RemoveEmptyEntries);
         foreach (var keyValue in keyValues)
         {
-            var keyValueParts = keyValue.Split(new[] { '=' }, StringSplitOptions.RemoveEmptyEntries);
+            var keyValueParts = keyValue.Split(['='], StringSplitOptions.RemoveEmptyEntries);
             if (keyValueParts.Length == 2)
                 query.Add(Uri.UnescapeDataString(keyValueParts[0]), Uri.UnescapeDataString(keyValueParts[1]));
         }
