@@ -35,12 +35,17 @@ public class DefaultPubSub : IPubSub
     }
 
     /// <inheritdoc />
-    public virtual async Task PublishAsync<T>(T message, Action<IPublishConfiguration> configure, CancellationToken cancellationToken)
+    public virtual Task PublishAsync<T>(T message, Action<IPublishConfiguration> configure, CancellationToken cancellationToken)
+    {
+        return PublishAsync(message, configure, static (configuration, config) => config(configuration), cancellationToken);
+    }
+
+    public virtual async Task PublishAsync<T, TData>(T message, TData configureData, Action<IPublishConfiguration, TData> configure, CancellationToken cancellationToken)
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         var publishConfiguration = new PublishConfiguration(conventions.TopicNamingConvention(typeof(T)));
-        configure(publishConfiguration);
+        configure(publishConfiguration, configureData);
 
         var messageType = typeof(T);
         var advancedMessageProperties = new MessageProperties
@@ -65,19 +70,28 @@ public class DefaultPubSub : IPubSub
         Func<T, CancellationToken, Task> onMessage,
         Action<ISubscriptionConfiguration> configure,
         CancellationToken cancellationToken
-    ) => SubscribeAsyncInternal(subscriptionId, onMessage, configure, cancellationToken);
+    ) => SubscribeAsyncInternal(subscriptionId, onMessage, configure, static (config, d) => d(config), cancellationToken);
 
-    private async Task<SubscriptionResult> SubscribeAsyncInternal<T>(
+    public virtual Task<SubscriptionResult> SubscribeAsync<T, TData>(
         string subscriptionId,
         Func<T, CancellationToken, Task> onMessage,
-        Action<ISubscriptionConfiguration> configure,
+        TData configureData,
+        Action<ISubscriptionConfiguration, TData> configure,
+        CancellationToken cancellationToken
+    ) => SubscribeAsyncInternal(subscriptionId, onMessage, configureData, configure, cancellationToken);
+
+    private async Task<SubscriptionResult> SubscribeAsyncInternal<T, TData>(
+        string subscriptionId,
+        Func<T, CancellationToken, Task> onMessage,
+        TData configureData,
+        Action<ISubscriptionConfiguration, TData> configure,
         CancellationToken cancellationToken
     )
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         var subscriptionConfiguration = new SubscriptionConfiguration(configuration.PrefetchCount, conventions.QueueTypeConvention(typeof(T)));
-        configure(subscriptionConfiguration);
+        configure(subscriptionConfiguration, configureData);
 
         var exchange = await advancedBus.ExchangeDeclareAsync(
             exchange: conventions.ExchangeNamingConvention(typeof(T)),
