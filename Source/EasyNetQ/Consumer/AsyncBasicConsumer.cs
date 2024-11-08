@@ -42,9 +42,9 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
     public event EventHandler<ConsumerEventArgs>? ConsumerCancelled;
 
     /// <inheritdoc />
-    public override async Task OnCancel(params string[] consumerTags)
+    protected override async Task OnCancelAsync(string[] consumerTags, CancellationToken cancellationToken = default)
     {
-        await base.OnCancel(consumerTags).ConfigureAwait(false);
+        await base.OnCancelAsync(consumerTags, cancellationToken).ConfigureAwait(false);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -64,7 +64,8 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
         string exchange,
         string routingKey,
         IReadOnlyBasicProperties properties,
-        ReadOnlyMemory<byte> body
+        ReadOnlyMemory<byte> body,
+        CancellationToken cancellationToken = default
     )
     {
         if (cts.IsCancellationRequested)
@@ -88,7 +89,7 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
         var ackStrategy = await consumeDelegate(new ConsumeContext(messageReceivedInfo, messageProperties, messageBody, serviceResolver, cts.Token)).ConfigureAwait(false);
         if (!autoAck)
         {
-            var ackResult = await AckAsync(ackStrategy, messageReceivedInfo);
+            var ackResult = await AckAsync(ackStrategy, messageReceivedInfo, cancellationToken);
             eventBus.Publish(new AckEvent(messageReceivedInfo, messageProperties, messageBody, ackResult));
         }
     }
@@ -114,8 +115,7 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
     {
         try
         {
-            if (Channel != null)
-                return await ackStrategy(Channel, receivedInfo.DeliveryTag, cancellationToken);
+            return await ackStrategy(Channel, receivedInfo.DeliveryTag, cancellationToken);
         }
         catch (AlreadyClosedException alreadyClosedException)
         {

@@ -18,9 +18,9 @@ public class QueueInsertion : IQueueInsertion
         CancellationToken cancellationToken = default)
     {
         using var connection = await HosepipeConnection.FromParametersAsync(parameters, cancellationToken);
-        using var channel = await connection.CreateChannelAsync(cancellationToken);
+        using var channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
 
-        await channel.ConfirmSelectAsync(false, cancellationToken);
+        // await channel.ConfirmSelectAsync(false, cancellationToken);
 
         await foreach (var message in messages)
         {
@@ -43,7 +43,7 @@ public class QueueInsertion : IQueueInsertion
             );
 
             using var cts = new CancellationTokenSource(parameters.ConfirmsTimeout);
-            await channel.WaitForConfirmsOrDieAsync(cts.Token);
+            // await channel.WaitForConfirmsOrDieAsync(cts.Token);
         }
     }
 }

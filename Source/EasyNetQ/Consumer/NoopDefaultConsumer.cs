@@ -17,11 +17,11 @@ internal sealed class NoopDefaultConsumer : IAsyncBasicConsumer
         remove { }
     }
 
-    public Task HandleBasicCancelAsync(string consumerTag) => Task.CompletedTask;
+    public Task HandleBasicCancelAsync(string consumerTag, CancellationToken cancellationToken = default) => Task.CompletedTask;
 
-    public Task HandleBasicCancelOkAsync(string consumerTag) => Task.CompletedTask;
+    public Task HandleBasicCancelOkAsync(string consumerTag, CancellationToken cancellationToken = default) => Task.CompletedTask;
 
-    public Task HandleBasicConsumeOkAsync(string consumerTag) => Task.CompletedTask;
+    public Task HandleBasicConsumeOkAsync(string consumerTag, CancellationToken cancellationToken = default) => Task.CompletedTask;
 
     public Task HandleBasicDeliverAsync(
         string consumerTag,
@@ -30,8 +30,10 @@ internal sealed class NoopDefaultConsumer : IAsyncBasicConsumer
         string exchange,
         string routingKey,
         IReadOnlyBasicProperties properties,
-        ReadOnlyMemory<byte> body
+        ReadOnlyMemory<byte> body,
+        CancellationToken cancellationToken = default
     ) => Task.CompletedTask;
+
 
     public Task HandleChannelShutdownAsync(object channel, ShutdownEventArgs reason) => Task.CompletedTask;
 }

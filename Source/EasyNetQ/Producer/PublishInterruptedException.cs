@@ -30,8 +30,10 @@ public class PublishInterruptedException : Exception
     {
     }
 
+#if NETSTANDARD2_0
     /// <inheritdoc />
     protected PublishInterruptedException(SerializationInfo info, StreamingContext context) : base(info, context)
     {
     }
+#endif
 }

@@ -73,7 +73,7 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
         try
         {
             var channel = await connection.CreateChannelAsync(cancellationToken);
-            if (configuration.PublisherConfirms) await channel.ConfirmSelectAsync(false, cancellationToken);
+            //if (configuration.PublisherConfirms) await channel.WaitForConfirmsAsync(false, cancellationToken);
 
             var errorExchange = await DeclareErrorExchangeWithQueueAsync(channel, receivedInfo, cancellationToken);
 
@@ -85,18 +85,16 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
                 Type = typeNameSerializer.Serialize(typeof(Error))
             };
 
-            await channel.BasicPublishAsync(errorExchange, receivedInfo.RoutingKey, false, errorProperties, message.Memory, cancellationToken: cancellationToken).ConfigureAwait(false);
+            await channel.BasicPublishAsync(errorExchange, receivedInfo.RoutingKey, false, errorProperties, message.Memory, cancellationToken).ConfigureAwait(false);
 
-            if (configuration.PublisherConfirms)
-            {
-                using var cts = new CancellationTokenSource(configuration.Timeout);
-                var waitForConfirmsResult = await channel.WaitForConfirmsAsync(cts.Token);
-                return waitForConfirmsResult ? AckStrategies.AckAsync : AckStrategies.NackWithRequeueAsync;
-            }
-            else
-            {
-                return AckStrategies.AckAsync;
-            }
+            // if (configuration.PublisherConfirms)
+            // {
+            //     using var cts = new CancellationTokenSource(configuration.Timeout);
+            //     var waitForConfirmsResult = await channel.WaitForConfirmsAsync(cts.Token);
+            //     return waitForConfirmsResult ? AckStrategies.AckAsync : AckStrategies.NackWithRequeueAsync;
+            // }
+
+            return AckStrategies.AckAsync;
         }
         catch (BrokerUnreachableException unreachableException)
         {

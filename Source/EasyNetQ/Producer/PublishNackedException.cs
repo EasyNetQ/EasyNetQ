@@ -30,8 +30,10 @@ public class PublishNackedException : Exception
     {
     }
 
+#if NETSTANDARD2_0
     /// <inheritdoc />
     protected PublishNackedException(SerializationInfo info, StreamingContext context) : base(info, context)
     {
     }
+#endif
 }

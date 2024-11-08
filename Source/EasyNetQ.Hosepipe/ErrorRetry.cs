@@ -22,9 +22,9 @@ public class ErrorRetry : IErrorRetry
         CancellationToken cancellationToken = default)
     {
         using var connection = await HosepipeConnection.FromParametersAsync(parameters, cancellationToken);
-        using var channel = await connection.CreateChannelAsync(cancellationToken);
+        using var channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
 
-        await channel.ConfirmSelectAsync(false, cancellationToken);
+        // await channel.ConfirmSelectAsync(false, cancellationToken);
 
         await foreach (var rawErrorMessage in rawErrorMessages)
         {
@@ -42,7 +42,7 @@ public class ErrorRetry : IErrorRetry
                 cancellationToken: cancellationToken
             );
 
-            await channel.WaitForConfirmsOrDieAsync(cancellationToken);
+            // await channel.WaitForConfirmsOrDieAsync(cancellationToken);
         }
     }
 }

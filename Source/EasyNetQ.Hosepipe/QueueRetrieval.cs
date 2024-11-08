@@ -22,7 +22,7 @@ public class QueueRetrieval : IQueueRetrieval
     public async IAsyncEnumerable<HosepipeMessage> GetMessagesFromQueueAsync(QueueParameters parameters, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         using var connection = await HosepipeConnection.FromParametersAsync(parameters, cancellationToken);
-        using var channel = await connection.CreateChannelAsync(cancellationToken);
+        using var channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
 
         try
         {

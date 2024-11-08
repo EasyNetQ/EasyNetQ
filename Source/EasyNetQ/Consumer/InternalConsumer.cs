@@ -42,7 +42,7 @@ public readonly struct InternalConsumerStatus
 /// <summary>
 ///     Represents an internal consumer's cancelled event
 /// </summary>
-public class InternalConsumerCancelledEventArgs : EventArgs
+public class InternalConsumerCancelledEventArgs : AsyncEventArgs
 {
     /// <inheritdoc />
     public InternalConsumerCancelledEventArgs(Queue cancelled, IReadOnlyCollection<Queue> active)
@@ -65,7 +65,7 @@ public class InternalConsumerCancelledEventArgs : EventArgs
 /// <summary>
 ///     Asynchronous event handler delegate
 /// </summary>
-public delegate Task AsyncEventHandler<TEventArgs>(object? sender, TEventArgs e) where TEventArgs : EventArgs;
+public delegate Task AsyncEventHandler<TEventArgs>(object? sender, TEventArgs e) where TEventArgs : AsyncEventArgs;
 
 /// <summary>
 ///     Consumer which starts/stops raw consumers
