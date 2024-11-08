@@ -20,6 +20,8 @@
     <SignAssembly>true</SignAssembly>
     <PublicSign>false</PublicSign>
     <NoWarn>$(NoWarn);1591;8002</NoWarn>
+    <!-- nuget audit https://learn.microsoft.com/en-us/nuget/concepts/auditing-packages -->
+    <NuGetAuditMode>direct</NuGetAuditMode>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <ProjectWeaverXml>..\FodyWeavers.xml</ProjectWeaverXml>
     <FodyGenerateXsd>false</FodyGenerateXsd>
