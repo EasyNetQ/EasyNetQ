@@ -31,9 +31,9 @@ public class PublishConfirmationListener : IPublishConfirmationListener
     }
 
     /// <inheritdoc />
-    public IPublishPendingConfirmation CreatePendingConfirmation(IChannel channel)
+    public async Task<IPublishPendingConfirmation> CreatePendingConfirmation(IChannel channel, CancellationToken cancellationToken = default)
     {
-        var sequenceNumber = channel.NextPublishSeqNo;
+        var sequenceNumber = await channel.GetNextPublishSequenceNumberAsync(cancellationToken);
 
         if (sequenceNumber == 0UL)
             throw new InvalidOperationException("Confirms not selected");
@@ -74,7 +74,10 @@ public class PublishConfirmationListener : IPublishConfirmationListener
 
     private void OnChannelRecovered(in ChannelRecoveredEvent @event)
     {
-        if (@event.Channel.NextPublishSeqNo == 0)
+        var nextPublishSequenceNumber = @event.Channel.GetNextPublishSequenceNumberAsync()
+            .ConfigureAwait(false)
+            .GetAwaiter().GetResult();
+        if (nextPublishSequenceNumber == 0)
             return;
 
         InterruptUnconfirmedRequests(@event.Channel.ChannelNumber);
@@ -82,7 +85,10 @@ public class PublishConfirmationListener : IPublishConfirmationListener
 
     private void OnChannelShutdown(in ChannelShutdownEvent @event)
     {
-        if (@event.Channel.NextPublishSeqNo == 0)
+        var nextPublishSequenceNumber = @event.Channel.GetNextPublishSequenceNumberAsync()
+            .ConfigureAwait(false)
+            .GetAwaiter().GetResult();
+        if (nextPublishSequenceNumber == 0)
             return;
 
         InterruptUnconfirmedRequests(@event.Channel.ChannelNumber);
@@ -90,7 +96,11 @@ public class PublishConfirmationListener : IPublishConfirmationListener
 
     private void OnReturnedMessage(in ReturnedMessageEvent @event)
     {
-        if (@event.Channel.NextPublishSeqNo == 0)
+        var nextPublishSequenceNumber = @event.Channel.GetNextPublishSequenceNumberAsync()
+            .ConfigureAwait(false)
+            .GetAwaiter().GetResult();
+
+        if (nextPublishSequenceNumber == 0)
             return;
 
         if (!@event.Properties.TryGetConfirmationId(out var confirmationId))

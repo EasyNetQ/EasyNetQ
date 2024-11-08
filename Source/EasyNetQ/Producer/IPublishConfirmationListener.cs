@@ -11,6 +11,8 @@ public interface IPublishConfirmationListener : IDisposable
     /// Creates pending confirmation for a next publish
     /// </summary>
     /// <param name="channel"></param>
+    /// <param name="cancellationToken"></param>
     /// <returns>Pending confirmation to wait</returns>
-    IPublishPendingConfirmation CreatePendingConfirmation(IChannel channel);
+    Task<IPublishPendingConfirmation> CreatePendingConfirmation(IChannel channel,
+        CancellationToken cancellationToken = default);
 }

@@ -721,7 +721,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 
         public async Task<IPublishPendingConfirmation> InvokeAsync(IChannel channel, CancellationToken cancellationToken = default)
         {
-            var confirmation = confirmationListener.CreatePendingConfirmation(channel);
+            var confirmation = await confirmationListener.CreatePendingConfirmation(channel, cancellationToken);
             var basicProperties = new BasicProperties();
             properties.SetConfirmationId(confirmation.Id).CopyTo(basicProperties);
 
