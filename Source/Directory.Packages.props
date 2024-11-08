@@ -37,11 +37,10 @@
     <PackageVersion Include="System.Text.Json" Version="8.0.5" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsPackable)' == 'true'">
-    <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
     <GlobalPackageReference Include="MinVer" Version="5.0.0" />
   </ItemGroup>
   <ItemGroup>
     <GlobalPackageReference Include="Fody" Version="6.8.1" />
-    <GlobalPackageReference Condition="'$(TargetFramework)'!='net8'" Include="PolySharp" Version="1.14.1" />
+    <GlobalPackageReference Condition="'$(TargetFramework)'!='net8.0'" Include="PolySharp" Version="1.14.1" />
   </ItemGroup>
 </Project>
