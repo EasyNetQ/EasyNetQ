@@ -83,7 +83,7 @@ public class PersistentChannel : IPersistentChannel
         {
             try
             {
-                var channel = initializedChannel ?? await CreateChannelAsync(cancellationToken).ConfigureAwait(false);
+                var channel = initializedChannel ?? await CreateChannelAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
                 // ReSharper disable once PossiblyImpureMethodCallOnReadonlyVariable
                 result = await channelAction.InvokeAsync(channel, cancellationToken);
                 return (true, result);
@@ -124,7 +124,11 @@ public class PersistentChannel : IPersistentChannel
 
             try
             {
-                initializedChannel ??= await CreateChannelAsync(cancellationToken).ConfigureAwait(false);
+                if (initializedChannel == null)
+                {
+                    initializedChannel = await CreateChannelAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                }
+
                 return await channelAction.InvokeAsync(initializedChannel, cancellationToken);
             }
             catch (Exception exception)
@@ -144,9 +148,10 @@ public class PersistentChannel : IPersistentChannel
         }
     }
 
-    private async Task<IChannel> CreateChannelAsync(CancellationToken cancellationToken = default)
+    private async Task<IChannel> CreateChannelAsync(CreateChannelOptions? createChannelOptions = null, CancellationToken cancellationToken = default)
     {
-        var channel = await connection.CreateChannelAsync(cancellationToken).ConfigureAwait(false);
+        createChannelOptions ??= new CreateChannelOptions(options.PublisherConfirms, options.PublisherConfirms);
+        var channel = await connection.CreateChannelAsync(createChannelOptions, cancellationToken).ConfigureAwait(false);
         AttachChannelEvents(channel);
         return channel;
     }
@@ -166,8 +171,6 @@ public class PersistentChannel : IPersistentChannel
     {
         if (options.PublisherConfirms)
         {
-            // channel.ConfirmSelectAsync();
-
             channel.BasicAcksAsync += OnAck;
             channel.BasicNacksAsync += OnNack;
         }

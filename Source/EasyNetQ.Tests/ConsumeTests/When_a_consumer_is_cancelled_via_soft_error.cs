@@ -2,6 +2,7 @@ using EasyNetQ.Persistent;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 

@@ -50,13 +50,16 @@ public class PersistentConnection : IPersistentConnection
     }
 
     /// <inheritdoc />
-    public async Task<IChannel> CreateChannelAsync(CancellationToken cancellationToken = default)
+    public async Task<IChannel> CreateChannelAsync(
+        CreateChannelOptions? options = null,
+        CancellationToken cancellationToken = default
+        )
     {
         if (disposed) throw new ObjectDisposedException(nameof(PersistentConnection));
 
         var connection = InitializeConnection();
         connection.EnsureIsOpen();
-        return await connection.CreateChannelAsync(cancellationToken: cancellationToken);
+        return await connection.CreateChannelAsync(options ?? CreateChannelOptions.Default, cancellationToken);
     }
 
     /// <inheritdoc />

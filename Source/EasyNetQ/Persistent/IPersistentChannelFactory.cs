@@ -1,3 +1,5 @@
+using RabbitMQ.Client;
+
 namespace EasyNetQ.Persistent;
 
 /// <summary>

@@ -49,12 +49,14 @@ public class EventBusTests
     {
         var published = new List<Event1>();
 
-        using var subscription = eventBus.Subscribe((in Event1 s) => published.Add(s));
-        subscription.Should().NotBeNull();
-
         var publishedEvent = new Event1 { Text = "Before cancellation" };
-        eventBus.Publish(publishedEvent);
 
+        {
+            using var subscription = eventBus.Subscribe((in Event1 s) => published.Add(s));
+            subscription.Should().NotBeNull();
+
+            eventBus.Publish(publishedEvent);
+        }
 
         eventBus.Publish(new Event1 { Text = "Hello World" });
 

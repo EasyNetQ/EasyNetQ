@@ -13,7 +13,6 @@ public class DefaultConsumerErrorStrategyTests
         using var persistedConnectionMock = Substitute.For<IConsumerConnection>();
         var modelMock = Substitute.For<IChannel>();
         using var cts = new CancellationTokenSource(Arg.Any<TimeSpan>());
-        modelMock.WaitForConfirmsAsync(cts.Token).Returns(true);
 #pragma warning disable IDISP004
         persistedConnectionMock.CreateChannelAsync().Returns(modelMock);
 #pragma warning restore IDISP004
@@ -24,8 +23,6 @@ public class DefaultConsumerErrorStrategyTests
         );
 
         Assert.Equal(AckStrategies.AckAsync, ackStrategy);
-        await modelMock.Received().WaitForConfirmsAsync(cts.Token);
-        await modelMock.Received().ConfirmSelectAsync();
     }
 
     [Fact]
@@ -35,7 +32,7 @@ public class DefaultConsumerErrorStrategyTests
         using var persistedConnectionMock = Substitute.For<IConsumerConnection>();
         var modelMock = Substitute.For<IChannel>();
         using var cts = new CancellationTokenSource(Arg.Any<TimeSpan>());
-        modelMock.WaitForConfirmsAsync(cts.Token).Returns(false);
+
 #pragma warning disable IDISP004
         persistedConnectionMock.CreateChannelAsync().Returns(modelMock);
 #pragma warning restore IDISP004
@@ -46,8 +43,6 @@ public class DefaultConsumerErrorStrategyTests
         );
 
         Assert.Equal(AckStrategies.NackWithRequeueAsync, ackStrategy);
-        await modelMock.Received().WaitForConfirmsAsync(cts.Token);
-        await modelMock.Received().ConfirmSelectAsync();
     }
 
     [Fact]
@@ -56,18 +51,17 @@ public class DefaultConsumerErrorStrategyTests
         using var persistedConnectionMock = Substitute.For<IConsumerConnection>();
         var modelMock = Substitute.For<IChannel>();
         using var cts = new CancellationTokenSource(Arg.Any<TimeSpan>());
-        modelMock.WaitForConfirmsAsync(cts.Token).Returns(false);
 #pragma warning disable IDISP004
-        persistedConnectionMock.CreateChannelAsync().Returns(modelMock);
+        persistedConnectionMock.CreateChannelAsync(new CreateChannelOptions(true, true), cts.Token)
+            .Returns(modelMock);
 #pragma warning restore IDISP004
         var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock);
 
         var ackStrategy = await consumerErrorStrategy.HandleErrorAsync(
-            CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!")
+            CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!"), cts.Token
         );
 
         Assert.Equal(AckStrategies.AckAsync, ackStrategy);
-        await modelMock.DidNotReceive().WaitForConfirmsAsync(cts.Token);
     }
 
     private static DefaultConsumeErrorStrategy CreateConsumerErrorStrategy(

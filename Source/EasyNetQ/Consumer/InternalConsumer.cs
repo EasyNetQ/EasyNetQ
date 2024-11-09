@@ -149,7 +149,7 @@ public class InternalConsumer : IInternalConsumer
             {
                 try
                 {
-                    channel = await connection.CreateChannelAsync(cancellationToken);
+                    channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
                     await channel.BasicQosAsync(0, configuration.PrefetchCount, false, cancellationToken);
                 }
                 catch (Exception exception)
