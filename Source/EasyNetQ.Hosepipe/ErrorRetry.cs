@@ -22,9 +22,7 @@ public class ErrorRetry : IErrorRetry
         CancellationToken cancellationToken = default)
     {
         using var connection = await HosepipeConnection.FromParametersAsync(parameters, cancellationToken);
-        using var channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
-
-        // await channel.ConfirmSelectAsync(false, cancellationToken);
+        using var channel = await connection.CreateChannelAsync(new CreateChannelOptions(true, true), cancellationToken);
 
         await foreach (var rawErrorMessage in rawErrorMessages)
         {
