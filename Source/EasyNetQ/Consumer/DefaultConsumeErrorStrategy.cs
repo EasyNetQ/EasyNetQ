@@ -72,8 +72,9 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
 
         try
         {
-            var channel = await connection.CreateChannelAsync(cancellationToken);
-            //if (configuration.PublisherConfirms) await channel.WaitForConfirmsAsync(false, cancellationToken);
+            var channel = await connection.CreateChannelAsync(
+                new CreateChannelOptions(configuration.PublisherConfirms, configuration.PublisherConfirms),
+                cancellationToken);
 
             var errorExchange = await DeclareErrorExchangeWithQueueAsync(channel, receivedInfo, cancellationToken);
 
@@ -85,14 +86,9 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
                 Type = typeNameSerializer.Serialize(typeof(Error))
             };
 
-            await channel.BasicPublishAsync(errorExchange, receivedInfo.RoutingKey, false, errorProperties, message.Memory, cancellationToken).ConfigureAwait(false);
-
-            // if (configuration.PublisherConfirms)
-            // {
-            //     using var cts = new CancellationTokenSource(configuration.Timeout);
-            //     var waitForConfirmsResult = await channel.WaitForConfirmsAsync(cts.Token);
-            //     return waitForConfirmsResult ? AckStrategies.AckAsync : AckStrategies.NackWithRequeueAsync;
-            // }
+            using var timeoutCts = new CancellationTokenSource(configuration.Timeout);
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
+            await channel.BasicPublishAsync(errorExchange, receivedInfo.RoutingKey, false, errorProperties, message.Memory, cts.Token).ConfigureAwait(false);
 
             return AckStrategies.AckAsync;
         }
