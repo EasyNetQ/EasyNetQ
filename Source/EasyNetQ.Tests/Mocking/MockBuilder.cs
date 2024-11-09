@@ -64,7 +64,6 @@ public class MockBuilder : IDisposable
                    var queueName = (string)queueDeclareInvocation[0];
                    return await Task.FromResult(new QueueDeclareOk(queueName, 0, 0));
                });
-            channel.WaitForConfirmsAsync(default).ReturnsForAnyArgs(true);
 
             await Task.Yield();
             return channel;

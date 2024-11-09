@@ -94,7 +94,6 @@ public class When_using_default_consume_error_strategy
 
         Assert.Same(AckStrategies.AckAsync, errorAckStrategy);
 
-        await mockBuilder.Channels[0].Received().ConfirmSelectAsync();
         await mockBuilder.Channels[0].Received().ExchangeDeclareAsync("CustomErrorExchangePrefixName.originalRoutingKey", "topic", true);
         await mockBuilder.Channels[0].Received().QueueDeclareAsync(
             "CustomEasyNetQErrorQueueName",
@@ -120,8 +119,5 @@ public class When_using_default_consume_error_strategy
             Arg.Any<ReadOnlyMemory<byte>>(),
             Arg.Any<CancellationToken>()
         );
-
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        await mockBuilder.Channels[0].Received().WaitForConfirmsAsync(cts.Token);
     }
 }
