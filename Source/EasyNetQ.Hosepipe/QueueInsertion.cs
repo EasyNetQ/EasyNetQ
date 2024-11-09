@@ -39,9 +39,6 @@ public class QueueInsertion : IQueueInsertion
                 body: body,
                 cancellationToken: cancellationToken
             );
-
-            using var cts = new CancellationTokenSource(parameters.ConfirmsTimeout);
-            // await channel.WaitForConfirmsOrDieAsync(cts.Token);
         }
     }
 }

@@ -86,10 +86,7 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
                 Type = typeNameSerializer.Serialize(typeof(Error))
             };
 
-            using var timeoutCts = new CancellationTokenSource(configuration.Timeout);
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
-            await channel.BasicPublishAsync(errorExchange, receivedInfo.RoutingKey, false, errorProperties, message.Memory, cts.Token).ConfigureAwait(false);
-
+            await channel.BasicPublishAsync(errorExchange, receivedInfo.RoutingKey, false, errorProperties, message.Memory, cancellationToken).ConfigureAwait(false);
             return AckStrategies.AckAsync;
         }
         catch (BrokerUnreachableException unreachableException)

@@ -59,7 +59,7 @@ public class PersistentConnection : IPersistentConnection
 
         var connection = InitializeConnection();
         connection.EnsureIsOpen();
-        return await connection.CreateChannelAsync(options, cancellationToken);
+        return await connection.CreateChannelAsync(options ?? CreateChannelOptions.Default, cancellationToken);
     }
 
     /// <inheritdoc />
