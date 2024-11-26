@@ -126,7 +126,7 @@ namespace EasyNetQ
         public System.Collections.Generic.IList<RabbitMQ.Client.IAuthMechanismFactory> AuthMechanisms { get; set; }
         public System.Collections.Generic.IDictionary<string, object> ClientProperties { get; }
         public System.TimeSpan ConnectIntervalAttempt { get; set; }
-        public int? ConsumerDispatcherConcurrency { get; set; }
+        public ushort? ConsumerDispatcherConcurrency { get; set; }
         public System.Collections.Generic.IList<EasyNetQ.HostConfiguration> Hosts { get; set; }
         public bool MandatoryPublish { get; set; }
         public string? Name { get; set; }
@@ -309,7 +309,6 @@ namespace EasyNetQ
     {
         public EasyNetQException() { }
         public EasyNetQException(string? message) { }
-        protected EasyNetQException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public EasyNetQException(string format, params object?[] args) { }
         public EasyNetQException(string? message, System.Exception? inner) { }
     }
@@ -318,7 +317,6 @@ namespace EasyNetQ
     {
         public EasyNetQResponderException() { }
         public EasyNetQResponderException(string? message) { }
-        protected EasyNetQResponderException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public EasyNetQResponderException(string format, params object?[] args) { }
         public EasyNetQResponderException(string? message, System.Exception? inner) { }
     }
@@ -1302,7 +1300,7 @@ namespace EasyNetQ.Consumer
         public System.Threading.Tasks.Task<EasyNetQ.Consumer.InternalConsumerStatus> StartConsumingAsync(bool firstStart, System.Threading.CancellationToken cancellationToken = default) { }
         public System.Threading.Tasks.Task StopConsumingAsync(System.Threading.CancellationToken cancellationToken = default) { }
     }
-    public class InternalConsumerCancelledEventArgs : System.EventArgs
+    public class InternalConsumerCancelledEventArgs : RabbitMQ.Client.Events.AsyncEventArgs
     {
         public InternalConsumerCancelledEventArgs(EasyNetQ.Topology.Queue cancelled, System.Collections.Generic.IReadOnlyCollection<EasyNetQ.Topology.Queue> active) { }
         public System.Collections.Generic.IReadOnlyCollection<EasyNetQ.Topology.Queue> Active { get; }
@@ -1686,7 +1684,7 @@ namespace EasyNetQ.Persistent
     public interface IPersistentConnection : System.IDisposable
     {
         EasyNetQ.Persistent.PersistentConnectionStatus Status { get; }
-        System.Threading.Tasks.Task<RabbitMQ.Client.IChannel> CreateChannelAsync(System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.Task<RabbitMQ.Client.IChannel> CreateChannelAsync(RabbitMQ.Client.CreateChannelOptions? options = null, System.Threading.CancellationToken cancellationToken = default);
         void EnsureConnected();
     }
     public class PersistentChannel : EasyNetQ.Persistent.IPersistentChannel, System.IDisposable
@@ -1710,7 +1708,7 @@ namespace EasyNetQ.Persistent
     {
         public PersistentConnection(EasyNetQ.Persistent.PersistentConnectionType type, Microsoft.Extensions.Logging.ILogger<EasyNetQ.Persistent.IPersistentConnection> logger, EasyNetQ.ConnectionConfiguration configuration, RabbitMQ.Client.IConnectionFactory connectionFactory, EasyNetQ.IEventBus eventBus) { }
         public EasyNetQ.Persistent.PersistentConnectionStatus Status { get; }
-        public System.Threading.Tasks.Task<RabbitMQ.Client.IChannel> CreateChannelAsync(System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.Task<RabbitMQ.Client.IChannel> CreateChannelAsync(RabbitMQ.Client.CreateChannelOptions? options = null, System.Threading.CancellationToken cancellationToken = default) { }
         public virtual void Dispose() { }
         public void EnsureConnected() { }
     }
@@ -1739,7 +1737,7 @@ namespace EasyNetQ.Producer
     public interface IProducerConnection : EasyNetQ.Persistent.IPersistentConnection, System.IDisposable { }
     public interface IPublishConfirmationListener : System.IDisposable
     {
-        EasyNetQ.Producer.IPublishPendingConfirmation CreatePendingConfirmation(RabbitMQ.Client.IChannel channel);
+        System.Threading.Tasks.Task<EasyNetQ.Producer.IPublishPendingConfirmation> CreatePendingConfirmation(RabbitMQ.Client.IChannel channel, System.Threading.CancellationToken cancellationToken = default);
     }
     public interface IPublishPendingConfirmation
     {
@@ -1773,7 +1771,7 @@ namespace EasyNetQ.Producer
     public class PublishConfirmationListener : EasyNetQ.Producer.IPublishConfirmationListener, System.IDisposable
     {
         public PublishConfirmationListener(EasyNetQ.IEventBus eventBus) { }
-        public EasyNetQ.Producer.IPublishPendingConfirmation CreatePendingConfirmation(RabbitMQ.Client.IChannel channel) { }
+        public System.Threading.Tasks.Task<EasyNetQ.Producer.IPublishPendingConfirmation> CreatePendingConfirmation(RabbitMQ.Client.IChannel channel, System.Threading.CancellationToken cancellationToken = default) { }
         public virtual void Dispose() { }
     }
     [System.Serializable]
@@ -1781,7 +1779,6 @@ namespace EasyNetQ.Producer
     {
         public PublishInterruptedException() { }
         public PublishInterruptedException(string? message) { }
-        protected PublishInterruptedException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public PublishInterruptedException(string? message, System.Exception? inner) { }
     }
     [System.Serializable]
@@ -1789,7 +1786,6 @@ namespace EasyNetQ.Producer
     {
         public PublishNackedException() { }
         public PublishNackedException(string? message) { }
-        protected PublishNackedException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public PublishNackedException(string? message, System.Exception? inner) { }
     }
     [System.Serializable]
@@ -1797,7 +1793,6 @@ namespace EasyNetQ.Producer
     {
         public PublishReturnedException() { }
         public PublishReturnedException(string? message) { }
-        protected PublishReturnedException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public PublishReturnedException(string? message, System.Exception? inner) { }
     }
 }
