@@ -74,8 +74,8 @@ public readonly struct AsyncLock : IDisposable
     /// <inheritdoc />
     public void Dispose()
     {
-        semaphore.Dispose();
         releaser.Dispose();
+        semaphore.Dispose();
     }
 
     private async Task<Releaser> WaitForAcquireAsync(Task acquireAsync)
