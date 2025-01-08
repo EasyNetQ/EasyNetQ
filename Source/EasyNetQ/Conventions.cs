@@ -1,5 +1,6 @@
 using System;
 using EasyNetQ.Internals;
+using EasyNetQ.Topology;
 
 namespace EasyNetQ;
 
@@ -197,6 +198,8 @@ public class Conventions : IConventions
         ErrorQueueNamingConvention = _ => "EasyNetQ_Default_Error_Queue";
         ErrorExchangeNamingConvention = receivedInfo => "ErrorExchange_" + receivedInfo.RoutingKey;
         ErrorQueueTypeConvention = () => null;
+        ErrorExchangeTypeConvention = () => ExchangeType.Direct;
+        ErrorExchangeRoutingKeyConvention = receivedInfo => receivedInfo.RoutingKey;
 
         RpcRequestExchangeNamingConvention = _ => "easy_net_q_rpc";
         RpcResponseExchangeNamingConvention = _ => "easy_net_q_rpc";
