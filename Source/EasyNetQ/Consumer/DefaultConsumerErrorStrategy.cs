@@ -1,6 +1,7 @@
 using System;
 using System.Buffers;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using EasyNetQ.Logging;
@@ -9,6 +10,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyNetQ.Internals;
 
 namespace EasyNetQ.Consumer;
 
@@ -144,9 +146,15 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
         disposed = true;
     }
 
-    private static void DeclareAndBindErrorExchangeWithErrorQueue(IModel model, string exchangeName, string queueName, string routingKey)
+    private static void DeclareAndBindErrorExchangeWithErrorQueue(IModel model, string exchangeName, string exchangeType, string queueName, string? queueType, string routingKey)
     {
-        model.QueueDeclare(queueName, true, false, false, null);
+        Dictionary<string, object>? queueArgs = null;
+        if (queueType != null)
+        {
+            queueArgs = new Dictionary<string, object> { { "x-queue-type", queueType } };
+        }
+
+        model.QueueDeclare(queueName, true, false, false, queueArgs);
         model.ExchangeDeclare(exchangeName, ExchangeType.Direct, true);
         model.QueueBind(queueName, exchangeName, routingKey);
     }
@@ -154,15 +162,17 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
     private string DeclareErrorExchangeWithQueue(IModel model, MessageReceivedInfo receivedInfo)
     {
         var errorExchangeName = conventions.ErrorExchangeNamingConvention(receivedInfo);
+        var errorExchangeType = conventions.ErrorExchangeTypeConvention();
         var errorQueueName = conventions.ErrorQueueNamingConvention(receivedInfo);
-        var routingKey = receivedInfo.RoutingKey;
+        var errorQueueType = conventions.ErrorQueueTypeConvention();
+        var routingKey = conventions.ErrorExchangeRoutingKeyConvention(receivedInfo);
 
         var errorTopologyIdentifier = $"{errorExchangeName}-{errorQueueName}-{routingKey}";
 
         existingErrorExchangesWithQueues.GetOrAdd(errorTopologyIdentifier, _ =>
         {
-            DeclareAndBindErrorExchangeWithErrorQueue(model, errorExchangeName, errorQueueName, routingKey);
-            return null;
+            DeclareAndBindErrorExchangeWithErrorQueue(model, errorExchangeName, errorExchangeType, errorQueueName, errorQueueType, routingKey);
+            return NoResult.Instance;
         });
 
         return errorExchangeName;
