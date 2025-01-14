@@ -98,7 +98,14 @@ public class PersistentChannel : IPersistentChannel
             }
             finally
             {
-                releaser.Dispose();
+                try
+                {
+                    releaser.Dispose();
+                }
+                catch (Exception exception)
+                {
+                    logger.LogWarning(exception, "Semaphore was already disposed during channel release!");
+                }
             }
         }
 
