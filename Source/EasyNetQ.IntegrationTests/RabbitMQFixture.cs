@@ -15,14 +15,21 @@ public class RabbitMQFixture : IAsyncLifetime, IDisposable
     private const string User = "guest";
     private const string Password = "guest";
 
-
     private readonly DockerProxy dockerProxy = new();
     private OSPlatform dockerEngineOsPlatform;
     private string dockerNetworkName;
 
     public string Host { get; private set; } = "localhost";
-
-    public IManagementClient ManagementClient { get; private set; }
+    private IManagementClient _managementClient;
+    public IManagementClient ManagementClient
+    {
+        get => _managementClient;
+        private set
+        {
+            _managementClient?.Dispose();
+            _managementClient = value;
+        }
+    }
 
     public async Task InitializeAsync()
     {
@@ -44,13 +51,15 @@ public class RabbitMQFixture : IAsyncLifetime, IDisposable
         await DisposeAsync(default);
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
+        ManagementClient?.Dispose();
         dockerProxy.Dispose();
     }
 
     private async Task DisposeAsync(CancellationToken cancellationToken)
     {
+        ManagementClient?.Dispose();
         await dockerProxy.StopContainerAsync(ContainerName, cancellationToken);
         await dockerProxy.RemoveContainerAsync(ContainerName, cancellationToken);
         if (dockerEngineOsPlatform == OSPlatform.Linux || dockerEngineOsPlatform == OSPlatform.OSX)

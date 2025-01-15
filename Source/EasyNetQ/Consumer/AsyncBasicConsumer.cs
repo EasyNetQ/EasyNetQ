@@ -2,11 +2,12 @@ using EasyNetQ.Events;
 using EasyNetQ.Topology;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.Consumer;
 
-internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
+internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisposable
 {
     private readonly CancellationTokenSource cts = new();
     private readonly IEventBus eventBus;
@@ -21,12 +22,12 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
     public AsyncBasicConsumer(
         IServiceProvider serviceResolver,
         ILogger logger,
-        IModel model,
+        IChannel channel,
         Queue queue,
         bool autoAck,
         IEventBus eventBus,
         ConsumeDelegate consumeDelegate
-    ) : base(model)
+    ) : base(channel)
     {
         this.serviceResolver = serviceResolver;
         this.logger = logger;
@@ -38,10 +39,12 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
 
     public Queue Queue => queue;
 
+    public event EventHandler<ConsumerEventArgs>? ConsumerCancelled;
+
     /// <inheritdoc />
-    public override async Task OnCancel(params string[] consumerTags)
+    protected override async Task OnCancelAsync(string[] consumerTags, CancellationToken cancellationToken = default)
     {
-        await base.OnCancel(consumerTags).ConfigureAwait(false);
+        await base.OnCancelAsync(consumerTags, cancellationToken).ConfigureAwait(false);
 
         if (logger.IsEnabled(LogLevel.Information))
         {
@@ -50,16 +53,19 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
                 string.Join(", ", consumerTags)
             );
         }
+
+        ConsumerCancelled?.Invoke(this, new ConsumerEventArgs(consumerTags));
     }
 
-    public override async Task HandleBasicDeliver(
+    public override async Task HandleBasicDeliverAsync(
         string consumerTag,
         ulong deliveryTag,
         bool redelivered,
         string exchange,
         string routingKey,
-        IBasicProperties properties,
-        ReadOnlyMemory<byte> body
+        IReadOnlyBasicProperties properties,
+        ReadOnlyMemory<byte> body,
+        CancellationToken cancellationToken = default
     )
     {
         if (cts.IsCancellationRequested)
@@ -83,13 +89,14 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
         var ackStrategy = await consumeDelegate(new ConsumeContext(messageReceivedInfo, messageProperties, messageBody, serviceResolver, cts.Token)).ConfigureAwait(false);
         if (!autoAck)
         {
-            var ackResult = Ack(ackStrategy, messageReceivedInfo);
+            var ackResult = await AckAsync(ackStrategy, messageReceivedInfo, cancellationToken);
             eventBus.Publish(new AckEvent(messageReceivedInfo, messageProperties, messageBody, ackResult));
         }
     }
 
     /// <inheritdoc />
-    public void Dispose()
+#pragma warning disable CS1998
+    public async ValueTask DisposeAsync()
     {
         if (disposed)
             return;
@@ -97,14 +104,18 @@ internal class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IDisposable
         disposed = true;
         cts.Cancel();
         cts.Dispose();
-        eventBus.Publish(new ConsumerModelDisposedEvent(ConsumerTags));
+        eventBus.Publish(new ConsumerChannelDisposedEvent(ConsumerTags));
     }
+#pragma warning restore CS1998
 
-    private AckResult Ack(AckStrategy ackStrategy, in MessageReceivedInfo receivedInfo)
+    private async Task<AckResult> AckAsync(
+        AckStrategyAsync ackStrategy,
+        MessageReceivedInfo receivedInfo,
+        CancellationToken cancellationToken = default)
     {
         try
         {
-            return ackStrategy(Model, receivedInfo.DeliveryTag);
+            return await ackStrategy(Channel, receivedInfo.DeliveryTag, cancellationToken);
         }
         catch (AlreadyClosedException alreadyClosedException)
         {

@@ -10,7 +10,7 @@ internal static class ConnectionStringGrammar
 {
     internal static readonly Parser<string> Text = Parse.CharExcept(';').Many().Text();
     internal static readonly Parser<ushort> UShortNumber = Parse.NonNegativeNumber.Select(ushort.Parse);
-    internal static readonly Parser<int?> NullableIntNumber = Parse.NonNegativeNumber.Select(x => (int?)int.Parse(x));
+    internal static readonly Parser<ushort?> NullableUShortNumber = Parse.NonNegativeNumber.Select(x => (ushort?)ushort.Parse(x));
     internal static readonly Parser<string> MinusOne = Parse.String("-1").Text();
 
     internal static readonly Parser<TimeSpan> TimeSpanSeconds = Parse.NonNegativeNumber.Or(MinusOne)
@@ -39,7 +39,7 @@ internal static class ConnectionStringGrammar
         BuildKeyValueParser("username", Text, c => c.UserName),
         BuildKeyValueParser("password", Text, c => c.Password),
         BuildKeyValueParser("prefetchCount", UShortNumber, c => c.PrefetchCount),
-        BuildKeyValueParser("consumerDispatcherConcurrency", NullableIntNumber, c => c.ConsumerDispatcherConcurrency),
+        BuildKeyValueParser("consumerDispatcherConcurrency", NullableUShortNumber, c => c.ConsumerDispatcherConcurrency),
         BuildKeyValueParser("timeout", TimeSpanSeconds, c => c.Timeout),
         BuildKeyValueParser("connectIntervalAttempt", TimeSpanSeconds, c => c.ConnectIntervalAttempt),
         BuildKeyValueParser("publisherConfirms", Bool, c => c.PublisherConfirms),
@@ -81,11 +81,11 @@ internal static class ConnectionStringGrammar
     private static Action<TContaining, TProperty> CreateSetter<TContaining, TProperty>(Expression<Func<TContaining, TProperty>> getter)
     {
         if (getter.Body is not MemberExpression memberExpr)
-            throw new ArgumentOutOfRangeException(nameof(getter), "Body is not a member-expression");
+            throw new ArgumentOutOfRangeException(nameof(getter), $"Body({getter.Body}) is not a member-expression");
         if (memberExpr.Member is not PropertyInfo propertyInfo)
-            throw new ArgumentOutOfRangeException(nameof(getter), "Member is not a property");
+            throw new ArgumentOutOfRangeException(nameof(getter), $"Member({memberExpr.Member.Name}) is not a property");
         if (!propertyInfo.CanWrite)
-            throw new ArgumentOutOfRangeException(nameof(getter), "Property is not writeable");
+            throw new ArgumentOutOfRangeException(nameof(getter), $"Property({propertyInfo.Name}) is not writeable");
 
         var valueParameterExpr = Expression.Parameter(typeof(TProperty), "value");
         var setter = propertyInfo.GetSetMethod() ?? throw new ArgumentOutOfRangeException(nameof(getter), "No set method");

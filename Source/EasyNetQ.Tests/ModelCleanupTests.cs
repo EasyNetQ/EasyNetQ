@@ -3,11 +3,12 @@ using EasyNetQ.Tests.Mocking;
 
 namespace EasyNetQ.Tests;
 
-public class ModelCleanupTests
+public class ModelCleanupTests : IDisposable
 {
     private readonly IBus bus;
     private readonly MockBuilder mockBuilder;
     private readonly TimeSpan waitTime;
+    private bool disposed;
 
     public ModelCleanupTests()
     {
@@ -16,10 +17,21 @@ public class ModelCleanupTests
         waitTime = TimeSpan.FromSeconds(10);
     }
 
-    private AutoResetEvent WaitForConsumerModelDisposedMessage()
+    public virtual void Dispose()
+    {
+        if (disposed)
+            return;
+
+        disposed = true;
+        mockBuilder.Dispose();
+    }
+
+    private AutoResetEvent WaitForConsumerChannelDisposedMessage()
     {
         var are = new AutoResetEvent(false);
-        mockBuilder.EventBus.Subscribe((in ConsumerModelDisposedEvent _) => are.Set());
+#pragma warning disable IDISP004
+        mockBuilder.EventBus.Subscribe((in ConsumerChannelDisposedEvent _) => are.Set());
+#pragma warning restore IDISP004
         return are;
     }
 
@@ -35,16 +47,18 @@ public class ModelCleanupTests
     [Fact]
     public void Should_cleanup_request_response_model()
     {
-        var waiter = new CountdownEvent(2);
+        using var waiter = new CountdownEvent(2);
 
+#pragma warning disable IDISP004
         mockBuilder.EventBus.Subscribe((in PublishedMessageEvent _) => waiter.Signal());
         mockBuilder.EventBus.Subscribe((in StartConsumingSucceededEvent _) => waiter.Signal());
+#pragma warning restore IDISP004
 
         bus.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
         if (!waiter.Wait(5000))
             throw new TimeoutException();
 
-        var are = WaitForConsumerModelDisposedMessage();
+        using var are = WaitForConsumerChannelDisposedMessage();
 
         mockBuilder.Dispose();
 
@@ -58,14 +72,16 @@ public class ModelCleanupTests
     [Fact]
     public void Should_cleanup_respond_model()
     {
-        var waiter = new CountdownEvent(1);
+        using var waiter = new CountdownEvent(1);
+#pragma warning disable IDISP004
         mockBuilder.EventBus.Subscribe((in StartConsumingSucceededEvent _) => waiter.Signal());
 
         bus.Rpc.Respond<TestRequestMessage, TestResponseMessage>(_ => (TestResponseMessage)null);
+#pragma warning restore IDISP004
         if (!waiter.Wait(5000))
             throw new TimeoutException();
 
-        var are = WaitForConsumerModelDisposedMessage();
+        using var are = WaitForConsumerChannelDisposedMessage();
 
         mockBuilder.Dispose();
 
@@ -79,8 +95,10 @@ public class ModelCleanupTests
     [Fact]
     public void Should_cleanup_subscribe_async_model()
     {
+#pragma warning disable IDISP004
         bus.PubSub.Subscribe<TestMessage>("abc", _ => { });
-        var are = WaitForConsumerModelDisposedMessage();
+#pragma warning restore IDISP004
+        using var are = WaitForConsumerChannelDisposedMessage();
 
         mockBuilder.Dispose();
 
@@ -94,8 +112,10 @@ public class ModelCleanupTests
     [Fact]
     public void Should_cleanup_subscribe_model()
     {
+#pragma warning disable IDISP004
         bus.PubSub.Subscribe<TestMessage>("abc", _ => { });
-        var are = WaitForConsumerModelDisposedMessage();
+#pragma warning restore IDISP004
+        using var are = WaitForConsumerChannelDisposedMessage();
 
         mockBuilder.Dispose();
 

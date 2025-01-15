@@ -17,10 +17,10 @@ public interface IConsumer : IDisposable
     Guid Id { get; }
 
     /// <summary>
-    ///     Starts the consumer
+    ///     Starts the consumer asynchronously
     /// </summary>
     /// <returns>Disposable to stop the consumer</returns>
-    void StartConsuming();
+    Task StartConsumingAsync(CancellationToken cancellationToken = default);
 }
 
 /// <summary>
@@ -139,7 +139,7 @@ public class Consumer : IConsumer
     public Guid Id { get; } = Guid.NewGuid();
 
     /// <inheritdoc />
-    public void StartConsuming()
+    public async Task StartConsumingAsync(CancellationToken cancellationToken = default)
     {
         if (disposed)
             throw new ObjectDisposedException(nameof(Consumer));
@@ -150,18 +150,18 @@ public class Consumer : IConsumer
                 throw new InvalidOperationException("Consumer has already started");
 
             consumer = internalConsumerFactory.CreateConsumer(configuration);
-            consumer.Cancelled += InternalConsumerOnCancelled;
-
-            var status = consumer.StartConsuming();
-            foreach (var queue in status.Started)
-                eventBus.Publish(new StartConsumingSucceededEvent(this, queue));
-            foreach (var queue in status.Failed)
-                eventBus.Publish(new StartConsumingFailedEvent(this, queue));
+            consumer.CancelledAsync += InternalConsumerOnCancelledAsync;
         }
+
+        var status = await consumer.StartConsumingAsync(cancellationToken: cancellationToken);
+        foreach (var queue in status.Started)
+            eventBus.Publish(new StartConsumingSucceededEvent(this, queue));
+        foreach (var queue in status.Failed)
+            eventBus.Publish(new StartConsumingFailedEvent(this, queue));
     }
 
     /// <inheritdoc />
-    public void Dispose()
+    public virtual async void Dispose()
     {
         if (disposed) return;
 
@@ -173,22 +173,23 @@ public class Consumer : IConsumer
         foreach (var disposable in disposables)
             disposable.Dispose();
 
-        consumerToDispose.Dispose();
+        await consumerToDispose.DisposeAsync();
 
         eventBus.Publish(new StoppedConsumingEvent(this));
     }
 
-    private void InternalConsumerOnCancelled(object? sender, InternalConsumerCancelledEventArgs e)
+    private async Task InternalConsumerOnCancelledAsync(object? sender, InternalConsumerCancelledEventArgs e)
     {
         if (e.Active.Count == 0)
             Dispose();
+        await Task.CompletedTask;
     }
 
     private void OnConnectionDisconnected(in ConnectionDisconnectedEvent @event)
     {
         if (@event.Type != PersistentConnectionType.Consumer) return;
 
-        consumer?.StopConsuming();
+        consumer?.StopConsumingAsync();
     }
 
     private void OnConnectionRecovered(in ConnectionRecoveredEvent @event)
@@ -198,7 +199,7 @@ public class Consumer : IConsumer
         var consumerToRestart = consumer;
         if (consumerToRestart == null) return;
 
-        var status = consumerToRestart.StartConsuming(false);
+        var status = consumerToRestart.StartConsumingAsync(false).GetAwaiter().GetResult();
 
         foreach (var queue in status.Started)
             eventBus.Publish(new StartConsumingSucceededEvent(this, queue));
@@ -214,7 +215,7 @@ public class Consumer : IConsumer
         var consumerToRestart = consumer;
         if (consumerToRestart == null) return;
 
-        var status = consumerToRestart.StartConsuming(false);
+        var status = consumerToRestart.StartConsumingAsync(false).GetAwaiter().GetResult();
 
         foreach (var queue in status.Started)
             eventBus.Publish(new StartConsumingSucceededEvent(this, queue));

@@ -15,7 +15,7 @@ serviceCollection.AddEasyNetQ("host=localhost")
     .UseNewtonsoftJson()
     .UseAlwaysAckConsumerErrorStrategy();
 
-var provider = serviceCollection.BuildServiceProvider();
+using var provider = serviceCollection.BuildServiceProvider();
 
 var bus = provider.GetRequiredService<IBus>();
 await bus.Advanced.QueueDeclareAsync(

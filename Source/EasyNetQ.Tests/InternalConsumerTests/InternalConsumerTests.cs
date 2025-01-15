@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace EasyNetQ.Tests.InternalConsumerTests;
 
-public class InternalConsumerTests : IDisposable
+public sealed class InternalConsumerTests : IAsyncDisposable
 {
     private readonly Queue exclusiveQueue = new("exclusive", isExclusive: true);
     private readonly Queue nonExclusiveQueue = new("non-exclusive", isExclusive: false);
@@ -31,7 +31,7 @@ public class InternalConsumerTests : IDisposable
                             "exclusiveConsumerTag",
                             false,
                             new Dictionary<string, object>(),
-                            _ => new ValueTask<AckStrategy>(AckStrategies.Ack)
+                            _ => new ValueTask<AckStrategyAsync>(AckStrategies.AckAsync)
                         )
                     },
                     {
@@ -41,7 +41,7 @@ public class InternalConsumerTests : IDisposable
                             "nonExclusiveConsumerTag",
                             false,
                             new Dictionary<string, object>(),
-                            _ => new ValueTask<AckStrategy>(AckStrategies.Ack)
+                            _ => new ValueTask<AckStrategyAsync>(AckStrategies.AckAsync)
                         )
                     }
                 }
@@ -52,44 +52,42 @@ public class InternalConsumerTests : IDisposable
     }
 
     [Fact]
-    public void Should_follow_reconnection_lifecycle()
+    public async Task Should_follow_reconnection_lifecycle_async()
     {
-        var status = internalConsumer.StartConsuming(true);
+        var status = await internalConsumer.StartConsumingAsync(true);
         status.Started.Should().BeEquivalentTo(new[] { exclusiveQueue, nonExclusiveQueue });
         status.Active.Should().BeEquivalentTo(new[] { exclusiveQueue, nonExclusiveQueue });
         status.Failed.Should().BeEmpty();
 
-        internalConsumer.StopConsuming();
+        await internalConsumer.StopConsumingAsync();
 
-        status = internalConsumer.StartConsuming(false);
-
+        status = await internalConsumer.StartConsumingAsync(false);
         status.Started.Should().BeEquivalentTo(new[] { nonExclusiveQueue });
         status.Active.Should().BeEquivalentTo(new[] { nonExclusiveQueue });
         status.Failed.Should().BeEquivalentTo(new[] { exclusiveQueue });
 
-        internalConsumer.StopConsuming();
+        await internalConsumer.StopConsumingAsync();
     }
 
     [Fact]
-    public void Should_follow_lifecycle_without_reconnections()
+    public async Task Should_follow_lifecycle_without_reconnections_async()
     {
-        var status = internalConsumer.StartConsuming(true);
-
+        var status = await internalConsumer.StartConsumingAsync(true);
         status.Started.Should().BeEquivalentTo(new[] { exclusiveQueue, nonExclusiveQueue });
         status.Active.Should().BeEquivalentTo(new[] { exclusiveQueue, nonExclusiveQueue });
         status.Failed.Should().BeEmpty();
 
-        status = internalConsumer.StartConsuming(false);
+        status = await internalConsumer.StartConsumingAsync(false);
         status.Started.Should().BeEmpty();
         status.Active.Should().BeEquivalentTo(new[] { exclusiveQueue, nonExclusiveQueue });
         status.Failed.Should().BeEmpty();
 
-        internalConsumer.StopConsuming();
+        await internalConsumer.StopConsumingAsync();
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         mockBuilder?.Dispose();
-        internalConsumer?.Dispose();
+        await internalConsumer.DisposeAsync();
     }
 }

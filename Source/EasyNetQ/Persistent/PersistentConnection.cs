@@ -14,7 +14,7 @@ public class PersistentConnection : IPersistentConnection
     private readonly ConnectionConfiguration configuration;
     private readonly IConnectionFactory connectionFactory;
     private readonly IEventBus eventBus;
-    private volatile IAutorecoveringConnection? initializedConnection;
+    private volatile IConnection? initializedConnection;
     private volatile bool disposed;
     private volatile PersistentConnectionStatus status;
 
@@ -50,17 +50,20 @@ public class PersistentConnection : IPersistentConnection
     }
 
     /// <inheritdoc />
-    public IModel CreateModel()
+    public async Task<IChannel> CreateChannelAsync(
+        CreateChannelOptions? options = null,
+        CancellationToken cancellationToken = default
+        )
     {
         if (disposed) throw new ObjectDisposedException(nameof(PersistentConnection));
 
         var connection = InitializeConnection();
         connection.EnsureIsOpen();
-        return connection.CreateModel();
+        return await connection.CreateChannelAsync(options, cancellationToken);
     }
 
     /// <inheritdoc />
-    public void Dispose()
+    public virtual void Dispose()
     {
         if (disposed) return;
 
@@ -68,19 +71,21 @@ public class PersistentConnection : IPersistentConnection
         disposed = true;
     }
 
-    private IAutorecoveringConnection InitializeConnection()
+    private IConnection InitializeConnection()
     {
         var connection = initializedConnection;
         if (connection is not null) return connection;
 
         try
         {
+            // TODO: this needs to be replaced with an async mutex
             lock (mutex)
             {
                 connection = initializedConnection;
                 if (connection is not null) return connection;
 
-                connection = initializedConnection = CreateConnection();
+                // TODO: this needs to be replaced with an async mutex
+                connection = initializedConnection = CreateConnectionAsync(CancellationToken.None).GetAwaiter().GetResult();
             }
         }
         catch (Exception exception)
@@ -100,7 +105,7 @@ public class PersistentConnection : IPersistentConnection
         return connection;
     }
 
-    private IAutorecoveringConnection CreateConnection()
+    private async Task<IConnection> CreateConnectionAsync(CancellationToken cancellationToken)
     {
         var endpoints = configuration.Hosts.Select(x =>
         {
@@ -110,13 +115,14 @@ public class PersistentConnection : IPersistentConnection
             return new AmqpTcpEndpoint(x.Host, x.Port, ssl);
         }).ToList();
 
-        if (connectionFactory.CreateConnection(endpoints) is not IAutorecoveringConnection connection)
+        if (await connectionFactory.CreateConnectionAsync(endpoints, cancellationToken) is not IConnection connection)
+            // review this: the return type is IConnection, so this code is practically unreachable, check with pliner
             throw new NotSupportedException("Non-recoverable connection is not supported");
 
-        connection.ConnectionShutdown += OnConnectionShutdown;
-        connection.ConnectionBlocked += OnConnectionBlocked;
-        connection.ConnectionUnblocked += OnConnectionUnblocked;
-        connection.RecoverySucceeded += OnConnectionRecovered;
+        connection.ConnectionShutdownAsync += OnConnectionShutdown;
+        connection.ConnectionBlockedAsync += OnConnectionBlocked;
+        connection.ConnectionUnblockedAsync += OnConnectionUnblocked;
+        connection.RecoverySucceededAsync += OnConnectionRecovered;
 
         return connection;
     }
@@ -125,18 +131,17 @@ public class PersistentConnection : IPersistentConnection
     {
         var connection = Interlocked.Exchange(ref initializedConnection, null);
         if (connection is null) return;
-
-        connection.Dispose();
         // We previously agreed to dispose firstly and then unsubscribe from events so as not to lose logs.
         // These works only for connection.RecoverySucceeded -= OnConnectionRecovered;, for other events
         // it's prohibited to unsubscribe from them after a connection disposal. There are good news though:
-        // these events handlers (except RecoverySucceeded one) are nullified on IAutorecoveringConnection.Dispose.
-        connection.RecoverySucceeded -= OnConnectionRecovered;
+        // these events handlers (except RecoverySucceeded one) are nullified on IConnection.Dispose.
+        connection.RecoverySucceededAsync -= OnConnectionRecovered;
+        connection.Dispose();
 
         status = status.ToUnknown();
     }
 
-    private void OnConnectionRecovered(object? sender, EventArgs e)
+    private Task OnConnectionRecovered(object sender, AsyncEventArgs e)
     {
         status = status.ToConnected();
         var connection = (IConnection)sender!;
@@ -147,9 +152,10 @@ public class PersistentConnection : IPersistentConnection
             connection.Endpoint.Port
         );
         eventBus.Publish(new ConnectionRecoveredEvent(type, connection.Endpoint));
+        return Task.CompletedTask;
     }
 
-    private void OnConnectionShutdown(object? sender, ShutdownEventArgs e)
+    private Task OnConnectionShutdown(object? sender, ShutdownEventArgs e)
     {
         status = status.ToDisconnected(e.ToString());
         var connection = (IConnection)sender!;
@@ -162,18 +168,21 @@ public class PersistentConnection : IPersistentConnection
             e.ReplyText
         );
         eventBus.Publish(new ConnectionDisconnectedEvent(type, connection.Endpoint, e.ReplyText));
+        return Task.CompletedTask;
     }
 
-    private void OnConnectionBlocked(object? sender, ConnectionBlockedEventArgs e)
+    private Task OnConnectionBlocked(object? sender, ConnectionBlockedEventArgs e)
     {
         logger.LogInformation("Connection {type} blocked with reason {reason}", type, e.Reason);
         eventBus.Publish(new ConnectionBlockedEvent(type, e.Reason ?? "Unknown reason"));
+        return Task.CompletedTask;
     }
 
-    private void OnConnectionUnblocked(object? sender, EventArgs e)
+    private Task OnConnectionUnblocked(object? sender, AsyncEventArgs e)
     {
         logger.LogInformation("Connection {type} unblocked", type);
         eventBus.Publish(new ConnectionUnblockedEvent(type));
+        return Task.CompletedTask;
     }
 
     private static SslOption NewSslForHost(SslOption option, string host) =>

@@ -11,9 +11,9 @@ public class When_a_responder_is_cancelled : IDisposable
     {
         mockBuilder = new MockBuilder();
 
-        var cde = new AsyncCountdownEvent(1);
+        using var cde = new AsyncCountdownEvent(1);
 
-        var responder = mockBuilder.Rpc.Respond<RpcRequest, RpcResponse>(
+        using var responder = mockBuilder.Rpc.Respond<RpcRequest, RpcResponse>(
             async (_, ct) =>
             {
                 cde.Decrement();
@@ -26,19 +26,18 @@ public class When_a_responder_is_cancelled : IDisposable
         var deliverTask = DeliverMessageAsync(new RpcRequest());
         cde.WaitAsync().GetAwaiter().GetResult();
 
-        responder.Dispose();
         deliverTask.GetAwaiter().GetResult();
     }
 
-    public void Dispose() => mockBuilder.Dispose();
+    public virtual void Dispose() => mockBuilder.Dispose();
 
     [Fact]
-    public void Should_NACK_with_requeue()
+    public async Task Should_NACK_with_requeue()
     {
-        mockBuilder.Channels[2].Received().BasicNack(0, false, true);
+        await mockBuilder.Channels[2].Received().BasicNackAsync(0, false, true);
     }
 
-    private Task DeliverMessageAsync(RpcRequest request)
+    private async Task DeliverMessageAsync(RpcRequest request)
     {
         var properties = new BasicProperties
         {
@@ -47,17 +46,18 @@ public class When_a_responder_is_cancelled : IDisposable
             ReplyTo = mockBuilder.Conventions.RpcReturnQueueNamingConvention(typeof(RpcResponse))
         };
 
-        var serializedMessage = mockBuilder.Serializer.MessageToBytes(typeof(RpcRequest), request);
-
-        return mockBuilder.Consumers[0].HandleBasicDeliver(
-            "consumer tag",
-            0,
-            false,
-            "the_exchange",
-            "the_routing_key",
-            properties,
-            serializedMessage.Memory
-        );
+        using (var serializedMessage = mockBuilder.Serializer.MessageToBytes(typeof(RpcRequest), request))
+        {
+            await mockBuilder.Consumers[0].HandleBasicDeliverAsync(
+                "consumer tag",
+                0,
+                false,
+                "the_exchange",
+                "the_routing_key",
+                properties,
+                serializedMessage.Memory
+            );
+        }
     }
 
     private sealed record RpcRequest;

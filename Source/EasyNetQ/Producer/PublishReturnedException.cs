@@ -30,8 +30,10 @@ public class PublishReturnedException : Exception
     {
     }
 
+#if NETSTANDARD2_0
     /// <inheritdoc />
     protected PublishReturnedException(SerializationInfo info, StreamingContext context) : base(info, context)
     {
     }
+#endif
 }

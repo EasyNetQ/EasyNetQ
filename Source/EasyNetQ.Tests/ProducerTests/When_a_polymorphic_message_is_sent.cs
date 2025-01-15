@@ -23,36 +23,39 @@ public class When_a_polymorphic_message_is_sent : IDisposable
         mockBuilder.PubSub.Publish<IMyMessageInterface>(message);
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }
 
     [Fact]
-    public void Should_name_exchange_after_interface()
+    public async Task Should_name_exchange_after_interface()
     {
-        mockBuilder.Channels[0].Received().ExchangeDeclare(
+        await mockBuilder.Channels[0].Received().ExchangeDeclareAsync(
             Arg.Is(interfaceTypeName),
             Arg.Is("topic"),
             Arg.Is(true),
             Arg.Is(false),
-            Arg.Any<IDictionary<string, object>>()
+            Arg.Any<IDictionary<string, object>>(),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>()
         );
     }
 
     [Fact]
-    public void Should_publish_to_correct_exchange()
+    public async Task Should_publish_to_correct_exchange()
     {
-        mockBuilder.Channels[1].Received().BasicPublish(
+        await mockBuilder.Channels[1].Received().BasicPublishAsync(
             Arg.Is(interfaceTypeName),
             Arg.Is(""),
             Arg.Is(false),
-            Arg.Is<IBasicProperties>(x => x.Type == implementationTypeName),
+            Arg.Is<RabbitMQ.Client.BasicProperties>(x => x.Type == implementationTypeName),
             Arg.Is<ReadOnlyMemory<byte>>(
                 x => x.ToArray().SequenceEqual(
                     Encoding.UTF8.GetBytes("{\"Text\":\"Hello Polymorphs!\",\"NotInInterface\":\"Hi\"}")
                 )
-            )
+            ),
+            Arg.Any<CancellationToken>()
         );
     }
 }

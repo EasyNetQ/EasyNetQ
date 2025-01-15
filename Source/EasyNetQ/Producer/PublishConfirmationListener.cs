@@ -31,14 +31,14 @@ public class PublishConfirmationListener : IPublishConfirmationListener
     }
 
     /// <inheritdoc />
-    public IPublishPendingConfirmation CreatePendingConfirmation(IModel model)
+    public async Task<IPublishPendingConfirmation> CreatePendingConfirmation(IChannel channel, CancellationToken cancellationToken = default)
     {
-        var sequenceNumber = model.NextPublishSeqNo;
+        var sequenceNumber = await channel.GetNextPublishSequenceNumberAsync(cancellationToken);
 
         if (sequenceNumber == 0UL)
             throw new InvalidOperationException("Confirms not selected");
 
-        var requests = unconfirmedChannelRequests.GetOrAdd(model.ChannelNumber, _ => new UnconfirmedRequests());
+        var requests = unconfirmedChannelRequests.GetOrAdd(channel.ChannelNumber, _ => new UnconfirmedRequests());
         var confirmationTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         if (!requests.TryAdd(sequenceNumber, confirmationTcs))
             throw new InvalidOperationException($"Confirmation {sequenceNumber} already exists");
@@ -47,7 +47,7 @@ public class PublishConfirmationListener : IPublishConfirmationListener
     }
 
     /// <inheritdoc />
-    public void Dispose()
+    public virtual void Dispose()
     {
         foreach (var subscription in subscriptions)
             subscription.Dispose();
@@ -74,7 +74,10 @@ public class PublishConfirmationListener : IPublishConfirmationListener
 
     private void OnChannelRecovered(in ChannelRecoveredEvent @event)
     {
-        if (@event.Channel.NextPublishSeqNo == 0)
+        var nextPublishSequenceNumber = @event.Channel.GetNextPublishSequenceNumberAsync()
+            .ConfigureAwait(false)
+            .GetAwaiter().GetResult();
+        if (nextPublishSequenceNumber == 0)
             return;
 
         InterruptUnconfirmedRequests(@event.Channel.ChannelNumber);
@@ -82,7 +85,10 @@ public class PublishConfirmationListener : IPublishConfirmationListener
 
     private void OnChannelShutdown(in ChannelShutdownEvent @event)
     {
-        if (@event.Channel.NextPublishSeqNo == 0)
+        var nextPublishSequenceNumber = @event.Channel.GetNextPublishSequenceNumberAsync()
+            .ConfigureAwait(false)
+            .GetAwaiter().GetResult();
+        if (nextPublishSequenceNumber == 0)
             return;
 
         InterruptUnconfirmedRequests(@event.Channel.ChannelNumber);
@@ -90,7 +96,11 @@ public class PublishConfirmationListener : IPublishConfirmationListener
 
     private void OnReturnedMessage(in ReturnedMessageEvent @event)
     {
-        if (@event.Channel.NextPublishSeqNo == 0)
+        var nextPublishSequenceNumber = @event.Channel.GetNextPublishSequenceNumberAsync()
+            .ConfigureAwait(false)
+            .GetAwaiter().GetResult();
+
+        if (nextPublishSequenceNumber == 0)
             return;
 
         if (!@event.Properties.TryGetConfirmationId(out var confirmationId))

@@ -18,9 +18,11 @@ public class When_a_consumer_has_multiple_handlers : IDisposable
 
         var queue = new Queue("test_queue", false);
 
-        var countdownEvent = new CountdownEvent(3);
+        using var countdownEvent = new CountdownEvent(3);
 
+#pragma warning disable IDISP004
         mockBuilder.Bus.Advanced.Consume(
+#pragma warning restore IDISP004
             queue,
             x => x.Add<MyMessage>((message, _) =>
                 {
@@ -39,19 +41,19 @@ public class When_a_consumer_has_multiple_handlers : IDisposable
                 })
         );
 
-        Deliver(new MyMessage { Text = "Hello Polymorphs!" });
-        Deliver(new MyOtherMessage { Text = "Hello Isomorphs!" });
-        Deliver(new Dog());
+        DeliverAsync(new MyMessage { Text = "Hello Polymorphs!" }).GetAwaiter().GetResult();
+        DeliverAsync(new MyOtherMessage { Text = "Hello Isomorphs!" }).GetAwaiter().GetResult();
+        DeliverAsync(new Dog()).GetAwaiter().GetResult();
 
         if (!countdownEvent.Wait(5000)) throw new TimeoutException();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }
 
-    private void Deliver<T>(T message) where T : class
+    private async Task DeliverAsync<T>(T message) where T : class
     {
         using var serializedMessage = new ReflectionBasedNewtonsoftJsonSerializer().MessageToBytes(typeof(T), message);
         var properties = new BasicProperties
@@ -59,7 +61,7 @@ public class When_a_consumer_has_multiple_handlers : IDisposable
             Type = new DefaultTypeNameSerializer().Serialize(typeof(T))
         };
 
-        mockBuilder.Consumers[0].HandleBasicDeliver(
+        await mockBuilder.Consumers[0].HandleBasicDeliverAsync(
             "consumer_tag",
             0,
             false,
@@ -67,7 +69,7 @@ public class When_a_consumer_has_multiple_handlers : IDisposable
             "routing_key",
             properties,
             serializedMessage.Memory
-        ).GetAwaiter().GetResult();
+        );
     }
 
     [Fact]

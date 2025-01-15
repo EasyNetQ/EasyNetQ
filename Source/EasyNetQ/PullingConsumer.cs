@@ -145,7 +145,9 @@ public readonly struct PullResult : IPullResult
     /// <inheritdoc />
     public void Dispose()
     {
+#pragma warning disable IDISP007 // the injected here is created in the calling method so it should be disposed
         disposable?.Dispose();
+#pragma warning restore IDISP007
     }
 }
 
@@ -393,9 +395,11 @@ public class PullingConsumer : IPullingConsumer<PullResult>
     }
 
     /// <inheritdoc />
-    public void Dispose()
+    public virtual void Dispose()
     {
+#pragma warning disable IDISP007 // the injected here is created in the calling method so it should be disposed
         channel.Dispose();
+#pragma warning restore IDISP007
     }
 
     private readonly struct BasicGetAction : IPersistentChannelAction<BasicGetResult?>
@@ -409,7 +413,10 @@ public class PullingConsumer : IPullingConsumer<PullResult>
             this.autoAck = autoAck;
         }
 
-        public BasicGetResult? Invoke(IModel model) => model.BasicGet(queue.Name, autoAck);
+        public async Task<BasicGetResult?> InvokeAsync(IChannel channel, CancellationToken cancellationToken = default)
+        {
+            return await channel.BasicGetAsync(queue.Name, autoAck, cancellationToken);
+        }
     }
 
     private readonly struct BasicAckAction : IPersistentChannelAction<bool>
@@ -423,9 +430,9 @@ public class PullingConsumer : IPullingConsumer<PullResult>
             this.multiple = multiple;
         }
 
-        public bool Invoke(IModel model)
+        public async Task<bool> InvokeAsync(IChannel channel, CancellationToken cancellationToken = default)
         {
-            model.BasicAck(deliveryTag, multiple);
+            await channel.BasicAckAsync(deliveryTag, multiple, cancellationToken);
             return true;
         }
     }
@@ -443,9 +450,9 @@ public class PullingConsumer : IPullingConsumer<PullResult>
             this.requeue = requeue;
         }
 
-        public bool Invoke(IModel model)
+        public async Task<bool> InvokeAsync(IChannel channel, CancellationToken cancellationToken = default)
         {
-            model.BasicNack(deliveryTag, multiple, requeue);
+            await channel.BasicNackAsync(deliveryTag, multiple, requeue, cancellationToken);
             return true;
         }
     }
@@ -506,8 +513,10 @@ public class PullingConsumer<T> : IPullingConsumer<PullResult<T>>
     }
 
     /// <inheritdoc />
-    public void Dispose()
+    public virtual void Dispose()
     {
+#pragma warning disable IDISP007 // the injected here is created in the calling method so it should be disposed
         consumer.Dispose();
+#pragma warning restore IDISP007
     }
 }

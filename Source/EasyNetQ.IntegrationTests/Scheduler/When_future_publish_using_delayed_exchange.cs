@@ -19,7 +19,7 @@ public class When_publish_and_subscribe_with_delay_using_delay_exchange : IDispo
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         serviceProvider?.Dispose();
     }

@@ -15,7 +15,7 @@ public class EasyNetQBuilderSystemTextJsonExtensionsTests
 
         register(easyNetQBuilder);
 
-        var serviceProvider = serviceCollection.BuildServiceProvider();
+        using var serviceProvider = serviceCollection.BuildServiceProvider();
         var registeredServiceDescriptor = serviceProvider.GetService<ISerializer>();
 
         Assert.NotNull(registeredServiceDescriptor);

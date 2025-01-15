@@ -21,51 +21,62 @@ public class When_auto_subscribing : IDisposable
     public When_auto_subscribing()
     {
         mockBuilder = new MockBuilder();
-
         var services = new ServiceCollection();
         serviceProvider = services.BuildServiceProvider();
-
-        var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, serviceProvider, "my_app");
-        autoSubscriber.Subscribe([typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>)]);
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
+        serviceProvider?.Dispose();
     }
 
     [Fact]
-    public void Should_have_declared_the_queues()
+    public async Task Should_have_declared_the_queues()
     {
-        Action<string> assertQueueDeclared = queueName =>
-            mockBuilder.Channels[1].Received().QueueDeclare(
+        async Task AssertQueueDeclared(string queueName)
+        {
+            await mockBuilder.Channels[1].Received().QueueDeclareAsync(
                 Arg.Is(queueName),
                 Arg.Is(true),
                 Arg.Is(false),
                 Arg.Is(false),
-                Arg.Is((IDictionary<string, object>)null)
+                Arg.Is((IDictionary<string, object>)null),
+                Arg.Any<bool>(),
+                Arg.Any<bool>(),
+                Arg.Any<CancellationToken>()
             );
+        }
 
-        assertQueueDeclared(expectedQueueName1);
-        assertQueueDeclared(expectedQueueName2);
-        assertQueueDeclared(expectedQueueName3);
+        var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, serviceProvider, "my_app");
+        await autoSubscriber.SubscribeAsync([typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>)]);
+
+        await AssertQueueDeclared(expectedQueueName1);
+        await AssertQueueDeclared(expectedQueueName2);
+        await AssertQueueDeclared(expectedQueueName3);
     }
 
     [Fact]
-    public void Should_have_bound_to_queues()
+    public async Task Should_have_bound_to_queues()
     {
-        Action<int, string, string> assertConsumerStarted =
-            (_, queueName, topicName) =>
-                mockBuilder.Channels[1].Received().QueueBind(
-                    Arg.Is(queueName),
-                    Arg.Any<string>(),
-                    Arg.Is(topicName),
-                    Arg.Is((IDictionary<string, object>)null)
-                );
+        async Task AssertConsumerStarted(int _, string queueName, string topicName)
+        {
+            await mockBuilder.Channels[1].Received().QueueBindAsync(
+                Arg.Is(queueName),
+                Arg.Any<string>(),
+                Arg.Is(topicName),
+                Arg.Is((IDictionary<string, object>)null),
+                Arg.Any<bool>(),
+                Arg.Any<CancellationToken>()
+            );
+        }
 
-        assertConsumerStarted(1, expectedQueueName1, "#");
-        assertConsumerStarted(2, expectedQueueName2, "#");
-        assertConsumerStarted(3, expectedQueueName3, "Important");
+        var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, serviceProvider, "my_app");
+        await autoSubscriber.SubscribeAsync([typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>)]);
+
+        await AssertConsumerStarted(1, expectedQueueName1, "#");
+        await AssertConsumerStarted(2, expectedQueueName2, "#");
+        await AssertConsumerStarted(3, expectedQueueName3, "Important");
     }
 
     [Fact]

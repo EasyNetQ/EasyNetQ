@@ -18,7 +18,7 @@ public class ErrorRetryTests
 
     [Fact]
     [Traits.Explicit("Requires a RabbitMQ instance and messages on disk in the given directory")]
-    public void Should_republish_all_error_messages_in_the_given_directory()
+    public async Task Should_republish_all_error_messages_in_the_given_directory()
     {
         var parameters = new QueueParameters
         {
@@ -29,9 +29,9 @@ public class ErrorRetryTests
         };
 
         var rawErrorMessages = new MessageReader()
-            .ReadMessages(parameters, conventions.ErrorQueueNamingConvention(default));
+           .ReadMessagesAsync(parameters, conventions.ErrorQueueNamingConvention(default));
 
-        errorRetry.RetryErrors(rawErrorMessages, parameters);
+        await errorRetry.RetryErrorsAsync(rawErrorMessages, parameters);
     }
 }
 

@@ -15,7 +15,7 @@ public class DockerProxy : IDisposable
         client = dockerConfiguration.CreateClient();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         client.Dispose();
         dockerConfiguration.Dispose();

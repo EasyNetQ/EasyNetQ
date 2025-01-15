@@ -13,19 +13,21 @@ public class When_an_action_is_invoked_that_throws_using_multi_channel : IDispos
     public When_an_action_is_invoked_that_throws_using_multi_channel()
     {
         var channelFactory = Substitute.For<IPersistentChannelFactory>();
-        var producerConnection = Substitute.For<IProducerConnection>();
+        using var producerConnection = Substitute.For<IProducerConnection>();
         var consumerConnection = Substitute.For<IConsumerConnection>();
         var channel = Substitute.For<IPersistentChannel>();
-        var model = Substitute.For<IModel>();
+        var model = Substitute.For<IChannel>();
 
+#pragma warning disable IDISP004
         channelFactory.CreatePersistentChannel(producerConnection, new PersistentChannelOptions()).Returns(channel);
+#pragma warning restore IDISP004
         channel.InvokeChannelActionAsync<int, FuncBasedPersistentChannelAction<int>>(default)
-            .ReturnsForAnyArgs(x => ((FuncBasedPersistentChannelAction<int>)x[0]).Invoke(model));
+            .ReturnsForAnyArgs(x => ((FuncBasedPersistentChannelAction<int>)x[0]).InvokeAsync(model, CancellationToken.None).Result);
 
         dispatcher = new MultiPersistentChannelDispatcher(1, producerConnection, consumerConnection, channelFactory);
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         dispatcher.Dispose();
     }
@@ -45,7 +47,7 @@ public class When_an_action_is_invoked_that_throws_using_multi_channel : IDispos
             () => dispatcher.InvokeAsync<int>(_ => throw new Exception(), PersistentChannelDispatchOptions.ProducerTopology).AsTask()
         );
 
-        var result = await dispatcher.InvokeAsync(_ => 42, PersistentChannelDispatchOptions.ProducerTopology);
+        var result = await dispatcher.InvokeAsync(_ => Task.FromResult(42), PersistentChannelDispatchOptions.ProducerTopology);
         result.Should().Be(42);
     }
 

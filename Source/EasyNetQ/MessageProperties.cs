@@ -9,11 +9,11 @@ public readonly record struct MessageProperties
 {
     public static MessageProperties Empty => default;
 
-    internal MessageProperties(IBasicProperties basicProperties)
+    internal MessageProperties(IReadOnlyBasicProperties basicProperties)
     {
         ContentType = basicProperties.ContentType;
         ContentEncoding = basicProperties.ContentEncoding;
-        DeliveryMode = basicProperties.DeliveryMode;
+        DeliveryMode = (byte)basicProperties.DeliveryMode;
         Priority = basicProperties.Priority;
         CorrelationId = basicProperties.CorrelationId;
         ReplyTo = basicProperties.ReplyTo;

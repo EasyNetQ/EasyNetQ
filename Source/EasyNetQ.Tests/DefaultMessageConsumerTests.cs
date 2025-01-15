@@ -11,7 +11,7 @@ public class DefaultMessageConsumerTests
     {
         var serviceCollection = new ServiceCollection();
         serviceCollection.TryAddSingleton<MyMessageConsumer>();
-        var serviceProvider = serviceCollection.BuildServiceProvider();
+        using var serviceProvider = serviceCollection.BuildServiceProvider();
 
         var consumer = new DefaultAutoSubscriberMessageDispatcher(serviceProvider);
         var message = new MyMessage();

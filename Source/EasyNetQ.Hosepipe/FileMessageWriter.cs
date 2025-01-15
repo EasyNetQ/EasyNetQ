@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 
 namespace EasyNetQ.Hosepipe;
 
@@ -6,7 +7,10 @@ public class FileMessageWriter : IMessageWriter
 {
     private static readonly Regex InvalidCharRegex = new(@"[\\\/:\*\?\""\<\>|]", RegexOptions.Compiled);
 
-    public void Write(IEnumerable<HosepipeMessage> messages, QueueParameters parameters)
+    public async Task WriteAsync(
+        IAsyncEnumerable<HosepipeMessage> messages,
+        QueueParameters parameters,
+        CancellationToken cancellationToken = default)
     {
         if (!Directory.Exists(parameters.MessagesOutputDirectory))
         {
@@ -15,7 +19,7 @@ public class FileMessageWriter : IMessageWriter
         }
 
         var count = 0;
-        foreach (var message in messages)
+        await foreach (var message in messages)
         {
             var uniqueFileName = SanitiseQueueName(parameters.QueueName) + "." + count;
 
@@ -28,9 +32,9 @@ public class FileMessageWriter : IMessageWriter
                 Console.WriteLine("Overwriting existing message file: {0}", bodyPath);
             }
 
-            File.WriteAllText(bodyPath, message.Body);
-            File.WriteAllText(propertiesPath, Newtonsoft.Json.JsonConvert.SerializeObject(message.Properties));
-            File.WriteAllText(infoPath, Newtonsoft.Json.JsonConvert.SerializeObject(message.Info));
+            await File.WriteAllTextAsync(bodyPath, message.Body, cancellationToken);
+            await File.WriteAllTextAsync(propertiesPath, JsonConvert.SerializeObject(message.Properties), cancellationToken);
+            await File.WriteAllTextAsync(infoPath, JsonConvert.SerializeObject(message.Info), cancellationToken);
 
             count++;
         }

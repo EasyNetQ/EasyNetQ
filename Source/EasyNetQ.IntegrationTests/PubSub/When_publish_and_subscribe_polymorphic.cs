@@ -18,7 +18,7 @@ public class When_publish_and_subscribe_polymorphic : IDisposable
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         serviceProvider?.Dispose();
     }

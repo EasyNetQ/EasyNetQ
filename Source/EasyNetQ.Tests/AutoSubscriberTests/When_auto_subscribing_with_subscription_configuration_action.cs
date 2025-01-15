@@ -1,14 +1,16 @@
+using System;
 using EasyNetQ.AutoSubscribe;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests;
 
-public class When_auto_subscribing_with_subscription_configuration_action
+public class When_auto_subscribing_with_subscription_configuration_action : IDisposable
 {
     private readonly IBus bus;
     private readonly ServiceProvider serviceProvider;
     private Action<ISubscriptionConfiguration> capturedAction;
     private readonly IPubSub pubSub;
+    private bool disposed;
 
     public When_auto_subscribing_with_subscription_configuration_action()
     {
@@ -28,7 +30,9 @@ public class When_auto_subscribing_with_subscription_configuration_action
                     .WithPriority(10)
         };
 
+#pragma warning disable IDISP004
         pubSub.SubscribeAsync(
+#pragma warning restore IDISP004
                 Arg.Is("MyActionTest"),
                 Arg.Any<Func<MessageA, CancellationToken, Task>>(),
                 Arg.Any<Action<ISubscriptionConfiguration>>()
@@ -36,13 +40,17 @@ public class When_auto_subscribing_with_subscription_configuration_action
             .Returns(Task.FromResult(new SubscriptionResult()))
             .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
 
+#pragma warning disable IDISP004
         autoSubscriber.Subscribe([typeof(MyConsumerWithAction)]);
+#pragma warning restore IDISP004
     }
 
     [Fact]
     public void Should_have_called_subscribe()
     {
+#pragma warning disable IDISP004
         pubSub.Received().SubscribeAsync(
+#pragma warning restore IDISP004
             Arg.Any<string>(),
             Arg.Any<Func<MessageA, CancellationToken, Task>>(),
             Arg.Any<Action<ISubscriptionConfiguration>>()
@@ -60,6 +68,15 @@ public class When_auto_subscribing_with_subscription_configuration_action
         subscriptionConfiguration.PrefetchCount.Should().Be(10);
         subscriptionConfiguration.Priority.Should().Be(10);
         subscriptionConfiguration.QueueArguments.Should().BeEquivalentTo(new Dictionary<string, object> { { "x-expires", 10 } });
+    }
+
+    public virtual void Dispose()
+    {
+        if (disposed)
+            return;
+
+        disposed = true;
+        serviceProvider?.Dispose();
     }
 
     // Discovered by reflection over test assembly, do not remove.

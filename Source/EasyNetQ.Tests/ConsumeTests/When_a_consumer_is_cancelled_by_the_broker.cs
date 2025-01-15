@@ -14,16 +14,20 @@ public class When_a_consumer_is_cancelled_by_the_broker : IDisposable
 
         var queue = new Queue("my_queue", false);
 
+#pragma warning disable IDISP004
         mockBuilder.Bus.Advanced.Consume(
+#pragma warning restore IDISP004
             queue,
             (_, _, _) => Task.Run(() => { }),
             c => c.WithConsumerTag("consumer_tag")
         );
 
-        var are = new AutoResetEvent(false);
-        mockBuilder.EventBus.Subscribe((in ConsumerModelDisposedEvent _) => are.Set());
+        using var are = new AutoResetEvent(false);
+#pragma warning disable IDISP004
+        mockBuilder.EventBus.Subscribe((in ConsumerChannelDisposedEvent _) => are.Set());
+#pragma warning restore IDISP004
 
-        mockBuilder.Consumers[0].HandleBasicCancel("consumer_tag").GetAwaiter().GetResult();
+        mockBuilder.Consumers[0].HandleBasicCancelAsync("consumer_tag").GetAwaiter().GetResult();
 
         if (!are.WaitOne(5000))
         {
@@ -31,7 +35,7 @@ public class When_a_consumer_is_cancelled_by_the_broker : IDisposable
         }
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }
@@ -39,6 +43,6 @@ public class When_a_consumer_is_cancelled_by_the_broker : IDisposable
     [Fact]
     public void Should_dispose_of_the_model()
     {
-        mockBuilder.Consumers[0].Model.Received().Dispose();
+        mockBuilder.Consumers[0].Channel.Received().Dispose();
     }
 }

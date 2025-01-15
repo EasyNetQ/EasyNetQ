@@ -93,7 +93,7 @@ public static partial class AdvancedBusExtensions
         return bus.Consume<T>(queue, async (m, i, c) =>
         {
             await handler(m, i, c).ConfigureAwait(false);
-            return AckStrategies.Ack;
+            return AckStrategies.AckAsync;
         }, configure);
     }
 
@@ -256,7 +256,7 @@ public static partial class AdvancedBusExtensions
     public static IDisposable Consume(
         this IAdvancedBus bus,
         Queue queue,
-        Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, Task<AckStrategy>> handler
+        Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, Task<AckStrategyAsync>> handler
     ) => bus.Consume(queue, handler, _ => { });
 
     /// <summary>
@@ -295,7 +295,7 @@ public static partial class AdvancedBusExtensions
     public static IDisposable Consume(
         this IAdvancedBus bus,
         Queue queue,
-        Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, Task<AckStrategy>> handler,
+        Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, Task<AckStrategyAsync>> handler,
         Action<ISimpleConsumeConfiguration> configure
     ) => bus.Consume(queue, (m, p, i, _) => handler(m, p, i), configure);
 
@@ -335,7 +335,7 @@ public static partial class AdvancedBusExtensions
         return bus.Consume(queue, async (m, p, i, c) =>
         {
             await handler(m, p, i, c).ConfigureAwait(false);
-            return AckStrategies.Ack;
+            return AckStrategies.AckAsync;
         }, configure);
     }
 

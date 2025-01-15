@@ -22,7 +22,7 @@ public class When_request_and_respond_in_flight_during_shutdown : IDisposable
     {
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
-        var requestArrived = new ManualResetEventSlim(false);
+        using var requestArrived = new ManualResetEventSlim(false);
         var responder = await bus.Rpc.RespondAsync<Request, Response>(
             async (r, c) =>
             {
@@ -43,7 +43,7 @@ public class When_request_and_respond_in_flight_during_shutdown : IDisposable
         cts.IsCancellationRequested.Should().BeTrue();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         serviceProvider?.Dispose();
     }

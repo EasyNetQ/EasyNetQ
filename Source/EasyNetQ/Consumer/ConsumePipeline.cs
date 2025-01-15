@@ -8,7 +8,7 @@ public readonly record struct ConsumeContext(
     in CancellationToken CancellationToken
 );
 
-public delegate ValueTask<AckStrategy> ConsumeDelegate(ConsumeContext context);
+public delegate ValueTask<AckStrategyAsync> ConsumeDelegate(ConsumeContext context);
 
 public sealed class ConsumePipelineBuilder
 {
@@ -34,7 +34,7 @@ public sealed class ConsumePipelineBuilder
 
     public ConsumeDelegate Build()
     {
-        ConsumeDelegate result = _ => new ValueTask<AckStrategy>(AckStrategies.NackWithRequeue);
+        ConsumeDelegate result = _ => new ValueTask<AckStrategyAsync>(AckStrategies.NackWithRequeueAsync);
         for (var i = middlewares.Count - 1; i >= 0; i--)
             result = middlewares[i](result);
         return result;

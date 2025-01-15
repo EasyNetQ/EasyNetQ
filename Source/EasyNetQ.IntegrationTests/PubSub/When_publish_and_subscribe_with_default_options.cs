@@ -21,7 +21,7 @@ public class When_publish_and_subscribe_with_default_options : IDisposable
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         serviceProvider?.Dispose();
     }

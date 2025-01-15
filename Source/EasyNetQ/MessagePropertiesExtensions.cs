@@ -34,7 +34,7 @@ public static class MessagePropertiesExtensions
     {
         if (source.ContentTypePresent) basicProperties.ContentType = source.ContentType;
         if (source.ContentEncodingPresent) basicProperties.ContentEncoding = source.ContentEncoding;
-        if (source.DeliveryModePresent) basicProperties.DeliveryMode = source.DeliveryMode;
+        if (source.DeliveryModePresent) basicProperties.DeliveryMode = (DeliveryModes)source.DeliveryMode;
         if (source.PriorityPresent) basicProperties.Priority = source.Priority;
         if (source.CorrelationIdPresent) basicProperties.CorrelationId = source.CorrelationId;
         if (source.ReplyToPresent) basicProperties.ReplyTo = source.ReplyTo;

@@ -3,12 +3,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests;
 
-public class When_auto_subscribing_async_with_subscription_configuration_action_and_attribute
+public class When_auto_subscribing_async_with_subscription_configuration_action_and_attribute : IDisposable
 {
     private readonly IBus bus;
     private readonly ServiceProvider serviceProvider;
     private Action<ISubscriptionConfiguration> capturedAction;
     private readonly IPubSub pubSub;
+    private bool disposed;
 
     public When_auto_subscribing_async_with_subscription_configuration_action_and_attribute()
     {
@@ -28,7 +29,9 @@ public class When_auto_subscribing_async_with_subscription_configuration_action_
                     .WithPriority(11)
         };
 
+#pragma warning disable IDISP004
         pubSub.SubscribeAsync(
+#pragma warning restore IDISP004
                 Arg.Is("MyActionAndAttributeTest"),
                 Arg.Any<Func<MessageA, CancellationToken, Task>>(),
                 Arg.Any<Action<ISubscriptionConfiguration>>()
@@ -36,13 +39,17 @@ public class When_auto_subscribing_async_with_subscription_configuration_action_
             .Returns(Task.FromResult(new SubscriptionResult()))
             .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
 
+#pragma warning disable IDISP004
         autoSubscriber.Subscribe([typeof(MyConsumerWithActionAndAttribute)]);
+#pragma warning restore IDISP004
     }
 
     [Fact]
     public void Should_have_called_subscribe_async()
     {
+#pragma warning disable IDISP004
         pubSub.Received().SubscribeAsync(
+#pragma warning restore IDISP004
             Arg.Any<string>(),
             Arg.Any<Func<MessageA, CancellationToken, Task>>(),
             Arg.Any<Action<ISubscriptionConfiguration>>()
@@ -62,6 +69,15 @@ public class When_auto_subscribing_async_with_subscription_configuration_action_
         subscriptionConfiguration.PrefetchCount.Should().Be(10);
         subscriptionConfiguration.Priority.Should().Be(10);
         subscriptionConfiguration.QueueArguments.Should().BeEquivalentTo(new Dictionary<string, object> { { "x-expires", 10 } });
+    }
+
+    public virtual void Dispose()
+    {
+        if (disposed)
+            return;
+
+        disposed = true;
+        serviceProvider?.Dispose();
     }
 
     // Discovered by reflection over test assembly, do not remove.
