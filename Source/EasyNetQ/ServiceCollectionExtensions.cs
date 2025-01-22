@@ -22,6 +22,7 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton(s =>
         {
             var configuration = connectionConfigurationFactory(s);
+
             configuration.SetDefaultProperties();
             return configuration;
         });
