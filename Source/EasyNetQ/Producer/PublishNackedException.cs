@@ -5,7 +5,7 @@ namespace EasyNetQ.Producer;
 /// <summary>
 ///     This exception indicates that a message was nacked
 /// </summary>
-[Serializable]
+
 public class PublishNackedException : Exception
 {
     //

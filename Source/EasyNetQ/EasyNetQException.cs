@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace EasyNetQ;
 
-[Serializable]
+
 public class EasyNetQException : Exception
 {
     /// <inheritdoc />
@@ -18,7 +18,7 @@ public class EasyNetQException : Exception
     public EasyNetQException(string? message, Exception? inner) : base(message, inner) { }
 }
 
-[Serializable]
+
 public class EasyNetQResponderException : EasyNetQException
 {
     /// <inheritdoc />
