@@ -304,21 +304,17 @@ namespace EasyNetQ
         public static EasyNetQ.Consumer.ConsumePipelineBuilder UseScope(this EasyNetQ.Consumer.ConsumePipelineBuilder pipelineBuilder) { }
         public static EasyNetQ.IEasyNetQBuilder UseVersionedMessage(this EasyNetQ.IEasyNetQBuilder builder) { }
     }
-    [System.Serializable]
     public class EasyNetQException : System.Exception
     {
         public EasyNetQException() { }
         public EasyNetQException(string? message) { }
-        protected EasyNetQException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public EasyNetQException(string format, params object?[] args) { }
         public EasyNetQException(string? message, System.Exception? inner) { }
     }
-    [System.Serializable]
     public class EasyNetQResponderException : EasyNetQ.EasyNetQException
     {
         public EasyNetQResponderException() { }
         public EasyNetQResponderException(string? message) { }
-        protected EasyNetQResponderException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public EasyNetQResponderException(string format, params object?[] args) { }
         public EasyNetQResponderException(string? message, System.Exception? inner) { }
     }
@@ -1773,28 +1769,22 @@ namespace EasyNetQ.Producer
         public EasyNetQ.Producer.IPublishPendingConfirmation CreatePendingConfirmation(RabbitMQ.Client.IModel model) { }
         public void Dispose() { }
     }
-    [System.Serializable]
     public class PublishInterruptedException : System.Exception
     {
         public PublishInterruptedException() { }
         public PublishInterruptedException(string? message) { }
-        protected PublishInterruptedException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public PublishInterruptedException(string? message, System.Exception? inner) { }
     }
-    [System.Serializable]
     public class PublishNackedException : System.Exception
     {
         public PublishNackedException() { }
         public PublishNackedException(string? message) { }
-        protected PublishNackedException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public PublishNackedException(string? message, System.Exception? inner) { }
     }
-    [System.Serializable]
     public class PublishReturnedException : System.Exception
     {
         public PublishReturnedException() { }
         public PublishReturnedException(string? message) { }
-        protected PublishReturnedException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public PublishReturnedException(string? message, System.Exception? inner) { }
     }
 }
