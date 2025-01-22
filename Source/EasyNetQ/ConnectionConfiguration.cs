@@ -21,6 +21,7 @@ public class ConnectionConfiguration
     /// </summary>
     public ConnectionConfiguration()
     {
+        ClientName = "EasyNetQ";
         Port = DefaultPort;
         VirtualHost = "/";
         UserName = "guest";
@@ -149,6 +150,8 @@ public class ConnectionConfiguration
     /// </summary>
     /// <remarks>For concurrency greater than one, the consumers could process messages in any order, not in the order they receive them</remarks>
     public int? ConsumerDispatcherConcurrency { get; set; } = null;
+
+    public string ClientName { get; set; }
 }
 
 /// <summary>
