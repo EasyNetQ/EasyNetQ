@@ -1,5 +1,6 @@
 using System;
 using EasyNetQ.Internals;
+using EasyNetQ.Topology;
 
 namespace EasyNetQ;
 
@@ -29,9 +30,25 @@ public delegate string QueueTypeConvention(Type messageType);
 public delegate string ErrorQueueNameConvention(MessageReceivedInfo receivedInfo);
 
 /// <summary>
+///     Convention for error queue type
+/// </summary>
+public delegate string? ErrorQueueTypeConvention();
+
+/// <summary>
 ///     Convention for error exchange naming
 /// </summary>
 public delegate string ErrorExchangeNameConvention(MessageReceivedInfo receivedInfo);
+
+/// <summary>
+///     Convention for error exchange type
+/// </summary>
+public delegate string ErrorExchangeTypeConvention();
+
+
+/// <summary>
+///     Convention for error exchange Routing Key
+/// </summary>
+public delegate string ErrorExchangeRoutingKeyConvention(MessageReceivedInfo receivedInfo);
 
 /// <summary>
 ///     Convention for rpc routing key naming
@@ -109,9 +126,24 @@ public interface IConventions
     ErrorQueueNameConvention ErrorQueueNamingConvention { get; }
 
     /// <summary>
+    ///     Convention for error queue type
+    /// </summary>
+    ErrorQueueTypeConvention ErrorQueueTypeConvention { get; }
+
+    /// <summary>
     ///     Convention for error exchange naming
     /// </summary>
     ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; }
+
+    /// <summary>
+    ///     Convention for error exchange type
+    /// </summary>
+    ErrorExchangeTypeConvention ErrorExchangeTypeConvention { get; }
+
+    /// <summary>
+    ///     Convention for error exchange Routing key
+    /// </summary>
+    ErrorExchangeRoutingKeyConvention ErrorExchangeRoutingKeyConvention { get; }
 }
 
 /// <inheritdoc />
@@ -165,6 +197,10 @@ public class Conventions : IConventions
 
         ErrorQueueNamingConvention = _ => "EasyNetQ_Default_Error_Queue";
         ErrorExchangeNamingConvention = receivedInfo => "ErrorExchange_" + receivedInfo.RoutingKey;
+        ErrorQueueTypeConvention = () => null;
+        ErrorExchangeTypeConvention = () => ExchangeType.Direct;
+        ErrorExchangeRoutingKeyConvention = receivedInfo => receivedInfo.RoutingKey;
+
         RpcRequestExchangeNamingConvention = _ => "easy_net_q_rpc";
         RpcResponseExchangeNamingConvention = _ => "easy_net_q_rpc";
         RpcReturnQueueNamingConvention = _ => "easynetq.response." + Guid.NewGuid();
@@ -196,7 +232,13 @@ public class Conventions : IConventions
     public ErrorQueueNameConvention ErrorQueueNamingConvention { get; set; }
 
     /// <inheritdoc />
+    public ErrorQueueTypeConvention ErrorQueueTypeConvention { get; set; }
+
+    /// <inheritdoc />
     public ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; set; }
+
+    /// <inheritdoc />
+    public ErrorExchangeTypeConvention ErrorExchangeTypeConvention { get; set; }
 
     /// <inheritdoc />
     public RpcExchangeNameConvention RpcRequestExchangeNamingConvention { get; set; }
@@ -209,4 +251,7 @@ public class Conventions : IConventions
 
     /// <inheritdoc />
     public ConsumerTagConvention ConsumerTagConvention { get; set; }
+
+    /// <inheritdoc />
+    public ErrorExchangeRoutingKeyConvention ErrorExchangeRoutingKeyConvention { get; set; }
 }

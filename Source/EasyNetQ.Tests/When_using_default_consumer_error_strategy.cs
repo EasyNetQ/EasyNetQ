@@ -1,6 +1,7 @@
 // ReSharper disable InconsistentNaming;
 
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using EasyNetQ.Consumer;
@@ -19,7 +20,10 @@ public class When_using_default_consumer_error_strategy
         var customConventions = new Conventions(new DefaultTypeNameSerializer())
         {
             ErrorQueueNamingConvention = _ => "CustomEasyNetQErrorQueueName",
-            ErrorExchangeNamingConvention = info => "CustomErrorExchangePrefixName." + info.RoutingKey
+            ErrorExchangeNamingConvention = info => "CustomErrorExchangePrefixName." + info.RoutingKey,
+            ErrorQueueTypeConvention = () => QueueType.Quorum,
+            ErrorExchangeTypeConvention = () => ExchangeType.Topic,
+            ErrorExchangeRoutingKeyConvention = _ => "CustomRoutingKey"
         };
 
         mockBuilder = new MockBuilder();
@@ -90,6 +94,12 @@ public class When_using_default_consumer_error_strategy
     {
         await errorStrategy.HandleConsumerErrorAsync(consumerExecutionContext, new Exception(), default);
 
-        mockBuilder.Channels[0].Received().QueueDeclare("CustomEasyNetQErrorQueueName", true, false, false, null);
+        mockBuilder.Channels[0].Received().QueueDeclare(
+            "CustomEasyNetQErrorQueueName",
+            true,
+            false,
+            false,
+            Arg.Is<IDictionary<string, object>>(x => x.ContainsKey("x-queue-type") && x["x-queue-type"].Equals(QueueType.Quorum))
+        );
     }
 }
