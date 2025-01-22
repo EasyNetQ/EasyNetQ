@@ -121,7 +121,10 @@ namespace EasyNetQ
         public Conventions(EasyNetQ.ITypeNameSerializer typeNameSerializer) { }
         public EasyNetQ.ConsumerTagConvention ConsumerTagConvention { get; set; }
         public EasyNetQ.ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; set; }
+        public EasyNetQ.ErrorExchangeRoutingKeyConvention ErrorExchangeRoutingKeyConvention { get; set; }
+        public EasyNetQ.ErrorExchangeTypeConvention ErrorExchangeTypeConvention { get; set; }
         public EasyNetQ.ErrorQueueNameConvention ErrorQueueNamingConvention { get; set; }
+        public EasyNetQ.ErrorQueueTypeConvention ErrorQueueTypeConvention { get; set; }
         public EasyNetQ.ExchangeNameConvention ExchangeNamingConvention { get; set; }
         public EasyNetQ.QueueNameConvention QueueNamingConvention { get; set; }
         public EasyNetQ.QueueTypeConvention QueueTypeConvention { get; set; }
@@ -248,7 +251,10 @@ namespace EasyNetQ
         public EasyNetQResponderException(string message, System.Exception inner) { }
     }
     public delegate string ErrorExchangeNameConvention(EasyNetQ.MessageReceivedInfo receivedInfo);
+    public delegate string ErrorExchangeRoutingKeyConvention(EasyNetQ.MessageReceivedInfo receivedInfo);
+    public delegate string ErrorExchangeTypeConvention();
     public delegate string ErrorQueueNameConvention(EasyNetQ.MessageReceivedInfo receivedInfo);
+    public delegate string? ErrorQueueTypeConvention();
     public sealed class EventBus : EasyNetQ.IEventBus
     {
         public EventBus(EasyNetQ.Logging.ILogger<EasyNetQ.EventBus> logger) { }
@@ -318,7 +324,10 @@ namespace EasyNetQ
     {
         EasyNetQ.ConsumerTagConvention ConsumerTagConvention { get; }
         EasyNetQ.ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; }
+        EasyNetQ.ErrorExchangeRoutingKeyConvention ErrorExchangeRoutingKeyConvention { get; }
+        EasyNetQ.ErrorExchangeTypeConvention ErrorExchangeTypeConvention { get; }
         EasyNetQ.ErrorQueueNameConvention ErrorQueueNamingConvention { get; }
+        EasyNetQ.ErrorQueueTypeConvention ErrorQueueTypeConvention { get; }
         EasyNetQ.ExchangeNameConvention ExchangeNamingConvention { get; }
         EasyNetQ.QueueNameConvention QueueNamingConvention { get; }
         EasyNetQ.QueueTypeConvention QueueTypeConvention { get; }
@@ -492,6 +501,7 @@ namespace EasyNetQ
         EasyNetQ.ISubscriptionConfiguration WithMaxLength(int maxLength);
         EasyNetQ.ISubscriptionConfiguration WithMaxLengthBytes(int maxLengthBytes);
         EasyNetQ.ISubscriptionConfiguration WithMaxPriority(byte priority);
+        EasyNetQ.ISubscriptionConfiguration WithPerQueueMessageTTl(System.TimeSpan ttl);
         EasyNetQ.ISubscriptionConfiguration WithPrefetchCount(ushort prefetchCount);
         EasyNetQ.ISubscriptionConfiguration WithPriority(int priority);
         EasyNetQ.ISubscriptionConfiguration WithQueueMode(string queueMode = "default");
