@@ -29,9 +29,4 @@ public class PublishInterruptedException : Exception
     public PublishInterruptedException(string? message, Exception? inner) : base(message, inner)
     {
     }
-
-    /// <inheritdoc />
-    protected PublishInterruptedException(SerializationInfo info, StreamingContext context) : base(info, context)
-    {
-    }
 }
