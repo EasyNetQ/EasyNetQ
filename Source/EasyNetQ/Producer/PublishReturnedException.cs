@@ -5,7 +5,7 @@ namespace EasyNetQ.Producer;
 /// <summary>
 ///     This exception indicates that a message was returned
 /// </summary>
-[Serializable]
+
 public class PublishReturnedException : Exception
 {
     //
@@ -27,11 +27,6 @@ public class PublishReturnedException : Exception
 
     /// <inheritdoc />
     public PublishReturnedException(string? message, Exception? inner) : base(message, inner)
-    {
-    }
-
-    /// <inheritdoc />
-    protected PublishReturnedException(SerializationInfo info, StreamingContext context) : base(info, context)
     {
     }
 }

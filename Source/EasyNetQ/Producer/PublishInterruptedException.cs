@@ -5,7 +5,7 @@ namespace EasyNetQ.Producer;
 /// <summary>
 ///     This exception indicates that a publish was interrupted(for instance, because of a reconnection)
 /// </summary>
-[Serializable]
+
 public class PublishInterruptedException : Exception
 {
     //
@@ -27,11 +27,6 @@ public class PublishInterruptedException : Exception
 
     /// <inheritdoc />
     public PublishInterruptedException(string? message, Exception? inner) : base(message, inner)
-    {
-    }
-
-    /// <inheritdoc />
-    protected PublishInterruptedException(SerializationInfo info, StreamingContext context) : base(info, context)
     {
     }
 }

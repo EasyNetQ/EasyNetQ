@@ -5,7 +5,7 @@ namespace EasyNetQ.Producer;
 /// <summary>
 ///     This exception indicates that a message was nacked
 /// </summary>
-[Serializable]
+
 public class PublishNackedException : Exception
 {
     //
@@ -27,11 +27,6 @@ public class PublishNackedException : Exception
 
     /// <inheritdoc />
     public PublishNackedException(string? message, Exception? inner) : base(message, inner)
-    {
-    }
-
-    /// <inheritdoc />
-    protected PublishNackedException(SerializationInfo info, StreamingContext context) : base(info, context)
     {
     }
 }
