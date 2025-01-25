@@ -23,6 +23,13 @@ public interface IResponderConfiguration
     IResponderConfiguration WithQueueName(string queueName);
 
     /// <summary>
+    /// Sets the routing key
+    /// </summary>
+    /// <param name="routingKey"></param>
+    /// <returns>Reference to the same <see cref="IResponderConfiguration"/> to allow methods chaining</returns>
+    IResponderConfiguration WithRoutingKey(string routingKey);
+
+    /// <summary>
     /// Configures the queue's durability
     /// </summary>
     /// <returns>Reference to the same <see cref="IResponderConfiguration"/> to allow methods chaining</returns>
@@ -68,6 +75,7 @@ internal class ResponderConfiguration : IResponderConfiguration
 
     public ushort PrefetchCount { get; private set; }
     public string? QueueName { get; private set; }
+    public string? RoutingKey { get; private set; }
     public bool Durable { get; private set; } = true;
 
     public IDictionary<string, object>? QueueArguments { get; private set; }
@@ -81,6 +89,12 @@ internal class ResponderConfiguration : IResponderConfiguration
     public IResponderConfiguration WithQueueName(string queueName)
     {
         QueueName = queueName;
+        return this;
+    }
+
+    public IResponderConfiguration WithRoutingKey(string routingKey)
+    {
+        RoutingKey = routingKey;
         return this;
     }
 
