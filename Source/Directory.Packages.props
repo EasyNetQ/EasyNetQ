@@ -15,13 +15,13 @@
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.*" />
     <PackageVersion Include="NSubstitute" Version="4.3.0" />
     <PackageVersion Include="NullGuard.Fody" Version="3.1.1" />
-    <PackageVersion Include="PublicApiGenerator" Version="11.1.0" />
+    <PackageVersion Include="PublicApiGenerator" Version="11.4.1" />
     <PackageVersion Include="RabbitMQ.Client" Version="6.8.*" />
-    <PackageVersion Include="Shouldly" Version="4.2.1" />
+    <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
-    <PackageVersion Include="xunit" Version="2.8.1" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.1" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.0.1" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.1" />
@@ -29,10 +29,10 @@
   </ItemGroup>
   <ItemGroup Condition="'$(IsPackable)' == 'true'">
     <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
-    <GlobalPackageReference Include="MinVer" Version="5.0.0" />
+    <GlobalPackageReference Include="MinVer" Version="6.0.0" />
   </ItemGroup>
   <ItemGroup>
     <GlobalPackageReference Include="Fody" Version="6.9.1" />
-    <GlobalPackageReference Condition="'$(TargetFramework)'!='net8'" Include="PolySharp" Version="1.14.1" />
+    <GlobalPackageReference Condition="'$(TargetFramework)'!='net8'" Include="PolySharp" Version="1.15.0" />
   </ItemGroup>
 </Project>
