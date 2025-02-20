@@ -251,17 +251,6 @@ public class InternalConsumer : IInternalConsumer
         foreach (var consumer in consumers.Values)
         {
             consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
-            foreach (var consumerTag in consumer.ConsumerTags)
-            {
-                try
-                {
-                    model?.BasicCancelNoWait(consumerTag);
-                }
-                catch (AlreadyClosedException)
-                {
-                }
-            }
-
             consumer.Dispose();
         }
 
