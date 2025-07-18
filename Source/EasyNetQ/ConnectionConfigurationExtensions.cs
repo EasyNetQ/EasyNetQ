@@ -22,7 +22,8 @@ internal static class ConnectionConfigurationExtensions
             if (hostConfiguration.Port == 0)
                 hostConfiguration.Port = configuration.Port;
 
-        var applicationNameAndPath = Environment.GetCommandLineArgs()[0];
+        var args = Environment.GetCommandLineArgs();
+        var applicationNameAndPath = args.Length > 0 ? Environment.GetCommandLineArgs()[0] : null;
 
         var applicationName = "unknown";
         var applicationPath = "unknown";
