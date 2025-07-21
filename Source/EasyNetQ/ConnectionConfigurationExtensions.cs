@@ -16,7 +16,7 @@ internal static class ConnectionConfigurationExtensions
         foreach (var hostConfiguration in configuration.Hosts)
             if (hostConfiguration.Port == 0)
                 hostConfiguration.Port = configuration.Port;
-        
+
         var args = Environment.GetCommandLineArgs();
         var applicationNameAndPath = args.Length > 0 ? args[0] : null;
 
