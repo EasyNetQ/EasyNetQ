@@ -1,6 +1,5 @@
-using System;
-using System.Threading;
 using EasyNetQ.Logging;
+
 
 namespace EasyNetQ.Internals;
 

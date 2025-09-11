@@ -308,7 +308,7 @@ public class When_the_handler_throws_an_exception : IDisposable
 
     private readonly MyMessage originalMessage;
     private ConsumerExecutionContext basicDeliverEventArgs;
-    private readonly IConsumerErrorStrategy consumerErrorStrategy;
+    private readonly IConsumeErrorStrategy consumerErrorStrategy;
     private readonly MockBuilder mockBuilder;
     private Exception raisedException;
 
@@ -319,7 +319,7 @@ public class When_the_handler_throws_an_exception : IDisposable
             ConsumerTagConvention = () => consumerTag
         };
 
-        consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
+        consumerErrorStrategy = Substitute.For<IConsumeErrorStrategy>();
         consumerErrorStrategy.HandleConsumerErrorAsync(default, null)
             .ReturnsForAnyArgs(i =>
             {

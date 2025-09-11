@@ -15,7 +15,7 @@ public class When_a_user_handler_is_executed
 {
     public When_a_user_handler_is_executed()
     {
-        var consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
+        var consumerErrorStrategy = Substitute.For<IConsumeErrorStrategy>();
 
         var handlerRunner = new HandlerRunner(Substitute.For<ILogger<IHandlerRunner>>(), consumerErrorStrategy);
 

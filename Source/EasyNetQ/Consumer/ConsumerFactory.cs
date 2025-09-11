@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Concurrent;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;

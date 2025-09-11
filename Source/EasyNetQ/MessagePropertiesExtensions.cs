@@ -1,8 +1,6 @@
 using RabbitMQ.Client;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
+using EasyNetQ.Internals;
 
 namespace EasyNetQ;
 
@@ -13,53 +11,30 @@ public static class MessagePropertiesExtensions
 {
     internal const string ConfirmationIdHeader = "EasyNetQ.Confirmation.Id";
 
-    internal static MessageProperties SetConfirmationId(this MessageProperties properties, ulong confirmationId)
+    public static MessageProperties SetHeader(in this MessageProperties source, string key, object? value)
     {
-        properties.Headers[ConfirmationIdHeader] = confirmationId.ToString();
-        return properties;
+        var headers = source.Headers ?? new Dictionary<string, object?>();
+        headers[key] = value;
+        return source with { Headers = headers };
     }
 
-    internal static bool TryGetConfirmationId(this MessageProperties properties, out ulong confirmationId)
+    internal static MessageProperties SetConfirmationId(in this MessageProperties properties, ulong confirmationId)
+        => properties.SetHeader(ConfirmationIdHeader, NumberHelpers.FormatULongToBytes(confirmationId));
+
+    internal static bool TryGetConfirmationId(in this MessageProperties properties, out ulong confirmationId)
     {
         confirmationId = 0;
-        return properties.Headers.TryGetValue(ConfirmationIdHeader, out var value) &&
-               ulong.TryParse(Encoding.UTF8.GetString(value as byte[] ?? Array.Empty<byte>()), out confirmationId);
+        return properties.Headers != null &&
+               properties.Headers.TryGetValue(ConfirmationIdHeader, out var value) &&
+               value is byte[] bytesValue &&
+               NumberHelpers.TryParseULongFromBytes(bytesValue, out confirmationId);
     }
 
-    public static void CopyFrom(this MessageProperties source, IBasicProperties basicProperties)
+    public static void CopyTo(in this MessageProperties source, IBasicProperties basicProperties)
     {
-        Preconditions.CheckNotNull(basicProperties, nameof(basicProperties));
-
-        if (basicProperties.IsContentTypePresent()) source.ContentType = basicProperties.ContentType;
-        if (basicProperties.IsContentEncodingPresent()) source.ContentEncoding = basicProperties.ContentEncoding;
-        if (basicProperties.IsDeliveryModePresent()) source.DeliveryMode = basicProperties.DeliveryMode;
-        if (basicProperties.IsPriorityPresent()) source.Priority = basicProperties.Priority;
-        if (basicProperties.IsCorrelationIdPresent()) source.CorrelationId = basicProperties.CorrelationId;
-        if (basicProperties.IsReplyToPresent()) source.ReplyTo = basicProperties.ReplyTo;
-        if (basicProperties.IsExpirationPresent())
-            source.Expiration = int.TryParse(basicProperties.Expiration, out var expirationMilliseconds)
-                ? TimeSpan.FromMilliseconds(expirationMilliseconds)
-                : default;
-        if (basicProperties.IsMessageIdPresent()) source.MessageId = basicProperties.MessageId;
-        if (basicProperties.IsTimestampPresent()) source.Timestamp = basicProperties.Timestamp.UnixTime;
-        if (basicProperties.IsTypePresent()) source.Type = basicProperties.Type;
-        if (basicProperties.IsUserIdPresent()) source.UserId = basicProperties.UserId;
-        if (basicProperties.IsAppIdPresent()) source.AppId = basicProperties.AppId;
-        if (basicProperties.IsClusterIdPresent()) source.ClusterId = basicProperties.ClusterId;
-
-        if (basicProperties.IsHeadersPresent())
-            source.Headers = basicProperties.Headers?.Count > 0
-                ? new Dictionary<string, object>(basicProperties.Headers)
-                : null;
-    }
-
-    public static void CopyTo(this MessageProperties source, IBasicProperties basicProperties)
-    {
-        Preconditions.CheckNotNull(basicProperties, nameof(basicProperties));
-
         if (source.ContentTypePresent) basicProperties.ContentType = source.ContentType;
         if (source.ContentEncodingPresent) basicProperties.ContentEncoding = source.ContentEncoding;
-        if (source.DeliveryModePresent) basicProperties.DeliveryMode = source.DeliveryMode;
+        if (source.DeliveryModePresent) basicProperties.DeliveryMode = (DeliveryModes)source.DeliveryMode;
         if (source.PriorityPresent) basicProperties.Priority = source.Priority;
         if (source.CorrelationIdPresent) basicProperties.CorrelationId = source.CorrelationId;
         if (source.ReplyToPresent) basicProperties.ReplyTo = source.ReplyTo;
@@ -74,7 +49,7 @@ public static class MessagePropertiesExtensions
         if (source.AppIdPresent) basicProperties.AppId = source.AppId;
         if (source.ClusterIdPresent) basicProperties.ClusterId = source.ClusterId;
 
-        if (source.HeadersPresent)
-            basicProperties.Headers = new Dictionary<string, object>(source.Headers);
+        if (source is { HeadersPresent: true, Headers: not null })
+            basicProperties.Headers = new Dictionary<string, object?>(source.Headers);
     }
 }

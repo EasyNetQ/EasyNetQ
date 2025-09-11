@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+using System.Threading;
 using EasyNetQ.Events;
 using RabbitMQ.Client;
 
@@ -6,7 +8,7 @@ namespace EasyNetQ.Consumer;
 /// <summary>
 ///     Represents a strategy of a message's acknowledgment
 /// </summary>
-public delegate AckResult AckStrategy(IModel model, ulong deliveryTag);
+public delegate Task<AckResult> AckStrategyAsync(IChannel model, ulong deliveryTag, CancellationToken cancellationToken);
 
 /// <summary>
 ///     Various strategies of a message's acknowledgment
@@ -16,27 +18,27 @@ public static class AckStrategies
     /// <summary>
     ///     Positive acknowledgment of a message
     /// </summary>
-    public static readonly AckStrategy Ack = (model, tag) =>
+    public static readonly AckStrategyAsync AckAsync = async (model, tag, cancellationToken) =>
     {
-        model.BasicAck(tag, false);
+        await model.BasicAckAsync(tag, false, cancellationToken);
         return AckResult.Ack;
     };
 
     /// <summary>
     ///     Negative acknowledgment of a message without requeue
     /// </summary>
-    public static readonly AckStrategy NackWithoutRequeue = (model, tag) =>
+    public static readonly AckStrategyAsync NackWithoutRequeueAsync = async (model, tag, cancellationToken) =>
     {
-        model.BasicNack(tag, false, false);
+        await model.BasicNackAsync(tag, false, false, cancellationToken);
         return AckResult.Nack;
     };
 
     /// <summary>
     ///     Negative acknowledgment of a message with requeue
     /// </summary>
-    public static readonly AckStrategy NackWithRequeue = (model, tag) =>
+    public static readonly AckStrategyAsync NackWithRequeueAsync = async (model, tag, cancellationToken) =>
     {
-        model.BasicNack(tag, false, true);
+        await model.BasicNackAsync(tag, false, true, cancellationToken);
         return AckResult.Nack;
     };
 }

@@ -1,5 +1,3 @@
-using System;
-
 namespace EasyNetQ;
 
 /// <summary>
@@ -19,5 +17,5 @@ public interface ITypeNameSerializer
     /// </summary>
     /// <param name="typeName">The serialized message type</param>
     /// <returns>The message type</returns>
-    Type DeSerialize(string typeName);
+    Type Deserialize(string typeName);
 }

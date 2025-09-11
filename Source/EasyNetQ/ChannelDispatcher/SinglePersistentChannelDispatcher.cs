@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Concurrent;
-using System.Threading;
 using System.Threading.Tasks;
+using System.Threading;
 using EasyNetQ.Consumer;
 using EasyNetQ.Internals;
 using EasyNetQ.Persistent;
@@ -12,7 +12,7 @@ namespace EasyNetQ.ChannelDispatcher;
 /// <summary>
 ///     Invokes client commands using single channel
 /// </summary>
-public sealed class SinglePersistentChannelDispatcher : IPersistentChannelDispatcher
+public sealed class SinglePersistentChannelDispatcher : IPersistentChannelDispatcher, IDisposable
 {
     private readonly ConcurrentDictionary<PersistentChannelDispatchOptions, IPersistentChannel> channelPerOptions;
     private readonly Func<PersistentChannelDispatchOptions, IPersistentChannel> createChannelFactory;
@@ -26,10 +26,6 @@ public sealed class SinglePersistentChannelDispatcher : IPersistentChannelDispat
         IPersistentChannelFactory channelFactory
     )
     {
-        Preconditions.CheckNotNull(producerConnection, nameof(producerConnection));
-        Preconditions.CheckNotNull(consumerConnection, nameof(consumerConnection));
-        Preconditions.CheckNotNull(channelFactory, nameof(channelFactory));
-
         channelPerOptions = new ConcurrentDictionary<PersistentChannelDispatchOptions, IPersistentChannel>();
         createChannelFactory = o =>
         {
@@ -48,7 +44,7 @@ public sealed class SinglePersistentChannelDispatcher : IPersistentChannelDispat
     }
 
     /// <inheritdoc />
-    public Task<TResult> InvokeAsync<TResult, TChannelAction>(
+    public ValueTask<TResult> InvokeAsync<TResult, TChannelAction>(
         TChannelAction channelAction,
         PersistentChannelDispatchOptions options,
         CancellationToken cancellationToken = default

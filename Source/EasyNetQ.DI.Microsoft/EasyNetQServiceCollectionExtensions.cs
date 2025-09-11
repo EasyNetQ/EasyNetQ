@@ -16,8 +16,9 @@ public static class EasyNetQServiceCollectionExtensions
             throw new ArgumentNullException(nameof(serviceCollection));
         }
 
+#warning nado??
         var serviceRegister = new ServiceCollectionAdapter(serviceCollection);
-        RabbitHutch.RegisterBus(serviceRegister, connectionConfigurationFactory, registerServices);
+        //RabbitHutch.RegisterBus(serviceRegister, connectionConfigurationFactory, registerServices);
         return serviceCollection;
     }
 

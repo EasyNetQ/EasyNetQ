@@ -21,7 +21,7 @@ public delegate string QueueNameConvention(Type messageType, string subscriberId
 /// <summary>
 ///     Convention for queue type
 /// </summary>
-public delegate string QueueTypeConvention(Type messageType);
+public delegate string? QueueTypeConvention(Type messageType);
 
 /// <summary>
 ///     Convention for error queue routing key naming
@@ -29,9 +29,25 @@ public delegate string QueueTypeConvention(Type messageType);
 public delegate string ErrorQueueNameConvention(MessageReceivedInfo receivedInfo);
 
 /// <summary>
+///     Convention for error queue type
+/// </summary>
+public delegate string? ErrorQueueTypeConvention();
+
+/// <summary>
 ///     Convention for error exchange naming
 /// </summary>
 public delegate string ErrorExchangeNameConvention(MessageReceivedInfo receivedInfo);
+
+/// <summary>
+///     Convention for error exchange type
+/// </summary>
+public delegate string ErrorExchangeTypeConvention();
+
+
+/// <summary>
+///     Convention for error exchange Routing Key
+/// </summary>
+public delegate string ErrorExchangeRoutingKeyConvention(MessageReceivedInfo receivedInfo);
 
 /// <summary>
 ///     Convention for rpc routing key naming
@@ -109,9 +125,24 @@ public interface IConventions
     ErrorQueueNameConvention ErrorQueueNamingConvention { get; }
 
     /// <summary>
+    ///     Convention for error queue type
+    /// </summary>
+    ErrorQueueTypeConvention ErrorQueueTypeConvention { get; }
+
+    /// <summary>
     ///     Convention for error exchange naming
     /// </summary>
     ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; }
+
+    /// <summary>
+    ///     Convention for error exchange type
+    /// </summary>
+    ErrorExchangeTypeConvention ErrorExchangeTypeConvention { get; }
+
+    /// <summary>
+    ///     Convention for error exchange Routing key
+    /// </summary>
+    ErrorExchangeRoutingKeyConvention ErrorExchangeRoutingKeyConvention { get; }
 }
 
 /// <inheritdoc />
@@ -122,12 +153,9 @@ public class Conventions : IConventions
     /// </summary>
     public Conventions(ITypeNameSerializer typeNameSerializer)
     {
-        Preconditions.CheckNotNull(typeNameSerializer, nameof(typeNameSerializer));
-
         ExchangeNamingConvention = type =>
         {
             var attr = GetQueueAttribute(type);
-
             return string.IsNullOrEmpty(attr.ExchangeName)
                 ? typeNameSerializer.Serialize(type)
                 : attr.ExchangeName;
@@ -136,10 +164,7 @@ public class Conventions : IConventions
         QueueTypeConvention = type =>
         {
             var attr = GetQueueAttribute(type);
-
-            return string.IsNullOrEmpty(attr.QueueType)
-                ? null
-                : attr.QueueType;
+            return attr.QueueType;
         };
 
         TopicNamingConvention = _ => "";
@@ -148,7 +173,7 @@ public class Conventions : IConventions
         {
             var attr = GetQueueAttribute(type);
 
-            if (string.IsNullOrEmpty(attr.QueueName))
+            if (attr.Name == null)
             {
                 var typeName = typeNameSerializer.Serialize(type);
 
@@ -158,13 +183,17 @@ public class Conventions : IConventions
             }
 
             return string.IsNullOrEmpty(subscriptionId)
-                ? attr.QueueName
-                : $"{attr.QueueName}_{subscriptionId}";
+                ? attr.Name
+                : $"{attr.Name}_{subscriptionId}";
         };
         RpcRoutingKeyNamingConvention = typeNameSerializer.Serialize;
 
         ErrorQueueNamingConvention = _ => "EasyNetQ_Default_Error_Queue";
         ErrorExchangeNamingConvention = receivedInfo => "ErrorExchange_" + receivedInfo.RoutingKey;
+        ErrorQueueTypeConvention = () => null;
+        ErrorExchangeTypeConvention = () => ExchangeType.Direct;
+        ErrorExchangeRoutingKeyConvention = receivedInfo => receivedInfo.RoutingKey;
+
         RpcRequestExchangeNamingConvention = _ => "easy_net_q_rpc";
         RpcResponseExchangeNamingConvention = _ => "easy_net_q_rpc";
         RpcReturnQueueNamingConvention = _ => "easynetq.response." + Guid.NewGuid();
@@ -172,7 +201,7 @@ public class Conventions : IConventions
         ConsumerTagConvention = () => Guid.NewGuid().ToString();
     }
 
-    private QueueAttribute GetQueueAttribute(Type messageType)
+    private static QueueAttribute GetQueueAttribute(Type messageType)
     {
         return messageType.GetAttribute<QueueAttribute>() ?? QueueAttribute.Default;
     }
@@ -196,7 +225,13 @@ public class Conventions : IConventions
     public ErrorQueueNameConvention ErrorQueueNamingConvention { get; set; }
 
     /// <inheritdoc />
+    public ErrorQueueTypeConvention ErrorQueueTypeConvention { get; set; }
+
+    /// <inheritdoc />
     public ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; set; }
+
+    /// <inheritdoc />
+    public ErrorExchangeTypeConvention ErrorExchangeTypeConvention { get; set; }
 
     /// <inheritdoc />
     public RpcExchangeNameConvention RpcRequestExchangeNamingConvention { get; set; }
@@ -209,4 +244,7 @@ public class Conventions : IConventions
 
     /// <inheritdoc />
     public ConsumerTagConvention ConsumerTagConvention { get; set; }
+
+    /// <inheritdoc />
+    public ErrorExchangeRoutingKeyConvention ErrorExchangeRoutingKeyConvention { get; set; }
 }

@@ -1,4 +1,6 @@
 using System;
+using System.Threading.Tasks;
+using System.Threading;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Persistent;
@@ -9,18 +11,18 @@ namespace EasyNetQ.Persistent;
 public interface IPersistentConnection : IDisposable
 {
     /// <summary>
-    ///     True if a connection is connected
+    ///     <see langword="true"/> if a connection is connected
     /// </summary>
-    bool IsConnected { get; }
+    PersistentConnectionStatus Status { get; }
 
     /// <summary>
     ///     Establish a connection
     /// </summary>
-    void Connect();
+    void EnsureConnected();
 
     /// <summary>
     ///     Creates a new channel
     /// </summary>
     /// <returns>New channel</returns>
-    IModel CreateModel();
+    Task<IChannel> CreateChannelAsync(CreateChannelOptions? options = null, CancellationToken cancellationToken = default);
 }

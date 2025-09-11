@@ -9,7 +9,7 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Producer;
 
-using UnconfirmedRequests = ConcurrentDictionary<ulong, TaskCompletionSource<object>>;
+using UnconfirmedRequests = ConcurrentDictionary<ulong, TaskCompletionSource<bool>>;
 
 /// <inheritdoc />
 public class PublishConfirmationListener : IPublishConfirmationListener
@@ -25,35 +25,33 @@ public class PublishConfirmationListener : IPublishConfirmationListener
     public PublishConfirmationListener(IEventBus eventBus)
     {
         unconfirmedChannelRequests = new ConcurrentDictionary<int, UnconfirmedRequests>();
-        subscriptions = new[]
-        {
+        subscriptions =
+        [
             eventBus.Subscribe<MessageConfirmationEvent>(OnMessageConfirmation),
             eventBus.Subscribe<ChannelRecoveredEvent>(OnChannelRecovered),
             eventBus.Subscribe<ChannelShutdownEvent>(OnChannelShutdown),
             eventBus.Subscribe<ReturnedMessageEvent>(OnReturnedMessage)
-        };
+        ];
     }
 
     /// <inheritdoc />
-    public IPublishPendingConfirmation CreatePendingConfirmation(IModel model)
+    public async Task<IPublishPendingConfirmation> CreatePendingConfirmation(IChannel channel, CancellationToken cancellationToken = default)
     {
-        var sequenceNumber = model.NextPublishSeqNo;
+        var sequenceNumber = await channel.GetNextPublishSequenceNumberAsync(cancellationToken);
 
         if (sequenceNumber == 0UL)
             throw new InvalidOperationException("Confirms not selected");
 
-        var requests = unconfirmedChannelRequests.GetOrAdd(model.ChannelNumber, _ => new UnconfirmedRequests());
-        var confirmationTcs = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var requests = unconfirmedChannelRequests.GetOrAdd(channel.ChannelNumber, _ => new UnconfirmedRequests());
+        var confirmationTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         if (!requests.TryAdd(sequenceNumber, confirmationTcs))
             throw new InvalidOperationException($"Confirmation {sequenceNumber} already exists");
 
-        return new PublishPendingConfirmation(
-            sequenceNumber, confirmationTcs, () => requests.Remove(sequenceNumber)
-        );
+        return new PublishPendingConfirmation(requests, sequenceNumber, confirmationTcs);
     }
 
     /// <inheritdoc />
-    public void Dispose()
+    public virtual void Dispose()
     {
         foreach (var subscription in subscriptions)
             subscription.Dispose();
@@ -80,7 +78,10 @@ public class PublishConfirmationListener : IPublishConfirmationListener
 
     private void OnChannelRecovered(in ChannelRecoveredEvent @event)
     {
-        if (@event.Channel.NextPublishSeqNo == 0)
+        var nextPublishSequenceNumber = @event.Channel.GetNextPublishSequenceNumberAsync()
+            .ConfigureAwait(false)
+            .GetAwaiter().GetResult();
+        if (nextPublishSequenceNumber == 0)
             return;
 
         InterruptUnconfirmedRequests(@event.Channel.ChannelNumber);
@@ -88,16 +89,22 @@ public class PublishConfirmationListener : IPublishConfirmationListener
 
     private void OnChannelShutdown(in ChannelShutdownEvent @event)
     {
-        if (@event.Channel.NextPublishSeqNo == 0)
+        var nextPublishSequenceNumber = @event.Channel.GetNextPublishSequenceNumberAsync()
+            .ConfigureAwait(false)
+            .GetAwaiter().GetResult();
+        if (nextPublishSequenceNumber == 0)
             return;
 
         InterruptUnconfirmedRequests(@event.Channel.ChannelNumber);
     }
 
-
     private void OnReturnedMessage(in ReturnedMessageEvent @event)
     {
-        if (@event.Channel.NextPublishSeqNo == 0)
+        var nextPublishSequenceNumber = @event.Channel.GetNextPublishSequenceNumberAsync()
+            .ConfigureAwait(false)
+            .GetAwaiter().GetResult();
+
+        if (nextPublishSequenceNumber == 0)
             return;
 
         if (!@event.Properties.TryGetConfirmationId(out var confirmationId))
@@ -143,7 +150,7 @@ public class PublishConfirmationListener : IPublishConfirmationListener
     }
 
     private static void Confirm(
-        TaskCompletionSource<object> confirmationTcs, ulong sequenceNumber, ConfirmationType type
+        TaskCompletionSource<bool> confirmationTcs, ulong sequenceNumber, ConfirmationType type
     )
     {
         switch (type)
@@ -159,7 +166,7 @@ public class PublishConfirmationListener : IPublishConfirmationListener
                 );
                 break;
             case ConfirmationType.Ack:
-                confirmationTcs.TrySetResult(null);
+                confirmationTcs.TrySetResult(true);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);
@@ -175,18 +182,18 @@ public class PublishConfirmationListener : IPublishConfirmationListener
 
     private sealed class PublishPendingConfirmation : IPublishPendingConfirmation
     {
-        private readonly ulong id;
-        private readonly TaskCompletionSource<object> confirmationTcs;
-        private readonly Action cleanup;
+        private readonly UnconfirmedRequests unconfirmedRequests;
+        private readonly ulong sequenceNumber;
+        private readonly TaskCompletionSource<bool> confirmationTcs;
 
-        public PublishPendingConfirmation(ulong id, TaskCompletionSource<object> confirmationTcs, Action cleanup)
+        public PublishPendingConfirmation(UnconfirmedRequests unconfirmedRequests, ulong sequenceNumber, TaskCompletionSource<bool> confirmationTcs)
         {
-            this.id = id;
+            this.unconfirmedRequests = unconfirmedRequests;
+            this.sequenceNumber = sequenceNumber;
             this.confirmationTcs = confirmationTcs;
-            this.cleanup = cleanup;
         }
 
-        public ulong Id => id;
+        public ulong Id => sequenceNumber;
 
         public async Task WaitAsync(CancellationToken cancellationToken)
         {
@@ -197,7 +204,7 @@ public class PublishConfirmationListener : IPublishConfirmationListener
             }
             finally
             {
-                cleanup();
+                unconfirmedRequests.TryRemove(sequenceNumber, out _);
             }
         }
 
@@ -209,7 +216,7 @@ public class PublishConfirmationListener : IPublishConfirmationListener
             }
             finally
             {
-                cleanup();
+                unconfirmedRequests.TryRemove(sequenceNumber, out _);
             }
         }
     }

@@ -1,5 +1,7 @@
-using System;
 using System.Collections.Generic;
+using System;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using EasyNetQ.Consumer;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
@@ -8,7 +10,7 @@ namespace EasyNetQ.Hosepipe;
 
 public interface IQueueRetrieval
 {
-    IEnumerable<HosepipeMessage> GetMessagesFromQueue(QueueParameters parameters);
+    IAsyncEnumerable<HosepipeMessage> GetMessagesFromQueueAsync(QueueParameters parameters, CancellationToken cancellationToken = default);
 }
 
 public class QueueRetrieval : IQueueRetrieval
@@ -20,14 +22,14 @@ public class QueueRetrieval : IQueueRetrieval
         this.errorMessageSerializer = errorMessageSerializer;
     }
 
-    public IEnumerable<HosepipeMessage> GetMessagesFromQueue(QueueParameters parameters)
+    public async IAsyncEnumerable<HosepipeMessage> GetMessagesFromQueueAsync(QueueParameters parameters, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        using var connection = HosepipeConnection.FromParameters(parameters);
-        using var channel = connection.CreateModel();
+        using var connection = await HosepipeConnection.FromParametersAsync(parameters, cancellationToken);
+        using var channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
 
         try
         {
-            channel.QueueDeclarePassive(parameters.QueueName);
+            await channel.QueueDeclarePassiveAsync(parameters.QueueName, cancellationToken);
         }
         catch (OperationInterruptedException exception)
         {
@@ -41,22 +43,21 @@ public class QueueRetrieval : IQueueRetrieval
             BasicGetResult basicGetResult;
             try
             {
-                basicGetResult = channel.BasicGet(parameters.QueueName, false);
+                basicGetResult = await channel.BasicGetAsync(parameters.QueueName, false, cancellationToken);
                 if (basicGetResult == null) break; // no more messages on the queue
 
                 if (parameters.Purge)
                 {
-                    channel.BasicAck(basicGetResult.DeliveryTag, false);
+                    await channel.BasicAckAsync(basicGetResult.DeliveryTag, false, cancellationToken);
                 }
             }
             catch (Exception exception)
             {
                 Console.WriteLine(exception.Message);
-                throw;
+                yield break;
             }
 
-            var properties = new MessageProperties();
-            properties.CopyFrom(basicGetResult.BasicProperties);
+            var properties = new MessageProperties(basicGetResult.BasicProperties);
             var info = new MessageReceivedInfo(
                 "hosepipe",
                 basicGetResult.DeliveryTag,

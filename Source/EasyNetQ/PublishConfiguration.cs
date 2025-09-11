@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace EasyNetQ;
 
 /// <summary>
@@ -37,15 +34,20 @@ public interface IPublishConfiguration
     /// </summary>
     /// <param name="headers">Headers to set</param>
     /// <returns>Returns a reference to itself</returns>
-    IPublishConfiguration WithHeaders(IDictionary<string, object> headers);
+    IPublishConfiguration WithHeaders(IDictionary<string, object?> headers);
+
+    /// <summary>
+    /// Set publisher confirms
+    /// </summary>
+    /// <param name="publisherConfirms">Publisher confirms flag to set</param>
+    /// <returns>Returns a reference to itself</returns>
+    IPublishConfiguration WithPublisherConfirms(bool publisherConfirms);
 }
 
 internal class PublishConfiguration : IPublishConfiguration
 {
     public PublishConfiguration(string defaultTopic)
     {
-        Preconditions.CheckNotNull(defaultTopic, nameof(defaultTopic));
-
         Topic = defaultTopic;
     }
 
@@ -57,8 +59,6 @@ internal class PublishConfiguration : IPublishConfiguration
 
     public IPublishConfiguration WithTopic(string topic)
     {
-        Preconditions.CheckNotNull(topic, nameof(topic));
-
         Topic = topic;
         return this;
     }
@@ -69,14 +69,22 @@ internal class PublishConfiguration : IPublishConfiguration
         return this;
     }
 
-    public IPublishConfiguration WithHeaders(IDictionary<string, object> headers)
+    public IPublishConfiguration WithHeaders(IDictionary<string, object?> headers)
     {
-        Headers = headers;
+        foreach (var kvp in headers)
+            (MessageHeaders ??= new Dictionary<string, object?>()).Add(kvp.Key, kvp.Value);
+        return this;
+    }
+
+    public IPublishConfiguration WithPublisherConfirms(bool publisherConfirms)
+    {
+        PublisherConfirms = publisherConfirms;
         return this;
     }
 
     public byte? Priority { get; private set; }
     public string Topic { get; private set; }
     public TimeSpan? Expires { get; private set; }
-    public IDictionary<string, object> Headers { get; private set; }
+    public IDictionary<string, object?>? MessageHeaders { get; private set; }
+    public bool PublisherConfirms { get; private set; }
 }

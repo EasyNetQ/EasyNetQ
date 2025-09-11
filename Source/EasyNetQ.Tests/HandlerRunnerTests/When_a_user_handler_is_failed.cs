@@ -20,13 +20,13 @@ public class When_a_user_handler_is_failed
     private readonly MessageReceivedInfo messageInfo = new("consumer_tag", 123, false, "exchange", "routingKey", "queue");
     private readonly byte[] messageBody = Array.Empty<byte>();
 
-    private readonly IConsumerErrorStrategy consumerErrorStrategy;
+    private readonly IConsumeErrorStrategy consumerErrorStrategy;
     private readonly ConsumerExecutionContext context;
     private readonly IModel channel;
 
     public When_a_user_handler_is_failed()
     {
-        consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
+        consumerErrorStrategy = Substitute.For<IConsumeErrorStrategy>();
         consumerErrorStrategy.HandleConsumerErrorAsync(default, null).ReturnsForAnyArgs(Task.FromResult(AckStrategies.Ack));
 
         var handlerRunner = new HandlerRunner(Substitute.For<ILogger<IHandlerRunner>>(), consumerErrorStrategy);

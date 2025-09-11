@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace EasyNetQ;
 
 /// <summary>
@@ -21,13 +19,22 @@ public interface ISendConfiguration
     /// </summary>
     /// <param name="headers">Headers to set</param>
     /// <returns>Returns a reference to itself</returns>
-    ISendConfiguration WithHeaders(IDictionary<string, object> headers);
+    ISendConfiguration WithHeaders(IDictionary<string, object?> headers);
+
+    /// <summary>
+    /// Set publisher confirms
+    /// </summary>
+    /// <param name="publisherConfirms">Publisher confirms flag to set</param>
+    /// <returns>Returns a reference to itself</returns>
+    ISendConfiguration WithPublisherConfirms(bool publisherConfirms);
 }
 
 internal class SendConfiguration : ISendConfiguration
 {
     public byte? Priority { get; private set; }
-    public IDictionary<string, object> Headers { get; private set; }
+    public IDictionary<string, object?>? MessageHeaders { get; private set; }
+    public bool PublisherConfirms { get; private set; }
+
 
     public ISendConfiguration WithPriority(byte priority)
     {
@@ -35,9 +42,16 @@ internal class SendConfiguration : ISendConfiguration
         return this;
     }
 
-    public ISendConfiguration WithHeaders(IDictionary<string, object> headers)
+    public ISendConfiguration WithHeaders(IDictionary<string, object?> headers)
     {
-        Headers = headers;
+        foreach (var kvp in headers)
+            (MessageHeaders ??= new Dictionary<string, object?>()).Add(kvp.Key, kvp.Value);
+        return this;
+    }
+
+    public ISendConfiguration WithPublisherConfirms(bool publisherConfirms)
+    {
+        PublisherConfirms = publisherConfirms;
         return this;
     }
 }

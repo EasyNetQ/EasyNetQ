@@ -1,9 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
+using System;
 using System.Reflection;
 using System.Text;
-
+using System.Threading.Tasks;
+using System.Threading;
 using EasyNetQ.Consumer;
 
 namespace EasyNetQ.Hosepipe;
@@ -44,7 +45,7 @@ public class Program
         this.conventions = conventions;
     }
 
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var typeNameSerializer = new LegacyTypeNameSerializer();
         var argParser = new ArgParser();
@@ -71,13 +72,15 @@ public class Program
             new FileMessageWriter(),
             new MessageReader(),
             new QueueInsertion(errorMessageSerializer),
-            new ErrorRetry(new JsonSerializer(), errorMessageSerializer),
+            new ErrorRetry(new ReflectionBasedNewtonsoftJsonSerializer(), errorMessageSerializer),
             new Conventions(typeNameSerializer)
         );
-        program.Start(args);
+
+        using var cts = new CancellationTokenSource();
+        await program.StartAsync(args, cts.Token);
     }
 
-    public void Start(string[] args)
+    public async Task StartAsync(string[] args, CancellationToken cancellationToken)
     {
         var arguments = argParser.Parse(args);
 
@@ -93,24 +96,30 @@ public class Program
             .FailWith(Message("Invalid number of messages to retrieve"));
         arguments.WithTypedKeyOptional<bool>("x", a => parameters.Purge = bool.Parse(a.Value))
             .FailWith(Message("Invalid purge (x) parameter"));
+        arguments.WithTypedKeyOptional<bool>("ssl", a => parameters.Ssl = bool.Parse(a.Value))
+            .FailWith(Message("Invalid Ssl (ssl) parameter"));
 
         try
         {
-            arguments.At(0, "dump", () => arguments.WithKey("q", a =>
+            if (arguments.At(0, "dump", () =>
             {
-                parameters.QueueName = a.Value;
-                Dump(parameters);
-            }).FailWith(Message("No Queue Name given")));
+                arguments.WithKey("q", a =>
+                {
+                    parameters.QueueName = a.Value;
+                }).FailWith(Message("No Queue Name given"));
+            }) != null)
+            {
+                await DumpAsync(parameters, cancellationToken);
+            }
 
-            arguments.At(0, "insert", () => Insert(parameters));
+            arguments.At(0, "insert", async () => await InsertAsync(parameters, cancellationToken));
 
-            arguments.At(0, "err", () => ErrorDump(parameters));
+            arguments.At(0, "err", async () => await ErrorDumpAsync(parameters, cancellationToken));
 
-            arguments.At(0, "retry", () => Retry(parameters));
+            arguments.At(0, "retry", async () => await RetryAsync(parameters, cancellationToken));
 
             arguments.At(0, "?", PrintUsage);
 
-            // print usage if there are no arguments
             arguments.At(0, _ => { }).FailWith(PrintUsage);
         }
         catch (EasyNetQHosepipeException easyNetQHosepipeException)
@@ -128,10 +137,10 @@ public class Program
         }
     }
 
-    private void Dump(QueueParameters parameters)
+    private async Task DumpAsync(QueueParameters parameters, CancellationToken cancellationToken = default)
     {
         var count = 0;
-        messageWriter.Write(WithEach(queueRetrieval.GetMessagesFromQueue(parameters), () => count++), parameters);
+        await messageWriter.WriteAsync(WithEachAsync(queueRetrieval.GetMessagesFromQueueAsync(parameters, cancellationToken), () => count++), parameters, cancellationToken);
 
         Console.WriteLine(
             "{0} messages from queue '{1}' were dumped to directory '{2}'",
@@ -139,11 +148,11 @@ public class Program
         );
     }
 
-    private void Insert(QueueParameters parameters)
+    private async Task InsertAsync(QueueParameters parameters, CancellationToken cancellationToken)
     {
         var count = 0;
-        queueInsertion.PublishMessagesToQueue(
-            WithEach(messageReader.ReadMessages(parameters), () => count++), parameters
+        await queueInsertion.PublishMessagesToQueueAsync(
+            WithEachAsync(messageReader.ReadMessagesAsync(parameters, cancellationToken), () => count++), parameters, cancellationToken
         );
 
         Console.WriteLine(
@@ -152,20 +161,20 @@ public class Program
         );
     }
 
-    private void ErrorDump(QueueParameters parameters)
+    private async Task ErrorDumpAsync(QueueParameters parameters, CancellationToken cancellationToken)
     {
         if (parameters.QueueName == null)
-            parameters.QueueName = conventions.ErrorQueueNamingConvention(null);
-        Dump(parameters);
+            parameters.QueueName = conventions.ErrorQueueNamingConvention(default);
+        await DumpAsync(parameters, cancellationToken);
     }
 
-    private void Retry(QueueParameters parameters)
+    private async Task RetryAsync(QueueParameters parameters, CancellationToken cancellationToken)
     {
         var count = 0;
-        var queueName = parameters.QueueName ?? conventions.ErrorQueueNamingConvention(null);
+        var queueName = parameters.QueueName ?? conventions.ErrorQueueNamingConvention(default);
 
-        errorRetry.RetryErrors(
-            WithEach(messageReader.ReadMessages(parameters, queueName), () => count++), parameters
+        await errorRetry.RetryErrorsAsync(
+            WithEachAsync(messageReader.ReadMessagesAsync(parameters, queueName, cancellationToken), () => count++), parameters, cancellationToken
         );
 
         Console.WriteLine(
@@ -173,9 +182,9 @@ public class Program
         );
     }
 
-    private static IEnumerable<HosepipeMessage> WithEach(IEnumerable<HosepipeMessage> messages, Action action)
+    private static async IAsyncEnumerable<HosepipeMessage> WithEachAsync(IAsyncEnumerable<HosepipeMessage> messages, Action action)
     {
-        foreach (var message in messages)
+        await foreach (var message in messages)
         {
             action();
             yield return message;

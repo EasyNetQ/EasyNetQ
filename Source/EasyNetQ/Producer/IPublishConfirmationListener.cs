@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Producer;
@@ -11,7 +13,9 @@ public interface IPublishConfirmationListener : IDisposable
     /// <summary>
     /// Creates pending confirmation for a next publish
     /// </summary>
-    /// <param name="model"></param>
+    /// <param name="channel"></param>
+    /// <param name="cancellationToken"></param>
     /// <returns>Pending confirmation to wait</returns>
-    IPublishPendingConfirmation CreatePendingConfirmation(IModel model);
+    Task<IPublishPendingConfirmation> CreatePendingConfirmation(IChannel channel,
+        CancellationToken cancellationToken = default);
 }

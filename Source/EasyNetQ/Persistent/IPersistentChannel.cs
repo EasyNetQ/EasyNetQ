@@ -8,12 +8,12 @@ namespace EasyNetQ.Persistent;
 /// <summary>
 /// An abstract action to run on top of the channel
 /// </summary>
-public interface IPersistentChannelAction<out TResult>
+public interface IPersistentChannelAction<TResult>
 {
     /// <summary>
     /// Runs an abstract action
     /// </summary>
-    TResult Invoke(IModel model);
+    Task<TResult> InvokeAsync(IChannel channel, CancellationToken cancellationToken = default);
 }
 
 /// <summary>
@@ -26,7 +26,7 @@ public interface IPersistentChannel : IDisposable
     /// </summary>
     /// <param name="channelAction">The action to invoke</param>
     /// <param name="cancellationToken">The cancellation token</param>
-    Task<TResult> InvokeChannelActionAsync<TResult, TChannelAction>(
+    ValueTask<TResult> InvokeChannelActionAsync<TResult, TChannelAction>(
         TChannelAction channelAction, CancellationToken cancellationToken = default
     ) where TChannelAction : struct, IPersistentChannelAction<TResult>;
 }

@@ -1,19 +1,19 @@
 using System;
 using System.Collections.Concurrent;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
+using System.Threading;
 using EasyNetQ.Consumer;
 using EasyNetQ.Internals;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
+using System.Linq;
 
 namespace EasyNetQ.ChannelDispatcher;
 
 /// <summary>
 ///     Invokes client commands using multiple channels
 /// </summary>
-public sealed class MultiPersistentChannelDispatcher : IPersistentChannelDispatcher
+public sealed class MultiPersistentChannelDispatcher : IPersistentChannelDispatcher, IDisposable
 {
     private readonly ConcurrentDictionary<PersistentChannelDispatchOptions, AsyncQueue<IPersistentChannel>> channelsPoolPerOptions;
     private readonly Func<PersistentChannelDispatchOptions, AsyncQueue<IPersistentChannel>> channelsPoolFactory;
@@ -56,13 +56,13 @@ public sealed class MultiPersistentChannelDispatcher : IPersistentChannelDispatc
         channelsPoolPerOptions.ClearAndDispose(x =>
         {
             while (x.TryDequeue(out var channel))
-                channel.Dispose();
+                channel!.Dispose();
             x.Dispose();
         });
     }
 
     /// <inheritdoc />
-    public async Task<TResult> InvokeAsync<TResult, TChannelAction>(
+    public async ValueTask<TResult> InvokeAsync<TResult, TChannelAction>(
         TChannelAction channelAction,
         PersistentChannelDispatchOptions options,
         CancellationToken cancellationToken = default

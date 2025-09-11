@@ -1,6 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Internals;
 
 namespace EasyNetQ;
@@ -19,17 +16,12 @@ public static class SendReceiveExtensions
     /// <param name="onMessage">The asynchronous function that handles the message</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>Consumer cancellation. Call Dispose to stop consuming</returns>
-    public static AwaitableDisposable<IDisposable> ReceiveAsync<T>(
+    public static Task<IDisposable> ReceiveAsync<T>(
         this ISendReceive sendReceive,
         string queue,
         Func<T, CancellationToken, Task> onMessage,
         CancellationToken cancellationToken = default
-    )
-    {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
-
-        return sendReceive.ReceiveAsync(queue, onMessage, _ => { }, cancellationToken);
-    }
+    ) => sendReceive.ReceiveAsync(queue, onMessage, _ => { }, cancellationToken);
 
     /// <summary>
     /// Receive a message from the specified queue
@@ -41,18 +33,13 @@ public static class SendReceiveExtensions
     /// <param name="configure">Action to configure consumer with</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>Consumer cancellation. Call Dispose to stop consuming</returns>
-    public static AwaitableDisposable<IDisposable> ReceiveAsync<T>(
+    public static Task<IDisposable> ReceiveAsync<T>(
         this ISendReceive sendReceive,
         string queue,
         Func<T, CancellationToken, Task> onMessage,
         Action<IReceiveConfiguration> configure,
         CancellationToken cancellationToken = default
-    )
-    {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
-
-        return sendReceive.ReceiveAsync(queue, c => c.Add(onMessage), configure, cancellationToken);
-    }
+    ) => sendReceive.ReceiveAsync(queue, c => c.Add(onMessage), configure, cancellationToken);
 
     /// <summary>
     /// Send a message directly to a queue
@@ -67,12 +54,7 @@ public static class SendReceiveExtensions
         string queue,
         T message,
         CancellationToken cancellationToken = default
-    )
-    {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
-
-        return sendReceive.SendAsync(queue, message, _ => { }, cancellationToken);
-    }
+    ) => sendReceive.SendAsync(queue, message, _ => { }, cancellationToken);
 
     /// <summary>
     /// Send a message directly to a queue
@@ -87,12 +69,7 @@ public static class SendReceiveExtensions
         string queue,
         T message,
         CancellationToken cancellationToken = default
-    )
-    {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
-
-        sendReceive.Send(queue, message, _ => { }, cancellationToken);
-    }
+    ) => sendReceive.Send(queue, message, _ => { }, cancellationToken);
 
     /// <summary>
     /// Send a message directly to a queue
@@ -113,8 +90,6 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
-
         sendReceive.SendAsync(queue, message, configure, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -129,15 +104,13 @@ public static class SendReceiveExtensions
     /// <param name="onMessage">The synchronous function that handles the message</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>Consumer cancellation. Call Dispose to stop consuming</returns>
-    public static AwaitableDisposable<IDisposable> ReceiveAsync<T>(
+    public static Task<IDisposable> ReceiveAsync<T>(
         this ISendReceive sendReceive,
         string queue,
         Action<T> onMessage,
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
-
         return sendReceive.ReceiveAsync(
             queue,
             onMessage,
@@ -156,7 +129,7 @@ public static class SendReceiveExtensions
     /// <param name="configure">Action to configure consumer with</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>Consumer cancellation. Call Dispose to stop consuming</returns>
-    public static AwaitableDisposable<IDisposable> ReceiveAsync<T>(
+    public static Task<IDisposable> ReceiveAsync<T>(
         this ISendReceive sendReceive,
         string queue,
         Action<T> onMessage,
@@ -164,8 +137,6 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
-
         var onMessageAsync = TaskHelpers.FromAction<T>((m, _) => onMessage(m));
 
         return sendReceive.ReceiveAsync(
@@ -185,15 +156,13 @@ public static class SendReceiveExtensions
     /// <param name="onMessage">The asynchronous function that handles the message</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>Consumer cancellation. Call Dispose to stop consuming</returns>
-    public static AwaitableDisposable<IDisposable> ReceiveAsync<T>(
+    public static Task<IDisposable> ReceiveAsync<T>(
         this ISendReceive sendReceive,
         string queue,
         Func<T, Task> onMessage,
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
-
         return sendReceive.ReceiveAsync(
             queue,
             onMessage,
@@ -212,7 +181,7 @@ public static class SendReceiveExtensions
     /// <param name="configure">Action to configure consumer with</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>Consumer cancellation. Call Dispose to stop consuming</returns>
-    public static AwaitableDisposable<IDisposable> ReceiveAsync<T>(
+    public static Task<IDisposable> ReceiveAsync<T>(
         this ISendReceive sendReceive,
         string queue,
         Func<T, Task> onMessage,
@@ -220,8 +189,6 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
-
         return sendReceive.ReceiveAsync<T>(
             queue,
             (m, _) => onMessage(m),
@@ -238,15 +205,13 @@ public static class SendReceiveExtensions
     /// <param name="addHandlers">A function to add handlers</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>Consumer cancellation. Call Dispose to stop consuming</returns>
-    public static AwaitableDisposable<IDisposable> ReceiveAsync(
+    public static Task<IDisposable> ReceiveAsync(
         this ISendReceive sendReceive,
         string queue,
         Action<IReceiveRegistration> addHandlers,
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
-
         return sendReceive.ReceiveAsync(
             queue,
             addHandlers,
@@ -271,8 +236,6 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
-
         return sendReceive.Receive(queue, onMessage, _ => { }, cancellationToken);
     }
 
@@ -294,8 +257,6 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
-
         var onMessageAsync = TaskHelpers.FromAction<T>((m, _) => onMessage(m));
 
         return sendReceive.Receive(
@@ -322,8 +283,6 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
-
         return sendReceive.Receive<T>(
             queue,
             (m, _) => onMessage(m),
@@ -350,8 +309,6 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
-
         return sendReceive.ReceiveAsync(
             queue,
             onMessage,
@@ -375,8 +332,6 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
-
         return sendReceive.Receive(
             queue,
             addHandlers,
@@ -402,8 +357,6 @@ public static class SendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
-
         return sendReceive.ReceiveAsync(
             queue,
             addHandlers,

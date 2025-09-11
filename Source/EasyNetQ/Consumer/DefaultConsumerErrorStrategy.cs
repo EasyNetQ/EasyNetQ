@@ -1,14 +1,9 @@
-using System;
 using System.Buffers;
 using System.Collections.Concurrent;
-using System.Linq;
-using System.Text;
 using EasyNetQ.Logging;
 using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EasyNetQ.Consumer;
 
@@ -24,24 +19,22 @@ namespace EasyNetQ.Consumer;
 ///
 /// Each exchange is bound to the central EasyNetQ error queue.
 /// </summary>
-public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
+public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
 {
-    private readonly ILogger<DefaultConsumerErrorStrategy> logger;
+    private readonly ILogger<DefaultConsumeErrorStrategy> logger;
     private readonly IConsumerConnection connection;
     private readonly IConventions conventions;
     private readonly IErrorMessageSerializer errorMessageSerializer;
-    private readonly ConcurrentDictionary<string, object> existingErrorExchangesWithQueues = new();
+    private readonly ConcurrentDictionary<string, bool> existingErrorExchangesWithQueues = new();
     private readonly ISerializer serializer;
     private readonly ITypeNameSerializer typeNameSerializer;
     private readonly ConnectionConfiguration configuration;
 
-    private volatile bool disposed;
-
     /// <summary>
     ///     Creates DefaultConsumerErrorStrategy
     /// </summary>
-    public DefaultConsumerErrorStrategy(
-        ILogger<DefaultConsumerErrorStrategy> logger,
+    public DefaultConsumeErrorStrategy(
+        ILogger<DefaultConsumeErrorStrategy> logger,
         IConsumerConnection connection,
         ISerializer serializer,
         IConventions conventions,
@@ -50,13 +43,6 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
         ConnectionConfiguration configuration
     )
     {
-        Preconditions.CheckNotNull(connection, nameof(connection));
-        Preconditions.CheckNotNull(serializer, nameof(serializer));
-        Preconditions.CheckNotNull(conventions, nameof(conventions));
-        Preconditions.CheckNotNull(typeNameSerializer, nameof(typeNameSerializer));
-        Preconditions.CheckNotNull(errorMessageSerializer, nameof(errorMessageSerializer));
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
-
         this.logger = logger;
         this.connection = connection;
         this.serializer = serializer;
@@ -67,14 +53,11 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
     }
 
     /// <inheritdoc />
-    public virtual Task<AckStrategy> HandleConsumerErrorAsync(ConsumerExecutionContext context, Exception exception, CancellationToken cancellationToken)
+    public virtual async ValueTask<AckStrategyAsync> HandleErrorAsync(
+        ConsumeContext context,
+        Exception exception,
+        CancellationToken cancellationToken = default)
     {
-        Preconditions.CheckNotNull(context, nameof(context));
-        Preconditions.CheckNotNull(exception, nameof(exception));
-
-        if (disposed)
-            throw new ObjectDisposedException(nameof(DefaultConsumerErrorStrategy));
-
         var receivedInfo = context.ReceivedInfo;
         var properties = context.Properties;
         var body = context.Body.ToArray();
@@ -89,22 +72,22 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
 
         try
         {
-            using var model = connection.CreateModel();
-            if (configuration.PublisherConfirms) model.ConfirmSelect();
+            var channel = await connection.CreateChannelAsync(
+                new CreateChannelOptions(configuration.PublisherConfirms, configuration.PublisherConfirms),
+                cancellationToken);
 
-            var errorExchange = DeclareErrorExchangeWithQueue(model, receivedInfo);
+            var errorExchange = await DeclareErrorExchangeWithQueueAsync(channel, receivedInfo, cancellationToken);
 
             using var message = CreateErrorMessage(receivedInfo, properties, body, exception);
 
-            var errorProperties = model.CreateBasicProperties();
-            errorProperties.Persistent = true;
-            errorProperties.Type = typeNameSerializer.Serialize(typeof(Error));
+            var errorProperties = new BasicProperties
+            {
+                Persistent = true,
+                Type = typeNameSerializer.Serialize(typeof(Error))
+            };
 
-            model.BasicPublish(errorExchange, receivedInfo.RoutingKey, errorProperties, message.Memory);
-
-            if (!configuration.PublisherConfirms) return Task.FromResult(AckStrategies.Ack);
-
-            return Task.FromResult(model.WaitForConfirms(configuration.Timeout) ? AckStrategies.Ack : AckStrategies.NackWithRequeue);
+            await channel.BasicPublishAsync(errorExchange, receivedInfo.RoutingKey, false, errorProperties, message.Memory, cancellationToken).ConfigureAwait(false);
+            return AckStrategies.AckAsync;
         }
         catch (BrokerUnreachableException unreachableException)
         {
@@ -128,82 +111,66 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
             logger.Error(unexpectedException, "Failed to publish error message");
         }
 
-        return Task.FromResult(AckStrategies.NackWithRequeue);
+        return AckStrategies.NackWithRequeueAsync;
     }
 
     /// <inheritdoc />
-    public virtual Task<AckStrategy> HandleConsumerCancelledAsync(ConsumerExecutionContext context, CancellationToken cancellationToken)
+    public virtual ValueTask<AckStrategyAsync> HandleCancelledAsync(ConsumeContext context, CancellationToken cancellationToken = default)
     {
-        return Task.FromResult(AckStrategies.NackWithRequeue);
+        return new(AckStrategies.NackWithRequeueAsync);
     }
 
-    /// <inheritdoc />
-    public virtual void Dispose()
+    private static async Task DeclareAndBindErrorExchangeWithErrorQueueAsync(
+        IChannel channel,
+        string exchangeName,
+        string exchangeType,
+        string queueName,
+        string? queueType,
+        string routingKey,
+        CancellationToken cancellationToken
+    )
     {
-        if (disposed) return;
-        disposed = true;
+        var queueArgs = queueType != null
+            ? new Dictionary<string, object?> { { "x-queue-type", queueType } }
+            : null;
+
+        await channel.QueueDeclareAsync(queueName, true, false, false, queueArgs, cancellationToken: cancellationToken);
+        await channel.ExchangeDeclareAsync(exchangeName, exchangeType, true, cancellationToken: cancellationToken);
+        await channel.QueueBindAsync(queueName, exchangeName, routingKey, cancellationToken: cancellationToken);
     }
 
-    private static void DeclareAndBindErrorExchangeWithErrorQueue(IModel model, string exchangeName, string queueName, string routingKey)
-    {
-        model.QueueDeclare(queueName, true, false, false, null);
-        model.ExchangeDeclare(exchangeName, ExchangeType.Direct, true);
-        model.QueueBind(queueName, exchangeName, routingKey);
-    }
-
-    private string DeclareErrorExchangeWithQueue(IModel model, MessageReceivedInfo receivedInfo)
+    private async Task<string> DeclareErrorExchangeWithQueueAsync(IChannel channel, MessageReceivedInfo receivedInfo, CancellationToken cancellationToken = default)
     {
         var errorExchangeName = conventions.ErrorExchangeNamingConvention(receivedInfo);
+        var errorExchangeType = conventions.ErrorExchangeTypeConvention();
         var errorQueueName = conventions.ErrorQueueNamingConvention(receivedInfo);
-        var routingKey = receivedInfo.RoutingKey;
+        var errorQueueType = conventions.ErrorQueueTypeConvention();
+        var routingKey = conventions.ErrorExchangeRoutingKeyConvention(receivedInfo);
 
         var errorTopologyIdentifier = $"{errorExchangeName}-{errorQueueName}-{routingKey}";
 
-        existingErrorExchangesWithQueues.GetOrAdd(errorTopologyIdentifier, _ =>
+        if (!existingErrorExchangesWithQueues.ContainsKey(errorTopologyIdentifier))
         {
-            DeclareAndBindErrorExchangeWithErrorQueue(model, errorExchangeName, errorQueueName, routingKey);
-            return null;
-        });
+            await DeclareAndBindErrorExchangeWithErrorQueueAsync(channel, errorExchangeName, errorExchangeType, errorQueueName, errorQueueType, routingKey, cancellationToken);
+            existingErrorExchangesWithQueues.GetOrAdd(errorTopologyIdentifier, true);
+        }
 
         return errorExchangeName;
     }
 
     private IMemoryOwner<byte> CreateErrorMessage(
-        MessageReceivedInfo receivedInfo, MessageProperties properties, byte[] body, Exception exception
+        in MessageReceivedInfo receivedInfo, in MessageProperties properties, byte[] body, Exception exception
     )
     {
-        var messageAsString = errorMessageSerializer.Serialize(body);
-        var error = new Error
-        {
-            RoutingKey = receivedInfo.RoutingKey,
-            Exchange = receivedInfo.Exchange,
-            Queue = receivedInfo.Queue,
-            Exception = exception.ToString(),
-            Message = messageAsString,
-            DateTime = DateTime.UtcNow
-        };
-
-        if (properties.Headers == null)
-        {
-            error.BasicProperties = properties;
-        }
-        else
-        {
-            // we'll need to clone context.Properties as we are mutating the headers dictionary
-            error.BasicProperties = (MessageProperties)properties.Clone();
-
-            // the RabbitMQClient implicitly converts strings to byte[] on sending, but reads them back as byte[]
-            // we're making the assumption here that any byte[] values in the headers are strings
-            // and all others are basic types. RabbitMq client generally throws a nasty exception if you try
-            // to store anything other than basic types in headers anyway.
-
-            //see http://hg.rabbitmq.com/rabbitmq-dotnet-client/file/tip/projects/client/RabbitMQ.Client/src/client/impl/WireFormatting.cs
-
-            error.BasicProperties.Headers = properties.Headers.ToDictionary(
-                kvp => kvp.Key,
-                kvp => kvp.Value is byte[] bytes ? Encoding.UTF8.GetString(bytes) : kvp.Value
-            );
-        }
+        var error = new Error(
+            receivedInfo.RoutingKey,
+            receivedInfo.Exchange,
+            receivedInfo.Queue,
+            exception.ToString(),
+            errorMessageSerializer.Serialize(body),
+            DateTime.UtcNow,
+            properties
+        );
         return serializer.MessageToBytes(typeof(Error), error);
     }
 }

@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+using System.Threading;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 
@@ -5,7 +7,7 @@ namespace EasyNetQ.Hosepipe;
 
 public static class HosepipeConnection
 {
-    public static IConnection FromParameters(QueueParameters parameters)
+    public static async Task<IConnection> FromParametersAsync(QueueParameters parameters, CancellationToken cancellationToken = default)
     {
         var connectionFactory = new ConnectionFactory
         {
@@ -13,11 +15,21 @@ public static class HosepipeConnection
             VirtualHost = parameters.VHost,
             UserName = parameters.Username,
             Password = parameters.Password,
-            Port = parameters.HostPort
+            Port = parameters.HostPort,
         };
+
+        if (parameters.Ssl)
+        {
+            connectionFactory.Ssl = new SslOption
+            {
+                Enabled = true,
+                ServerName = parameters.HostName
+            };
+        }
+
         try
         {
-            return connectionFactory.CreateConnection();
+            return await connectionFactory.CreateConnectionAsync(cancellationToken);
         }
         catch (BrokerUnreachableException)
         {

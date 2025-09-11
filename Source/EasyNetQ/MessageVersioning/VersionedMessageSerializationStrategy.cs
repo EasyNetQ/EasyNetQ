@@ -1,4 +1,4 @@
-using System;
+using EasyNetQ.Internals;
 
 namespace EasyNetQ.MessageVersioning;
 
@@ -13,7 +13,9 @@ public class VersionedMessageSerializationStrategy : IMessageSerializationStrate
     ///     Creates VersionedMessageSerializationStrategy
     /// </summary>
     public VersionedMessageSerializationStrategy(
-        ITypeNameSerializer typeNameSerializer, ISerializer serializer, ICorrelationIdGenerationStrategy correlationIdGenerator
+        ITypeNameSerializer typeNameSerializer,
+        ISerializer serializer,
+        ICorrelationIdGenerationStrategy correlationIdGenerator
     )
     {
         this.typeNameSerializer = typeNameSerializer;
@@ -24,21 +26,23 @@ public class VersionedMessageSerializationStrategy : IMessageSerializationStrate
     /// <inheritdoc />
     public SerializedMessage SerializeMessage(IMessage message)
     {
-        var messageBody = serializer.MessageToBytes(message.MessageType, message.GetBody());
-        var messageTypeProperties = MessageTypeProperty.CreateForMessageType(message.MessageType, typeNameSerializer);
+        var messageBody = message.GetBody() is null
+            ? EmptyMemoryOwner.Instance
+            : serializer.MessageToBytes(message.MessageType, message.GetBody()!);
+        var messageTypeProperty = MessageTypeProperty.CreateForMessageType(message.MessageType, typeNameSerializer);
         var messageProperties = message.Properties;
-        messageTypeProperties.AppendTo(messageProperties);
+        messageProperties = messageTypeProperty.AppendTo(messageProperties);
         if (string.IsNullOrEmpty(messageProperties.CorrelationId))
-            messageProperties.CorrelationId = correlationIdGenerator.GetCorrelationId();
+            messageProperties = messageProperties with { CorrelationId = correlationIdGenerator.GetCorrelationId() };
         return new SerializedMessage(messageProperties, messageBody);
     }
 
     /// <inheritdoc />
-    public IMessage DeserializeMessage(MessageProperties properties, in ReadOnlyMemory<byte> body)
+    public IMessage DeserializeMessage(in MessageProperties properties, in ReadOnlyMemory<byte> body)
     {
         var messageTypeProperty = MessageTypeProperty.ExtractFromProperties(properties, typeNameSerializer);
         var messageType = messageTypeProperty.GetMessageType();
-        var messageBody = serializer.BytesToMessage(messageType, body);
+        var messageBody = body.IsEmpty ? null : serializer.BytesToMessage(messageType, body);
         messageTypeProperty.AppendTo(properties);
         return MessageFactory.CreateInstance(messageType, messageBody, properties);
     }

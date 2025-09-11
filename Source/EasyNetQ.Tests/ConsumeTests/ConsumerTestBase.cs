@@ -17,7 +17,7 @@ public abstract class ConsumerTestBase : IDisposable
     protected const string ConsumerTag = "the_consumer_tag";
     protected const ulong DeliverTag = 10101;
     protected readonly CancellationTokenSource Cancellation;
-    protected readonly IConsumerErrorStrategy ConsumerErrorStrategy;
+    protected readonly IConsumeErrorStrategy ConsumerErrorStrategy;
     protected readonly MockBuilder MockBuilder;
     protected bool ConsumerWasInvoked;
     protected ReadOnlyMemory<byte> DeliveredMessageBody;
@@ -32,7 +32,7 @@ public abstract class ConsumerTestBase : IDisposable
     {
         Cancellation = new CancellationTokenSource();
 
-        ConsumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
+        ConsumerErrorStrategy = Substitute.For<IConsumeErrorStrategy>();
         MockBuilder = new MockBuilder(x => x.Register(ConsumerErrorStrategy));
         AdditionalSetUp();
     }

@@ -1,6 +1,6 @@
-using System;
-using System.Threading;
 using System.Threading.Tasks;
+using System.Threading;
+using System;
 
 namespace EasyNetQ.Internals;
 
@@ -53,17 +53,34 @@ public readonly struct AsyncLock : IDisposable
         return releaser;
     }
 
-    public readonly struct Releaser : IDisposable
+    /// <summary>
+    /// Tries to acquire a lock
+    /// </summary>
+    /// <param name="result">Releaser, which should be disposed to release a lock</param>
+    /// <returns>True if acquired</returns>
+    public bool TryAcquire(out Releaser result)
     {
-        private readonly SemaphoreSlim semaphore;
+        if (semaphore.Wait(0))
+        {
+            result = releaser;
+            return true;
+        }
 
-        public Releaser(SemaphoreSlim semaphore) => this.semaphore = semaphore;
+        result = default;
+        return false;
+    }
 
-        public void Dispose() => semaphore.Release();
+    public readonly struct Releaser(SemaphoreSlim? semaphore) : IDisposable
+    {
+        public void Dispose() => semaphore?.Release();
     }
 
     /// <inheritdoc />
-    public void Dispose() => semaphore.Dispose();
+    public void Dispose()
+    {
+        releaser.Dispose();
+        semaphore.Dispose();
+    }
 
     private async Task<Releaser> WaitForAcquireAsync(Task acquireAsync)
     {

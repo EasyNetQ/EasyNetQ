@@ -1,6 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Internals;
 
 namespace EasyNetQ;
@@ -25,8 +22,6 @@ public static class RpcExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(rpc, nameof(rpc));
-
         return rpc.RequestAsync<TRequest, TResponse>(request, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -47,8 +42,6 @@ public static class RpcExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(rpc, nameof(rpc));
-
         return rpc.RequestAsync<TRequest, TResponse>(request, _ => { }, cancellationToken);
     }
 
@@ -71,8 +64,6 @@ public static class RpcExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(rpc, nameof(rpc));
-
         return rpc.RequestAsync<TRequest, TResponse>(request, configure, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -86,14 +77,12 @@ public static class RpcExtensions
     /// <param name="rpc">The rpc instance</param>
     /// <param name="responder">A function that performs the response</param>
     /// <param name="cancellationToken">The cancellation token</param>
-    public static AwaitableDisposable<IDisposable> RespondAsync<TRequest, TResponse>(
+    public static Task<IDisposable> RespondAsync<TRequest, TResponse>(
         this IRpc rpc,
         Func<TRequest, TResponse> responder,
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(rpc, nameof(rpc));
-
         var asyncResponder = TaskHelpers.FromFunc<TRequest, TResponse>((m, _) => responder(m));
         return rpc.RespondAsync(asyncResponder, _ => { }, cancellationToken);
     }
@@ -107,16 +96,11 @@ public static class RpcExtensions
     /// <param name="rpc">The rpc instance</param>
     /// <param name="responder">A function that performs the response</param>
     /// <param name="cancellationToken">The cancellation token</param>
-    public static AwaitableDisposable<IDisposable> RespondAsync<TRequest, TResponse>(
+    public static Task<IDisposable> RespondAsync<TRequest, TResponse>(
         this IRpc rpc,
         Func<TRequest, Task<TResponse>> responder,
         CancellationToken cancellationToken = default
-    )
-    {
-        Preconditions.CheckNotNull(rpc, nameof(rpc));
-
-        return rpc.RespondAsync<TRequest, TResponse>((r, _) => responder(r), _ => { }, cancellationToken);
-    }
+    ) => rpc.RespondAsync<TRequest, TResponse>((r, _) => responder(r), _ => { }, cancellationToken);
 
     /// <summary>
     ///     Set up a responder for an RPC service.
@@ -130,12 +114,7 @@ public static class RpcExtensions
         this IRpc rpc,
         Func<TRequest, Task<TResponse>> responder,
         CancellationToken cancellationToken = default
-    )
-    {
-        Preconditions.CheckNotNull(rpc, nameof(rpc));
-
-        return rpc.Respond(responder, _ => { }, cancellationToken);
-    }
+    ) => rpc.Respond(responder, _ => { }, cancellationToken);
 
     /// <summary>
     ///     Set up a responder for an RPC service.
@@ -167,8 +146,6 @@ public static class RpcExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(rpc, nameof(rpc));
-
         var asyncResponder = TaskHelpers.FromFunc<TRequest, TResponse>((m, _) => responder(m));
         return rpc.Respond(asyncResponder, configure, cancellationToken);
     }
@@ -188,12 +165,7 @@ public static class RpcExtensions
         Func<TRequest, Task<TResponse>> responder,
         Action<IResponderConfiguration> configure,
         CancellationToken cancellationToken = default
-    )
-    {
-        Preconditions.CheckNotNull(rpc, nameof(rpc));
-
-        return rpc.Respond<TRequest, TResponse>((r, _) => responder(r), configure, cancellationToken);
-    }
+    ) => rpc.Respond<TRequest, TResponse>((r, _) => responder(r), configure, cancellationToken);
 
     /// <summary>
     ///     Set up a responder for an RPC service.
@@ -211,8 +183,6 @@ public static class RpcExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(rpc, nameof(rpc));
-
         return rpc.RespondAsync(responder, configure, cancellationToken)
             .GetAwaiter()
             .GetResult();

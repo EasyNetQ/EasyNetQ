@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace EasyNetQ.Hosepipe;
 
 public interface IMessageWriter
 {
-    void Write(IEnumerable<HosepipeMessage> messages, QueueParameters parameters);
+    Task WriteAsync(IAsyncEnumerable<HosepipeMessage> messages, QueueParameters parameters, CancellationToken cancellationToken = default);
 }

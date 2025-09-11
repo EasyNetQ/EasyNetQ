@@ -1,12 +1,7 @@
 using EasyNetQ.Internals;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EasyNetQ.AutoSubscribe;
 
@@ -16,8 +11,8 @@ namespace EasyNetQ.AutoSubscribe;
 /// </summary>
 public class AutoSubscriber
 {
-    private static readonly MethodInfo AutoSubscribeAsyncConsumerMethodInfo = typeof(AutoSubscriber).GetMethod(nameof(AutoSubscribeAsyncConsumerAsync), BindingFlags.Instance | BindingFlags.NonPublic);
-    private static readonly MethodInfo AutoSubscribeConsumerMethodInfo = typeof(AutoSubscriber).GetMethod(nameof(AutoSubscribeConsumerAsync), BindingFlags.Instance | BindingFlags.NonPublic);
+    private static readonly MethodInfo AutoSubscribeAsyncConsumerMethodInfo = typeof(AutoSubscriber).GetMethod(nameof(AutoSubscribeAsyncConsumerAsync), BindingFlags.Instance | BindingFlags.NonPublic)!;
+    private static readonly MethodInfo AutoSubscribeConsumerMethodInfo = typeof(AutoSubscriber).GetMethod(nameof(AutoSubscribeConsumerAsync), BindingFlags.Instance | BindingFlags.NonPublic)!;
 
     protected readonly IBus Bus;
 
@@ -55,14 +50,11 @@ public class AutoSubscriber
     /// </summary>
     public Action<ISubscriptionConfiguration> ConfigureSubscriptionConfiguration { protected get; set; }
 
-    public AutoSubscriber(IBus bus, string subscriptionIdPrefix)
+    public AutoSubscriber(IBus bus, IServiceProvider serviceProvider, string subscriptionIdPrefix)
     {
-        Preconditions.CheckNotNull(bus, nameof(bus));
-        Preconditions.CheckNotBlank(subscriptionIdPrefix, nameof(subscriptionIdPrefix), "You need to specify a SubscriptionId prefix, which will be used as part of the checksum of all generated subscription ids.");
-
         Bus = bus;
         SubscriptionIdPrefix = subscriptionIdPrefix;
-        AutoSubscriberMessageDispatcher = new DefaultAutoSubscriberMessageDispatcher();
+        AutoSubscriberMessageDispatcher = new DefaultAutoSubscriberMessageDispatcher(serviceProvider);
         GenerateSubscriptionId = DefaultSubscriptionIdGenerator;
         ConfigureSubscriptionConfiguration = _ => { };
     }
@@ -81,18 +73,18 @@ public class AutoSubscriber
 
         foreach (var subscriberConsumerInfo in GetSubscriberConsumerInfos(consumerTypes, typeof(IConsumeAsync<>)))
         {
-            var awaitableSubscriptionResult = (AwaitableDisposable<SubscriptionResult>)AutoSubscribeAsyncConsumerMethodInfo
+            var awaitableSubscriptionResult = (Task<SubscriptionResult>)AutoSubscribeAsyncConsumerMethodInfo
                 .MakeGenericMethod(subscriberConsumerInfo.MessageType, subscriberConsumerInfo.ConcreteType)
-                .Invoke(this, new object[] { subscriberConsumerInfo, cancellationToken });
+                .Invoke(this, [subscriberConsumerInfo, cancellationToken])!;
 
             subscriptions.Add(await awaitableSubscriptionResult.ConfigureAwait(false));
         }
 
         foreach (var subscriberConsumerInfo in GetSubscriberConsumerInfos(consumerTypes, typeof(IConsume<>)))
         {
-            var awaitableSubscriptionResult = (AwaitableDisposable<SubscriptionResult>)AutoSubscribeConsumerMethodInfo
+            var awaitableSubscriptionResult = (Task<SubscriptionResult>)AutoSubscribeConsumerMethodInfo
                 .MakeGenericMethod(subscriberConsumerInfo.MessageType, subscriberConsumerInfo.ConcreteType)
-                .Invoke(this, new object[] { subscriberConsumerInfo, cancellationToken });
+                .Invoke(this, [subscriberConsumerInfo, cancellationToken])!;
 
             subscriptions.Add(await awaitableSubscriptionResult.ConfigureAwait(false));
         }
@@ -105,10 +97,7 @@ public class AutoSubscriber
     {
         private readonly List<IDisposable> subscriptions;
 
-        public AutoSubscribeDisposable(List<IDisposable> subscriptions)
-        {
-            this.subscriptions = subscriptions;
-        }
+        public AutoSubscribeDisposable(List<IDisposable> subscriptions) => this.subscriptions = subscriptions;
 
         public void Dispose()
         {
@@ -132,12 +121,12 @@ public class AutoSubscriber
         return string.Concat(SubscriptionIdPrefix, ":", r.ToString());
     }
 
-    private AwaitableDisposable<SubscriptionResult> AutoSubscribeAsyncConsumerAsync<TMessage, TConsumerAsync>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken)
+    private Task<SubscriptionResult> AutoSubscribeAsyncConsumerAsync<TMessage, TConsumerAsync>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken)
         where TMessage : class
         where TConsumerAsync : class, IConsumeAsync<TMessage>
     {
         var subscriptionAttribute = GetSubscriptionAttribute(subscriptionInfo);
-        var subscriptionId = subscriptionAttribute != null ? subscriptionAttribute.SubscriptionId : GenerateSubscriptionId(subscriptionInfo);
+        var subscriptionId = subscriptionAttribute?.SubscriptionId ?? GenerateSubscriptionId(subscriptionInfo);
         var configureSubscriptionAction = GenerateConfigurationAction(subscriptionInfo);
 
         return Bus.PubSub.SubscribeAsync<TMessage>(
@@ -148,12 +137,12 @@ public class AutoSubscriber
         );
     }
 
-    private AwaitableDisposable<SubscriptionResult> AutoSubscribeConsumerAsync<TMessage, TConsumer>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken)
+    private Task<SubscriptionResult> AutoSubscribeConsumerAsync<TMessage, TConsumer>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken)
         where TMessage : class
         where TConsumer : class, IConsume<TMessage>
     {
         var subscriptionAttribute = GetSubscriptionAttribute(subscriptionInfo);
-        var subscriptionId = subscriptionAttribute != null ? subscriptionAttribute.SubscriptionId : GenerateSubscriptionId(subscriptionInfo);
+        var subscriptionId = subscriptionAttribute?.SubscriptionId ?? GenerateSubscriptionId(subscriptionInfo);
         var configureSubscriptionAction = GenerateConfigurationAction(subscriptionInfo);
 
         var asyncDispatcher = TaskHelpers.FromAction<TMessage>((m, c) => AutoSubscriberMessageDispatcher.Dispatch<TMessage, TConsumer>(m, c));
@@ -224,7 +213,7 @@ public class AutoSubscriber
         };
     }
 
-    private static SubscriptionConfigurationAttribute GetSubscriptionConfigurationAttributeValue(AutoSubscriberConsumerInfo subscriptionInfo)
+    private static SubscriptionConfigurationAttribute? GetSubscriptionConfigurationAttributeValue(AutoSubscriberConsumerInfo subscriptionInfo)
     {
         var customAttributes = subscriptionInfo.ConsumeMethod.GetCustomAttributes(typeof(SubscriptionConfigurationAttribute), true);
         return customAttributes
@@ -232,7 +221,7 @@ public class AutoSubscriber
             .FirstOrDefault();
     }
 
-    protected virtual AutoSubscriberConsumerAttribute GetSubscriptionAttribute(AutoSubscriberConsumerInfo consumerInfo)
+    protected virtual AutoSubscriberConsumerAttribute? GetSubscriptionAttribute(AutoSubscriberConsumerInfo consumerInfo)
     {
         return consumerInfo.ConsumeMethod
             .GetCustomAttributes(typeof(AutoSubscriberConsumerAttribute), true)
