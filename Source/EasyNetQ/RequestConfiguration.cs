@@ -25,9 +25,9 @@ public interface IRequestConfiguration
     /// <summary>
     /// Sets the queue name to publish to
     /// </summary>
-    /// <param name="queueName">The queue name to set</param>
+    /// <param name="routingKey">The queue name to set</param>
     /// <returns>Returns a reference to itself</returns>
-    IRequestConfiguration WithQueueName(string queueName);
+    IRequestConfiguration WithRoutingKey(string routingKey);
 
     /// <summary>
     /// Sets headers
@@ -46,13 +46,13 @@ public interface IRequestConfiguration
 
 internal class RequestConfiguration : IRequestConfiguration
 {
-    public RequestConfiguration(string queueName, TimeSpan expiration)
+    public RequestConfiguration(string routingKey, TimeSpan expiration)
     {
-        QueueName = queueName;
+        RoutingKey = routingKey;
         Expiration = expiration;
     }
 
-    public string QueueName { get; private set; }
+    public string RoutingKey { get; private set; }
     public TimeSpan Expiration { get; private set; }
     public byte? Priority { get; private set; }
     public IDictionary<string, object?>? MessageHeaders { get; private set; }
@@ -70,9 +70,9 @@ internal class RequestConfiguration : IRequestConfiguration
         return this;
     }
 
-    public IRequestConfiguration WithQueueName(string queueName)
+    public IRequestConfiguration WithRoutingKey(string routingKey)
     {
-        QueueName = queueName;
+        RoutingKey = routingKey;
         return this;
     }
 
