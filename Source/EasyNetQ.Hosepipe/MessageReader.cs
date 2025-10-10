@@ -1,17 +1,20 @@
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace EasyNetQ.Hosepipe;
 
 public class MessageReader : IMessageReader
 {
-    public IEnumerable<HosepipeMessage> ReadMessages(QueueParameters parameters)
+    public IAsyncEnumerable<HosepipeMessage> ReadMessagesAsync(QueueParameters parameters, CancellationToken cancellationToken = default)
     {
-        return ReadMessages(parameters, null);
+        return ReadMessagesAsync(parameters, null, cancellationToken);
     }
 
-    public IEnumerable<HosepipeMessage> ReadMessages(QueueParameters parameters, string messageName)
+    public async IAsyncEnumerable<HosepipeMessage> ReadMessagesAsync(QueueParameters parameters, string messageName, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         if (!Directory.Exists(parameters.MessagesOutputDirectory))
         {
@@ -26,16 +29,16 @@ public class MessageReader : IMessageReader
             const string messageTag = ".message.";
             var directoryName = Path.GetDirectoryName(file);
             var fileName = Path.GetFileName(file);
-            var propertiesFileName = Path.Combine(directoryName, fileName.Replace(messageTag, ".properties."));
-            var infoFileName = Path.Combine(directoryName, fileName.Replace(messageTag, ".info."));
+            var propertiesFileName = Path.Combine(directoryName!, fileName.Replace(messageTag, ".properties."));
+            var infoFileName = Path.Combine(directoryName!, fileName.Replace(messageTag, ".info."));
 
-            var body = File.ReadAllText(file);
+            var body = await File.ReadAllTextAsync(file, cancellationToken);
 
-            var propertiesJson = File.ReadAllText(propertiesFileName);
-            var properties = Newtonsoft.Json.JsonConvert.DeserializeObject<MessageProperties>(propertiesJson);
+            var propertiesJson = await File.ReadAllTextAsync(propertiesFileName, cancellationToken);
+            var properties = JsonConvert.DeserializeObject<MessageProperties>(propertiesJson);
 
-            var infoJson = File.ReadAllText(infoFileName);
-            var info = Newtonsoft.Json.JsonConvert.DeserializeObject<MessageReceivedInfo>(infoJson);
+            var infoJson = await File.ReadAllTextAsync(infoFileName, cancellationToken);
+            var info = JsonConvert.DeserializeObject<MessageReceivedInfo>(infoJson);
 
             yield return new HosepipeMessage(body, properties, info);
         }

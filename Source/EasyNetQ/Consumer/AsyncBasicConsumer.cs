@@ -1,5 +1,6 @@
 using EasyNetQ.Events;
 using EasyNetQ.Logging;
+using EasyNetQ.OTEL;
 using EasyNetQ.Topology;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -48,7 +49,7 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
 
         if (logger.IsInfoEnabled())
         {
-            logger.Info(
+            logger.InfoFormat(
                 "Consumer with consumerTags {consumerTags} has cancelled",
                 string.Join(", ", consumerTags)
             );
@@ -73,7 +74,7 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
 
         if (logger.IsDebugEnabled())
         {
-            logger.Debug(
+            logger.DebugFormat(
                 "Message delivered to consumer {consumerTag} with deliveryTag {deliveryTag}",
                 consumerTag,
                 deliveryTag
@@ -84,8 +85,12 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
         var messageReceivedInfo = new MessageReceivedInfo(
             consumerTag, deliveryTag, redelivered, exchange, routingKey, queue.Name
         );
+
         var messageProperties = new MessageProperties(properties);
         eventBus.Publish(new DeliveredMessageEvent(messageReceivedInfo, messageProperties, messageBody));
+
+        using var _ = CustomRabbitMQActivitySource.Deliver(routingKey, exchange, deliveryTag, properties, body.Length);
+
         var ackStrategy = await consumeDelegate(new ConsumeContext(messageReceivedInfo, messageProperties, messageBody, serviceResolver, cts.Token)).ConfigureAwait(false);
         if (!autoAck)
         {
@@ -135,7 +140,7 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
         }
         catch (Exception exception)
         {
-            logger.Info(
+            logger.Error(
                 exception,
                 "Unexpected exception when attempting to ACK or NACK, receivedInfo={receivedInfo}",
                 receivedInfo

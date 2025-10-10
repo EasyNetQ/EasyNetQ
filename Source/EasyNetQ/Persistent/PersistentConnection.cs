@@ -1,5 +1,6 @@
 using EasyNetQ.Events;
 using EasyNetQ.Logging;
+using EasyNetQ.OTEL;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -14,7 +15,7 @@ public class PersistentConnection : IPersistentConnection
     private readonly ConnectionConfiguration configuration;
     private readonly IConnectionFactory connectionFactory;
     private readonly IEventBus eventBus;
-    private volatile IConnection? initializedConnection;
+    private volatile IConnection initializedConnection;
     private volatile bool disposed;
     private volatile PersistentConnectionStatus status;
 
@@ -37,11 +38,13 @@ public class PersistentConnection : IPersistentConnection
         status = new PersistentConnectionStatus(type, PersistentConnectionState.NotInitialised);
     }
 
+    public bool IsConnected => initializedConnection is { IsOpen: true };
+
     /// <inheritdoc />
     public PersistentConnectionStatus Status => status;
 
     /// <inheritdoc />
-    public void EnsureConnected()
+    public void Connect()
     {
         if (disposed) throw new ObjectDisposedException(nameof(PersistentConnection));
 
@@ -158,10 +161,10 @@ public class PersistentConnection : IPersistentConnection
     private Task OnConnectionShutdown(object? sender, ShutdownEventArgs e)
     {
         status = status.ToDisconnected(e.ToString());
-        var connection = (IConnection)sender!;
-        logger.Info(
-            e.Cause as Exception,
+        var connection = (IConnection)sender;
+        logger.InfoException(
             "Connection {type} disconnected from broker {host}:{port} because of {reason}",
+            e.Cause as Exception,
             type,
             connection.Endpoint.HostName,
             connection.Endpoint.Port,

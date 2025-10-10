@@ -1,6 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Persistent;
 
 namespace EasyNetQ.ChannelDispatcher;
@@ -19,7 +16,7 @@ public interface IPersistentChannelDispatcher : IDisposable
     /// <typeparam name="TResult"></typeparam>
     /// <typeparam name="TChannelAction"></typeparam>
     /// <returns></returns>
-    ValueTask<TResult> InvokeAsync<TResult, TChannelAction>(
+    Task<TResult> InvokeAsync<TResult, TChannelAction>(
         TChannelAction channelAction,
         PersistentChannelDispatchOptions options,
         CancellationToken cancellationToken = default

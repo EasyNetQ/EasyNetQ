@@ -1,4 +1,3 @@
-using System;
 using EasyNetQ.Internals;
 
 namespace EasyNetQ;
@@ -21,7 +20,7 @@ public delegate string QueueNameConvention(Type messageType, string subscriberId
 /// <summary>
 ///     Convention for queue type
 /// </summary>
-public delegate string? QueueTypeConvention(Type messageType);
+public delegate string QueueTypeConvention(Type messageType);
 
 /// <summary>
 ///     Convention for error queue routing key naming
@@ -31,7 +30,7 @@ public delegate string ErrorQueueNameConvention(MessageReceivedInfo receivedInfo
 /// <summary>
 ///     Convention for error queue type
 /// </summary>
-public delegate string? ErrorQueueTypeConvention();
+public delegate string ErrorQueueTypeConvention();
 
 /// <summary>
 ///     Convention for error exchange naming
@@ -173,7 +172,7 @@ public class Conventions : IConventions
         {
             var attr = GetQueueAttribute(type);
 
-            if (attr.Name == null)
+            if (attr.QueueName == null)
             {
                 var typeName = typeNameSerializer.Serialize(type);
 
@@ -183,8 +182,8 @@ public class Conventions : IConventions
             }
 
             return string.IsNullOrEmpty(subscriptionId)
-                ? attr.Name
-                : $"{attr.Name}_{subscriptionId}";
+                ? attr.QueueName
+                : $"{attr.QueueName}_{subscriptionId}";
         };
         RpcRoutingKeyNamingConvention = typeNameSerializer.Serialize;
 

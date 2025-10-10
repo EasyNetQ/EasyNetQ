@@ -1,6 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Persistent;
 using RabbitMQ.Client;
 
@@ -8,7 +5,7 @@ namespace EasyNetQ.ChannelDispatcher;
 
 internal static class PersistentChannelDispatcherExtensions
 {
-    public static ValueTask<bool> InvokeAsync(
+    public static Task<bool> InvokeAsync(
         this IPersistentChannelDispatcher dispatcher,
         Func<IChannel, Task> channelAction,
         PersistentChannelDispatchOptions options,
@@ -20,7 +17,7 @@ internal static class PersistentChannelDispatcherExtensions
         );
     }
 
-    public static ValueTask<TResult> InvokeAsync<TResult>(
+    public static Task<TResult> InvokeAsync<TResult>(
         this IPersistentChannelDispatcher dispatcher,
         Func<IChannel, Task<TResult>> channelAction,
         PersistentChannelDispatchOptions options,

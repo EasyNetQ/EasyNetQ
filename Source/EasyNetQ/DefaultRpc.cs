@@ -12,8 +12,6 @@ namespace EasyNetQ;
 /// <summary>
 ///     Default implementation of EasyNetQ's request-response pattern
 /// </summary>
-/// 
-#warning TODO LOGGING (microsoft or easy net q)
 
 public class DefaultRpc : IRpc, IDisposable
 {
@@ -117,7 +115,7 @@ public class DefaultRpc : IRpc, IDisposable
 
         return RespondAsyncInternal(responder, configure, cancellationToken);
     }
-
+    
     /// <inheritdoc />
     public virtual void Dispose()
     {
@@ -237,7 +235,7 @@ public class DefaultRpc : IRpc, IDisposable
         byte? priority,
         bool? mandatory,
         bool? publisherConfirms,
-        IDictionary<string, object?>? headers,
+        IDictionary<string, object> headers,
         CancellationToken cancellationToken
     )
     {

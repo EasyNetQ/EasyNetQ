@@ -1,6 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Persistent;
@@ -16,7 +13,7 @@ internal static class PersistentChannelExtensions
             .GetResult();
     }
 
-    public static ValueTask<bool> InvokeChannelActionAsync(
+    public static Task<bool> InvokeChannelActionAsync(
         this IPersistentChannel source, Func<IChannel, Task> channelAction, CancellationToken cancellationToken = default
     )
     {
@@ -25,7 +22,7 @@ internal static class PersistentChannelExtensions
         );
     }
 
-    public static ValueTask<TResult> InvokeChannelActionAsync<TResult>(
+    public static Task<TResult> InvokeChannelActionAsync<TResult>(
         this IPersistentChannel source, Func<IChannel, Task<TResult>> channelAction, CancellationToken cancellationToken = default
     )
     {

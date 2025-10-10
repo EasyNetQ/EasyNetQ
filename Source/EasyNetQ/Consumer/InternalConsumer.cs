@@ -1,7 +1,7 @@
 using EasyNetQ.Internals;
+using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 using EasyNetQ.Topology;
-using EasyNetQ.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
@@ -103,7 +103,7 @@ public class InternalConsumer : IInternalConsumer
     private readonly ILogger<InternalConsumer> logger;
 
     private volatile bool disposed;
-    private IChannel? channel;
+    private IChannel channel;
 
     /// <summary>
     ///     Creates InternalConsumer
@@ -157,7 +157,7 @@ public class InternalConsumer : IInternalConsumer
                     channel?.Dispose();
                     channel = null;
 
-                    logger.Info(exception, "Failed to create channel");
+                    logger.Error(exception, "Failed to create channel");
                     return new InternalConsumerStatus(Array.Empty<Queue>(), Array.Empty<Queue>(), Array.Empty<Queue>());
                 }
             }
@@ -211,7 +211,7 @@ public class InternalConsumer : IInternalConsumer
                     );
                     consumers.Add(queue.Name, consumer);
 
-                    logger.Info(
+                    logger.InfoFormat(
                         "Declared consumer with consumerTag {consumerTag} on queue {queue}",
                         consumerTag,
                         queue.Name

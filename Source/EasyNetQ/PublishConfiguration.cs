@@ -85,6 +85,6 @@ internal class PublishConfiguration : IPublishConfiguration
     public byte? Priority { get; private set; }
     public string Topic { get; private set; }
     public TimeSpan? Expires { get; private set; }
-    public IDictionary<string, object?>? MessageHeaders { get; private set; }
+    public IDictionary<string, object> MessageHeaders { get; private set; }
     public bool PublisherConfirms { get; private set; }
 }

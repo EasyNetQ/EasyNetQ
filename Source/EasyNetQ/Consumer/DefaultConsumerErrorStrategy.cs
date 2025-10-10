@@ -1,6 +1,7 @@
 using System.Buffers;
 using System.Collections.Concurrent;
 using EasyNetQ.Logging;
+using EasyNetQ.OTEL;
 using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;

@@ -1,6 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Logging;
 
 namespace EasyNetQ.Consumer;
@@ -31,7 +28,7 @@ public class HandlerRunner : IHandlerRunner
     {
         if (logger.IsDebugEnabled())
         {
-            logger.Debug("Received message with receivedInfo={receivedInfo}", context.ReceivedInfo);
+            logger.DebugFormat("Received message with receivedInfo={receivedInfo}", context.ReceivedInfo);
         }
 
         return AckStrategies.NackWithRequeueAsync;

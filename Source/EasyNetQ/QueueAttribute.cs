@@ -1,5 +1,4 @@
 using System;
-using System.Transactions;
 
 namespace EasyNetQ;
 
@@ -15,13 +14,12 @@ public sealed class QueueAttribute : Attribute
 
     public QueueAttribute(string name)
     {
-        Name = name;
+        QueueName = name ?? string.Empty;
     }
 
-    public string? Name { get; set; }
+    public string QueueName { get; set; }
 
     public string ExchangeName { get; set; }
 
-    public string? QueueType { get; set; }
-
+    public string QueueType { get; set; }
 }

@@ -1,7 +1,3 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Threading;
-using System;
 using EasyNetQ.Internals;
 using EasyNetQ.Producer;
 

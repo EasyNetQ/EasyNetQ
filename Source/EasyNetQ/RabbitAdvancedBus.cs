@@ -1,13 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
 using EasyNetQ.Logging;
+using EasyNetQ.OTEL;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
@@ -126,7 +122,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     public Task EnsureConnectedAsync(PersistentConnectionType type, CancellationToken cancellationToken = default)
     {
         var connection = GetConnection(type);
-        connection.EnsureConnected();
+        connection.Connect();
         return Task.CompletedTask;
     }
 
@@ -192,19 +188,19 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     #endregion
 
     /// <inheritdoc />
-    public event EventHandler<ConnectedEventArgs>? Connected;
+    public event EventHandler<ConnectedEventArgs> Connected;
 
     /// <inheritdoc />
-    public event EventHandler<DisconnectedEventArgs>? Disconnected;
+    public event EventHandler<DisconnectedEventArgs> Disconnected;
 
     /// <inheritdoc />
-    public event EventHandler<BlockedEventArgs>? Blocked;
+    public event EventHandler<BlockedEventArgs> Blocked;
 
     /// <inheritdoc />
-    public event EventHandler<UnblockedEventArgs>? Unblocked;
+    public event EventHandler<UnblockedEventArgs> Unblocked;
 
     /// <inheritdoc />
-    public event EventHandler<MessageReturnedEventArgs>? MessageReturned;
+    public event EventHandler<MessageReturnedEventArgs> MessageReturned;
 
     /// <inheritdoc />
     public virtual void Dispose()
@@ -275,7 +271,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 
         if (logger.IsDebugEnabled())
         {
-            logger.Debug(
+            logger.DebugFormat(
                 "{queue} has {messagesCount} messages and {consumersCount} consumers.",
                 queue,
                 declareResult.MessageCount,
@@ -325,7 +321,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 
         if (logger.IsDebugEnabled())
         {
-            logger.Debug(
+            logger.DebugFormat(
                 "Declared queue {queue}: durable={durable}, exclusive={exclusive}, autoDelete={autoDelete}, arguments={arguments}",
                 declareResult.QueueName,
                 durable,
@@ -353,7 +349,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 
         if (logger.IsDebugEnabled())
         {
-            logger.Debug("Deleted queue {queue}", queue);
+            logger.DebugFormat("Deleted queue {queue}", queue);
         }
     }
 
@@ -370,7 +366,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 
         if (logger.IsDebugEnabled())
         {
-            logger.Debug("Purged queue {queue}", queue);
+            logger.DebugFormat("Purged queue {queue}", queue);
         }
     }
 
@@ -387,7 +383,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 
         if (logger.IsDebugEnabled())
         {
-            logger.Debug("Passive declared exchange {exchange}", exchange);
+            logger.DebugFormat("Passive declared exchange {exchange}", exchange);
         }
     }
 
@@ -441,7 +437,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 
         if (logger.IsDebugEnabled())
         {
-            logger.Debug("Deleted exchange {exchange}", exchange);
+            logger.DebugFormat("Deleted exchange {exchange}", exchange);
         }
     }
 
@@ -450,13 +446,13 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         string queue,
         string exchange,
         string routingKey,
-        IDictionary<string, object>? arguments,
+        IDictionary<string, object> arguments,
         CancellationToken cancellationToken
     )
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-        IDictionary<string, object?>? nullableArguments = arguments?.ToDictionary(kvp => kvp.Key, kvp => (object?)kvp.Value);
+        IDictionary<string, object> nullableArguments = arguments?.ToDictionary(kvp => kvp.Key, kvp => (object?)kvp.Value);
 
         await persistentChannelDispatcher.InvokeAsync(
             async x => await x.QueueBindAsync(queue, exchange, routingKey, nullableArguments, cancellationToken: cancellationToken),
@@ -487,7 +483,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-        IDictionary<string, object?>? nullableArguments = arguments?.ToDictionary(kvp => kvp.Key, kvp => (object?)kvp.Value);
+        IDictionary<string, object> nullableArguments = arguments?.ToDictionary(kvp => kvp.Key, kvp => (object?)kvp.Value);
 
         await persistentChannelDispatcher.InvokeAsync(
             async x => await x.QueueUnbindAsync(queue, exchange, routingKey, nullableArguments, cancellationToken),
@@ -693,6 +689,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         {
             var basicProperties = new BasicProperties();
             properties.CopyTo(basicProperties);
+
             await channel.BasicPublishAsync(exchange, routingKey, mandatory, basicProperties, body, cancellationToken);
             return true;
         }
@@ -726,7 +723,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 
         public async Task<IPublishPendingConfirmation> InvokeAsync(IChannel channel, CancellationToken cancellationToken = default)
         {
-            var confirmation = await confirmationListener.CreatePendingConfirmation(channel, cancellationToken);
+            var confirmation = await confirmationListener.CreatePendingConfirmationAsync(channel, cancellationToken);
             var basicProperties = new BasicProperties();
             properties.SetConfirmationId(confirmation.Id).CopyTo(basicProperties);
 

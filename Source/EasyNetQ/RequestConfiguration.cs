@@ -55,7 +55,7 @@ internal class RequestConfiguration : IRequestConfiguration
     public string QueueName { get; private set; }
     public TimeSpan Expiration { get; private set; }
     public byte? Priority { get; private set; }
-    public IDictionary<string, object?>? MessageHeaders { get; private set; }
+    public IDictionary<string, object> MessageHeaders { get; private set; }
     public bool PublisherConfirms { get; private set; }
 
     public IRequestConfiguration WithPriority(byte priority)

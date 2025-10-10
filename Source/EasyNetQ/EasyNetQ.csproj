@@ -1,38 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <Target Name="ForceCorrectVersion" BeforeTargets="CoreCompile;GenerateNuspec">
-    <PropertyGroup>
-      <Version>7.8.6</Version>
-      <AssemblyVersion>7.8.6.0</AssemblyVersion>
-      <FileVersion>7.8.6.0</FileVersion>
-      <InformationalVersion>7.8.6</InformationalVersion>
-      <PackageVersion>7.8.6</PackageVersion>
-    </PropertyGroup>
-    <Message Importance="high" Text="Принудительно установлена версия: $(AssemblyVersion)" />
-  </Target>
-  
   <PropertyGroup>
     <Description>A nice .NET API for RabbitMQ</Description>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageId>$(AssemblyName)-Fork-Test</PackageId>
-
+    <PackageId>$(AssemblyName)</PackageId>
+    <Version>7.9.1</Version>
   </PropertyGroup>
-
-
   <ItemGroup>
+    <PackageReference Include="LightInject" Version="6.4.1" />
     <PackageReference Include="LightInject.Source" Version="6.5.1">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.9" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.8" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
-    <PackageReference Include="MinVer" Version="4.2.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="PolySharp" Version="1.12.1">
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.9" />
+    <PackageReference Include="PolySharp" Version="1.15.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

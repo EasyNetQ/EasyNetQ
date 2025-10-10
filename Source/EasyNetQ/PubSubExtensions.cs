@@ -139,7 +139,6 @@ public static class PubSubExtensions
     )
     {
 
-
         var onMessageAsync = TaskHelpers.FromAction<T>((m, _) => onMessage(m));
 
         return pubSub.SubscribeAsync(

@@ -15,7 +15,7 @@ namespace EasyNetQ;
 public interface IPullResult : IDisposable
 {
     /// <summary>
-    ///     <see langword="true"/> if a message is available
+    ///     True if a message is available
     /// </summary>
     public bool IsAvailable { get; }
 
@@ -41,7 +41,7 @@ public readonly struct PullResult : IPullResult
     private readonly MessageProperties properties;
     private readonly ReadOnlyMemory<byte> body;
     private readonly ulong messagesCount;
-    private readonly IDisposable? disposable;
+    private readonly IDisposable disposable;
 
     /// <summary>
     ///     Represents a result when no message is available
@@ -54,10 +54,10 @@ public readonly struct PullResult : IPullResult
     /// <returns></returns>
     public static PullResult Available(
         ulong messagesCount,
-        in MessageReceivedInfo receivedInfo,
-        in MessageProperties properties,
+        MessageReceivedInfo receivedInfo,
+        MessageProperties properties,
         in ReadOnlyMemory<byte> body,
-        IDisposable? disposable
+        IDisposable disposable
     )
     {
         return new PullResult(true, messagesCount, receivedInfo, properties, body, disposable);
@@ -160,7 +160,7 @@ public readonly struct PullResult : IPullResult
 public readonly struct PullResult<T> : IPullResult
 {
     private readonly MessageReceivedInfo receivedInfo;
-    private readonly IMessage<T>? message;
+    private readonly IMessage<T> message;
     private readonly ulong messagesCount;
 
     /// <summary>
@@ -182,8 +182,8 @@ public readonly struct PullResult<T> : IPullResult
     private PullResult(
         bool isAvailable,
         ulong messagesCount,
-        in MessageReceivedInfo receivedInfo,
-        IMessage<T>? message
+        MessageReceivedInfo receivedInfo,
+        IMessage<T> message
     )
     {
         IsAvailable = isAvailable;
@@ -238,7 +238,7 @@ public readonly struct PullResult<T> : IPullResult
             if (!IsAvailable)
                 throw new InvalidOperationException("No message is available");
 
-            return message!;
+            return message;
         }
     }
 

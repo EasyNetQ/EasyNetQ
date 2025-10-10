@@ -2,7 +2,7 @@
 
     <PropertyGroup>
       <Description>An adaptor to allow EasyNetQ to use Serilog</Description>
-      <TargetFramework>netstandard2.0</TargetFramework>
+      <TargetFramework>net9.0</TargetFramework>
       <PackageTags>Serilog;Logging;$(PackageTags)</PackageTags>
     </PropertyGroup>
 
@@ -11,7 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Serilog" Version="2.8.0" />
+      <PackageReference Include="Serilog" Version="4.3.0" />
       <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
       <PackageReference Include="MinVer" Version="4.2.0">
         <PrivateAssets>all</PrivateAssets>

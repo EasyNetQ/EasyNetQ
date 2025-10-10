@@ -1,6 +1,5 @@
 using EasyNetQ.Logging;
 
-
 namespace EasyNetQ.Internals;
 
 /// <summary>

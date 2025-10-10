@@ -1,6 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Persistent;
@@ -26,7 +23,7 @@ public interface IPersistentChannel : IDisposable
     /// </summary>
     /// <param name="channelAction">The action to invoke</param>
     /// <param name="cancellationToken">The cancellation token</param>
-    ValueTask<TResult> InvokeChannelActionAsync<TResult, TChannelAction>(
+    Task<TResult> InvokeChannelActionAsync<TResult, TChannelAction>(
         TChannelAction channelAction, CancellationToken cancellationToken = default
     ) where TChannelAction : struct, IPersistentChannelAction<TResult>;
 }

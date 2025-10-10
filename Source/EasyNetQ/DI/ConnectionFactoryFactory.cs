@@ -1,4 +1,3 @@
-using System.Linq;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.DI;

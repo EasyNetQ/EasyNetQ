@@ -1,10 +1,9 @@
 #if LIGHT_INJECT_PACKAGE
 using LightInject;
 #else
-using EasyNetQ.LightInject;
+using LightInject;
+
 #endif
-using System;
-using System.Linq;
 
 #if LIGHT_INJECT_PACKAGE
 namespace EasyNetQ.DI.LightInject;

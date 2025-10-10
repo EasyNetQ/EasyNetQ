@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System;
 using EasyNetQ.Consumer;
 using EasyNetQ.Topology;
 
@@ -13,7 +11,7 @@ internal class PerQueueConsumeConfiguration : IPerQueueConsumeConfiguration
 
     public bool IsExclusive { get; private set; }
 
-    public IDictionary<string, object>? Arguments { get; private set; }
+    public IDictionary<string, object> Arguments { get; private set; }
 
 
     public IPerQueueConsumeConfiguration WithConsumerTag(string consumerTag)

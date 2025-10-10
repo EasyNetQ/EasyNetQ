@@ -1,8 +1,3 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Threading;
-using System;
-
 namespace EasyNetQ.Consumer;
 
 public readonly record struct ConsumeContext(

@@ -111,7 +111,7 @@ public class Consumer : IConsumer
     private readonly IDisposable[] disposables;
     private readonly object mutex = new();
 
-    private volatile IInternalConsumer? consumer;
+    private volatile IInternalConsumer consumer;
     private volatile bool disposed;
 
     /// <summary>
@@ -178,7 +178,7 @@ public class Consumer : IConsumer
         eventBus.Publish(new StoppedConsumingEvent(this));
     }
 
-    private async Task InternalConsumerOnCancelledAsync(object? sender, InternalConsumerCancelledEventArgs e)
+    private async Task InternalConsumerOnCancelledAsync(object sender, InternalConsumerCancelledEventArgs e)
     {
         if (e.Active.Count == 0)
             Dispose();
@@ -189,7 +189,7 @@ public class Consumer : IConsumer
     {
         if (@event.Type != PersistentConnectionType.Consumer) return;
 
-        consumer?.StopConsumingAsync();
+        consumer?.StopConsumingAsync()?.GetAwaiter().GetResult();
     }
 
     private void OnConnectionRecovered(in ConnectionRecoveredEvent @event)

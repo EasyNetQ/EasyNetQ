@@ -1,8 +1,4 @@
-using System;
 using System.Collections.Concurrent;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
 using RabbitMQ.Client;
@@ -35,7 +31,7 @@ public class PublishConfirmationListener : IPublishConfirmationListener
     }
 
     /// <inheritdoc />
-    public async Task<IPublishPendingConfirmation> CreatePendingConfirmation(IChannel channel, CancellationToken cancellationToken = default)
+    public async Task<IPublishPendingConfirmation> CreatePendingConfirmationAsync(IChannel channel, CancellationToken cancellationToken = default)
     {
         var sequenceNumber = await channel.GetNextPublishSequenceNumberAsync(cancellationToken);
 

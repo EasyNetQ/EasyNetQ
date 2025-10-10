@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-using System.Threading;
 using EasyNetQ.Events;
 using RabbitMQ.Client;
 

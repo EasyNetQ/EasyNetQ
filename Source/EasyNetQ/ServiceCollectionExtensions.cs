@@ -48,6 +48,7 @@ public static class ServiceCollectionExtensions
             var connectionConfiguration = serviceProvider.GetRequiredService<ConnectionConfiguration>();
             return ConnectionFactoryFactory.CreateConnectionFactory(connectionConfiguration);
         });
+        services.TryAddSingleton<IServiceResolver, MicrosoftDIServiceResolver>();
         services.TryAddSingleton<IPersistentChannelDispatcher, SinglePersistentChannelDispatcher>();
         services.TryAddSingleton<IProducerConnection, ProducerConnection>();
         services.TryAddSingleton<IConsumerConnection, ConsumerConnection>();

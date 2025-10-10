@@ -1,7 +1,7 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Threading;
 using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;

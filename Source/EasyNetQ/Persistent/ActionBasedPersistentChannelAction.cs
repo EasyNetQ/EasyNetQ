@@ -1,6 +1,3 @@
-using System.Threading.Tasks;
-using System.Threading;
-using System;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Persistent;

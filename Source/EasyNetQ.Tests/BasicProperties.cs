@@ -248,6 +248,10 @@ public sealed class BasicProperties : IBasicProperties
     public ushort ProtocolClassId => 60;
     public string ProtocolClassName => "basic";
 
+    DeliveryModes IBasicProperties.DeliveryMode { get; set; }
+
+    DeliveryModes IReadOnlyBasicProperties.DeliveryMode { get; }
+
     public void AppendPropertyDebugStringTo(StringBuilder sb)
     {
         sb.Append("(");

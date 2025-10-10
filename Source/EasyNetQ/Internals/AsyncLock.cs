@@ -1,7 +1,3 @@
-using System.Threading.Tasks;
-using System.Threading;
-using System;
-
 namespace EasyNetQ.Internals;
 
 /// <summary>
