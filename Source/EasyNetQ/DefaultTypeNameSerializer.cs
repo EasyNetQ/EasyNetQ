@@ -109,7 +109,7 @@ public class DefaultTypeNameSerializer : ITypeNameSerializer
 
         if (assemblyName != null)
         {
-            var assembly = Assembly.Load(new AssemblyName(assemblyName));
+            var assembly = GetAssembly(assemblyName);
             if (assembly == null)
             {
                 throw new EasyNetQException($"Could not load assembly '{assemblyName}'");
@@ -143,6 +143,36 @@ public class DefaultTypeNameSerializer : ITypeNameSerializer
 
         return Type.GetType(typeName) ?? throw new EasyNetQException($"Could not find type '{typeName}'");
     }
+
+    private const string CoreLibAssembly = "System.Private.CoreLib";
+    private const string MscorlibAssembly = "mscorlib";
+    private static Assembly? GetAssembly(string assemblyName)
+    {
+        Assembly? assembly = null;
+
+        if (assemblyName.Equals(CoreLibAssembly, StringComparison.InvariantCultureIgnoreCase)
+            || assemblyName.StartsWith(MscorlibAssembly))
+        {
+            assembly =
+                AppDomain.CurrentDomain.GetAssemblies()
+                    .FirstOrDefault(x=> (x.FullName?.StartsWith(MscorlibAssembly, StringComparison.InvariantCultureIgnoreCase) ?? false)
+                              || (x.FullName?.StartsWith(CoreLibAssembly, StringComparison.InvariantCultureIgnoreCase) ?? false));
+        }
+        else
+        {
+            try
+            {
+                assembly = Assembly.Load(new AssemblyName(assemblyName));
+            }
+            catch (FileNotFoundException)
+            {
+            }
+        }
+
+
+        return assembly;
+    }
+
 
     private static Type? GetGenericTypeFromTypeName(string typeName, Assembly assembly)
     {
