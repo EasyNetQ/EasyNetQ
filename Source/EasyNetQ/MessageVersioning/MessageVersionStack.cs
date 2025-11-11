@@ -1,4 +1,7 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace EasyNetQ.MessageVersioning;
@@ -51,7 +54,7 @@ public class MessageVersionStack : IEnumerable<Type>
         return messageVersions;
     }
 
-    private static Type? GetSupersededType(Type type)
+    private static Type GetSupersededType(Type type)
     {
         if (type.BaseType == null)
             return null;

@@ -4,13 +4,13 @@ namespace EasyNetQ.Persistent;
 
 public readonly struct ActionBasedPersistentChannelAction : IPersistentChannelAction<bool>
 {
-    private readonly Action<IModel> action;
+    private readonly Func<IChannel, Task> action;
 
-    public ActionBasedPersistentChannelAction(Action<IModel> action) => this.action = action;
+    public ActionBasedPersistentChannelAction(Func<IChannel, Task> action) => this.action = action;
 
-    public bool Invoke(IModel model)
+    public async Task<bool> InvokeAsync(IChannel channel, CancellationToken cancellationToken = default)
     {
-        action(model);
+        await action(channel);
         return true;
     }
 }

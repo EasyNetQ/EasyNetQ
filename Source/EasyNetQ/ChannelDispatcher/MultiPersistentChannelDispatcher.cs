@@ -9,7 +9,7 @@ namespace EasyNetQ.ChannelDispatcher;
 /// <summary>
 ///     Invokes client commands using multiple channels
 /// </summary>
-public sealed class MultiPersistentChannelDispatcher : IPersistentChannelDispatcher, IDisposable
+public sealed class MultiPersistentChannelDispatcher : IPersistentChannelDispatcher, IAsyncDisposable
 {
     private readonly ConcurrentDictionary<PersistentChannelDispatchOptions, AsyncQueue<IPersistentChannel>> channelsPoolPerOptions;
     private readonly Func<PersistentChannelDispatchOptions, AsyncQueue<IPersistentChannel>> channelsPoolFactory;
@@ -47,18 +47,19 @@ public sealed class MultiPersistentChannelDispatcher : IPersistentChannelDispatc
     }
 
     /// <inheritdoc />
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        channelsPoolPerOptions.ClearAndDispose(x =>
+        foreach (var item in channelsPoolPerOptions)
         {
-            while (x.TryDequeue(out var channel))
-                channel!.Dispose();
-            x.Dispose();
-        });
+            if (item.Value.TryDequeue(out var channel))
+                await channel.DisposeAsync();
+            item.Value.Dispose();
+        }
+        channelsPoolPerOptions.Clear();
     }
 
     /// <inheritdoc />
-    public async ValueTask<TResult> InvokeAsync<TResult, TChannelAction>(
+    public async Task<TResult> InvokeAsync<TResult, TChannelAction>(
         TChannelAction channelAction,
         PersistentChannelDispatchOptions options,
         CancellationToken cancellationToken = default

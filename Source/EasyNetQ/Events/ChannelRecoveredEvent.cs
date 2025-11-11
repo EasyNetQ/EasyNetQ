@@ -6,4 +6,4 @@ namespace EasyNetQ.Events;
 ///     This event is raised after a successful recovery of the channel
 /// </summary>
 /// <param name="Channel">The affected channel</param>
-public readonly record struct ChannelRecoveredEvent(IModel Channel);
+public readonly record struct ChannelRecoveredEvent(IChannel Channel);

@@ -1,7 +1,7 @@
 using System.Buffers;
 using System.Collections.Concurrent;
+using EasyNetQ.Logging;
 using EasyNetQ.SystemMessages;
-using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 
@@ -53,13 +53,16 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
     }
 
     /// <inheritdoc />
-    public virtual ValueTask<AckStrategy> HandleErrorAsync(ConsumeContext context, Exception exception)
+    public virtual async ValueTask<AckStrategyAsync> HandleErrorAsync(
+        ConsumeContext context,
+        Exception exception,
+        CancellationToken cancellationToken = default)
     {
         var receivedInfo = context.ReceivedInfo;
         var properties = context.Properties;
         var body = context.Body.ToArray();
 
-        logger.LogError(
+        logger.Error(
             exception,
             "Exception thrown by subscription callback, receivedInfo={receivedInfo}, properties={properties}, message={message}",
             receivedInfo,
@@ -69,29 +72,27 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
 
         try
         {
-            using var model = connection.CreateModel();
-            if (configuration.PublisherConfirms) model.ConfirmSelect();
+            var channel = await connection.CreateChannelAsync(
+                new CreateChannelOptions(configuration.PublisherConfirms, configuration.PublisherConfirms),
+                cancellationToken);
 
-            var errorExchange = DeclareErrorExchangeWithQueue(model, receivedInfo);
+            var errorExchange = await DeclareErrorExchangeWithQueueAsync(channel, receivedInfo, cancellationToken);
 
             using var message = CreateErrorMessage(receivedInfo, properties, body, exception);
 
-            var errorProperties = model.CreateBasicProperties();
-            errorProperties.Persistent = true;
-            errorProperties.Type = typeNameSerializer.Serialize(typeof(Error));
+            var errorProperties = new BasicProperties
+            {
+                Persistent = true,
+                Type = typeNameSerializer.Serialize(typeof(Error))
+            };
 
-            model.BasicPublish(errorExchange, receivedInfo.RoutingKey, errorProperties, message.Memory);
-
-            return new ValueTask<AckStrategy>(
-                configuration.PublisherConfirms
-                    ? model.WaitForConfirms(configuration.Timeout) ? AckStrategies.Ack : AckStrategies.NackWithRequeue
-                    : AckStrategies.Ack
-            );
+            await channel.BasicPublishAsync(errorExchange, receivedInfo.RoutingKey, false, errorProperties, message.Memory, cancellationToken).ConfigureAwait(false);
+            return AckStrategies.AckAsync;
         }
         catch (BrokerUnreachableException unreachableException)
         {
             // thrown if the broker is unreachable during initial creation.
-            logger.LogError(
+            logger.Error(
                 unreachableException,
                 "Cannot connect to broker while attempting to publish error message"
             );
@@ -99,7 +100,7 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
         catch (OperationInterruptedException interruptedException)
         {
             // thrown if the broker connection is broken during declare or publish.
-            logger.LogError(
+            logger.Error(
                 interruptedException,
                 "Broker connection was closed while attempting to publish error message"
             );
@@ -107,36 +108,38 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
         catch (Exception unexpectedException)
         {
             // Something else unexpected has gone wrong :(
-            logger.LogError(unexpectedException, "Failed to publish error message");
+            logger.Error(unexpectedException, "Failed to publish error message");
         }
 
-        return new ValueTask<AckStrategy>(AckStrategies.NackWithRequeue);
+        return AckStrategies.NackWithRequeueAsync;
     }
 
     /// <inheritdoc />
-    public virtual ValueTask<AckStrategy> HandleCancelledAsync(ConsumeContext context) => new(AckStrategies.NackWithRequeue);
+    public virtual ValueTask<AckStrategyAsync> HandleCancelledAsync(ConsumeContext context, CancellationToken cancellationToken = default)
+    {
+        return new(AckStrategies.NackWithRequeueAsync);
+    }
 
-    private static void DeclareAndBindErrorExchangeWithErrorQueue(
-        IModel model,
+    private static async Task DeclareAndBindErrorExchangeWithErrorQueueAsync(
+        IChannel channel,
         string exchangeName,
         string exchangeType,
         string queueName,
-        string? queueType,
-        string routingKey
+        string queueType,
+        string routingKey,
+        CancellationToken cancellationToken
     )
     {
-        Dictionary<string, object>? queueArgs = null;
-        if (queueType != null)
-        {
-            queueArgs = new Dictionary<string, object> { { "x-queue-type", queueType } };
-        }
+        var queueArgs = queueType != null
+            ? new Dictionary<string, object> { { "x-queue-type", queueType } }
+            : null;
 
-        model.QueueDeclare(queueName, true, false, false, queueArgs);
-        model.ExchangeDeclare(exchangeName, exchangeType, true);
-        model.QueueBind(queueName, exchangeName, routingKey);
+        await channel.QueueDeclareAsync(queueName, true, false, false, queueArgs, cancellationToken: cancellationToken);
+        await channel.ExchangeDeclareAsync(exchangeName, exchangeType, true, cancellationToken: cancellationToken);
+        await channel.QueueBindAsync(queueName, exchangeName, routingKey, cancellationToken: cancellationToken);
     }
 
-    private string DeclareErrorExchangeWithQueue(IModel model, MessageReceivedInfo receivedInfo)
+    private async Task<string> DeclareErrorExchangeWithQueueAsync(IChannel channel, MessageReceivedInfo receivedInfo, CancellationToken cancellationToken = default)
     {
         var errorExchangeName = conventions.ErrorExchangeNamingConvention(receivedInfo);
         var errorExchangeType = conventions.ErrorExchangeTypeConvention();
@@ -146,11 +149,11 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
 
         var errorTopologyIdentifier = $"{errorExchangeName}-{errorQueueName}-{routingKey}";
 
-        existingErrorExchangesWithQueues.GetOrAdd(errorTopologyIdentifier, _ =>
+        if (!existingErrorExchangesWithQueues.ContainsKey(errorTopologyIdentifier))
         {
-            DeclareAndBindErrorExchangeWithErrorQueue(model, errorExchangeName, errorExchangeType, errorQueueName, errorQueueType, routingKey);
-            return true;
-        });
+            await DeclareAndBindErrorExchangeWithErrorQueueAsync(channel, errorExchangeName, errorExchangeType, errorQueueName, errorQueueType, routingKey, cancellationToken);
+            existingErrorExchangesWithQueues.GetOrAdd(errorTopologyIdentifier, true);
+        }
 
         return errorExchangeName;
     }
@@ -159,13 +162,12 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
         in MessageReceivedInfo receivedInfo, in MessageProperties properties, byte[] body, Exception exception
     )
     {
-        var message = errorMessageSerializer.Serialize(body);
         var error = new Error(
             receivedInfo.RoutingKey,
             receivedInfo.Exchange,
             receivedInfo.Queue,
             exception.ToString(),
-            message,
+            errorMessageSerializer.Serialize(body),
             DateTime.UtcNow,
             properties
         );

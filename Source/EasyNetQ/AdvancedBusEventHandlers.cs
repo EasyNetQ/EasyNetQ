@@ -1,3 +1,5 @@
+using System;
+
 namespace EasyNetQ;
 
 /// <summary>
@@ -8,27 +10,27 @@ public class AdvancedBusEventHandlers
     /// <summary>
     /// An event handler for <see cref="IAdvancedBus.Connected"/>.
     /// </summary>
-    public EventHandler<ConnectedEventArgs>? Connected { get; }
+    public EventHandler<ConnectedEventArgs> Connected { get; }
 
     /// <summary>
     /// An event handler for <see cref="IAdvancedBus.Disconnected"/>.
     /// </summary>
-    public EventHandler<DisconnectedEventArgs>? Disconnected { get; }
+    public EventHandler<DisconnectedEventArgs> Disconnected { get; }
 
     /// <summary>
     /// An event handler for <see cref="IAdvancedBus.Blocked"/>.
     /// </summary>
-    public EventHandler<BlockedEventArgs>? Blocked { get; }
+    public EventHandler<BlockedEventArgs> Blocked { get; }
 
     /// <summary>
     /// An event handler for <see cref="IAdvancedBus.Unblocked"/>.
     /// </summary>
-    public EventHandler<UnblockedEventArgs>? Unblocked { get; }
+    public EventHandler<UnblockedEventArgs> Unblocked { get; }
 
     /// <summary>
     /// An event handler for <see cref="IAdvancedBus.MessageReturned"/>.
     /// </summary>
-    public EventHandler<MessageReturnedEventArgs>? MessageReturned { get; }
+    public EventHandler<MessageReturnedEventArgs> MessageReturned { get; }
 
     /// <summary>
     ///     Creates AdvancedBusEventHandlers
@@ -39,11 +41,11 @@ public class AdvancedBusEventHandlers
     /// <param name="unblocked">The unblocked event handler</param>
     /// <param name="messageReturned">The message returned event handler</param>
     public AdvancedBusEventHandlers(
-        EventHandler<ConnectedEventArgs>? connected = null,
-        EventHandler<DisconnectedEventArgs>? disconnected = null,
-        EventHandler<BlockedEventArgs>? blocked = null,
-        EventHandler<UnblockedEventArgs>? unblocked = null,
-        EventHandler<MessageReturnedEventArgs>? messageReturned = null
+        EventHandler<ConnectedEventArgs> connected = null,
+        EventHandler<DisconnectedEventArgs> disconnected = null,
+        EventHandler<BlockedEventArgs> blocked = null,
+        EventHandler<UnblockedEventArgs> unblocked = null,
+        EventHandler<MessageReturnedEventArgs> messageReturned = null
     )
     {
         // It's ok for any of the specified handler to be null.

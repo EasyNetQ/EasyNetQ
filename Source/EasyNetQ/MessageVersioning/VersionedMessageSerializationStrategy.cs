@@ -38,7 +38,7 @@ public class VersionedMessageSerializationStrategy : IMessageSerializationStrate
     }
 
     /// <inheritdoc />
-    public IMessage DeserializeMessage(in MessageProperties properties, in ReadOnlyMemory<byte> body)
+    public IMessage DeserializeMessage(MessageProperties properties, in ReadOnlyMemory<byte> body)
     {
         var messageTypeProperty = MessageTypeProperty.ExtractFromProperties(properties, typeNameSerializer);
         var messageType = messageTypeProperty.GetMessageType();

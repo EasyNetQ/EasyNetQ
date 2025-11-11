@@ -4,10 +4,19 @@ internal delegate IResult<T> Parser<out T>(Input input);
 
 internal static class ParserExtensions
 {
-    public static IResult<T> TryParse<T>(this Parser<T> parser, string input) => parser(new Input(input));
+    public static IResult<T> TryParse<T>(this Parser<T> parser, string input)
+    {
+        Preconditions.CheckNotNull(parser, nameof(parser));
+        Preconditions.CheckNotNull(input, nameof(input));
+
+        return parser(new Input(input));
+    }
 
     public static T Parse<T>(this Parser<T> parser, string input)
     {
+        Preconditions.CheckNotNull(parser, nameof(parser));
+        Preconditions.CheckNotNull(input, nameof(input));
+
         var result = parser.TryParse(input);
 
         if (result is ISuccess<T> success)
@@ -19,6 +28,6 @@ internal static class ParserExtensions
             throw new ParseException($"Parsing failure: Couldn't parse the whole input; unparsable remainder is: \"{unparsableReminder}\".");
         }
 
-        throw new ParseException(result.ToString() ?? "Unknown failure");
+        throw new ParseException(result.ToString());
     }
 }

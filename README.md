@@ -16,28 +16,22 @@ A Nice .NET API for RabbitMQ
 Initial development was sponsored by travel industry experts [15below](http://15below.com/)
 
 * **[Homepage](http://easynetq.com)**
-* **[Documentation](https://github.com/EasyNetQ/EasyNetQ/wiki/Introduction)**
-* **[NuGet](http://www.nuget.org/packages/EasyNetQ)**
-* **[Discussions](https://github.com/EasyNetQ/EasyNetQ/discussions)**
-* **[~Old Discussion Group~](https://groups.google.com/group/easynetq)**
 
 Goals:
 
 ### Important Update
 
-With the release of EasyNetQ v8, the method for connecting to a RabbitMQ broker has changed. The rest of the API remains unchanged.
-
 To make working with RabbitMQ on .NET as easy as possible.
 
-To connect to a RabbitMQ broker in v7...
+To connect to a RabbitMQ broker ...
 ```c#
     var bus = RabbitHutch.CreateBus("host=localhost");
 ```
 
-To connect to a RabbitMQ broker in v8...
+Or
 ```c#
     var serviceCollection = new ServiceCollection();
-    serviceCollection.AddEasyNetQ("host=localhost").UseSystemTextJson();
+    serviceCollection.RegisterEasyNetQ("host=localhost");
 
     using var provider = serviceCollection.BuildServiceProvider();
     var bus = provider.GetRequiredService<IBus>();

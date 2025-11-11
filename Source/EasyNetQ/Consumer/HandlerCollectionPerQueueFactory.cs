@@ -9,5 +9,8 @@ public class HandlerCollectionPerQueueFactory : IHandlerCollectionFactory
     private readonly ConcurrentDictionary<string, IHandlerCollection> handlerCollections = new();
 
     /// <inheritdoc />
-    public IHandlerCollection CreateHandlerCollection(in Queue queue) => handlerCollections.GetOrAdd(queue.Name, _ => new HandlerCollection());
+    public IHandlerCollection CreateHandlerCollection(in Queue queue)
+    {
+        return handlerCollections.GetOrAdd(queue.Name, _ => new HandlerCollection());
+    }
 }

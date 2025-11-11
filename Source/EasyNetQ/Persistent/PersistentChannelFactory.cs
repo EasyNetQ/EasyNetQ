@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Logging;
+using EasyNetQ.Logging;
 
 namespace EasyNetQ.Persistent;
 

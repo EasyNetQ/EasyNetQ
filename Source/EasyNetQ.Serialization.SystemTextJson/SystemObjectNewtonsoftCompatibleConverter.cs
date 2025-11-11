@@ -1,8 +1,10 @@
+using System;
+
 namespace EasyNetQ.Serialization.SystemTextJson;
 
 public class SystemObjectNewtonsoftCompatibleConverter : System.Text.Json.Serialization.JsonConverter<object>
 {
-    public override object? Read(ref System.Text.Json.Utf8JsonReader reader, Type typeToConvert, System.Text.Json.JsonSerializerOptions options)
+    public override object Read(ref System.Text.Json.Utf8JsonReader reader, Type typeToConvert, System.Text.Json.JsonSerializerOptions options)
     {
         switch (reader.TokenType)
         {

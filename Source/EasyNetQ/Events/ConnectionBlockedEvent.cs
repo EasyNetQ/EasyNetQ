@@ -5,6 +5,24 @@ namespace EasyNetQ.Events;
 /// <summary>
 ///     This event is raised after a block of the connection
 /// </summary>
-/// <param name="Type">The type of the associated connection</param>
-/// <param name="Reason">The reason of a block</param>
-public readonly record struct ConnectionBlockedEvent(PersistentConnectionType Type, string Reason);
+public readonly struct ConnectionBlockedEvent
+{
+    /// <summary>
+    ///     The type of the associated connection
+    /// </summary>
+    public PersistentConnectionType Type { get; }
+
+    /// <summary>
+    ///     The reason of a block
+    /// </summary>
+    public string Reason { get; }
+
+    /// <summary>
+    ///     Creates ConnectionBlockedEvent
+    /// </summary>
+    public ConnectionBlockedEvent(PersistentConnectionType type, string reason)
+    {
+        Type = type;
+        Reason = reason;
+    }
+}

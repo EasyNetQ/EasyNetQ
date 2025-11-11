@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace EasyNetQ;
 
 /// <summary>
@@ -44,7 +46,7 @@ internal class QueueDeclareConfiguration : IQueueDeclareConfiguration
     public bool IsExclusive { get; private set; }
     public bool IsAutoDelete { get; private set; }
 
-    public IDictionary<string, object>? Arguments { get; private set; }
+    public IDictionary<string, object> Arguments { get; private set; }
 
     public IQueueDeclareConfiguration AsDurable(bool isDurable)
     {

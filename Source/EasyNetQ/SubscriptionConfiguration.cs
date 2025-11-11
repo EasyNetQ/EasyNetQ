@@ -137,12 +137,12 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
     public ushort PrefetchCount { get; private set; }
     public bool IsExclusive { get; private set; }
     public bool Durable { get; private set; }
-    public string? QueueName { get; private set; }
+    public string QueueName { get; private set; }
     public string ExchangeType { get; private set; } = EasyNetQ.ExchangeType.Topic;
-    public IDictionary<string, object>? QueueArguments { get; private set; }
-    public IDictionary<string, object>? ExchangeArguments { get; private set; }
+    public IDictionary<string, object> QueueArguments { get; private set; }
+    public IDictionary<string, object> ExchangeArguments { get; private set; }
 
-    public SubscriptionConfiguration(ushort defaultPrefetchCount, string? queueType = null)
+    public SubscriptionConfiguration(ushort defaultPrefetchCount, string queueType = null)
     {
         Topics = new List<string>();
         AutoDelete = false;

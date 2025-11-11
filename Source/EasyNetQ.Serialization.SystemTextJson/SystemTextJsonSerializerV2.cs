@@ -1,3 +1,4 @@
+using System;
 using System.Buffers;
 using EasyNetQ.Internals;
 

@@ -11,9 +11,9 @@ public static class MessagePropertiesExtensions
 {
     internal const string ConfirmationIdHeader = "EasyNetQ.Confirmation.Id";
 
-    public static MessageProperties SetHeader(in this MessageProperties source, string key, object? value)
+    public static MessageProperties SetHeader(in this MessageProperties source, string key, object value)
     {
-        var headers = source.Headers ?? new Dictionary<string, object?>();
+        var headers = source.Headers ?? new Dictionary<string, object>();
         headers[key] = value;
         return source with { Headers = headers };
     }
@@ -34,7 +34,7 @@ public static class MessagePropertiesExtensions
     {
         if (source.ContentTypePresent) basicProperties.ContentType = source.ContentType;
         if (source.ContentEncodingPresent) basicProperties.ContentEncoding = source.ContentEncoding;
-        if (source.DeliveryModePresent) basicProperties.DeliveryMode = source.DeliveryMode;
+        if (source.DeliveryModePresent) basicProperties.DeliveryMode = (DeliveryModes)source.DeliveryMode;
         if (source.PriorityPresent) basicProperties.Priority = source.Priority;
         if (source.CorrelationIdPresent) basicProperties.CorrelationId = source.CorrelationId;
         if (source.ReplyToPresent) basicProperties.ReplyTo = source.ReplyTo;
@@ -50,6 +50,6 @@ public static class MessagePropertiesExtensions
         if (source.ClusterIdPresent) basicProperties.ClusterId = source.ClusterId;
 
         if (source is { HeadersPresent: true, Headers: not null })
-            basicProperties.Headers = new Dictionary<string, object?>(source.Headers);
+            basicProperties.Headers = new Dictionary<string, object>(source.Headers);
     }
 }

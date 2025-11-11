@@ -1,3 +1,6 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ;
@@ -36,30 +39,6 @@ public static partial class AdvancedBusExtensions
             cancellationToken: cancellationToken
         );
     }
-
-
-    /// <summary>
-    /// Declare a queue. If the queue already exists this method does nothing
-    /// </summary>
-    /// <param name="bus">The bus instance</param>
-    /// <param name="queue">The name of the queue</param>
-    /// <param name="configure">Delegate to configure the queue</param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    /// <returns>
-    /// The queue
-    /// </returns>
-    public static Queue QueueDeclare(
-        this IAdvancedBus bus,
-        string queue,
-        Action<IQueueDeclareConfiguration> configure,
-        CancellationToken cancellationToken = default
-    )
-    {
-        return bus.QueueDeclareAsync(queue, configure, cancellationToken)
-            .GetAwaiter()
-            .GetResult();
-    }
-
     /// <summary>
     /// Declare an exchange
     /// </summary>
@@ -86,25 +65,5 @@ public static partial class AdvancedBusExtensions
             arguments: exchangeDeclareConfiguration.Arguments,
             cancellationToken: cancellationToken
         );
-    }
-
-    /// <summary>
-    /// Declare an exchange
-    /// </summary>
-    /// <param name="bus">The bus instance</param>
-    /// <param name="exchange">The exchange name</param>
-    /// <param name="configure">The configuration of exchange</param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    /// <returns>The exchange</returns>
-    public static Exchange ExchangeDeclare(
-        this IAdvancedBus bus,
-        string exchange,
-        Action<IExchangeDeclareConfiguration> configure,
-        CancellationToken cancellationToken = default
-    )
-    {
-        return bus.ExchangeDeclareAsync(exchange, configure, cancellationToken)
-            .GetAwaiter()
-            .GetResult();
     }
 }

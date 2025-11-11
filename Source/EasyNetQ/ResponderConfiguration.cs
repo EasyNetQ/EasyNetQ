@@ -58,7 +58,7 @@ public interface IResponderConfiguration
 
 internal class ResponderConfiguration : IResponderConfiguration
 {
-    public ResponderConfiguration(ushort defaultPrefetchCount, string? queueType = null)
+    public ResponderConfiguration(ushort defaultPrefetchCount, string queueType = null)
     {
         PrefetchCount = defaultPrefetchCount;
 
@@ -67,10 +67,10 @@ internal class ResponderConfiguration : IResponderConfiguration
     }
 
     public ushort PrefetchCount { get; private set; }
-    public string? QueueName { get; private set; }
+    public string QueueName { get; private set; }
     public bool Durable { get; private set; } = true;
 
-    public IDictionary<string, object>? QueueArguments { get; private set; }
+    public IDictionary<string, object> QueueArguments { get; private set; }
 
     public IResponderConfiguration WithPrefetchCount(ushort prefetchCount)
     {

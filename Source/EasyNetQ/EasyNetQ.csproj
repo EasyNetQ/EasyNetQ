@@ -1,22 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>A nice .NET API for RabbitMQ</Description>
-    <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
-    <Nullable>enable</Nullable>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageId>EasyNetQ</PackageId>
+    <Version>7.9.0</Version>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
-    <PackageReference Include="RabbitMQ.Client" />
-  </ItemGroup>
-  <ItemGroup Label="InternalsVisibleTo">
-    <InternalsVisibleTo Include="EasyNetQ.Tests" />
-    <InternalsVisibleTo Include="EasyNetQ.Hosepipe" />
-    <InternalsVisibleTo Include="EasyNetQ.Hosepipe.Tests" />
-    <InternalsVisibleTo Include="EasyNetQ.Serialization.Tests" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="RabbitMQ.Client" />
   </ItemGroup>
 </Project>
