@@ -30,7 +30,7 @@ public interface ISendReceive
     /// <param name="configure">Action to configure consumer with</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>Consumer cancellation. Call Dispose to stop consuming</returns>
-    Task<IDisposable> ReceiveAsync(
+    Task<IAsyncDisposable> ReceiveAsync(
         string queue,
         Action<IReceiveRegistration> addHandlers,
         Action<IReceiveConfiguration> configure,

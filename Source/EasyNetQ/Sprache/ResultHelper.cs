@@ -1,3 +1,5 @@
+using System;
+
 namespace EasyNetQ.Sprache;
 
 internal static class ResultHelper

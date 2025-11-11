@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+
 namespace EasyNetQ.Interception;
 
 public class CompositeProduceConsumerInterceptor : IProduceConsumeInterceptor

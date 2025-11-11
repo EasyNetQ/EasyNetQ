@@ -9,7 +9,7 @@ namespace EasyNetQ.Events;
 /// <param name="DeliveryTag">The delivery tag</param>
 /// <param name="Multiple"><see langword="true"/> if a confirmation affects all previous messages</param>
 /// <param name="IsNack"><see langword="true"/> if a message is rejected</param>
-public readonly record struct MessageConfirmationEvent(IModel Channel, ulong DeliveryTag, bool Multiple, bool IsNack)
+public readonly record struct MessageConfirmationEvent(IChannel Channel, ulong DeliveryTag, bool Multiple, bool IsNack)
 {
     /// <summary>
     ///     Creates ack event
@@ -18,7 +18,7 @@ public readonly record struct MessageConfirmationEvent(IModel Channel, ulong Del
     /// <param name="deliveryTag">The delivery tag</param>
     /// <param name="multiple">The multiple option</param>
     /// <returns></returns>
-    public static MessageConfirmationEvent Ack(IModel channel, ulong deliveryTag, bool multiple) =>
+    public static MessageConfirmationEvent Ack(IChannel channel, ulong deliveryTag, bool multiple) =>
         new(channel, deliveryTag, multiple, false);
 
     /// <summary>
@@ -28,6 +28,6 @@ public readonly record struct MessageConfirmationEvent(IModel Channel, ulong Del
     /// <param name="deliveryTag">The delivery tag</param>
     /// <param name="multiple">The multiple option</param>
     /// <returns></returns>
-    public static MessageConfirmationEvent Nack(IModel channel, ulong deliveryTag, bool multiple) =>
+    public static MessageConfirmationEvent Nack(IChannel channel, ulong deliveryTag, bool multiple) =>
         new(channel, deliveryTag, multiple, true);
 }

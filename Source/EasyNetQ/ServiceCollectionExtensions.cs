@@ -2,12 +2,11 @@ using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Consumer;
 using EasyNetQ.DI;
+using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using RabbitMQ.Client;
 
 namespace EasyNetQ;
@@ -22,7 +21,6 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton(s =>
         {
             var configuration = connectionConfigurationFactory(s);
-
             configuration.SetDefaultProperties();
             return configuration;
         });
@@ -50,6 +48,7 @@ public static class ServiceCollectionExtensions
             var connectionConfiguration = serviceProvider.GetRequiredService<ConnectionConfiguration>();
             return ConnectionFactoryFactory.CreateConnectionFactory(connectionConfiguration);
         });
+        services.TryAddSingleton<IServiceResolver, MicrosoftDIServiceResolver>();
         services.TryAddSingleton<IPersistentChannelDispatcher, SinglePersistentChannelDispatcher>();
         services.TryAddSingleton<IProducerConnection, ProducerConnection>();
         services.TryAddSingleton<IConsumerConnection, ConsumerConnection>();
@@ -63,8 +62,9 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<ISendReceive, DefaultSendReceive>();
         services.TryAddSingleton<IScheduler, DeadLetterExchangeAndMessageTtlScheduler>();
         services.TryAddSingleton<IBus, RabbitBus>();
-        services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
-        services.TryAddSingleton<ILoggerFactory>(new NullLoggerFactory());
+        
+        services.TryAddSingleton(typeof(ILogger), typeof(NoopLogger));
+        services.TryAddSingleton(typeof(ILogger<>), typeof(NoopLogger<>));
         return services;
     }
 }

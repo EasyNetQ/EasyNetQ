@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
@@ -8,6 +11,8 @@ internal static class ConnectionConfigurationExtensions
 {
     public static void SetDefaultProperties(this ConnectionConfiguration configuration)
     {
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+
         if (configuration.Hosts.Count == 0)
             throw new EasyNetQException(
                 "Invalid connection string. 'host' value must be supplied. e.g: \"host=myserver\""
@@ -17,8 +22,7 @@ internal static class ConnectionConfigurationExtensions
             if (hostConfiguration.Port == 0)
                 hostConfiguration.Port = configuration.Port;
 
-        var args = Environment.GetCommandLineArgs();
-        var applicationNameAndPath = args.Length > 0 ? args[0] : null;
+        var applicationNameAndPath = Environment.GetCommandLineArgs()[0];
 
         var applicationName = "unknown";
         var applicationPath = "unknown";
@@ -28,7 +32,7 @@ internal static class ConnectionConfigurationExtensions
                 // Will only throw an exception if the applicationName contains invalid characters, is empty, or too long
                 // Silently catch the exception, as we will just leave the application name and path to "unknown"
                 applicationName = Path.GetFileName(applicationNameAndPath);
-                applicationPath = Path.GetDirectoryName(applicationNameAndPath) ?? "unknown";
+                applicationPath = Path.GetDirectoryName(applicationNameAndPath);
             }
             catch (ArgumentException)
             {
@@ -44,7 +48,7 @@ internal static class ConnectionConfigurationExtensions
         AddValueIfNotExists(configuration.ClientProperties, "platform", configuration.Platform ?? GetPlatform());
         AddValueIfNotExists(configuration.ClientProperties, "os", Environment.OSVersion.ToString());
         AddValueIfNotExists(configuration.ClientProperties, "version", GetApplicationVersion());
-        AddValueIfNotExists(configuration.ClientProperties, "easynetq_version", typeof(ConnectionConfigurationExtensions).Assembly.GetName().Version?.ToString() ?? "unknown");
+        AddValueIfNotExists(configuration.ClientProperties, "easynetq_version", typeof(ConnectionConfigurationExtensions).Assembly.GetName().Version.ToString());
         AddValueIfNotExists(configuration.ClientProperties, "application", applicationName);
         AddValueIfNotExists(configuration.ClientProperties, "application_location", applicationPath);
         AddValueIfNotExists(configuration.ClientProperties, "machine_name", Environment.MachineName);
@@ -67,18 +71,18 @@ internal static class ConnectionConfigurationExtensions
     {
         try
         {
-            return Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "unknown";
+            return Assembly.GetEntryAssembly()?.GetName().Version.ToString();
         }
         catch
         {
-            return "unknown";
+            return null;
         }
     }
 
     private static string GetPlatform()
     {
-        var platform = RuntimeInformation.FrameworkDescription;
-        var frameworkName = Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName;
+        string platform = RuntimeInformation.FrameworkDescription;
+        string frameworkName = Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName;
         if (frameworkName != null)
             platform = platform + " [" + frameworkName + "]";
 

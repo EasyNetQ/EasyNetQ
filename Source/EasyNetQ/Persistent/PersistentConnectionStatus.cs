@@ -1,3 +1,5 @@
+using System;
+
 namespace EasyNetQ.Persistent;
 
 /// <summary>
@@ -11,7 +13,7 @@ public sealed record PersistentConnectionStatus(
     PersistentConnectionType Type,
     PersistentConnectionState State,
     DateTime? ConnectedAt = null,
-    string? FailureReason = null
+    string FailureReason = null
 )
 {
     internal PersistentConnectionStatus ToUnknown() =>
@@ -20,6 +22,6 @@ public sealed record PersistentConnectionStatus(
     internal PersistentConnectionStatus ToConnected() =>
         new(Type, PersistentConnectionState.Connected, DateTime.UtcNow);
 
-    internal PersistentConnectionStatus ToDisconnected(string? reason) =>
+    internal PersistentConnectionStatus ToDisconnected(string reason) =>
         new(Type, PersistentConnectionState.Disconnected, null, reason);
 }

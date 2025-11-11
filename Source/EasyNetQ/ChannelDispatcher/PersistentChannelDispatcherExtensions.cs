@@ -5,9 +5,9 @@ namespace EasyNetQ.ChannelDispatcher;
 
 internal static class PersistentChannelDispatcherExtensions
 {
-    public static ValueTask<bool> InvokeAsync(
+    public static Task<bool> InvokeAsync(
         this IPersistentChannelDispatcher dispatcher,
-        Action<IModel> channelAction,
+        Func<IChannel, Task> channelAction,
         PersistentChannelDispatchOptions options,
         CancellationToken cancellationToken = default
     )
@@ -17,9 +17,9 @@ internal static class PersistentChannelDispatcherExtensions
         );
     }
 
-    public static ValueTask<TResult> InvokeAsync<TResult>(
+    public static Task<TResult> InvokeAsync<TResult>(
         this IPersistentChannelDispatcher dispatcher,
-        Func<IModel, TResult> channelAction,
+        Func<IChannel, Task<TResult>> channelAction,
         PersistentChannelDispatchOptions options,
         CancellationToken cancellationToken = default
     )

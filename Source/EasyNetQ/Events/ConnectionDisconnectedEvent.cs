@@ -6,11 +6,34 @@ namespace EasyNetQ.Events;
 /// <summary>
 ///     This event is raised after a successful connection to the endpoint
 /// </summary>
-/// <param name="Type">The type of the associated connection</param>
-/// <param name="Endpoint">The The endpoint a connection is connected to</param>
-/// <param name="Reason">The reason of a disconnection</param>
-public readonly record struct ConnectionDisconnectedEvent(
-    PersistentConnectionType Type,
-    AmqpTcpEndpoint Endpoint,
-    string Reason
-);
+public readonly struct ConnectionDisconnectedEvent
+{
+    /// <summary>
+    ///     The type of the associated connection
+    /// </summary>
+    public PersistentConnectionType Type { get; }
+
+    /// <summary>
+    ///     The endpoint a connection is disconnected from
+    /// </summary>
+    public AmqpTcpEndpoint Endpoint { get; }
+
+    /// <summary>
+    ///     The reason of a disconnection
+    /// </summary>
+    public string Reason { get; }
+
+    /// <summary>
+    ///     Creates ConnectionDisconnectedEvent
+    /// </summary>
+    public ConnectionDisconnectedEvent(
+        PersistentConnectionType type,
+        AmqpTcpEndpoint endpoint,
+        string reason
+    )
+    {
+        Type = type;
+        Endpoint = endpoint;
+        Reason = reason;
+    }
+}

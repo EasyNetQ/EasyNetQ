@@ -1,3 +1,4 @@
+using System.Linq;
 using EasyNetQ.Sprache;
 
 namespace EasyNetQ.ConnectionString;

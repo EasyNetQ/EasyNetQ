@@ -57,7 +57,7 @@ public static class ConsumeConfigurationExtensions
             async (body, properties, receivedInfo, cancellationToken) =>
             {
                 await handler(body, properties, receivedInfo, cancellationToken).ConfigureAwait(false);
-                return AckStrategies.Ack;
+                return AckStrategies.AckAsync;
             },
             configure
         );

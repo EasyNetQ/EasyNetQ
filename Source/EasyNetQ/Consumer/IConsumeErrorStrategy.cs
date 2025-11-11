@@ -1,3 +1,7 @@
+using System.Threading.Tasks;
+using System.Threading;
+using System;
+
 namespace EasyNetQ.Consumer;
 
 public interface IConsumeErrorStrategy
@@ -8,14 +12,16 @@ public interface IConsumeErrorStrategy
     /// </summary>
     /// <param name="context">The consumer execution context.</param>
     /// <param name="exception">The exception</param>
-    /// <returns><see cref="AckStrategy"/> for processing the original failed message</returns>
-    ValueTask<AckStrategy> HandleErrorAsync(ConsumeContext context, Exception exception);
+    /// <param name="cancellationToken"></param>
+    /// <returns><see cref="AckStrategyAsync"/> for processing the original failed message</returns>
+    ValueTask<AckStrategyAsync> HandleErrorAsync(ConsumeContext context, Exception exception, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// This method is fired when the task returned from the UserHandler is cancelled.
     /// Implement a strategy for handling the cancellation here.
     /// </summary>
     /// <param name="context">The consumer execution context.</param>
-    /// <returns><see cref="AckStrategy"/> for processing the original cancelled message</returns>
-    ValueTask<AckStrategy> HandleCancelledAsync(ConsumeContext context);
+    /// <param name="cancellationToken"></param>
+    /// <returns><see cref="AckStrategyAsync"/> for processing the original cancelled message</returns>
+    ValueTask<AckStrategyAsync> HandleCancelledAsync(ConsumeContext context, CancellationToken cancellationToken = default);
 }

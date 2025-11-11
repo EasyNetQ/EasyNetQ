@@ -9,4 +9,4 @@ namespace EasyNetQ.Events;
 /// <param name="Body">The message body</param>
 /// <param name="Properties">The message properties</param>
 /// <param name="Info">The returned message info</param>
-public readonly record struct ReturnedMessageEvent(IModel Channel, in ReadOnlyMemory<byte> Body, in MessageProperties Properties, in MessageReturnedInfo Info);
+public readonly record struct ReturnedMessageEvent(IChannel Channel, in ReadOnlyMemory<byte> Body, in MessageProperties Properties, in MessageReturnedInfo Info);

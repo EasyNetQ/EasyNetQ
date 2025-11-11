@@ -1,3 +1,5 @@
+using System;
+
 namespace EasyNetQ.Internals;
 
 /// <summary>
@@ -16,6 +18,12 @@ public static class StringExtensions
     /// </summary>
     public static string Trim(this string s, int start, int length)
     {
+        // References: https://referencesource.microsoft.com/#mscorlib/system/string.cs,2691
+        // https://referencesource.microsoft.com/#mscorlib/system/string.cs,1226
+        if (s == null)
+        {
+            throw new ArgumentNullException(nameof(s));
+        }
         if (start < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(start));

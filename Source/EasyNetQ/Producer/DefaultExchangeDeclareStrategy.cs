@@ -1,7 +1,10 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using EasyNetQ.Internals;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ;
+namespace EasyNetQ.Producer;
 
 /// <inheritdoc />
 public class DefaultExchangeDeclareStrategy : IExchangeDeclareStrategy
@@ -11,6 +14,9 @@ public class DefaultExchangeDeclareStrategy : IExchangeDeclareStrategy
 
     public DefaultExchangeDeclareStrategy(IConventions conventions, IAdvancedBus advancedBus)
     {
+        Preconditions.CheckNotNull(conventions, nameof(conventions));
+        Preconditions.CheckNotNull(advancedBus, nameof(advancedBus));
+
         this.conventions = conventions;
         declaredExchanges = new AsyncCache<ExchangeKey, Exchange>((k, c) => advancedBus.ExchangeDeclareAsync(k.Name, k.Type, cancellationToken: c));
     }

@@ -1,3 +1,4 @@
+using System;
 using System.Buffers;
 using EasyNetQ.Internals;
 
@@ -23,6 +24,8 @@ public sealed class SystemTextJsonSerializer : ISerializer
 
     public IMemoryOwner<byte> MessageToBytes(Type messageType, object message)
     {
+        Preconditions.CheckNotNull(messageType, nameof(messageType));
+
         var stream = new ArrayPooledMemoryStream();
         System.Text.Json.JsonSerializer.Serialize(stream, message, messageType, serialiseOptions);
         return stream;
@@ -30,6 +33,8 @@ public sealed class SystemTextJsonSerializer : ISerializer
 
     public object BytesToMessage(Type messageType, in ReadOnlyMemory<byte> bytes)
     {
-        return System.Text.Json.JsonSerializer.Deserialize(bytes.Span, messageType, deserializeOptions)!;
+        Preconditions.CheckNotNull(messageType, nameof(messageType));
+
+        return System.Text.Json.JsonSerializer.Deserialize(bytes.Span, messageType, deserializeOptions);
     }
 }

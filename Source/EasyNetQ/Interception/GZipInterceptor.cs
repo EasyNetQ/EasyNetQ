@@ -1,4 +1,5 @@
 using System.Buffers;
+using System.IO;
 using System.IO.Compression;
 
 namespace EasyNetQ.Interception;

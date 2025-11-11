@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace EasyNetQ.Sprache;
 
 internal sealed class Failure<T> : IFailure<T>

@@ -29,7 +29,7 @@ public class HandlerCollection : IHandlerCollection
         if (ThrowOnNoMatchingHandler)
             throw new EasyNetQException("No handler found for message type {0}", messageType.Name);
 
-        return (_, _, _) => Task.FromResult(AckStrategies.Ack);
+        return (_, _, _) => Task.FromResult(AckStrategies.AckAsync);
     }
 
     /// <inheritdoc />

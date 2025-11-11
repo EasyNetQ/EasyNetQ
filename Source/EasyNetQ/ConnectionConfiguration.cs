@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using RabbitMQ.Client;
 
 namespace EasyNetQ;
@@ -21,7 +23,6 @@ public class ConnectionConfiguration
     /// </summary>
     public ConnectionConfiguration()
     {
-        ClientName = "EasyNetQ";
         Port = DefaultPort;
         VirtualHost = "/";
         UserName = "guest";
@@ -112,17 +113,17 @@ public class ConnectionConfiguration
     /// <summary>
     ///     Allows to override default product value
     /// </summary>
-    public string? Product { get; set; }
+    public string Product { get; set; }
 
     /// <summary>
     ///     Allows to override default platform value
     /// </summary>
-    public string? Platform { get; set; }
+    public string Platform { get; set; }
 
     /// <summary>
     ///     Name to be used for connection
     /// </summary>
-    public string? Name { get; set; }
+    public string Name { get; set; }
 
     /// <summary>
     ///     Auth mechanisms to use
@@ -150,8 +151,6 @@ public class ConnectionConfiguration
     /// </summary>
     /// <remarks>For concurrency greater than one, the consumers could process messages in any order, not in the order they receive them</remarks>
     public int? ConsumerDispatcherConcurrency { get; set; } = null;
-
-    public string ClientName { get; set; }
 }
 
 /// <summary>
@@ -159,16 +158,10 @@ public class ConnectionConfiguration
 /// </summary>
 public class HostConfiguration
 {
-    public HostConfiguration(string host, ushort port)
-    {
-        Host = host;
-        Port = port;
-    }
-
     /// <summary>
     ///     Address of the host
     /// </summary>
-    public string Host { get; }
+    public string Host { get; set; }
 
     /// <summary>
     ///     Port of the host

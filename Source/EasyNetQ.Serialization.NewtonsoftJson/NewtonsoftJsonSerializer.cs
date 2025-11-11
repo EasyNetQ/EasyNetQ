@@ -1,4 +1,6 @@
+using System;
 using System.Buffers;
+using System.IO;
 using System.Text;
 using EasyNetQ.Internals;
 
@@ -10,7 +12,6 @@ namespace EasyNetQ.Serialization.NewtonsoftJson;
 public sealed class NewtonsoftJsonSerializer : ISerializer
 {
     private static readonly Encoding Encoding = new UTF8Encoding(false);
-
     private static readonly Newtonsoft.Json.JsonSerializerSettings DefaultSerializerSettings =
         new()
         {
@@ -37,6 +38,8 @@ public sealed class NewtonsoftJsonSerializer : ISerializer
     /// <inheritdoc />
     public IMemoryOwner<byte> MessageToBytes(Type messageType, object message)
     {
+        Preconditions.CheckNotNull(messageType, nameof(messageType));
+
         var stream = new ArrayPooledMemoryStream();
 
         using var streamWriter = new StreamWriter(stream, Encoding, DefaultBufferSize, true);
@@ -54,23 +57,20 @@ public sealed class NewtonsoftJsonSerializer : ISerializer
     /// <inheritdoc />
     public object BytesToMessage(Type messageType, in ReadOnlyMemory<byte> bytes)
     {
+        Preconditions.CheckNotNull(messageType, nameof(messageType));
+
         using var memoryStream = new ReadOnlyMemoryStream(bytes);
         using var streamReader = new StreamReader(memoryStream, Encoding, false, DefaultBufferSize, true);
         using var reader = new Newtonsoft.Json.JsonTextReader(streamReader) { ArrayPool = JsonSerializerArrayPool<char>.Instance };
-        return jsonSerializer.Deserialize(reader, messageType)!;
+        return jsonSerializer.Deserialize(reader, messageType);
     }
 
-    private sealed class JsonSerializerArrayPool<T> : Newtonsoft.Json.IArrayPool<T>
+    private class JsonSerializerArrayPool<T> : Newtonsoft.Json.IArrayPool<T>
     {
         public static JsonSerializerArrayPool<T> Instance { get; } = new();
 
         public T[] Rent(int minimumLength) => ArrayPool<T>.Shared.Rent(minimumLength);
 
-        public void Return(T[]? array)
-        {
-            if (array == null) return;
-
-            ArrayPool<T>.Shared.Return(array);
-        }
+        public void Return(T[] array) => ArrayPool<T>.Shared.Return(array);
     }
 }

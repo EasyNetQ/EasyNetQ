@@ -86,7 +86,7 @@ public class DefaultTypeNameSerializer : ITypeNameSerializer
         var assemblyDelimiterIndex = GetAssemblyDelimiterIndex(fullyQualifiedTypeName);
 
         string typeName;
-        string? assemblyName;
+        string assemblyName;
 
         if (assemblyDelimiterIndex != null)
         {
@@ -144,9 +144,9 @@ public class DefaultTypeNameSerializer : ITypeNameSerializer
         return Type.GetType(typeName) ?? throw new EasyNetQException($"Could not find type '{typeName}'");
     }
 
-    private static Type? GetGenericTypeFromTypeName(string typeName, Assembly assembly)
+    private static Type GetGenericTypeFromTypeName(string typeName, Assembly assembly)
     {
-        Type? type = null;
+        Type type = null;
         var openBracketIndex = typeName.IndexOf('[');
         if (openBracketIndex >= 0)
         {
@@ -217,5 +217,5 @@ public class DefaultTypeNameSerializer : ITypeNameSerializer
         return null;
     }
 
-    private readonly record struct TypeNameKey(string? AssemblyName, string TypeName);
+    private readonly record struct TypeNameKey(string AssemblyName, string TypeName);
 }

@@ -109,7 +109,7 @@ internal class ReceiveConfiguration : IReceiveConfiguration
     public bool IsExclusive { get; private set; }
     public bool Durable { get; private set; }
 
-    public IDictionary<string, object>? QueueArguments { get; private set; }
+    public IDictionary<string, object> QueueArguments { get; private set; }
 
     public ReceiveConfiguration(ushort defaultPrefetchCount)
     {

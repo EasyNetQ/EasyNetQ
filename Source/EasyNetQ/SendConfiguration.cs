@@ -19,7 +19,7 @@ public interface ISendConfiguration
     /// </summary>
     /// <param name="headers">Headers to set</param>
     /// <returns>Returns a reference to itself</returns>
-    ISendConfiguration WithHeaders(IDictionary<string, object?> headers);
+    ISendConfiguration WithHeaders(IDictionary<string, object> headers);
 
     /// <summary>
     /// Set publisher confirms
@@ -32,7 +32,7 @@ public interface ISendConfiguration
 internal class SendConfiguration : ISendConfiguration
 {
     public byte? Priority { get; private set; }
-    public IDictionary<string, object?>? MessageHeaders { get; private set; }
+    public IDictionary<string, object> MessageHeaders { get; private set; }
     public bool PublisherConfirms { get; private set; }
 
 
@@ -42,10 +42,10 @@ internal class SendConfiguration : ISendConfiguration
         return this;
     }
 
-    public ISendConfiguration WithHeaders(IDictionary<string, object?> headers)
+    public ISendConfiguration WithHeaders(IDictionary<string, object> headers)
     {
         foreach (var kvp in headers)
-            (MessageHeaders ??= new Dictionary<string, object?>()).Add(kvp.Key, kvp.Value);
+            (MessageHeaders ??= new Dictionary<string, object>()).Add(kvp.Key, kvp.Value);
         return this;
     }
 

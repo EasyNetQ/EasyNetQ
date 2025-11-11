@@ -20,7 +20,7 @@ public delegate string QueueNameConvention(Type messageType, string subscriberId
 /// <summary>
 ///     Convention for queue type
 /// </summary>
-public delegate string? QueueTypeConvention(Type messageType);
+public delegate string QueueTypeConvention(Type messageType);
 
 /// <summary>
 ///     Convention for error queue routing key naming
@@ -30,7 +30,7 @@ public delegate string ErrorQueueNameConvention(MessageReceivedInfo receivedInfo
 /// <summary>
 ///     Convention for error queue type
 /// </summary>
-public delegate string? ErrorQueueTypeConvention();
+public delegate string ErrorQueueTypeConvention();
 
 /// <summary>
 ///     Convention for error exchange naming
@@ -154,14 +154,16 @@ public class Conventions : IConventions
     {
         ExchangeNamingConvention = type =>
         {
-            var attr = GetExchangeAttribute(type);
-            return attr.Name ?? typeNameSerializer.Serialize(type);
+            var attr = GetQueueAttribute(type);
+            return string.IsNullOrEmpty(attr.ExchangeName)
+                ? typeNameSerializer.Serialize(type)
+                : attr.ExchangeName;
         };
 
         QueueTypeConvention = type =>
         {
             var attr = GetQueueAttribute(type);
-            return attr.Type;
+            return attr.QueueType;
         };
 
         TopicNamingConvention = _ => "";
@@ -170,7 +172,7 @@ public class Conventions : IConventions
         {
             var attr = GetQueueAttribute(type);
 
-            if (attr.Name == null)
+            if (attr.QueueName == null)
             {
                 var typeName = typeNameSerializer.Serialize(type);
 
@@ -180,8 +182,8 @@ public class Conventions : IConventions
             }
 
             return string.IsNullOrEmpty(subscriptionId)
-                ? attr.Name
-                : $"{attr.Name}_{subscriptionId}";
+                ? attr.QueueName
+                : $"{attr.QueueName}_{subscriptionId}";
         };
         RpcRoutingKeyNamingConvention = typeNameSerializer.Serialize;
 
@@ -201,11 +203,6 @@ public class Conventions : IConventions
     private static QueueAttribute GetQueueAttribute(Type messageType)
     {
         return messageType.GetAttribute<QueueAttribute>() ?? QueueAttribute.Default;
-    }
-
-    private static ExchangeAttribute GetExchangeAttribute(Type messageType)
-    {
-        return messageType.GetAttribute<ExchangeAttribute>() ?? ExchangeAttribute.Default;
     }
 
     /// <inheritdoc />

@@ -1,5 +1,9 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading;
 using EasyNetQ.Sprache;
 
 namespace EasyNetQ.ConnectionString;
@@ -19,13 +23,12 @@ internal static class ConnectionStringGrammar
             x => x is 0 or -1 ? Timeout.InfiniteTimeSpan : TimeSpan.FromSeconds(x)
         );
 
-    internal static readonly Parser<bool> Bool = Parse.CaseInsensitiveString("true").Or(Parse.CaseInsensitiveString("false")).Text()
-        .Select(x => x.ToLower() == "true");
+    internal static readonly Parser<bool> Bool = Parse.CaseInsensitiveString("true").Or(Parse.CaseInsensitiveString("false")).Text().Select(x => x.ToLower() == "true");
 
     internal static readonly Parser<HostConfiguration> Host =
         from host in Parse.Char(c => c != ':' && c != ';' && c != ',', "host").Many().Text()
         from port in Parse.Char(':').Then(_ => UShortNumber).Or(Parse.Return((ushort)0))
-        select new HostConfiguration(host, port);
+        select new HostConfiguration { Host = host, Port = port };
 
     internal static readonly Parser<IList<HostConfiguration>> Hosts = Host.ListDelimitedBy(',').Select(hosts => hosts.ToList());
 
