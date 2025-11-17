@@ -2,13 +2,8 @@
   <Folder Name="/.Solution Items/">
     <File Path="../.editorconfig" />
     <File Path="../.gitignore" />
-    <File Path="../README.md" />
-    <File Path="Directory.Build.props" />
     <File Path="Directory.Packages.props" />
   </Folder>
-  <Folder Name="/Serialization/">
-    <Project Path="EasyNetQ.Serialization.NewtonsoftJson/EasyNetQ.Serialization.NewtonsoftJson.csproj" />
-    <Project Path="EasyNetQ.Serialization.SystemTextJson/EasyNetQ.Serialization.SystemTextJson.csproj" />
-  </Folder>
+  <Project Path="ConsoleSandbox/ConsoleSandbox.csproj" />
   <Project Path="EasyNetQ/EasyNetQ.csproj" />
 </Solution>

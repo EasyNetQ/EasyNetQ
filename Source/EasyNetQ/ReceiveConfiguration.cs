@@ -91,7 +91,7 @@ public interface IReceiveConfiguration
     /// </summary>
     /// <param name="queueType">Desired queue type.</param>
     /// <returns>Returns a reference to itself</returns>
-    IReceiveConfiguration WithQueueType(string queueType = QueueType.Classic);
+    IReceiveConfiguration WithQueueType(string queueType = QueueType.Quorum);
 
     /// <summary>
     /// Configure the queue as single active consumer. Single active consumer allows to have only one consumer at a time consuming from a queue and to fail over to another registered consumer in case the active one is cancelled or dies.
@@ -181,7 +181,7 @@ internal class ReceiveConfiguration : IReceiveConfiguration
         return this;
     }
 
-    public IReceiveConfiguration WithQueueType(string queueType = QueueType.Classic)
+    public IReceiveConfiguration WithQueueType(string queueType = QueueType.Quorum)
     {
         InitializedQueueArguments.WithQueueType(queueType);
         return this;

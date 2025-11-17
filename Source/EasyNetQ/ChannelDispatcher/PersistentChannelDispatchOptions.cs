@@ -1,4 +1,3 @@
-using System;
 using EasyNetQ.Persistent;
 
 namespace EasyNetQ.ChannelDispatcher;

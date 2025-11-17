@@ -1,9 +1,8 @@
 using System.Collections.Concurrent;
 using EasyNetQ.Consumer;
-using EasyNetQ.Internals;
-using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
+using Microsoft.Extensions.Logging;
 
 namespace EasyNetQ.ChannelDispatcher;
 
@@ -28,7 +27,7 @@ public sealed class SinglePersistentChannelDispatcher : IPersistentChannelDispat
         channelPerOptions = new ConcurrentDictionary<PersistentChannelDispatchOptions, IPersistentChannel>();
         createChannelFactory = o =>
         {
-            logger.Debug($"Creating new channel with options: {System.Text.Json.JsonSerializer.Serialize(o)}");
+            logger.LogDebug($"Creating new channel with options: {System.Text.Json.JsonSerializer.Serialize(o)}");
 
             var options = new PersistentChannelOptions(o.PublisherConfirms);
             return o.ConnectionType switch

@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using EasyNetQ.Events;
-using EasyNetQ.Internals;
-using EasyNetQ.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace EasyNetQ.Consumer;
 

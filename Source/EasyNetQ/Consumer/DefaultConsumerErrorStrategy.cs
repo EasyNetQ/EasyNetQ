@@ -1,6 +1,6 @@
 using System.Buffers;
 using System.Collections.Concurrent;
-using EasyNetQ.Logging;
+using Microsoft.Extensions.Logging;
 using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
@@ -62,7 +62,7 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
         var properties = context.Properties;
         var body = context.Body.ToArray();
 
-        logger.Error(
+        logger.LogError(
             exception,
             "Exception thrown by subscription callback, receivedInfo={receivedInfo}, properties={properties}, message={message}",
             receivedInfo,
@@ -92,7 +92,7 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
         catch (BrokerUnreachableException unreachableException)
         {
             // thrown if the broker is unreachable during initial creation.
-            logger.Error(
+            logger.LogError(
                 unreachableException,
                 "Cannot connect to broker while attempting to publish error message"
             );
@@ -100,7 +100,7 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
         catch (OperationInterruptedException interruptedException)
         {
             // thrown if the broker connection is broken during declare or publish.
-            logger.Error(
+            logger.LogError(
                 interruptedException,
                 "Broker connection was closed while attempting to publish error message"
             );
@@ -108,7 +108,7 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
         catch (Exception unexpectedException)
         {
             // Something else unexpected has gone wrong :(
-            logger.Error(unexpectedException, "Failed to publish error message");
+            logger.LogError(unexpectedException, "Failed to publish error message");
         }
 
         return AckStrategies.NackWithRequeueAsync;

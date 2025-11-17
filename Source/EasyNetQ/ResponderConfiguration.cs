@@ -53,7 +53,7 @@ public interface IResponderConfiguration
     /// </summary>
     /// <param name="queueType">Desired queue type.</param>
     /// <returns>Returns a reference to itself</returns>
-    IResponderConfiguration WithQueueType(string queueType = QueueType.Classic);
+    IResponderConfiguration WithQueueType(string queueType = QueueType.Quorum);
 }
 
 internal class ResponderConfiguration : IResponderConfiguration
@@ -102,7 +102,7 @@ internal class ResponderConfiguration : IResponderConfiguration
         return this;
     }
 
-    public IResponderConfiguration WithQueueType(string queueType = QueueType.Classic)
+    public IResponderConfiguration WithQueueType(string queueType = QueueType.Quorum)
     {
         InitializedQueueArguments.WithQueueType(queueType);
         return this;

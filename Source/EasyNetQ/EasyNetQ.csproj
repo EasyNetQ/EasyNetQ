@@ -5,11 +5,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>EasyNetQ</PackageId>
-    <Version>7.9.0</Version>
+    <Version>8.0.0</Version>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
     <PackageReference Include="RabbitMQ.Client" />
+    <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
 </Project>

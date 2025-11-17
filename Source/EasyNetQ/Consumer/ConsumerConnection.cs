@@ -1,4 +1,4 @@
-using EasyNetQ.Logging;
+using Microsoft.Extensions.Logging;
 using EasyNetQ.Persistent;
 using RabbitMQ.Client;
 

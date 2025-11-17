@@ -1,5 +1,3 @@
-using System;
-
 namespace EasyNetQ;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
@@ -9,7 +7,7 @@ public sealed class QueueAttribute : Attribute
 
     public QueueAttribute()
     {
-        
+
     }
 
     public QueueAttribute(string name)

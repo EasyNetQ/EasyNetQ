@@ -1,8 +1,5 @@
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using EasyNetQ.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace EasyNetQ;
 
@@ -110,7 +107,7 @@ public sealed class EventBus : IEventBus
                 }
                 catch (Exception exception)
                 {
-                    logger.ErrorException("Failed to handle {event}", exception, messageEvent);
+                    logger.LogError(exception, "Failed to handle {event}", messageEvent);
                 }
         }
     }

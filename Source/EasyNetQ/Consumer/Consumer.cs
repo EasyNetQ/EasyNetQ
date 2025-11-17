@@ -1,6 +1,6 @@
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
-using EasyNetQ.Logging;
+using Microsoft.Extensions.Logging;
 using EasyNetQ.Persistent;
 using EasyNetQ.Topology;
 

@@ -1,4 +1,3 @@
-using System;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ;
@@ -143,7 +142,7 @@ public static class QueueDeclareConfigurationExtensions
     /// <param name="configuration">The configuration instance</param>
     /// <param name="queueType">The queue type to set</param>
     /// <returns>The same <paramref name="configuration"/></returns>
-    public static IQueueDeclareConfiguration WithQueueType(this IQueueDeclareConfiguration configuration, string queueType = QueueType.Classic)
+    public static IQueueDeclareConfiguration WithQueueType(this IQueueDeclareConfiguration configuration, string queueType = QueueType.Quorum)
     {
         Preconditions.CheckNotNull(configuration, nameof(configuration));
 

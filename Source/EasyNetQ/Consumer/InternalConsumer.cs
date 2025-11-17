@@ -1,5 +1,5 @@
 using EasyNetQ.Internals;
-using EasyNetQ.Logging;
+using Microsoft.Extensions.Logging;
 using EasyNetQ.Persistent;
 using EasyNetQ.Topology;
 using RabbitMQ.Client;
@@ -131,7 +131,7 @@ public class InternalConsumer : IInternalConsumer
         {
             if (IsChannelClosedWithSoftError(channel))
             {
-                logger.Info("Channel has shutdown with soft error and will be recreated");
+                logger.LogInformation("Channel has shutdown with soft error and will be recreated");
 
                 foreach (var consumer in consumers.Values)
                 {
@@ -158,7 +158,7 @@ public class InternalConsumer : IInternalConsumer
                         await channel.DisposeAsync();
                     channel = null;
 
-                    logger.Error(exception, "Failed to create channel");
+                    logger.LogError(exception, "Failed to create channel");
                     return new InternalConsumerStatus(Array.Empty<Queue>(), Array.Empty<Queue>(), Array.Empty<Queue>());
                 }
             }
@@ -212,7 +212,7 @@ public class InternalConsumer : IInternalConsumer
                     );
                     consumers.Add(queue.Name, consumer);
 
-                    logger.InfoFormat(
+                    logger.LogInformation(
                         "Declared consumer with consumerTag {consumerTag} on queue {queue}",
                         consumerTag,
                         queue.Name
@@ -223,7 +223,7 @@ public class InternalConsumer : IInternalConsumer
                 }
                 catch (Exception exception)
                 {
-                    logger.Error(
+                    logger.LogError(
                         exception,
                         "Failed to declare consumer on queue {queue}",
                         queue.Name
@@ -256,7 +256,7 @@ public class InternalConsumer : IInternalConsumer
                     }
                     catch (Exception exception)
                     {
-                        logger.Error(
+                        logger.LogError(
                             exception,
                             "Failed to stop consuming on consumerTag {consumerTag}",
                             consumerTag
@@ -294,7 +294,7 @@ public class InternalConsumer : IInternalConsumer
                     }
                     catch (Exception ex)
                     {
-                        logger.Error(
+                        logger.LogError(
                             ex,
                             "Failed to dispose on consumerTag {consumerTag}",
                             consumerTag

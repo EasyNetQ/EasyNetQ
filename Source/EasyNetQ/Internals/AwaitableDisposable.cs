@@ -1,6 +1,4 @@
-using System;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 
 namespace EasyNetQ.Internals;
 

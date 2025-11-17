@@ -1,12 +1,12 @@
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
 using EasyNetQ.Interception;
+using Microsoft.Extensions.Logging;
 using EasyNetQ.MessageVersioning;
 using EasyNetQ.MultipleExchange;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 using Microsoft.Extensions.DependencyInjection;
-using EasyNetQ.Logging;
 
 namespace EasyNetQ;
 
@@ -145,7 +145,7 @@ public static class EasyNetQBuilderExtensions
             }
             catch (Exception exception)
             {
-                logger.Error(exception, "Consume error strategy has failed");
+                logger.LogError(exception, "Consume error strategy has failed");
 
                 return AckStrategies.NackWithRequeueAsync;
             }

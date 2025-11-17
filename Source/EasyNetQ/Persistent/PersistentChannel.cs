@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
-using EasyNetQ.Logging;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
@@ -100,7 +100,7 @@ public class PersistentChannel : IPersistentChannel
                 if (exceptionVerdict.Rethrow)
                     throw;
 
-                logger.Error(exception, "Failed to fast invoke channel action, invocation will be retried");
+                logger.LogError(exception, "Failed to fast invoke channel action, invocation will be retried");
             }
             finally
             {
@@ -143,7 +143,7 @@ public class PersistentChannel : IPersistentChannel
                 if (exceptionVerdict.Rethrow)
                     throw;
 
-                logger.Error(exception, "Failed to invoke channel action, invocation will be retried");
+                logger.LogError(exception, "Failed to invoke channel action, invocation will be retried");
             }
 
             await Task.Delay(retryTimeoutMs, cts.Token).ConfigureAwait(false);
@@ -160,7 +160,7 @@ public class PersistentChannel : IPersistentChannel
 
             string stackTraceStr = string.Join('\n', frames.Select(x => x.GetFileName() ?? "???" + x.GetMethod().Name ?? "??"));
 
-            logger.DebugFormat($"Creating new channel. Stack trace: {stackTraceStr}");
+            logger.LogDebug($"Creating new channel. Stack trace: {stackTraceStr}");
 
         }
         createChannelOptions ??= new CreateChannelOptions(options.PublisherConfirms, options.PublisherConfirms);

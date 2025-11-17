@@ -1,6 +1,6 @@
-using RabbitMQ.Client;
 using System.Globalization;
 using EasyNetQ.Internals;
+using RabbitMQ.Client;
 
 namespace EasyNetQ;
 

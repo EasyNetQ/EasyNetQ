@@ -105,7 +105,7 @@ public interface ISubscriptionConfiguration
     /// </summary>
     /// <param name="queueType">Desired queue type.</param>
     /// <returns>Returns a reference to itself</returns>
-    ISubscriptionConfiguration WithQueueType(string queueType = QueueType.Classic);
+    ISubscriptionConfiguration WithQueueType(string queueType = QueueType.Quorum);
 
     /// <summary>
     /// Sets type of the exchange used for subscription.
@@ -228,7 +228,7 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
         return this;
     }
 
-    public ISubscriptionConfiguration WithQueueType(string queueType = QueueType.Classic)
+    public ISubscriptionConfiguration WithQueueType(string queueType = QueueType.Quorum)
     {
         InitializedQueueArguments.WithQueueType(queueType);
         return this;

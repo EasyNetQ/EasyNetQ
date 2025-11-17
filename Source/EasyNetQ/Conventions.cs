@@ -185,7 +185,15 @@ public class Conventions : IConventions
                 ? attr.QueueName
                 : $"{attr.QueueName}_{subscriptionId}";
         };
-        RpcRoutingKeyNamingConvention = typeNameSerializer.Serialize;
+        RpcRoutingKeyNamingConvention = (type) =>
+        {
+            var attr = GetQueueAttribute(type);
+            if (attr.QueueName == null)
+                return typeNameSerializer.Serialize(type);
+            else
+                return attr.QueueName;
+
+        };
 
         ErrorQueueNamingConvention = _ => "EasyNetQ_Default_Error_Queue";
         ErrorExchangeNamingConvention = receivedInfo => "ErrorExchange_" + receivedInfo.RoutingKey;

@@ -1,7 +1,7 @@
-using EasyNetQ.Internals;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using EasyNetQ.Internals;
 
 namespace EasyNetQ.AutoSubscribe;
 
@@ -79,7 +79,7 @@ public class AutoSubscriber
 
             subscriptions.Add(await awaitableSubscriptionResult.ConfigureAwait(false));
         }
-        
+
         foreach (var subscriberConsumerInfo in GetSubscriberConsumerInfos(consumerTypes, typeof(IConsume<>)))
         {
             var awaitableSubscriptionResult = (Task<SubscriptionResult>)AutoSubscribeConsumerMethodInfo

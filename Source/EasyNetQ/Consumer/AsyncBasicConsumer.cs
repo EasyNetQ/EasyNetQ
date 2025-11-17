@@ -1,5 +1,5 @@
 using EasyNetQ.Events;
-using EasyNetQ.Logging;
+using Microsoft.Extensions.Logging;
 using EasyNetQ.Topology;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -48,7 +48,7 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
 
         if (logger.IsInfoEnabled())
         {
-            logger.InfoFormat(
+            logger.LogInformation(
                 "Consumer with consumerTags {consumerTags} has cancelled",
                 string.Join(", ", consumerTags)
             );
@@ -73,7 +73,7 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
 
         if (logger.IsDebugEnabled())
         {
-            logger.DebugFormat(
+            logger.LogDebug(
                 "Message delivered to consumer {consumerTag} with deliveryTag {deliveryTag}",
                 consumerTag,
                 deliveryTag
@@ -121,7 +121,7 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
         }
         catch (AlreadyClosedException alreadyClosedException)
         {
-            logger.Info(
+            logger.LogInformation(
                 alreadyClosedException,
                 "Failed to ACK or NACK, message will be retried, receivedInfo={receivedInfo}",
                 receivedInfo
@@ -129,7 +129,7 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
         }
         catch (IOException ioException)
         {
-            logger.Info(
+            logger.LogInformation(
                 ioException,
                 "Failed to ACK or NACK, message will be retried, receivedInfo={receivedInfo}",
                 receivedInfo
@@ -137,7 +137,7 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
         }
         catch (Exception exception)
         {
-            logger.Error(
+            logger.LogError(
                 exception,
                 "Unexpected exception when attempting to ACK or NACK, receivedInfo={receivedInfo}",
                 receivedInfo
