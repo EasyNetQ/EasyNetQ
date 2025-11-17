@@ -66,17 +66,17 @@ public readonly struct AsyncLock : IDisposable
         return false;
     }
 
-    public readonly struct Releaser : IDisposable
+    public readonly struct Releaser(SemaphoreSlim semaphore) : IDisposable
     {
-        private readonly SemaphoreSlim? semaphore;
-
-        public Releaser(SemaphoreSlim? semaphore) => this.semaphore = semaphore;
-
         public void Dispose() => semaphore?.Release();
     }
 
     /// <inheritdoc />
-    public void Dispose() => semaphore.Dispose();
+    public void Dispose()
+    {
+        releaser.Dispose();
+        semaphore.Dispose();
+    }
 
     private async Task<Releaser> WaitForAcquireAsync(Task acquireAsync)
     {

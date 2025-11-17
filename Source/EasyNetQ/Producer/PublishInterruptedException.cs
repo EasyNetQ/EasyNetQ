@@ -1,11 +1,9 @@
-using System.Runtime.Serialization;
-
 namespace EasyNetQ.Producer;
 
 /// <summary>
 ///     This exception indicates that a publish was interrupted(for instance, because of a reconnection)
 /// </summary>
-
+[Serializable]
 public class PublishInterruptedException : Exception
 {
     //
@@ -21,12 +19,14 @@ public class PublishInterruptedException : Exception
     }
 
     /// <inheritdoc />
-    public PublishInterruptedException(string? message) : base(message)
+    public PublishInterruptedException(string message)
+        : base(message)
     {
     }
 
     /// <inheritdoc />
-    public PublishInterruptedException(string? message, Exception? inner) : base(message, inner)
+    public PublishInterruptedException(string message, Exception inner)
+        : base(message, inner)
     {
     }
 }

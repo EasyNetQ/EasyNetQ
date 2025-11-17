@@ -1,18 +1,18 @@
-using EasyNetQ.Persistent;
 using Microsoft.Extensions.Logging;
+using EasyNetQ.Persistent;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Producer;
 
 /// <summary>
-///
+/// 
 /// </summary>
 public interface IProducerConnection : IPersistentConnection
 {
 }
 
 /// <inheritdoc cref="EasyNetQ.Producer.IProducerConnection" />
-public sealed class ProducerConnection : PersistentConnection, IProducerConnection
+public class ProducerConnection : PersistentConnection, IProducerConnection
 {
     /// <summary>
     ///     Creates ProducerConnection

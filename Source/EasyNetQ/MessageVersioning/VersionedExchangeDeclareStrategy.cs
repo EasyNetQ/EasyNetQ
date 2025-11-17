@@ -1,4 +1,5 @@
 using EasyNetQ.Internals;
+using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ.MessageVersioning;
@@ -12,6 +13,9 @@ public class VersionedExchangeDeclareStrategy : IExchangeDeclareStrategy
 
     public VersionedExchangeDeclareStrategy(IConventions conventions, IAdvancedBus advancedBus)
     {
+        Preconditions.CheckNotNull(conventions, nameof(conventions));
+        Preconditions.CheckNotNull(advancedBus, nameof(advancedBus));
+
         this.conventions = conventions;
         this.advancedBus = advancedBus;
 

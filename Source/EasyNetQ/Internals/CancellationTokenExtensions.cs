@@ -17,7 +17,10 @@ public static class CancellationTokenExtensions
     ///     ValueCancellationTokenSource associated with <paramref name="cancellationToken"/>
     ///     and with <paramref name="timeout"/>
     /// </returns>
-    public static ValueCancellationTokenSource WithTimeout(this CancellationToken cancellationToken, TimeSpan timeout) => new(cancellationToken, timeout);
+    public static ValueCancellationTokenSource WithTimeout(this CancellationToken cancellationToken, TimeSpan timeout)
+    {
+        return new ValueCancellationTokenSource(cancellationToken, timeout);
+    }
 
     /// <summary>
     /// Struct that holds a cancellation token.
@@ -25,7 +28,7 @@ public static class CancellationTokenExtensions
     /// </summary>
     public readonly struct ValueCancellationTokenSource : IDisposable
     {
-        private readonly CancellationTokenSource? cts = null;
+        private readonly CancellationTokenSource cts = null;
         private readonly CancellationToken cancellationToken;
 
         /// <summary>
@@ -57,6 +60,9 @@ public static class CancellationTokenExtensions
         public CancellationToken Token => cts?.Token ?? cancellationToken;
 
         /// <inheritdoc />
-        public void Dispose() => cts?.Dispose();
+        public void Dispose()
+        {
+            cts?.Dispose();
+        }
     }
 }

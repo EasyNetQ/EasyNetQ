@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 namespace EasyNetQ;
 
 /// <inheritdoc />
-public delegate void TEventHandler<TEvent>(in TEvent @event) where TEvent : struct;
+public delegate Task TEventHandler<TEvent>(TEvent messageEvent) where TEvent : struct;
 
 /// <summary>
 ///     An internal pub-sub bus to distribute events within EasyNetQ
@@ -14,9 +14,9 @@ public interface IEventBus
     /// <summary>
     ///     Publishes the event
     /// </summary>
-    /// <param name="event">The event</param>
+    /// <param name="messageEvent">The event</param>
     /// <typeparam name="TEvent">The event type</typeparam>
-    void Publish<TEvent>(in TEvent @event) where TEvent : struct;
+    Task PublishAsync<TEvent>(TEvent messageEvent) where TEvent : struct;
 
     /// <summary>
     ///     Subscribes to the event type
@@ -40,12 +40,12 @@ public sealed class EventBus : IEventBus
     }
 
     /// <inheritdoc />
-    public void Publish<TEvent>(in TEvent @event) where TEvent : struct
+    public async Task PublishAsync<TEvent>(TEvent messageEvent) where TEvent : struct
     {
         if (!subscriptions.TryGetValue(typeof(TEvent), out var handlers))
             return;
 
-        ((Handlers<TEvent>)handlers).Handle(@event);
+        await ((Handlers<TEvent>)handlers).HandleAsync(messageEvent);
     }
 
     /// <inheritdoc />
@@ -97,17 +97,17 @@ public sealed class EventBus : IEventBus
             }
         }
 
-        public void Handle(in TEvent @event)
+        public async Task HandleAsync(TEvent messageEvent)
         {
             // ReSharper disable once InconsistentlySynchronizedField
             foreach (var handler in handlers)
                 try
                 {
-                    handler(in @event);
+                    await handler(messageEvent);
                 }
                 catch (Exception exception)
                 {
-                    logger.LogError(exception, "Failed to handle {event}", @event);
+                    logger.LogError(exception, "Failed to handle {event}", messageEvent);
                 }
         }
     }

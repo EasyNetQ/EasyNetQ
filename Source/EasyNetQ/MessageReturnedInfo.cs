@@ -29,6 +29,10 @@ public readonly struct MessageReturnedInfo
         string returnReason
     )
     {
+        Preconditions.CheckNotNull(exchange, nameof(exchange));
+        Preconditions.CheckNotNull(routingKey, nameof(routingKey));
+        Preconditions.CheckNotNull(returnReason, nameof(returnReason));
+
         Exchange = exchange;
         RoutingKey = routingKey;
         ReturnReason = returnReason;

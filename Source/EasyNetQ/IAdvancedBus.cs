@@ -11,19 +11,6 @@ namespace EasyNetQ;
 public interface IAdvancedBus
 {
     /// <summary>
-    /// <see langword="true"/> if a connection of the given type is established.
-    /// </summary>
-    [Obsolete("IsConnected is deprecated because it is misleading. Please use GetConnectionStatus instead")]
-    bool IsConnected { get; }
-
-    /// <summary>
-    /// Initialises all connections, but does not check if they are connected currently.
-    /// </summary>>
-    /// <param name="cancellationToken">The cancellation token</param>
-    [Obsolete("ConnectAsync is deprecated because it is misleading. Please use EnsureConnectedAsync instead")]
-    Task ConnectAsync(CancellationToken cancellationToken = default);
-
-    /// <summary>
     ///     Gets a connection status for the given type
     /// </summary>
     /// <param name="type">The connection type</param>
@@ -42,7 +29,7 @@ public interface IAdvancedBus
     /// <param name="configure">
     /// Fluent configuration e.g. x => x.WithPriority(10)</param>
     /// <returns>A disposable to cancel the consumer</returns>
-    IDisposable Consume(Action<IConsumeConfiguration> configure);
+    Task<IAsyncDisposable> ConsumeAsync(Action<IConsumeConfiguration> configure);
 
     /// <summary>
     /// Publish a message as a .NET type when the type is only known at runtime.
@@ -123,7 +110,7 @@ public interface IAdvancedBus
         bool durable = true,
         bool exclusive = false,
         bool autoDelete = false,
-        IDictionary<string, object>? arguments = null,
+        IDictionary<string, object> arguments = null,
         CancellationToken cancellationToken = default
     );
 
@@ -177,7 +164,7 @@ public interface IAdvancedBus
         string type = ExchangeType.Topic,
         bool durable = true,
         bool autoDelete = false,
-        IDictionary<string, object>? arguments = null,
+        IDictionary<string, object> arguments = null,
         CancellationToken cancellationToken = default
     );
 
@@ -200,7 +187,7 @@ public interface IAdvancedBus
         string queue,
         string exchange,
         string routingKey,
-        IDictionary<string, object>? arguments = null,
+        IDictionary<string, object> arguments = null,
         CancellationToken cancellationToken = default
     );
 
@@ -211,7 +198,7 @@ public interface IAdvancedBus
         string queue,
         string exchange,
         string routingKey,
-        IDictionary<string, object>? arguments = null,
+        IDictionary<string, object> arguments = null,
         CancellationToken cancellationToken = default
     );
 
@@ -222,7 +209,7 @@ public interface IAdvancedBus
         string destinationExchange,
         string sourceExchange,
         string routingKey,
-        IDictionary<string, object>? arguments = null,
+        IDictionary<string, object> arguments = null,
         CancellationToken cancellationToken = default
     );
 
@@ -233,7 +220,7 @@ public interface IAdvancedBus
         string destinationExchange,
         string sourceExchange,
         string routingKey,
-        IDictionary<string, object>? arguments = null,
+        IDictionary<string, object> arguments = null,
         CancellationToken cancellationToken = default
     );
 

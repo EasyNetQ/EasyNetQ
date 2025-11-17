@@ -18,7 +18,7 @@ public sealed class ArrayPooledMemoryStream : Stream, IMemoryOwner<byte>
     /// <inheritdoc />
     public ArrayPooledMemoryStream()
     {
-        rentBuffer = [];
+        rentBuffer = Array.Empty<byte>();
         length = 0;
         position = 0;
     }
@@ -125,10 +125,10 @@ public sealed class ArrayPooledMemoryStream : Stream, IMemoryOwner<byte>
     protected override void Dispose(bool disposing)
     {
         base.Dispose(disposing);
-        if (rentBuffer != Array.Empty<byte>())
+        if (rentBuffer != null)
         {
             ArrayPool<byte>.Shared.Return(rentBuffer);
-            rentBuffer = [];
+            rentBuffer = null;
         }
 
         length = 0;

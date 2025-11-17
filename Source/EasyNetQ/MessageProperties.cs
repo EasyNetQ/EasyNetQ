@@ -9,11 +9,11 @@ public readonly record struct MessageProperties
 {
     public static MessageProperties Empty => default;
 
-    internal MessageProperties(IBasicProperties basicProperties)
+    internal MessageProperties(IReadOnlyBasicProperties basicProperties)
     {
         ContentType = basicProperties.ContentType;
         ContentEncoding = basicProperties.ContentEncoding;
-        DeliveryMode = basicProperties.DeliveryMode;
+        DeliveryMode = (byte)basicProperties.DeliveryMode;
         Priority = basicProperties.Priority;
         CorrelationId = basicProperties.CorrelationId;
         ReplyTo = basicProperties.ReplyTo;
@@ -32,17 +32,17 @@ public readonly record struct MessageProperties
     /// <summary>
     ///     MIME Content type
     /// </summary>
-    public string? ContentType { get; init; }
+    public string ContentType { get; init; }
 
     /// <summary>
     ///     MIME content encoding
     /// </summary>
-    public string? ContentEncoding { get; init; }
+    public string ContentEncoding { get; init; }
 
     /// <summary>
     ///     Various headers
     /// </summary>
-    public IDictionary<string, object?>? Headers { get; init; }
+    public IDictionary<string, object> Headers { get; init; }
 
     /// <summary>
     ///     non-persistent (1) or persistent (2)
@@ -57,12 +57,12 @@ public readonly record struct MessageProperties
     /// <summary>
     ///     Application correlation identifier
     /// </summary>
-    public string? CorrelationId { get; init; }
+    public string CorrelationId { get; init; }
 
     /// <summary>
     ///     Destination to reply to
     /// </summary>
-    public string? ReplyTo { get; init; }
+    public string ReplyTo { get; init; }
 
     /// <summary>
     ///     Message expiration specification
@@ -72,7 +72,7 @@ public readonly record struct MessageProperties
     /// <summary>
     ///     Application message identifier
     /// </summary>
-    public string? MessageId { get; init; }
+    public string MessageId { get; init; }
 
     /// <summary>
     ///     Message timestamp
@@ -82,22 +82,22 @@ public readonly record struct MessageProperties
     /// <summary>
     ///     Message type name
     /// </summary>
-    public string? Type { get; init; }
+    public string Type { get; init; }
 
     /// <summary>
     ///     Creating user id
     /// </summary>
-    public string? UserId { get; init; }
+    public string UserId { get; init; }
 
     /// <summary>
     ///     Application id
     /// </summary>
-    public string? AppId { get; init; }
+    public string AppId { get; init; }
 
     /// <summary>
     ///     Intra-cluster routing identifier
     /// </summary>
-    public string? ClusterId { get; init; }
+    public string ClusterId { get; init; }
 
     /// <summary>
     ///     True if <see cref="ContentType"/> is present

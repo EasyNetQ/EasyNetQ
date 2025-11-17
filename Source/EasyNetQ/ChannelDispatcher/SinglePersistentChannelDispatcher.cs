@@ -1,15 +1,15 @@
 using System.Collections.Concurrent;
 using EasyNetQ.Consumer;
-using EasyNetQ.Internals;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
+using Microsoft.Extensions.Logging;
 
 namespace EasyNetQ.ChannelDispatcher;
 
 /// <summary>
 ///     Invokes client commands using single channel
 /// </summary>
-public sealed class SinglePersistentChannelDispatcher : IPersistentChannelDispatcher, IDisposable
+public sealed class SinglePersistentChannelDispatcher : IPersistentChannelDispatcher, IAsyncDisposable
 {
     private readonly ConcurrentDictionary<PersistentChannelDispatchOptions, IPersistentChannel> channelPerOptions;
     private readonly Func<PersistentChannelDispatchOptions, IPersistentChannel> createChannelFactory;
@@ -20,12 +20,15 @@ public sealed class SinglePersistentChannelDispatcher : IPersistentChannelDispat
     public SinglePersistentChannelDispatcher(
         IProducerConnection producerConnection,
         IConsumerConnection consumerConnection,
-        IPersistentChannelFactory channelFactory
+        IPersistentChannelFactory channelFactory,
+        ILogger<SinglePersistentChannelDispatcher> logger
     )
     {
         channelPerOptions = new ConcurrentDictionary<PersistentChannelDispatchOptions, IPersistentChannel>();
         createChannelFactory = o =>
         {
+            logger.LogDebug($"Creating new channel with options: {System.Text.Json.JsonSerializer.Serialize(o)}");
+
             var options = new PersistentChannelOptions(o.PublisherConfirms);
             return o.ConnectionType switch
             {
@@ -41,7 +44,7 @@ public sealed class SinglePersistentChannelDispatcher : IPersistentChannelDispat
     }
 
     /// <inheritdoc />
-    public ValueTask<TResult> InvokeAsync<TResult, TChannelAction>(
+    public Task<TResult> InvokeAsync<TResult, TChannelAction>(
         TChannelAction channelAction,
         PersistentChannelDispatchOptions options,
         CancellationToken cancellationToken = default
@@ -53,5 +56,12 @@ public sealed class SinglePersistentChannelDispatcher : IPersistentChannelDispat
     }
 
     /// <inheritdoc />
-    public void Dispose() => channelPerOptions.ClearAndDispose();
+    public async ValueTask DisposeAsync()
+    {
+        foreach (var item in channelPerOptions)
+        {
+            await item.Value.DisposeAsync();
+        }
+        channelPerOptions.Clear();
+    }
 }

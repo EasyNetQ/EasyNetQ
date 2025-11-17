@@ -1,4 +1,5 @@
 using EasyNetQ.Internals;
+using EasyNetQ.Producer;
 
 namespace EasyNetQ;
 
@@ -97,7 +98,7 @@ public class DefaultPubSub : IPubSub
         foreach (var topic in subscriptionConfiguration.Topics.DefaultIfEmpty("#"))
             await advancedBus.BindAsync(exchange, queue, topic, cts.Token).ConfigureAwait(false);
 
-        var consumerCancellation = advancedBus.Consume<T>(
+        var consumerCancellation = await advancedBus.ConsumeAsync<T>(
             queue,
             (message, _, cancellation) => onMessage(message.Body!, cancellation),
             c => c.WithPrefetchCount(subscriptionConfiguration.PrefetchCount)

@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/.Solution Items/">
+    <File Path="../.editorconfig" />
+    <File Path="../.gitignore" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Project Path="ConsoleSandbox/ConsoleSandbox.csproj" />
+  <Project Path="EasyNetQ/EasyNetQ.csproj" />
+</Solution>

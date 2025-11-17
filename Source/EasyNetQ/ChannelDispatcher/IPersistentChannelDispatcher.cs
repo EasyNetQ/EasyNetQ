@@ -5,7 +5,7 @@ namespace EasyNetQ.ChannelDispatcher;
 /// <summary>
 ///     Responsible for invoking client commands.
 /// </summary>
-public interface IPersistentChannelDispatcher
+public interface IPersistentChannelDispatcher : IAsyncDisposable
 {
     /// <summary>
     /// Invokes an action on top of model
@@ -16,7 +16,7 @@ public interface IPersistentChannelDispatcher
     /// <typeparam name="TResult"></typeparam>
     /// <typeparam name="TChannelAction"></typeparam>
     /// <returns></returns>
-    ValueTask<TResult> InvokeAsync<TResult, TChannelAction>(
+    Task<TResult> InvokeAsync<TResult, TChannelAction>(
         TChannelAction channelAction,
         PersistentChannelDispatchOptions options,
         CancellationToken cancellationToken = default

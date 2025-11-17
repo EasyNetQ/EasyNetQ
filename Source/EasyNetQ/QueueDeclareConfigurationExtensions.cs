@@ -13,8 +13,12 @@ public static class QueueDeclareConfigurationExtensions
     /// <param name="configuration">The configuration instance</param>
     /// <param name="maxPriority">The maximum priority to set, should be a positive integer between 1 and 255</param>
     /// <returns>The same <paramref name="configuration"/></returns>
-    public static IQueueDeclareConfiguration WithMaxPriority(this IQueueDeclareConfiguration configuration, byte maxPriority) =>
-        configuration.WithArgument(Argument.MaxPriority, maxPriority);
+    public static IQueueDeclareConfiguration WithMaxPriority(this IQueueDeclareConfiguration configuration, int maxPriority)
+    {
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+
+        return configuration.WithArgument("x-max-priority", maxPriority);
+    }
 
     /// <summary>
     ///     Sets maximum queue length. The maximum number of ready messages that may exist on the queue.
@@ -25,7 +29,11 @@ public static class QueueDeclareConfigurationExtensions
     /// <param name="maxLength">The maximum length to set</param>
     /// <returns>The same <paramref name="configuration"/></returns>
     public static IQueueDeclareConfiguration WithMaxLength(this IQueueDeclareConfiguration configuration, int maxLength)
-        => configuration.WithArgument(Argument.MaxLength, maxLength);
+    {
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+
+        return configuration.WithArgument("x-max-length", maxLength);
+    }
 
     /// <summary>
     ///     Sets maximum queue length in bytes. The maximum size of the queue in bytes.
@@ -35,8 +43,12 @@ public static class QueueDeclareConfigurationExtensions
     /// <param name="configuration">The configuration instance</param>
     /// <param name="maxLengthBytes">The maximum queue length to set</param>
     /// <returns>The same <paramref name="configuration"/></returns>
-    public static IQueueDeclareConfiguration WithMaxLengthBytes(this IQueueDeclareConfiguration configuration, int maxLengthBytes) =>
-        configuration.WithArgument(Argument.MaxLengthBytes, maxLengthBytes);
+    public static IQueueDeclareConfiguration WithMaxLengthBytes(this IQueueDeclareConfiguration configuration, int maxLengthBytes)
+    {
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+
+        return configuration.WithArgument("x-max-length-bytes", maxLengthBytes);
+    }
 
     /// <summary>
     ///     Sets overflow type to configure overflow behaviour.
@@ -45,8 +57,12 @@ public static class QueueDeclareConfigurationExtensions
     /// <param name="configuration">The configuration instance</param>
     /// <param name="overflowType">The overflow type to set</param>
     /// <returns>The same <paramref name="configuration"/></returns>
-    public static IQueueDeclareConfiguration WithOverflowType(this IQueueDeclareConfiguration configuration, string overflowType = OverflowType.DropHead) =>
-        configuration.WithArgument(Argument.Overflow, overflowType);
+    public static IQueueDeclareConfiguration WithOverflowType(this IQueueDeclareConfiguration configuration, string overflowType = OverflowType.DropHead)
+    {
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+
+        return configuration.WithArgument("x-overflow", overflowType);
+    }
 
     /// <summary>
     ///     Sets expires of the queue.
@@ -55,8 +71,12 @@ public static class QueueDeclareConfigurationExtensions
     /// <param name="configuration">The configuration instance</param>
     /// <param name="expires">The expires to set</param>
     /// <returns>The same <paramref name="configuration"/></returns>
-    public static IQueueDeclareConfiguration WithExpires(this IQueueDeclareConfiguration configuration, TimeSpan expires) =>
-        configuration.WithArgument(Argument.Expires, (int)expires.TotalMilliseconds);
+    public static IQueueDeclareConfiguration WithExpires(this IQueueDeclareConfiguration configuration, TimeSpan expires)
+    {
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+
+        return configuration.WithArgument("x-expires", (int)expires.TotalMilliseconds);
+    }
 
     /// <summary>
     ///     Sets message TTL.
@@ -65,8 +85,12 @@ public static class QueueDeclareConfigurationExtensions
     /// <param name="configuration">The configuration instance</param>
     /// <param name="messageTtl">The message TTL to set</param>
     /// <returns>The same <paramref name="configuration"/></returns>
-    public static IQueueDeclareConfiguration WithMessageTtl(this IQueueDeclareConfiguration configuration, TimeSpan messageTtl) =>
-        configuration.WithArgument(Argument.MessageTtl, (int)messageTtl.TotalMilliseconds);
+    public static IQueueDeclareConfiguration WithMessageTtl(this IQueueDeclareConfiguration configuration, TimeSpan messageTtl)
+    {
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+
+        return configuration.WithArgument("x-message-ttl", (int)messageTtl.TotalMilliseconds);
+    }
 
     /// <summary>
     ///     Sets dead letter exchange for queue.
@@ -75,8 +99,12 @@ public static class QueueDeclareConfigurationExtensions
     /// <param name="configuration">The configuration instance</param>
     /// <param name="deadLetterExchange">The dead letter exchange to set</param>
     /// <returns>The same <paramref name="configuration"/></returns>
-    public static IQueueDeclareConfiguration WithDeadLetterExchange(this IQueueDeclareConfiguration configuration, Exchange deadLetterExchange) =>
-        configuration.WithArgument(Argument.DeadLetterExchange, deadLetterExchange.Name);
+    public static IQueueDeclareConfiguration WithDeadLetterExchange(this IQueueDeclareConfiguration configuration, Exchange deadLetterExchange)
+    {
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+
+        return configuration.WithArgument("x-dead-letter-exchange", deadLetterExchange.Name);
+    }
 
     /// <summary>
     ///     Sets dead letter routing key.
@@ -86,8 +114,12 @@ public static class QueueDeclareConfigurationExtensions
     /// <param name="configuration">The configuration instance</param>
     /// <param name="deadLetterRoutingKey">The dead letter routing key to set</param>
     /// <returns>The same <paramref name="configuration"/></returns>
-    public static IQueueDeclareConfiguration WithDeadLetterRoutingKey(this IQueueDeclareConfiguration configuration, string deadLetterRoutingKey) =>
-        configuration.WithArgument(Argument.DeadLetterRoutingKey, deadLetterRoutingKey);
+    public static IQueueDeclareConfiguration WithDeadLetterRoutingKey(this IQueueDeclareConfiguration configuration, string deadLetterRoutingKey)
+    {
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+
+        return configuration.WithArgument("x-dead-letter-routing-key", deadLetterRoutingKey);
+    }
 
     /// <summary>
     ///     Sets queue mode.
@@ -96,8 +128,12 @@ public static class QueueDeclareConfigurationExtensions
     /// <param name="configuration">The configuration instance</param>
     /// <param name="queueMode">The queue mode to set</param>
     /// <returns>The same <paramref name="configuration"/></returns>
-    public static IQueueDeclareConfiguration WithQueueMode(this IQueueDeclareConfiguration configuration, string queueMode = QueueMode.Default) =>
-        configuration.WithArgument(Argument.QueueMode, queueMode);
+    public static IQueueDeclareConfiguration WithQueueMode(this IQueueDeclareConfiguration configuration, string queueMode = QueueMode.Default)
+    {
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+
+        return configuration.WithArgument("x-queue-mode", queueMode);
+    }
 
     /// <summary>
     ///     Sets queue type.
@@ -106,8 +142,12 @@ public static class QueueDeclareConfigurationExtensions
     /// <param name="configuration">The configuration instance</param>
     /// <param name="queueType">The queue type to set</param>
     /// <returns>The same <paramref name="configuration"/></returns>
-    public static IQueueDeclareConfiguration WithQueueType(this IQueueDeclareConfiguration configuration, string queueType = QueueType.Classic) =>
-        configuration.WithArgument(Argument.QueueType, queueType);
+    public static IQueueDeclareConfiguration WithQueueType(this IQueueDeclareConfiguration configuration, string queueType = QueueType.Quorum)
+    {
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+
+        return configuration.WithArgument("x-queue-type", queueType);
+    }
 
     /// <summary>
     ///     Enables single active consumer.
@@ -115,10 +155,16 @@ public static class QueueDeclareConfigurationExtensions
     ///     over to another registered consumer in case the active one is cancelled or dies.
     /// </summary>
     /// <param name="configuration">The configuration instance</param>
-    /// <param name="singleActiveConsumer"><see langword="true"/> if a queue has a single active consumer</param>
+    /// <param name="singleActiveConsumer">True if a queue has a single active consumer</param>
     /// <returns>The same <paramref name="configuration"/></returns>
-    public static IQueueDeclareConfiguration WithSingleActiveConsumer(this IQueueDeclareConfiguration configuration, bool singleActiveConsumer = true) =>
-        configuration.WithArgument(Argument.SingleActiveConsumer, singleActiveConsumer);
+    public static IQueueDeclareConfiguration WithSingleActiveConsumer(
+        this IQueueDeclareConfiguration configuration, bool singleActiveConsumer = true
+    )
+    {
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+
+        return configuration.WithArgument("x-single-active-consumer", singleActiveConsumer);
+    }
 
     /// <summary>
     ///     Sets queue master locator.
@@ -127,8 +173,14 @@ public static class QueueDeclareConfigurationExtensions
     /// <param name="configuration">The configuration instance</param>
     /// <param name="queueMasterLocator">The queue master locator to set</param>
     /// <returns>The same <paramref name="configuration"/></returns>
-    public static IQueueDeclareConfiguration WithQueueMasterLocator(this IQueueDeclareConfiguration configuration, string queueMasterLocator = QueueMasterLocator.MinMasters) =>
-        configuration.WithArgument(Argument.QueueMasterLocator, queueMasterLocator);
+    public static IQueueDeclareConfiguration WithQueueMasterLocator(
+        this IQueueDeclareConfiguration configuration, string queueMasterLocator = QueueMasterLocator.MinMasters
+    )
+    {
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+
+        return configuration.WithArgument("x-queue-master-locator", queueMasterLocator);
+    }
 
     /// <summary>
     ///     Sets dead letter strategy.
@@ -137,6 +189,13 @@ public static class QueueDeclareConfigurationExtensions
     /// <param name="configuration">The configuration instance</param>
     /// <param name="deadLetterStrategy">The dead letter strategy to set</param>
     /// <returns>The same <paramref name="configuration"/></returns>
-    public static IQueueDeclareConfiguration WithDeadLetterStrategy(this IQueueDeclareConfiguration configuration, string deadLetterStrategy = DeadLetterStrategy.AtMostOnce) =>
-        configuration.WithArgument(Argument.DeadLetterStrategy, deadLetterStrategy);
+    public static IQueueDeclareConfiguration WithDeadLetterStrategy(
+        this IQueueDeclareConfiguration configuration, string deadLetterStrategy = DeadLetterStrategy.AtMostOnce
+    )
+    {
+        Preconditions.CheckNotNull(configuration, nameof(configuration));
+
+        return configuration.WithArgument("x-dead-letter-strategy", deadLetterStrategy);
+    }
+
 }

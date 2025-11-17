@@ -19,7 +19,7 @@ public class DefaultAutoSubscriberMessageDispatcher(IServiceProvider resolver) :
         where TMessage : class
         where TAsyncConsumer : class, IConsumeAsync<TMessage>
     {
-        var scope = resolver.CreateScope();
+        using var scope = resolver.CreateScope();
         try
         {
             var asyncConsumer = scope.ServiceProvider.GetRequiredService<TAsyncConsumer>();

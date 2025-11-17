@@ -26,75 +26,11 @@ public static class NonGenericSchedulerExtensions
         Type messageType,
         TimeSpan delay,
         CancellationToken cancellationToken = default
-    ) => scheduler.FuturePublishAsync(message, messageType, delay, _ => { }, cancellationToken);
-
-    /// <summary>
-    /// Schedule a message to be published at some time in the future
-    /// </summary>
-    /// <param name="scheduler">The scheduler instance</param>
-    /// <param name="message">The message</param>
-    /// <param name="messageType">The message type</param>
-    /// <param name="delay">The delay for message to publish in future</param>
-    /// <param name="topic">The topic string</param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    public static void FuturePublish(
-        this IScheduler scheduler,
-        object message,
-        Type messageType,
-        TimeSpan delay,
-        string topic,
-        CancellationToken cancellationToken = default
     )
     {
-        scheduler.FuturePublishAsync(message, messageType, delay, c => c.WithTopic(topic), cancellationToken)
-            .GetAwaiter()
-            .GetResult();
-    }
+        Preconditions.CheckNotNull(scheduler, nameof(scheduler));
 
-    /// <summary>
-    /// Schedule a message to be published at some time in the future
-    /// </summary>
-    /// <param name="scheduler">The scheduler instance</param>
-    /// <param name="message">The message</param>
-    /// <param name="messageType">The message type</param>
-    /// <param name="delay">The delay for message to publish in future</param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    public static void FuturePublish(
-        this IScheduler scheduler,
-        object message,
-        Type messageType,
-        TimeSpan delay,
-        CancellationToken cancellationToken = default
-    )
-    {
-        scheduler.FuturePublishAsync(message, messageType, delay, cancellationToken)
-            .GetAwaiter()
-            .GetResult();
-    }
-
-    /// <summary>
-    /// Schedule a message to be published at some time in the future.
-    /// </summary>
-    /// <param name="scheduler">The scheduler instance</param>
-    /// <param name="message">The message</param>
-    /// <param name="messageType">The message type</param>
-    /// <param name="delay">The delay for message to publish in future</param>
-    /// <param name="configure">
-    ///     Fluent configuration e.g. x => x.WithTopic("*.brighton").WithPriority(2)
-    /// </param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    public static void FuturePublish(
-        this IScheduler scheduler,
-        object message,
-        Type messageType,
-        TimeSpan delay,
-        Action<IFuturePublishConfiguration> configure,
-        CancellationToken cancellationToken = default
-    )
-    {
-        scheduler.FuturePublishAsync(message, messageType, delay, configure, cancellationToken)
-            .GetAwaiter()
-            .GetResult();
+        return scheduler.FuturePublishAsync(message, messageType, delay, _ => { }, cancellationToken);
     }
 
     /// <summary>
@@ -117,6 +53,8 @@ public static class NonGenericSchedulerExtensions
         CancellationToken cancellationToken = default
     )
     {
+        Preconditions.CheckNotNull(scheduler, nameof(scheduler));
+
         var futurePublishDelegate = FuturePublishDelegates.GetOrAdd(messageType, t =>
         {
             var futurePublishMethodInfo = typeof(IScheduler).GetMethod("FuturePublishAsync");

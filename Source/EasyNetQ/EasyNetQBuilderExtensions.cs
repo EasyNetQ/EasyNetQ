@@ -1,12 +1,12 @@
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
 using EasyNetQ.Interception;
+using Microsoft.Extensions.Logging;
 using EasyNetQ.MessageVersioning;
 using EasyNetQ.MultipleExchange;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace EasyNetQ;
 
@@ -116,7 +116,7 @@ public static class EasyNetQBuilderExtensions
     {
         return pipelineBuilder.Use(next => async ctx =>
         {
-            var scopedResolver = ctx.ServiceResolver.CreateScope();
+            using var scopedResolver = ctx.ServiceResolver.CreateScope();
             return await next(ctx with { ServiceResolver = scopedResolver.ServiceProvider }).ConfigureAwait(false);
         });
     }
@@ -147,7 +147,7 @@ public static class EasyNetQBuilderExtensions
             {
                 logger.LogError(exception, "Consume error strategy has failed");
 
-                return AckStrategies.NackWithRequeue;
+                return AckStrategies.NackWithRequeueAsync;
             }
         });
     }

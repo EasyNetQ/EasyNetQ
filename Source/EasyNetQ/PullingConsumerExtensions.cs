@@ -58,14 +58,18 @@ public static class PullingConsumerExtensions
         ulong deliveryTag,
         CancellationToken cancellationToken = default
     ) where TPullResult : IPullResult
-        => consumer.AckAsync(deliveryTag, false, cancellationToken);
+    {
+        Preconditions.CheckNotNull(consumer, nameof(consumer));
+
+        return consumer.AckAsync(deliveryTag, false, cancellationToken);
+    }
 
     /// <summary>
     ///     Rejects single message
     /// </summary>
     /// <param name="consumer">The consumer</param>
     /// <param name="deliveryTag">The delivery tag</param>
-    /// <param name="requeue"><see langword="true"/> if the message should be returned to the queue</param>
+    /// <param name="requeue">True if the message should be returned to the queue</param>
     /// <param name="cancellationToken">The cancellation token</param>
     public static Task RejectAsync<TPullResult>(
         this IPullingConsumer<TPullResult> consumer,
@@ -73,7 +77,11 @@ public static class PullingConsumerExtensions
         bool requeue = false,
         CancellationToken cancellationToken = default
     ) where TPullResult : IPullResult
-        => consumer.RejectAsync(deliveryTag, false, requeue, cancellationToken);
+    {
+        Preconditions.CheckNotNull(consumer, nameof(consumer));
+
+        return consumer.RejectAsync(deliveryTag, false, requeue, cancellationToken);
+    }
 
     /// <summary>
     ///     Pulls a batch of messages
@@ -86,6 +94,8 @@ public static class PullingConsumerExtensions
         this IPullingConsumer<TPullResult> consumer, int batchSize, CancellationToken cancellationToken = default
     ) where TPullResult : IPullResult
     {
+        Preconditions.CheckNotNull(consumer, nameof(consumer));
+
         var messages = new List<TPullResult>(batchSize);
         for (var i = 0; i < batchSize; ++i)
         {
@@ -110,14 +120,18 @@ public static class PullingConsumerExtensions
         ulong deliveryTag,
         CancellationToken cancellationToken = default
     ) where TPullResult : IPullResult
-        => consumer.AckAsync(deliveryTag, true, cancellationToken);
+    {
+        Preconditions.CheckNotNull(consumer, nameof(consumer));
+
+        return consumer.AckAsync(deliveryTag, true, cancellationToken);
+    }
 
     /// <summary>
     ///     Rejects all messages of the batch
     /// </summary>
     /// <param name="consumer">The consumer</param>
     /// <param name="deliveryTag">The delivery tag of the batch</param>
-    /// <param name="requeue"><see langword="true"/> if all messages of batch should be returned to the queue</param>
+    /// <param name="requeue">True if all messages of batch should be returned to the queue</param>
     /// <param name="cancellationToken">The cancellation token</param>
     public static Task RejectBatchAsync<TPullResult>(
         this IPullingConsumer<TPullResult> consumer,
@@ -125,5 +139,9 @@ public static class PullingConsumerExtensions
         bool requeue = false,
         CancellationToken cancellationToken = default
     ) where TPullResult : IPullResult
-        => consumer.RejectAsync(deliveryTag, true, requeue, cancellationToken);
+    {
+        Preconditions.CheckNotNull(consumer, nameof(consumer));
+
+        return consumer.RejectAsync(deliveryTag, true, requeue, cancellationToken);
+    }
 }

@@ -31,14 +31,14 @@ public class PublishConfirmationListener : IPublishConfirmationListener
     }
 
     /// <inheritdoc />
-    public IPublishPendingConfirmation CreatePendingConfirmation(IModel model)
+    public async Task<IPublishPendingConfirmation> CreatePendingConfirmationAsync(IChannel channel, CancellationToken cancellationToken = default)
     {
-        var sequenceNumber = model.NextPublishSeqNo;
+        var sequenceNumber = await channel.GetNextPublishSequenceNumberAsync(cancellationToken);
 
         if (sequenceNumber == 0UL)
             throw new InvalidOperationException("Confirms not selected");
 
-        var requests = unconfirmedChannelRequests.GetOrAdd(model.ChannelNumber, _ => new UnconfirmedRequests());
+        var requests = unconfirmedChannelRequests.GetOrAdd(channel.ChannelNumber, _ => new UnconfirmedRequests());
         var confirmationTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         if (!requests.TryAdd(sequenceNumber, confirmationTcs))
             throw new InvalidOperationException($"Confirmation {sequenceNumber} already exists");
@@ -47,21 +47,21 @@ public class PublishConfirmationListener : IPublishConfirmationListener
     }
 
     /// <inheritdoc />
-    public void Dispose()
+    public virtual void Dispose()
     {
         foreach (var subscription in subscriptions)
             subscription.Dispose();
         InterruptAllUnconfirmedRequests(true);
     }
 
-    private void OnMessageConfirmation(in MessageConfirmationEvent @event)
+    private Task OnMessageConfirmation(MessageConfirmationEvent messageEvent)
     {
-        if (!unconfirmedChannelRequests.TryGetValue(@event.Channel.ChannelNumber, out var requests))
-            return;
+        if (!unconfirmedChannelRequests.TryGetValue(messageEvent.Channel.ChannelNumber, out var requests))
+            return Task.CompletedTask;
 
-        var deliveryTag = @event.DeliveryTag;
-        var multiple = @event.Multiple;
-        var type = @event.IsNack ? ConfirmationType.Nack : ConfirmationType.Ack;
+        var deliveryTag = messageEvent.DeliveryTag;
+        var multiple = messageEvent.Multiple;
+        var type = messageEvent.IsNack ? ConfirmationType.Nack : ConfirmationType.Ack;
         if (multiple)
         {
             foreach (var sequenceNumber in requests.Select(x => x.Key))
@@ -70,33 +70,37 @@ public class PublishConfirmationListener : IPublishConfirmationListener
         }
         else if (requests.TryRemove(deliveryTag, out var confirmation))
             Confirm(confirmation, deliveryTag, type);
+        return Task.CompletedTask;
     }
 
-    private void OnChannelRecovered(in ChannelRecoveredEvent @event)
+    private async Task OnChannelRecovered(ChannelRecoveredEvent messageEvent)
     {
-        if (@event.Channel.NextPublishSeqNo == 0)
+        var nextPublishSequenceNumber = await messageEvent.Channel.GetNextPublishSequenceNumberAsync();
+        if (nextPublishSequenceNumber == 0)
             return;
 
-        InterruptUnconfirmedRequests(@event.Channel.ChannelNumber);
+        InterruptUnconfirmedRequests(messageEvent.Channel.ChannelNumber);
     }
 
-    private void OnChannelShutdown(in ChannelShutdownEvent @event)
+    private async Task OnChannelShutdown(ChannelShutdownEvent messageEvent)
     {
-        if (@event.Channel.NextPublishSeqNo == 0)
+        var nextPublishSequenceNumber = await messageEvent.Channel.GetNextPublishSequenceNumberAsync();
+        if (nextPublishSequenceNumber == 0)
             return;
-
-        InterruptUnconfirmedRequests(@event.Channel.ChannelNumber);
+        InterruptUnconfirmedRequests(messageEvent.Channel.ChannelNumber);
     }
 
-    private void OnReturnedMessage(in ReturnedMessageEvent @event)
+    private async Task OnReturnedMessage(ReturnedMessageEvent messageEvent)
     {
-        if (@event.Channel.NextPublishSeqNo == 0)
+        var nextPublishSequenceNumber = await messageEvent.Channel.GetNextPublishSequenceNumberAsync();
+
+        if (nextPublishSequenceNumber == 0)
             return;
 
-        if (!@event.Properties.TryGetConfirmationId(out var confirmationId))
+        if (!messageEvent.Properties.TryGetConfirmationId(out var confirmationId))
             return;
 
-        if (!unconfirmedChannelRequests.TryGetValue(@event.Channel.ChannelNumber, out var requests))
+        if (!unconfirmedChannelRequests.TryGetValue(messageEvent.Channel.ChannelNumber, out var requests))
             return;
 
         if (!requests.TryRemove(confirmationId, out var confirmationTcs))

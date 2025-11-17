@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
 using Microsoft.Extensions.Logging;
@@ -23,7 +23,7 @@ public class PersistentChannel : IPersistentChannel
     private readonly PersistentChannelOptions options;
     private readonly ILogger<PersistentChannel> logger;
 
-    private volatile IModel? initializedChannel;
+    private volatile IChannel initializedChannel;
     private volatile bool disposed;
 
     /// <summary>
@@ -47,20 +47,21 @@ public class PersistentChannel : IPersistentChannel
     }
 
     /// <inheritdoc />
-    public ValueTask<TResult> InvokeChannelActionAsync<TResult, TChannelAction>(
+    public async Task<TResult> InvokeChannelActionAsync<TResult, TChannelAction>(
         TChannelAction channelAction, CancellationToken cancellationToken = default
     ) where TChannelAction : struct, IPersistentChannelAction<TResult>
     {
         if (disposed)
             throw new ObjectDisposedException(nameof(PersistentChannel));
 
-        return TryInvokeChannelActionFast<TResult, TChannelAction>(channelAction, out var result)
-            ? new ValueTask<TResult>(result)
-            : new ValueTask<TResult>(InvokeChannelActionSlowAsync<TResult, TChannelAction>(channelAction, cancellationToken));
+        var (success, result) = await TryInvokeChannelActionFastAsync<TResult, TChannelAction>(channelAction, cancellationToken);
+        return success
+            ? result!
+            : await InvokeChannelActionSlowAsync<TResult, TChannelAction>(channelAction, cancellationToken);
     }
 
     /// <inheritdoc />
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         if (disposed)
             return;
@@ -68,28 +69,33 @@ public class PersistentChannel : IPersistentChannel
         disposed = true;
         disposeCts.Cancel();
         mutex.Dispose();
-        CloseChannel();
+        await CloseChannelAsync();
         disposeCts.Dispose();
     }
 
-    private bool TryInvokeChannelActionFast<TResult, TChannelAction>(
-        in TChannelAction channelAction, [MaybeNullWhen(false)] out TResult result
+    private async Task<(bool Success, TResult Result)> TryInvokeChannelActionFastAsync<TResult, TChannelAction>(
+    TChannelAction channelAction,
+    CancellationToken cancellationToken = default
     ) where TChannelAction : struct, IPersistentChannelAction<TResult>
     {
+        TResult result = default;
+
         if (mutex.TryAcquire(out var releaser))
         {
             try
             {
-                var channel = initializedChannel ??= CreateChannel();
-                // ReSharper disable once PossiblyImpureMethodCallOnReadonlyVariable
-                result = channelAction.Invoke(channel);
-                return true;
+                var channel = initializedChannel ?? await CreateChannelAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+
+                initializedChannel ??= channel;
+
+                result = await channelAction.InvokeAsync(channel, cancellationToken);
+                return (true, result);
             }
             catch (Exception exception)
             {
                 var exceptionVerdict = GetExceptionVerdict(exception);
                 if (exceptionVerdict.CloseChannel)
-                    CloseChannel();
+                    await CloseChannelAsync(cancellationToken);
 
                 if (exceptionVerdict.Rethrow)
                     throw;
@@ -98,23 +104,16 @@ public class PersistentChannel : IPersistentChannel
             }
             finally
             {
-                try
-                {
-                    releaser.Dispose();
-                }
-                catch (Exception exception)
-                {
-                    logger.LogWarning(exception, "Semaphore was already disposed during channel release!");
-                }
+                releaser.Dispose();
             }
         }
 
-        result = default;
-        return false;
+        return (false, result);
     }
 
+
     private async Task<TResult> InvokeChannelActionSlowAsync<TResult, TChannelAction>(
-        TChannelAction channelAction, CancellationToken cancellationToken = default
+    TChannelAction channelAction, CancellationToken cancellationToken = default
     ) where TChannelAction : struct, IPersistentChannelAction<TResult>
     {
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, disposeCts.Token);
@@ -128,14 +127,18 @@ public class PersistentChannel : IPersistentChannel
 
             try
             {
-                var channel = initializedChannel ??= CreateChannel();
-                return channelAction.Invoke(channel);
+                if (initializedChannel == null)
+                {
+                    initializedChannel = await CreateChannelAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                }
+
+                return await channelAction.InvokeAsync(initializedChannel, cancellationToken);
             }
             catch (Exception exception)
             {
                 var exceptionVerdict = GetExceptionVerdict(exception);
                 if (exceptionVerdict.CloseChannel)
-                    CloseChannel();
+                    await CloseChannelAsync(cancellationToken);
 
                 if (exceptionVerdict.Rethrow)
                     throw;
@@ -148,89 +151,98 @@ public class PersistentChannel : IPersistentChannel
         }
     }
 
-    private IModel CreateChannel()
+    private async Task<IChannel> CreateChannelAsync(CreateChannelOptions createChannelOptions = null, CancellationToken cancellationToken = default)
     {
-        var channel = connection.CreateModel();
+        if (logger.IsDebugEnabled())
+        {
+            var stackTrace = new StackTrace();
+            var frames = stackTrace.GetFrames();
+
+            string stackTraceStr = string.Join('\n', frames.Select(x => x.GetFileName() ?? "???" + x.GetMethod().Name ?? "??"));
+
+            logger.LogDebug($"Creating new channel. Stack trace: {stackTraceStr}");
+
+        }
+        createChannelOptions ??= new CreateChannelOptions(options.PublisherConfirms, options.PublisherConfirms);
+        var channel = await connection.CreateChannelAsync(createChannelOptions, cancellationToken).ConfigureAwait(false);
         AttachChannelEvents(channel);
         return channel;
     }
 
-    private void CloseChannel()
+    private async ValueTask CloseChannelAsync(CancellationToken cancellationToken = default)
     {
         var channel = Interlocked.Exchange(ref initializedChannel, null);
         if (channel == null)
             return;
 
-        channel.Close();
+        await channel.CloseAsync(cancellationToken: cancellationToken);
         DetachChannelEvents(channel);
-        channel.Dispose();
+        await channel.DisposeAsync();
     }
 
-    private void AttachChannelEvents(IModel channel)
+    private void AttachChannelEvents(IChannel channel)
     {
         if (options.PublisherConfirms)
         {
-            channel.ConfirmSelect();
-
-            channel.BasicAcks += OnAck;
-            channel.BasicNacks += OnNack;
+            channel.BasicAcksAsync += OnAck;
+            channel.BasicNacksAsync += OnNack;
         }
 
-        channel.BasicReturn += OnReturn;
-        channel.ModelShutdown += OnChannelShutdown;
+        channel.BasicReturnAsync += OnReturn;
+        channel.ChannelShutdownAsync += OnChannelShutdown;
 
         if (channel is IRecoverable recoverable)
-            recoverable.Recovery += OnChannelRecovered;
+            recoverable.RecoveryAsync += OnChannelRecovered;
         else
             throw new NotSupportedException("Non-recoverable channel is not supported");
     }
 
-    private void DetachChannelEvents(IModel channel)
+    private void DetachChannelEvents(IChannel channel)
     {
         if (channel is IRecoverable recoverable)
-            recoverable.Recovery -= OnChannelRecovered;
+            recoverable.RecoveryAsync -= OnChannelRecovered;
 
-        channel.ModelShutdown -= OnChannelShutdown;
-        channel.BasicReturn -= OnReturn;
+        channel.ChannelShutdownAsync -= OnChannelShutdown;
+        channel.BasicReturnAsync -= OnReturn;
 
         if (!options.PublisherConfirms)
             return;
 
-        channel.BasicNacks -= OnNack;
-        channel.BasicAcks -= OnAck;
+        channel.BasicNacksAsync -= OnNack;
+        channel.BasicAcksAsync -= OnAck;
     }
 
-    private void OnChannelRecovered(object? sender, EventArgs e)
+    private Task OnChannelRecovered(object sender, AsyncEventArgs e)
     {
-        eventBus.Publish(new ChannelRecoveredEvent((IModel)sender!));
+        return eventBus.PublishAsync(new ChannelRecoveredEvent((IChannel)sender!));
     }
 
-    private void OnChannelShutdown(object? sender, ShutdownEventArgs e)
+    private Task OnChannelShutdown(object sender, ShutdownEventArgs e)
     {
-        eventBus.Publish(new ChannelShutdownEvent((IModel)sender!));
+        return eventBus.PublishAsync(new ChannelShutdownEvent((IChannel)sender!));
     }
 
-    private void OnReturn(object? sender, BasicReturnEventArgs args)
+    private Task OnReturn(object sender, BasicReturnEventArgs args)
     {
         var messageProperties = new MessageProperties(args.BasicProperties);
         var messageReturnedInfo = new MessageReturnedInfo(args.Exchange, args.RoutingKey, args.ReplyText);
-        var @event = new ReturnedMessageEvent(
-            (IModel)sender!,
+        var messageEvent = new ReturnedMessageEvent(
+            (IChannel)sender!,
             args.Body,
             messageProperties,
             messageReturnedInfo
         );
-        eventBus.Publish(@event);
+        return eventBus.PublishAsync(messageEvent);
     }
 
-    private void OnAck(object? sender, BasicAckEventArgs args)
+    private async Task OnAck(object sender, BasicAckEventArgs args)
     {
-        eventBus.Publish(MessageConfirmationEvent.Ack((IModel)sender!, args.DeliveryTag, args.Multiple));
+        await eventBus.PublishAsync(MessageConfirmationEvent.Ack((IChannel)sender!, args.DeliveryTag, args.Multiple));
     }
 
-    private void OnNack(object? sender, BasicNackEventArgs args)
+    private Task OnNack(object sender, BasicNackEventArgs args)
     {
-        eventBus.Publish(MessageConfirmationEvent.Nack((IModel)sender!, args.DeliveryTag, args.Multiple));
+        return eventBus.PublishAsync(MessageConfirmationEvent.Nack((IChannel)sender!, args.DeliveryTag, args.Multiple));
     }
 
     private static ExceptionVerdict GetExceptionVerdict(Exception exception)

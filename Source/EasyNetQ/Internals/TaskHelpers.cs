@@ -15,7 +15,7 @@ public static class TaskHelpers
     ///     doing so can result in application failures when updating to a new EasyNetQ release.
     /// </summary>
     public static Func<T1, CancellationToken, Task<T2>> FromFunc<T1, T2>(Func<T1, CancellationToken, T2> func)
-        => (x, c) => Task.Run(() => func(x, c), c);
+        => (x, c) => Task.Run(() => func(x, c), default);
 
     /// <summary>
     ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
@@ -25,7 +25,7 @@ public static class TaskHelpers
     /// </summary>
     public static Func<T1, T2, T3, CancellationToken, Task> FromAction<T1, T2, T3>(
         Action<T1, T2, T3, CancellationToken> action
-    ) => (x, y, z, c) => Task.Run(() => action(x, y, z, c), c);
+    ) => (x, y, z, c) => Task.Run(() => action(x, y, z, c), default);
 
     /// <summary>
     ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
@@ -34,7 +34,7 @@ public static class TaskHelpers
     ///     doing so can result in application failures when updating to a new EasyNetQ release.
     /// </summary>
     public static Func<T1, T2, CancellationToken, Task> FromAction<T1, T2>(Action<T1, T2, CancellationToken> action)
-        => (x, y, c) => Task.Run(() => action(x, y, c), c);
+        => (x, y, c) => Task.Run(() => action(x, y, c), default);
 
     /// <summary>
     ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
@@ -43,7 +43,7 @@ public static class TaskHelpers
     ///     doing so can result in application failures when updating to a new EasyNetQ release.
     /// </summary>
     public static Func<T1, CancellationToken, Task> FromAction<T1>(Action<T1, CancellationToken> action)
-        => (x, c) => Task.Run(() => action(x, c), c);
+        => (x, c) => Task.Run(() => action(x, c), default);
 
     /// <summary>
     ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
@@ -68,7 +68,7 @@ public static class TaskHelpers
         state.CancellationTokenRegistration = cancellationToken.Register(
             s =>
             {
-                var t = (TcsWithCancellationToken<T>)s!;
+                var t = (TcsWithCancellationToken<T>)s;
                 t.Tcs.TrySetCanceled(t.CancellationToken);
             },
             state,
@@ -77,7 +77,7 @@ public static class TaskHelpers
         taskCompletionSource.Task.ContinueWith(
             (_, s) =>
             {
-                var r = (TcsWithCancellationToken<T>)s!;
+                var r = (TcsWithCancellationToken<T>)s;
                 r.CancellationTokenRegistration.Dispose();
             },
             state,

@@ -52,20 +52,14 @@ public sealed class AsyncQueue<T> : IDisposable
     ///     Tries to take the element from queue
     /// </summary>
     /// <param name="element">Dequeued element</param>
-    /// <returns><see langword="true"/> if an element was dequeued</returns>
-    public bool TryDequeue(out T? element)
+    /// <returns>True if an element was dequeued</returns>
+    public bool TryDequeue(out T element)
     {
         lock (mutex)
         {
             var hasElements = elements.Count > 0;
-            if (hasElements)
-            {
-                element = elements.Dequeue();
-                return true;
-            }
-
-            element = default;
-            return false;
+            element = hasElements ? elements.Dequeue() : default;
+            return hasElements;
         }
     }
 
@@ -88,22 +82,19 @@ public sealed class AsyncQueue<T> : IDisposable
     /// </summary>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>The dequeued element</returns>
-    public ValueTask<T> DequeueAsync(CancellationToken cancellationToken = default)
+    public Task<T> DequeueAsync(CancellationToken cancellationToken = default)
     {
-        if (cancellationToken.IsCancellationRequested)
-            return new ValueTask<T>(Task.FromCanceled<T>(cancellationToken));
-
         lock (mutex)
         {
             if (elements.Count > 0)
-                return new ValueTask<T>(elements.Dequeue());
+                return Task.FromResult(elements.Dequeue());
 
             CleanUpCancelledWaiters();
 
             var waiter = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
             waiter.AttachCancellation(cancellationToken);
             waiters.Enqueue(waiter);
-            return new ValueTask<T>(waiter.Task);
+            return waiter.Task;
         }
     }
 

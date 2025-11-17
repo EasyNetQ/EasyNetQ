@@ -4,5 +4,8 @@ namespace EasyNetQ;
 public class DefaultCorrelationIdGenerationStrategy : ICorrelationIdGenerationStrategy
 {
     /// <inheritdoc />
-    public string GetCorrelationId() => Guid.NewGuid().ToString();
+    public string GetCorrelationId()
+    {
+        return Guid.NewGuid().ToString();
+    }
 }

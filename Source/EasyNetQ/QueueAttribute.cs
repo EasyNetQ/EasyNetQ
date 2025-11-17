@@ -5,8 +5,19 @@ public sealed class QueueAttribute : Attribute
 {
     internal static readonly QueueAttribute Default = new();
 
-    public string? Name { get; set; }
+    public QueueAttribute()
+    {
 
-    public string? Type { get; set; }
+    }
 
+    public QueueAttribute(string name)
+    {
+        QueueName = name ?? string.Empty;
+    }
+
+    public string QueueName { get; set; }
+
+    public string ExchangeName { get; set; }
+
+    public string QueueType { get; set; }
 }

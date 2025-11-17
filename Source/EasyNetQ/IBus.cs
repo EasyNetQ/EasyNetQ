@@ -3,7 +3,7 @@ namespace EasyNetQ;
 /// <summary>
 /// Provides a simple Publish/Subscribe, Request/Response, Send/Receive and Delayed Publish API for a message bus.
 /// </summary>
-public interface IBus
+public interface IBus : IDisposable
 {
     /// <summary>
     /// Provides a simple Publish/Subscribe API
