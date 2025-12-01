@@ -7,9 +7,9 @@ namespace EasyNetQ.Serialization.SystemTextJson;
 
 internal static class JsonHeaderExtensions
 {
-    public static Dictionary<string, object?> ConvertJsonToHeaders(this JsonElement jsonElement, JsonSerializerOptions options)
+    public static Dictionary<string, object> ConvertJsonToHeaders(this JsonElement jsonElement, JsonSerializerOptions options)
     {
-        var headers = new Dictionary<string, object?>();
+        var headers = new Dictionary<string, object>();
         using (var enumerator = jsonElement.EnumerateObject())
         {
             foreach (var property in enumerator)
@@ -22,7 +22,7 @@ internal static class JsonHeaderExtensions
         return headers;
     }
 
-    public static void AddHeaderToJson(this JsonObject json, string name, object? value, JsonSerializerOptions options)
+    public static void AddHeaderToJson(this JsonObject json, string name, object value, JsonSerializerOptions options)
     {
         var (valueType, valueJson) = value.ConvertToTypeAndJson(options);
         var valueContainer = new JsonObject
@@ -33,7 +33,7 @@ internal static class JsonHeaderExtensions
         json.Add(name, valueContainer);
     }
 
-    private static (int, JsonNode?) ConvertToTypeAndJson(this object? value, JsonSerializerOptions options)
+    private static (int, JsonNode) ConvertToTypeAndJson(this object value, JsonSerializerOptions options)
     {
         switch (value)
         {
@@ -99,7 +99,7 @@ internal static class JsonHeaderExtensions
         throw new InternalBufferOverflowException();
     }
 
-    private static object? ConvertJsonToObject(this (int Type, JsonElement Value) valueContainer, JsonSerializerOptions options)
+    private static object ConvertJsonToObject(this (int Type, JsonElement Value) valueContainer, JsonSerializerOptions options)
     {
         var (type, json) = valueContainer;
         switch (type)
@@ -133,7 +133,7 @@ internal static class JsonHeaderExtensions
             case JsonHeaderType.AmqpTimestamp:
                 return new AmqpTimestamp(json.GetInt64());
             case JsonHeaderType.List:
-                var list = new List<object?>();
+                var list = new List<object>();
                 using (var enumerator = json.EnumerateArray())
                 {
                     foreach (var arrayItem in enumerator)
@@ -145,7 +145,7 @@ internal static class JsonHeaderExtensions
                 }
                 return list;
             case JsonHeaderType.Dictionary:
-                var dictionary = new Dictionary<string, object?>();
+                var dictionary = new Dictionary<string, object>();
                 using (var enumerator = json.EnumerateObject())
                 {
                     foreach (var objectItem in enumerator)

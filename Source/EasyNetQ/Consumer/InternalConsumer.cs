@@ -327,10 +327,9 @@ public class InternalConsumer : IInternalConsumer
                 consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
                 cancelled = consumer.Queue;
                 active = consumers.Select(x => x.Value.Queue).ToList();
+#pragma warning disable IDISP007 // Don't dispose injected
                 await consumer.DisposeAsync();
-                if (IsChannelClosedWithSoftError(channel)) return;
-                await consumer.DisposeAsync();
-#pragma warning restore IDISP007
+#pragma warning restore IDISP007 // Don't dispose injected
                 if (IsChannelClosedWithSoftError(channel)) return;
             }
             else

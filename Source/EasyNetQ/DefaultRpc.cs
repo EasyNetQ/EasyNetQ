@@ -12,19 +12,19 @@ namespace EasyNetQ;
 ///     Default implementation of EasyNetQ's request-response pattern
 /// </summary>
 
-public class DefaultRpc : IRpc, IAsyncDisposable
+public sealed class DefaultRpc : IRpc, IAsyncDisposable
 {
-    protected const string IsFaultedKey = "IsFaulted";
-    protected const string ExceptionMessageKey = "ExceptionMessage";
-    protected readonly IAdvancedBus advancedBus;
+    const string IsFaultedKey = "IsFaulted";
+    const string ExceptionMessageKey = "ExceptionMessage";
+    readonly IAdvancedBus advancedBus;
     private readonly ILogger<DefaultRpc> logger;
     private readonly ConnectionConfiguration configuration;
-    protected readonly IConventions conventions;
+    readonly IConventions conventions;
     private readonly ICorrelationIdGenerationStrategy correlationIdGenerationStrategy;
     private readonly IDisposable eventSubscription;
-    protected readonly IExchangeDeclareStrategy exchangeDeclareStrategy;
+    readonly IExchangeDeclareStrategy exchangeDeclareStrategy;
 
-    protected readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
+    readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
 
     private readonly ConcurrentDictionary<string, ResponseAction> responseActions = new();
 
@@ -58,7 +58,7 @@ public class DefaultRpc : IRpc, IAsyncDisposable
     }
 
     /// <inheritdoc />
-    public virtual async Task<TResponse> RequestAsync<TRequest, TResponse>(
+    public async Task<TResponse> RequestAsync<TRequest, TResponse>(
         TRequest request,
         Action<IRequestConfiguration> configure,
         CancellationToken cancellationToken = default
@@ -100,7 +100,7 @@ public class DefaultRpc : IRpc, IAsyncDisposable
     }
 
     /// <inheritdoc />
-    public virtual Task<IAsyncDisposable> RespondAsync<TRequest, TResponse>(
+    public Task<IAsyncDisposable> RespondAsync<TRequest, TResponse>(
         Func<TRequest, CancellationToken, Task<TResponse>> responder,
         Action<IResponderConfiguration> configure,
         CancellationToken cancellationToken = default
@@ -139,12 +139,12 @@ public class DefaultRpc : IRpc, IAsyncDisposable
         return Task.CompletedTask;
     }
 
-    protected void DeRegisterResponseActions(string correlationId)
+    void DeRegisterResponseActions(string correlationId)
     {
         responseActions.TryRemove(correlationId, out _);
     }
 
-    protected void RegisterResponseActions<TResponse>(string correlationId, TaskCompletionSource<TResponse> tcs)
+    void RegisterResponseActions<TResponse>(string correlationId, TaskCompletionSource<TResponse> tcs)
     {
         var responseAction = new ResponseAction(
             message =>
@@ -177,7 +177,7 @@ public class DefaultRpc : IRpc, IAsyncDisposable
         responseActions.TryAdd(correlationId, responseAction);
     }
 
-    protected virtual async Task<string> SubscribeToResponseAsync<TRequest, TResponse>(
+    async Task<string> SubscribeToResponseAsync<TRequest, TResponse>(
         CancellationToken cancellationToken
     )
     {
@@ -226,7 +226,7 @@ public class DefaultRpc : IRpc, IAsyncDisposable
         return queue.Name;
     }
 
-    protected virtual async Task RequestPublishAsync<TRequest>(
+    async Task RequestPublishAsync<TRequest>(
         TRequest request,
         string routingKey,
         string returnQueueName,
@@ -235,7 +235,7 @@ public class DefaultRpc : IRpc, IAsyncDisposable
         byte? priority,
         bool? mandatory,
         bool? publisherConfirms,
-        IDictionary<string, object?>? headers,
+        IDictionary<string, object> headers,
         CancellationToken cancellationToken
     )
     {
@@ -364,9 +364,9 @@ public class DefaultRpc : IRpc, IAsyncDisposable
         }
     }
 
-    protected readonly record struct RpcKey(Type RequestType, Type ResponseType);
+    readonly record struct RpcKey(Type RequestType, Type ResponseType);
 
-    protected readonly struct ResponseAction
+    readonly struct ResponseAction
     {
         public ResponseAction(Action<object> onSuccess, Action onFailure)
         {
@@ -378,7 +378,7 @@ public class DefaultRpc : IRpc, IAsyncDisposable
         public Action OnFailure { get; }
     }
 
-    protected readonly struct ResponseSubscription
+    readonly struct ResponseSubscription
     {
         public ResponseSubscription(string queueName, IAsyncDisposable subscription)
         {

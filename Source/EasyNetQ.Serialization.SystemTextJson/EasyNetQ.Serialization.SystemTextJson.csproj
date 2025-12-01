@@ -1,8 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
       <Description>An adaptor to allow EasyNetQ to use System.Text.Json serializer</Description>
       <TargetFrameworks>netstandard2.0;net8.0;net9.0</TargetFrameworks>
-      <Nullable>enable</Nullable>
       <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
     <ItemGroup>

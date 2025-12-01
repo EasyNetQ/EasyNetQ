@@ -66,7 +66,7 @@ public class PersistentChannelDispatchOptions
         return string.Equals(Name, other.Name, StringComparison.InvariantCulture) && ConnectionType == other.ConnectionType && PublisherConfirms == other.PublisherConfirms;
     }
 
-    public override bool Equals(object? obj)
+    public override bool Equals(object obj)
     {
         if (ReferenceEquals(null, obj)) return false;
         if (ReferenceEquals(this, obj)) return true;

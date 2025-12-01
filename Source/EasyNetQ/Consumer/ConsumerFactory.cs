@@ -17,7 +17,7 @@ public interface IConsumerFactory : IAsyncDisposable
 }
 
 /// <inheritdoc />
-public class ConsumerFactory : IConsumerFactory
+public sealed class ConsumerFactory : IConsumerFactory
 {
     private readonly ConcurrentDictionary<Guid, IConsumer> consumers = new();
     private readonly IEventBus eventBus;

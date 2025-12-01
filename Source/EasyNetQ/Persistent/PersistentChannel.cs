@@ -9,7 +9,7 @@ using RabbitMQ.Client.Exceptions;
 namespace EasyNetQ.Persistent;
 
 /// <inheritdoc />
-public class PersistentChannel : IPersistentChannel
+public sealed class PersistentChannel : IPersistentChannel
 {
     private const string RequestPipeliningForbiddenMessage = "Pipelining of requests forbidden";
 
@@ -104,7 +104,14 @@ public class PersistentChannel : IPersistentChannel
             }
             finally
             {
-                releaser.Dispose();
+                try
+                {
+                    releaser.Dispose();
+                }
+                catch (Exception exception)
+                {
+                    logger.LogWarning(exception, "Semaphore was already disposed during channel release!");
+                }
             }
         }
 
@@ -225,7 +232,6 @@ public class PersistentChannel : IPersistentChannel
             messageReturnedInfo
         );
         return eventBus.PublishAsync(messageEvent);
-        return Task.CompletedTask;
     }
 
     private async Task OnAck(object sender, BasicAckEventArgs args)

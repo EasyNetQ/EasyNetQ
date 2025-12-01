@@ -26,7 +26,7 @@ public interface IFuturePublishConfiguration
     /// </summary>
     /// <param name="headers">Headers to set</param>
     /// <returns>Returns a reference to itself</returns>
-    IFuturePublishConfiguration WithHeaders(IDictionary<string, object?> headers);
+    IFuturePublishConfiguration WithHeaders(IDictionary<string, object> headers);
 
     /// <summary>
     /// Set publisher confirms
@@ -60,7 +60,7 @@ internal class FuturePublishConfiguration : IFuturePublishConfiguration
         return this;
     }
 
-    public IFuturePublishConfiguration WithHeaders(IDictionary<string, object?> headers)
+    public IFuturePublishConfiguration WithHeaders(IDictionary<string, object> headers)
     {
         foreach (var kvp in headers)
             (MessageHeaders ??= new Dictionary<string, object>()).Add(kvp.Key, kvp.Value);

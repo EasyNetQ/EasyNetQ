@@ -9,9 +9,9 @@ namespace EasyNetQ;
 /// </summary>
 public static class MessageFactory
 {
-    private static readonly ConcurrentDictionary<Type, Func<object?, MessageProperties, IMessage>> InstanceActivators = new();
+    private static readonly ConcurrentDictionary<Type, Func<object, MessageProperties, IMessage>> InstanceActivators = new();
 
-    public static IMessage CreateInstance(Type messageType, object? body, in MessageProperties properties)
+    public static IMessage CreateInstance(Type messageType, object body, in MessageProperties properties)
     {
         var activator = InstanceActivators.GetOrAdd(messageType, bodyType =>
         {
@@ -20,7 +20,7 @@ public static class MessageFactory
                 .Single(x => x.GetParameters().Length == 2);
             var bodyParameter = Expression.Parameter(typeof(object));
             var propertiesParameter = Expression.Parameter(typeof(MessageProperties));
-            var expression = Expression.Lambda<Func<object?, MessageProperties, IMessage>>(
+            var expression = Expression.Lambda<Func<object, MessageProperties, IMessage>>(
                 Expression.New(
                     constructor,
                     Expression.Convert(bodyParameter, bodyType),

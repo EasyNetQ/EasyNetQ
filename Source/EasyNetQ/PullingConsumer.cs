@@ -38,7 +38,7 @@ public readonly struct PullResult : IPullResult
     private readonly MessageProperties properties;
     private readonly ReadOnlyMemory<byte> body;
     private readonly ulong messagesCount;
-    private readonly IDisposable? disposable;
+    private readonly IDisposable disposable;
 
     /// <summary>
     ///     Represents a result when no message is available
@@ -54,7 +54,7 @@ public readonly struct PullResult : IPullResult
         in MessageReceivedInfo receivedInfo,
         in MessageProperties properties,
         in ReadOnlyMemory<byte> body,
-        IDisposable? disposable
+        IDisposable disposable
     )
     {
         return new PullResult(true, messagesCount, receivedInfo, properties, body, disposable);
@@ -66,7 +66,7 @@ public readonly struct PullResult : IPullResult
         in MessageReceivedInfo receivedInfo,
         in MessageProperties properties,
         in ReadOnlyMemory<byte> body,
-        IDisposable? disposable
+        IDisposable disposable
     )
     {
         IsAvailable = isAvailable;
@@ -157,7 +157,7 @@ public readonly struct PullResult : IPullResult
 public readonly struct PullResult<T> : IPullResult
 {
     private readonly MessageReceivedInfo receivedInfo;
-    private readonly IMessage<T>? message;
+    private readonly IMessage<T> message;
     private readonly ulong messagesCount;
 
     /// <summary>
@@ -180,7 +180,7 @@ public readonly struct PullResult<T> : IPullResult
         bool isAvailable,
         ulong messagesCount,
         in MessageReceivedInfo receivedInfo,
-        IMessage<T>? message
+        IMessage<T> message
     )
     {
         IsAvailable = isAvailable;
@@ -306,7 +306,7 @@ public readonly struct PullingConsumerOptions
 }
 
 /// <inheritdoc />
-public class PullingConsumer : IPullingConsumer<PullResult>
+public sealed class PullingConsumer : IPullingConsumer<PullResult>
 {
     private readonly IPersistentChannel channel;
     private readonly IProduceConsumeInterceptor[] produceConsumeInterceptors;
@@ -338,7 +338,7 @@ public class PullingConsumer : IPullingConsumer<PullResult>
     {
         using var cts = cancellationToken.WithTimeout(options.Timeout);
 
-        var basicGetResult = await channel.InvokeChannelActionAsync<BasicGetResult?, BasicGetAction>(
+        var basicGetResult = await channel.InvokeChannelActionAsync<BasicGetResult, BasicGetAction>(
             new BasicGetAction(queue, options.AutoAck), cts.Token
         ).ConfigureAwait(false);
 
@@ -402,7 +402,7 @@ public class PullingConsumer : IPullingConsumer<PullResult>
 #pragma warning restore IDISP007
     }
 
-    private readonly struct BasicGetAction : IPersistentChannelAction<BasicGetResult?>
+    private readonly struct BasicGetAction : IPersistentChannelAction<BasicGetResult>
     {
         private readonly Queue queue;
         private readonly bool autoAck;
@@ -459,7 +459,7 @@ public class PullingConsumer : IPullingConsumer<PullResult>
 }
 
 /// <inheritdoc />
-public class PullingConsumer<T> : IPullingConsumer<PullResult<T>>
+public sealed class PullingConsumer<T> : IPullingConsumer<PullResult<T>>
 {
     private readonly IPullingConsumer<PullResult> consumer;
     private readonly IMessageSerializationStrategy messageSerializationStrategy;
@@ -490,7 +490,7 @@ public class PullingConsumer<T> : IPullingConsumer<PullResult<T>>
             return PullResult<T>.Available(
                 pullResult.MessagesCount,
                 pullResult.ReceivedInfo,
-                new Message<T>((T?)message.GetBody(), message.Properties)
+                new Message<T>((T)message.GetBody(), message.Properties)
             );
 
         throw new EasyNetQException(

@@ -35,7 +35,7 @@ public class PerQueueConsumerConfiguration
         bool autoAck,
         string consumerTag,
         bool isExclusive,
-        IDictionary<string, object>? arguments,
+        IDictionary<string, object> arguments,
         ConsumeDelegate consumeDelegate
     )
     {
@@ -64,7 +64,7 @@ public class PerQueueConsumerConfiguration
     /// <summary>
     ///     Custom arguments
     /// </summary>
-    public IDictionary<string, object>? Arguments { get; }
+    public IDictionary<string, object> Arguments { get; }
 
     /// <summary>
     ///     Handler for messages which are received by consumer
@@ -101,7 +101,7 @@ public class ConsumerConfiguration
 }
 
 /// <inheritdoc />
-public class Consumer : IConsumer
+public sealed class Consumer : IConsumer
 {
     private static readonly TimeSpan RestartConsumingPeriod = TimeSpan.FromSeconds(5);
 
@@ -111,7 +111,7 @@ public class Consumer : IConsumer
     private readonly IDisposable[] disposables;
     private readonly object mutex = new();
 
-    private volatile IInternalConsumer? consumer;
+    private volatile IInternalConsumer consumer;
     private volatile bool disposed;
     /// <summary>
     ///     Creates Consumer

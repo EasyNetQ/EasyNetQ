@@ -162,12 +162,13 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
         in MessageReceivedInfo receivedInfo, in MessageProperties properties, byte[] body, Exception exception
     )
     {
+        var message = errorMessageSerializer.Serialize(body);
         var error = new Error(
             receivedInfo.RoutingKey,
             receivedInfo.Exchange,
             receivedInfo.Queue,
             exception.ToString(),
-            errorMessageSerializer.Serialize(body),
+            message,
             DateTime.UtcNow,
             properties
         );

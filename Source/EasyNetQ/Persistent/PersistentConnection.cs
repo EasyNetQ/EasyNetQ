@@ -67,6 +67,7 @@ public class PersistentConnection : IPersistentConnection
         if (disposed) return;
 
         DisposeConnection();
+        mutex.Dispose();
         disposed = true;
     }
 

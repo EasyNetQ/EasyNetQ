@@ -42,7 +42,7 @@ public static partial class AdvancedBusExtensions
         bool durable = true,
         bool exclusive = false,
         bool autoDelete = false,
-        IDictionary<string, object>? arguments = null,
+        IDictionary<string, object> arguments = null,
         CancellationToken cancellationToken = default
     )
     {

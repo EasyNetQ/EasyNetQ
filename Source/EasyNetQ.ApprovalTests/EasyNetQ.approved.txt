@@ -124,6 +124,7 @@ namespace EasyNetQ
         public const int DefaultPort = 5672;
         public ConnectionConfiguration() { }
         public System.Collections.Generic.IList<RabbitMQ.Client.IAuthMechanismFactory> AuthMechanisms { get; set; }
+        public string ClientName { get; set; }
         public System.Collections.Generic.IDictionary<string, object> ClientProperties { get; }
         public System.TimeSpan ConnectIntervalAttempt { get; set; }
         public ushort? ConsumerDispatcherConcurrency { get; set; }
@@ -304,7 +305,6 @@ namespace EasyNetQ
         public static EasyNetQ.Consumer.ConsumePipelineBuilder UseScope(this EasyNetQ.Consumer.ConsumePipelineBuilder pipelineBuilder) { }
         public static EasyNetQ.IEasyNetQBuilder UseVersionedMessage(this EasyNetQ.IEasyNetQBuilder builder) { }
     }
-    [System.Serializable]
     public class EasyNetQException : System.Exception
     {
         public EasyNetQException() { }
@@ -312,7 +312,6 @@ namespace EasyNetQ
         public EasyNetQException(string format, params object?[] args) { }
         public EasyNetQException(string? message, System.Exception? inner) { }
     }
-    [System.Serializable]
     public class EasyNetQResponderException : EasyNetQ.EasyNetQException
     {
         public EasyNetQResponderException() { }
@@ -1774,21 +1773,18 @@ namespace EasyNetQ.Producer
         public System.Threading.Tasks.Task<EasyNetQ.Producer.IPublishPendingConfirmation> CreatePendingConfirmation(RabbitMQ.Client.IChannel channel, System.Threading.CancellationToken cancellationToken = default) { }
         public virtual void Dispose() { }
     }
-    [System.Serializable]
     public class PublishInterruptedException : System.Exception
     {
         public PublishInterruptedException() { }
         public PublishInterruptedException(string? message) { }
         public PublishInterruptedException(string? message, System.Exception? inner) { }
     }
-    [System.Serializable]
     public class PublishNackedException : System.Exception
     {
         public PublishNackedException() { }
         public PublishNackedException(string? message) { }
         public PublishNackedException(string? message, System.Exception? inner) { }
     }
-    [System.Serializable]
     public class PublishReturnedException : System.Exception
     {
         public PublishReturnedException() { }
