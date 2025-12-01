@@ -115,7 +115,7 @@ public class DefaultRpc : IRpc, IAsyncDisposable
 
         return RespondAsyncInternal(responder, configure, cancellationToken);
     }
-    
+
     /// <inheritdoc />
     public async ValueTask DisposeAsync()
     {

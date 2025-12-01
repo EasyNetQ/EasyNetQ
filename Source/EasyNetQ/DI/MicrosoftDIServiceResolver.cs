@@ -16,5 +16,5 @@ namespace EasyNetQ.DI
         {
             return _serviceProvider.GetService<TService>();
         }
-    }    
+    }
 }

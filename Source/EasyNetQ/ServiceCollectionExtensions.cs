@@ -62,7 +62,7 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<ISendReceive, DefaultSendReceive>();
         services.TryAddSingleton<IScheduler, DeadLetterExchangeAndMessageTtlScheduler>();
         services.TryAddSingleton<IBus, RabbitBus>();
-        
+
         services.TryAddSingleton(typeof(ILogger), typeof(NoopLogger));
         services.TryAddSingleton(typeof(ILogger<>), typeof(NoopLogger<>));
         return services;
