@@ -4,11 +4,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests;
 
-public class When_auto_subscribing_with_explicit_implementation : IDisposable
+#pragma warning disable IDISP006
+public class When_auto_subscribing_with_explicit_implementation : IAsyncLifetime
 {
     private readonly MockBuilder mockBuilder;
     private readonly ServiceProvider serviceProvider;
-
+    AutoSubscriber autoSubscriber;
     private const string expectedQueueName1 =
         "EasyNetQ.Tests.AutoSubscriberTests.When_auto_subscribing_with_explicit_implementation+MessageA, EasyNetQ.Tests_my_app:552bba04667af93e428cfdc296acb6d4";
 
@@ -25,16 +26,18 @@ public class When_auto_subscribing_with_explicit_implementation : IDisposable
         var services = new ServiceCollection();
         serviceProvider = services.BuildServiceProvider();
 
-        var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, serviceProvider, "my_app");
+        autoSubscriber = new AutoSubscriber(mockBuilder.Bus, serviceProvider, "my_app");
 #pragma warning disable IDISP004
-        autoSubscriber.Subscribe([typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>)]);
+        
 #pragma warning restore IDISP004
     }
 
-    public virtual void Dispose()
+    public Task InitializeAsync() => autoSubscriber.SubscribeAsync([typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>)]);
+
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
-        serviceProvider?.Dispose();
+        await mockBuilder.DisposeAsync();
+        await serviceProvider.DisposeAsync();
     }
 
     [Fact]
@@ -47,7 +50,10 @@ public class When_auto_subscribing_with_explicit_implementation : IDisposable
                 Arg.Is(true),
                 Arg.Is(false),
                 Arg.Is(false),
-                Arg.Is((IDictionary<string, object>)null)
+                Arg.Is((IDictionary<string, object>)null),
+                default,
+                default,
+                Arg.Any<CancellationToken>()
             );
         };
 
@@ -64,7 +70,9 @@ public class When_auto_subscribing_with_explicit_implementation : IDisposable
                 Arg.Is(queueName),
                 Arg.Any<string>(),
                 Arg.Is(topicName),
-                Arg.Is((IDictionary<string, object>)null)
+                Arg.Is((IDictionary<string, object>)null),
+                default,
+                Arg.Any<CancellationToken>()
             );
 
         await assertConsumerStarted(1, expectedQueueName1, "#");

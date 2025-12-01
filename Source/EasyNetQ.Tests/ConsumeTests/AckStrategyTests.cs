@@ -4,18 +4,23 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 
-public class Ack_strategy
+public class Ack_strategy : IAsyncLifetime
 {
     public Ack_strategy()
     {
         channel = Substitute.For<IChannel, IRecoverable>();
-
-        result = AckStrategies.AckAsync(channel, deliveryTag, CancellationToken.None).GetAwaiter().GetResult();
     }
 
     private readonly IChannel channel;
-    private readonly AckResult result;
+    private AckResult result;
     private const ulong deliveryTag = 1234;
+
+    public async Task InitializeAsync()
+    {
+        result = await AckStrategies.AckAsync(channel, deliveryTag, CancellationToken.None);
+    }
+
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task Should_ack_message()
@@ -30,18 +35,23 @@ public class Ack_strategy
     }
 }
 
-public class NackWithoutRequeue_strategy
+public class NackWithoutRequeue_strategy : IAsyncLifetime
 {
     public NackWithoutRequeue_strategy()
     {
         channel = Substitute.For<IChannel, IRecoverable>();
-
-        result = AckStrategies.NackWithoutRequeueAsync(channel, deliveryTag, CancellationToken.None).GetAwaiter().GetResult();
     }
 
     private readonly IChannel channel;
-    private readonly AckResult result;
+    private AckResult result;
     private const ulong deliveryTag = 1234;
+
+    public async Task InitializeAsync()
+    {
+        result = await AckStrategies.NackWithoutRequeueAsync(channel, deliveryTag, CancellationToken.None);
+    }
+
+    public Task DisposeAsync() => Task.CompletedTask;
 
     [Fact]
     public async Task Should_nack_message_and_not_requeue()

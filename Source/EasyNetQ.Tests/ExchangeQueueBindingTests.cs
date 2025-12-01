@@ -4,7 +4,7 @@ using Queue = EasyNetQ.Topology.Queue;
 
 namespace EasyNetQ.Tests;
 
-public class When_a_queue_is_declared : IDisposable
+public class When_a_queue_is_declared : IAsyncLifetime
 {
     public When_a_queue_is_declared()
     {
@@ -22,9 +22,11 @@ public class When_a_queue_is_declared : IDisposable
         );
     }
 
-    public virtual void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     private readonly MockBuilder mockBuilder;
@@ -57,7 +59,7 @@ public class When_a_queue_is_declared : IDisposable
     }
 }
 
-public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange : IDisposable
+public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange : IAsyncLifetime
 {
     public When_a_queue_is_declared_With_NonEmptyDeadLetterExchange()
     {
@@ -78,9 +80,11 @@ public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange : IDisposa
         );
     }
 
-    public virtual void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     private readonly MockBuilder mockBuilder;
@@ -115,7 +119,7 @@ public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange : IDisposa
     }
 }
 
-public class When_a_queue_is_declared_With_EmptyDeadLetterExchange : IDisposable
+public class When_a_queue_is_declared_With_EmptyDeadLetterExchange : IAsyncLifetime
 {
     public When_a_queue_is_declared_With_EmptyDeadLetterExchange()
     {
@@ -135,9 +139,11 @@ public class When_a_queue_is_declared_With_EmptyDeadLetterExchange : IDisposable
         );
     }
 
-    public virtual void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     private readonly MockBuilder mockBuilder;
@@ -172,18 +178,19 @@ public class When_a_queue_is_declared_With_EmptyDeadLetterExchange : IDisposable
     }
 }
 
-public class When_a_queue_is_deleted : IDisposable
+public class When_a_queue_is_deleted : IAsyncLifetime
 {
     public When_a_queue_is_deleted()
     {
         mockBuilder = new MockBuilder();
 
-        mockBuilder.Bus.Advanced.QueueDelete("my_queue");
-    }
+   }
 
-    public virtual void Dispose()
+    public Task InitializeAsync() => mockBuilder.Bus.Advanced.QueueDeleteAsync("my_queue");
+
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     private readonly MockBuilder mockBuilder;
@@ -195,18 +202,20 @@ public class When_a_queue_is_deleted : IDisposable
     }
 }
 
-public class When_a_queue_is_deleted_with_name : IDisposable
+public class When_a_queue_is_deleted_with_name : IAsyncLifetime
 {
     public When_a_queue_is_deleted_with_name()
     {
         mockBuilder = new MockBuilder();
 
-        mockBuilder.Bus.Advanced.QueueDelete("my_queue");
+
     }
 
-    public virtual void Dispose()
+    public Task InitializeAsync() => mockBuilder.Bus.Advanced.QueueDeleteAsync("my_queue");
+
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     private readonly MockBuilder mockBuilder;
@@ -218,28 +227,33 @@ public class When_a_queue_is_deleted_with_name : IDisposable
     }
 }
 
-public class When_an_exchange_is_declared : IDisposable
+public class When_an_exchange_is_declared : IAsyncLifetime
 {
     public When_an_exchange_is_declared()
     {
         mockBuilder = new MockBuilder();
 
-        exchange = mockBuilder.Bus.Advanced.ExchangeDeclare(
-            "my_exchange",
-            type: ExchangeType.Direct,
-            durable: false,
-            autoDelete: true,
-            arguments: new Dictionary<string, object>().WithAlternateExchange("my.alternate.exchange")
-        );
+
     }
 
-    public virtual void Dispose()
+    public async Task InitializeAsync()
     {
-        mockBuilder.Dispose();
+        exchange = await mockBuilder.Bus.Advanced.ExchangeDeclareAsync(
+    "my_exchange",
+    type: ExchangeType.Direct,
+    durable: false,
+    autoDelete: true,
+    arguments: new Dictionary<string, object>().WithAlternateExchange("my.alternate.exchange")
+);
+    }
+
+    public async Task DisposeAsync()
+    {
+        await mockBuilder.DisposeAsync();
     }
 
     private readonly MockBuilder mockBuilder;
-    private readonly Exchange exchange;
+    private Exchange exchange;
 
     [Fact]
     public async Task Should_declare_an_exchange()
@@ -264,18 +278,20 @@ public class When_an_exchange_is_declared : IDisposable
     }
 }
 
-public class When_an_exchange_is_declared_passively : IDisposable
+public class When_an_exchange_is_declared_passively : IAsyncLifetime
 {
     public When_an_exchange_is_declared_passively()
     {
         mockBuilder = new MockBuilder();
 
-        mockBuilder.Bus.Advanced.ExchangeDeclarePassive("my_exchange");
+        
     }
 
-    public virtual void Dispose()
+    public Task InitializeAsync() => mockBuilder.Bus.Advanced.ExchangeDeclarePassiveAsync("my_exchange");
+
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     private readonly MockBuilder mockBuilder;
@@ -288,19 +304,24 @@ public class When_an_exchange_is_declared_passively : IDisposable
     }
 }
 
-public class When_an_exchange_is_deleted : IDisposable
+public class When_an_exchange_is_deleted : IAsyncLifetime
 {
     public When_an_exchange_is_deleted()
     {
         mockBuilder = new MockBuilder();
 
-        var exchange = new Exchange("my_exchange");
-        mockBuilder.Bus.Advanced.ExchangeDelete(exchange);
+       
     }
 
-    public virtual void Dispose()
+    public async Task InitializeAsync()
     {
-        mockBuilder.Dispose();
+        var exchange = new Exchange("my_exchange");
+        await mockBuilder.Bus.Advanced.ExchangeDeleteAsync(exchange);
+    }
+
+    public async Task DisposeAsync()
+    {
+        await mockBuilder.DisposeAsync();
     }
 
     private readonly MockBuilder mockBuilder;
@@ -312,27 +333,29 @@ public class When_an_exchange_is_deleted : IDisposable
     }
 }
 
-public class When_a_queue_is_bound_to_an_exchange : IDisposable
+public class When_a_queue_is_bound_to_an_exchange : IAsyncLifetime
 {
     public When_a_queue_is_bound_to_an_exchange()
     {
         mockBuilder = new MockBuilder();
         advancedBus = mockBuilder.Bus.Advanced;
-
-        var exchange = new Exchange("my_exchange");
-        var queue = new Queue("my_queue", false);
-
-        binding = advancedBus.Bind(exchange, queue, "my_routing_key");
     }
 
-    public virtual void Dispose()
+    public async Task InitializeAsync()
     {
-        mockBuilder.Dispose();
+        var exchange = new Exchange("my_exchange");
+        var queue = new Queue("my_queue", false);
+        binding = await advancedBus.BindAsync(exchange, queue, "my_routing_key");
+    }
+
+    public async Task DisposeAsync()
+    {
+        await mockBuilder.DisposeAsync();
     }
 
     private readonly MockBuilder mockBuilder;
     private readonly IAdvancedBus advancedBus;
-    private readonly Binding<Queue> binding;
+    private Binding<Queue> binding;
 
     [Fact]
     public void Should_create_a_binding_instance()
@@ -358,27 +381,31 @@ public class When_a_queue_is_bound_to_an_exchange : IDisposable
     }
 }
 
-public class When_a_queue_is_bound_to_an_exchange_with_headers : IDisposable
+public class When_a_queue_is_bound_to_an_exchange_with_headers : IAsyncLifetime
 {
     public When_a_queue_is_bound_to_an_exchange_with_headers()
     {
         mockBuilder = new MockBuilder();
         advancedBus = mockBuilder.Bus.Advanced;
+    }
+
+    public async Task InitializeAsync()
+    {
 
         var exchange = new Exchange("my_exchange");
         var queue = new Queue("my_queue", false);
 
-        binding = advancedBus.Bind(exchange, queue, "my_routing_key", new Dictionary<string, object> { ["header1"] = "value1" });
+        binding = await advancedBus.BindAsync(exchange, queue, "my_routing_key", new Dictionary<string, object> { ["header1"] = "value1" });
     }
 
-    public virtual void Dispose()
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     private readonly MockBuilder mockBuilder;
     private readonly IAdvancedBus advancedBus;
-    private readonly Binding<Queue> binding;
+    private Binding<Queue> binding;
 
     [Fact]
     public void Should_create_a_binding_instance()
@@ -407,27 +434,31 @@ public class When_a_queue_is_bound_to_an_exchange_with_headers : IDisposable
     }
 }
 
-public class When_a_queue_is_unbound_from_an_exchange : IDisposable
+public class When_a_queue_is_unbound_from_an_exchange : IAsyncLifetime
 {
     public When_a_queue_is_unbound_from_an_exchange()
     {
         mockBuilder = new MockBuilder();
         advancedBus = mockBuilder.Bus.Advanced;
+    }
+
+    public async Task InitializeAsync()
+    {
 
         var exchange = new Exchange("my_exchange");
         var queue = new Queue("my_queue", false);
-        binding = advancedBus.Bind(exchange, queue, "my_routing_key");
-        advancedBus.Unbind(binding);
+        binding = await advancedBus.BindAsync(exchange, queue, "my_routing_key");
+        await advancedBus.UnbindAsync(binding);
     }
 
-    public virtual void Dispose()
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     private readonly MockBuilder mockBuilder;
     private readonly IAdvancedBus advancedBus;
-    private readonly Binding<Queue> binding;
+    private Binding<Queue> binding;
 
     [Fact]
     public async Task Should_unbind_the_exchange()

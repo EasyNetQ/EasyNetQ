@@ -21,7 +21,6 @@
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageVersion Include="NSubstitute" Version="5.3.0" />
-    <PackageVersion Include="NullGuard.Fody" Version="3.1.1" />
     <PackageVersion Include="PublicApiGenerator" Version="11.5.3" />
     <PackageVersion Include="RabbitMQ.Client" Version="7.2.0" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />
@@ -41,7 +40,6 @@
     <GlobalPackageReference Include="MinVer" Version="6.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <GlobalPackageReference Include="Fody" Version="6.9.3" />
     <GlobalPackageReference Condition="'$(TargetFramework)'!='net8.0'" Include="PolySharp" Version="1.15.0" />
   </ItemGroup>
 </Project>

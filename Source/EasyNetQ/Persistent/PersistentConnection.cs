@@ -48,7 +48,14 @@ public class PersistentConnection : IPersistentConnection
         var connection = await InitializeConnectionAsync();
         connection.EnsureIsOpen();
     }
+    /// <inheritdoc />
+    public async Task EnsureConnectedAsync(CancellationToken token = default)
+    {
+        if (disposed) throw new ObjectDisposedException(nameof(PersistentConnection));
 
+        var connection = await InitializeConnectionAsync(token);
+        connection.EnsureIsOpen();
+    }
     /// <inheritdoc />
     public async Task<IChannel> CreateChannelAsync(
         CreateChannelOptions options = null,
@@ -71,14 +78,14 @@ public class PersistentConnection : IPersistentConnection
         disposed = true;
     }
 
-    private async Task<IConnection> InitializeConnectionAsync()
+    private async Task<IConnection> InitializeConnectionAsync(CancellationToken cancellationToken = default)
     {
         var connection = initializedConnection;
         if (connection is not null) return connection;
 
         try
         {
-            bool lockAcquired = await mutex.WaitAsync(5_000);
+            bool lockAcquired = await mutex.WaitAsync(5_000, cancellationToken);
             if (!lockAcquired)
                 throw new NotSupportedException("Non-recoverable connection is not supported");
             try

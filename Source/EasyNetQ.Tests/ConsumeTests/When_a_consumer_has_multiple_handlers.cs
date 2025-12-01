@@ -4,7 +4,7 @@ using EasyNetQ.Topology;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 
-public class When_a_consumer_has_multiple_handlers : IDisposable
+public class When_a_consumer_has_multiple_handlers : IAsyncLifetime
 {
     private readonly MockBuilder mockBuilder;
     private IAnimal animalResult;
@@ -15,13 +15,16 @@ public class When_a_consumer_has_multiple_handlers : IDisposable
     public When_a_consumer_has_multiple_handlers()
     {
         mockBuilder = new MockBuilder();
+    }
 
+    public async Task InitializeAsync()
+    {
         var queue = new Queue("test_queue", false);
 
         using var countdownEvent = new CountdownEvent(3);
 
 #pragma warning disable IDISP004
-        mockBuilder.Bus.Advanced.Consume(
+        await mockBuilder.Bus.Advanced.ConsumeAsync(
 #pragma warning restore IDISP004
             queue,
             x => x.Add<MyMessage>((message, _) =>
@@ -38,19 +41,18 @@ public class When_a_consumer_has_multiple_handlers : IDisposable
                 {
                     animalResult = message.Body;
                     countdownEvent.Signal();
-                })
-        );
+                }));
 
-        DeliverAsync(new MyMessage { Text = "Hello Polymorphs!" }).GetAwaiter().GetResult();
-        DeliverAsync(new MyOtherMessage { Text = "Hello Isomorphs!" }).GetAwaiter().GetResult();
-        DeliverAsync(new Dog()).GetAwaiter().GetResult();
+        await DeliverAsync(new MyMessage { Text = "Hello Polymorphs!" });
+        await DeliverAsync(new MyOtherMessage { Text = "Hello Isomorphs!" });
+        await DeliverAsync(new Dog());
 
         if (!countdownEvent.Wait(5000)) throw new TimeoutException();
     }
 
-    public virtual void Dispose()
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     private async Task DeliverAsync<T>(T message) where T : class

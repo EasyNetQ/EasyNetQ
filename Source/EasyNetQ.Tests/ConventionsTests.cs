@@ -1,3 +1,4 @@
+using System;
 using EasyNetQ.Tests.Mocking;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
@@ -144,7 +145,7 @@ public class When_using_QueueAttribute
     }
 }
 
-public class When_publishing_a_message : IDisposable
+public class When_publishing_a_message : IAsyncLifetime
 {
     public When_publishing_a_message()
     {
@@ -160,9 +161,11 @@ public class When_publishing_a_message : IDisposable
         mockBuilder.PubSub.Publish(new TestMessage());
     }
 
-    public virtual void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     private readonly MockBuilder mockBuilder;
@@ -210,7 +213,7 @@ public class When_publishing_a_message : IDisposable
     }
 }
 
-public class When_registering_response_handler : IDisposable
+public class When_registering_response_handler : IAsyncLifetime
 {
     public When_registering_response_handler()
     {
@@ -221,15 +224,13 @@ public class When_registering_response_handler : IDisposable
         };
 
         mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(customConventions));
-
-#pragma warning disable IDISP004
-        mockBuilder.Rpc.Respond<TestMessage, TestMessage>(_ => new TestMessage());
-#pragma warning restore IDISP004
     }
 
-    public virtual void Dispose()
+    public Task InitializeAsync() => mockBuilder.Rpc.RespondAsync<TestMessage, TestMessage>(_ => new TestMessage());
+
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     private readonly MockBuilder mockBuilder;

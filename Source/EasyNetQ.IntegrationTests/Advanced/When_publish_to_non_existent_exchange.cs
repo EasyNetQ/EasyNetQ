@@ -5,7 +5,7 @@ using RabbitMQ.Client.Exceptions;
 namespace EasyNetQ.IntegrationTests.Advanced;
 
 [Collection("RabbitMQ")]
-public class When_publish_to_non_existent_exchange : IDisposable
+public class When_publish_to_non_existent_exchange : IDisposable, IAsyncLifetime
 {
     private readonly ServiceProvider serviceProvider;
     private readonly IBus bus;
@@ -17,6 +17,13 @@ public class When_publish_to_non_existent_exchange : IDisposable
 
         serviceProvider = serviceCollection.BuildServiceProvider();
         bus = serviceProvider.GetRequiredService<IBus>();
+    }
+
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
+    {
+        await serviceProvider.DisposeAsync();
     }
 
     public virtual void Dispose()

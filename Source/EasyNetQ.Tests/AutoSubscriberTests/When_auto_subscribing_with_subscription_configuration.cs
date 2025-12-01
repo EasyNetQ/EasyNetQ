@@ -3,14 +3,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests;
 
-public class When_auto_subscribing_with_subscription_configuration_attribute : IDisposable
+public class When_auto_subscribing_with_subscription_configuration_attribute : IDisposable, IAsyncLifetime
 {
     private readonly IBus bus;
     private readonly ServiceProvider serviceProvider;
     private Action<ISubscriptionConfiguration> capturedAction;
     private readonly IPubSub pubSub;
     private bool disposed;
-
+    AutoSubscriber autoSubscriber;
     public When_auto_subscribing_with_subscription_configuration_attribute()
     {
         pubSub = Substitute.For<IPubSub>();
@@ -20,7 +20,7 @@ public class When_auto_subscribing_with_subscription_configuration_attribute : I
         var services = new ServiceCollection();
         serviceProvider = services.BuildServiceProvider();
 
-        var autoSubscriber = new AutoSubscriber(bus, serviceProvider, "my_app");
+        autoSubscriber = new AutoSubscriber(bus, serviceProvider, "my_app");
 #pragma warning disable IDISP004
         pubSub.SubscribeAsync(
 #pragma warning restore IDISP004
@@ -31,9 +31,7 @@ public class When_auto_subscribing_with_subscription_configuration_attribute : I
             .Returns(Task.FromResult(new SubscriptionResult()))
             .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
 
-#pragma warning disable IDISP004
-        autoSubscriber.Subscribe([typeof(MyConsumerWithAttr)]);
-#pragma warning restore IDISP004
+
     }
 
     [Fact]
@@ -69,6 +67,10 @@ public class When_auto_subscribing_with_subscription_configuration_attribute : I
         disposed = true;
         serviceProvider?.Dispose();
     }
+
+    public Task InitializeAsync()=> autoSubscriber.SubscribeAsync([typeof(MyConsumerWithAttr)]);
+
+    public Task DisposeAsync() => Task.CompletedTask;
 
     // Discovered by reflection over test assembly, do not remove.
     private sealed class MyConsumerWithAttr : IConsume<MessageA>

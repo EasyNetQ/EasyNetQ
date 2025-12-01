@@ -2,7 +2,7 @@ namespace EasyNetQ.IntegrationTests.Utils;
 
 public class MessagesSink
 {
-    private readonly TaskCompletionSource<object> allMessagedReceived = new();
+    private readonly TaskCompletionSource<object> allMessagedReceived = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly object locker = new();
     private readonly int maxCount;
     private readonly List<Message> receivedMessages = new();

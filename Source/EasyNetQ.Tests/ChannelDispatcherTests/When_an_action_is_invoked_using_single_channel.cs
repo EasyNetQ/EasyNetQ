@@ -1,3 +1,4 @@
+using System;
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
 using EasyNetQ.Persistent;
@@ -6,13 +7,13 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.ChannelDispatcherTests;
 
-public class When_an_action_is_invoked_using_single_channel : IDisposable
+public class When_an_action_is_invoked_using_single_channel : IAsyncLifetime
 {
     private readonly SinglePersistentChannelDispatcher dispatcher;
     private readonly IPersistentChannelFactory channelFactory;
-    private readonly int actionResult;
-
+    private int actionResult;
     private readonly IProducerConnection producerConnection;
+    private readonly Func<IChannel, Task<int>> action;
 
     public When_an_action_is_invoked_using_single_channel()
     {
@@ -20,22 +21,23 @@ public class When_an_action_is_invoked_using_single_channel : IDisposable
         producerConnection = Substitute.For<IProducerConnection>();
         var consumerConnection = Substitute.For<IConsumerConnection>();
         var channel = Substitute.For<IPersistentChannel>();
-        var action = Substitute.For<Func<IChannel, Task<int>>>();
+        action = Substitute.For<Func<IChannel, Task<int>>>();
 #pragma warning disable IDISP004
         channelFactory.CreatePersistentChannel(producerConnection, new PersistentChannelOptions()).Returns(channel);
 #pragma warning restore IDISP004
         channel.InvokeChannelActionAsync(action).Returns(42);
 
         dispatcher = new SinglePersistentChannelDispatcher(producerConnection, consumerConnection, channelFactory);
-
-        actionResult = dispatcher.InvokeAsync(action, PersistentChannelDispatchOptions.ProducerTopology)
-            .GetAwaiter()
-            .GetResult();
     }
 
-    public virtual void Dispose()
+    public async Task InitializeAsync()
     {
-        dispatcher.Dispose();
+        actionResult = await dispatcher.InvokeAsync(action, PersistentChannelDispatchOptions.ProducerTopology);
+    }
+
+    public async Task DisposeAsync()
+    {
+        await dispatcher.DisposeAsync();
     }
 
     [Fact]
@@ -51,4 +53,5 @@ public class When_an_action_is_invoked_using_single_channel : IDisposable
     {
         actionResult.Should().Be(42);
     }
+
 }

@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace EasyNetQ.Tests.InternalConsumerTests;
 
-public sealed class InternalConsumerTests : IAsyncDisposable
+public sealed class InternalConsumerTests : IAsyncLifetime
 {
     private readonly Queue exclusiveQueue = new("exclusive", isExclusive: true);
     private readonly Queue nonExclusiveQueue = new("non-exclusive", isExclusive: false);
@@ -85,9 +85,11 @@ public sealed class InternalConsumerTests : IAsyncDisposable
         await internalConsumer.StopConsumingAsync();
     }
 
-    public async ValueTask DisposeAsync()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
     {
-        mockBuilder?.Dispose();
+        await mockBuilder.DisposeAsync();
         await internalConsumer.DisposeAsync();
     }
 }

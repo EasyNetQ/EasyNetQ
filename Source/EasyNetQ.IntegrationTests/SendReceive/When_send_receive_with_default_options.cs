@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace EasyNetQ.IntegrationTests.SendReceive;
 
 [Collection("RabbitMQ")]
-public class When_send_receive_with_default_options : IDisposable
+public class When_send_receive_with_default_options : IDisposable, IAsyncLifetime
 {
     private readonly RabbitMQFixture rmqFixture;
     private const int MessagesCount = 10;
@@ -22,9 +22,16 @@ public class When_send_receive_with_default_options : IDisposable
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
+    public Task InitializeAsync() => Task.CompletedTask;
+
     public virtual void Dispose()
     {
         serviceProvider?.Dispose();
+    }
+
+    public async Task DisposeAsync()
+    {
+        await serviceProvider.DisposeAsync();
     }
 
 
@@ -36,7 +43,7 @@ public class When_send_receive_with_default_options : IDisposable
         var queue = Guid.NewGuid().ToString();
         var messagesSink = new MessagesSink(MessagesCount);
         var messages = MessagesFactories.Create(MessagesCount);
-        using (
+        await using (
             await bus.SendReceive.ReceiveAsync(queue, x => x.Add<Message>(messagesSink.Receive), cts.Token)
         )
         {
@@ -54,7 +61,7 @@ public class When_send_receive_with_default_options : IDisposable
 
         var queue = Guid.NewGuid().ToString();
         var messagesSink = new MessagesSink(2);
-        using (await bus.SendReceive.ReceiveAsync(queue, x => x.Add<Message>(messagesSink.Receive), cts.Token))
+        await using (await bus.SendReceive.ReceiveAsync(queue, x => x.Add<Message>(messagesSink.Receive), cts.Token))
         {
             var message = new Message(0);
             await bus.SendReceive.SendAsync(queue, message, cts.Token);

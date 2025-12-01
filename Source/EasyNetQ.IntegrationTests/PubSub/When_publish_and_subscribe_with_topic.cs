@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace EasyNetQ.IntegrationTests.PubSub;
 
 [Collection("RabbitMQ")]
-public class When_publish_and_subscribe_with_topic : IDisposable
+public class When_publish_and_subscribe_with_topic : IDisposable, IAsyncLifetime
 {
     private readonly ServiceProvider serviceProvider;
     private readonly IBus bus;
@@ -18,9 +18,16 @@ public class When_publish_and_subscribe_with_topic : IDisposable
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
+    public Task InitializeAsync() => Task.CompletedTask;
+
     public virtual void Dispose()
     {
         serviceProvider?.Dispose();
+    }
+
+    public async Task DisposeAsync()
+    {
+        await serviceProvider.DisposeAsync();
     }
 
     private const int MessagesCount = 10;
@@ -36,7 +43,7 @@ public class When_publish_and_subscribe_with_topic : IDisposable
         var firstTopicMessages = MessagesFactories.Create(MessagesCount);
         var secondTopicMessages = MessagesFactories.Create(MessagesCount, MessagesCount);
 
-        using (
+        await using (
             await bus.PubSub.SubscribeAsync<Message>(
                 Guid.NewGuid().ToString(),
                 firstTopicMessagesSink.Receive,
@@ -44,7 +51,7 @@ public class When_publish_and_subscribe_with_topic : IDisposable
                 cts.Token
             )
         )
-        using (
+        await using (
             await bus.PubSub.SubscribeAsync<Message>(
                 Guid.NewGuid().ToString(),
                 secondTopicMessagesSink.Receive,

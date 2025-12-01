@@ -4,7 +4,7 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.PersistentChannelTests;
 
-public class When_an_action_is_invoked : IDisposable
+public class When_an_action_is_invoked : IAsyncLifetime
 {
     private readonly IPersistentChannel persistentChannel;
     private readonly IPersistentConnection persistentConnection;
@@ -16,7 +16,7 @@ public class When_an_action_is_invoked : IDisposable
         channel = Substitute.For<IChannel, IRecoverable>();
 
 #pragma warning disable IDISP004
-        persistentConnection.CreateChannelAsync().Returns(channel);
+        persistentConnection.CreateChannelAsync(Arg.Any<CreateChannelOptions>(), default).Returns(channel);
 #pragma warning restore IDISP004
 
         persistentChannel = new PersistentChannel(
@@ -25,14 +25,17 @@ public class When_an_action_is_invoked : IDisposable
             persistentConnection,
             Substitute.For<IEventBus>()
         );
+    }
 
-        persistentChannel.InvokeChannelAction(async x => await x.ExchangeDeclareAsync("MyExchange", "direct"));
+    public async Task InitializeAsync()
+    {
+        await persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", "direct"));
     }
 
     [Fact]
     public async Task Should_open_a_channel()
     {
-        await persistentConnection.Received().CreateChannelAsync();
+        await persistentConnection.Received().CreateChannelAsync(Arg.Any<CreateChannelOptions>(), default);
     }
 
     [Fact]
@@ -41,8 +44,8 @@ public class When_an_action_is_invoked : IDisposable
         await channel.Received().ExchangeDeclareAsync("MyExchange", "direct");
     }
 
-    public virtual void Dispose()
+    public async Task DisposeAsync()
     {
-        persistentChannel.Dispose();
+        await persistentChannel.DisposeAsync();
     }
 }

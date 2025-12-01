@@ -5,9 +5,12 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.ProducerTests;
 
-public class When_a_request_is_sent : IDisposable
+public class When_a_request_is_sent : IAsyncLifetime
 {
-    public When_a_request_is_sent()
+    private MockBuilder mockBuilder;
+    private TestResponseMessage responseMessage;
+
+    public async Task InitializeAsync()
     {
         var correlationId = Guid.NewGuid().ToString();
         mockBuilder = new MockBuilder(
@@ -19,26 +22,23 @@ public class When_a_request_is_sent : IDisposable
         using var waiter = new CountdownEvent(2);
 
 #pragma warning disable IDISP004
-        mockBuilder.EventBus.Subscribe((in PublishedMessageEvent _) => waiter.Signal());
-        mockBuilder.EventBus.Subscribe((in StartConsumingSucceededEvent _) => waiter.Signal());
+        mockBuilder.EventBus.Subscribe((PublishedMessageEvent _) => Task.FromResult(waiter.Signal()));
+        mockBuilder.EventBus.Subscribe((StartConsumingSucceededEvent _) => Task.FromResult(waiter.Signal()));
 #pragma warning restore IDISP004
 
         var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
         if (!waiter.Wait(5000))
             throw new TimeoutException();
 
-        DeliverMessageAsync(correlationId).GetAwaiter().GetResult();
+        await DeliverMessageAsync(correlationId);
 
-        responseMessage = task.GetAwaiter().GetResult();
+        responseMessage = await task;
     }
 
-    public virtual void Dispose()
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
-
-    private readonly MockBuilder mockBuilder;
-    private readonly TestResponseMessage responseMessage;
 
     private async Task DeliverMessageAsync(string correlationId)
     {
@@ -57,7 +57,7 @@ public class When_a_request_is_sent : IDisposable
             "the_routing_key",
             properties,
             body
-        ).GetAwaiter().GetResult();
+        );
     }
 
     [Fact]

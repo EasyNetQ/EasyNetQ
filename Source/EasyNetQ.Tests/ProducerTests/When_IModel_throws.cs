@@ -5,7 +5,7 @@ using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.Tests.ProducerTests;
 
-public class When_IModel_throws_because_of_closed_connection : IDisposable
+public class When_IModel_throws_because_of_closed_connection : IAsyncLifetime
 {
     public When_IModel_throws_because_of_closed_connection()
     {
@@ -21,9 +21,11 @@ public class When_IModel_throws_because_of_closed_connection : IDisposable
             });
     }
 
-    public virtual void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     private readonly MockBuilder mockBuilder;

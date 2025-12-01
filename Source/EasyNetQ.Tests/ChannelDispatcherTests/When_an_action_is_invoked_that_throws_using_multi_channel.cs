@@ -6,7 +6,7 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.ChannelDispatcherTests;
 
-public class When_an_action_is_invoked_that_throws_using_multi_channel : IDisposable
+public class When_an_action_is_invoked_that_throws_using_multi_channel : IAsyncLifetime
 {
     private readonly MultiPersistentChannelDispatcher dispatcher;
 
@@ -27,9 +27,11 @@ public class When_an_action_is_invoked_that_throws_using_multi_channel : IDispos
         dispatcher = new MultiPersistentChannelDispatcher(1, producerConnection, consumerConnection, channelFactory);
     }
 
-    public virtual void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
     {
-        dispatcher.Dispose();
+        await dispatcher.DisposeAsync();
     }
 
     [Fact]

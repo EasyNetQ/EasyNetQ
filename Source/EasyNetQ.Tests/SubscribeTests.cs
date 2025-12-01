@@ -6,7 +6,8 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests;
 
-public class When_subscribe_is_called : IDisposable
+#pragma warning disable IDISP006
+public class When_subscribe_is_called : IAsyncLifetime
 {
     private const string typeName = "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests";
     private const string subscriptionId = "the_subscription_id";
@@ -14,7 +15,7 @@ public class When_subscribe_is_called : IDisposable
     private const string consumerTag = "the_consumer_tag";
 
     private readonly MockBuilder mockBuilder;
-    private readonly SubscriptionResult subscriptionResult;
+    private SubscriptionResult subscriptionResult;
 
     public When_subscribe_is_called()
     {
@@ -26,14 +27,18 @@ public class When_subscribe_is_called : IDisposable
         mockBuilder = new MockBuilder(x => x
             .AddSingleton<IConventions>(conventions)
         );
-
-        subscriptionResult = mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, _ => { });
     }
 
-    public virtual void Dispose()
+    public async Task InitializeAsync()
     {
-        subscriptionResult.Dispose();
-        mockBuilder.Dispose();
+        subscriptionResult = await mockBuilder.PubSub.SubscribeAsync<MyMessage>(subscriptionId, _ => { });
+    }
+
+    public async Task DisposeAsync()
+    {
+        await subscriptionResult.DisposeAsync();
+        
+        await mockBuilder.DisposeAsync();
     }
 
     [Fact]
@@ -140,7 +145,7 @@ public class When_subscribe_with_configuration_is_called
         int? maxLengthBytes
     )
     {
-        using var mockBuilder = new MockBuilder();
+        await using var mockBuilder = new MockBuilder();
         // Configure subscription
         await mockBuilder.PubSub.SubscribeAsync<MyMessage>(
             "x",
@@ -224,7 +229,7 @@ public class When_subscribe_with_configuration_is_called
     }
 }
 
-public class When_a_message_is_delivered : IDisposable
+public class When_a_message_is_delivered : IAsyncLifetime
 {
     private const string typeName = "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests";
     private const string subscriptionId = "the_subscription_id";
@@ -233,7 +238,7 @@ public class When_a_message_is_delivered : IDisposable
     private const ulong deliveryTag = 123;
     private MyMessage deliveredMessage;
     private readonly MockBuilder mockBuilder;
-    private readonly MyMessage originalMessage;
+    private MyMessage originalMessage;
 
     public When_a_message_is_delivered()
     {
@@ -244,10 +249,14 @@ public class When_a_message_is_delivered : IDisposable
 
         mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(conventions));
 
+
+    }
+
+    public async Task InitializeAsync()
+    {
 #pragma warning disable IDISP004
-        mockBuilder.PubSub.SubscribeAsync<MyMessage>(subscriptionId, message => { deliveredMessage = message; })
+        await mockBuilder.PubSub.SubscribeAsync<MyMessage>(subscriptionId, message => { deliveredMessage = message; });
 #pragma warning restore IDISP004
-            .GetAwaiter().GetResult();
 
         const string text = "Hello there, I am the text!";
         originalMessage = new MyMessage { Text = text };
@@ -255,7 +264,7 @@ public class When_a_message_is_delivered : IDisposable
         using var serializedMessage = new ReflectionBasedNewtonsoftJsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
 
         // deliver a message
-        mockBuilder.Consumers[0].HandleBasicDeliverAsync(
+        await mockBuilder.Consumers[0].HandleBasicDeliverAsync(
             consumerTag,
             deliveryTag,
             false, // redelivered
@@ -267,12 +276,12 @@ public class When_a_message_is_delivered : IDisposable
                 CorrelationId = correlationId
             },
             serializedMessage.Memory
-        ).GetAwaiter().GetResult();
+        );
     }
 
-    public virtual void Dispose()
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     [Fact]
@@ -295,7 +304,7 @@ public class When_a_message_is_delivered : IDisposable
     }
 }
 
-public class When_the_handler_throws_an_exception : IDisposable
+public class When_the_handler_throws_an_exception : IAsyncLifetime
 {
     private const string typeName = "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests";
     private const string subscriptionId = "the_subscription_id";
@@ -304,7 +313,7 @@ public class When_the_handler_throws_an_exception : IDisposable
     private const ulong deliveryTag = 123;
     private readonly Exception originalException = new("Some exception message");
 
-    private readonly MyMessage originalMessage;
+    private MyMessage originalMessage;
     private ConsumeContext basicDeliverEventArgs;
     private readonly IConsumeErrorStrategy consumeErrorStrategy;
     private readonly MockBuilder mockBuilder;
@@ -332,11 +341,13 @@ public class When_the_handler_throws_an_exception : IDisposable
             .AddSingleton<IConventions>(conventions)
             .AddSingleton(consumeErrorStrategy)
         );
+    }
 
+    public async Task InitializeAsync()
+    {
 #pragma warning disable IDISP004
-        mockBuilder.PubSub.SubscribeAsync<MyMessage>(subscriptionId, _ => throw originalException)
+        await mockBuilder.PubSub.SubscribeAsync<MyMessage>(subscriptionId, _ => throw originalException);
 #pragma warning restore IDISP004
-            .GetAwaiter().GetResult();
 
         const string text = "Hello there, I am the text!";
         originalMessage = new MyMessage { Text = text };
@@ -344,7 +355,7 @@ public class When_the_handler_throws_an_exception : IDisposable
         using var serializedMessage = new ReflectionBasedNewtonsoftJsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
 
         // deliver a message
-        mockBuilder.Consumers[0].HandleBasicDeliverAsync(
+        await mockBuilder.Consumers[0].HandleBasicDeliverAsync(
             consumerTag,
             deliveryTag,
             false, // redelivered
@@ -356,12 +367,11 @@ public class When_the_handler_throws_an_exception : IDisposable
                 CorrelationId = correlationId
             },
             serializedMessage.Memory
-        ).GetAwaiter().GetResult();
+        );
     }
-
-    public virtual void Dispose()
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     [Fact]
@@ -393,7 +403,7 @@ public class When_the_handler_throws_an_exception : IDisposable
     }
 }
 
-public class When_a_subscription_is_cancelled_by_the_user : IDisposable
+public class When_a_subscription_is_cancelled_by_the_user : IAsyncLifetime
 {
     private const string subscriptionId = "the_subscription_id";
     private const string consumerTag = "the_consumer_tag";
@@ -407,17 +417,22 @@ public class When_a_subscription_is_cancelled_by_the_user : IDisposable
         };
 
         mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(conventions));
-        using var subscriptionResult = mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, _ => { });
+
+    }
+
+    public async Task InitializeAsync()
+    {
+        await using var subscriptionResult = await mockBuilder.PubSub.SubscribeAsync<MyMessage>(subscriptionId, _ => { });
         using var are = new AutoResetEvent(false);
 #pragma warning disable IDISP004
-        mockBuilder.EventBus.Subscribe((in ConsumerChannelDisposedEvent _) => are.Set());
+        mockBuilder.EventBus.Subscribe((ConsumerChannelDisposedEvent _) => Task.FromResult(are.Set()));
 #pragma warning restore IDISP004
         are.WaitOne(500);
     }
 
-    public virtual void Dispose()
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     [Fact]

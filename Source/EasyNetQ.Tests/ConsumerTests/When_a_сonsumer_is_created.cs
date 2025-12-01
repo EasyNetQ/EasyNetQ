@@ -4,15 +4,16 @@ namespace EasyNetQ.Tests.ConsumerTests;
 
 public class WhenAСonsumerStartsConsuming : Given_a_сonsumer
 {
-    public WhenAСonsumerStartsConsuming()
+    protected override async Task InitializeAsyncCore()
     {
-        consumer.StartConsumingAsync().GetAwaiter().GetResult();
+        await consumer.StartConsumingAsync();
+        await base.InitializeAsyncCore();
     }
 
     [Fact]
     public void Should_ask_the_internal_consumer_to_start_consuming()
     {
-        internalConsumers[0].Received().StartConsumingAsync().GetAwaiter();
+        internalConsumers[0].Received().StartConsumingAsync();
     }
 
     [Fact]

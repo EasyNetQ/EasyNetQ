@@ -3,14 +3,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests;
 
-public class When_auto_subscribing_async_with_subscription_configuration_action : IDisposable
+public class When_auto_subscribing_async_with_subscription_configuration_action : IDisposable,IAsyncLifetime
 {
     private readonly IBus bus;
     private readonly ServiceProvider serviceProvider;
     private Action<ISubscriptionConfiguration> capturedAction;
     private readonly IPubSub pubSub;
     private bool disposed;
-
+    AutoSubscriber autoSubscriber;
     public When_auto_subscribing_async_with_subscription_configuration_action()
     {
         pubSub = Substitute.For<IPubSub>();
@@ -20,7 +20,7 @@ public class When_auto_subscribing_async_with_subscription_configuration_action 
         var services = new ServiceCollection();
         serviceProvider = services.BuildServiceProvider();
 
-        var autoSubscriber = new AutoSubscriber(bus, serviceProvider, "my_app")
+        autoSubscriber = new AutoSubscriber(bus, serviceProvider, "my_app")
         {
             ConfigureSubscriptionConfiguration =
                 c => c.WithAutoDelete()
@@ -40,7 +40,7 @@ public class When_auto_subscribing_async_with_subscription_configuration_action 
             .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
 
 #pragma warning disable IDISP004
-        autoSubscriber.Subscribe([typeof(MyConsumerWithAction)]);
+        
 #pragma warning restore IDISP004
     }
 
@@ -79,6 +79,10 @@ public class When_auto_subscribing_async_with_subscription_configuration_action 
         disposed = true;
         serviceProvider?.Dispose();
     }
+
+    public Task InitializeAsync()=> autoSubscriber.SubscribeAsync([typeof(MyConsumerWithAction)]);
+
+    public Task DisposeAsync() => Task.CompletedTask;
 
     // Discovered by reflection over test assembly, do not remove.
     // ReSharper disable once UnusedMember.Local

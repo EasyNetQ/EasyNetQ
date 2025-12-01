@@ -6,12 +6,15 @@ using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.Tests.PersistentChannelTests;
 
-public class When_an_action_is_performed_on_a_closed_channel_that_then_opens
+public class When_an_action_is_performed_on_a_closed_channel_that_then_opens : IAsyncLifetime
 {
     public When_an_action_is_performed_on_a_closed_channel_that_then_opens()
     {
-        using var persistentConnection = Substitute.For<IPersistentConnection>();
         channel = Substitute.For<IChannel, IRecoverable>();
+    }
+    public async Task InitializeAsync()
+    {
+        using var persistentConnection = Substitute.For<IPersistentConnection>();
         var eventBus = new EventBus(Substitute.For<ILogger<EventBus>>());
 
         var shutdownArgs = new ShutdownEventArgs(
@@ -22,15 +25,15 @@ public class When_an_action_is_performed_on_a_closed_channel_that_then_opens
         var exception = new OperationInterruptedException(shutdownArgs);
 
 #pragma warning disable IDISP004
-        persistentConnection.CreateChannelAsync().Returns(
+        persistentConnection.CreateChannelAsync(Arg.Any<CreateChannelOptions>(), default).Returns(
 #pragma warning restore IDISP004
             _ => throw exception, _ => channel, _ => channel
         );
 
-        using var persistentChannel = new PersistentChannel(
+        await using var persistentChannel = new PersistentChannel(
             new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, eventBus
         );
-        persistentChannel.InvokeChannelAction(async x => await x.ExchangeDeclareAsync("MyExchange", "direct"));
+        await persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", "direct"));
     }
 
     private readonly IChannel channel;
@@ -40,4 +43,6 @@ public class When_an_action_is_performed_on_a_closed_channel_that_then_opens
     {
         await channel.Received().ExchangeDeclareAsync("MyExchange", "direct");
     }
+
+    public Task DisposeAsync() => Task.CompletedTask;
 }

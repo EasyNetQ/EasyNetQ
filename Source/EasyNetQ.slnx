@@ -11,8 +11,6 @@
     <File Path="Directory.Build.props" />
     <File Path="Directory.Packages.props" />
     <File Path="docker-compose.yml" />
-    <File Path="FodyWeavers.xml" />
-    <File Path="FodyWeavers.xsd" />
   </Folder>
   <Folder Name="/Serialization/">
     <Project Path="EasyNetQ.Serialization.NewtonsoftJson/EasyNetQ.Serialization.NewtonsoftJson.csproj" />

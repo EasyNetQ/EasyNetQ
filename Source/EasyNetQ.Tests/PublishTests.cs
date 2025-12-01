@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Tests;
 
-public class When_publish_is_called : IDisposable
+public class When_publish_is_called : IAsyncLifetime
 {
     private const string correlationId = "abc123";
 
@@ -23,16 +23,18 @@ public class When_publish_is_called : IDisposable
         WaitForMessageToPublish();
     }
 
-    public virtual void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     private void WaitForMessageToPublish()
     {
         using var autoResetEvent = new AutoResetEvent(false);
 #pragma warning disable IDISP004
-        mockBuilder.EventBus.Subscribe((in PublishedMessageEvent _) => autoResetEvent.Set());
+        mockBuilder.EventBus.Subscribe((PublishedMessageEvent _) => Task.FromResult(autoResetEvent.Set()));
 #pragma warning restore IDISP004
         autoResetEvent.WaitOne(1000);
     }
@@ -71,12 +73,13 @@ public class When_publish_is_called : IDisposable
             Arg.Is("topic"),
             Arg.Is(true),
             Arg.Is(false),
-            Arg.Is((IDictionary<string, object>)null)
+            Arg.Is((IDictionary<string, object>)null),
+            cancellationToken:Arg.Any<CancellationToken>()
         );
     }
 }
 
-public class When_publish_with_topic_is_called : IDisposable
+public class When_publish_with_topic_is_called : IAsyncLifetime
 {
     private readonly MockBuilder mockBuilder;
 
@@ -89,16 +92,18 @@ public class When_publish_with_topic_is_called : IDisposable
         WaitForMessageToPublish();
     }
 
-    public virtual void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     private void WaitForMessageToPublish()
     {
         using var autoResetEvent = new AutoResetEvent(false);
 #pragma warning disable IDISP004
-        mockBuilder.EventBus.Subscribe((in PublishedMessageEvent _) => autoResetEvent.Set());
+        mockBuilder.EventBus.Subscribe((PublishedMessageEvent _) => Task.FromResult(autoResetEvent.Set()));
 #pragma warning restore IDISP004
         autoResetEvent.WaitOne(1000);
     }

@@ -4,21 +4,24 @@ namespace EasyNetQ.Tests.ConsumeTests;
 
 public class When_cancellation_of_message_handler_occurs : ConsumerTestBase
 {
-    protected override void AdditionalSetUp()
+    protected override async Task InitializeAsyncCore()
     {
         ConsumeErrorStrategy.HandleCancelledAsync(default)
             .ReturnsForAnyArgs(new ValueTask<AckStrategyAsync>(AckStrategies.NackWithRequeueAsync));
 
         using var are = new AutoResetEvent(false);
-        using var consumer = StartConsumer((_, _, _, ct) =>
+        Task deliverTask;
+        await using (await StartConsumerAsync((_, _, _, ct) =>
         {
             are.Set();
             Task.Delay(-1, ct).GetAwaiter().GetResult();
             return AckStrategies.AckAsync;
-        });
-        var deliverTask = DeliverMessageAsync();
-        are.WaitOne();
-        deliverTask.GetAwaiter().GetResult();
+        }))
+        {
+            deliverTask = DeliverMessageAsync();
+            are.WaitOne();
+        }
+        await deliverTask;
     }
 
     [Fact]

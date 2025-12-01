@@ -27,9 +27,9 @@ public class PublishConfirmationListenerTest : IDisposable
     {
         using var cts = new CancellationTokenSource();
         channel.GetNextPublishSequenceNumberAsync(cts.Token).Returns(DeliveryTag - 1, DeliveryTag);
-        var confirmation1 = publishConfirmationListener.CreatePendingConfirmation(channel, cts.Token);
-        var confirmation2 = publishConfirmationListener.CreatePendingConfirmation(channel, cts.Token);
-        eventBus.Publish(MessageConfirmationEvent.Nack(channel, DeliveryTag, true));
+        var confirmation1 = await publishConfirmationListener.CreatePendingConfirmationAsync(channel, cts.Token);
+        var confirmation2 = await publishConfirmationListener.CreatePendingConfirmationAsync(channel, cts.Token);
+        await eventBus.PublishAsync(MessageConfirmationEvent.Nack(channel, DeliveryTag, true));
         await Assert.ThrowsAsync<PublishNackedException>(
             () => confirmation1.WaitAsync(cts.Token)
         );
@@ -42,8 +42,8 @@ public class PublishConfirmationListenerTest : IDisposable
     public async Task Should_fail_with_nack_confirmation_event()
     {
         channel.GetNextPublishSequenceNumberAsync().Returns(DeliveryTag);
-        var confirmation = publishConfirmationListener.CreatePendingConfirmation(channel);
-        eventBus.Publish(MessageConfirmationEvent.Nack(channel, DeliveryTag, false));
+        var confirmation = await publishConfirmationListener.CreatePendingConfirmationAsync(channel);
+        await eventBus.PublishAsync(MessageConfirmationEvent.Nack(channel, DeliveryTag, false));
         await Assert.ThrowsAsync<PublishNackedException>(
             () => confirmation.WaitAsync(CancellationToken.None)
         );
@@ -53,8 +53,8 @@ public class PublishConfirmationListenerTest : IDisposable
     public async Task Should_success_with_ack_confirmation_event()
     {
         channel.GetNextPublishSequenceNumberAsync().Returns(DeliveryTag);
-        var confirmation = publishConfirmationListener.CreatePendingConfirmation(channel);
-        eventBus.Publish(MessageConfirmationEvent.Ack(channel, DeliveryTag, false));
+        var confirmation = await publishConfirmationListener.CreatePendingConfirmationAsync(channel);
+        await eventBus.PublishAsync(MessageConfirmationEvent.Ack(channel, DeliveryTag, false));
         await confirmation.WaitAsync(CancellationToken.None);
     }
 
@@ -62,9 +62,9 @@ public class PublishConfirmationListenerTest : IDisposable
     public async Task Should_success_with_multiple_ack_confirmation_event()
     {
         channel.GetNextPublishSequenceNumberAsync().Returns(DeliveryTag - 1, DeliveryTag);
-        var confirmation1 = publishConfirmationListener.CreatePendingConfirmation(channel);
-        var confirmation2 = publishConfirmationListener.CreatePendingConfirmation(channel);
-        eventBus.Publish(MessageConfirmationEvent.Ack(channel, DeliveryTag, true));
+        var confirmation1 = await publishConfirmationListener.CreatePendingConfirmationAsync(channel);
+        var confirmation2 = await publishConfirmationListener.CreatePendingConfirmationAsync(channel);
+        await eventBus.PublishAsync(MessageConfirmationEvent.Ack(channel, DeliveryTag, true));
         await confirmation1.WaitAsync(CancellationToken.None);
         await confirmation2.WaitAsync(CancellationToken.None);
     }
@@ -73,7 +73,7 @@ public class PublishConfirmationListenerTest : IDisposable
     public async Task Should_cancel_without_confirmation_event()
     {
         channel.GetNextPublishSequenceNumberAsync().Returns(DeliveryTag);
-        var confirmation = publishConfirmationListener.CreatePendingConfirmation(channel);
+        var confirmation = await publishConfirmationListener.CreatePendingConfirmationAsync(channel);
         using var cts = new CancellationTokenSource(1000);
         await Assert.ThrowsAsync<TaskCanceledException>(
             () => confirmation.WaitAsync(cts.Token)
@@ -84,14 +84,14 @@ public class PublishConfirmationListenerTest : IDisposable
     public async Task Should_work_after_reconnection()
     {
         channel.GetNextPublishSequenceNumberAsync().Returns(DeliveryTag);
-        var confirmation1 = publishConfirmationListener.CreatePendingConfirmation(channel);
-        eventBus.Publish(new ChannelRecoveredEvent(channel));
+        var confirmation1 = await publishConfirmationListener.CreatePendingConfirmationAsync(channel);
+        await eventBus.PublishAsync(new ChannelRecoveredEvent(channel));
         await Assert.ThrowsAsync<PublishInterruptedException>(
             () => confirmation1.WaitAsync(CancellationToken.None)
         );
 
-        var confirmation2 = publishConfirmationListener.CreatePendingConfirmation(channel);
-        eventBus.Publish(MessageConfirmationEvent.Ack(channel, DeliveryTag, false));
+        var confirmation2 = await publishConfirmationListener.CreatePendingConfirmationAsync(channel);
+        await eventBus.PublishAsync(MessageConfirmationEvent.Ack(channel, DeliveryTag, false));
         await confirmation2.WaitAsync(CancellationToken.None);
     }
 
@@ -99,7 +99,7 @@ public class PublishConfirmationListenerTest : IDisposable
     public async Task Should_fail_with_returned_message_event()
     {
         channel.GetNextPublishSequenceNumberAsync().Returns(DeliveryTag);
-        var confirmation1 = publishConfirmationListener.CreatePendingConfirmation(channel);
+        var confirmation1 = await publishConfirmationListener.CreatePendingConfirmationAsync(channel);
         var properties = new MessageProperties
         {
             Headers = new Dictionary<string, object>
@@ -107,7 +107,7 @@ public class PublishConfirmationListenerTest : IDisposable
                 { MessagePropertiesExtensions.ConfirmationIdHeader, Encoding.UTF8.GetBytes(confirmation1.Id.ToString()) }
             }
         };
-        eventBus.Publish(
+        await eventBus.PublishAsync(
             new ReturnedMessageEvent(
                 channel,
                 Array.Empty<byte>(),

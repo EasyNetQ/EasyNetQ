@@ -6,7 +6,8 @@ public class When_an_error_occurs_in_the_message_handler : ConsumerTestBase
 {
     private Exception exception;
 
-    protected override void AdditionalSetUp()
+    protected override async Task InitializeAsyncCore()
+
     {
         exception = new Exception("I've had a bad day :(");
 
@@ -14,9 +15,9 @@ public class When_an_error_occurs_in_the_message_handler : ConsumerTestBase
             .ReturnsForAnyArgs(new ValueTask<AckStrategyAsync>(AckStrategies.AckAsync));
 
 #pragma warning disable IDISP004
-        StartConsumer((_, _, _, _) => throw exception);
+        await StartConsumerAsync((_, _, _, _) => throw exception);
 #pragma warning restore IDISP004
-        DeliverMessage();
+        await DeliverMessageAsync();
     }
 
     [Fact]

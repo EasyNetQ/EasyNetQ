@@ -6,7 +6,7 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 
-public abstract class ConsumerTestBase : IDisposable
+public abstract class ConsumerTestBase : IAsyncLifetime
 {
     protected const string ConsumerTag = "the_consumer_tag";
     protected const ulong DeliverTag = 10101;
@@ -21,28 +21,29 @@ public abstract class ConsumerTestBase : IDisposable
     // populated when a message is delivered
     protected IBasicProperties OriginalProperties;
 
-    public ConsumerTestBase()
+    protected ConsumerTestBase()
     {
         ConsumeErrorStrategy = Substitute.For<IConsumeErrorStrategy>();
         MockBuilder = new MockBuilder(x => x.AddSingleton(ConsumeErrorStrategy));
-        AdditionalSetUp();
     }
 
-    public virtual void Dispose()
+    public Task InitializeAsync() => InitializeAsyncCore();
+
+    protected virtual Task InitializeAsyncCore() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
     {
-        MockBuilder.Dispose();
+        await MockBuilder.DisposeAsync();
     }
-
-    protected abstract void AdditionalSetUp();
-
-    protected IDisposable StartConsumer(
+ 
+    protected async Task<IAsyncDisposable> StartConsumerAsync(
         Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, CancellationToken, AckStrategyAsync> handler,
         bool autoAck = false
     )
     {
         ConsumerWasInvoked = false;
         var queue = new Queue("my_queue", false);
-        return MockBuilder.Bus.Advanced.Consume(
+        return await MockBuilder.Bus.Advanced.ConsumeAsync(
             queue,
             (body, properties, messageInfo, ct) =>
             {
@@ -64,11 +65,6 @@ public abstract class ConsumerTestBase : IDisposable
                 c.WithConsumerTag(ConsumerTag);
             }
         );
-    }
-
-    protected void DeliverMessage()
-    {
-        DeliverMessageAsync().GetAwaiter().GetResult();
     }
 
     protected Task DeliverMessageAsync()

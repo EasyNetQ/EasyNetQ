@@ -3,7 +3,7 @@ using EasyNetQ.Tests.Mocking;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 
-public class When_a_message_is_received : IDisposable
+public class When_a_message_is_received : IAsyncLifetime
 {
     private readonly MockBuilder mockBuilder;
     private MyMessage deliveredMyMessage;
@@ -12,21 +12,24 @@ public class When_a_message_is_received : IDisposable
     public When_a_message_is_received()
     {
         mockBuilder = new MockBuilder();
-
-#pragma warning disable IDISP004
-        mockBuilder.SendReceive.ReceiveAsync("the_queue", x => x
-#pragma warning restore IDISP004
-           .Add<MyMessage>(message => deliveredMyMessage = message)
-           .Add<MyOtherMessage>(message => deliveredMyOtherMessage = message));
-
-        DeliverMessageAsync("{ Text: \"Hello World :)\" }", "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests").GetAwaiter().GetResult();
-        DeliverMessageAsync("{ Text: \"Goodbye Cruel World!\" }", "EasyNetQ.Tests.MyOtherMessage, EasyNetQ.Tests").GetAwaiter().GetResult();
-        DeliverMessageAsync("{ Text: \"Shouldn't get this\" }", "EasyNetQ.Tests.Unknown, EasyNetQ.Tests").GetAwaiter().GetResult();
     }
 
-    public virtual void Dispose()
+    public async Task InitializeAsync()
     {
-        mockBuilder.Dispose();
+#pragma warning disable IDISP004
+        await mockBuilder.SendReceive.ReceiveAsync("the_queue", x => x
+#pragma warning restore IDISP004
+            .Add<MyMessage>(message => deliveredMyMessage = message)
+            .Add<MyOtherMessage>(message => deliveredMyOtherMessage = message));
+
+        await DeliverMessageAsync("{ Text: \"Hello World :)\" }", "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests");
+        await DeliverMessageAsync("{ Text: \"Goodbye Cruel World!\" }", "EasyNetQ.Tests.MyOtherMessage, EasyNetQ.Tests");
+        await DeliverMessageAsync("{ Text: \"Shouldn't get this\" }", "EasyNetQ.Tests.Unknown, EasyNetQ.Tests");
+    }
+
+    public async Task DisposeAsync()
+    {
+        await mockBuilder.DisposeAsync();
     }
 
     [Fact]

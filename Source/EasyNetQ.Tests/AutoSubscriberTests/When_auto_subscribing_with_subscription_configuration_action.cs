@@ -4,14 +4,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests;
 
-public class When_auto_subscribing_with_subscription_configuration_action : IDisposable
+public class When_auto_subscribing_with_subscription_configuration_action : IDisposable, IAsyncLifetime
 {
     private readonly IBus bus;
     private readonly ServiceProvider serviceProvider;
     private Action<ISubscriptionConfiguration> capturedAction;
     private readonly IPubSub pubSub;
     private bool disposed;
-
+    AutoSubscriber autoSubscriber;
     public When_auto_subscribing_with_subscription_configuration_action()
     {
         pubSub = Substitute.For<IPubSub>();
@@ -21,7 +21,7 @@ public class When_auto_subscribing_with_subscription_configuration_action : IDis
         var services = new ServiceCollection();
         serviceProvider = services.BuildServiceProvider();
 
-        var autoSubscriber = new AutoSubscriber(bus, serviceProvider, "my_app")
+        autoSubscriber = new AutoSubscriber(bus, serviceProvider, "my_app")
         {
             ConfigureSubscriptionConfiguration =
                 c => c.WithAutoDelete()
@@ -39,12 +39,10 @@ public class When_auto_subscribing_with_subscription_configuration_action : IDis
             )
             .Returns(Task.FromResult(new SubscriptionResult()))
             .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
-
-#pragma warning disable IDISP004
-        autoSubscriber.Subscribe([typeof(MyConsumerWithAction)]);
-#pragma warning restore IDISP004
     }
+    public Task InitializeAsync() => autoSubscriber.SubscribeAsync([typeof(MyConsumerWithAction)]);
 
+    public Task DisposeAsync() => Task.CompletedTask;
     [Fact]
     public void Should_have_called_subscribe()
     {

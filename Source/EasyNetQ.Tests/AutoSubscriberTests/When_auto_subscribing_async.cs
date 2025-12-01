@@ -4,7 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests;
 
-public class When_auto_subscribing_async : IDisposable
+#pragma warning disable IDISP006
+public class When_auto_subscribing_async : IAsyncLifetime
 {
     private readonly MockBuilder mockBuilder;
     private readonly ServiceProvider serviceProvider;
@@ -24,17 +25,20 @@ public class When_auto_subscribing_async : IDisposable
 
         var services = new ServiceCollection();
         serviceProvider = services.BuildServiceProvider();
+    }
 
+    public async Task InitializeAsync()
+    {
         var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, serviceProvider, "my_app");
 #pragma warning disable IDISP004
-        autoSubscriber.SubscribeAsync([typeof(MyAsyncConsumer)]).GetAwaiter().GetResult();
+        await autoSubscriber.SubscribeAsync([typeof(MyAsyncConsumer)]);
 #pragma warning restore IDISP004
     }
 
-    public virtual void Dispose()
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
-        serviceProvider?.Dispose();
+        await mockBuilder.DisposeAsync();
+        await serviceProvider.DisposeAsync();
     }
 
     [Fact]
@@ -46,7 +50,10 @@ public class When_auto_subscribing_async : IDisposable
                 Arg.Is(true),
                 Arg.Is(false),
                 Arg.Is(false),
-                Arg.Is((IDictionary<string, object>)null)
+                Arg.Is((IDictionary<string, object>)null),
+                Arg.Is(false),
+                Arg.Is(false),
+                Arg.Any<CancellationToken>()
             );
 
         await VerifyQueueDeclared(expectedQueueName1);
@@ -62,12 +69,14 @@ public class When_auto_subscribing_async : IDisposable
                 Arg.Is(queueName),
                 Arg.Any<string>(),
                 Arg.Is(topicName),
-                Arg.Is((IDictionary<string, object>)null)
+                Arg.Is((IDictionary<string, object>)null),
+                default,
+                Arg.Any<CancellationToken>()
             );
 
         await ConsumerStarted(1, expectedQueueName1, "#");
-        await ConsumerStarted(2, expectedQueueName2, "#");
-        await ConsumerStarted(3, expectedQueueName3, "Important");
+        await ConsumerStarted(1, expectedQueueName2, "#");
+        await ConsumerStarted(1, expectedQueueName3, "Important");
     }
 
     [Fact]

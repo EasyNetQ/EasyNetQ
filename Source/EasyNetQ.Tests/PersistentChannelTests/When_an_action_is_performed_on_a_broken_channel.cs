@@ -60,7 +60,7 @@ public class When_an_action_is_performed_and_channel_reopens
 
     [Theory]
     [MemberData(nameof(CloseAndRetryTestCases))]
-    public void Should_succeed_after_channel_recreation(Exception exception)
+    public async Task Should_succeed_after_channel_recreation(Exception exception)
     {
         using var persistentConnection = Substitute.For<IPersistentConnection>();
         var brokenChannel = Substitute.For<IChannel, IRecoverable>();
@@ -68,25 +68,25 @@ public class When_an_action_is_performed_and_channel_reopens
             .Do(_ => throw exception);
         var channel = Substitute.For<IChannel, IRecoverable>();
 #pragma warning disable IDISP004
-        persistentConnection.CreateChannelAsync().Returns(_ => brokenChannel, _ => channel);
+        persistentConnection.CreateChannelAsync(Arg.Any<CreateChannelOptions>(), default).Returns(_ => brokenChannel, _ => channel);
 #pragma warning restore IDISP004
 
-        using var persistentChannel = new PersistentChannel(
+        await using var persistentChannel = new PersistentChannel(
             new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, Substitute.For<IEventBus>()
         );
 
-        persistentChannel.InvokeChannelAction(async x => await x.ExchangeDeclareAsync("MyExchange", "direct"));
+        await persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", "direct"));
 
-        brokenChannel.Received().ExchangeDeclareAsync("MyExchange", "direct");
-        brokenChannel.Received().CloseAsync();
+        await brokenChannel.Received().ExchangeDeclareAsync("MyExchange", "direct");
+        await brokenChannel.Received().CloseAsync();
         brokenChannel.Received().Dispose();
 
-        channel.Received().ExchangeDeclareAsync("MyExchange", "direct");
+        await channel.Received().ExchangeDeclareAsync("MyExchange", "direct");
     }
 
     [Theory]
     [MemberData(nameof(SoftChannelTestCases))]
-    public void Should_throw_exception_and_close_channel(Exception exception)
+    public async Task Should_throw_exception_and_close_channel(Exception exception)
     {
         using var persistentConnection = Substitute.For<IPersistentConnection>();
         var brokenChannel = Substitute.For<IChannel, IRecoverable>();
@@ -94,67 +94,66 @@ public class When_an_action_is_performed_and_channel_reopens
             .Do(_ => throw exception);
 
 #pragma warning disable IDISP004
-        persistentConnection.CreateChannelAsync().Returns(_ => brokenChannel);
+         persistentConnection.CreateChannelAsync(Arg.Any<CreateChannelOptions>(), default).Returns(_ => brokenChannel);
 #pragma warning restore IDISP004
 
-        using var persistentChannel = new PersistentChannel(
+        await using var persistentChannel = new PersistentChannel(
             new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, Substitute.For<IEventBus>()
         );
-
         Assert.Throws(
             exception.GetType(),
-            () => persistentChannel.InvokeChannelAction(async x => await x.ExchangeDeclareAsync("MyExchange", "direct"))
+            () => persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", "direct")).GetAwaiter().GetResult()
         );
 
-        brokenChannel.Received().ExchangeDeclareAsync("MyExchange", "direct");
-        brokenChannel.Received().CloseAsync();
+        await brokenChannel.Received().ExchangeDeclareAsync("MyExchange", "direct");
+        await brokenChannel.Received().CloseAsync();
         brokenChannel.Received().Dispose();
     }
 
     [Fact]
-    public void Should_succeed_when_broker_reachable()
+    public async Task Should_succeed_when_broker_reachable()
     {
         using var persistentConnection = Substitute.For<IPersistentConnection>();
 
         var channel = Substitute.For<IChannel, IRecoverable>();
 #pragma warning disable IDISP004
-        persistentConnection.CreateChannelAsync()
+        persistentConnection.CreateChannelAsync(Arg.Any<CreateChannelOptions>(), default)
 #pragma warning restore IDISP004
             .Returns(
                 _ => throw new BrokerUnreachableException(new Exception("Oops")),
                 _ => channel
             );
 
-        using var persistentChannel = new PersistentChannel(
+        await using var persistentChannel = new PersistentChannel(
             new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, Substitute.For<IEventBus>()
         );
 
-        persistentChannel.InvokeChannelAction(async x => await x.ExchangeDeclareAsync("MyExchange", "direct"));
+        await persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", "direct"));
 
-        channel.Received().ExchangeDeclareAsync("MyExchange", "direct");
+        await channel.Received().ExchangeDeclareAsync("MyExchange", "direct");
     }
 
     [Fact]
-    public void Should_fail_when_auth_is_failed()
+    public async Task Should_fail_when_auth_is_failed()
     {
         using var persistentConnection = Substitute.For<IPersistentConnection>();
         var channel = Substitute.For<IChannel, IRecoverable>();
 #pragma warning disable IDISP004
-        persistentConnection.CreateChannelAsync()
+        persistentConnection.CreateChannelAsync(Arg.Any<CreateChannelOptions>(), default)
 #pragma warning restore IDISP004
             .Returns(
                 _ => throw new BrokerUnreachableException(new AuthenticationFailureException("Oops")),
                 _ => channel
             );
 
-        using var persistentChannel = new PersistentChannel(
+        await using var persistentChannel = new PersistentChannel(
             new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, Substitute.For<IEventBus>()
         );
 
         Assert.Throws<BrokerUnreachableException>(
-            () => persistentChannel.InvokeChannelAction(async x => await x.ExchangeDeclareAsync("MyExchange", "direct"))
+            () => persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", "direct")).GetAwaiter().GetResult()
         );
 
-        channel.DidNotReceive().ExchangeDeclareAsync("MyExchange", "direct");
+        await channel.DidNotReceive().ExchangeDeclareAsync("MyExchange", "direct");
     }
 }

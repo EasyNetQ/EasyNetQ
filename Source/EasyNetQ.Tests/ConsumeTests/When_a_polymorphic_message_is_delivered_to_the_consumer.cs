@@ -3,7 +3,7 @@ using EasyNetQ.Topology;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 
-public class When_a_polymorphic_message_is_delivered_to_the_consumer : IDisposable
+public class When_a_polymorphic_message_is_delivered_to_the_consumer : IAsyncLifetime
 {
     private readonly MockBuilder mockBuilder;
     private ITestMessageInterface receivedMessage;
@@ -11,11 +11,14 @@ public class When_a_polymorphic_message_is_delivered_to_the_consumer : IDisposab
     public When_a_polymorphic_message_is_delivered_to_the_consumer()
     {
         mockBuilder = new MockBuilder();
+    }
 
+    public async Task InitializeAsync()
+    {
         var queue = new Queue("test_queue", false);
 
 #pragma warning disable IDISP004
-        mockBuilder.Bus.Advanced.Consume<ITestMessageInterface>(queue, (message, _) => receivedMessage = message.Body);
+        await mockBuilder.Bus.Advanced.ConsumeAsync<ITestMessageInterface>(queue, (message, _) => receivedMessage = message.Body);
 #pragma warning restore IDISP004
 
         var publishedMessage = new Implementation { Text = "Hello Polymorphs!" };
@@ -25,7 +28,7 @@ public class When_a_polymorphic_message_is_delivered_to_the_consumer : IDisposab
             Type = new DefaultTypeNameSerializer().Serialize(typeof(Implementation))
         };
 
-        mockBuilder.Consumers[0].HandleBasicDeliverAsync(
+        await mockBuilder.Consumers[0].HandleBasicDeliverAsync(
             "consumer_tag",
             0,
             false,
@@ -33,12 +36,12 @@ public class When_a_polymorphic_message_is_delivered_to_the_consumer : IDisposab
             "routing_key",
             properties,
             serializedMessage.Memory
-        ).GetAwaiter().GetResult();
+        );
     }
 
-    public virtual void Dispose()
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     [Fact]

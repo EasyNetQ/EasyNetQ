@@ -27,7 +27,7 @@ public class When_request_and_respond_polymorphic : IDisposable
     {
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
-        using (await bus.Rpc.RespondAsync<Request, Response>(x =>
+        await using (await bus.Rpc.RespondAsync<Request, Response>(x =>
                {
                    return x switch
                    {

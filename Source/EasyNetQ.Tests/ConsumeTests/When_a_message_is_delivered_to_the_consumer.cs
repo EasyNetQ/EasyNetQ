@@ -4,12 +4,12 @@ namespace EasyNetQ.Tests.ConsumeTests;
 
 public class When_a_message_is_delivered_to_the_consumer : ConsumerTestBase
 {
-    protected override void AdditionalSetUp()
+    protected override async Task InitializeAsyncCore()
     {
 #pragma warning disable IDISP004
-        StartConsumer((_, _, _, _) => AckStrategies.AckAsync);
+        await StartConsumerAsync((_, _, _, _) => AckStrategies.AckAsync);
 #pragma warning restore IDISP004
-        DeliverMessage();
+        await DeliverMessageAsync();
     }
 
     [Fact]

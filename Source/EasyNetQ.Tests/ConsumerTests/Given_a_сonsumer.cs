@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace EasyNetQ.Tests.ConsumerTests;
 
-public abstract class Given_a_сonsumer : IDisposable
+public abstract class Given_a_сonsumer : IAsyncLifetime
 {
     private const string queueName = "my_queue";
 
@@ -52,12 +52,16 @@ public abstract class Given_a_сonsumer : IDisposable
         );
     }
 
-    public virtual void Dispose()
+    public async Task DisposeAsync()
     {
         if (disposed)
             return;
 
         disposed = true;
-        consumer.Dispose();
+        await consumer.DisposeAsync();
     }
+
+    public Task InitializeAsync() => InitializeAsyncCore();
+
+    protected virtual Task InitializeAsyncCore() => Task.CompletedTask;
 }

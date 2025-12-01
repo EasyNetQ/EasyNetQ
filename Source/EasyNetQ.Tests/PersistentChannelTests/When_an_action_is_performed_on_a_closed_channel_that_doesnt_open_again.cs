@@ -6,7 +6,7 @@ using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.Tests.PersistentChannelTests;
 
-public class When_an_action_is_performed_on_a_closed_channel_that_doesnt_open_again : IDisposable
+public class When_an_action_is_performed_on_a_closed_channel_that_doesnt_open_again : IAsyncLifetime
 {
     public When_an_action_is_performed_on_a_closed_channel_that_doesnt_open_again()
     {
@@ -19,7 +19,7 @@ public class When_an_action_is_performed_on_a_closed_channel_that_doesnt_open_ag
         );
         var exception = new OperationInterruptedException(shutdownArgs);
 
-        persistentConnection.When(async x => await x.CreateChannelAsync()).Do(_ => throw exception);
+        persistentConnection.When(async x => await x.CreateChannelAsync(Arg.Any<CreateChannelOptions>(), Arg.Any<CancellationToken>())).Do(_ => throw exception);
         persistentChannel = new PersistentChannel(new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, eventBus);
     }
 
@@ -31,12 +31,14 @@ public class When_an_action_is_performed_on_a_closed_channel_that_doesnt_open_ag
         Assert.Throws<TaskCanceledException>(() =>
         {
             using var cts = new CancellationTokenSource(1000);
-            persistentChannel.InvokeChannelAction(async x => await x.ExchangeDeclareAsync("MyExchange", "direct"), cts.Token);
+            persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", "direct"), cts.Token).GetAwaiter().GetResult();
         });
     }
 
-    public virtual void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
     {
-        persistentChannel.Dispose();
+        await persistentChannel.DisposeAsync();
     }
 }

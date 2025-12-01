@@ -4,7 +4,7 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.ProducerTests;
 
-public class When_a_polymorphic_message_is_sent : IDisposable
+public class When_a_polymorphic_message_is_sent : IAsyncLifetime
 {
     private readonly MockBuilder mockBuilder;
     private const string interfaceTypeName = "EasyNetQ.Tests.ProducerTests.IMyMessageInterface, EasyNetQ.Tests";
@@ -23,9 +23,11 @@ public class When_a_polymorphic_message_is_sent : IDisposable
         mockBuilder.PubSub.Publish<IMyMessageInterface>(message);
     }
 
-    public virtual void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     [Fact]

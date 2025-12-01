@@ -2,9 +2,10 @@ using EasyNetQ.Topology;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.IntegrationTests.Advanced;
+#pragma warning disable IDISP006
 
 [Collection("RabbitMQ")]
-public class When_pull_messages_batch : IDisposable
+public sealed class When_pull_messages_batch : IAsyncLifetime
 {
     private readonly ServiceProvider serviceProvider;
     private readonly IBus bus;
@@ -18,9 +19,11 @@ public class When_pull_messages_batch : IDisposable
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public virtual void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
     {
-        serviceProvider?.Dispose();
+        await serviceProvider.DisposeAsync();
     }
 
     [Fact]
@@ -38,7 +41,7 @@ public class When_pull_messages_batch : IDisposable
             Exchange.Default, queue.Name, false, true, MessageProperties.Empty, Array.Empty<byte>(), cts.Token
         );
 
-        using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
+        await using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
 
         {
             using var pullResult = await consumer.PullBatchAsync(2, cts.Token);
@@ -69,7 +72,7 @@ public class When_pull_messages_batch : IDisposable
             Exchange.Default, queue.Name, false, true, MessageProperties.Empty, Array.Empty<byte>(), cts.Token
         );
 
-        using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
+        await using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
 
         {
             using var pullResult = await consumer.PullBatchAsync(2, cts.Token);
@@ -100,7 +103,7 @@ public class When_pull_messages_batch : IDisposable
             Exchange.Default, queue.Name, false, true, MessageProperties.Empty, Array.Empty<byte>(), cts.Token
         );
 
-        using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
+        await using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
 
         {
             using var pullResult = await consumer.PullBatchAsync(2, cts.Token);
@@ -131,7 +134,7 @@ public class When_pull_messages_batch : IDisposable
             Exchange.Default, queue.Name, false, true, MessageProperties.Empty, Array.Empty<byte>(), cts.Token
         );
 
-        using var consumer = bus.Advanced.CreatePullingConsumer(queue);
+        await using var consumer = bus.Advanced.CreatePullingConsumer(queue);
 
         {
             using var pullResult = await consumer.PullBatchAsync(2, cts.Token);

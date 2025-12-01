@@ -67,16 +67,15 @@ public class ProgramIntegrationTests
         }
     }
 
-    public void ConsumeMessages()
+    public async Task ConsumeMessagesAsync()
     {
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddEasyNetQ("host=localhost");
 
-        using var provider = serviceCollection.BuildServiceProvider();
+        await using var provider = serviceCollection.BuildServiceProvider();
         var bus = provider.GetRequiredService<IBus>();
-        using var subscription = bus.PubSub.Subscribe<TestMessage>("hosepipe", message => Console.WriteLine(message.Text));
-
-        Thread.Sleep(1000);
+        await using var subscription = await bus.PubSub.SubscribeAsync<TestMessage>("hosepipe", message => Console.WriteLine(message.Text));
+        await Task.Delay(1000);
     }
 
     private sealed class TestMessage

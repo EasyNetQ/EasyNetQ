@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Tests.ProducerTests;
 
-public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : IDisposable
+public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : IAsyncLifetime
 {
     private readonly MockBuilder mockBuilder;
     private readonly TestRequestMessage requestMessage;
@@ -23,9 +23,11 @@ public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : ID
         requestMessage = new TestRequestMessage();
     }
 
-    public virtual void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     [Fact]
@@ -36,15 +38,15 @@ public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : ID
             using var waiter = new CountdownEvent(2);
 
 #pragma warning disable IDISP004
-            mockBuilder.EventBus.Subscribe((in PublishedMessageEvent _) => waiter.Signal());
-            mockBuilder.EventBus.Subscribe((in StartConsumingSucceededEvent _) => waiter.Signal());
+            mockBuilder.EventBus.Subscribe((PublishedMessageEvent _) => Task.FromResult(waiter.Signal()));
+            mockBuilder.EventBus.Subscribe((StartConsumingSucceededEvent _) => Task.FromResult(waiter.Signal()));
 #pragma warning restore IDISP004
 
             var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage);
             if (!waiter.Wait(5000))
                 throw new TimeoutException();
 
-            DeliverMessageAsync(null).GetAwaiter().GetResult();
+            await DeliverMessageAsync(null);
             await task;
         });
     }
@@ -57,15 +59,15 @@ public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : ID
             using var waiter = new CountdownEvent(2);
 
 #pragma warning disable IDISP004
-            mockBuilder.EventBus.Subscribe((in PublishedMessageEvent _) => waiter.Signal());
-            mockBuilder.EventBus.Subscribe((in StartConsumingSucceededEvent _) => waiter.Signal());
+            mockBuilder.EventBus.Subscribe((PublishedMessageEvent _) => Task.FromResult(waiter.Signal()));
+            mockBuilder.EventBus.Subscribe((StartConsumingSucceededEvent _) => Task.FromResult(waiter.Signal()));
 #pragma warning restore IDISP004
 
             var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage);
             if (!waiter.Wait(5000))
                 throw new TimeoutException();
 
-            DeliverMessageAsync("Why you are so bad with me?").GetAwaiter().GetResult();
+            await DeliverMessageAsync("Why you are so bad with me?");
 
             await task;
         }); // ,"Why you are so bad with me?"
@@ -101,6 +103,6 @@ public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : ID
             "the_routing_key",
             properties,
             body
-        ).GetAwaiter().GetResult();
+        );
     }
 }

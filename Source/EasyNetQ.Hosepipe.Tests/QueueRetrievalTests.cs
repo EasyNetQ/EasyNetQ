@@ -48,15 +48,15 @@ public class QueueRetrievalTests
 
     [Fact]
     [Traits.Explicit("Requires a RabbitMQ server on localhost")]
-    public void ConsumeMessages()
+    public async Task ConsumeMessages()
     {
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddEasyNetQ("host=localhost");
 
-        using var provider = serviceCollection.BuildServiceProvider();
+        await using var provider = serviceCollection.BuildServiceProvider();
 
         var bus = provider.GetRequiredService<IBus>();
-        using var subscription = bus.PubSub.Subscribe<TestMessage>("hosepipe", message => Console.WriteLine(message.Text));
+        await using var subscription = await bus.PubSub.SubscribeAsync<TestMessage>("hosepipe", message => Console.WriteLine(message.Text));
 
 
         Thread.Sleep(1000);

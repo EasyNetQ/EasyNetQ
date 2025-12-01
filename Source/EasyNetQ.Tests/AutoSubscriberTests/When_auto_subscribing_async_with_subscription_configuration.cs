@@ -3,14 +3,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests;
 
-public class When_auto_subscribing_async_with_subscription_configuration_attribute : IDisposable
+public class When_auto_subscribing_async_with_subscription_configuration_attribute : IDisposable, IAsyncLifetime
 {
     private readonly IBus bus;
     private readonly ServiceProvider serviceProvider;
     private Action<ISubscriptionConfiguration> capturedAction;
     private readonly IPubSub pubSub;
     private bool disposed;
-
+    AutoSubscriber autoSubscriber;
     public When_auto_subscribing_async_with_subscription_configuration_attribute()
     {
         pubSub = Substitute.For<IPubSub>();
@@ -20,7 +20,7 @@ public class When_auto_subscribing_async_with_subscription_configuration_attribu
         var services = new ServiceCollection();
         serviceProvider = services.BuildServiceProvider();
 
-        var autoSubscriber = new AutoSubscriber(bus, serviceProvider, "my_app");
+        autoSubscriber = new AutoSubscriber(bus, serviceProvider, "my_app");
 
 #pragma warning disable IDISP004
         pubSub.SubscribeAsync(
@@ -33,10 +33,15 @@ public class When_auto_subscribing_async_with_subscription_configuration_attribu
             .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
 
 #pragma warning disable IDISP004
-        autoSubscriber.Subscribe([typeof(MyConsumerWithAttr)]);
+        
 #pragma warning restore IDISP004
     }
+    public async Task InitializeAsync()
+    {
+        await autoSubscriber.SubscribeAsync([typeof(MyConsumerWithAttr)]);
+    }
 
+    public Task DisposeAsync() => Task.CompletedTask;
     [Fact]
     public void Should_have_called_subscribe()
     {
@@ -88,14 +93,14 @@ public class When_auto_subscribing_async_with_subscription_configuration_attribu
     }
 }
 
-public class When_auto_subscribing_async_explicit_implementation_with_subscription_configuration_attribute : IDisposable
+public class When_auto_subscribing_async_explicit_implementation_with_subscription_configuration_attribute : IDisposable, IAsyncLifetime
 {
     private readonly IBus bus;
     private readonly ServiceProvider serviceProvider;
     private Action<ISubscriptionConfiguration> capturedAction;
     private readonly IPubSub pubSub;
     private bool disposed;
-
+    AutoSubscriber autoSubscriber;
     public When_auto_subscribing_async_explicit_implementation_with_subscription_configuration_attribute()
     {
         pubSub = Substitute.For<IPubSub>();
@@ -105,7 +110,7 @@ public class When_auto_subscribing_async_explicit_implementation_with_subscripti
         var services = new ServiceCollection();
         serviceProvider = services.BuildServiceProvider();
 
-        var autoSubscriber = new AutoSubscriber(bus, serviceProvider, "my_app");
+        autoSubscriber = new AutoSubscriber(bus, serviceProvider, "my_app");
 
 #pragma warning disable IDISP004
         pubSub.SubscribeAsync(
@@ -118,10 +123,14 @@ public class When_auto_subscribing_async_explicit_implementation_with_subscripti
             .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
 
 #pragma warning disable IDISP004
-        autoSubscriber.Subscribe([typeof(MyConsumerWithAttr)]);
 #pragma warning restore IDISP004
     }
+    public async Task InitializeAsync()
+    {
+        await autoSubscriber.SubscribeAsync([typeof(MyConsumerWithAttr)]);
+    }
 
+    public Task DisposeAsync() => Task.CompletedTask;
     [Fact]
     public void Should_have_called_subscribe()
     {

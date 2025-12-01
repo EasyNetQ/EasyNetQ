@@ -4,12 +4,12 @@ namespace EasyNetQ.Tests.ConsumeTests;
 
 public class When_a_nack_received_from_the_message_handler : ConsumerTestBase
 {
-    protected override void AdditionalSetUp()
+    protected override async Task InitializeAsyncCore()
     {
 #pragma warning disable IDISP004
-        StartConsumer((_, _, _, _) => AckStrategies.NackWithRequeueAsync);
+        await StartConsumerAsync((_, _, _, _) => AckStrategies.NackWithRequeueAsync);
 #pragma warning restore IDISP004
-        DeliverMessage();
+        await DeliverMessageAsync();
     }
 
     [Fact]

@@ -6,7 +6,7 @@ public class When_a_cancellation_error_occurs_in_the_message_handler : ConsumerT
 {
     private Exception exception;
 
-    protected override void AdditionalSetUp()
+    protected override async Task InitializeAsyncCore()
     {
         exception = new OperationCanceledException("I've had a bad day :(");
 
@@ -14,9 +14,9 @@ public class When_a_cancellation_error_occurs_in_the_message_handler : ConsumerT
             .ReturnsForAnyArgs(new ValueTask<AckStrategyAsync>(AckStrategies.AckAsync));
 
 #pragma warning disable IDISP004
-        StartConsumer((_, _, _, _) => throw exception);
+        await StartConsumerAsync((_, _, _, _) => throw exception);
 #pragma warning restore IDISP004
-        DeliverMessage();
+        await DeliverMessageAsync();
     }
 
     [Fact]

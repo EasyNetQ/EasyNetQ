@@ -2,13 +2,15 @@ using EasyNetQ.Tests.Mocking;
 
 namespace EasyNetQ.Tests.ProducerTests;
 
-public class When_a_request_is_sent_but_no_reply_is_received : IDisposable
+public class When_a_request_is_sent_but_no_reply_is_received : IAsyncLifetime
 {
     private readonly MockBuilder mockBuilder = new("host=localhost;timeout=1");
 
-    public virtual void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     [Fact]

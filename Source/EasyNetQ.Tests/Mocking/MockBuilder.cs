@@ -7,12 +7,11 @@ using RabbitMQ.Client;
 namespace EasyNetQ.Tests.Mocking;
 
 [SuppressMessage("IDisposableAnalyzers.Correctness", "IDISP004:Don't ignore created IDisposable")]
-public class MockBuilder : IDisposable
+public sealed class MockBuilder : IAsyncDisposable
 {
     private readonly IServiceProvider serviceProvider;
     private readonly IBus bus;
 
-    private readonly IBasicProperties basicProperties = new RabbitMQ.Client.BasicProperties();
     private readonly Stack<IChannel> channelPool = new();
     private readonly List<IChannel> channels = new();
     private readonly IConnection connection = Substitute.For<IConnection>();
@@ -40,14 +39,13 @@ public class MockBuilder : IDisposable
 
         connection.IsOpen.Returns(true);
         connection.Endpoint.Returns(new AmqpTcpEndpoint("localhost"));
-        connection.CreateChannelAsync().Returns(async _ =>
+        connection.CreateChannelAsync(default, default).ReturnsForAnyArgs(async _ =>
         {
             var channel = channelPool.Pop();
             channels.Add(channel);
-            new RabbitMQ.Client.BasicProperties().Returns(basicProperties);
             channel.IsOpen.Returns(true);
-            channel.BasicConsumeAsync(null, false, null, true, false, null, null)
-                .Returns(async consumeInvocation =>
+            channel.BasicConsumeAsync(Arg.Any<string>(), false, Arg.Any<string>(), true, false, Arg.Any<IDictionary<string, object>>(), Arg.Any<IAsyncBasicConsumer>(), default)
+                .ReturnsForAnyArgs(async consumeInvocation =>
                 {
                     var queueName = (string)consumeInvocation[0];
                     var consumerTag = (string)consumeInvocation[2];
@@ -58,8 +56,8 @@ public class MockBuilder : IDisposable
                     consumers.Add(consumer);
                     return string.Empty;
                 });
-            channel.QueueDeclareAsync(null, true, false, false, null)
-               .Returns(async queueDeclareInvocation =>
+            channel.QueueDeclareAsync(null, true, false, false, null, default)
+                .ReturnsForAnyArgs(async queueDeclareInvocation =>
                {
                    var queueName = (string)queueDeclareInvocation[0];
                    return await Task.FromResult(new QueueDeclareOk(queueName, 0, 0));
@@ -113,5 +111,11 @@ public class MockBuilder : IDisposable
 
     public List<string> ConsumerQueueNames { get; } = new();
 
-    public virtual void Dispose() => (serviceProvider as IDisposable)?.Dispose();
+    public async ValueTask DisposeAsync()
+    {
+        if (serviceProvider is IAsyncDisposable sp)
+        {
+            await sp.DisposeAsync();
+        }
+    }
 }

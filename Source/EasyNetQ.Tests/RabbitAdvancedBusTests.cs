@@ -16,7 +16,7 @@ public class RabbitAdvancedBusTests
     [InlineData(true, true, true)]
     public async Task Should_use_mandatory_per_request_if_not_null_else_from_settings(bool mandatoryFromSettings, bool? mandatoryPerRequest, bool expected)
     {
-        using var mockBuilder = new MockBuilder(
+        await using var mockBuilder = new MockBuilder(
             x => x.AddSingleton(new ConnectionConfiguration { MandatoryPublish = mandatoryFromSettings })
         );
 
@@ -42,7 +42,7 @@ public class RabbitAdvancedBusTests
     public async Task Should_use_confirms_per_request_if_not_null_else_from_settings(bool confirmsFromSettings, bool? confirmsPerRequest, int expected)
     {
         var xxx = Substitute.For<IPublishConfirmationListener>();
-        using var mockBuilder = new MockBuilder(
+        await using var mockBuilder = new MockBuilder(
             x =>
             {
                 x.AddSingleton(new ConnectionConfiguration { PublisherConfirms = confirmsFromSettings });
@@ -51,7 +51,7 @@ public class RabbitAdvancedBusTests
 
         await mockBuilder.Bus.Advanced.PublishAsync("", "", null, confirmsPerRequest, new Message<object>(null));
 
-        await xxx.Received(expected).CreatePendingConfirmation(Arg.Any<IChannel>());
+        await xxx.Received(expected).CreatePendingConfirmationAsync(Arg.Any<IChannel>(), Arg.Any<CancellationToken>());
         await mockBuilder.Channels[0].Received().BasicPublishAsync(
             Arg.Any<string>(),
             Arg.Any<string>(),
