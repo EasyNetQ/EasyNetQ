@@ -158,10 +158,10 @@ public class When_publishing_a_message : IAsyncLifetime
         };
 
         mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(customConventions));
-        mockBuilder.PubSub.Publish(new TestMessage());
+        
     }
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public Task InitializeAsync() => mockBuilder.PubSub.PublishAsync(new TestMessage());
 
     public async Task DisposeAsync()
     {

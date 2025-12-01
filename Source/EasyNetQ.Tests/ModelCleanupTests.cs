@@ -40,10 +40,10 @@ public sealed class ModelCleanupTests : IAsyncLifetime
     [Fact]
     public async Task Should_cleanup_publish_model()
     {
-        bus.PubSub.Publish(new TestMessage());
+        await bus.PubSub.PublishAsync(new TestMessage());
         await mockBuilder.DisposeAsync();
         
-        mockBuilder.Channels[0].Received().Dispose();
+        mockBuilder.Channels[0].Received().DisposeAsync();
     }
 
     [Fact]
@@ -67,8 +67,8 @@ public sealed class ModelCleanupTests : IAsyncLifetime
         var signalReceived = are.WaitOne(waitTime);
         Assert.True(signalReceived, $"Set event was not received within {waitTime.TotalSeconds} seconds");
 
-        mockBuilder.Channels[0].Received().Dispose();
-        mockBuilder.Channels[1].Received().Dispose();
+        mockBuilder.Channels[0].Received().DisposeAsync();
+        mockBuilder.Channels[1].Received().DisposeAsync();
     }
 
     [Fact]
@@ -90,8 +90,8 @@ public sealed class ModelCleanupTests : IAsyncLifetime
         var signalReceived = are.WaitOne(waitTime);
         Assert.True(signalReceived, $"Set event was not received within {waitTime.TotalSeconds} seconds");
 
-        mockBuilder.Channels[0].Received().Dispose();
-        mockBuilder.Channels[1].Received().Dispose();
+        mockBuilder.Channels[0].Received().DisposeAsync();
+        mockBuilder.Channels[1].Received().DisposeAsync();
     }
 
     [Fact]
@@ -107,8 +107,8 @@ public sealed class ModelCleanupTests : IAsyncLifetime
         var signalReceived = are.WaitOne(waitTime);
         Assert.True(signalReceived, $"Set event was not received within {waitTime.TotalSeconds} seconds");
 
-        mockBuilder.Channels[0].Received().Dispose();
-        mockBuilder.Channels[1].Received().Dispose();
+        mockBuilder.Channels[0].Received().DisposeAsync();
+        mockBuilder.Channels[1].Received().DisposeAsync();
     }
 
     [Fact]
@@ -124,7 +124,7 @@ public sealed class ModelCleanupTests : IAsyncLifetime
         var signalReceived = are.WaitOne(waitTime);
         Assert.True(signalReceived, $"Set event was not received within {waitTime.TotalSeconds} seconds");
 
-        mockBuilder.Channels[0].Received().Dispose();
-        mockBuilder.Channels[1].Received().Dispose();
+        mockBuilder.Channels[0].Received().DisposeAsync();
+        mockBuilder.Channels[1].Received().DisposeAsync();
     }
 }

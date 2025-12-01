@@ -13,17 +13,18 @@ public class When_a_polymorphic_message_is_sent : IAsyncLifetime
     public When_a_polymorphic_message_is_sent()
     {
         mockBuilder = new MockBuilder();
+       
+    }
 
+    public async Task InitializeAsync()
+    {
         var message = new MyImplementation
         {
             Text = "Hello Polymorphs!",
             NotInInterface = "Hi"
         };
-
-        mockBuilder.PubSub.Publish<IMyMessageInterface>(message);
+        await mockBuilder.PubSub.PublishAsync<IMyMessageInterface>(message);
     }
-
-    public Task InitializeAsync() => Task.CompletedTask;
 
     public async Task DisposeAsync()
     {

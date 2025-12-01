@@ -79,7 +79,7 @@ public class When_an_action_is_performed_and_channel_reopens
 
         await brokenChannel.Received().ExchangeDeclareAsync("MyExchange", "direct");
         await brokenChannel.Received().CloseAsync();
-        brokenChannel.Received().Dispose();
+        brokenChannel.Received().DisposeAsync();
 
         await channel.Received().ExchangeDeclareAsync("MyExchange", "direct");
     }
@@ -107,7 +107,7 @@ public class When_an_action_is_performed_and_channel_reopens
 
         await brokenChannel.Received().ExchangeDeclareAsync("MyExchange", "direct");
         await brokenChannel.Received().CloseAsync();
-        brokenChannel.Received().Dispose();
+        brokenChannel.Received().DisposeAsync();
     }
 
     [Fact]

@@ -17,13 +17,14 @@ public class When_publish_is_called : IAsyncLifetime
         mockBuilder = new MockBuilder(x =>
             x.AddSingleton<ICorrelationIdGenerationStrategy>(new StaticCorrelationIdGenerationStrategy(correlationId))
         );
-
-        var message = new MyMessage { Text = "Hiya!" };
-        mockBuilder.PubSub.Publish(message);
-        WaitForMessageToPublish();
     }
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public async Task InitializeAsync()
+    {
+        var message = new MyMessage { Text = "Hiya!" };
+        await mockBuilder.PubSub.PublishAsync(message);
+        WaitForMessageToPublish();
+    }
 
     public async Task DisposeAsync()
     {
@@ -86,13 +87,14 @@ public class When_publish_with_topic_is_called : IAsyncLifetime
     public When_publish_with_topic_is_called()
     {
         mockBuilder = new MockBuilder();
-
-        var message = new MyMessage { Text = "Hiya!" };
-        mockBuilder.PubSub.Publish(message, c => c.WithTopic("X.A"));
-        WaitForMessageToPublish();
     }
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public async Task InitializeAsync()
+    {
+        var message = new MyMessage { Text = "Hiya!" };
+        await mockBuilder.PubSub.PublishAsync(message, c => c.WithTopic("X.A"));
+        WaitForMessageToPublish();
+    }
 
     public async Task DisposeAsync()
     {

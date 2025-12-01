@@ -35,44 +35,6 @@ public static class PubSubExtensions
         => pubSub.PublishAsync(message, c => c.WithTopic(topic), cancellationToken);
 
     /// <summary>
-    /// Publishes a message.
-    /// </summary>
-    /// <typeparam name="T">The message type</typeparam>
-    /// <param name="pubSub">The pubSub instance</param>
-    /// <param name="message">The message to publish</param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    public static void Publish<T>(this IPubSub pubSub, T message, CancellationToken cancellationToken = default)
-        => pubSub.Publish(message, _ => { }, cancellationToken);
-
-    /// <summary>
-    /// Publishes a message.
-    /// </summary>
-    /// <typeparam name="T">The message type</typeparam>
-    /// <param name="pubSub">The pubSub instance</param>
-    /// <param name="message">The message to publish</param>
-    /// <param name="configure">
-    /// Fluent configuration e.g. x => x.WithTopic("*.brighton").WithPriority(2)
-    /// </param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    public static void Publish<T>(this IPubSub pubSub, T message, Action<IPublishConfiguration> configure, CancellationToken cancellationToken = default)
-    {
-        pubSub.PublishAsync(message, configure, cancellationToken)
-            .GetAwaiter()
-            .GetResult();
-    }
-
-    /// <summary>
-    /// Publishes a message with a topic
-    /// </summary>
-    /// <typeparam name="T">The message type</typeparam>
-    /// <param name="pubSub">The pubSub instance</param>
-    /// <param name="message">The message to publish</param>
-    /// <param name="topic">The topic string</param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    public static void Publish<T>(this IPubSub pubSub, T message, string topic, CancellationToken cancellationToken = default)
-        => pubSub.Publish(message, c => c.WithTopic(topic), cancellationToken);
-
-    /// <summary>
     /// Subscribes to a stream of messages that match a .NET type.
     /// </summary>
     /// <typeparam name="T">The type to subscribe to</typeparam>

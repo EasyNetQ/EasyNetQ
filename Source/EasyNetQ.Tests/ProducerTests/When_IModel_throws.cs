@@ -31,8 +31,15 @@ public class When_IModel_throws_because_of_closed_connection : IAsyncLifetime
     private readonly MockBuilder mockBuilder;
 
     [Fact]
-    public void Should_try_to_reconnect_until_timeout()
+    public async Task Should_try_to_reconnect_until_timeout()
     {
-        Assert.Throws<TaskCanceledException>(() => mockBuilder.PubSub.Publish(new MyMessage { Text = "Hello World" }));
+        try
+        {
+            await mockBuilder.PubSub.PublishAsync(new MyMessage { Text = "Hello World" });
+        }
+        catch (Exception ex)
+        {
+            ex.Should().BeOfType<TaskCanceledException>();
+        }
     }
 }

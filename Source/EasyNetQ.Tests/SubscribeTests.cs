@@ -438,6 +438,6 @@ public class When_a_subscription_is_cancelled_by_the_user : IAsyncLifetime
     [Fact]
     public void Should_dispose_the_model()
     {
-        mockBuilder.Consumers[0].Channel.Received().Dispose();
+        mockBuilder.Consumers[0].Channel.Received().DisposeAsync();
     }
 }
