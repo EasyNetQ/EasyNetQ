@@ -6,7 +6,7 @@ using EasyNetQ.MultipleExchange;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 using Microsoft.Extensions.DependencyInjection;
-using EasyNetQ.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace EasyNetQ;
 
@@ -145,7 +145,7 @@ public static class EasyNetQBuilderExtensions
             }
             catch (Exception exception)
             {
-                logger.Error(exception, "Consume error strategy has failed");
+                logger.LogError(exception, "Consume error strategy has failed");
 
                 return AckStrategies.NackWithRequeueAsync;
             }

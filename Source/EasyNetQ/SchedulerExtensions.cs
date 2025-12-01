@@ -1,7 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-
 namespace EasyNetQ;
 
 /// <summary>
@@ -23,10 +19,5 @@ public static class SchedulerExtensions
         T message,
         TimeSpan delay,
         CancellationToken cancellationToken = default
-    )
-    {
-        Preconditions.CheckNotNull(scheduler, nameof(scheduler));
-
-        return scheduler.FuturePublishAsync(message, delay, _ => { }, cancellationToken);
-    }
+    ) => scheduler.FuturePublishAsync(message, delay, _ => { }, cancellationToken);
 }

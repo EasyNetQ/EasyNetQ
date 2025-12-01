@@ -25,7 +25,7 @@ public class VersionedExchangeDeclareStrategyTests
         var conventions = Substitute.For<IConventions>();
         conventions.ExchangeNamingConvention.Returns(t => t.Name);
 
-        var exchangeDeclareStrategy = new VersionedExchangeDeclareStrategy(conventions, advancedBus);
+        using var exchangeDeclareStrategy = new VersionedExchangeDeclareStrategy(conventions, advancedBus);
         try
         {
             exchangeDeclareStrategy.DeclareExchange(exchangeName, ExchangeType.Topic);
@@ -68,7 +68,7 @@ public class VersionedExchangeDeclareStrategyTests
         var conventions = Substitute.For<IConventions>();
         conventions.ExchangeNamingConvention.Returns(t => t.Name);
 
-        var publishExchangeStrategy = new VersionedExchangeDeclareStrategy(conventions, advancedBus);
+        using var publishExchangeStrategy = new VersionedExchangeDeclareStrategy(conventions, advancedBus);
 
         publishExchangeStrategy.DeclareExchange(typeof(MyMessage), ExchangeType.Topic);
 
@@ -103,7 +103,7 @@ public class VersionedExchangeDeclareStrategyTests
         var conventions = Substitute.For<IConventions>();
         conventions.ExchangeNamingConvention.Returns(t => t.Name);
 
-        var publishExchangeStrategy = new VersionedExchangeDeclareStrategy(conventions, advancedBus);
+        using var publishExchangeStrategy = new VersionedExchangeDeclareStrategy(conventions, advancedBus);
 
         publishExchangeStrategy.DeclareExchange(typeof(MyMessageV2), ExchangeType.Topic);
 

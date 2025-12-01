@@ -23,15 +23,17 @@ public class When_publish_is_called : IDisposable
         WaitForMessageToPublish();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }
 
     private void WaitForMessageToPublish()
     {
-        var autoResetEvent = new AutoResetEvent(false);
+        using var autoResetEvent = new AutoResetEvent(false);
+#pragma warning disable IDISP004
         mockBuilder.EventBus.Subscribe((in PublishedMessageEvent _) => autoResetEvent.Set());
+#pragma warning restore IDISP004
         autoResetEvent.WaitOne(1000);
     }
 
@@ -43,27 +45,28 @@ public class When_publish_is_called : IDisposable
     }
 
     [Fact]
-    public void Should_call_basic_publish()
+    public async Task Should_call_basic_publish()
     {
-        mockBuilder.Channels[1].Received().BasicPublish(
+        await mockBuilder.Channels[1].Received().BasicPublishAsync(
             Arg.Is("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
             Arg.Is(""),
             Arg.Is(false),
-            Arg.Is<IBasicProperties>(
+            Arg.Is<RabbitMQ.Client.BasicProperties>(
                 x => x.CorrelationId == correlationId
                      && x.Type == "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"
-                     && x.DeliveryMode == 2
+                     && x.DeliveryMode == (DeliveryModes)2
             ),
             Arg.Is<ReadOnlyMemory<byte>>(
                 x => x.ToArray().SequenceEqual(Encoding.UTF8.GetBytes("{\"Text\":\"Hiya!\"}"))
-            )
+            ),
+            Arg.Any<CancellationToken>()
         );
     }
 
     [Fact]
-    public void Should_declare_exchange()
+    public async Task Should_declare_exchange()
     {
-        mockBuilder.Channels[0].Received().ExchangeDeclare(
+        await mockBuilder.Channels[0].Received().ExchangeDeclareAsync(
             Arg.Is("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
             Arg.Is("topic"),
             Arg.Is(true),
@@ -86,27 +89,30 @@ public class When_publish_with_topic_is_called : IDisposable
         WaitForMessageToPublish();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }
 
     private void WaitForMessageToPublish()
     {
-        var autoResetEvent = new AutoResetEvent(false);
+        using var autoResetEvent = new AutoResetEvent(false);
+#pragma warning disable IDISP004
         mockBuilder.EventBus.Subscribe((in PublishedMessageEvent _) => autoResetEvent.Set());
+#pragma warning restore IDISP004
         autoResetEvent.WaitOne(1000);
     }
 
     [Fact]
-    public void Should_call_basic_publish_with_correct_routing_key()
+    public async Task Should_call_basic_publish_with_correct_routing_key()
     {
-        mockBuilder.Channels[1].Received().BasicPublish(
+        await mockBuilder.Channels[1].Received().BasicPublishAsync(
             Arg.Is("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
             Arg.Is("X.A"),
             Arg.Is(false),
-            Arg.Any<IBasicProperties>(),
-            Arg.Any<ReadOnlyMemory<byte>>()
+            Arg.Any<RabbitMQ.Client.BasicProperties>(),
+            Arg.Any<ReadOnlyMemory<byte>>(),
+            Arg.Any<CancellationToken>()
         );
     }
 }

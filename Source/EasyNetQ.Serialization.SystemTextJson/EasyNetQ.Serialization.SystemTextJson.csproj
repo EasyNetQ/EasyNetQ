@@ -1,15 +1,32 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <Description>An adaptor to allow EasyNetQ to use System.Text.Json serializer</Description>
-    <TargetFramework>net9.0</TargetFramework>
-  </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="..\EasyNetQ\Preconditions.cs" Link="Preconditions.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="System.Text.Json" />
-  </ItemGroup>
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+      <Description>An adaptor to allow EasyNetQ to use System.Text.Json serializer</Description>
+      <TargetFrameworks>netstandard2.0;net8.0;net9.0</TargetFrameworks>
+      <Nullable>enable</Nullable>
+      <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(TargetFramework)'== 'netstandard2.0'">
+      <PackageReference Include="System.Text.Json" />
+    </ItemGroup>
+    <ItemGroup>
+      <PackageVersion Update="Fody" Version="6.9.3" />
+    </ItemGroup>
+    <ItemGroup>
+      <PackageReference Update="Fody">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      </PackageReference>
+    </ItemGroup>
+    <ItemGroup>
+      <PackageVersion Update="MinVer" Version="6.0.0" />
+    </ItemGroup>
+    <ItemGroup>
+      <PackageReference Update="MinVer">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      </PackageReference>
+    </ItemGroup>
 </Project>

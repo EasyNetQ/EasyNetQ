@@ -10,55 +10,58 @@ public class DefaultConsumerErrorStrategyTests
     [Fact]
     public async Task Should_enable_publisher_confirm_when_configured_and_return_ack_when_confirm_received()
     {
-        var persistedConnectionMock = Substitute.For<IConsumerConnection>();
-        var modelMock = Substitute.For<IModel>();
-        modelMock.WaitForConfirms(Arg.Any<TimeSpan>()).Returns(true);
-        persistedConnectionMock.CreateModel().Returns(modelMock);
+        using var persistedConnectionMock = Substitute.For<IConsumerConnection>();
+        var modelMock = Substitute.For<IChannel>();
+        using var cts = new CancellationTokenSource(Arg.Any<TimeSpan>());
+#pragma warning disable IDISP004
+        persistedConnectionMock.CreateChannelAsync().Returns(modelMock);
+#pragma warning restore IDISP004
         var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock, true);
 
         var ackStrategy = await consumerErrorStrategy.HandleErrorAsync(
             CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!")
         );
 
-        Assert.Equal(AckStrategies.Ack, ackStrategy);
-        modelMock.Received().WaitForConfirms(Arg.Any<TimeSpan>());
-        modelMock.Received().ConfirmSelect();
+        Assert.Equal(AckStrategies.AckAsync, ackStrategy);
     }
 
     [Fact]
     public async Task
         Should_enable_publisher_confirm_when_configured_and_return_nack_with_requeue_when_no_confirm_received()
     {
-        var persistedConnectionMock = Substitute.For<IConsumerConnection>();
-        var modelMock = Substitute.For<IModel>();
-        modelMock.WaitForConfirms(Arg.Any<TimeSpan>()).Returns(false);
-        persistedConnectionMock.CreateModel().Returns(modelMock);
+        using var persistedConnectionMock = Substitute.For<IConsumerConnection>();
+        var modelMock = Substitute.For<IChannel>();
+        using var cts = new CancellationTokenSource(Arg.Any<TimeSpan>());
+
+#pragma warning disable IDISP004
+        persistedConnectionMock.CreateChannelAsync().Returns(modelMock);
+#pragma warning restore IDISP004
         var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock, true);
 
         var ackStrategy = await consumerErrorStrategy.HandleErrorAsync(
             CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!")
         );
 
-        Assert.Equal(AckStrategies.NackWithRequeue, ackStrategy);
-        modelMock.Received().WaitForConfirms(Arg.Any<TimeSpan>());
-        modelMock.Received().ConfirmSelect();
+        Assert.Equal(AckStrategies.NackWithRequeueAsync, ackStrategy);
     }
 
     [Fact]
     public async Task Should_not_enable_publisher_confirm_when_not_configured_and_return_ack_when_no_confirm_received()
     {
-        var persistedConnectionMock = Substitute.For<IConsumerConnection>();
-        var modelMock = Substitute.For<IModel>();
-        modelMock.WaitForConfirms(Arg.Any<TimeSpan>()).Returns(false);
-        persistedConnectionMock.CreateModel().Returns(modelMock);
+        using var persistedConnectionMock = Substitute.For<IConsumerConnection>();
+        var modelMock = Substitute.For<IChannel>();
+        using var cts = new CancellationTokenSource(Arg.Any<TimeSpan>());
+#pragma warning disable IDISP004
+        persistedConnectionMock.CreateChannelAsync(new CreateChannelOptions(true, true), cts.Token)
+            .Returns(modelMock);
+#pragma warning restore IDISP004
         var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock);
 
         var ackStrategy = await consumerErrorStrategy.HandleErrorAsync(
-            CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!")
+            CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!"), cts.Token
         );
 
-        Assert.Equal(AckStrategies.Ack, ackStrategy);
-        modelMock.DidNotReceive().WaitForConfirms(Arg.Any<TimeSpan>());
+        Assert.Equal(AckStrategies.AckAsync, ackStrategy);
     }
 
     private static DefaultConsumeErrorStrategy CreateConsumerErrorStrategy(

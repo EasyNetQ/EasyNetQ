@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Security.Authentication;
 using EasyNetQ.Internals;
 
 namespace EasyNetQ.ConnectionString;
@@ -15,11 +11,11 @@ public class AmqpConnectionStringParser : IConnectionStringParser
 {
     private static readonly IReadOnlyCollection<string> SupportedSchemes = new[] { "amqp", "amqps" };
 
-    private static readonly List<UpdateConfiguration> Parsers = new()
-    {
+    private static readonly List<UpdateConfiguration> Parsers =
+    [
         BuildKeyValueParser("requestedHeartbeat", c => TimeSpan.FromSeconds(int.Parse(c)), c => c.RequestedHeartbeat),
         BuildKeyValueParser("prefetchCount", ushort.Parse, c => c.PrefetchCount),
-        BuildKeyValueParser("consumerDispatcherConcurrency", x => int.Parse(x), c => c.ConsumerDispatcherConcurrency),
+        BuildKeyValueParser("consumerDispatcherConcurrency", x => ushort.Parse(x), c => c.ConsumerDispatcherConcurrency),
         BuildKeyValueParser("timeout", c => TimeSpan.FromSeconds(int.Parse(c)), c => c.Timeout),
         BuildKeyValueParser("connectIntervalAttempt", c => TimeSpan.FromSeconds(int.Parse(c)), c => c.ConnectIntervalAttempt),
         BuildKeyValueParser("publisherConfirms", bool.Parse, c => c.PublisherConfirms),
@@ -28,7 +24,7 @@ public class AmqpConnectionStringParser : IConnectionStringParser
         BuildKeyValueParser("platform", c => c, c => c.Platform),
         BuildKeyValueParser("name", c => c, c => c.Name),
         BuildKeyValueParser("mandatoryPublish", bool.Parse, c => c.MandatoryPublish)
-    };
+    ];
 
     /// <inheritdoc />
     public ConnectionConfiguration Parse(string connectionString)
@@ -38,13 +34,12 @@ public class AmqpConnectionStringParser : IConnectionStringParser
             throw new ArgumentException($"Wrong scheme in AMQP URI: {uri.Scheme}");
 
         var secured = uri.Scheme == "amqps";
-        var host = new HostConfiguration
-        {
-            Host = string.IsNullOrEmpty(uri.Host) ? "localhost" : uri.Host,
-            Port = uri.Port == -1
+        var host = new HostConfiguration(
+            string.IsNullOrEmpty(uri.Host) ? "localhost" : uri.Host,
+            uri.Port == -1
                 ? (ushort)(secured ? ConnectionConfiguration.DefaultAmqpsPort : ConnectionConfiguration.DefaultPort)
-                : (ushort)uri.Port,
-        };
+                : (ushort)uri.Port
+        );
         if (secured)
         {
             host.Ssl.Enabled = true;
@@ -71,7 +66,7 @@ public class AmqpConnectionStringParser : IConnectionStringParser
         if (uri.Segments.Length == 2) configuration.VirtualHost = Uri.UnescapeDataString(uri.Segments[1]);
 
         var query = uri.ParseQuery();
-        return Parsers.Aggregate(configuration, (current, parser) => parser(current, query));
+        return query == null ? configuration : Parsers.Aggregate(configuration, (current, parser) => parser(current, query));
     }
 
     private static UpdateConfiguration BuildKeyValueParser<T>(
@@ -107,17 +102,11 @@ public class AmqpConnectionStringParser : IConnectionStringParser
     /// <returns></returns>
     private static Action<TContaining, TProperty> CreateSetter<TContaining, TProperty>(Expression<Func<TContaining, TProperty>> getter)
     {
-        Preconditions.CheckNotNull(getter, nameof(getter));
+        if (getter.Body is not MemberExpression memberEx) throw new ArgumentOutOfRangeException(nameof(getter), "Body is not a member-expression.");
+        if (memberEx.Member is not PropertyInfo propertyInfo) throw new ArgumentOutOfRangeException(nameof(getter), "Member is not a property.");
+        if (!propertyInfo.CanWrite) throw new ArgumentOutOfRangeException(nameof(getter), "Member is not a writeable property.");
 
-        var memberEx = getter.Body as MemberExpression;
-
-        Preconditions.CheckNotNull(memberEx, nameof(getter), "Body is not a member-expression.");
-
-        var property = memberEx.Member as PropertyInfo;
-
-        Preconditions.CheckNotNull(property, nameof(getter), "Member is not a property.");
-        if (!property.CanWrite) throw new ArgumentOutOfRangeException(nameof(getter), null, "Member is not a writeable property.");
-
-        return (Action<TContaining, TProperty>)property.GetSetMethod().CreateDelegate(typeof(Action<TContaining, TProperty>));
+        var setMethodInfo = propertyInfo.GetSetMethod() ?? throw new ArgumentOutOfRangeException(nameof(getter), "No set method.");
+        return (Action<TContaining, TProperty>)setMethodInfo.CreateDelegate(typeof(Action<TContaining, TProperty>));
     }
 }

@@ -50,6 +50,6 @@ public static class MessagePropertiesExtensions
         if (source.ClusterIdPresent) basicProperties.ClusterId = source.ClusterId;
 
         if (source is { HeadersPresent: true, Headers: not null })
-            basicProperties.Headers = new Dictionary<string, object>(source.Headers);
+            basicProperties.Headers = new Dictionary<string, object?>(source.Headers);
     }
 }

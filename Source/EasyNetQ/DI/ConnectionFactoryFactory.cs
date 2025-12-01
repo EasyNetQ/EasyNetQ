@@ -20,7 +20,7 @@ internal static class ConnectionFactoryFactory
             ClientProvidedName = configuration.Name,
             NetworkRecoveryInterval = configuration.ConnectIntervalAttempt,
             ContinuationTimeout = configuration.Timeout,
-            ConsumerDispatchConcurrency = configuration.ConsumerDispatcherConcurrency.HasValue ? (ushort)configuration.ConsumerDispatcherConcurrency.Value : configuration.PrefetchCount,
+            ConsumerDispatchConcurrency = configuration.ConsumerDispatcherConcurrency ?? configuration.PrefetchCount,
             RequestedChannelMax = configuration.RequestedChannelMax
         };
 

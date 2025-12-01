@@ -93,7 +93,6 @@ public class PublishConfirmationListener : IPublishConfirmationListener
     private async Task OnReturnedMessage(ReturnedMessageEvent messageEvent)
     {
         var nextPublishSequenceNumber = await messageEvent.Channel.GetNextPublishSequenceNumberAsync();
-
         if (nextPublishSequenceNumber == 0)
             return;
 

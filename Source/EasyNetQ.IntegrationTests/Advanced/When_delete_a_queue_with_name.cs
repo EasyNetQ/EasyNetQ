@@ -33,7 +33,7 @@ public class When_delete_a_queue_with_name : IDisposable
         Assert.Equal(404, exception.ShutdownReason.ReplyCode);
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         serviceProvider?.Dispose();
     }

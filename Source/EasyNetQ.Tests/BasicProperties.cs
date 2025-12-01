@@ -2,12 +2,12 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests;
 
-public sealed class BasicProperties : IBasicProperties
+public sealed class BasicProperties : IReadOnlyBasicProperties
 {
     private string contentType;
     private string contentEncoding;
     private IDictionary<string, object> headers;
-    private byte deliveryMode;
+    private DeliveryModes deliveryMode;
     private byte priority;
     private string correlationId;
     private string replyTo;
@@ -64,7 +64,7 @@ public sealed class BasicProperties : IBasicProperties
         }
     }
 
-    public byte DeliveryMode
+    public DeliveryModes DeliveryMode
     {
         get => deliveryMode;
         set
@@ -76,8 +76,8 @@ public sealed class BasicProperties : IBasicProperties
 
     public bool Persistent
     {
-        get => DeliveryMode == 2;
-        set => DeliveryMode = value ? (byte)2 : (byte)1;
+        get => DeliveryMode == DeliveryModes.Persistent;
+        set => DeliveryMode = value ? DeliveryModes.Persistent : DeliveryModes.Transient;
     }
 
     public byte Priority

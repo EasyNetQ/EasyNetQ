@@ -1,4 +1,3 @@
-using System;
 using EasyNetQ.Persistent;
 
 namespace EasyNetQ.ChannelDispatcher;
@@ -58,7 +57,7 @@ public class PersistentChannelDispatchOptions
     public PersistentConnectionType ConnectionType { get; }
 
     /// <summary>
-    ///     True if publisher confirms are enabled
+    ///     <see langword="true"/> if publisher confirms are enabled
     /// </summary>
     public bool PublisherConfirms { get; }
 
@@ -67,11 +66,11 @@ public class PersistentChannelDispatchOptions
         return string.Equals(Name, other.Name, StringComparison.InvariantCulture) && ConnectionType == other.ConnectionType && PublisherConfirms == other.PublisherConfirms;
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (ReferenceEquals(null, obj)) return false;
         if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != this.GetType()) return false;
+        if (obj.GetType() != GetType()) return false;
         return Equals((PersistentChannelDispatchOptions)obj);
     }
 

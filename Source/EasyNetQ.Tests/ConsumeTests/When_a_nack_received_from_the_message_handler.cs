@@ -6,13 +6,15 @@ public class When_a_nack_received_from_the_message_handler : ConsumerTestBase
 {
     protected override void AdditionalSetUp()
     {
-        StartConsumer((_, _, _, _) => AckStrategies.NackWithRequeue);
+#pragma warning disable IDISP004
+        StartConsumer((_, _, _, _) => AckStrategies.NackWithRequeueAsync);
+#pragma warning restore IDISP004
         DeliverMessage();
     }
 
     [Fact]
-    public void Should_nack()
+    public async Task Should_nack()
     {
-        MockBuilder.Channels[0].Received().BasicNack(DeliverTag, false, true);
+        await MockBuilder.Channels[0].Received().BasicNackAsync(DeliverTag, false, true);
     }
 }

@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-
 namespace EasyNetQ.Internals;
 
 /// <summary>
@@ -57,14 +52,20 @@ public sealed class AsyncQueue<T> : IDisposable
     ///     Tries to take the element from queue
     /// </summary>
     /// <param name="element">Dequeued element</param>
-    /// <returns>True if an element was dequeued</returns>
-    public bool TryDequeue(out T element)
+    /// <returns><see langword="true"/> if an element was dequeued</returns>
+    public bool TryDequeue(out T? element)
     {
         lock (mutex)
         {
             var hasElements = elements.Count > 0;
-            element = hasElements ? elements.Dequeue() : default;
-            return hasElements;
+            if (hasElements)
+            {
+                element = elements.Dequeue();
+                return true;
+            }
+
+            element = default;
+            return false;
         }
     }
 
@@ -87,19 +88,22 @@ public sealed class AsyncQueue<T> : IDisposable
     /// </summary>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>The dequeued element</returns>
-    public Task<T> DequeueAsync(CancellationToken cancellationToken = default)
+    public ValueTask<T> DequeueAsync(CancellationToken cancellationToken = default)
     {
+        if (cancellationToken.IsCancellationRequested)
+            return new ValueTask<T>(Task.FromCanceled<T>(cancellationToken));
+
         lock (mutex)
         {
             if (elements.Count > 0)
-                return Task.FromResult(elements.Dequeue());
+                return new ValueTask<T>(elements.Dequeue());
 
             CleanUpCancelledWaiters();
 
             var waiter = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
             waiter.AttachCancellation(cancellationToken);
             waiters.Enqueue(waiter);
-            return waiter.Task;
+            return new ValueTask<T>(waiter.Task);
         }
     }
 

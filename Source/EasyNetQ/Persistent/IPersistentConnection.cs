@@ -7,10 +7,6 @@ namespace EasyNetQ.Persistent;
 /// </summary>
 public interface IPersistentConnection : IDisposable
 {
-    /// <summary>
-    ///     True if a connection is connected
-    /// </summary>
-    [Obsolete("Use Status instead")] bool IsConnected { get; }
 
     /// <summary>
     ///     <see langword="true"/> if a connection is connected

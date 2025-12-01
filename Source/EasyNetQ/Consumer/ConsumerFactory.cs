@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
-using EasyNetQ.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace EasyNetQ.Consumer;
 
@@ -34,10 +34,6 @@ public class ConsumerFactory : IConsumerFactory
         IInternalConsumerFactory internalConsumerFactory
     )
     {
-        Preconditions.CheckNotNull(logger, nameof(logger));
-        Preconditions.CheckNotNull(internalConsumerFactory, nameof(internalConsumerFactory));
-        Preconditions.CheckNotNull(eventBus, nameof(eventBus));
-
         this.logger = logger;
         this.internalConsumerFactory = internalConsumerFactory;
         this.eventBus = eventBus;

@@ -44,10 +44,11 @@ public class DefaultMessageSerializationStrategy : IMessageSerializationStrategy
     }
 
     /// <inheritdoc />
-    public IMessage DeserializeMessage(MessageProperties properties, in ReadOnlyMemory<byte> body)
+    public IMessage DeserializeMessage(in MessageProperties properties, in ReadOnlyMemory<byte> body)
     {
         var messageType = typeNameSerializer.Deserialize(properties.Type!);
         var messageBody = body.IsEmpty ? null : serializer.BytesToMessage(messageType, body);
         return MessageFactory.CreateInstance(messageType, messageBody, properties);
     }
 }
+

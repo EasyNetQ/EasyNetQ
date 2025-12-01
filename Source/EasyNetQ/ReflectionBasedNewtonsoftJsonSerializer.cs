@@ -23,7 +23,7 @@ public sealed class ReflectionBasedNewtonsoftJsonSerializer : ISerializer
     /// <summary>
     ///     Creates JsonSerializer
     /// </summary>
-    public ReflectionBasedNewtonsoftJsonSerializer(object serializerSettings = null)
+    public ReflectionBasedNewtonsoftJsonSerializer(object? serializerSettings = null)
     {
         var jsonSerializerType = TryGetType("Newtonsoft.Json.JsonSerializer", "Newtonsoft.Json");
         if (jsonSerializerType == null)
@@ -165,7 +165,7 @@ public sealed class ReflectionBasedNewtonsoftJsonSerializer : ISerializer
                ?? throw new InvalidOperationException($"Type {typeName} has not been found in {assemblyName}");
     }
 
-    private static Type TryGetType(string typeName, string assemblyName)
+    private static Type? TryGetType(string typeName, string assemblyName)
     {
         return Type.GetType($"{typeName}, {assemblyName}") ?? Type.GetType(typeName);
     }

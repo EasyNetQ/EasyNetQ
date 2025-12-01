@@ -28,7 +28,7 @@ public abstract class ConsumerTestBase : IDisposable
         AdditionalSetUp();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         MockBuilder.Dispose();
     }
@@ -36,7 +36,7 @@ public abstract class ConsumerTestBase : IDisposable
     protected abstract void AdditionalSetUp();
 
     protected IDisposable StartConsumer(
-        Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, CancellationToken, AckStrategy> handler,
+        Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, CancellationToken, AckStrategyAsync> handler,
         bool autoAck = false
     )
     {
@@ -73,14 +73,14 @@ public abstract class ConsumerTestBase : IDisposable
 
     protected Task DeliverMessageAsync()
     {
-        OriginalProperties = new BasicProperties
+        OriginalProperties = new RabbitMQ.Client.BasicProperties
         {
             Type = "the_message_type",
             CorrelationId = "the_correlation_id",
         };
         OriginalBody = "Hello World"u8.ToArray();
 
-        return MockBuilder.Consumers[0].HandleBasicDeliver(
+        return MockBuilder.Consumers[0].HandleBasicDeliverAsync(
             ConsumerTag,
             DeliverTag,
             false,

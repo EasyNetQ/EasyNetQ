@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace EasyNetQ.Topology;
 
 /// <summary>
@@ -10,10 +8,8 @@ public readonly struct Binding<TBindable> where TBindable : struct, IBindable
     /// <summary>
     ///     Creates Binding
     /// </summary>
-    public Binding(in Exchange source, in TBindable destination, string routingKey, IDictionary<string, object> arguments = null)
+    public Binding(in Exchange source, in TBindable destination, string routingKey, IDictionary<string, object>? arguments = null)
     {
-        Preconditions.CheckNotNull(routingKey, nameof(routingKey));
-
         Source = source;
         Destination = destination;
         RoutingKey = routingKey;
@@ -38,5 +34,5 @@ public readonly struct Binding<TBindable> where TBindable : struct, IBindable
     /// <summary>
     ///     The binging arguments
     /// </summary>
-    public IDictionary<string, object> Arguments { get; }
+    public IDictionary<string, object>? Arguments { get; }
 }

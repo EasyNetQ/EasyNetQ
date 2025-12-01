@@ -1,5 +1,3 @@
-using System;
-
 namespace EasyNetQ;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
@@ -7,19 +5,10 @@ public sealed class QueueAttribute : Attribute
 {
     internal static readonly QueueAttribute Default = new();
 
-    public QueueAttribute()
-    {
+    public string Name { get; set; }
 
-    }
 
-    public QueueAttribute(string name)
-    {
-        QueueName = name ?? string.Empty;
-    }
 
-    public string QueueName { get; set; }
+    public string Type { get; set; }
 
-    public string ExchangeName { get; set; }
-
-    public string QueueType { get; set; }
 }

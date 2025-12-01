@@ -1,4 +1,4 @@
-using EasyNetQ.Logging;
+using Microsoft.Extensions.Logging;
 namespace EasyNetQ.Consumer;
 
 public interface IInternalConsumerFactory

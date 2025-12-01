@@ -1,8 +1,5 @@
-using System;
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EasyNetQ;
 
@@ -29,12 +26,7 @@ public static class NonGenericSchedulerExtensions
         Type messageType,
         TimeSpan delay,
         CancellationToken cancellationToken = default
-    )
-    {
-        Preconditions.CheckNotNull(scheduler, nameof(scheduler));
-
-        return scheduler.FuturePublishAsync(message, messageType, delay, _ => { }, cancellationToken);
-    }
+    ) => scheduler.FuturePublishAsync(message, messageType, delay, _ => { }, cancellationToken);
 
     /// <summary>
     /// Schedule a message to be published at some time in the future.
@@ -56,8 +48,6 @@ public static class NonGenericSchedulerExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(scheduler, nameof(scheduler));
-
         var futurePublishDelegate = FuturePublishDelegates.GetOrAdd(messageType, t =>
         {
             var futurePublishMethodInfo = typeof(IScheduler).GetMethod("FuturePublishAsync");

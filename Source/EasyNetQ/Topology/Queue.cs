@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace EasyNetQ.Topology;
 
 /// <summary>
@@ -15,7 +13,7 @@ public readonly struct Queue : IBindable
         bool isDurable = true,
         bool isExclusive = false,
         bool isAutoDelete = false,
-        IDictionary<string, object> arguments = null
+        IDictionary<string, object>? arguments = null
     )
     {
         Name = name;
@@ -48,5 +46,5 @@ public readonly struct Queue : IBindable
     /// <summary>
     ///     The queue arguments
     /// </summary>
-    public IDictionary<string, object> Arguments { get; }
+    public IDictionary<string, object>? Arguments { get; }
 }

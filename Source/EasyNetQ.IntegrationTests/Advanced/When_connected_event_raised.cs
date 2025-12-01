@@ -17,7 +17,7 @@ public class When_connected_event_raised : IDisposable
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         serviceProvider?.Dispose();
     }
@@ -27,7 +27,7 @@ public class When_connected_event_raised : IDisposable
     {
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
-        var mre = new ManualResetEventSlim(false);
+        using var mre = new ManualResetEventSlim(false);
         bus.Advanced.Connected += (_, _) => mre.Set();
 
         await bus.Advanced.ExchangeDeclareAsync(Guid.NewGuid().ToString("N"), cancellationToken: cts.Token);

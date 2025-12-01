@@ -1,5 +1,3 @@
-using System;
-using System.Threading.Tasks;
 using EasyNetQ.Internals;
 
 namespace EasyNetQ;
@@ -18,8 +16,6 @@ public static class ReceiveRegistrationExtensions
     /// <returns>The same <paramref name="receiveRegistration"/> for fluent configuration</returns>
     public static IReceiveRegistration Add<T>(this IReceiveRegistration receiveRegistration, Func<T, Task> onMessage)
     {
-        Preconditions.CheckNotNull(receiveRegistration, nameof(receiveRegistration));
-
         return receiveRegistration.Add<T>((m, _) => onMessage(m));
     }
 
@@ -32,8 +28,6 @@ public static class ReceiveRegistrationExtensions
     /// <returns>The same <paramref name="receiveRegistration"/> for fluent configuration</returns>
     public static IReceiveRegistration Add<T>(this IReceiveRegistration receiveRegistration, Action<T> onMessage)
     {
-        Preconditions.CheckNotNull(receiveRegistration, nameof(receiveRegistration));
-
         var onMessageAsync = TaskHelpers.FromAction<T>((m, _) => onMessage(m));
         return receiveRegistration.Add(onMessageAsync);
     }

@@ -22,7 +22,7 @@ public class When_publish_and_subscribe_using_delay_using_dead_letter_exchange_w
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         serviceProvider?.Dispose();
     }

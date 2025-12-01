@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace EasyNetQ;
 
 public static class ArgumentsExtensions

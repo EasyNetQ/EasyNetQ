@@ -1,6 +1,4 @@
-using System;
 using System.Buffers;
-using System.IO;
 using System.Runtime.CompilerServices;
 
 namespace EasyNetQ.Internals;
@@ -16,13 +14,15 @@ public sealed class ArrayPooledMemoryStream : Stream, IMemoryOwner<byte>
     private byte[] rentBuffer;
     private int length;
     private int position;
+    private bool disposed;
 
     /// <inheritdoc />
     public ArrayPooledMemoryStream()
     {
-        rentBuffer = Array.Empty<byte>();
+        rentBuffer = [];
         length = 0;
         position = 0;
+        disposed = false;
     }
 
     /// <inheritdoc />
@@ -126,15 +126,22 @@ public sealed class ArrayPooledMemoryStream : Stream, IMemoryOwner<byte>
     /// <inheritdoc />
     protected override void Dispose(bool disposing)
     {
-        base.Dispose(disposing);
-        if (rentBuffer != null)
+        if (disposed) return;
+
+        if (disposing)
         {
-            ArrayPool<byte>.Shared.Return(rentBuffer);
-            rentBuffer = null;
+            if (rentBuffer != Array.Empty<byte>())
+            {
+                ArrayPool<byte>.Shared.Return(rentBuffer);
+                rentBuffer = [];
+            }
+
+            length = 0;
+            position = 0;
         }
 
-        length = 0;
-        position = 0;
+        disposed = true;
+        base.Dispose(disposing);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

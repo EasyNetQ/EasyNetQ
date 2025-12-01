@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ;
@@ -10,6 +7,68 @@ namespace EasyNetQ;
 /// </summary>
 public static partial class AdvancedBusExtensions
 {
+    /// <summary>
+    /// Gets stats for the given queue
+    /// </summary>
+    /// <param name="bus">The bus instance</param>
+    /// <param name="queue">The name of the queue</param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    /// <returns>The stats of the queue</returns>
+    public static QueueStats GetQueueStats(
+        this IAdvancedBus bus, string queue, CancellationToken cancellationToken = default
+    )
+    {
+        return bus.GetQueueStatsAsync(queue, cancellationToken)
+            .GetAwaiter()
+            .GetResult();
+    }
+
+    /// <summary>
+    /// Declare a queue. If the queue already exists this method does nothing
+    /// </summary>
+    /// <param name="bus">The bus instance</param>
+    /// <param name="queue">The name of the queue</param>
+    /// <param name="durable">Durable queues remain active when a server restarts.</param>
+    /// <param name="exclusive">Exclusive queues may only be accessed by the current connection, and are deleted when that connection closes.</param>
+    /// <param name="autoDelete">If set, the queue is deleted when all consumers have finished using it.</param>
+    /// <param name="arguments"></param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    /// <returns>
+    /// The queue
+    /// </returns>
+    public static Queue QueueDeclare(
+        this IAdvancedBus bus,
+        string queue,
+        bool durable = true,
+        bool exclusive = false,
+        bool autoDelete = false,
+        IDictionary<string, object>? arguments = null,
+        CancellationToken cancellationToken = default
+    )
+    {
+        return bus.QueueDeclareAsync(queue, durable, exclusive, autoDelete, arguments, cancellationToken)
+            .GetAwaiter()
+            .GetResult();
+    }
+
+    /// <summary>
+    /// Declare a queue passively. Throw an exception rather than create the queue if it doesn't exist
+    /// </summary>
+    /// <param name="bus">The bus instance</param>
+    /// <param name="queue">The queue to declare</param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    public static void QueueDeclarePassive(
+        this IAdvancedBus bus,
+        string queue,
+        CancellationToken cancellationToken = default
+    )
+    {
+        bus.QueueDeclarePassiveAsync(queue, cancellationToken)
+            .GetAwaiter()
+            .GetResult();
+    }
+
+
     /// <summary>
     /// Bind an exchange to a queue. Does nothing if the binding already exists.
     /// </summary>

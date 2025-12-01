@@ -1,14 +1,9 @@
-using System;
-
 namespace EasyNetQ;
 
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = false)]
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
 public class DeliveryModeAttribute : Attribute
 {
-    public DeliveryModeAttribute(bool isPersistent)
-    {
-        IsPersistent = isPersistent;
-    }
+    public DeliveryModeAttribute(bool isPersistent) => IsPersistent = isPersistent;
 
     public bool IsPersistent { get; }
 }

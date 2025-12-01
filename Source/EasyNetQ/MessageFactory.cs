@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Concurrent;
+using System.Linq.Expressions;
 
 namespace EasyNetQ;
 
@@ -9,23 +9,28 @@ namespace EasyNetQ;
 /// </summary>
 public static class MessageFactory
 {
-    private static readonly ConcurrentDictionary<Type, Type> genericMessageTypesMap = new();
+    private static readonly ConcurrentDictionary<Type, Func<object?, MessageProperties, IMessage>> InstanceActivators = new();
 
-    public static IMessage CreateInstance(Type messageType, object body)
+    public static IMessage CreateInstance(Type messageType, object? body, in MessageProperties properties)
     {
-        Preconditions.CheckNotNull(messageType, nameof(messageType));
-        Preconditions.CheckNotNull(body, nameof(body));
-
-        var genericType = genericMessageTypesMap.GetOrAdd(messageType, t => typeof(Message<>).MakeGenericType(t));
-        return (IMessage)Activator.CreateInstance(genericType, body);
-    }
-
-    public static IMessage CreateInstance(Type messageType, object body, MessageProperties properties)
-    {
-        Preconditions.CheckNotNull(messageType, nameof(messageType));
-        Preconditions.CheckNotNull(properties, nameof(properties));
-
-        var genericType = genericMessageTypesMap.GetOrAdd(messageType, t => typeof(Message<>).MakeGenericType(t));
-        return (IMessage)Activator.CreateInstance(genericType, body, properties);
+        var activator = InstanceActivators.GetOrAdd(messageType, bodyType =>
+        {
+            var constructor = typeof(Message<>).MakeGenericType(bodyType)
+                .GetConstructors()
+                .Single(x => x.GetParameters().Length == 2);
+            var bodyParameter = Expression.Parameter(typeof(object));
+            var propertiesParameter = Expression.Parameter(typeof(MessageProperties));
+            var expression = Expression.Lambda<Func<object?, MessageProperties, IMessage>>(
+                Expression.New(
+                    constructor,
+                    Expression.Convert(bodyParameter, bodyType),
+                    Expression.Convert(propertiesParameter, typeof(MessageProperties))
+                ),
+                bodyParameter,
+                propertiesParameter
+            );
+            return expression.Compile();
+        });
+        return activator(body, properties);
     }
 }

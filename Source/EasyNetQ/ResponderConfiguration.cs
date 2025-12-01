@@ -67,7 +67,7 @@ internal class ResponderConfiguration : IResponderConfiguration
     }
 
     public ushort PrefetchCount { get; private set; }
-    public string QueueName { get; private set; }
+    public string? QueueName { get; private set; }
     public bool Durable { get; private set; } = true;
 
     public IDictionary<string, object> QueueArguments { get; private set; }

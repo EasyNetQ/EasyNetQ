@@ -1,17 +1,3 @@
-using System;
-
 namespace EasyNetQ.Events;
 
-public readonly struct DeliveredMessageEvent
-{
-    public MessageReceivedInfo ReceivedInfo { get; }
-    public MessageProperties Properties { get; }
-    public ReadOnlyMemory<byte> Body { get; }
-
-    public DeliveredMessageEvent(MessageReceivedInfo info, MessageProperties properties, in ReadOnlyMemory<byte> body)
-    {
-        ReceivedInfo = info;
-        Properties = properties;
-        Body = body;
-    }
-}
+public readonly record struct DeliveredMessageEvent(in MessageReceivedInfo Info, in MessageProperties Properties, in ReadOnlyMemory<byte> Body);

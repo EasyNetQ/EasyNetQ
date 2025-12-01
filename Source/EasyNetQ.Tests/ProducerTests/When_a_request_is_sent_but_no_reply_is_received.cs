@@ -6,7 +6,7 @@ public class When_a_request_is_sent_but_no_reply_is_received : IDisposable
 {
     private readonly MockBuilder mockBuilder = new("host=localhost;timeout=1");
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         mockBuilder.Dispose();
     }

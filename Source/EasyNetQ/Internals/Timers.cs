@@ -1,5 +1,4 @@
-using System.Threading;
-using EasyNetQ.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace EasyNetQ.Internals;
 
@@ -19,15 +18,46 @@ public static class Timers
     /// </summary>
     public static IDisposable Start(Func<Task> callback, TimeSpan period, ILogger logger)
     {
+#if NET8_0_OR_GREATER
         PeriodicTimer timer = new PeriodicTimer(period);
-        StartAsync(timer, callback);
+        StartAsync(timer, callback, logger);
         return timer;
+#else
+        var callbackLock = new object();
+        var timer = new Timer(_ =>
+        {
+            if (!Monitor.TryEnter(callbackLock)) return;
+            try
+            {
+                callback.Invoke();
+            }
+            catch (Exception exception)
+            {
+                logger.LogError(exception, "Error from timer callback");
+            }
+            finally
+            {
+                Monitor.Exit(callbackLock);
+            }
+        });
+        timer.Change(period, period);
+        return timer;
+#endif
     }
-    private async static Task StartAsync(PeriodicTimer timer, Func<Task> callback)
+#if NET8_0_OR_GREATER
+    private async static Task StartAsync(PeriodicTimer timer, Func<Task> callback, ILogger logger)
     {
         while (await timer.WaitForNextTickAsync())
         {
+            try
+            {
             await callback();
+            }
+            catch (Exception exception)
+            {
+                logger.LogError(exception, "Error from timer callback");
+            }
         }
     }
+#endif
 }

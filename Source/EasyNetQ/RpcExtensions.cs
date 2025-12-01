@@ -45,6 +45,7 @@ public static class RpcExtensions
     }
 
 
+
     /// <summary>
     ///     Set up a responder for an RPC service.
     /// </summary>

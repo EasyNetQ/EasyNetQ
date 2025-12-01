@@ -1,9 +1,6 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Topology;
 
-namespace EasyNetQ.Producer;
+namespace EasyNetQ;
 
 public interface IExchangeDeclareStrategy
 {

@@ -1,7 +1,4 @@
-using System;
 using System.Collections.Concurrent;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EasyNetQ.Internals;
 
@@ -11,7 +8,7 @@ namespace EasyNetQ.Internals;
 ///     any release. You should only use it directly in your code with extreme caution and knowing that
 ///     doing so can result in application failures when updating to a new EasyNetQ release.
 /// </summary>
-public sealed class AsyncCache<TKey, TValue> : IDisposable
+public sealed class AsyncCache<TKey, TValue> : IDisposable where TKey : notnull
 {
     private readonly AsyncLock mutex = new();
     private readonly ConcurrentDictionary<TKey, Task<TValue>> storage = new();
@@ -23,10 +20,7 @@ public sealed class AsyncCache<TKey, TValue> : IDisposable
     ///     any release. You should only use it directly in your code with extreme caution and knowing that
     ///     doing so can result in application failures when updating to a new EasyNetQ release.
     /// </summary>
-    public AsyncCache(Func<TKey, CancellationToken, Task<TValue>> valueFactory)
-    {
-        this.valueFactory = valueFactory;
-    }
+    public AsyncCache(Func<TKey, CancellationToken, Task<TValue>> valueFactory) => this.valueFactory = valueFactory;
 
     /// <summary>
     ///
@@ -52,8 +46,5 @@ public sealed class AsyncCache<TKey, TValue> : IDisposable
     }
 
     /// <inheritdoc />
-    public void Dispose()
-    {
-        mutex.Dispose();
-    }
+    public void Dispose() => mutex.Dispose();
 }

@@ -1,4 +1,3 @@
-using System;
 using EasyNetQ.Internals;
 
 namespace EasyNetQ;
@@ -14,14 +13,12 @@ public class MessageDeliveryModeStrategy : IMessageDeliveryModeStrategy
 
     public MessageDeliveryModeStrategy(ConnectionConfiguration connectionConfiguration)
     {
-        Preconditions.CheckNotNull(connectionConfiguration, nameof(connectionConfiguration));
         this.connectionConfiguration = connectionConfiguration;
     }
 
     /// <inheritdoc />
     public byte GetDeliveryMode(Type messageType)
     {
-        Preconditions.CheckNotNull(messageType, nameof(messageType));
         var deliveryModeAttribute = messageType.GetAttribute<DeliveryModeAttribute>();
         if (deliveryModeAttribute == null)
             return GetDeliveryModeInternal(connectionConfiguration.PersistentMessages);

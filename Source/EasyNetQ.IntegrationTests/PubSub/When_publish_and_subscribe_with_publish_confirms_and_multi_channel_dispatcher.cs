@@ -19,7 +19,7 @@ public class When_publish_and_subscribe_with_publish_confirms_and_multi_channel_
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         serviceProvider?.Dispose();
     }

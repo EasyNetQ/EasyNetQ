@@ -1,24 +1,18 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Internals;
-using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ.MultipleExchange;
 
 /// <inheritdoc />
-public class MultipleExchangeDeclareStrategy : IExchangeDeclareStrategy
+public class MultipleExchangeDeclareStrategy : IExchangeDeclareStrategy, IDisposable
 {
     private readonly IAdvancedBus advancedBus;
     private readonly IConventions conventions;
     private readonly AsyncCache<ExchangeKey, Exchange> declaredExchanges;
+    private bool disposed;
 
     public MultipleExchangeDeclareStrategy(IConventions conventions, IAdvancedBus advancedBus)
     {
-        Preconditions.CheckNotNull(conventions, nameof(conventions));
-        Preconditions.CheckNotNull(advancedBus, nameof(advancedBus));
-
         this.conventions = conventions;
         this.advancedBus = advancedBus;
 
@@ -49,4 +43,12 @@ public class MultipleExchangeDeclareStrategy : IExchangeDeclareStrategy
     }
 
     private readonly record struct ExchangeKey(string Name, string Type);
+    public virtual void Dispose()
+    {
+        if (disposed)
+            return;
+        disposed = true;
+        declaredExchanges.Dispose();
+    }
+
 }

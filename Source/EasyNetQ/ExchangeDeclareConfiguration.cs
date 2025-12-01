@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace EasyNetQ;
 
 /// <summary>
@@ -46,9 +44,9 @@ internal class ExchangeDeclareConfiguration : IExchangeDeclareConfiguration
 
     public bool IsAutoDelete { get; private set; }
 
-    public string Type { get; private set; }
+    public string Type { get; private set; } = ExchangeType.Topic;
 
-    public IDictionary<string, object> Arguments { get; private set; }
+    public IDictionary<string, object>? Arguments { get; private set; }
 
     public IExchangeDeclareConfiguration AsDurable(bool isDurable)
     {

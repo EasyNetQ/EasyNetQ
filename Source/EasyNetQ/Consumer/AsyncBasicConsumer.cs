@@ -1,6 +1,6 @@
 using EasyNetQ.Events;
-using EasyNetQ.Logging;
 using EasyNetQ.Topology;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
@@ -46,9 +46,9 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
     {
         await base.OnCancelAsync(consumerTags, cancellationToken).ConfigureAwait(false);
 
-        if (logger.IsInfoEnabled())
+        if (logger.IsEnabled(LogLevel.Information))
         {
-            logger.InfoFormat(
+            logger.LogInformation(
                 "Consumer with consumerTags {consumerTags} has cancelled",
                 string.Join(", ", consumerTags)
             );
@@ -71,9 +71,9 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
         if (cts.IsCancellationRequested)
             return;
 
-        if (logger.IsDebugEnabled())
+        if (logger.IsEnabled(LogLevel.Debug))
         {
-            logger.DebugFormat(
+            logger.LogDebug(
                 "Message delivered to consumer {consumerTag} with deliveryTag {deliveryTag}",
                 consumerTag,
                 deliveryTag
@@ -84,7 +84,6 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
         var messageReceivedInfo = new MessageReceivedInfo(
             consumerTag, deliveryTag, redelivered, exchange, routingKey, queue.Name
         );
-
         var messageProperties = new MessageProperties(properties);
         await eventBus.PublishAsync(new DeliveredMessageEvent(messageReceivedInfo, messageProperties, messageBody));
 
@@ -121,7 +120,7 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
         }
         catch (AlreadyClosedException alreadyClosedException)
         {
-            logger.Info(
+            logger.LogInformation(
                 alreadyClosedException,
                 "Failed to ACK or NACK, message will be retried, receivedInfo={receivedInfo}",
                 receivedInfo
@@ -129,7 +128,7 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
         }
         catch (IOException ioException)
         {
-            logger.Info(
+            logger.LogInformation(
                 ioException,
                 "Failed to ACK or NACK, message will be retried, receivedInfo={receivedInfo}",
                 receivedInfo
@@ -137,7 +136,7 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
         }
         catch (Exception exception)
         {
-            logger.Error(
+            logger.LogError(
                 exception,
                 "Unexpected exception when attempting to ACK or NACK, receivedInfo={receivedInfo}",
                 receivedInfo

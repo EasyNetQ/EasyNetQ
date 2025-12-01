@@ -1,7 +1,5 @@
-using System.Threading.Tasks;
 using System.Threading;
 using System;
-
 namespace EasyNetQ.Consumer;
 
 public interface IConsumeErrorStrategy

@@ -1,5 +1,3 @@
-using System;
-
 namespace EasyNetQ.ConnectionString;
 
 internal sealed class CompositeConnectionStringParser : IConnectionStringParser

@@ -1,8 +1,5 @@
-using System;
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EasyNetQ;
 
@@ -30,12 +27,7 @@ public static class NonGenericSendReceiveExtensions
         object message,
         Type messageType,
         CancellationToken cancellationToken = default
-    )
-    {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
-
-        return sendReceive.SendAsync(queue, message, messageType, _ => { }, cancellationToken);
-    }
+    ) => sendReceive.SendAsync(queue, message, messageType, _ => { }, cancellationToken);
 
     /// <summary>
     /// Send a message directly to a queue
@@ -57,8 +49,6 @@ public static class NonGenericSendReceiveExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(sendReceive, nameof(sendReceive));
-
         var sendDelegate = SendDelegates.GetOrAdd(messageType, t =>
         {
             var sendMethodInfo = typeof(ISendReceive).GetMethod("SendAsync");

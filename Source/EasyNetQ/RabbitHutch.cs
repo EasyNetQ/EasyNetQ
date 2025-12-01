@@ -12,7 +12,9 @@ public static class RabbitHutch
     {
         var tempCollection = new ServiceCollection();
         tempCollection.RegisterEasyNetQ(connectionString);
+#pragma warning disable IDISP004 // Don't ignore created IDisposable
         var coefBus = tempCollection.BuildServiceProvider().GetRequiredService<IBus>();
+#pragma warning restore IDISP004 // Don't ignore created IDisposable
         return coefBus;
     }
     /// <summary>

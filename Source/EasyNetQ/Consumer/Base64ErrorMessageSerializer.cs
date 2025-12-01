@@ -1,5 +1,3 @@
-using System;
-
 namespace EasyNetQ.Consumer;
 
 public class Base64ErrorMessageSerializer : IErrorMessageSerializer

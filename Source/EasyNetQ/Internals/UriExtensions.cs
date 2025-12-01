@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace EasyNetQ.Internals;
 
 /// <summary>
@@ -16,7 +13,7 @@ public static class UriExtensions
     /// There could be multiple values per key, but it doesn't matter for configuration purposes
     /// </summary>
     /// <returns>A collection of parsed keys and values, null if there are no entries.</returns>
-    public static Dictionary<string, string> ParseQuery(this Uri uri)
+    public static Dictionary<string, string>? ParseQuery(this Uri uri)
     {
         var queryString = uri.Query;
         if (string.IsNullOrEmpty(queryString) || queryString == "?")
@@ -26,10 +23,10 @@ public static class UriExtensions
             queryString = queryString.Substring(1);
 
         var query = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
-        var keyValues = queryString.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries);
+        var keyValues = queryString.Split(['&'], StringSplitOptions.RemoveEmptyEntries);
         foreach (var keyValue in keyValues)
         {
-            var keyValueParts = keyValue.Split(new[] { '=' }, StringSplitOptions.RemoveEmptyEntries);
+            var keyValueParts = keyValue.Split(['='], StringSplitOptions.RemoveEmptyEntries);
             if (keyValueParts.Length == 2)
                 query.Add(Uri.UnescapeDataString(keyValueParts[0]), Uri.UnescapeDataString(keyValueParts[1]));
         }

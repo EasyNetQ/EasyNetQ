@@ -1,5 +1,3 @@
-using System;
-using System.IO;
 using System.Runtime.CompilerServices;
 
 namespace EasyNetQ.Internals;
@@ -16,10 +14,7 @@ public sealed class ReadOnlyMemoryStream : Stream
     private int position;
 
     /// <inheritdoc />
-    public ReadOnlyMemoryStream(in ReadOnlyMemory<byte> content)
-    {
-        this.content = content;
-    }
+    public ReadOnlyMemoryStream(in ReadOnlyMemory<byte> content) => this.content = content;
 
     /// <inheritdoc />
     public override bool CanRead => true;

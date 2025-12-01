@@ -2,10 +2,9 @@ using System.Collections.Concurrent;
 using System.Text;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
-using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
-using EasyNetQ.Producer;
 using EasyNetQ.Topology;
+using Microsoft.Extensions.Logging;
 
 namespace EasyNetQ;
 
@@ -188,7 +187,7 @@ public class DefaultRpc : IRpc, IAsyncDisposable
         if (responseSubscriptions.TryGetValue(rpcKey, out var responseSubscription))
             return responseSubscription.QueueName;
 
-        logger.Debug("Subscribing for {requestType}/{responseType}", requestType, responseType);
+        logger.LogDebug("Subscribing for {requestType}/{responseType}", requestType, responseType);
 
         using var _ = await responseSubscriptionsLock.AcquireAsync(cancellationToken).ConfigureAwait(false);
 
@@ -222,7 +221,7 @@ public class DefaultRpc : IRpc, IAsyncDisposable
         );
         responseSubscriptions.TryAdd(rpcKey, new ResponseSubscription(queue.Name, subscription));
 
-        logger.Debug("Subscription for {requestType}/{responseType} is created", requestType, responseType);
+        logger.LogDebug("Subscription for {requestType}/{responseType} is created", requestType, responseType);
 
         return queue.Name;
     }
@@ -236,7 +235,7 @@ public class DefaultRpc : IRpc, IAsyncDisposable
         byte? priority,
         bool? mandatory,
         bool? publisherConfirms,
-        IDictionary<string, object> headers,
+        IDictionary<string, object?>? headers,
         CancellationToken cancellationToken
     )
     {

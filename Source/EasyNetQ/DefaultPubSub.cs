@@ -1,5 +1,4 @@
 using EasyNetQ.Internals;
-using EasyNetQ.Producer;
 
 namespace EasyNetQ;
 

@@ -16,6 +16,7 @@ public class ApprovalTests
             AllowNamespacePrefixes = ["Microsoft.Extensions.DependencyInjection"],
             ExcludeAttributes = ["System.Diagnostics.DebuggerDisplayAttribute"],
         });
+        Assert.NotNull(publicApi);
 
         publicApi.ShouldMatchApproved(options => options.WithFilenameGenerator((_, _, fileType, fileExtension) => $"{type.Assembly.GetName().Name}.{fileType}.{fileExtension}"));
     }

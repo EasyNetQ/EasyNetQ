@@ -1,4 +1,3 @@
-using System;
 using System.Runtime.Serialization;
 
 namespace EasyNetQ.Producer;
@@ -22,12 +21,14 @@ public class PublishReturnedException : Exception
     }
 
     /// <inheritdoc />
-    public PublishReturnedException(string message) : base(message)
+    public PublishReturnedException(string? message) : base(message)
     {
     }
 
     /// <inheritdoc />
-    public PublishReturnedException(string message, Exception inner) : base(message, inner)
+    public PublishReturnedException(string? message, Exception? inner) : base(message, inner)
     {
     }
+#if NETSTANDARD2_0
+#endif
 }

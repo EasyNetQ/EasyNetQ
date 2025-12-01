@@ -57,7 +57,7 @@ public class AdvancedBusEventHandlersTests : IDisposable
         );
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         advancedBus.Dispose();
     }
@@ -121,7 +121,7 @@ public class AdvancedBusEventHandlersTests : IDisposable
     public void AdvancedBusEventHandlers_MessageReturned_handler_is_called()
     {
         var @event = new ReturnedMessageEvent(
-            Substitute.For<IModel>(),
+            Substitute.For<IChannel>(),
             Array.Empty<byte>(),
             MessageProperties.Empty,
             new MessageReturnedInfo("my.exchange", "routing.key", "reason")

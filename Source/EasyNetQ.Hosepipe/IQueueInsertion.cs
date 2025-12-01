@@ -2,5 +2,5 @@ namespace EasyNetQ.Hosepipe;
 
 public interface IQueueInsertion
 {
-    void PublishMessagesToQueue(IEnumerable<HosepipeMessage> messages, QueueParameters parameters);
+    Task PublishMessagesToQueueAsync(IAsyncEnumerable<HosepipeMessage> messages, QueueParameters parameters, CancellationToken cancellationToken = default);
 }

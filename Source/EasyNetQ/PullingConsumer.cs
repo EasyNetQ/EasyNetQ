@@ -1,6 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Interception;
 using EasyNetQ.Internals;
 using EasyNetQ.Persistent;
@@ -15,7 +12,7 @@ namespace EasyNetQ;
 public interface IPullResult : IDisposable
 {
     /// <summary>
-    ///     True if a message is available
+    ///     <see langword="true"/> if a message is available
     /// </summary>
     public bool IsAvailable { get; }
 
@@ -41,7 +38,7 @@ public readonly struct PullResult : IPullResult
     private readonly MessageProperties properties;
     private readonly ReadOnlyMemory<byte> body;
     private readonly ulong messagesCount;
-    private readonly IDisposable disposable;
+    private readonly IDisposable? disposable;
 
     /// <summary>
     ///     Represents a result when no message is available
@@ -54,10 +51,10 @@ public readonly struct PullResult : IPullResult
     /// <returns></returns>
     public static PullResult Available(
         ulong messagesCount,
-        MessageReceivedInfo receivedInfo,
-        MessageProperties properties,
+        in MessageReceivedInfo receivedInfo,
+        in MessageProperties properties,
         in ReadOnlyMemory<byte> body,
-        IDisposable disposable
+        IDisposable? disposable
     )
     {
         return new PullResult(true, messagesCount, receivedInfo, properties, body, disposable);
@@ -69,7 +66,7 @@ public readonly struct PullResult : IPullResult
         in MessageReceivedInfo receivedInfo,
         in MessageProperties properties,
         in ReadOnlyMemory<byte> body,
-        IDisposable disposable
+        IDisposable? disposable
     )
     {
         IsAvailable = isAvailable;
@@ -160,7 +157,7 @@ public readonly struct PullResult : IPullResult
 public readonly struct PullResult<T> : IPullResult
 {
     private readonly MessageReceivedInfo receivedInfo;
-    private readonly IMessage<T> message;
+    private readonly IMessage<T>? message;
     private readonly ulong messagesCount;
 
     /// <summary>
@@ -182,8 +179,8 @@ public readonly struct PullResult<T> : IPullResult
     private PullResult(
         bool isAvailable,
         ulong messagesCount,
-        MessageReceivedInfo receivedInfo,
-        IMessage<T> message
+        in MessageReceivedInfo receivedInfo,
+        IMessage<T>? message
     )
     {
         IsAvailable = isAvailable;
@@ -238,7 +235,7 @@ public readonly struct PullResult<T> : IPullResult
             if (!IsAvailable)
                 throw new InvalidOperationException("No message is available");
 
-            return message;
+            return message!;
         }
     }
 
@@ -341,7 +338,7 @@ public class PullingConsumer : IPullingConsumer<PullResult>
     {
         using var cts = cancellationToken.WithTimeout(options.Timeout);
 
-        var basicGetResult = await channel.InvokeChannelActionAsync<BasicGetResult, BasicGetAction>(
+        var basicGetResult = await channel.InvokeChannelActionAsync<BasicGetResult?, BasicGetAction>(
             new BasicGetAction(queue, options.AutoAck), cts.Token
         ).ConfigureAwait(false);
 
@@ -400,10 +397,12 @@ public class PullingConsumer : IPullingConsumer<PullResult>
     /// <inheritdoc />
     public ValueTask DisposeAsync()
     {
+#pragma warning disable IDISP007 // the injected here is created in the calling method so it should be disposed
         return channel.DisposeAsync();
+#pragma warning restore IDISP007
     }
 
-    private readonly struct BasicGetAction : IPersistentChannelAction<BasicGetResult>
+    private readonly struct BasicGetAction : IPersistentChannelAction<BasicGetResult?>
     {
         private readonly Queue queue;
         private readonly bool autoAck;
@@ -491,7 +490,7 @@ public class PullingConsumer<T> : IPullingConsumer<PullResult<T>>
             return PullResult<T>.Available(
                 pullResult.MessagesCount,
                 pullResult.ReceivedInfo,
-                new Message<T>((T)message.GetBody(), message.Properties)
+                new Message<T>((T?)message.GetBody(), message.Properties)
             );
 
         throw new EasyNetQException(
@@ -516,6 +515,8 @@ public class PullingConsumer<T> : IPullingConsumer<PullResult<T>>
     /// <inheritdoc />
     public ValueTask DisposeAsync()
     {
+#pragma warning disable IDISP007 // the injected here is created in the calling method so it should be disposed
         return consumer.DisposeAsync();
+#pragma warning restore IDISP007
     }
 }

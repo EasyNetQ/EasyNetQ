@@ -1,7 +1,4 @@
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace EasyNetQ.Internals;
 
@@ -44,7 +41,7 @@ public static class ReflectionHelpers
     ///     any release. You should only use it directly in your code with extreme caution and knowing that
     ///     doing so can result in application failures when updating to a new EasyNetQ release.
     /// </summary>
-    public static TAttribute GetAttribute<TAttribute>(this Type type) where TAttribute : Attribute
+    public static TAttribute? GetAttribute<TAttribute>(this Type type) where TAttribute : Attribute
     {
         if (GetOrAddTypeAttributeDictionary(type).TryGetValue(typeof(TAttribute), out var attributes) && attributes.Length > 0)
         {

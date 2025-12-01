@@ -20,7 +20,7 @@ public interface IMessageSerializationStrategy
     /// <param name="properties">The properties</param>
     /// <param name="body">The body</param>
     /// <returns></returns>
-    IMessage DeserializeMessage(MessageProperties properties, in ReadOnlyMemory<byte> body);
+    IMessage DeserializeMessage(in MessageProperties properties, in ReadOnlyMemory<byte> body);
 }
 
 /// <summary>
@@ -33,7 +33,7 @@ public readonly struct SerializedMessage : IDisposable
     /// <summary>
     ///     Creates SerializedMessage
     /// </summary>s
-    public SerializedMessage(MessageProperties properties, IMemoryOwner<byte> body)
+    public SerializedMessage(in MessageProperties properties, IMemoryOwner<byte> body)
     {
         Properties = properties;
         Body = body.Memory;
@@ -54,6 +54,8 @@ public readonly struct SerializedMessage : IDisposable
 
     public void Dispose()
     {
+#pragma warning disable IDISP007 // the injected here is created in the calling method so it should be disposed
         owner?.Dispose();
+#pragma warning restore IDISP007
     }
 }

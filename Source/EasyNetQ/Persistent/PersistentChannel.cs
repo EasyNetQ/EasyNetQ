@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
-using EasyNetQ.Logging;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
@@ -47,7 +47,7 @@ public class PersistentChannel : IPersistentChannel
     }
 
     /// <inheritdoc />
-    public async Task<TResult> InvokeChannelActionAsync<TResult, TChannelAction>(
+    public async ValueTask<TResult> InvokeChannelActionAsync<TResult, TChannelAction>(
         TChannelAction channelAction, CancellationToken cancellationToken = default
     ) where TChannelAction : struct, IPersistentChannelAction<TResult>
     {
@@ -100,7 +100,7 @@ public class PersistentChannel : IPersistentChannel
                 if (exceptionVerdict.Rethrow)
                     throw;
 
-                logger.Error(exception, "Failed to fast invoke channel action, invocation will be retried");
+                logger.LogError(exception, "Failed to fast invoke channel action, invocation will be retried");
             }
             finally
             {
@@ -143,7 +143,7 @@ public class PersistentChannel : IPersistentChannel
                 if (exceptionVerdict.Rethrow)
                     throw;
 
-                logger.Error(exception, "Failed to invoke channel action, invocation will be retried");
+                logger.LogError(exception, "Failed to invoke channel action, invocation will be retried");
             }
 
             await Task.Delay(retryTimeoutMs, cts.Token).ConfigureAwait(false);
@@ -152,17 +152,9 @@ public class PersistentChannel : IPersistentChannel
     }
 
     private async Task<IChannel> CreateChannelAsync(CreateChannelOptions createChannelOptions = null, CancellationToken cancellationToken = default)
+
+
     {
-        if (logger.IsDebugEnabled())
-        {
-            var stackTrace = new StackTrace();
-            var frames = stackTrace.GetFrames();
-
-            string stackTraceStr = string.Join('\n', frames.Select(x => x.GetFileName() ?? "???" + x.GetMethod().Name ?? "??"));
-
-            logger.DebugFormat($"Creating new channel. Stack trace: {stackTraceStr}");
-
-        }
         createChannelOptions ??= new CreateChannelOptions(options.PublisherConfirms, options.PublisherConfirms);
         var channel = await connection.CreateChannelAsync(createChannelOptions, cancellationToken).ConfigureAwait(false);
         AttachChannelEvents(channel);
@@ -233,6 +225,7 @@ public class PersistentChannel : IPersistentChannel
             messageReturnedInfo
         );
         return eventBus.PublishAsync(messageEvent);
+        return Task.CompletedTask;
     }
 
     private async Task OnAck(object sender, BasicAckEventArgs args)

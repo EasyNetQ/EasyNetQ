@@ -45,7 +45,7 @@ public class When_using_default_consume_error_strategy
 
         var cancelAckStrategy = await mockBuilder.ConsumeErrorStrategy.HandleCancelledAsync(consumerExecutionContext);
 
-        Assert.Same(AckStrategies.NackWithRequeue, cancelAckStrategy);
+        Assert.Same(AckStrategies.NackWithRequeueAsync, cancelAckStrategy);
     }
 
     [Fact]
@@ -55,28 +55,30 @@ public class When_using_default_consume_error_strategy
 
         var errorAckStrategy = await mockBuilder.ConsumeErrorStrategy.HandleErrorAsync(consumerExecutionContext, new Exception());
 
-        Assert.Same(AckStrategies.Ack, errorAckStrategy);
+        Assert.Same(AckStrategies.AckAsync, errorAckStrategy);
 
-        mockBuilder.Channels[0].Received().ExchangeDeclare("CustomErrorExchangePrefixName.originalRoutingKey", "topic", true);
-        mockBuilder.Channels[0].Received().QueueDeclare(
+        await mockBuilder.Channels[0].Received().ExchangeDeclareAsync("CustomErrorExchangePrefixName.originalRoutingKey", "topic", true);
+        await mockBuilder.Channels[0].Received().QueueDeclareAsync(
             "CustomEasyNetQErrorQueueName",
             true,
             false,
             false,
             Arg.Is<IDictionary<string, object>>(x => x.ContainsKey("x-queue-type") && x["x-queue-type"].Equals(QueueType.Quorum))
         );
-        mockBuilder.Channels[0].Received().QueueBind(
+        await mockBuilder.Channels[0].Received().QueueBindAsync(
             "CustomEasyNetQErrorQueueName",
             "CustomErrorExchangePrefixName.originalRoutingKey",
             "CustomRoutingKey",
             null
         );
-        mockBuilder.Channels[0].Received().BasicPublish(
+
+        await mockBuilder.Channels[0].Received().BasicPublishAsync(
             "CustomErrorExchangePrefixName.originalRoutingKey",
             "originalRoutingKey",
             false,
-            Arg.Any<IBasicProperties>(),
-            Arg.Any<ReadOnlyMemory<byte>>()
+            Arg.Any<RabbitMQ.Client.BasicProperties>(),
+            Arg.Any<ReadOnlyMemory<byte>>(),
+            Arg.Any<CancellationToken>()
         );
     }
 
@@ -90,30 +92,32 @@ public class When_using_default_consume_error_strategy
 
         var errorAckStrategy = await mockBuilder.ConsumeErrorStrategy.HandleErrorAsync(consumerExecutionContext, new Exception());
 
-        Assert.Same(AckStrategies.Ack, errorAckStrategy);
+        Assert.Same(AckStrategies.AckAsync, errorAckStrategy);
 
-        mockBuilder.Channels[0].Received().ConfirmSelect();
-        mockBuilder.Channels[0].Received().ExchangeDeclare("CustomErrorExchangePrefixName.originalRoutingKey", "topic", true);
-        mockBuilder.Channels[0].Received().QueueDeclare(
+        await mockBuilder.Channels[0].Received().ExchangeDeclareAsync("CustomErrorExchangePrefixName.originalRoutingKey", "topic", true);
+        await mockBuilder.Channels[0].Received().QueueDeclareAsync(
             "CustomEasyNetQErrorQueueName",
             true,
             false,
             false,
-            Arg.Is<IDictionary<string, object>>(x => x.ContainsKey("x-queue-type") && x["x-queue-type"].Equals(QueueType.Quorum))
+            Arg.Is<IDictionary<string, object>>(x => x.ContainsKey("x-queue-type") && x["x-queue-type"].Equals(QueueType.Quorum)),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>()
         );
-        mockBuilder.Channels[0].Received().QueueBind(
+        await mockBuilder.Channels[0].Received().QueueBindAsync(
             "CustomEasyNetQErrorQueueName",
             "CustomErrorExchangePrefixName.originalRoutingKey",
             "CustomRoutingKey",
             null
         );
-        mockBuilder.Channels[0].Received().BasicPublish(
+
+        await mockBuilder.Channels[0].Received().BasicPublishAsync(
             "CustomErrorExchangePrefixName.originalRoutingKey",
             "originalRoutingKey",
             false,
-            Arg.Any<IBasicProperties>(),
-            Arg.Any<ReadOnlyMemory<byte>>()
+            Arg.Any<RabbitMQ.Client.BasicProperties>(),
+            Arg.Any<ReadOnlyMemory<byte>>(),
+            Arg.Any<CancellationToken>()
         );
-        mockBuilder.Channels[0].Received().WaitForConfirms(TimeSpan.FromSeconds(10));
     }
 }

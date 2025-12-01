@@ -1,4 +1,3 @@
-using System;
 using EasyNetQ.Consumer;
 using EasyNetQ.Topology;
 
@@ -15,8 +14,6 @@ public readonly struct SubscriptionResult : IAsyncDisposable
     /// </summary>
     public SubscriptionResult(in Exchange exchange, in Queue queue, IAsyncDisposable consumerCancellation)
     {
-        Preconditions.CheckNotNull(consumerCancellation, nameof(consumerCancellation));
-
         Exchange = exchange;
         Queue = queue;
         ConsumerCancellation = consumerCancellation;
@@ -39,4 +36,5 @@ public readonly struct SubscriptionResult : IAsyncDisposable
 
     /// <inheritdoc />
     public ValueTask DisposeAsync() => ConsumerCancellation.DisposeAsync();
+
 }

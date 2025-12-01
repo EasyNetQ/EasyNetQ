@@ -1,9 +1,6 @@
-using System;
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace EasyNetQ;
 
@@ -31,12 +28,7 @@ public static class NonGenericRpcExtensions
         Type requestType,
         Type responseType,
         CancellationToken cancellationToken = default
-    )
-    {
-        Preconditions.CheckNotNull(rpc, nameof(rpc));
-
-        return rpc.RequestAsync(request, requestType, responseType, _ => { }, cancellationToken);
-    }
+    ) => rpc.RequestAsync(request, requestType, responseType, _ => { }, cancellationToken);
 
     /// <summary>
     ///     Makes an RPC style request
@@ -59,8 +51,6 @@ public static class NonGenericRpcExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(rpc, nameof(rpc));
-
         var requestDelegate = RequestDelegates.GetOrAdd(Tuple.Create(requestType, responseType), t =>
         {
             var requestMethodInfo = typeof(IRpc).GetMethod("RequestAsync");
@@ -100,5 +90,5 @@ public static class NonGenericRpcExtensions
         return requestDelegate(rpc, request, requestType, responseType, configure, cancellationToken);
     }
 
-    private static async Task<object> ToTaskOfObject<T>(Task<T> task) => await task.ConfigureAwait(false);
+    private static async Task<object> ToTaskOfObject<T>(Task<T> task) => (await task.ConfigureAwait(false))!;
 }
