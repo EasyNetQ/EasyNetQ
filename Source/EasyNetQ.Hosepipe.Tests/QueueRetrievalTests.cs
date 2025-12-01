@@ -31,7 +31,7 @@ public class QueueRetrievalTests
 
     [Fact]
     [Traits.Explicit("Requires a RabbitMQ server on localhost")]
-    public void PublishSomeMessages()
+    public async Task PublishSomeMessages()
     {
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddEasyNetQ("host=localhost");
@@ -42,7 +42,7 @@ public class QueueRetrievalTests
 
         for (var i = 0; i < 10; i++)
         {
-            bus.PubSub.Publish(new TestMessage { Text = string.Format("\n>>>>>> Message {0}\n", i) });
+            await bus.PubSub.PublishAsync(new TestMessage { Text = string.Format("\n>>>>>> Message {0}\n", i) });
         }
     }
 

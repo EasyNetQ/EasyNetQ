@@ -39,7 +39,7 @@ var eventQueue = await bus.Advanced.QueueDeclareAsync(
         .WithDeadLetterStrategy(DeadLetterStrategy.AtLeastOnce)
 );
 
-using var eventsConsumer = bus.Advanced.Consume(eventQueue, (_, _, _) => throw new Exception("Oops"));
+await using var eventsConsumer = await bus.Advanced.ConsumeAsync(eventQueue, (_, _, _) => throw new Exception("Oops"));
 
 await bus.Advanced.PublishAsync(Exchange.Default, "Events", true, true, MessageProperties.Empty, ReadOnlyMemory<byte>.Empty);
 

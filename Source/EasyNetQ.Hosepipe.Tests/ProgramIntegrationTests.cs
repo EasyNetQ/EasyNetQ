@@ -55,7 +55,7 @@ public class ProgramIntegrationTests
         }
     }
 
-    public void PublishSomeMessages()
+    public async Task PublishSomeMessagesAsync()
     {
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddEasyNetQ("host=localhost");
@@ -63,7 +63,7 @@ public class ProgramIntegrationTests
         var bus = provider.GetRequiredService<IBus>();
         for (var i = 0; i < 10; i++)
         {
-            bus.PubSub.Publish(new TestMessage { Text = string.Format("\n>>>>>> Message {0}\n", i) });
+            await bus.PubSub.PublishAsync(new TestMessage { Text = string.Format("\n>>>>>> Message {0}\n", i) });
         }
     }
 

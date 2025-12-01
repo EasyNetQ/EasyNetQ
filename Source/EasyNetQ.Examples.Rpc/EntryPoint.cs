@@ -16,7 +16,7 @@ using var provider = serviceCollection.BuildServiceProvider();
 
 var bus = provider.GetRequiredService<IBus>();
 
-using var _ = await bus.Rpc.RespondAsync<Request, Response>(r => new Response(r.Id), cts.Token);
+await using var _ = await bus.Rpc.RespondAsync<Request, Response>(r => new Response(r.Id), cts.Token);
 
 while (!cts.IsCancellationRequested)
 {
