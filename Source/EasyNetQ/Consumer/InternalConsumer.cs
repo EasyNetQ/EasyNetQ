@@ -199,7 +199,7 @@ public class InternalConsumer : IInternalConsumer
                         perQueueConfiguration.ConsumeDelegate
                     );
                     var arguments = perQueueConfiguration.Arguments ?? new Dictionary<string, object>();
-                    consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
+                    consumer.ConsumerCancelled += AsyncBasicConsumerOnConsumerCancelled;
                     var consumerTag = await channel.BasicConsumeAsync(
                         queue.Name, // queue
                         perQueueConfiguration.AutoAck, // noAck
