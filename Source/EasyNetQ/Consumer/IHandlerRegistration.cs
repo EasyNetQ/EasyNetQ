@@ -29,16 +29,6 @@ public interface IHandlerCollection : IHandlerRegistration
     /// an EasyNetQException, or return null, depending on the value of the
     /// ThrowOnNoMatchingHandler property.
     /// </summary>
-    /// <typeparam name="T">The type of handler to return</typeparam>
-    /// <returns>The handler</returns>
-    IMessageHandler<T> GetHandler<T>();
-
-    /// <summary>
-    /// Retrieve a handler from the collection.
-    /// If a matching handler cannot be found, the handler collection will either throw
-    /// an EasyNetQException, or return null, depending on the value of the
-    /// ThrowOnNoMatchingHandler property.
-    /// </summary>
     /// <param name="messageType">The type of handler to return</param>
     /// <returns>The handler</returns>
     IMessageHandler GetHandler(Type messageType);

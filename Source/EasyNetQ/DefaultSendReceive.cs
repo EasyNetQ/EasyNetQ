@@ -1,6 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Internals;
 using EasyNetQ.Topology;
@@ -31,11 +28,6 @@ public class DefaultSendReceive : ISendReceive
         IMessageDeliveryModeStrategy messageDeliveryModeStrategy
     )
     {
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
-        Preconditions.CheckNotNull(conventions, nameof(conventions));
-        Preconditions.CheckNotNull(advancedBus, nameof(advancedBus));
-        Preconditions.CheckNotNull(messageDeliveryModeStrategy, nameof(messageDeliveryModeStrategy));
-
         this.configuration = configuration;
         this.conventions = conventions;
         this.advancedBus = advancedBus;
@@ -47,42 +39,31 @@ public class DefaultSendReceive : ISendReceive
         string queue, T message, Action<ISendConfiguration> configure, CancellationToken cancellationToken
     )
     {
-        Preconditions.CheckNotNull(queue, nameof(queue));
-        Preconditions.CheckNotNull(message, nameof(message));
-
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         var sendConfiguration = new SendConfiguration();
         configure(sendConfiguration);
 
-        var properties = new MessageProperties();
-        if (sendConfiguration.Priority != null)
-            properties.Priority = sendConfiguration.Priority.Value;
-        if (sendConfiguration.Headers?.Count > 0)
-            properties.Headers.UnionWith(sendConfiguration.Headers);
-        properties.DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T));
-
+        var properties = new MessageProperties
+        {
+            Priority = sendConfiguration.Priority ?? 0,
+            Headers = sendConfiguration.MessageHeaders,
+            DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T))
+        };
         await advancedBus.PublishAsync(
-            Exchange.Default, queue, configuration.MandatoryPublish, new Message<T>(message, properties), cts.Token
+            Exchange.DefaultName, queue, null, sendConfiguration.PublisherConfirms, new Message<T>(message, properties), cts.Token
         ).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
-    public AwaitableDisposable<IDisposable> ReceiveAsync(
+    public Task<IAsyncDisposable> ReceiveAsync(
         string queue,
         Action<IReceiveRegistration> addHandlers,
         Action<IReceiveConfiguration> configure,
         CancellationToken cancellationToken
-    )
-    {
-        Preconditions.CheckNotNull(queue, nameof(queue));
-        Preconditions.CheckNotNull(addHandlers, nameof(addHandlers));
-        Preconditions.CheckNotNull(configure, nameof(configure));
+    ) => ReceiveInternalAsync(queue, addHandlers, configure, cancellationToken);
 
-        return ReceiveInternalAsync(queue, addHandlers, configure, cancellationToken).ToAwaitableDisposable();
-    }
-
-    private async Task<IDisposable> ReceiveInternalAsync(
+    private async Task<IAsyncDisposable> ReceiveInternalAsync(
         string queueName,
         Action<IReceiveRegistration> addHandlers,
         Action<IReceiveConfiguration> configure,
@@ -95,30 +76,14 @@ public class DefaultSendReceive : ISendReceive
         configure(receiveConfiguration);
 
         var queue = await advancedBus.QueueDeclareAsync(
-            queueName,
-            c =>
-            {
-                c.AsDurable(receiveConfiguration.Durable);
-                c.AsAutoDelete(receiveConfiguration.AutoDelete);
-                if (receiveConfiguration.Expires.HasValue)
-                    c.WithExpires(TimeSpan.FromMilliseconds(receiveConfiguration.Expires.Value));
-                if (receiveConfiguration.MaxPriority.HasValue)
-                    c.WithMaxPriority(receiveConfiguration.MaxPriority.Value);
-                if (receiveConfiguration.MaxLength.HasValue)
-                    c.WithMaxLength(receiveConfiguration.MaxLength.Value);
-                if (receiveConfiguration.MaxLengthBytes.HasValue)
-                    c.WithMaxLengthBytes(receiveConfiguration.MaxLengthBytes.Value);
-                if (!string.IsNullOrEmpty(receiveConfiguration.QueueMode))
-                    c.WithQueueMode(receiveConfiguration.QueueMode);
-                if (!string.IsNullOrEmpty(receiveConfiguration.QueueType))
-                    c.WithQueueType(receiveConfiguration.QueueType);
-                if (receiveConfiguration.SingleActiveConsumer)
-                    c.WithSingleActiveConsumer();
-            },
-            cts.Token
+            queue: queueName,
+            durable: receiveConfiguration.Durable,
+            autoDelete: receiveConfiguration.AutoDelete,
+            arguments: receiveConfiguration.QueueArguments,
+            cancellationToken: cts.Token
         ).ConfigureAwait(false);
 
-        return advancedBus.Consume(
+        return await advancedBus.ConsumeAsync(
             queue,
             c => addHandlers(new HandlerAdder(c)),
             c => c.WithPrefetchCount(receiveConfiguration.PrefetchCount)
@@ -139,7 +104,7 @@ public class DefaultSendReceive : ISendReceive
 
         public IReceiveRegistration Add<T>(Func<T, CancellationToken, Task> onMessage)
         {
-            handlerRegistration.Add<T>((message, _, c) => onMessage(message.Body, c));
+            handlerRegistration.Add<T>((message, _, c) => onMessage(message.Body!, c));
             return this;
         }
     }

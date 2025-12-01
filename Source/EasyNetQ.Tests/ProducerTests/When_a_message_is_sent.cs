@@ -1,9 +1,5 @@
-// ReSharper disable InconsistentNaming
-using System;
 using EasyNetQ.Tests.Mocking;
-using NSubstitute;
 using RabbitMQ.Client;
-using Xunit;
 
 namespace EasyNetQ.Tests.ProducerTests;
 
@@ -36,5 +32,3 @@ public class When_a_message_is_sent : IDisposable
         );
     }
 }
-
-// ReSharper restore InconsistentNaming

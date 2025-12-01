@@ -1,12 +1,6 @@
-// ReSharper disable InconsistentNaming
-
-using System;
-using System.Threading.Tasks;
 using EasyNetQ.Tests.Mocking;
-using NSubstitute;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
-using Xunit;
 
 namespace EasyNetQ.Tests.ProducerTests;
 
@@ -39,5 +33,3 @@ public class When_IModel_throws_because_of_closed_connection : IDisposable
         Assert.Throws<TaskCanceledException>(() => mockBuilder.PubSub.Publish(new MyMessage { Text = "Hello World" }));
     }
 }
-
-// ReSharper restore InconsistentNaming

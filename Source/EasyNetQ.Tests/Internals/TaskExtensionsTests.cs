@@ -1,8 +1,4 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Internals;
-using Xunit;
 
 namespace EasyNetQ.Tests.Internals;
 

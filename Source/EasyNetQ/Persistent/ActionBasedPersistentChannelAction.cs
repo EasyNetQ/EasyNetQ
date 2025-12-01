@@ -1,18 +1,16 @@
-using System;
-using EasyNetQ.Internals;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Persistent;
 
-public readonly struct ActionBasedPersistentChannelAction : IPersistentChannelAction<NoResult>
+public readonly struct ActionBasedPersistentChannelAction : IPersistentChannelAction<bool>
 {
-    private readonly Action<IModel> action;
+    private readonly Func<IChannel, Task> action;
 
-    public ActionBasedPersistentChannelAction(Action<IModel> action) => this.action = action;
+    public ActionBasedPersistentChannelAction(Func<IChannel, Task> action) => this.action = action;
 
-    public NoResult Invoke(IModel model)
+    public async Task<bool> InvokeAsync(IChannel channel, CancellationToken cancellationToken = default)
     {
-        action(model);
-        return NoResult.Instance;
+        await action(channel);
+        return true;
     }
 }

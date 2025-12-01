@@ -30,9 +30,4 @@ public class PublishNackedException : Exception
     public PublishNackedException(string message, Exception inner) : base(message, inner)
     {
     }
-
-    /// <inheritdoc />
-    protected PublishNackedException(SerializationInfo info, StreamingContext context) : base(info, context)
-    {
-    }
 }

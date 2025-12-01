@@ -17,9 +17,6 @@ public class EasyNetQException : Exception
 
     /// <inheritdoc />
     public EasyNetQException(string message, Exception inner) : base(message, inner) { }
-
-    /// <inheritdoc />
-    protected EasyNetQException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 }
 
 [Serializable]
@@ -36,7 +33,4 @@ public class EasyNetQResponderException : EasyNetQException
 
     /// <inheritdoc />
     public EasyNetQResponderException(string message, Exception inner) : base(message, inner) { }
-
-    /// <inheritdoc />
-    protected EasyNetQResponderException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 }

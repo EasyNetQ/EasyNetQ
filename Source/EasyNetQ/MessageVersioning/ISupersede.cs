@@ -7,7 +7,7 @@ namespace EasyNetQ.MessageVersioning;
 /// </summary>
 /// <remarks>
 /// Requires that <see cref="VersionedMessageSerializationStrategy"/> and <see cref="VersionedExchangeDeclareStrategy"/> are
-/// registered in the <see cref="IServiceRegister"/> to take advantage of message version support.
+/// registered to take advantage of message version support.
 /// </remarks>
 /// <typeparam name="T">The type of the message being superseded.</typeparam>
 /// <example>

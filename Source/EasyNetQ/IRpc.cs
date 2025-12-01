@@ -1,14 +1,9 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using EasyNetQ.Internals;
-
 namespace EasyNetQ;
 
 /// <summary>
 ///     An RPC style request-response pattern
 /// </summary>
-public interface IRpc : IDisposable
+public interface IRpc
 {
     /// <summary>
     ///     Make a request to an RPC service
@@ -35,7 +30,7 @@ public interface IRpc : IDisposable
     /// <param name="responder">A function that performs the response</param>
     /// <param name="configure">A function that performs the configuration</param>
     /// <param name="cancellationToken">The cancellation token</param>
-    AwaitableDisposable<IDisposable> RespondAsync<TRequest, TResponse>(
+    Task<IAsyncDisposable> RespondAsync<TRequest, TResponse>(
         Func<TRequest, CancellationToken, Task<TResponse>> responder,
         Action<IResponderConfiguration> configure,
         CancellationToken cancellationToken = default

@@ -1,21 +1,27 @@
 using EasyNetQ;
 using EasyNetQ.Topology;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 var cts = new CancellationTokenSource();
 Console.CancelKeyPress += (_, _) => cts.Cancel();
 
-using var bus = RabbitHutch.CreateBus(
-    "host=localhost;publisherConfirms=True",
-    x => x.EnableNewtonsoftJson()
-        .EnableAlwaysNackWithoutRequeueConsumerErrorStrategy()
-        .EnableConsoleLogger()
-);
+var serviceCollection = new ServiceCollection();
 
+serviceCollection.AddLogging(builder => builder.AddConsole());
+serviceCollection.AddEasyNetQ("host=localhost;publisherConfirms=True")
+    .UseNewtonsoftJson()
+    .UseAlwaysNackWithoutRequeueConsumerErrorStrategy();
+
+var provider = serviceCollection.BuildServiceProvider();
+
+var bus = provider.GetRequiredService<IBus>();
 var eventQueue = await bus.Advanced.QueueDeclareAsync(
-    "Events",
-    c => c.WithQueueType(QueueType.Quorum)
+    queue: "Events",
+    arguments: new Dictionary<string, object>()
+        .WithQueueType(QueueType.Quorum)
         .WithOverflowType(OverflowType.RejectPublish),
-    cts.Token
+    cancellationToken: cts.Token
 );
 
 using var eventsConsumer = bus.Advanced.Consume(eventQueue, (_, _, _) => { });
@@ -28,7 +34,8 @@ while (!cts.IsCancellationRequested)
             Exchange.Default,
             "Events",
             true,
-            new MessageProperties(),
+            true,
+            MessageProperties.Empty,
             ReadOnlyMemory<byte>.Empty,
             cts.Token
         );

@@ -1,12 +1,6 @@
-// ReSharper disable InconsistentNaming
-
-using System;
-using System.Threading;
 using EasyNetQ.Consumer;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
-using FluentAssertions;
-using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 
@@ -59,7 +53,7 @@ public class When_a_consumer_has_multiple_handlers : IDisposable
 
     private void Deliver<T>(T message) where T : class
     {
-        using var serializedMessage = new JsonSerializer().MessageToBytes(typeof(T), message);
+        using var serializedMessage = new ReflectionBasedNewtonsoftJsonSerializer().MessageToBytes(typeof(T), message);
         var properties = new BasicProperties
         {
             Type = new DefaultTypeNameSerializer().Serialize(typeof(T))
@@ -97,5 +91,3 @@ public class When_a_consumer_has_multiple_handlers : IDisposable
         myOtherMessageResult.Text.Should().Be("Hello Isomorphs!");
     }
 }
-
-// ReSharper restore InconsistentNaming

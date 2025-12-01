@@ -1,4 +1,3 @@
-using System;
 using System.Threading;
 using EasyNetQ.Logging;
 
@@ -18,26 +17,17 @@ public static class Timers
     ///     any release. You should only use it directly in your code with extreme caution and knowing that
     ///     doing so can result in application failures when updating to a new EasyNetQ release.
     /// </summary>
-    public static IDisposable Start(Action callback, TimeSpan dueTime, TimeSpan period, ILogger logger)
+    public static IDisposable Start(Func<Task> callback, TimeSpan period, ILogger logger)
     {
-        var callbackLock = new object();
-        var timer = new Timer(_ =>
-        {
-            if (!Monitor.TryEnter(callbackLock)) return;
-            try
-            {
-                callback.Invoke();
-            }
-            catch (Exception exception)
-            {
-                logger.Error(exception, "Error from timer callback");
-            }
-            finally
-            {
-                Monitor.Exit(callbackLock);
-            }
-        });
-        timer.Change(dueTime, period);
+        PeriodicTimer timer = new PeriodicTimer(period);
+        StartAsync(timer, callback);
         return timer;
+    }
+    private async static Task StartAsync(PeriodicTimer timer, Func<Task> callback)
+    {
+        while (await timer.WaitForNextTickAsync())
+        {
+            await callback();
+        }
     }
 }

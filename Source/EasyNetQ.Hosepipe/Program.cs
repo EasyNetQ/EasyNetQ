@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
 using System.Text;
 
@@ -71,7 +68,7 @@ public class Program
             new FileMessageWriter(),
             new MessageReader(),
             new QueueInsertion(errorMessageSerializer),
-            new ErrorRetry(new JsonSerializer(), errorMessageSerializer),
+            new ErrorRetry(new ReflectionBasedNewtonsoftJsonSerializer(), errorMessageSerializer),
             new Conventions(typeNameSerializer)
         );
         program.Start(args);
@@ -93,6 +90,8 @@ public class Program
             .FailWith(Message("Invalid number of messages to retrieve"));
         arguments.WithTypedKeyOptional<bool>("x", a => parameters.Purge = bool.Parse(a.Value))
             .FailWith(Message("Invalid purge (x) parameter"));
+        arguments.WithTypedKeyOptional<bool>("ssl", a => parameters.Ssl = bool.Parse(a.Value))
+            .FailWith(Message("Invalid Ssl (ssl) parameter"));
 
         try
         {
@@ -155,14 +154,14 @@ public class Program
     private void ErrorDump(QueueParameters parameters)
     {
         if (parameters.QueueName == null)
-            parameters.QueueName = conventions.ErrorQueueNamingConvention(null);
+            parameters.QueueName = conventions.ErrorQueueNamingConvention(default);
         Dump(parameters);
     }
 
     private void Retry(QueueParameters parameters)
     {
         var count = 0;
-        var queueName = parameters.QueueName ?? conventions.ErrorQueueNamingConvention(null);
+        var queueName = parameters.QueueName ?? conventions.ErrorQueueNamingConvention(default);
 
         errorRetry.RetryErrors(
             WithEach(messageReader.ReadMessages(parameters, queueName), () => count++), parameters

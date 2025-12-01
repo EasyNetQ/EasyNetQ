@@ -1,21 +1,10 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using NSubstitute;
-using Xunit;
-
 namespace EasyNetQ.Tests;
 
 public class NonGenericSchedulerExtensionsTests
 {
     private readonly Action<IFuturePublishConfiguration> configure = _ => { };
     private readonly TimeSpan delay = TimeSpan.FromSeconds(42);
-    private readonly IScheduler scheduler;
-
-    public NonGenericSchedulerExtensionsTests()
-    {
-        scheduler = Substitute.For<IScheduler>();
-    }
+    private readonly IScheduler scheduler = Substitute.For<IScheduler>();
 
     [Fact]
     public async Task Should_be_able_to_future_publish_struct()

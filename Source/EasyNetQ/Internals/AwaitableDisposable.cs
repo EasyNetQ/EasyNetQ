@@ -10,7 +10,7 @@ namespace EasyNetQ.Internals;
 ///     any release. You should only use it directly in your code with extreme caution and knowing that
 ///     doing so can result in application failures when updating to a new EasyNetQ release.
 /// </summary>
-public readonly struct AwaitableDisposable<T> where T : IDisposable
+public readonly struct AwaitableDisposable<T> where T : IAsyncDisposable
 {
     /// <summary>
     ///     The underlying task.

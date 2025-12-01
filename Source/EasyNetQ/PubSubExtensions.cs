@@ -1,6 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Internals;
 
 namespace EasyNetQ;
@@ -21,11 +18,7 @@ public static class PubSubExtensions
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns></returns>
     public static Task PublishAsync<T>(this IPubSub pubSub, T message, CancellationToken cancellationToken = default)
-    {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
-
-        return pubSub.PublishAsync(message, _ => { }, cancellationToken);
-    }
+        => pubSub.PublishAsync(message, _ => { }, cancellationToken);
 
     /// <summary>
     /// Publishes a message with a topic.
@@ -39,12 +32,7 @@ public static class PubSubExtensions
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns></returns>
     public static Task PublishAsync<T>(this IPubSub pubSub, T message, string topic, CancellationToken cancellationToken = default)
-    {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
-        Preconditions.CheckNotNull(topic, nameof(topic));
-
-        return pubSub.PublishAsync(message, c => c.WithTopic(topic), cancellationToken);
-    }
+        => pubSub.PublishAsync(message, c => c.WithTopic(topic), cancellationToken);
 
     /// <summary>
     /// Publishes a message.
@@ -54,11 +42,7 @@ public static class PubSubExtensions
     /// <param name="message">The message to publish</param>
     /// <param name="cancellationToken">The cancellation token</param>
     public static void Publish<T>(this IPubSub pubSub, T message, CancellationToken cancellationToken = default)
-    {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
-
-        pubSub.Publish(message, _ => { }, cancellationToken);
-    }
+        => pubSub.Publish(message, _ => { }, cancellationToken);
 
     /// <summary>
     /// Publishes a message.
@@ -72,8 +56,6 @@ public static class PubSubExtensions
     /// <param name="cancellationToken">The cancellation token</param>
     public static void Publish<T>(this IPubSub pubSub, T message, Action<IPublishConfiguration> configure, CancellationToken cancellationToken = default)
     {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
-
         pubSub.PublishAsync(message, configure, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -88,11 +70,7 @@ public static class PubSubExtensions
     /// <param name="topic">The topic string</param>
     /// <param name="cancellationToken">The cancellation token</param>
     public static void Publish<T>(this IPubSub pubSub, T message, string topic, CancellationToken cancellationToken = default)
-    {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
-
-        pubSub.Publish(message, c => c.WithTopic(topic), cancellationToken);
-    }
+        => pubSub.Publish(message, c => c.WithTopic(topic), cancellationToken);
 
     /// <summary>
     /// Subscribes to a stream of messages that match a .NET type.
@@ -114,15 +92,13 @@ public static class PubSubExtensions
     /// An <see cref="SubscriptionResult"/>
     /// Call Dispose on it to cancel the subscription.
     /// </returns>
-    public static AwaitableDisposable<SubscriptionResult> SubscribeAsync<T>(
+    public static Task<SubscriptionResult> SubscribeAsync<T>(
         this IPubSub pubSub,
         string subscriptionId,
         Action<T> onMessage,
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
-
         return pubSub.SubscribeAsync(
             subscriptionId,
             onMessage,
@@ -154,7 +130,7 @@ public static class PubSubExtensions
     /// An <see cref="SubscriptionResult"/>
     /// Call Dispose on it to cancel the subscription.
     /// </returns>
-    public static AwaitableDisposable<SubscriptionResult> SubscribeAsync<T>(
+    public static Task<SubscriptionResult> SubscribeAsync<T>(
         this IPubSub pubSub,
         string subscriptionId,
         Action<T> onMessage,
@@ -162,7 +138,6 @@ public static class PubSubExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
 
         var onMessageAsync = TaskHelpers.FromAction<T>((m, _) => onMessage(m));
 
@@ -195,15 +170,13 @@ public static class PubSubExtensions
     /// An <see cref="SubscriptionResult"/>
     /// Call Dispose on it to cancel the subscription.
     /// </returns>
-    public static AwaitableDisposable<SubscriptionResult> SubscribeAsync<T>(
+    public static Task<SubscriptionResult> SubscribeAsync<T>(
         this IPubSub pubSub,
         string subscriptionId,
         Func<T, Task> onMessage,
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
-
         return pubSub.SubscribeAsync<T>(
             subscriptionId,
             (m, _) => onMessage(m),
@@ -212,160 +185,4 @@ public static class PubSubExtensions
         );
     }
 
-    /// <summary>
-    /// Subscribes to a stream of messages that match a .NET type.
-    /// </summary>
-    /// <typeparam name="T">The type to subscribe to</typeparam>
-    /// <param name="pubSub">The pubSub instance</param>
-    /// <param name="subscriptionId">
-    /// A unique identifier for the subscription. Two subscriptions with the same subscriptionId
-    /// and type will get messages delivered in turn. This is useful if you want multiple subscribers
-    /// to load balance a subscription in a round-robin fashion.
-    /// </param>
-    /// <param name="onMessage">
-    /// The action to run when a message arrives. When onMessage completes the message
-    /// receipt is Ack'd. All onMessage delegates are processed on a single thread so you should
-    /// avoid long running blocking IO operations. Consider using SubscribeAsync
-    /// </param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    /// <returns>
-    /// An <see cref="SubscriptionResult"/>
-    /// Call Dispose on it to cancel the subscription.
-    /// </returns>
-    public static SubscriptionResult Subscribe<T>(
-        this IPubSub pubSub,
-        string subscriptionId,
-        Action<T> onMessage,
-        CancellationToken cancellationToken = default
-    )
-    {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
-
-        return pubSub.Subscribe(
-            subscriptionId,
-            onMessage,
-            _ => { },
-            cancellationToken
-        );
-    }
-
-    /// <summary>
-    /// Subscribes to a stream of messages that match a .NET type.
-    /// </summary>
-    /// <typeparam name="T">The type to subscribe to</typeparam>
-    /// <param name="pubSub">The pubSub instance</param>
-    /// <param name="subscriptionId">
-    /// A unique identifier for the subscription. Two subscriptions with the same subscriptionId
-    /// and type will get messages delivered in turn. This is useful if you want multiple subscribers
-    /// to load balance a subscription in a round-robin fashion.
-    /// </param>
-    /// <param name="onMessage">
-    /// The action to run when a message arrives. When onMessage completes the message
-    /// receipt is Ack'd. All onMessage delegates are processed on a single thread so you should
-    /// avoid long running blocking IO operations. Consider using SubscribeAsync
-    /// </param>
-    /// <param name="configure">
-    /// Fluent configuration e.g. x => x.WithTopic("uk.london")
-    /// </param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    /// <returns>
-    /// An <see cref="SubscriptionResult"/>
-    /// Call Dispose on it to cancel the subscription.
-    /// </returns>
-    public static SubscriptionResult Subscribe<T>(
-        this IPubSub pubSub,
-        string subscriptionId,
-        Action<T> onMessage,
-        Action<ISubscriptionConfiguration> configure,
-        CancellationToken cancellationToken = default
-    )
-    {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
-
-        var onMessageAsync = TaskHelpers.FromAction<T>((m, _) => onMessage(m));
-
-        return pubSub.Subscribe(
-            subscriptionId,
-            onMessageAsync,
-            configure,
-            cancellationToken
-        );
-    }
-
-    /// <summary>
-    /// Subscribes to a stream of messages that match a .NET type.
-    /// Allows the subscriber to complete asynchronously.
-    /// </summary>
-    /// <typeparam name="T">The type to subscribe to</typeparam>
-    /// <param name="pubSub">The pubSub instance</param>
-    /// <param name="subscriptionId">
-    /// A unique identifier for the subscription. Two subscriptions with the same subscriptionId
-    /// and type will get messages delivered in turn. This is useful if you want multiple subscribers
-    /// to load balance a subscription in a round-robin fashion.
-    /// </param>
-    /// <param name="onMessage">
-    /// The action to run when a message arrives. onMessage can immediately return a Task and
-    /// then continue processing asynchronously. When the Task completes the message will be
-    /// Ack'd.
-    /// </param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    /// <returns>
-    /// An <see cref="SubscriptionResult"/>
-    /// Call Dispose on it to cancel the subscription.
-    /// </returns>
-    public static SubscriptionResult Subscribe<T>(
-        this IPubSub pubSub,
-        string subscriptionId,
-        Func<T, Task> onMessage,
-        CancellationToken cancellationToken = default
-    )
-    {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
-
-        return pubSub.Subscribe<T>(
-            subscriptionId,
-            (m, _) => onMessage(m),
-            _ => { },
-            cancellationToken
-        );
-    }
-
-    /// <summary>
-    /// Subscribes to a stream of messages that match a .NET type.
-    /// Allows the subscriber to complete asynchronously.
-    /// </summary>
-    /// <typeparam name="T">The type to subscribe to</typeparam>
-    /// <param name="pubSub">The pubSub instance</param>
-    /// <param name="subscriptionId">
-    /// A unique identifier for the subscription. Two subscriptions with the same subscriptionId
-    /// and type will get messages delivered in turn. This is useful if you want multiple subscribers
-    /// to load balance a subscription in a round-robin fashion.
-    /// </param>
-    /// <param name="onMessage">
-    /// The action to run when a message arrives. onMessage can immediately return a Task and
-    /// then continue processing asynchronously. When the Task completes the message will be
-    /// Ack'd.
-    /// </param>
-    /// <param name="configure">
-    /// Fluent configuration e.g. x => x.WithTopic("uk.london")
-    /// </param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    /// <returns>
-    /// An <see cref="SubscriptionResult"/>
-    /// Call Dispose on it to cancel the subscription.
-    /// </returns>
-    public static SubscriptionResult Subscribe<T>(
-        this IPubSub pubSub,
-        string subscriptionId,
-        Func<T, CancellationToken, Task> onMessage,
-        Action<ISubscriptionConfiguration> configure,
-        CancellationToken cancellationToken = default
-    )
-    {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
-
-        return pubSub.SubscribeAsync(subscriptionId, onMessage, configure, cancellationToken)
-            .GetAwaiter()
-            .GetResult();
-    }
 }

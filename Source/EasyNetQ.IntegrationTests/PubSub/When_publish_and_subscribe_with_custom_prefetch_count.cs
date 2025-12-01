@@ -1,38 +1,39 @@
-using System;
 using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.IntegrationTests.Utils;
-using FluentAssertions;
-using Xunit;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.IntegrationTests.PubSub;
 
 [Collection("RabbitMQ")]
 public class When_publish_and_subscribe_with_custom_prefetch_count : IDisposable
 {
+    private readonly ServiceProvider serviceProvider;
+    private readonly IBus bus;
+
     public When_publish_and_subscribe_with_custom_prefetch_count(RabbitMQFixture rmqFixture)
     {
-        bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=2;timeout=-1");
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddEasyNetQ($"host={rmqFixture.Host};prefetchCount=2;timeout=-1");
+
+        serviceProvider = serviceCollection.BuildServiceProvider();
+        bus = serviceProvider.GetRequiredService<IBus>();
     }
 
     public void Dispose()
     {
-        bus.Dispose();
+        serviceProvider?.Dispose();
     }
 
     private const int MessagesCount = 10;
 
-    private readonly IBus bus;
-
     [Fact]
     public async Task Should_publish_and_consume()
     {
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
         var subscriptionId = Guid.NewGuid().ToString();
-        var messagesSink = new MessagesSink(MessagesCount);
-        var messages = MessagesFactories.Create(MessagesCount);
+        var messagesSink = new MessagesSink(2 * MessagesCount);
+        var messages = MessagesFactories.Create(2 * MessagesCount);
 
         void SlowSyncAction(Message message)
         {
@@ -49,7 +50,7 @@ public class When_publish_and_subscribe_with_custom_prefetch_count : IDisposable
             await messagesSink.WaitAllReceivedAsync(cts.Token);
             messagesSink.ReceivedMessages.Should().BeEquivalentTo(messages);
 
-            Stopwatch.GetElapsedTime(started).Should().BeLessThan(TimeSpan.FromSeconds(3));
+            Stopwatch.GetElapsedTime(started).Should().BeLessThan(TimeSpan.FromSeconds(7.5));
         }
     }
 }

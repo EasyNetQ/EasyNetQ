@@ -17,7 +17,7 @@ public static class AwaitableDisposableExtensions
     ///     any release. You should only use it directly in your code with extreme caution and knowing that
     ///     doing so can result in application failures when updating to a new EasyNetQ release.
     /// </summary>
-    public static AwaitableDisposable<T> ToAwaitableDisposable<T>(this Task<T> source) where T : IDisposable
+    public static AwaitableDisposable<T> ToAwaitableDisposable<T>(this Task<T> source) where T : IAsyncDisposable
     {
         Preconditions.CheckNotNull(source, nameof(source));
 

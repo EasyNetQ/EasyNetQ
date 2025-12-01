@@ -24,6 +24,10 @@ indent_style = space
 indent_size = 4
 charset = utf-8
 
+# Do not insert newline for API approval tests
+[*.txt]
+insert_final_newline = false
+
 [*.{csproj,json,config,yml}]
 indent_size = 2
 
@@ -193,3 +197,7 @@ csharp_preserve_single_line_statements = false
 
 # C# formatting settings - Namespace options
 csharp_style_namespace_declarations = file_scoped:warning
+
+[*.{cs,vb}]
+# Sealed classes https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1852
+dotnet_diagnostic.CA1852.severity = warning

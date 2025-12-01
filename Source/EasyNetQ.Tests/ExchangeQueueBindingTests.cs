@@ -1,14 +1,5 @@
-// ReSharper disable InconsistentNaming
-
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
-using FluentAssertions;
-using NSubstitute;
-using Xunit;
 using Queue = EasyNetQ.Topology.Queue;
 
 namespace EasyNetQ.Tests;
@@ -20,10 +11,11 @@ public class When_a_queue_is_declared : IDisposable
         mockBuilder = new MockBuilder();
 
         queue = mockBuilder.Bus.Advanced.QueueDeclare(
-            "my_queue",
-            c => c.AsDurable(false)
-                .AsExclusive(true)
-                .AsAutoDelete(true)
+            queue: "my_queue",
+            durable: false,
+            exclusive: true,
+            autoDelete: true,
+            arguments: new Dictionary<string, object>()
                 .WithMessageTtl(TimeSpan.FromSeconds(1))
                 .WithExpires(TimeSpan.FromSeconds(2))
                 .WithMaxPriority(10)
@@ -46,10 +38,12 @@ public class When_a_queue_is_declared : IDisposable
             Arg.Is(false),
             Arg.Is(true),
             Arg.Is(true),
-            Arg.Is<IDictionary<string, object>>(args =>
-                ((int)args["x-message-ttl"] == 1000) &&
-                ((int)args["x-expires"] == 2000) &&
-                ((int)args["x-max-priority"] == 10)));
+            Arg.Is<IDictionary<string, object>>(
+                args => (int)args["x-message-ttl"] == 1000 &&
+                        (int)args["x-expires"] == 2000 &&
+                        (byte)args["x-max-priority"] == 10
+            )
+        );
     }
 
     [Fact]
@@ -68,14 +62,15 @@ public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange : IDisposa
 
         var advancedBus = mockBuilder.Bus.Advanced;
         queue = advancedBus.QueueDeclare(
-            "my_queue",
-            c => c.AsDurable(false)
-                .AsExclusive(true)
-                .AsAutoDelete(true)
+            queue: "my_queue",
+            durable: false,
+            exclusive: true,
+            autoDelete: true,
+            arguments: new Dictionary<string, object>()
                 .WithMessageTtl(TimeSpan.FromSeconds(1))
                 .WithExpires(TimeSpan.FromSeconds(2))
                 .WithMaxPriority(10)
-                .WithDeadLetterExchange(new Exchange("my_exchange"))
+                .WithDeadLetterExchange("my_exchange")
                 .WithDeadLetterRoutingKey("my_routing_key")
         );
     }
@@ -86,7 +81,7 @@ public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange : IDisposa
     }
 
     private readonly MockBuilder mockBuilder;
-    private Queue queue;
+    private readonly Queue queue;
 
     [Fact]
     public void Should_declare_the_queue()
@@ -96,12 +91,14 @@ public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange : IDisposa
             Arg.Is(false),
             Arg.Is(true),
             Arg.Is(true),
-            Arg.Is<IDictionary<string, object>>(args =>
-                ((int)args["x-message-ttl"] == 1000) &&
-                ((int)args["x-expires"] == 2000) &&
-                ((int)args["x-max-priority"] == 10) &&
-                ((string)args["x-dead-letter-exchange"] == "my_exchange") &&
-                ((string)args["x-dead-letter-routing-key"] == "my_routing_key")));
+            Arg.Is<IDictionary<string, object>>(
+                args => (int)args["x-message-ttl"] == 1000 &&
+                        (int)args["x-expires"] == 2000 &&
+                        (byte)args["x-max-priority"] == 10 &&
+                        (string)args["x-dead-letter-exchange"] == "my_exchange" &&
+                        (string)args["x-dead-letter-routing-key"] == "my_routing_key"
+            )
+        );
     }
 
     [Fact]
@@ -119,14 +116,15 @@ public class When_a_queue_is_declared_With_EmptyDeadLetterExchange : IDisposable
         mockBuilder = new MockBuilder();
 
         queue = mockBuilder.Bus.Advanced.QueueDeclare(
-            "my_queue",
-            c => c.AsDurable(false)
-                .AsExclusive(true)
-                .AsAutoDelete(true)
+            queue: "my_queue",
+            durable: false,
+            exclusive: true,
+            autoDelete: true,
+            arguments: new Dictionary<string, object>()
                 .WithMessageTtl(TimeSpan.FromSeconds(1))
                 .WithExpires(TimeSpan.FromSeconds(2))
                 .WithMaxPriority(10)
-                .WithDeadLetterExchange(Exchange.Default)
+                .WithDeadLetterExchange(Exchange.DefaultName)
                 .WithDeadLetterRoutingKey("my_queue2")
         );
     }
@@ -147,12 +145,14 @@ public class When_a_queue_is_declared_With_EmptyDeadLetterExchange : IDisposable
             Arg.Is(false),
             Arg.Is(true),
             Arg.Is(true),
-            Arg.Is<IDictionary<string, object>>(args =>
-                ((int)args["x-message-ttl"] == 1000) &&
-                ((int)args["x-expires"] == 2000) &&
-                ((int)args["x-max-priority"] == 10) &&
-                ((string)args["x-dead-letter-exchange"] == "") &&
-                ((string)args["x-dead-letter-routing-key"] == "my_queue2")));
+            Arg.Is<IDictionary<string, object>>(
+                args => (int)args["x-message-ttl"] == 1000 &&
+                        (int)args["x-expires"] == 2000 &&
+                        (byte)args["x-max-priority"] == 10 &&
+                        (string)args["x-dead-letter-exchange"] == "" &&
+                        (string)args["x-dead-letter-routing-key"] == "my_queue2"
+            )
+        );
     }
 
     [Fact]
@@ -215,15 +215,12 @@ public class When_an_exchange_is_declared : IDisposable
     {
         mockBuilder = new MockBuilder();
 
-        mockBuilder.NextModel.WhenForAnyArgs(x => x.ExchangeDeclare(null, null, false, false, null))
-            .Do(x => { arguments = x[4] as IDictionary; });
-
         exchange = mockBuilder.Bus.Advanced.ExchangeDeclare(
             "my_exchange",
-            c => c.WithType(ExchangeType.Direct)
-                .AsDurable(false)
-                .AsAutoDelete(true)
-                .WithAlternateExchange(new Exchange("my.alternate.exchange"))
+            type: ExchangeType.Direct,
+            durable: false,
+            autoDelete: true,
+            arguments: new Dictionary<string, object>().WithAlternateExchange("my.alternate.exchange")
         );
     }
 
@@ -234,14 +231,6 @@ public class When_an_exchange_is_declared : IDisposable
 
     private readonly MockBuilder mockBuilder;
     private readonly Exchange exchange;
-    private IDictionary arguments;
-
-    [Fact]
-    public void Should_add_correct_arguments()
-    {
-        arguments.Should().NotBeNull();
-        arguments["alternate-exchange"].Should().Be("my.alternate.exchange");
-    }
 
     [Fact]
     public void Should_declare_an_exchange()
@@ -251,7 +240,8 @@ public class When_an_exchange_is_declared : IDisposable
             Arg.Is("direct"),
             Arg.Is(false),
             Arg.Is(true),
-            Arg.Any<IDictionary<string, object>>());
+            Arg.Is<IDictionary<string, object>>(c => (string)c["alternate-exchange"] == "my.alternate.exchange")
+        );
     }
 
     [Fact]
@@ -329,7 +319,7 @@ public class When_a_queue_is_bound_to_an_exchange : IDisposable
     }
 
     private readonly MockBuilder mockBuilder;
-    private IAdvancedBus advancedBus;
+    private readonly IAdvancedBus advancedBus;
     private readonly Binding<Queue> binding;
 
     [Fact]
@@ -373,7 +363,7 @@ public class When_a_queue_is_bound_to_an_exchange_with_headers : IDisposable
     }
 
     private readonly MockBuilder mockBuilder;
-    private IAdvancedBus advancedBus;
+    private readonly IAdvancedBus advancedBus;
     private readonly Binding<Queue> binding;
 
     [Fact]
@@ -419,7 +409,7 @@ public class When_a_queue_is_unbound_from_an_exchange : IDisposable
     }
 
     private readonly MockBuilder mockBuilder;
-    private IAdvancedBus advancedBus;
+    private readonly IAdvancedBus advancedBus;
     private readonly Binding<Queue> binding;
 
     [Fact]
@@ -428,5 +418,3 @@ public class When_a_queue_is_unbound_from_an_exchange : IDisposable
         mockBuilder.Channels[0].Received().QueueUnbind("my_queue", "my_exchange", "my_routing_key", null);
     }
 }
-
-// ReSharper restore InconsistentNaming

@@ -1,8 +1,6 @@
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
-using NSubstitute;
 using RabbitMQ.Client;
-using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 

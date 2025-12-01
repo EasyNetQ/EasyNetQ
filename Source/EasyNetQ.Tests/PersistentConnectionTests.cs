@@ -1,12 +1,7 @@
-using System;
-using System.Collections.Generic;
-using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 using EasyNetQ.Tests.Mocking;
-using FluentAssertions;
-using NSubstitute;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
-using Xunit;
 
 namespace EasyNetQ.Tests;
 
@@ -27,9 +22,11 @@ public class PersistentConnectionTests
             mockBuilder.EventBus
         );
 
-        Assert.Throws<Exception>(() => connection.Connect());
+        connection.Status.State.Should().Be(PersistentConnectionState.NotInitialised);
 
-        connection.IsConnected.Should().BeFalse();
+        Assert.Throws<Exception>(() => connection.EnsureConnected());
+
+        connection.Status.State.Should().Be(PersistentConnectionState.Disconnected);
         mockBuilder.ConnectionFactory.Received().CreateConnection(Arg.Any<IList<AmqpTcpEndpoint>>());
     }
 
@@ -45,9 +42,11 @@ public class PersistentConnectionTests
             mockBuilder.EventBus
         );
 
-        connection.Connect();
+        connection.Status.State.Should().Be(PersistentConnectionState.NotInitialised);
 
-        connection.IsConnected.Should().BeTrue();
+        connection.EnsureConnected();
+
+        connection.Status.State.Should().Be(PersistentConnectionState.Connected);
         mockBuilder.ConnectionFactory.Received(1).CreateConnection(Arg.Any<IList<AmqpTcpEndpoint>>());
     }
 
@@ -66,9 +65,11 @@ public class PersistentConnectionTests
             mockBuilder.EventBus
         );
 
+        connection.Status.State.Should().Be(PersistentConnectionState.NotInitialised);
+
         Assert.Throws<Exception>(() => connection.CreateModel());
 
-        connection.IsConnected.Should().BeFalse();
+        connection.Status.State.Should().Be(PersistentConnectionState.Disconnected);
         mockBuilder.ConnectionFactory.Received().CreateConnection(Arg.Any<IList<AmqpTcpEndpoint>>());
     }
 
@@ -84,9 +85,11 @@ public class PersistentConnectionTests
             mockBuilder.EventBus
         );
 
+        connection.Status.State.Should().Be(PersistentConnectionState.NotInitialised);
+
         connection.CreateModel();
 
-        connection.IsConnected.Should().BeTrue();
+        connection.Status.State.Should().Be(PersistentConnectionState.Connected);
         mockBuilder.ConnectionFactory.Received(1).CreateConnection(Arg.Any<IList<AmqpTcpEndpoint>>());
     }
 }

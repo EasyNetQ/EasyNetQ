@@ -1,13 +1,6 @@
-// ReSharper disable InconsistentNaming
-
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
-using NSubstitute;
-using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 
@@ -49,5 +42,3 @@ public class When_a_consumer_is_cancelled_by_the_broker : IDisposable
         mockBuilder.Consumers[0].Model.Received().Dispose();
     }
 }
-
-// ReSharper restore InconsistentNaming

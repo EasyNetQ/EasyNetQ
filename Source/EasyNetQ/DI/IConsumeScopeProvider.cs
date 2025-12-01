@@ -3,7 +3,7 @@ using System;
 namespace EasyNetQ.DI;
 
 /// <summary>
-/// Provides dependency resolution scope for <see cref="RabbitAdvancedBus.Consume(Action{IConsumeConfiguration})"/>
+/// Provides dependency resolution scope for <see cref="IConsumeConfiguration"/>
 /// </summary>
 public interface IConsumeScopeProvider
 {

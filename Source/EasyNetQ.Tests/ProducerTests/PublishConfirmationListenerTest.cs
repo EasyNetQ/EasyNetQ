@@ -1,13 +1,8 @@
-using System;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Events;
-using EasyNetQ.Logging;
 using EasyNetQ.Producer;
-using NSubstitute;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
-using Xunit;
 
 namespace EasyNetQ.Tests.ProducerTests;
 
@@ -104,9 +99,9 @@ public class PublishConfirmationListenerTest
         var confirmation1 = publishConfirmationListener.CreatePendingConfirmation(model);
         var properties = new MessageProperties
         {
-            Headers =
+            Headers = new Dictionary<string, object>
             {
-                [MessagePropertiesExtensions.ConfirmationIdHeader] = Encoding.UTF8.GetBytes(confirmation1.Id.ToString())
+                { MessagePropertiesExtensions.ConfirmationIdHeader, Encoding.UTF8.GetBytes(confirmation1.Id.ToString()) }
             }
         };
         eventBus.Publish(

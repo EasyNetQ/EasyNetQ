@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace EasyNetQ;
 
 /// <summary>
@@ -130,15 +127,6 @@ public interface ISubscriptionConfiguration
     /// <param name="singleActiveConsumer">Queue's single-active-consumer flag</param>
     /// <returns>Returns a reference to itself</returns>
     ISubscriptionConfiguration WithSingleActiveConsumer(bool singleActiveConsumer = true);
-
-
-    /// <summary>
-    /// Configure the message TTL for the queue.
-    /// A message that has been in the queue for longer than the configured TTL is said to be dead.
-    /// </summary>
-    /// <param name="ttl">The message ttl</param>
-    /// <returns>Returns a reference to itself</returns>
-    ISubscriptionConfiguration WithPerQueueMessageTTl(TimeSpan ttl);
 }
 
 internal class SubscriptionConfiguration : ISubscriptionConfiguration
@@ -147,20 +135,14 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
     public bool AutoDelete { get; private set; }
     public int Priority { get; private set; }
     public ushort PrefetchCount { get; private set; }
-    public int? Expires { get; private set; }
     public bool IsExclusive { get; private set; }
-    public byte? MaxPriority { get; private set; }
     public bool Durable { get; private set; }
     public string QueueName { get; private set; }
-    public int? MaxLength { get; private set; }
-    public int? MaxLengthBytes { get; private set; }
-    public string QueueMode { get; private set; }
-    public string QueueType { get; private set; }
-    public string ExchangeType { get; private set; } = Topology.ExchangeType.Topic;
-    public string AlternateExchange { get; private set; }
-    public bool SingleActiveConsumer { get; private set; }
-    public TimeSpan? PerQueueMessageTTl { get; set; }
-    public SubscriptionConfiguration(ushort defaultPrefetchCount)
+    public string ExchangeType { get; private set; } = EasyNetQ.ExchangeType.Topic;
+    public IDictionary<string, object> QueueArguments { get; private set; }
+    public IDictionary<string, object> ExchangeArguments { get; private set; }
+
+    public SubscriptionConfiguration(ushort defaultPrefetchCount, string queueType = null)
     {
         Topics = new List<string>();
         AutoDelete = false;
@@ -168,7 +150,8 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
         PrefetchCount = defaultPrefetchCount;
         IsExclusive = false;
         Durable = true;
-        SingleActiveConsumer = false;
+        if (queueType != null)
+            QueueArguments = new Dictionary<string, object> { { Argument.QueueType, queueType } };
     }
 
     public ISubscriptionConfiguration WithTopic(string topic)
@@ -205,7 +188,7 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
 
     public ISubscriptionConfiguration WithExpires(int expires)
     {
-        Expires = expires;
+        InitializedQueueArguments.WithExpires(expires);
         return this;
     }
 
@@ -217,7 +200,7 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
 
     public ISubscriptionConfiguration WithMaxPriority(byte priority)
     {
-        MaxPriority = priority;
+        InitializedQueueArguments.WithMaxPriority(priority);
         return this;
     }
 
@@ -229,25 +212,25 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
 
     public ISubscriptionConfiguration WithMaxLength(int maxLength)
     {
-        MaxLength = maxLength;
+        InitializedQueueArguments.WithMaxLength(maxLength);
         return this;
     }
 
     public ISubscriptionConfiguration WithMaxLengthBytes(int maxLengthBytes)
     {
-        MaxLengthBytes = maxLengthBytes;
+        InitializedQueueArguments.WithMaxLengthBytes(maxLengthBytes);
         return this;
     }
 
-    public ISubscriptionConfiguration WithQueueMode(string queueMode = EasyNetQ.QueueMode.Default)
+    public ISubscriptionConfiguration WithQueueMode(string queueMode = QueueMode.Default)
     {
-        QueueMode = queueMode;
+        InitializedQueueArguments.WithQueueMode(queueMode);
         return this;
     }
 
-    public ISubscriptionConfiguration WithQueueType(string queueType = EasyNetQ.QueueType.Classic)
+    public ISubscriptionConfiguration WithQueueType(string queueType = QueueType.Classic)
     {
-        QueueType = queueType;
+        InitializedQueueArguments.WithQueueType(queueType);
         return this;
     }
 
@@ -259,19 +242,23 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
 
     public ISubscriptionConfiguration WithAlternateExchange(string alternateExchange)
     {
-        AlternateExchange = alternateExchange;
+        InitializedExchangeArguments.WithAlternateExchange(alternateExchange);
         return this;
     }
 
     public ISubscriptionConfiguration WithSingleActiveConsumer(bool singleActiveConsumer = true)
     {
-        SingleActiveConsumer = singleActiveConsumer;
+        InitializedQueueArguments.WithSingleActiveConsumer(singleActiveConsumer);
         return this;
     }
 
-    public ISubscriptionConfiguration WithPerQueueMessageTTl(TimeSpan ttl)
+    public ISubscriptionConfiguration WithQueueArguments(IDictionary<string, object> arguments)
     {
-        PerQueueMessageTTl = ttl;
+        foreach (var kvp in arguments)
+            InitializedQueueArguments[kvp.Key] = kvp.Value;
         return this;
     }
+
+    private IDictionary<string, object> InitializedQueueArguments => QueueArguments ??= new Dictionary<string, object>();
+    private IDictionary<string, object> InitializedExchangeArguments => ExchangeArguments ??= new Dictionary<string, object>();
 }

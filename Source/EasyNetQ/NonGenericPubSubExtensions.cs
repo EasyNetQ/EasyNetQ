@@ -113,66 +113,6 @@ public static class NonGenericPubSubExtensions
     }
 
     /// <summary>
-    /// Publishes a message.
-    /// </summary>
-    /// <param name="pubSub">The pubSub instance</param>
-    /// <param name="message">The message to publish</param>
-    /// <param name="messageType">The message type</param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    public static void Publish(this IPubSub pubSub, object message, Type messageType, CancellationToken cancellationToken = default)
-    {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
-
-        pubSub.Publish(message, messageType, _ => { }, cancellationToken);
-    }
-
-    /// <summary>
-    /// Publishes a message.
-    /// </summary>
-    /// <param name="pubSub">The pubSub instance</param>
-    /// <param name="message">The message to publish</param>
-    /// <param name="messageType">The message type</param>
-    /// <param name="configure">
-    /// Fluent configuration e.g. x => x.WithTopic("*.brighton").WithPriority(2)
-    /// </param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    public static void Publish(
-        this IPubSub pubSub,
-        object message,
-        Type messageType,
-        Action<IPublishConfiguration> configure,
-        CancellationToken cancellationToken = default
-    )
-    {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
-
-        pubSub.PublishAsync(message, messageType, configure, cancellationToken)
-            .GetAwaiter()
-            .GetResult();
-    }
-
-    /// <summary>
-    /// Publishes a message with a topic
-    /// </summary>
-    /// <param name="pubSub">The pubSub instance</param>
-    /// <param name="message">The message to publish</param>
-    /// <param name="messageType">The message type</param>
-    /// <param name="topic">The topic string</param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    public static void Publish(
-        this IPubSub pubSub,
-        object message,
-        Type messageType,
-        string topic,
-        CancellationToken cancellationToken = default
-    )
-    {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
-
-        pubSub.Publish(message, messageType, c => c.WithTopic(topic), cancellationToken);
-    }
-
-    /// <summary>
     /// Subscribes to a stream of messages that match a .NET type.
     /// </summary>
     /// <param name="pubSub">The pubSub instance</param>
@@ -255,46 +195,5 @@ public static class NonGenericPubSubExtensions
             return lambda.Compile();
         });
         return subscribeDelegate(pubSub, subscriptionId, messageType, onMessage, configure, cancellationToken);
-    }
-
-    /// <summary>
-    /// Subscribes to a stream of messages that match a .NET type.
-    /// </summary>
-    /// <param name="pubSub">The pubSub instance</param>
-    /// <param name="subscriptionId">
-    /// A unique identifier for the subscription. Two subscriptions with the same subscriptionId
-    /// and type will get messages delivered in turn. This is useful if you want multiple subscribers
-    /// to load balance a subscription in a round-robin fashion.
-    /// </param>
-    /// <param name="messageType">
-    /// The type to subscribe to
-    /// </param>
-    /// <param name="onMessage">
-    /// The action to run when a message arrives. onMessage can immediately return a Task and
-    /// then continue processing asynchronously. When the Task completes the message will be
-    /// Ack'd.
-    /// </param>
-    /// <param name="configure">
-    /// Fluent configuration e.g. x => x.WithTopic("uk.london").WithArgument("x-message-ttl", "60")
-    /// </param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    /// <returns>
-    /// An <see cref="SubscriptionResult"/>
-    /// Call Dispose on it or on its <see cref="SubscriptionResult.ConsumerCancellation"/> to cancel the subscription.
-    /// </returns>
-    public static SubscriptionResult Subscribe(
-        this IPubSub pubSub,
-        string subscriptionId,
-        Type messageType,
-        Func<object, Type, CancellationToken, Task> onMessage,
-        Action<ISubscriptionConfiguration> configure,
-        CancellationToken cancellationToken = default
-    )
-    {
-        Preconditions.CheckNotNull(pubSub, nameof(pubSub));
-
-        return pubSub.SubscribeAsync(subscriptionId, messageType, onMessage, configure, cancellationToken)
-            .GetAwaiter()
-            .GetResult();
     }
 }

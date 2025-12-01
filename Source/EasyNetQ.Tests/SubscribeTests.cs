@@ -1,17 +1,8 @@
-// ReSharper disable InconsistentNaming
-
 using EasyNetQ.Consumer;
-using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
-using FluentAssertions;
-using NSubstitute;
+using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace EasyNetQ.Tests;
 
@@ -33,7 +24,7 @@ public class When_subscribe_is_called : IDisposable
         };
 
         mockBuilder = new MockBuilder(x => x
-            .Register<IConventions>(conventions)
+            .AddSingleton<IConventions>(conventions)
         );
 
         subscriptionResult = mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, _ => { });
@@ -124,8 +115,8 @@ public class When_subscribe_is_called : IDisposable
 
 public class When_subscribe_with_configuration_is_called
 {
-    [InlineData("ttt", true, 99, 999, 10, true, (byte)11, false, "qqq", 1001, 10001, 6000)]
-    [InlineData(null, false, 0, 0, null, false, null, true, "qqq", null, null, null)]
+    [InlineData("ttt", true, 99, 999, 10, true, (byte)11, false, "qqq", 1001, 10001)]
+    [InlineData(null, false, 0, 0, null, false, null, true, "qqq", null, null)]
     [Theory]
     public void Queue_should_be_declared_with_correct_options(
         string topic,
@@ -138,58 +129,49 @@ public class When_subscribe_with_configuration_is_called
         bool durable,
         string queueName,
         int? maxLength,
-        int? maxLengthBytes,
-        int? perQueueMessageTtlInMs
+        int? maxLengthBytes
     )
     {
         var mockBuilder = new MockBuilder();
-        using (mockBuilder.Bus)
-        {
-            // Configure subscription
-            mockBuilder.PubSub.Subscribe<MyMessage>(
-                "x",
-                _ => { },
-                c =>
+        // Configure subscription
+        mockBuilder.PubSub.Subscribe<MyMessage>(
+            "x",
+            _ => { },
+            c =>
+            {
+                c.WithAutoDelete(autoDelete)
+                    .WithPriority(priority)
+                    .WithPrefetchCount(prefetchCount)
+                    .AsExclusive(isExclusive)
+                    .WithDurable(durable)
+                    .WithQueueName(queueName);
+
+                if (topic != null)
                 {
-                    c.WithAutoDelete(autoDelete)
-                        .WithPriority(priority)
-                        .WithPrefetchCount(prefetchCount)
-                        .AsExclusive(isExclusive)
-                        .WithDurable(durable)
-                        .WithQueueName(queueName);
-
-                    if (topic != null)
-                    {
-                        c.WithTopic(topic);
-                    }
-
-                    if (maxPriority.HasValue)
-                    {
-                        c.WithMaxPriority(maxPriority.Value);
-                    }
-
-                    if (expires.HasValue)
-                    {
-                        c.WithExpires(expires.Value);
-                    }
-
-                    if (maxLength.HasValue)
-                    {
-                        c.WithMaxLength(maxLength.Value);
-                    }
-
-                    if (maxLengthBytes.HasValue)
-                    {
-                        c.WithMaxLengthBytes(maxLengthBytes.Value);
-                    }
-
-                    if (perQueueMessageTtlInMs.HasValue)
-                    {
-                        c.WithPerQueueMessageTTl(TimeSpan.FromMilliseconds(perQueueMessageTtlInMs.Value));
-                    }
+                    c.WithTopic(topic);
                 }
-            );
-        }
+
+                if (maxPriority.HasValue)
+                {
+                    c.WithMaxPriority(maxPriority.Value);
+                }
+
+                if (expires.HasValue)
+                {
+                    c.WithExpires(expires.Value);
+                }
+
+                if (maxLength.HasValue)
+                {
+                    c.WithMaxLength(maxLength.Value);
+                }
+
+                if (maxLengthBytes.HasValue)
+                {
+                    c.WithMaxLengthBytes(maxLengthBytes.Value);
+                }
+            }
+        );
 
         // Assert that queue got declared correctly
         mockBuilder.Channels[1].Received().QueueDeclare(
@@ -198,15 +180,12 @@ public class When_subscribe_with_configuration_is_called
             Arg.Is(false),
             Arg.Is(autoDelete),
             Arg.Is<IDictionary<string, object>>(
-                x =>
-                    (!expires.HasValue || expires.Value == (int)x["x-expires"]) &&
-                    (!maxPriority.HasValue || maxPriority.Value == (int)x["x-max-priority"]) &&
-                    (!maxLength.HasValue || maxLength.Value == (int)x["x-max-length"]) &&
-                    (!maxLengthBytes.HasValue || maxLengthBytes.Value == (int)x["x-max-length-bytes"]) &&
-                    (!perQueueMessageTtlInMs.HasValue || perQueueMessageTtlInMs.Value == (int)x["x-message-ttl"])
+                x => (!expires.HasValue || expires.Value == (int)x["x-expires"]) &&
+                     (!maxPriority.HasValue || maxPriority.Value == (byte)x["x-max-priority"]) &&
+                     (!maxLength.HasValue || maxLength.Value == (int)x["x-max-length"]) &&
+                     (!maxLengthBytes.HasValue || maxLengthBytes.Value == (int)x["x-max-length-bytes"])
             )
         );
-
 
         // Assert that consumer was created correctly
         mockBuilder.Channels[2].Received().BasicConsume(
@@ -227,7 +206,8 @@ public class When_subscribe_with_configuration_is_called
             Arg.Is(queueName),
             Arg.Is("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
             Arg.Is(topic ?? "#"),
-            Arg.Is((IDictionary<string, object>)null));
+            Arg.Is((IDictionary<string, object>)null)
+        );
     }
 }
 
@@ -249,17 +229,14 @@ public class When_a_message_is_delivered : IDisposable
             ConsumerTagConvention = () => consumerTag
         };
 
-        mockBuilder = new MockBuilder(x => x.Register<IConventions>(conventions));
-
-        var autoResetEvent = new AutoResetEvent(false);
-        mockBuilder.EventBus.Subscribe((in AckEvent _) => autoResetEvent.Set());
+        mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(conventions));
 
         mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, message => { deliveredMessage = message; });
 
         const string text = "Hello there, I am the text!";
         originalMessage = new MyMessage { Text = text };
 
-        using var serializedMessage = new JsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
+        using var serializedMessage = new ReflectionBasedNewtonsoftJsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
 
         // deliver a message
         mockBuilder.Consumers[0].HandleBasicDeliver(
@@ -274,10 +251,7 @@ public class When_a_message_is_delivered : IDisposable
                 CorrelationId = correlationId
             },
             serializedMessage.Memory
-        );
-
-        // wait for the subscription thread to handle the message ...
-        autoResetEvent.WaitOne(1000);
+        ).GetAwaiter().GetResult();
     }
 
     public void Dispose()
@@ -315,8 +289,8 @@ public class When_the_handler_throws_an_exception : IDisposable
     private readonly Exception originalException = new("Some exception message");
 
     private readonly MyMessage originalMessage;
-    private ConsumerExecutionContext basicDeliverEventArgs;
-    private readonly IConsumerErrorStrategy consumerErrorStrategy;
+    private ConsumeContext basicDeliverEventArgs;
+    private readonly IConsumeErrorStrategy consumeErrorStrategy;
     private readonly MockBuilder mockBuilder;
     private Exception raisedException;
 
@@ -327,18 +301,20 @@ public class When_the_handler_throws_an_exception : IDisposable
             ConsumerTagConvention = () => consumerTag
         };
 
-        consumerErrorStrategy = Substitute.For<IConsumerErrorStrategy>();
-        consumerErrorStrategy.HandleConsumerErrorAsync(default, null)
-            .ReturnsForAnyArgs(i =>
-            {
-                basicDeliverEventArgs = (ConsumerExecutionContext)i[0];
-                raisedException = (Exception)i[1];
-                return Task.FromResult(AckStrategies.Ack);
-            });
+        consumeErrorStrategy = Substitute.For<IConsumeErrorStrategy>();
+        consumeErrorStrategy.HandleErrorAsync(Arg.Any<ConsumeContext>(), Arg.Any<Exception>())
+            .ReturnsForAnyArgs(
+                i =>
+                {
+                    basicDeliverEventArgs = (ConsumeContext)i[0];
+                    raisedException = (Exception)i[1];
+                    return new ValueTask<AckStrategy>(AckStrategies.Ack);
+                }
+            );
 
         mockBuilder = new MockBuilder(x => x
-            .Register<IConventions>(conventions)
-            .Register(consumerErrorStrategy)
+            .AddSingleton<IConventions>(conventions)
+            .AddSingleton(consumeErrorStrategy)
         );
 
         mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, _ => throw originalException);
@@ -346,7 +322,7 @@ public class When_the_handler_throws_an_exception : IDisposable
         const string text = "Hello there, I am the text!";
         originalMessage = new MyMessage { Text = text };
 
-        using var serializedMessage = new JsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
+        using var serializedMessage = new ReflectionBasedNewtonsoftJsonSerializer().MessageToBytes(typeof(MyMessage), originalMessage);
 
         // deliver a message
         mockBuilder.Consumers[0].HandleBasicDeliver(
@@ -361,12 +337,7 @@ public class When_the_handler_throws_an_exception : IDisposable
                 CorrelationId = correlationId
             },
             serializedMessage.Memory
-        );
-
-        // wait for the subscription thread to handle the message ...
-        var autoResetEvent = new AutoResetEvent(false);
-        mockBuilder.EventBus.Subscribe((in AckEvent _) => autoResetEvent.Set());
-        autoResetEvent.WaitOne(1000);
+        ).GetAwaiter().GetResult();
     }
 
     public void Dispose()
@@ -383,8 +354,8 @@ public class When_the_handler_throws_an_exception : IDisposable
     [Fact]
     public void Should_invoke_the_consumer_error_strategy()
     {
-        consumerErrorStrategy.Received()
-            .HandleConsumerErrorAsync(Arg.Any<ConsumerExecutionContext>(), Arg.Any<Exception>(), Arg.Any<CancellationToken>());
+        consumeErrorStrategy.Received()
+            .HandleErrorAsync(Arg.Any<ConsumeContext>(), Arg.Any<Exception>());
     }
 
     [Fact]
@@ -407,7 +378,7 @@ public class When_a_subscription_is_cancelled_by_the_user : IDisposable
 {
     private const string subscriptionId = "the_subscription_id";
     private const string consumerTag = "the_consumer_tag";
-    private MockBuilder mockBuilder;
+    private readonly MockBuilder mockBuilder;
 
     public When_a_subscription_is_cancelled_by_the_user()
     {
@@ -416,7 +387,7 @@ public class When_a_subscription_is_cancelled_by_the_user : IDisposable
             ConsumerTagConvention = () => consumerTag
         };
 
-        mockBuilder = new MockBuilder(x => x.Register<IConventions>(conventions));
+        mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(conventions));
         var subscriptionResult = mockBuilder.PubSub.Subscribe<MyMessage>(subscriptionId, _ => { });
         var are = new AutoResetEvent(false);
         mockBuilder.EventBus.Subscribe((in ConsumerModelDisposedEvent _) => are.Set());
@@ -435,5 +406,3 @@ public class When_a_subscription_is_cancelled_by_the_user : IDisposable
         mockBuilder.Consumers[0].Model.Received().Dispose();
     }
 }
-
-// ReSharper restore InconsistentNaming

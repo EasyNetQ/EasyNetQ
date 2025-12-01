@@ -1,9 +1,4 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Internals;
-using FluentAssertions;
-using Xunit;
 
 namespace EasyNetQ.Tests.Internals;
 
@@ -31,7 +26,7 @@ public class AsyncQueueTests
     {
         using var queue = new AsyncQueue<int>();
         using var dequeueCts = new CancellationTokenSource();
-        var dequeueTask = queue.DequeueAsync(dequeueCts.Token);
+        var dequeueTask = queue.DequeueAsync(dequeueCts.Token).AsTask();
         var _ = Task.Run(dequeueCts.Cancel, CancellationToken.None);
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => dequeueTask);
     }

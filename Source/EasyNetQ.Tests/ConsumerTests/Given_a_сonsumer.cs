@@ -1,12 +1,6 @@
-// ReSharper disable InconsistentNaming
-
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using EasyNetQ.Consumer;
-using EasyNetQ.Logging;
 using EasyNetQ.Topology;
-using NSubstitute;
+using Microsoft.Extensions.Logging;
 
 namespace EasyNetQ.Tests.ConsumerTests;
 
@@ -44,7 +38,7 @@ public abstract class Given_a_сonsumer
                     {
                         queue,
                         new PerQueueConsumerConfiguration(
-                            false, "", false, null, (_, _, _, _) => Task.FromResult(AckStrategies.Ack)
+                            false, "", false, null, _ => new(AckStrategies.Ack)
                         )
                     }
                 }
@@ -54,5 +48,3 @@ public abstract class Given_a_сonsumer
         );
     }
 }
-
-// ReSharper restore InconsistentNaming

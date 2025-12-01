@@ -1,10 +1,4 @@
-// ReSharper disable InconsistentNaming
-
-using FluentAssertions;
-using NSubstitute;
-using System.Collections.Generic;
 using EasyNetQ.Consumer;
-using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 
@@ -12,7 +6,7 @@ public class When_consume_is_called : ConsumerTestBase
 {
     protected override void AdditionalSetUp()
     {
-        StartConsumer((_, _, _) => AckStrategies.Ack);
+        StartConsumer((_, _, _, _) => AckStrategies.Ack);
     }
 
     [Fact]

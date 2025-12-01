@@ -1,13 +1,6 @@
-// ReSharper disable InconsistentNaming
-
-using EasyNetQ.DI;
 using EasyNetQ.Tests.Mocking;
-using FluentAssertions;
-using NSubstitute;
+using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
-using System;
-using System.Collections.Generic;
-using Xunit;
 
 namespace EasyNetQ.Tests;
 
@@ -19,8 +12,8 @@ public class When_using_default_conventions
         conventions = new Conventions(typeNameSerializer);
     }
 
-    private Conventions conventions;
-    private ITypeNameSerializer typeNameSerializer;
+    private readonly Conventions conventions;
+    private readonly ITypeNameSerializer typeNameSerializer;
 
     [Fact]
     public void The_default_error_exchange_name_should_be()
@@ -34,7 +27,7 @@ public class When_using_default_conventions
     [Fact]
     public void The_default_error_queue_name_should_be()
     {
-        var result = conventions.ErrorQueueNamingConvention(null);
+        var result = conventions.ErrorQueueNamingConvention(default);
         result.Should().Be("EasyNetQ_Default_Error_Queue");
     }
 
@@ -84,8 +77,8 @@ public class When_using_default_conventions
 
 public class When_using_QueueAttribute
 {
-    private Conventions conventions;
-    private ITypeNameSerializer typeNameSerializer;
+    private readonly Conventions conventions;
+    private readonly ITypeNameSerializer typeNameSerializer;
 
     public When_using_QueueAttribute()
     {
@@ -163,7 +156,7 @@ public class When_publishing_a_message : IDisposable
             TopicNamingConvention = _ => "CustomTopicNamingConvention"
         };
 
-        mockBuilder = new MockBuilder(x => x.Register<IConventions>(customConventions));
+        mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(customConventions));
         mockBuilder.PubSub.Publish(new TestMessage());
     }
 
@@ -222,7 +215,7 @@ public class When_registering_response_handler : IDisposable
             RpcRoutingKeyNamingConvention = _ => "CustomRpcRoutingKeyName"
         };
 
-        mockBuilder = new MockBuilder(x => x.Register<IConventions>(customConventions));
+        mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(customConventions));
 
         mockBuilder.Rpc.Respond<TestMessage, TestMessage>(_ => new TestMessage());
     }
@@ -257,5 +250,3 @@ public class When_registering_response_handler : IDisposable
         );
     }
 }
-
-// ReSharper restore InconsistentNaming

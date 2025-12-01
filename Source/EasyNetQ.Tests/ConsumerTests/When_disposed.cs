@@ -1,8 +1,3 @@
-// ReSharper disable InconsistentNaming
-
-using NSubstitute;
-using Xunit;
-
 namespace EasyNetQ.Tests.ConsumerTests;
 
 public class When_disposed : Given_a_сonsumer

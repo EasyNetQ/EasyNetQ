@@ -1,21 +1,10 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using NSubstitute;
-using Xunit;
-
 namespace EasyNetQ.Tests;
 
 public class NonGenericSendReceiveExtensionsTests
 {
     private readonly Action<ISendConfiguration> configure = _ => { };
-    private readonly ISendReceive sendReceive;
+    private readonly ISendReceive sendReceive = Substitute.For<ISendReceive>();
     private const string Queue = "queue";
-
-    public NonGenericSendReceiveExtensionsTests()
-    {
-        sendReceive = Substitute.For<ISendReceive>();
-    }
 
     [Fact]
     public async Task Should_be_able_to_send_struct()

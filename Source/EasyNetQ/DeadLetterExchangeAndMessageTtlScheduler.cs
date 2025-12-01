@@ -1,9 +1,5 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Internals;
 using EasyNetQ.Producer;
-using EasyNetQ.Topology;
 
 namespace EasyNetQ;
 
@@ -34,12 +30,6 @@ public class DeadLetterExchangeAndMessageTtlScheduler : IScheduler
         IExchangeDeclareStrategy exchangeDeclareStrategy
     )
     {
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
-        Preconditions.CheckNotNull(advancedBus, nameof(advancedBus));
-        Preconditions.CheckNotNull(conventions, nameof(conventions));
-        Preconditions.CheckNotNull(messageDeliveryModeStrategy, nameof(messageDeliveryModeStrategy));
-        Preconditions.CheckNotNull(exchangeDeclareStrategy, nameof(exchangeDeclareStrategy));
-
         this.configuration = configuration;
         this.advancedBus = advancedBus;
         this.conventions = conventions;
@@ -55,9 +45,6 @@ public class DeadLetterExchangeAndMessageTtlScheduler : IScheduler
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(message, nameof(message));
-        Preconditions.CheckNotNull(configure, nameof(configure));
-
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         var publishConfiguration = new FuturePublishConfiguration(conventions.TopicNamingConvention(typeof(T)));
@@ -78,27 +65,24 @@ public class DeadLetterExchangeAndMessageTtlScheduler : IScheduler
         ).ConfigureAwait(false);
 
         var futureQueue = await advancedBus.QueueDeclareAsync(
-            conventions.QueueNamingConvention(typeof(T), delayString),
-            c =>
-            {
-                c.WithMessageTtl(delay);
-                c.WithDeadLetterExchange(exchange);
-            },
-            cts.Token
+            queue: conventions.QueueNamingConvention(typeof(T), delayString),
+            arguments: new Dictionary<string, object>()
+                .WithMessageTtl(delay)
+                .WithDeadLetterExchange(exchange.Name),
+            cancellationToken: cts.Token
         ).ConfigureAwait(false);
 
         await advancedBus.BindAsync(futureExchange, futureQueue, topic, cts.Token).ConfigureAwait(false);
 
-        var properties = new MessageProperties();
-        if (publishConfiguration.Priority != null)
-            properties.Priority = publishConfiguration.Priority.Value;
-        if (publishConfiguration.Headers?.Count > 0)
-            properties.Headers.UnionWith(publishConfiguration.Headers);
-        properties.DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T));
-
+        var properties = new MessageProperties
+        {
+            Priority = publishConfiguration.Priority ?? 0,
+            Headers = publishConfiguration.MessageHeaders,
+            DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T)),
+        };
         var advancedMessage = new Message<T>(message, properties);
         await advancedBus.PublishAsync(
-            futureExchange, topic, configuration.MandatoryPublish, advancedMessage, cts.Token
+            futureExchange.Name, topic, null, publishConfiguration.PublisherConfirms, advancedMessage, cts.Token
         ).ConfigureAwait(false);
     }
 }

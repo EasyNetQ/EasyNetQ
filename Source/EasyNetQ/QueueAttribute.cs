@@ -2,17 +2,22 @@ using System;
 
 namespace EasyNetQ;
 
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = false)]
-public class QueueAttribute : Attribute
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
+public sealed class QueueAttribute : Attribute
 {
-    internal static readonly QueueAttribute Default = new(null);
+    internal static readonly QueueAttribute Default = new();
 
-    public QueueAttribute(string queueName)
+    public QueueAttribute()
     {
-        QueueName = queueName ?? string.Empty;
+        
     }
 
-    public string QueueName { get; }
+    public QueueAttribute(string name)
+    {
+        QueueName = name ?? string.Empty;
+    }
+
+    public string QueueName { get; set; }
 
     public string ExchangeName { get; set; }
 

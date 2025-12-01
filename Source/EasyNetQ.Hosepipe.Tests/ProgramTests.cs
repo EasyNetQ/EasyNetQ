@@ -1,10 +1,5 @@
 // ReSharper disable InconsistentNaming
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using Xunit;
-
 namespace EasyNetQ.Hosepipe.Tests;
 
 public class ProgramTests
@@ -149,8 +144,8 @@ public class MockQueueRetrieval : IQueueRetrieval
 {
     public IEnumerable<HosepipeMessage> GetMessagesFromQueue(QueueParameters parameters)
     {
-        yield return new HosepipeMessage("some message", new MessageProperties(), Helper.CreateMessageReceivedInfo());
-        yield return new HosepipeMessage("some message", new MessageProperties(), Helper.CreateMessageReceivedInfo());
+        yield return new HosepipeMessage("some message", MessageProperties.Empty, Helper.CreateMessageReceivedInfo());
+        yield return new HosepipeMessage("some message", MessageProperties.Empty, Helper.CreateMessageReceivedInfo());
     }
 }
 
@@ -161,8 +156,8 @@ public class MockMessageReader : IMessageReader
     public IEnumerable<HosepipeMessage> ReadMessages(QueueParameters parameters)
     {
         Parameters = parameters;
-        yield return new HosepipeMessage("some message", new MessageProperties(), Helper.CreateMessageReceivedInfo());
-        yield return new HosepipeMessage("some message", new MessageProperties(), Helper.CreateMessageReceivedInfo());
+        yield return new HosepipeMessage("some message", MessageProperties.Empty, Helper.CreateMessageReceivedInfo());
+        yield return new HosepipeMessage("some message", MessageProperties.Empty, Helper.CreateMessageReceivedInfo());
     }
 
     public IEnumerable<HosepipeMessage> ReadMessages(QueueParameters parameters, string messageName)

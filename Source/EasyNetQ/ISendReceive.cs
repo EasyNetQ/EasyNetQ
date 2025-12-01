@@ -1,8 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using EasyNetQ.Internals;
-
 namespace EasyNetQ;
 
 /// <summary>
@@ -35,7 +30,7 @@ public interface ISendReceive
     /// <param name="configure">Action to configure consumer with</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>Consumer cancellation. Call Dispose to stop consuming</returns>
-    AwaitableDisposable<IDisposable> ReceiveAsync(
+    Task<IAsyncDisposable> ReceiveAsync(
         string queue,
         Action<IReceiveRegistration> addHandlers,
         Action<IReceiveConfiguration> configure,

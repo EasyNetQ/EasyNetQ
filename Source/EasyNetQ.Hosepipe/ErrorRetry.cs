@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using EasyNetQ.Consumer;
 using EasyNetQ.SystemMessages;
 

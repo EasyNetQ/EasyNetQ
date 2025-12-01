@@ -1,19 +1,21 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client.Exceptions;
-using Xunit;
 
 namespace EasyNetQ.IntegrationTests.Advanced;
 
 [Collection("RabbitMQ")]
 public class When_delete_a_queue_with_name : IDisposable
 {
+    private readonly ServiceProvider serviceProvider;
     private readonly IBus bus;
 
     public When_delete_a_queue_with_name(RabbitMQFixture rmqFixture)
     {
-        bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=-1");
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddEasyNetQ($"host={rmqFixture.Host};prefetchCount=1;timeout=-1");
+
+        serviceProvider = serviceCollection.BuildServiceProvider();
+        bus = serviceProvider.GetRequiredService<IBus>();
     }
 
     [Fact]
@@ -22,7 +24,7 @@ public class When_delete_a_queue_with_name : IDisposable
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
         var queueName = Guid.NewGuid().ToString();
-        var queue = await bus.Advanced.QueueDeclareAsync(queueName, cts.Token);
+        var queue = await bus.Advanced.QueueDeclareAsync(queue: queueName, cancellationToken: cts.Token);
 
         await bus.Advanced.QueueDeclarePassiveAsync(queueName, cts.Token);
         await bus.Advanced.QueueDeleteAsync(queueName, cancellationToken: cts.Token);
@@ -31,5 +33,8 @@ public class When_delete_a_queue_with_name : IDisposable
         Assert.Equal(404, exception.ShutdownReason.ReplyCode);
     }
 
-    public void Dispose() => bus.Dispose();
+    public void Dispose()
+    {
+        serviceProvider?.Dispose();
+    }
 }

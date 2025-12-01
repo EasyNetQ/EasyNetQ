@@ -1,12 +1,6 @@
-// ReSharper disable InconsistentNaming
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using EasyNetQ.Tests.Mocking;
-using NSubstitute;
 using RabbitMQ.Client;
-using Xunit;
 
 namespace EasyNetQ.Tests.ProducerTests;
 
@@ -73,5 +67,3 @@ public class MyImplementation : IMyMessageInterface
     public string Text { get; set; }
     public string NotInInterface { get; set; }
 }
-
-// ReSharper restore InconsistentNaming

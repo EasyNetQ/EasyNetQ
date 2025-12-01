@@ -1,15 +1,8 @@
-// ReSharper disable InconsistentNaming
-
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Events;
 using EasyNetQ.Persistent;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
-using NSubstitute;
 using RabbitMQ.Client;
-using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 
@@ -48,5 +41,3 @@ public class When_a_consumer_is_started_on_exclusive_queue_and_connection_is_dro
         mockBuilder.Consumers[0].Model.Received().Dispose();
     }
 }
-
-// ReSharper restore InconsistentNaming

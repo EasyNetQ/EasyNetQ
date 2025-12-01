@@ -1,20 +1,14 @@
-// ReSharper disable InconsistentNaming
-
-using System;
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
-using FluentAssertions;
-using NSubstitute;
 using RabbitMQ.Client;
-using Xunit;
 
 namespace EasyNetQ.Tests.ChannelDispatcherTests;
 
 public class When_an_action_is_invoked_using_single_channel : IDisposable
 {
-    private readonly IPersistentChannelDispatcher dispatcher;
+    private readonly SinglePersistentChannelDispatcher dispatcher;
     private readonly IPersistentChannelFactory channelFactory;
     private readonly int actionResult;
 
@@ -54,5 +48,3 @@ public class When_an_action_is_invoked_using_single_channel : IDisposable
         actionResult.Should().Be(42);
     }
 }
-
-// ReSharper restore InconsistentNaming

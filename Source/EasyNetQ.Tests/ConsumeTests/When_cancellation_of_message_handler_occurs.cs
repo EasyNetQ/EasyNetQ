@@ -1,11 +1,4 @@
-// ReSharper disable InconsistentNaming
-
 using EasyNetQ.Consumer;
-using NSubstitute;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 
@@ -13,42 +6,38 @@ public class When_cancellation_of_message_handler_occurs : ConsumerTestBase
 {
     protected override void AdditionalSetUp()
     {
-        ConsumerErrorStrategy.HandleConsumerCancelledAsync(default)
-            .ReturnsForAnyArgs(Task.FromResult(AckStrategies.Ack));
+        ConsumeErrorStrategy.HandleCancelledAsync(default)
+            .ReturnsForAnyArgs(new ValueTask<AckStrategy>(AckStrategies.NackWithRequeue));
 
-        StartConsumer((_, _, _) =>
+        var are = new AutoResetEvent(false);
+        var consumer = StartConsumer((_, _, _, ct) =>
         {
-            Cancellation.Cancel();
-            Cancellation.Token.ThrowIfCancellationRequested();
+            are.Set();
+            Task.Delay(-1, ct).GetAwaiter().GetResult();
             return AckStrategies.Ack;
         });
-        DeliverMessage();
+        var deliverTask = DeliverMessageAsync();
+        are.WaitOne();
+        consumer.Dispose();
+        deliverTask.GetAwaiter().GetResult();
     }
 
     [Fact]
     public async Task Should_invoke_the_cancellation_strategy()
     {
-        await ConsumerErrorStrategy.Received().HandleConsumerCancelledAsync(
-            Arg.Is<ConsumerExecutionContext>(args => args.ReceivedInfo.ConsumerTag == ConsumerTag &&
-                                                     args.ReceivedInfo.DeliveryTag == DeliverTag &&
-                                                     args.ReceivedInfo.Exchange == "the_exchange" &&
-                                                     args.Body.ToArray().SequenceEqual(OriginalBody)),
-            Arg.Any<CancellationToken>());
+        await ConsumeErrorStrategy.Received().HandleCancelledAsync(
+            Arg.Is<ConsumeContext>(
+                args => args.ReceivedInfo.ConsumerTag == ConsumerTag &&
+                        args.ReceivedInfo.DeliveryTag == DeliverTag &&
+                        args.ReceivedInfo.Exchange == "the_exchange" &&
+                        args.Body.ToArray().SequenceEqual(OriginalBody)
+            )
+        );
     }
 
     [Fact]
-    public void Should_ack()
+    public void Should_nack_with_requeue()
     {
-        MockBuilder.Channels[0].Received().BasicAck(DeliverTag, false);
-    }
-
-    [Fact]
-    public void Should_dispose_of_the_consumer_error_strategy_when_the_bus_is_disposed()
-    {
-        MockBuilder.Dispose();
-
-        ConsumerErrorStrategy.Received().Dispose();
+        MockBuilder.Channels[0].Received().BasicNack(DeliverTag, false, true);
     }
 }
-
-// ReSharper restore InconsistentNaming

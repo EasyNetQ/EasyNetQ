@@ -1,4 +1,3 @@
-using System;
 using System.Buffers;
 
 namespace EasyNetQ;
@@ -37,7 +36,7 @@ public readonly struct SerializedMessage : IDisposable
     public SerializedMessage(MessageProperties properties, IMemoryOwner<byte> body)
     {
         Properties = properties;
-        Body = body?.Memory ?? ReadOnlyMemory<byte>.Empty;
+        Body = body.Memory;
         owner = body;
     }
 
@@ -52,5 +51,9 @@ public readonly struct SerializedMessage : IDisposable
     public ReadOnlyMemory<byte> Body { get; }
 
     /// <inheritdoc />
-    public void Dispose() => owner?.Dispose();
+
+    public void Dispose()
+    {
+        owner?.Dispose();
+    }
 }

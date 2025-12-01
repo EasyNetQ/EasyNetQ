@@ -46,7 +46,7 @@ public readonly struct PullResult : IPullResult
     /// <summary>
     ///     Represents a result when no message is available
     /// </summary>
-    public static PullResult NotAvailable { get; } = new(false, 0, null, null, null, null);
+    public static PullResult NotAvailable { get; } = new(false, 0, default, default, null, null);
 
     /// <summary>
     ///     Represents a result when a message is available
@@ -66,8 +66,8 @@ public readonly struct PullResult : IPullResult
     private PullResult(
         bool isAvailable,
         ulong messagesCount,
-        MessageReceivedInfo receivedInfo,
-        MessageProperties properties,
+        in MessageReceivedInfo receivedInfo,
+        in MessageProperties properties,
         in ReadOnlyMemory<byte> body,
         IDisposable disposable
     )
@@ -81,7 +81,7 @@ public readonly struct PullResult : IPullResult
     }
 
     /// <summary>
-    ///     True if a message is available
+    ///     <see langword="true"/> if a message is available
     /// </summary>
     public bool IsAvailable { get; }
 
@@ -148,7 +148,9 @@ public readonly struct PullResult : IPullResult
     /// <inheritdoc />
     public void Dispose()
     {
+#pragma warning disable IDISP007 // the injected here is created in the calling method so it should be disposed
         disposable?.Dispose();
+#pragma warning restore IDISP007
     }
 }
 
@@ -164,7 +166,7 @@ public readonly struct PullResult<T> : IPullResult
     /// <summary>
     ///     Represents a result when no message is available
     /// </summary>
-    public static PullResult<T> NotAvailable { get; } = new(false, 0, null, null);
+    public static PullResult<T> NotAvailable { get; } = new(false, 0, default, null);
 
     /// <summary>
     ///     Represents a result when a message is available
@@ -191,7 +193,7 @@ public readonly struct PullResult<T> : IPullResult
     }
 
     /// <summary>
-    ///     True if a message is available
+    ///     <see langword="true"/> if a message is available
     /// </summary>
     public bool IsAvailable { get; }
 
@@ -250,7 +252,7 @@ public readonly struct PullResult<T> : IPullResult
 /// <summary>
 ///     Allows to receive messages by pulling them one by one
 /// </summary>
-public interface IPullingConsumer<TPullResult> : IDisposable where TPullResult : IPullResult
+public interface IPullingConsumer<TPullResult> : IAsyncDisposable where TPullResult : IPullResult
 {
     /// <summary>
     ///     Receives a single message
@@ -285,7 +287,7 @@ public interface IPullingConsumer<TPullResult> : IDisposable where TPullResult :
 public readonly struct PullingConsumerOptions
 {
     /// <summary>
-    ///     True if auto ack is enabled for the consumer
+    ///     <see langword="true"/> if auto ack is enabled for the consumer
     /// </summary>
     public bool AutoAck { get; }
 
@@ -347,8 +349,7 @@ public class PullingConsumer : IPullingConsumer<PullResult>
             return PullResult.NotAvailable;
 
         var messagesCount = basicGetResult.MessageCount;
-        var messageProperties = new MessageProperties();
-        messageProperties.CopyFrom(basicGetResult.BasicProperties);
+        var messageProperties = new MessageProperties(basicGetResult.BasicProperties);
         var messageReceivedInfo = new MessageReceivedInfo(
             "",
             basicGetResult.DeliveryTag,
@@ -376,7 +377,7 @@ public class PullingConsumer : IPullingConsumer<PullResult>
 
         using var cts = cancellationToken.WithTimeout(options.Timeout);
 
-        await channel.InvokeChannelActionAsync<NoResult, BasicAckAction>(
+        await channel.InvokeChannelActionAsync<bool, BasicAckAction>(
             new BasicAckAction(deliveryTag, multiple), cts.Token
         ).ConfigureAwait(false);
     }
@@ -391,15 +392,15 @@ public class PullingConsumer : IPullingConsumer<PullResult>
 
         using var cts = cancellationToken.WithTimeout(options.Timeout);
 
-        await channel.InvokeChannelActionAsync<NoResult, BasicNackAction>(
+        await channel.InvokeChannelActionAsync<bool, BasicNackAction>(
             new BasicNackAction(deliveryTag, multiple, requeue), cts.Token
         ).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
-    public void Dispose()
+    public ValueTask DisposeAsync()
     {
-        channel.Dispose();
+        return channel.DisposeAsync();
     }
 
     private readonly struct BasicGetAction : IPersistentChannelAction<BasicGetResult>
@@ -413,10 +414,13 @@ public class PullingConsumer : IPullingConsumer<PullResult>
             this.autoAck = autoAck;
         }
 
-        public BasicGetResult Invoke(IModel model) => model.BasicGet(queue.Name, autoAck);
+        public async Task<BasicGetResult> InvokeAsync(IChannel channel, CancellationToken cancellationToken = default)
+        {
+            return await channel.BasicGetAsync(queue.Name, autoAck, cancellationToken);
+        }
     }
 
-    private readonly struct BasicAckAction : IPersistentChannelAction<NoResult>
+    private readonly struct BasicAckAction : IPersistentChannelAction<bool>
     {
         private readonly ulong deliveryTag;
         private readonly bool multiple;
@@ -427,14 +431,14 @@ public class PullingConsumer : IPullingConsumer<PullResult>
             this.multiple = multiple;
         }
 
-        public NoResult Invoke(IModel model)
+        public async Task<bool> InvokeAsync(IChannel channel, CancellationToken cancellationToken = default)
         {
-            model.BasicAck(deliveryTag, multiple);
-            return NoResult.Instance;
+            await channel.BasicAckAsync(deliveryTag, multiple, cancellationToken);
+            return true;
         }
     }
 
-    private readonly struct BasicNackAction : IPersistentChannelAction<NoResult>
+    private readonly struct BasicNackAction : IPersistentChannelAction<bool>
     {
         private readonly ulong deliveryTag;
         private readonly bool multiple;
@@ -447,10 +451,10 @@ public class PullingConsumer : IPullingConsumer<PullResult>
             this.requeue = requeue;
         }
 
-        public NoResult Invoke(IModel model)
+        public async Task<bool> InvokeAsync(IChannel channel, CancellationToken cancellationToken = default)
         {
-            model.BasicNack(deliveryTag, multiple, requeue);
-            return NoResult.Instance;
+            await channel.BasicNackAsync(deliveryTag, multiple, requeue, cancellationToken);
+            return true;
         }
     }
 }
@@ -510,8 +514,8 @@ public class PullingConsumer<T> : IPullingConsumer<PullResult<T>>
     }
 
     /// <inheritdoc />
-    public void Dispose()
+    public ValueTask DisposeAsync()
     {
-        consumer.Dispose();
+        return consumer.DisposeAsync();
     }
 }

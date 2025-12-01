@@ -1,6 +1,4 @@
-using System;
 using EasyNetQ.Internals;
-using EasyNetQ.Topology;
 
 namespace EasyNetQ;
 
@@ -32,7 +30,7 @@ public delegate string ErrorQueueNameConvention(MessageReceivedInfo receivedInfo
 /// <summary>
 ///     Convention for error queue type
 /// </summary>
-public delegate string? ErrorQueueTypeConvention();
+public delegate string ErrorQueueTypeConvention();
 
 /// <summary>
 ///     Convention for error exchange naming
@@ -154,12 +152,9 @@ public class Conventions : IConventions
     /// </summary>
     public Conventions(ITypeNameSerializer typeNameSerializer)
     {
-        Preconditions.CheckNotNull(typeNameSerializer, nameof(typeNameSerializer));
-
         ExchangeNamingConvention = type =>
         {
             var attr = GetQueueAttribute(type);
-
             return string.IsNullOrEmpty(attr.ExchangeName)
                 ? typeNameSerializer.Serialize(type)
                 : attr.ExchangeName;
@@ -168,10 +163,7 @@ public class Conventions : IConventions
         QueueTypeConvention = type =>
         {
             var attr = GetQueueAttribute(type);
-
-            return string.IsNullOrEmpty(attr.QueueType)
-                ? null
-                : attr.QueueType;
+            return attr.QueueType;
         };
 
         TopicNamingConvention = _ => "";
@@ -180,7 +172,7 @@ public class Conventions : IConventions
         {
             var attr = GetQueueAttribute(type);
 
-            if (string.IsNullOrEmpty(attr.QueueName))
+            if (attr.QueueName == null)
             {
                 var typeName = typeNameSerializer.Serialize(type);
 
@@ -208,7 +200,7 @@ public class Conventions : IConventions
         ConsumerTagConvention = () => Guid.NewGuid().ToString();
     }
 
-    private QueueAttribute GetQueueAttribute(Type messageType)
+    private static QueueAttribute GetQueueAttribute(Type messageType)
     {
         return messageType.GetAttribute<QueueAttribute>() ?? QueueAttribute.Default;
     }

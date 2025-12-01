@@ -1,11 +1,5 @@
-// ReSharper disable InconsistentNaming
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
-using FluentAssertions;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 
@@ -20,15 +14,10 @@ public class When_a_polymorphic_message_is_delivered_to_the_consumer : IDisposab
 
         var queue = new Queue("test_queue", false);
 
-        var are = new AutoResetEvent(false);
-        mockBuilder.Bus.Advanced.Consume<ITestMessageInterface>(queue, (message, _) => Task.Factory.StartNew(() =>
-        {
-            receivedMessage = message.Body;
-            are.Set();
-        }));
+        mockBuilder.Bus.Advanced.Consume<ITestMessageInterface>(queue, (message, _) => receivedMessage = message.Body);
 
         var publishedMessage = new Implementation { Text = "Hello Polymorphs!" };
-        var serializedMessage = new JsonSerializer().MessageToBytes(typeof(Implementation), publishedMessage);
+        var serializedMessage = new ReflectionBasedNewtonsoftJsonSerializer().MessageToBytes(typeof(Implementation), publishedMessage);
         var properties = new BasicProperties
         {
             Type = new DefaultTypeNameSerializer().Serialize(typeof(Implementation))
@@ -42,12 +31,7 @@ public class When_a_polymorphic_message_is_delivered_to_the_consumer : IDisposab
             "routing_key",
             properties,
             serializedMessage.Memory
-        );
-
-        if (!are.WaitOne(5000))
-        {
-            throw new TimeoutException();
-        }
+        ).GetAwaiter().GetResult();
     }
 
     public void Dispose()
@@ -73,5 +57,3 @@ public class Implementation : ITestMessageInterface
 {
     public string Text { get; set; }
 }
-
-// ReSharper restore InconsistentNaming
