@@ -19,7 +19,7 @@ public class When_an_action_is_invoked_using_multi_channel : IAsyncLifetime
         channelFactory = Substitute.For<IPersistentChannelFactory>();
         producerConnection = Substitute.For<IProducerConnection>();
 
-        
+
     }
 
     public async Task InitializeAsync()

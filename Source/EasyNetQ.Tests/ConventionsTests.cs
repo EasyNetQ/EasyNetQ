@@ -158,7 +158,7 @@ public class When_publishing_a_message : IAsyncLifetime
         };
 
         mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(customConventions));
-        
+
     }
 
     public Task InitializeAsync() => mockBuilder.PubSub.PublishAsync(new TestMessage());

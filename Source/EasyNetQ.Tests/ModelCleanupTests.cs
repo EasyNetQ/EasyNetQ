@@ -42,7 +42,7 @@ public sealed class ModelCleanupTests : IAsyncLifetime
     {
         await bus.PubSub.PublishAsync(new TestMessage());
         await mockBuilder.DisposeAsync();
-        
+
         mockBuilder.Channels[0].Received().DisposeAsync();
     }
 
@@ -53,7 +53,7 @@ public sealed class ModelCleanupTests : IAsyncLifetime
 
 #pragma warning disable IDISP004
         mockBuilder.EventBus.Subscribe((PublishedMessageEvent _) => Task.FromResult(waiter.Signal()));
-        mockBuilder.EventBus.Subscribe((StartConsumingSucceededEvent _) =>Task.FromResult(waiter.Signal()));
+        mockBuilder.EventBus.Subscribe((StartConsumingSucceededEvent _) => Task.FromResult(waiter.Signal()));
 #pragma warning restore IDISP004
 
         _ = bus.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());

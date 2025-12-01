@@ -68,7 +68,7 @@ public class When_auto_subscribing_with_subscription_configuration_attribute : I
         serviceProvider?.Dispose();
     }
 
-    public Task InitializeAsync()=> autoSubscriber.SubscribeAsync([typeof(MyConsumerWithAttr)]);
+    public Task InitializeAsync() => autoSubscriber.SubscribeAsync([typeof(MyConsumerWithAttr)]);
 
     public Task DisposeAsync() => Task.CompletedTask;
 

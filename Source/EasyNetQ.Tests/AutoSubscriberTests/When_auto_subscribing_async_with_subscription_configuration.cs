@@ -33,7 +33,7 @@ public class When_auto_subscribing_async_with_subscription_configuration_attribu
             .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
 
 #pragma warning disable IDISP004
-        
+
 #pragma warning restore IDISP004
     }
     public async Task InitializeAsync()

@@ -35,7 +35,7 @@ public abstract class ConsumerTestBase : IAsyncLifetime
     {
         await MockBuilder.DisposeAsync();
     }
- 
+
     protected async Task<IAsyncDisposable> StartConsumerAsync(
         Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, CancellationToken, AckStrategyAsync> handler,
         bool autoAck = false

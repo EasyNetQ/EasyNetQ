@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests;
 
-public class When_auto_subscribing_async_with_subscription_configuration_action : IDisposable,IAsyncLifetime
+public class When_auto_subscribing_async_with_subscription_configuration_action : IDisposable, IAsyncLifetime
 {
     private readonly IBus bus;
     private readonly ServiceProvider serviceProvider;
@@ -40,7 +40,7 @@ public class When_auto_subscribing_async_with_subscription_configuration_action 
             .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
 
 #pragma warning disable IDISP004
-        
+
 #pragma warning restore IDISP004
     }
 
@@ -80,7 +80,7 @@ public class When_auto_subscribing_async_with_subscription_configuration_action 
         serviceProvider?.Dispose();
     }
 
-    public Task InitializeAsync()=> autoSubscriber.SubscribeAsync([typeof(MyConsumerWithAction)]);
+    public Task InitializeAsync() => autoSubscriber.SubscribeAsync([typeof(MyConsumerWithAction)]);
 
     public Task DisposeAsync() => Task.CompletedTask;
 

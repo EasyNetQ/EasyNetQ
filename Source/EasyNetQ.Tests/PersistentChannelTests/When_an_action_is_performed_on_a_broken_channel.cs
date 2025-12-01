@@ -94,7 +94,7 @@ public class When_an_action_is_performed_and_channel_reopens
             .Do(_ => throw exception);
 
 #pragma warning disable IDISP004
-         persistentConnection.CreateChannelAsync(Arg.Any<CreateChannelOptions>(), default).Returns(_ => brokenChannel);
+        persistentConnection.CreateChannelAsync(Arg.Any<CreateChannelOptions>(), default).Returns(_ => brokenChannel);
 #pragma warning restore IDISP004
 
         await using var persistentChannel = new PersistentChannel(

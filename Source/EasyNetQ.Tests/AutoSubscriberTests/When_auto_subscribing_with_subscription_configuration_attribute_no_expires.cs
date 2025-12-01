@@ -67,7 +67,7 @@ public class When_auto_subscribing_with_subscription_configuration_attribute_no_
         serviceProvider?.Dispose();
     }
 
-    public Task InitializeAsync()=> autoSubscriber.SubscribeAsync([typeof(MyConsumerWithAttr)]);
+    public Task InitializeAsync() => autoSubscriber.SubscribeAsync([typeof(MyConsumerWithAttr)]);
     public Task DisposeAsync() => Task.CompletedTask;
 
     // Discovered by reflection over test assembly, do not remove.

@@ -28,7 +28,7 @@ public class When_auto_subscribing_with_explicit_implementation : IAsyncLifetime
 
         autoSubscriber = new AutoSubscriber(mockBuilder.Bus, serviceProvider, "my_app");
 #pragma warning disable IDISP004
-        
+
 #pragma warning restore IDISP004
     }
 

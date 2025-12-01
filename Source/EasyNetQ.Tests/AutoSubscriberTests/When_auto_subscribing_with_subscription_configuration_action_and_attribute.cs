@@ -41,7 +41,7 @@ public class When_auto_subscribing_with_subscription_configuration_action_and_at
             .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
 
 #pragma warning disable IDISP004
-        
+
 #pragma warning restore IDISP004
     }
 

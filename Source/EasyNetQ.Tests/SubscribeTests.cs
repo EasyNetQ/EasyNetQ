@@ -37,7 +37,7 @@ public class When_subscribe_is_called : IAsyncLifetime
     public async Task DisposeAsync()
     {
         await subscriptionResult.DisposeAsync();
-        
+
         await mockBuilder.DisposeAsync();
     }
 

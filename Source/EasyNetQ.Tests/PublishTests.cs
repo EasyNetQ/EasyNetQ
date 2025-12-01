@@ -75,7 +75,7 @@ public class When_publish_is_called : IAsyncLifetime
             Arg.Is(true),
             Arg.Is(false),
             Arg.Is((IDictionary<string, object>)null),
-            cancellationToken:Arg.Any<CancellationToken>()
+            cancellationToken: Arg.Any<CancellationToken>()
         );
     }
 }

@@ -184,7 +184,7 @@ public class When_a_queue_is_deleted : IAsyncLifetime
     {
         mockBuilder = new MockBuilder();
 
-   }
+    }
 
     public Task InitializeAsync() => mockBuilder.Bus.Advanced.QueueDeleteAsync("my_queue");
 
@@ -284,7 +284,7 @@ public class When_an_exchange_is_declared_passively : IAsyncLifetime
     {
         mockBuilder = new MockBuilder();
 
-        
+
     }
 
     public Task InitializeAsync() => mockBuilder.Bus.Advanced.ExchangeDeclarePassiveAsync("my_exchange");
@@ -310,7 +310,7 @@ public class When_an_exchange_is_deleted : IAsyncLifetime
     {
         mockBuilder = new MockBuilder();
 
-       
+
     }
 
     public async Task InitializeAsync()
