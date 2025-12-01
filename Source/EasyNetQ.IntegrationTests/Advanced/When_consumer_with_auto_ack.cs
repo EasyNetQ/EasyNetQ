@@ -37,16 +37,14 @@ public class When_consumer_with_auto_ack : IDisposable, IAsyncLifetime
             allMessagesReceived.Increment();
         }
 
-#warning allMessagesReceived.Decrement
-        /*
+
         await using (
             await bus.Advanced.ConsumeAsync(
                 queue,
-                (_, _, _) => allMessagesReceived.Decrement(),
-                c => c.WithAutoAck(), cancellationToken: cts.Token)
+                (_, _, _) => { allMessagesReceived.Decrement(); return Task.CompletedTask; },
+                c => c.WithAutoAck())
         )
             await allMessagesReceived.WaitAsync(cts.Token);
-        */
     }
 
     public virtual void Dispose()

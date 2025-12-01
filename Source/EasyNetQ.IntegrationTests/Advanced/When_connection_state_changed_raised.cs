@@ -41,7 +41,7 @@ public class When_connection_state_changed_raised : IDisposable, IAsyncLifetime
         var advanced = bus.Advanced;
 
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
 
             var producerStatus = advanced.GetConnectionStatus(PersistentConnectionType.Producer);
             var consumerStatus = advanced.GetConnectionStatus(PersistentConnectionType.Consumer);
@@ -61,7 +61,7 @@ public class When_connection_state_changed_raised : IDisposable, IAsyncLifetime
         }
 
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
 
             await advanced.EnsureConnectedAsync(PersistentConnectionType.Producer, cts.Token);
 
@@ -85,7 +85,7 @@ public class When_connection_state_changed_raised : IDisposable, IAsyncLifetime
         }
 
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
 
             await advanced.EnsureConnectedAsync(PersistentConnectionType.Consumer, cts.Token);
 

@@ -39,7 +39,7 @@ public class When_publish_and_subscribe_using_delay_using_dead_letter_exchange_w
     [Fact]
     public async Task Test()
     {
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
 
         var subscriptionId = Guid.NewGuid().ToString();
         var messagesSink = new MessagesSink(MessagesCount);

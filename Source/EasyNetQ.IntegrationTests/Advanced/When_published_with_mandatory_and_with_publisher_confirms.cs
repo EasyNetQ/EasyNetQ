@@ -39,7 +39,7 @@ public class When_published_with_mandatory_and_with_publisher_confirms : IDispos
             Guid.NewGuid().ToString("N"), ExchangeType.Direct, cancellationToken: cts.Token
         );
 
-        await Assert.ThrowsAsync<PublishReturnedException>(
+        await Assert.ThrowsAsync<RabbitMQ.Client.Exceptions.PublishReturnException>(
             () => bus.Advanced.PublishAsync(
                 exchange, "#", true, true, MessageProperties.Empty, Array.Empty<byte>(), cts.Token
             )

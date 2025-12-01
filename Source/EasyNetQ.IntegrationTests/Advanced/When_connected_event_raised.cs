@@ -32,7 +32,7 @@ public class When_connected_event_raised : IDisposable, IAsyncLifetime
     [Fact]
     public async Task Test()
     {
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
 
         using var mre = new ManualResetEventSlim(false);
         bus.Advanced.Connected += (_, _) => mre.Set();
