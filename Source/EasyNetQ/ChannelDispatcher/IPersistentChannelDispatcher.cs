@@ -1,6 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Persistent;
 
 namespace EasyNetQ.ChannelDispatcher;
@@ -8,7 +5,7 @@ namespace EasyNetQ.ChannelDispatcher;
 /// <summary>
 ///     Responsible for invoking client commands.
 /// </summary>
-public interface IPersistentChannelDispatcher : IDisposable
+public interface IPersistentChannelDispatcher : IAsyncDisposable
 {
     /// <summary>
     /// Invokes an action on top of model

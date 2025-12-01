@@ -1,20 +1,22 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Internals;
 using EasyNetQ.Topology;
-using Xunit;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.IntegrationTests.Advanced;
 
 [Collection("RabbitMQ")]
 public class When_consumer_callback_does_not_respect_ct : IDisposable
 {
+    private readonly ServiceProvider serviceProvider;
     private readonly IBus bus;
 
     public When_consumer_callback_does_not_respect_ct(RabbitMQFixture rmqFixture)
     {
-        bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1");
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddEasyNetQ($"host={rmqFixture.Host};prefetchCount=1;timeout=-1");
+
+        serviceProvider = serviceCollection.BuildServiceProvider();
+        bus = serviceProvider.GetRequiredService<IBus>();
     }
 
     [Fact]
@@ -28,7 +30,7 @@ public class When_consumer_callback_does_not_respect_ct : IDisposable
         var queue = await bus.Advanced.QueueDeclareAsync(queueName, cancellationToken: cts.Token);
 
         await bus.Advanced.PublishAsync(
-            Exchange.Default, queueName, true, new MessageProperties(), ReadOnlyMemory<byte>.Empty, cts.Token
+            Exchange.Default, queueName, true, true, MessageProperties.Empty, ReadOnlyMemory<byte>.Empty, cts.Token
         );
         allMessagesReceived.Increment();
 
@@ -39,8 +41,11 @@ public class When_consumer_callback_does_not_respect_ct : IDisposable
                 return Task.Delay(-1, CancellationToken.None);
             })
         )
-            allMessagesReceived.Wait();
+            await allMessagesReceived.WaitAsync(cts.Token);
     }
 
-    public void Dispose() => bus.Dispose();
+    public void Dispose()
+    {
+        serviceProvider?.Dispose();
+    }
 }

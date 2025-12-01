@@ -1,6 +1,3 @@
-using System;
-using System.Linq;
-using Xunit;
 using EasyNetQ.Internals;
 
 namespace EasyNetQ.Tests;

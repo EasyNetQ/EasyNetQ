@@ -1,5 +1,3 @@
-using Xunit;
-
 namespace EasyNetQ.Hosepipe.Tests;
 
 public static class TestExtensions

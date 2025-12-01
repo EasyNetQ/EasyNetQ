@@ -1,13 +1,9 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-
 namespace EasyNetQ.Consumer;
 
 /// <summary>
 ///     Represents a delegate which is called by consumer for every message
 /// </summary>
-public delegate Task<AckStrategy> MessageHandler(
+public delegate Task<AckStrategyAsync> MessageHandler(
     ReadOnlyMemory<byte> body,
     MessageProperties properties,
     MessageReceivedInfo receivedInfo,
@@ -17,7 +13,7 @@ public delegate Task<AckStrategy> MessageHandler(
 /// <summary>
 ///     Represents a delegate which is called by consumer for every message
 /// </summary>
-public delegate Task<AckStrategy> IMessageHandler(
+public delegate Task<AckStrategyAsync> IMessageHandler(
     IMessage message,
     MessageReceivedInfo receivedInfo,
     CancellationToken cancellationToken
@@ -26,7 +22,7 @@ public delegate Task<AckStrategy> IMessageHandler(
 /// <summary>
 ///     Represents a delegate which is called by consumer for every message
 /// </summary>
-public delegate Task<AckStrategy> IMessageHandler<in T>(
+public delegate Task<AckStrategyAsync> IMessageHandler<in T>(
     IMessage<T> message,
     MessageReceivedInfo receivedInfo,
     CancellationToken cancellationToken

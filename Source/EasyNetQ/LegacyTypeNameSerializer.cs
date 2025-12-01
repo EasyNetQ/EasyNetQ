@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Concurrent;
 using System.Reflection;
 
@@ -10,10 +9,8 @@ public class LegacyTypeNameSerializer : ITypeNameSerializer
     private readonly ConcurrentDictionary<string, Type> deserializedTypes = new();
 
     /// <inheritdoc />
-    public Type DeSerialize(string typeName)
+    public Type Deserialize(string typeName)
     {
-        Preconditions.CheckNotBlank(typeName, nameof(typeName));
-
         return deserializedTypes.GetOrAdd(typeName, t =>
         {
             var nameParts = t.Split(':');
@@ -39,8 +36,6 @@ public class LegacyTypeNameSerializer : ITypeNameSerializer
     /// <inheritdoc />
     public string Serialize(Type type)
     {
-        Preconditions.CheckNotNull(type, nameof(type));
-
         return serializedTypes.GetOrAdd(type, t =>
         {
             var typeName = t.FullName + ":" + t.GetTypeInfo().Assembly.GetName().Name;

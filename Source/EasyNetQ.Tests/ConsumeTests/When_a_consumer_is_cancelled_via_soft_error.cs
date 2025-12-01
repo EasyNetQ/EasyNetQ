@@ -1,13 +1,7 @@
-// ReSharper disable InconsistentNaming
-
-using System;
-using System.Threading.Tasks;
 using EasyNetQ.Persistent;
 using EasyNetQ.Tests.Mocking;
 using EasyNetQ.Topology;
-using NSubstitute;
 using RabbitMQ.Client;
-using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 
@@ -23,7 +17,7 @@ public class When_a_consumer_is_cancelled_via_soft_error : IDisposable
 
         mockBuilder.Bus.Advanced.Consume(
             queue,
-            (_, _, _) => { },
+            (_, _, _) => Task.Run(() => { }),
             c => c.WithConsumerTag("consumer_tag")
         );
 
@@ -32,7 +26,7 @@ public class When_a_consumer_is_cancelled_via_soft_error : IDisposable
         );
         mockBuilder.Consumers[0].HandleBasicCancel("consumer_tag").GetAwaiter().GetResult();
         // Wait for a periodic consumer restart
-        Task.Delay(TimeSpan.FromSeconds(5 + 1)).GetAwaiter().GetResult();
+        Task.Delay(TimeSpan.FromSeconds(10)).GetAwaiter().GetResult();
     }
 
     public void Dispose()
@@ -47,5 +41,3 @@ public class When_a_consumer_is_cancelled_via_soft_error : IDisposable
         mockBuilder.Consumers[1].Model.DidNotReceive().Dispose();
     }
 }
-
-// ReSharper restore InconsistentNaming

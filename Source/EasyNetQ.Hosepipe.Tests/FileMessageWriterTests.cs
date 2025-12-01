@@ -1,10 +1,5 @@
 // ReSharper disable InconsistentNaming
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using Xunit;
-
 namespace EasyNetQ.Hosepipe.Tests;
 
 public class FileMessageWriterTests
@@ -29,7 +24,7 @@ public class FileMessageWriterTests
             }
         }
 
-        var properties = new MessageProperties();
+        var properties = MessageProperties.Empty;
         var info = Helper.CreateMessageReceivedInfo();
         var writer = new FileMessageWriter();
         var messages = new List<HosepipeMessage>

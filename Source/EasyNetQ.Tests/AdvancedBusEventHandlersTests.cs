@@ -1,17 +1,10 @@
-using System;
-using System.Collections.Generic;
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
-using EasyNetQ.DI;
 using EasyNetQ.Events;
-using EasyNetQ.Interception;
-using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
-using FluentAssertions;
-using NSubstitute;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
-using Xunit;
 
 namespace EasyNetQ.Tests;
 
@@ -54,14 +47,13 @@ public class AdvancedBusEventHandlersTests : IDisposable
             Substitute.For<IPublishConfirmationListener>(),
             eventBus,
             Substitute.For<IHandlerCollectionFactory>(),
-            Substitute.For<IServiceResolver>(),
             Substitute.For<ConnectionConfiguration>(),
-            Substitute.For<IEnumerable<IProduceConsumeInterceptor>>(),
+            new ProducePipelineBuilder(),
+            new ConsumePipelineBuilder(),
+            Substitute.For<IServiceProvider>(),
             Substitute.For<IMessageSerializationStrategy>(),
-            Substitute.For<IConventions>(),
             Substitute.For<IPullingConsumerFactory>(),
-            advancedBusEventHandlers,
-            Substitute.For<IConsumeScopeProvider>()
+            advancedBusEventHandlers
         );
     }
 
@@ -78,7 +70,7 @@ public class AdvancedBusEventHandlersTests : IDisposable
     private bool unBlockedCalled;
     private bool messageReturnedCalled;
     private MessageReturnedEventArgs messageReturnedEventArgs;
-    private readonly IAdvancedBus advancedBus;
+    private readonly RabbitAdvancedBus advancedBus;
     private ConnectedEventArgs connectedEventArgs;
     private DisconnectedEventArgs disconnectedEventArgs;
 
@@ -129,9 +121,9 @@ public class AdvancedBusEventHandlersTests : IDisposable
     public void AdvancedBusEventHandlers_MessageReturned_handler_is_called()
     {
         var @event = new ReturnedMessageEvent(
-            null,
+            Substitute.For<IModel>(),
             Array.Empty<byte>(),
-            new MessageProperties(),
+            MessageProperties.Empty,
             new MessageReturnedInfo("my.exchange", "routing.key", "reason")
         );
 

@@ -1,16 +1,8 @@
-// ReSharper disable InconsistentNaming
-using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
-using FluentAssertions;
-using NSubstitute;
 using RabbitMQ.Client;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading;
-using Xunit;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Tests;
 
@@ -23,7 +15,7 @@ public class When_publish_is_called : IDisposable
     public When_publish_is_called()
     {
         mockBuilder = new MockBuilder(x =>
-            x.Register<ICorrelationIdGenerationStrategy>(new StaticCorrelationIdGenerationStrategy(correlationId))
+            x.AddSingleton<ICorrelationIdGenerationStrategy>(new StaticCorrelationIdGenerationStrategy(correlationId))
         );
 
         var message = new MyMessage { Text = "Hiya!" };
@@ -118,5 +110,3 @@ public class When_publish_with_topic_is_called : IDisposable
         );
     }
 }
-
-// ReSharper restore InconsistentNaming

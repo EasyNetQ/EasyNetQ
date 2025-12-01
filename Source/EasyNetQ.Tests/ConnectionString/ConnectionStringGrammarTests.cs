@@ -1,10 +1,5 @@
-// ReSharper disable InconsistentNaming
-
-using System.Linq;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Sprache;
-using FluentAssertions;
-using Xunit;
 
 namespace EasyNetQ.Tests.ConnectionString;
 
@@ -48,5 +43,3 @@ public class ConnectionStringGrammarTests
         Assert.Throws<ParseException>(() => ConnectionStringGrammar.ConnectionStringBuilder.Parse(""));
     }
 }
-
-// ReSharper restore InconsistentNaming

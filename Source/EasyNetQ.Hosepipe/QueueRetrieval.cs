@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using EasyNetQ.Consumer;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
@@ -55,8 +53,7 @@ public class QueueRetrieval : IQueueRetrieval
                 throw;
             }
 
-            var properties = new MessageProperties();
-            properties.CopyFrom(basicGetResult.BasicProperties);
+            var properties = new MessageProperties(basicGetResult.BasicProperties);
             var info = new MessageReceivedInfo(
                 "hosepipe",
                 basicGetResult.DeliveryTag,

@@ -22,5 +22,5 @@
   <ItemGroup Condition="'$(IsPackable)' == 'true'">
     <None Include="..\..\Assets\EasyNetQ.png" Pack="true" PackagePath="" />
     <None Include="..\..\licence.txt" Pack="true" PackagePath="" />
-  </ItemGroup>
+  </ItemGroup>    
 </Project>

@@ -1,29 +1,27 @@
-using System;
-using System.Collections.Generic;
 using EasyNetQ.Consumer;
-using EasyNetQ.DI;
 using EasyNetQ.Producer;
-using NSubstitute;
+using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.Mocking;
 
 public class MockBuilder : IDisposable
 {
-    private readonly IBasicProperties basicProperties = new BasicProperties();
+    private readonly IServiceProvider serviceProvider;
     private readonly IBus bus;
+
+    private readonly IBasicProperties basicProperties = new BasicProperties();
     private readonly Stack<IModel> channelPool = new();
     private readonly List<IModel> channels = new();
     private readonly IConnection connection = Substitute.For<IAutorecoveringConnection>();
     private readonly IConnectionFactory connectionFactory = Substitute.For<IConnectionFactory>();
-    private readonly List<string> consumerQueueNames = new();
     private readonly List<AsyncDefaultBasicConsumer> consumers = new();
 
     public MockBuilder() : this(_ => { })
     {
     }
 
-    public MockBuilder(Action<IServiceRegister> registerServices) : this("host=localhost", registerServices)
+    public MockBuilder(Action<IServiceCollection> registerServices) : this("host=localhost", registerServices)
     {
     }
 
@@ -31,7 +29,7 @@ public class MockBuilder : IDisposable
     {
     }
 
-    public MockBuilder(string connectionString, Action<IServiceRegister> registerServices)
+    public MockBuilder(string connectionString, Action<IServiceCollection> registerServices)
     {
         for (var i = 0; i < 10; i++)
             channelPool.Push(Substitute.For<IModel, IRecoverable>());
@@ -54,7 +52,9 @@ public class MockBuilder : IDisposable
                     var consumer = (AsyncDefaultBasicConsumer)consumeInvocation[6];
 
                     ConsumerQueueNames.Add(queueName);
-                    consumer.HandleBasicConsumeOk(consumerTag);
+                    consumer.HandleBasicConsumeOk(consumerTag)
+                        .GetAwaiter()
+                        .GetResult();
                     consumers.Add(consumer);
                     return string.Empty;
                 });
@@ -64,24 +64,21 @@ public class MockBuilder : IDisposable
                     var queueName = (string)queueDeclareInvocation[0];
                     return new QueueDeclareOk(queueName, 0, 0);
                 });
+            channel.WaitForConfirms(default).ReturnsForAnyArgs(true);
 
             return channel;
         });
 
-        bus = RabbitHutch.CreateBus(connectionString, x =>
-        {
-            registerServices(x);
-            x.Register(connectionFactory);
-        });
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddSingleton(connectionFactory);
+
+        serviceCollection.AddEasyNetQ(connectionString);
+        registerServices(serviceCollection);
+        serviceProvider = serviceCollection.BuildServiceProvider();
+        bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public IPubSub PubSub => bus.PubSub;
-
-    public IRpc Rpc => bus.Rpc;
-
-    public ISendReceive SendReceive => bus.SendReceive;
-
-    public IScheduler Scheduler => bus.Scheduler;
+    public IBus Bus => bus;
 
     public IConnectionFactory ConnectionFactory => connectionFactory;
 
@@ -91,18 +88,30 @@ public class MockBuilder : IDisposable
 
     public List<AsyncDefaultBasicConsumer> Consumers => consumers;
 
-    public IBus Bus => bus;
-
-    public IServiceResolver ServiceProvider => bus.Advanced.Container;
-
     public IModel NextModel => channelPool.Peek();
 
-    public IEventBus EventBus => ServiceProvider.Resolve<IEventBus>();
+    public IPubSub PubSub => serviceProvider.GetRequiredService<IPubSub>();
 
-    public IProducerConnection ProducerConnection => ServiceProvider.Resolve<IProducerConnection>();
-    public IConsumerConnection ConsumerConnection => ServiceProvider.Resolve<IConsumerConnection>();
+    public IRpc Rpc => serviceProvider.GetRequiredService<IRpc>();
 
-    public List<string> ConsumerQueueNames => consumerQueueNames;
+    public ISendReceive SendReceive => serviceProvider.GetRequiredService<ISendReceive>();
 
-    public void Dispose() => bus.Dispose();
+    public IScheduler Scheduler => serviceProvider.GetRequiredService<IScheduler>();
+
+    public IEventBus EventBus => serviceProvider.GetRequiredService<IEventBus>();
+
+    public IConventions Conventions => serviceProvider.GetRequiredService<IConventions>();
+
+    public ITypeNameSerializer TypeNameSerializer => serviceProvider.GetRequiredService<ITypeNameSerializer>();
+
+    public ISerializer Serializer => serviceProvider.GetRequiredService<ISerializer>();
+
+    public IProducerConnection ProducerConnection => serviceProvider.GetRequiredService<IProducerConnection>();
+    public IConsumerConnection ConsumerConnection => serviceProvider.GetRequiredService<IConsumerConnection>();
+
+    public IConsumeErrorStrategy ConsumeErrorStrategy => serviceProvider.GetRequiredService<IConsumeErrorStrategy>();
+
+    public List<string> ConsumerQueueNames { get; } = new();
+
+    public void Dispose() => (serviceProvider as IDisposable)?.Dispose();
 }

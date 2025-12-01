@@ -1,13 +1,7 @@
-// ReSharper disable InconsistentNaming
-
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Persistent;
-using NSubstitute;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
-using Xunit;
 
 namespace EasyNetQ.Tests.PersistentChannelTests;
 
@@ -25,7 +19,7 @@ public class When_an_action_is_performed_on_a_closed_channel_that_doesnt_open_ag
         var exception = new OperationInterruptedException(shutdownArgs);
 
         persistentConnection.When(x => x.CreateModel()).Do(_ => throw exception);
-        persistentChannel = new PersistentChannel(new PersistentChannelOptions(), persistentConnection, eventBus);
+        persistentChannel = new PersistentChannel(new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, eventBus);
     }
 
     private readonly IPersistentChannel persistentChannel;
@@ -45,5 +39,3 @@ public class When_an_action_is_performed_on_a_closed_channel_that_doesnt_open_ag
         persistentChannel.Dispose();
     }
 }
-
-// ReSharper restore InconsistentNaming

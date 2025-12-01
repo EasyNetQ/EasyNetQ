@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-
 namespace EasyNetQ.Hosepipe;
 
 public class MessageReader : IMessageReader

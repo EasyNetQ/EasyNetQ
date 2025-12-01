@@ -1,21 +1,10 @@
-// ReSharper disable InconsistentNaming
-
-using System;
-using System.Linq;
 using EasyNetQ.ConnectionString;
-using FluentAssertions;
-using Xunit;
 
 namespace EasyNetQ.Tests.ConnectionString;
 
 public class ConnectionStringParserTests
 {
-    public ConnectionStringParserTests()
-    {
-        connectionStringParser = new ConnectionStringParser();
-    }
-
-    private readonly ConnectionStringParser connectionStringParser;
+    private readonly ConnectionStringParser connectionStringParser = new();
 
     private const string ConnectionString =
         "virtualHost=Copa;username=Copa;host=192.168.1.1;password=abc_xyz;port=12345;" +
@@ -60,5 +49,3 @@ public class ConnectionStringParserTests
         Assert.Throws<EasyNetQException>(() => connectionStringParser.Parse("amqp=Foo"));
     }
 }
-
-// ReSharper restore InconsistentNaming

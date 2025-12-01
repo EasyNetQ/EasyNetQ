@@ -30,9 +30,4 @@ public class PublishReturnedException : Exception
     public PublishReturnedException(string message, Exception inner) : base(message, inner)
     {
     }
-
-    /// <inheritdoc />
-    protected PublishReturnedException(SerializationInfo info, StreamingContext context) : base(info, context)
-    {
-    }
 }

@@ -1,16 +1,7 @@
-// ReSharper disable InconsistentNaming
-
-using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
-using FluentAssertions;
-using NSubstitute;
+using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using Xunit;
 
 namespace EasyNetQ.Tests.ProducerTests;
 
@@ -20,7 +11,7 @@ public class When_a_request_is_sent : IDisposable
     {
         var correlationId = Guid.NewGuid().ToString();
         mockBuilder = new MockBuilder(
-            c => c.Register<ICorrelationIdGenerationStrategy>(
+            c => c.AddSingleton<ICorrelationIdGenerationStrategy>(
                 _ => new StaticCorrelationIdGenerationStrategy(correlationId)
             )
         );
@@ -54,7 +45,7 @@ public class When_a_request_is_sent : IDisposable
             Type = "EasyNetQ.Tests.TestResponseMessage, EasyNetQ.Tests",
             CorrelationId = correlationId
         };
-        var body = Encoding.UTF8.GetBytes("{ Id:12, Text:\"Hello World\"}");
+        var body = "{ Id:12, Text:\"Hello World\"}"u8.ToArray();
 
         mockBuilder.Consumers[0].HandleBasicDeliver(
             "consumer_tag",
@@ -64,7 +55,7 @@ public class When_a_request_is_sent : IDisposable
             "the_routing_key",
             properties,
             body
-        );
+        ).GetAwaiter().GetResult();
     }
 
     [Fact]
@@ -109,5 +100,3 @@ public class When_a_request_is_sent : IDisposable
         responseMessage.Text.Should().Be("Hello World");
     }
 }
-
-// ReSharper restore InconsistentNaming

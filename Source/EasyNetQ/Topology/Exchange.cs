@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace EasyNetQ.Topology;
 
 /// <summary>
@@ -8,9 +6,14 @@ namespace EasyNetQ.Topology;
 public readonly struct Exchange : IBindable
 {
     /// <summary>
+    ///     Returns the default exchange name
+    /// </summary>
+    public const string DefaultName = "";
+
+    /// <summary>
     ///     Returns the default exchange
     /// </summary>
-    public static Exchange Default { get; } = new("");
+    public static Exchange Default { get; } = new(DefaultName);
 
     /// <summary>
     ///     Creates Exchange
@@ -23,8 +26,6 @@ public readonly struct Exchange : IBindable
         IDictionary<string, object> arguments = null
     )
     {
-        Preconditions.CheckNotNull(name, nameof(name));
-
         Name = name;
         Type = type;
         IsDurable = durable;

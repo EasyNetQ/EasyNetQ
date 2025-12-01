@@ -1,34 +1,24 @@
-using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Management.Client;
 using EasyNetQ.Management.Client.Model;
-using Xunit;
 
 namespace EasyNetQ.IntegrationTests;
 
 public class RabbitMQFixture : IAsyncLifetime, IDisposable
 {
     private static readonly TimeSpan InitializationTimeout = TimeSpan.FromMinutes(2);
-    private static readonly Vhost VirtualHost = new() { Name = "/", Tracing = false };
+    private static readonly Vhost VirtualHost = new(Name: "/");
 
     private const string ContainerName = "easynetq.tests";
-    private const string Image = "easynetq/rabbitmq";
-    private const string Tag = "3.8-alpine";
+    private const string Image = "heidiks/rabbitmq-delayed-message-exchange";
+    private const string Tag = "latest";
     private const string User = "guest";
     private const string Password = "guest";
 
 
-    private readonly DockerProxy dockerProxy;
+    private readonly DockerProxy dockerProxy = new();
     private OSPlatform dockerEngineOsPlatform;
     private string dockerNetworkName;
-
-    public RabbitMQFixture()
-    {
-        dockerProxy = new DockerProxy();
-    }
 
     public string Host { get; private set; } = "localhost";
 
@@ -45,7 +35,7 @@ public class RabbitMQFixture : IAsyncLifetime, IDisposable
         var containerId = await RunNewContainerAsync(cts.Token);
         if (dockerEngineOsPlatform == OSPlatform.Windows)
             Host = await dockerProxy.GetContainerIpAsync(containerId, cts.Token);
-        ManagementClient = new ManagementClient(Host, User, Password);
+        ManagementClient = new ManagementClient(new Uri($"http://{Host}:15672"), User, Password);
         await WaitForRabbitMqReadyAsync(cts.Token);
     }
 
@@ -82,12 +72,8 @@ public class RabbitMQFixture : IAsyncLifetime, IDisposable
     {
         var portMappings = new Dictionary<string, ISet<string>>
         {
-            {"4369", new HashSet<string> {"4369"}},
-            {"5671", new HashSet<string> {"5671"}},
-            {"5672", new HashSet<string> {"5672"}},
-            {"15671", new HashSet<string> {"15671"}},
-            {"15672", new HashSet<string> {"15672"}},
-            {"25672", new HashSet<string> {"25672"}}
+            { "5672", new HashSet<string> { "5672" } },
+            { "15672", new HashSet<string> { "15672" } }
         };
         var envVars = new List<string> { "RABBITMQ_DEFAULT_VHOST=/" };
         var containerId = await dockerProxy.CreateContainerAsync(
@@ -119,7 +105,7 @@ public class RabbitMQFixture : IAsyncLifetime, IDisposable
         {
             return await ManagementClient.IsAliveAsync(VirtualHost, cancellationToken);
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             throw;
         }

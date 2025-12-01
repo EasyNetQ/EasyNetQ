@@ -100,57 +100,5 @@ public static class NonGenericRpcExtensions
         return requestDelegate(rpc, request, requestType, responseType, configure, cancellationToken);
     }
 
-    /// <summary>
-    ///     Makes an RPC style request
-    /// </summary>
-    /// <param name="rpc">The rpc instance.</param>
-    /// <param name="request">The request message.</param>
-    /// <param name="requestType">The request type</param>
-    /// <param name="responseType">The response type</param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    /// <returns>The response</returns>
-    public static object Request(
-        this IRpc rpc,
-        object request,
-        Type requestType,
-        Type responseType,
-        CancellationToken cancellationToken = default
-    )
-    {
-        Preconditions.CheckNotNull(rpc, nameof(rpc));
-
-        return rpc.RequestAsync(request, requestType, responseType, cancellationToken)
-            .GetAwaiter()
-            .GetResult();
-    }
-
-    /// <summary>
-    ///     Makes an RPC style request
-    /// </summary>
-    /// <param name="rpc">The rpc instance</param>
-    /// <param name="request">The request message</param>
-    /// <param name="requestType">The request type</param>
-    /// <param name="responseType">The response type</param>
-    /// <param name="configure">
-    ///     Fluent configuration e.g. x => x.WithQueueName("uk.london")
-    /// </param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    /// <returns>The response</returns>
-    public static object Request(
-        this IRpc rpc,
-        object request,
-        Type requestType,
-        Type responseType,
-        Action<IRequestConfiguration> configure,
-        CancellationToken cancellationToken = default
-    )
-    {
-        Preconditions.CheckNotNull(rpc, nameof(rpc));
-
-        return rpc.RequestAsync(request, requestType, responseType, configure, cancellationToken)
-            .GetAwaiter()
-            .GetResult();
-    }
-
     private static async Task<object> ToTaskOfObject<T>(Task<T> task) => await task.ConfigureAwait(false);
 }

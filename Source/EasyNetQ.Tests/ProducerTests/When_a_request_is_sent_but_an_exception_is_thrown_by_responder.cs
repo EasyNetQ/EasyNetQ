@@ -1,13 +1,7 @@
-// ReSharper disable InconsistentNaming
-using EasyNetQ.DI;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
-using System;
-using System.Collections.Generic;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Tests.ProducerTests;
 
@@ -21,7 +15,7 @@ public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : ID
     {
         correlationId = Guid.NewGuid().ToString();
         mockBuilder = new MockBuilder(
-            c => c.Register<ICorrelationIdGenerationStrategy>(
+            c => c.AddSingleton<ICorrelationIdGenerationStrategy>(
                 _ => new StaticCorrelationIdGenerationStrategy(correlationId)
             )
         );
@@ -93,7 +87,7 @@ public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : ID
             properties.Headers.Add("ExceptionMessage", Encoding.UTF8.GetBytes(exceptionMessage));
         }
 
-        var body = Encoding.UTF8.GetBytes("{}");
+        var body = "{}"u8.ToArray();
 
         mockBuilder.Consumers[0].HandleBasicDeliver(
             "consumer_tag",
@@ -103,8 +97,6 @@ public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : ID
             "the_routing_key",
             properties,
             body
-        );
+        ).GetAwaiter().GetResult();
     }
 }
-
-// ReSharper restore InconsistentNaming

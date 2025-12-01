@@ -1,26 +1,27 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Topology;
-using FluentAssertions;
-using Xunit;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.IntegrationTests.Advanced;
 
 [Collection("RabbitMQ")]
 public class When_pull_messages : IDisposable
 {
+    private readonly ServiceProvider serviceProvider;
+    private readonly IBus bus;
+
     public When_pull_messages(RabbitMQFixture rmqFixture)
     {
-        bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=-1;publisherConfirms=True");
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddEasyNetQ($"host={rmqFixture.Host};prefetchCount=1;timeout=-1");
+
+        serviceProvider = serviceCollection.BuildServiceProvider();
+        bus = serviceProvider.GetRequiredService<IBus>();
     }
 
     public void Dispose()
     {
-        bus.Dispose();
+        serviceProvider?.Dispose();
     }
-
-    private readonly IBus bus;
 
     [Fact]
     public async Task Should_be_able_ack()
@@ -28,10 +29,10 @@ public class When_pull_messages : IDisposable
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
         var queue = await bus.Advanced.QueueDeclareAsync(
-            Guid.NewGuid().ToString("N"), cts.Token
+            queue: Guid.NewGuid().ToString("N"), cancellationToken: cts.Token
         );
         await bus.Advanced.PublishAsync(
-            Exchange.Default, queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
+            Exchange.Default, queue.Name, false, true, MessageProperties.Empty, Array.Empty<byte>(), cts.Token
         );
 
         using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
@@ -56,10 +57,10 @@ public class When_pull_messages : IDisposable
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
         var queue = await bus.Advanced.QueueDeclareAsync(
-            Guid.NewGuid().ToString("N"), cts.Token
+            queue: Guid.NewGuid().ToString("N"), cancellationToken: cts.Token
         );
         await bus.Advanced.PublishAsync(
-            Exchange.Default, queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
+            Exchange.Default, queue.Name, false, false, MessageProperties.Empty, Array.Empty<byte>(), cts.Token
         );
 
         using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
@@ -84,10 +85,10 @@ public class When_pull_messages : IDisposable
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
         var queue = await bus.Advanced.QueueDeclareAsync(
-            Guid.NewGuid().ToString("N"), cts.Token
+            queue: Guid.NewGuid().ToString("N"), cancellationToken: cts.Token
         );
         await bus.Advanced.PublishAsync(
-            Exchange.Default, queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
+            Exchange.Default, queue.Name, false, false, MessageProperties.Empty, Array.Empty<byte>(), cts.Token
         );
 
         using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
@@ -112,10 +113,10 @@ public class When_pull_messages : IDisposable
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
         var queue = await bus.Advanced.QueueDeclareAsync(
-            Guid.NewGuid().ToString("N"), cts.Token
+            queue: Guid.NewGuid().ToString("N"), cancellationToken: cts.Token
         );
         await bus.Advanced.PublishAsync(
-            Exchange.Default, queue.Name, false, new MessageProperties(), Array.Empty<byte>(), cts.Token
+            Exchange.Default, queue.Name, false, false, MessageProperties.Empty, Array.Empty<byte>(), cts.Token
         );
 
         using var consumer = bus.Advanced.CreatePullingConsumer(queue);

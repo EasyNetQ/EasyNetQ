@@ -6,8 +6,6 @@ internal static class ConnectionFactoryFactory
 {
     public static IConnectionFactory CreateConnectionFactory(ConnectionConfiguration configuration)
     {
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
-
         var connectionFactory = new ConnectionFactory
         {
             AutomaticRecoveryEnabled = true,
@@ -17,13 +15,12 @@ internal static class ConnectionFactoryFactory
             Password = configuration.Password,
             Port = configuration.Port,
             RequestedHeartbeat = configuration.RequestedHeartbeat,
-            ClientProperties = configuration.ClientProperties,
+            ClientProperties = configuration.ClientProperties.ToDictionary(kvp => kvp.Key, kvp => (object)kvp.Value),
             AuthMechanisms = configuration.AuthMechanisms,
             ClientProvidedName = configuration.Name,
             NetworkRecoveryInterval = configuration.ConnectIntervalAttempt,
             ContinuationTimeout = configuration.Timeout,
-            DispatchConsumersAsync = true,
-            ConsumerDispatchConcurrency = configuration.ConsumerDispatcherConcurrency ?? configuration.PrefetchCount,
+            ConsumerDispatchConcurrency = configuration.ConsumerDispatcherConcurrency.HasValue ? (ushort)configuration.ConsumerDispatcherConcurrency.Value : configuration.PrefetchCount,
             RequestedChannelMax = configuration.RequestedChannelMax
         };
 

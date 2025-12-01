@@ -7,6 +7,25 @@ namespace EasyNetQ.SystemMessages;
 /// </summary>
 public class Error
 {
+    public Error(
+        string routingKey,
+        string exchange,
+        string queue,
+        string exception,
+        string message,
+        DateTime dateTime,
+        MessageProperties basicProperties
+    )
+    {
+        RoutingKey = routingKey;
+        Exchange = exchange;
+        Queue = queue;
+        Exception = exception;
+        Message = message;
+        DateTime = dateTime;
+        BasicProperties = basicProperties;
+    }
+
     public string RoutingKey { get; set; }
     public string Exchange { get; set; }
     public string Queue { get; set; }

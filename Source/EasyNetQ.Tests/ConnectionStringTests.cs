@@ -1,10 +1,4 @@
-// ReSharper disable InconsistentNaming
-
-using System;
-using System.Linq;
 using EasyNetQ.ConnectionString;
-using FluentAssertions;
-using Xunit;
 
 namespace EasyNetQ.Tests;
 
@@ -13,15 +7,10 @@ public class ConnectionStringTests
     private const string connectionStringValue =
         "host=192.168.1.1:1001,my.little.host:1002;virtualHost=Copa;username=Copa;" +
         "password=abc_xyz;port=12345;requestedHeartbeat=3";
-    private ConnectionConfiguration connectionString;
 
-    private ConnectionConfiguration defaults;
+    private readonly ConnectionConfiguration connectionString = new ConnectionStringParser().Parse(connectionStringValue);
 
-    public ConnectionStringTests()
-    {
-        connectionString = new ConnectionStringParser().Parse(connectionStringValue);
-        defaults = new ConnectionStringParser().Parse("host=localhost");
-    }
+    private readonly ConnectionConfiguration defaults = new ConnectionStringParser().Parse("host=localhost");
 
     [Fact]
     public void Should_parse_host()
@@ -44,7 +33,7 @@ public class ConnectionStringTests
     [Fact]
     public void Should_parse_seond_port()
     {
-        connectionString.Hosts.Last().Port.Should().Be((ushort)1002);
+        connectionString.Hosts.Last().Port.Should().Be(1002);
     }
 
     [Fact]
@@ -68,10 +57,7 @@ public class ConnectionStringTests
     [Fact]
     public void Should_throw_on_malformed_string()
     {
-        Assert.Throws<EasyNetQException>(() =>
-        {
-            new ConnectionStringParser().Parse("not a well formed name value pair;");
-        });
+        Assert.Throws<EasyNetQException>(() => { new ConnectionStringParser().Parse("not a well formed name value pair;"); });
     }
 
     [Fact]
@@ -139,5 +125,3 @@ public class ConnectionStringTests
         parsed.RequestedHeartbeat.Should().Be(TimeSpan.FromSeconds(3));
     }
 }
-
-// ReSharper restore InconsistentNaming

@@ -29,20 +29,26 @@ public interface IFuturePublishConfiguration
     /// <param name="headers">Headers to set</param>
     /// <returns>Returns a reference to itself</returns>
     IFuturePublishConfiguration WithHeaders(IDictionary<string, object> headers);
+
+    /// <summary>
+    /// Set publisher confirms
+    /// </summary>
+    /// <param name="publisherConfirms">Publisher confirms flag to set</param>
+    /// <returns>Returns a reference to itself</returns>
+    IFuturePublishConfiguration WithPublisherConfirms(bool publisherConfirms);
 }
 
 internal class FuturePublishConfiguration : IFuturePublishConfiguration
 {
     public FuturePublishConfiguration(string defaultTopic)
     {
-        Preconditions.CheckNotNull(defaultTopic, nameof(defaultTopic));
-
         Topic = defaultTopic;
     }
 
     public byte? Priority { get; private set; }
     public string Topic { get; private set; }
-    public IDictionary<string, object> Headers { get; private set; }
+    public IDictionary<string, object> MessageHeaders { get; private set; }
+    public bool PublisherConfirms { get; private set; }
 
     public IFuturePublishConfiguration WithPriority(byte priority)
     {
@@ -52,15 +58,20 @@ internal class FuturePublishConfiguration : IFuturePublishConfiguration
 
     public IFuturePublishConfiguration WithTopic(string topic)
     {
-        Preconditions.CheckNotNull(topic, nameof(topic));
-
         Topic = topic;
         return this;
     }
 
     public IFuturePublishConfiguration WithHeaders(IDictionary<string, object> headers)
     {
-        Headers = headers;
+        foreach (var kvp in headers)
+            (MessageHeaders ??= new Dictionary<string, object>()).Add(kvp.Key, kvp.Value);
+        return this;
+    }
+
+    public IFuturePublishConfiguration WithPublisherConfirms(bool publisherConfirms)
+    {
+        PublisherConfirms = publisherConfirms;
         return this;
     }
 }

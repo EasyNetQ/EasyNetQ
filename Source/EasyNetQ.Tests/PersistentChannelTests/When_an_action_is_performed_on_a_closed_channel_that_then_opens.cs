@@ -1,11 +1,7 @@
-// ReSharper disable InconsistentNaming
-
-using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
-using NSubstitute;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
-using Xunit;
 
 namespace EasyNetQ.Tests.PersistentChannelTests;
 
@@ -29,7 +25,7 @@ public class When_an_action_is_performed_on_a_closed_channel_that_then_opens
         );
 
         var persistentChannel = new PersistentChannel(
-            new PersistentChannelOptions(), persistentConnection, eventBus
+            new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, eventBus
         );
         persistentChannel.InvokeChannelAction(x => x.ExchangeDeclare("MyExchange", "direct"));
     }
@@ -42,5 +38,3 @@ public class When_an_action_is_performed_on_a_closed_channel_that_then_opens
         channel.Received().ExchangeDeclare("MyExchange", "direct");
     }
 }
-
-// ReSharper restore InconsistentNaming

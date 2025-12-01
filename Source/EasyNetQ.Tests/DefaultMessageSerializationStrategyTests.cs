@@ -1,10 +1,5 @@
-// ReSharper disable InconsistentNaming
-
-using NSubstitute;
-using System;
 using System.Buffers;
 using System.Text;
-using Xunit;
 
 namespace EasyNetQ.Tests;
 
@@ -14,7 +9,7 @@ public class DefaultMessageSerializationStrategyTests
     public void When_using_the_default_serialization_strategy_messages_are_correctly_serialized()
     {
         const string messageType = "MyMessageTypeName";
-        var serializedMessageBody = Encoding.UTF8.GetBytes("Hello world!");
+        var serializedMessageBody = "Hello world!"u8.ToArray();
         const string correlationId = "CorrelationId";
 
         var message = new Message<MyMessage>(new MyMessage());
@@ -29,13 +24,10 @@ public class DefaultMessageSerializationStrategyTests
     public void When_serializing_a_message_with_a_correlation_id_it_is_not_overwritten()
     {
         const string messageType = "MyMessageTypeName";
-        var serializedMessageBody = Encoding.UTF8.GetBytes("Hello world!");
+        var serializedMessageBody = "Hello world!"u8.ToArray();
         const string correlationId = "CorrelationId";
 
-        var message = new Message<MyMessage>(new MyMessage())
-        {
-            Properties = { CorrelationId = correlationId }
-        };
+        var message = new Message<MyMessage>(new MyMessage(), new MessageProperties { CorrelationId = correlationId });
         var serializationStrategy = CreateSerializationStrategy(message, messageType, serializedMessageBody, "SomeOtherCorrelationId");
 
         using var serializedMessage = serializationStrategy.SerializeMessage(message);
@@ -51,15 +43,15 @@ public class DefaultMessageSerializationStrategyTests
         var serializedMessageBody = Encoding.UTF8.GetBytes(messageContent);
         const string correlationId = "CorrelationId";
 
-        var message = new Message<MyMessage>(new MyMessage { Text = messageContent })
-        {
-            Properties =
+        var message = new Message<MyMessage>(
+            new MyMessage { Text = messageContent },
+            new MessageProperties
             {
                 Type = messageType,
                 CorrelationId = correlationId,
                 UserId = "Bob"
-            },
-        };
+            }
+        );
         var serializationStrategy = CreateDeserializationStrategy(message, serializedMessageBody, correlationId);
 
         var deserializedMessage = serializationStrategy.DeserializeMessage(message.Properties, serializedMessageBody);
@@ -71,10 +63,11 @@ public class DefaultMessageSerializationStrategyTests
     public void When_using_the_default_serialization_strategy_messages_are_correctly_round_tripped()
     {
         var typeNameSerializer = new DefaultTypeNameSerializer();
-        var serializer = new JsonSerializer();
+        var serializer = new ReflectionBasedNewtonsoftJsonSerializer();
         const string correlationId = "CorrelationId";
 
-        var serializationStrategy = new DefaultMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
+        var serializationStrategy =
+            new DefaultMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
 
         var messageBody = new MyMessage { Text = "Hello world!" };
         var message = new Message<MyMessage>(messageBody);
@@ -89,10 +82,11 @@ public class DefaultMessageSerializationStrategyTests
     public void When_using_the_default_serialization_strategy_messages_are_correctly_round_tripped_when_null()
     {
         var typeNameSerializer = new DefaultTypeNameSerializer();
-        var serializer = new JsonSerializer();
+        var serializer = new ReflectionBasedNewtonsoftJsonSerializer();
         const string correlationId = "CorrelationId";
 
-        var serializationStrategy = new DefaultMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
+        var serializationStrategy =
+            new DefaultMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
 
         var message = new Message<MyMessage>();
         using var serializedMessage = serializationStrategy.SerializeMessage(message);
@@ -102,14 +96,16 @@ public class DefaultMessageSerializationStrategyTests
         Assert.Null(((Message<MyMessage>)deserializedMessage).Body);
     }
 
-    private static void AssertMessageSerializedCorrectly(SerializedMessage message, byte[] expectedBody, string expectedMessageType, string expectedCorrelationId)
+    private static void AssertMessageSerializedCorrectly(SerializedMessage message, byte[] expectedBody, string expectedMessageType,
+        string expectedCorrelationId)
     {
         Assert.Equal(message.Body, expectedBody); //, "Serialized message body does not match expected value");
         Assert.Equal(message.Properties.Type, expectedMessageType); //, "Serialized message type does not match expected value");
         Assert.Equal(message.Properties.CorrelationId, expectedCorrelationId); //, "Serialized message correlation id does not match expected value");
     }
 
-    private void AssertMessageDeserializedCorrectly(IMessage<MyMessage> message, string expectedBodyText, Type expectedMessageType, string expectedMessageProperties)
+    private void AssertMessageDeserializedCorrectly(IMessage<MyMessage> message, string expectedBodyText, Type expectedMessageType,
+        string expectedMessageProperties)
     {
         Assert.Equal(message.Body.Text, expectedBodyText); //, "Deserialized message body text does not match expected value");
         Assert.Equal(message.MessageType, expectedMessageType); //, "Deserialized message type does not match expected value");
@@ -135,7 +131,7 @@ public class DefaultMessageSerializationStrategyTests
     private static DefaultMessageSerializationStrategy CreateDeserializationStrategy(IMessage<MyMessage> message, byte[] messageBody, string correlationId)
     {
         var typeNameSerializer = Substitute.For<ITypeNameSerializer>();
-        typeNameSerializer.DeSerialize(message.Properties.Type).Returns(message.Body.GetType());
+        typeNameSerializer.Deserialize(message.Properties.Type).Returns(message.Body.GetType());
 
         var serializer = Substitute.For<ISerializer>();
         serializer.BytesToMessage(message.Body.GetType(), messageBody).Returns(message.Body);

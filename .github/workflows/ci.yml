@@ -18,40 +18,35 @@ permissions:
 jobs:
   test:
     name: Lint & Test
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
       matrix:
-        dotnet: ['7.*']
+        dotnet: ['8.*']
       fail-fast: true
     steps:
     - name: Checkout
-      uses: actions/checkout@v3.1.0
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
     - name: Setup .NET Core ${{ matrix.dotnet }}
-      uses: actions/setup-dotnet@v2
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ matrix.dotnet }}
 
     - name: Install dependencies
-      run: dotnet restore ${{ github.workspace }}/Source/EasyNetQ.sln
+      run: dotnet restore ${{ github.workspace }}/Source/EasyNetQ.slnx
 
     - name: Check formatting
-      run: dotnet format --no-restore --verify-no-changes --severity warn ./Source/EasyNetQ.sln || (echo "Run 'dotnet format' to fix issues" && exit 1)
+      run: dotnet format --no-restore --verify-no-changes --severity warn ./Source/EasyNetQ.slnx || (echo "Run 'dotnet format' to fix issues" && exit 1)
 
     - name: Build
-      run: dotnet build ${{ github.workspace }}/Source/EasyNetQ.sln --configuration Release
+      run: dotnet build ${{ github.workspace }}/Source/EasyNetQ.slnx --configuration Release
 
     - name: Tests
       run: |
         cd ${{ github.workspace }}/Source/EasyNetQ.Tests
-        dotnet test --configuration Release --no-build
-
-    - name: DI.Tests
-      run: |
-        cd ${{ github.workspace }}/Source/EasyNetQ.DI.Tests
         dotnet test --configuration Release --no-build
 
     - name: Serialization.Tests
@@ -76,23 +71,23 @@ jobs:
 
   publish-to-nuget:
     name: Publish to NuGet
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     needs: test
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     steps:
       - name: Checkout
-        uses: actions/checkout@v3.1.0
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Setup .NET Core ${{ matrix.dotnet }}
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '7.*'
+          dotnet-version: '8.*'
       - name: Install dependencies
-        run: dotnet restore ${{ github.workspace }}/Source/EasyNetQ.sln
+        run: dotnet restore ${{ github.workspace }}/Source/EasyNetQ.slnx
       - name: Build
-        run: dotnet build ${{ github.workspace }}/Source/EasyNetQ.sln --configuration Release
+        run: dotnet build ${{ github.workspace }}/Source/EasyNetQ.slnx --configuration Release
       - name: Pack
-        run: dotnet pack ${{ github.workspace }}/Source/EasyNetQ.sln --configuration Release --no-build --include-symbols --output ${{ github.workspace }}/Packages
+        run: dotnet pack ${{ github.workspace }}/Source/EasyNetQ.slnx --configuration Release --no-build --include-symbols -p:PackageOutputPath="${{ github.workspace }}/Packages"
       - name: Publish
         run: dotnet nuget push '${{ github.workspace }}/Packages/*.*' --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_TOKEN }}

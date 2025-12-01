@@ -1,9 +1,4 @@
-// ReSharper disable InconsistentNaming
-
 using EasyNetQ.Consumer;
-using FluentAssertions;
-using NSubstitute;
-using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 
@@ -11,7 +6,7 @@ public class When_a_message_is_delivered_to_the_consumer : ConsumerTestBase
 {
     protected override void AdditionalSetUp()
     {
-        StartConsumer((_, _, _) => AckStrategies.Ack);
+        StartConsumer((_, _, _, _) => AckStrategies.Ack);
         DeliverMessage();
     }
 
@@ -69,4 +64,3 @@ public class When_a_message_is_delivered_to_the_consumer : ConsumerTestBase
         MockBuilder.Channels[0].Received().BasicAck(DeliverTag, false);
     }
 }
-// ReSharper restore InconsistentNaming

@@ -1,25 +1,26 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using FluentAssertions;
-using Xunit;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.IntegrationTests.Rpc;
 
 [Collection("RabbitMQ")]
 public class When_request_and_respond_polymorphic : IDisposable
 {
+    private readonly ServiceProvider serviceProvider;
+    private readonly IBus bus;
+
     public When_request_and_respond_polymorphic(RabbitMQFixture fixture)
     {
-        bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;timeout=-1");
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddEasyNetQ($"host={fixture.Host};prefetchCount=1;timeout=-1");
+
+        serviceProvider = serviceCollection.BuildServiceProvider();
+        bus = serviceProvider.GetRequiredService<IBus>();
     }
 
     public void Dispose()
     {
-        bus.Dispose();
+        serviceProvider?.Dispose();
     }
-
-    private readonly IBus bus;
 
     [Fact]
     public async Task Should_receive_response()

@@ -1,5 +1,3 @@
-using System;
-
 namespace EasyNetQ.Hosepipe;
 
 public class EasyNetQHosepipeException : Exception

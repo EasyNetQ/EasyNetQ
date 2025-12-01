@@ -1,11 +1,7 @@
-using System;
 using System.Text;
 using EasyNetQ.Consumer;
-using NSubstitute;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
-using System.Threading.Tasks;
-using EasyNetQ.Logging;
-using Xunit;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 
@@ -20,7 +16,9 @@ public class DefaultConsumerErrorStrategyTests
         persistedConnectionMock.CreateModel().Returns(modelMock);
         var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock, true);
 
-        var ackStrategy = await consumerErrorStrategy.HandleConsumerErrorAsync(CreateConsumerExcutionContext(CreateOriginalMessage()), new Exception("I just threw!"), default);
+        var ackStrategy = await consumerErrorStrategy.HandleErrorAsync(
+            CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!")
+        );
 
         Assert.Equal(AckStrategies.Ack, ackStrategy);
         modelMock.Received().WaitForConfirms(Arg.Any<TimeSpan>());
@@ -37,7 +35,9 @@ public class DefaultConsumerErrorStrategyTests
         persistedConnectionMock.CreateModel().Returns(modelMock);
         var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock, true);
 
-        var ackStrategy = await consumerErrorStrategy.HandleConsumerErrorAsync(CreateConsumerExcutionContext(CreateOriginalMessage()), new Exception("I just threw!"), default);
+        var ackStrategy = await consumerErrorStrategy.HandleErrorAsync(
+            CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!")
+        );
 
         Assert.Equal(AckStrategies.NackWithRequeue, ackStrategy);
         modelMock.Received().WaitForConfirms(Arg.Any<TimeSpan>());
@@ -53,18 +53,20 @@ public class DefaultConsumerErrorStrategyTests
         persistedConnectionMock.CreateModel().Returns(modelMock);
         var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock);
 
-        var ackStrategy = await consumerErrorStrategy.HandleConsumerErrorAsync(CreateConsumerExcutionContext(CreateOriginalMessage()), new Exception("I just threw!"), default);
+        var ackStrategy = await consumerErrorStrategy.HandleErrorAsync(
+            CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!")
+        );
 
         Assert.Equal(AckStrategies.Ack, ackStrategy);
         modelMock.DidNotReceive().WaitForConfirms(Arg.Any<TimeSpan>());
     }
 
-    private static DefaultConsumerErrorStrategy CreateConsumerErrorStrategy(
+    private static DefaultConsumeErrorStrategy CreateConsumerErrorStrategy(
         IConsumerConnection connectionMock, bool configurePublisherConfirm = false
     )
     {
-        var consumerErrorStrategy = new DefaultConsumerErrorStrategy(
-            Substitute.For<ILogger<DefaultConsumerErrorStrategy>>(),
+        var consumerErrorStrategy = new DefaultConsumeErrorStrategy(
+            Substitute.For<ILogger<DefaultConsumeErrorStrategy>>(),
             connectionMock,
             Substitute.For<ISerializer>(),
             Substitute.For<IConventions>(),
@@ -75,17 +77,18 @@ public class DefaultConsumerErrorStrategyTests
         return consumerErrorStrategy;
     }
 
-    private static ConsumerExecutionContext CreateConsumerExcutionContext(byte[] originalMessageBody)
+    private static ConsumeContext CreateConsumerExecutionContext(byte[] originalMessageBody)
     {
-        return new ConsumerExecutionContext(
-            (_, _, _, _) => null,
+        return new ConsumeContext(
             new MessageReceivedInfo("consumertag", 0, false, "orginalExchange", "originalRoutingKey", "queue"),
             new MessageProperties
             {
                 CorrelationId = "123",
                 AppId = "456"
             },
-            originalMessageBody
+            originalMessageBody,
+            Substitute.For<IServiceProvider>(),
+            CancellationToken.None
         );
     }
 

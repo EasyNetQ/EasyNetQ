@@ -1,13 +1,12 @@
-using System;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Persistent;
 
 public readonly struct FuncBasedPersistentChannelAction<TResult> : IPersistentChannelAction<TResult>
 {
-    private readonly Func<IModel, TResult> func;
+    private readonly Func<IChannel, Task<TResult>> func;
 
-    public FuncBasedPersistentChannelAction(Func<IModel, TResult> func) => this.func = func;
+    public FuncBasedPersistentChannelAction(Func<IChannel, Task<TResult>> func) => this.func = func;
 
-    public TResult Invoke(IModel model) => func(model);
+    public Task<TResult> InvokeAsync(IChannel channel, CancellationToken cancellationToken) => func(channel);
 }

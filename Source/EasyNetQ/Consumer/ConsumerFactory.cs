@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Concurrent;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
@@ -7,7 +6,7 @@ using EasyNetQ.Logging;
 namespace EasyNetQ.Consumer;
 
 /// <inheritdoc />
-public interface IConsumerFactory : IDisposable
+public interface IConsumerFactory : IAsyncDisposable
 {
     /// <summary>
     ///     Creates a consumer based on the configuration
@@ -44,9 +43,10 @@ public class ConsumerFactory : IConsumerFactory
         this.eventBus = eventBus;
 
         unsubscribeFromStoppedConsumerEvent = eventBus.Subscribe(
-            (in StoppedConsumingEvent @event) => consumers.Remove(@event.Consumer.Id)
+            (StoppedConsumingEvent messageEvent) => { consumers.TryRemove(messageEvent.Consumer.Id, out _); return Task.CompletedTask; }
         );
     }
+
 
     /// <inheritdoc />
     public IConsumer CreateConsumer(ConsumerConfiguration configuration)
@@ -56,10 +56,13 @@ public class ConsumerFactory : IConsumerFactory
         return consumer;
     }
 
-    /// <inheritdoc />
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         unsubscribeFromStoppedConsumerEvent.Dispose();
-        consumers.ClearAndDispose();
+        foreach (var item in consumers)
+        {
+            await item.Value.DisposeAsync();
+        }
+        consumers.Clear();
     }
 }

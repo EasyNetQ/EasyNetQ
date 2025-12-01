@@ -1,8 +1,4 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Internals;
-using EasyNetQ.Topology;
 
 namespace EasyNetQ;
 
@@ -30,11 +26,6 @@ public class DelayedExchangeScheduler : IScheduler
         IMessageDeliveryModeStrategy messageDeliveryModeStrategy
     )
     {
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
-        Preconditions.CheckNotNull(advancedBus, nameof(advancedBus));
-        Preconditions.CheckNotNull(conventions, nameof(conventions));
-        Preconditions.CheckNotNull(messageDeliveryModeStrategy, nameof(messageDeliveryModeStrategy));
-
         this.configuration = configuration;
         this.advancedBus = advancedBus;
         this.conventions = conventions;
@@ -49,9 +40,6 @@ public class DelayedExchangeScheduler : IScheduler
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(message, nameof(message));
-        Preconditions.CheckNotNull(configure, nameof(configure));
-
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         var publishConfiguration = new FuturePublishConfiguration(conventions.TopicNamingConvention(typeof(T)));
@@ -61,27 +49,27 @@ public class DelayedExchangeScheduler : IScheduler
         var exchangeName = conventions.ExchangeNamingConvention(typeof(T));
         var futureExchangeName = exchangeName + "_delayed";
         var futureExchange = await advancedBus.ExchangeDeclareAsync(
-            futureExchangeName,
-            c => c.AsDelayedExchange(ExchangeType.Topic),
-            cts.Token
+            exchange: futureExchangeName,
+            type: ExchangeType.DelayedMessage,
+            arguments: new Dictionary<string, object>().WithDelayedType(ExchangeType.Topic),
+            cancellationToken: cts.Token
         ).ConfigureAwait(false);
 
         var exchange = await advancedBus.ExchangeDeclareAsync(
-            exchangeName,
-            c => c.WithType(ExchangeType.Topic),
-            cts.Token
+            exchange: exchangeName,
+            cancellationToken: cts.Token
         ).ConfigureAwait(false);
         await advancedBus.BindAsync(futureExchange, exchange, topic, cts.Token).ConfigureAwait(false);
 
-        var properties = new MessageProperties();
-        if (publishConfiguration.Priority != null)
-            properties.Priority = publishConfiguration.Priority.Value;
-        if (publishConfiguration.Headers?.Count > 0)
-            properties.Headers.UnionWith(publishConfiguration.Headers);
-        properties.DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T));
+        var properties = new MessageProperties
+        {
+            Priority = publishConfiguration.Priority ?? 0,
+            Headers = publishConfiguration.MessageHeaders,
+            DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(typeof(T))
+        }.WithDelay(delay);
 
         await advancedBus.PublishAsync(
-            futureExchange, topic, configuration.MandatoryPublish, new Message<T>(message, properties).WithDelay(delay), cts.Token
+            futureExchange.Name, topic, null, publishConfiguration.PublisherConfirms, new Message<T>(message, properties), cts.Token
         ).ConfigureAwait(false);
     }
 }

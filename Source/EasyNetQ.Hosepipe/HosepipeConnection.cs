@@ -13,8 +13,18 @@ public static class HosepipeConnection
             VirtualHost = parameters.VHost,
             UserName = parameters.Username,
             Password = parameters.Password,
-            Port = parameters.HostPort
+            Port = parameters.HostPort,
         };
+
+        if (parameters.Ssl)
+        {
+            connectionFactory.Ssl = new SslOption
+            {
+                Enabled = true,
+                ServerName = parameters.HostName
+            };
+        }
+
         try
         {
             return connectionFactory.CreateConnection();

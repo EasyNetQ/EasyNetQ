@@ -1,5 +1,3 @@
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Management.Client;
 
 namespace EasyNetQ.IntegrationTests.Utils;

@@ -1,20 +1,11 @@
 // ReSharper disable InconsistentNaming
 
-using System;
-using Xunit;
-
 namespace EasyNetQ.Hosepipe.Tests;
 
 public class MessageReaderTests
 {
-    private readonly IMessageReader messageReader;
-    private readonly IConventions conventions;
-
-    public MessageReaderTests()
-    {
-        conventions = new Conventions(new LegacyTypeNameSerializer());
-        messageReader = new MessageReader();
-    }
+    private readonly IMessageReader messageReader = new MessageReader();
+    private readonly IConventions conventions = new Conventions(new LegacyTypeNameSerializer());
 
     /// <summary>
     /// 1. Put some messages in C:\temp\MessageOutput
@@ -49,7 +40,7 @@ public class MessageReaderTests
             MessagesOutputDirectory = @"C:\temp\MessageOutput"
         };
 
-        var messages = messageReader.ReadMessages(parameters, conventions.ErrorQueueNamingConvention(null));
+        var messages = messageReader.ReadMessages(parameters, conventions.ErrorQueueNamingConvention(default));
         foreach (var message in messages)
         {
             Console.WriteLine(message.Body);

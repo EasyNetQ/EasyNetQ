@@ -1,6 +1,3 @@
-using System;
-using System.Threading;
-using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 
 namespace EasyNetQ.Tests;
@@ -14,8 +11,6 @@ public static class PublishExchangeDeclareStrategyExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(strategy, nameof(strategy));
-
         return strategy.DeclareExchangeAsync(exchangeName, exchangeType, cancellationToken)
             .GetAwaiter()
             .GetResult();
@@ -28,8 +23,6 @@ public static class PublishExchangeDeclareStrategyExtensions
         CancellationToken cancellationToken = default
     )
     {
-        Preconditions.CheckNotNull(strategy, nameof(strategy));
-
         return strategy.DeclareExchangeAsync(messageType, exchangeType, cancellationToken)
             .GetAwaiter()
             .GetResult();

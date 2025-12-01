@@ -1,9 +1,5 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.IntegrationTests.Utils;
-using FluentAssertions;
-using Xunit;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.IntegrationTests.SendReceive;
 
@@ -13,18 +9,24 @@ public class When_send_receive_with_default_options : IDisposable
     private readonly RabbitMQFixture rmqFixture;
     private const int MessagesCount = 10;
 
+    private readonly ServiceProvider serviceProvider;
     private readonly IBus bus;
 
     public When_send_receive_with_default_options(RabbitMQFixture rmqFixture)
     {
         this.rmqFixture = rmqFixture;
-        bus = RabbitHutch.CreateBus($"host={rmqFixture.Host};prefetchCount=1;timeout=-1");
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddEasyNetQ($"host={rmqFixture.Host};prefetchCount=1;timeout=-1");
+
+        serviceProvider = serviceCollection.BuildServiceProvider();
+        bus = serviceProvider.GetRequiredService<IBus>();
     }
 
     public void Dispose()
     {
-        bus.Dispose();
+        serviceProvider?.Dispose();
     }
+
 
     [Fact]
     public async Task Should_work_with_default_options()

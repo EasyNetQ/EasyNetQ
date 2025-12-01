@@ -4,15 +4,13 @@ using EasyNetQ.SystemMessages;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 using System.Text;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace EasyNetQ.Hosepipe.Tests;
 
 public class ErrorMessageRepublishSpike
 {
     private readonly ITestOutputHelper testOutputHelper;
-    private readonly ISerializer serializer = new JsonSerializer();
+    private readonly ISerializer serializer = new ReflectionBasedNewtonsoftJsonSerializer();
 
     public ErrorMessageRepublishSpike(ITestOutputHelper testOutputHelper)
     {
@@ -26,14 +24,6 @@ public class ErrorMessageRepublishSpike
 
         error.RoutingKey.ShouldEqual("originalRoutingKey");
         error.Message.ShouldEqual("{ Text:\"Hello World\"}");
-    }
-
-    [Fact]
-    public void Should_fail_to_deserialize_some_other_random_message()
-    {
-        const string randomMessage = "{\"Text\":\"Hello World\"}";
-        var error = (Error)serializer.BytesToMessage(typeof(Error), Encoding.UTF8.GetBytes(randomMessage));
-        error.Message.ShouldBeNull();
     }
 
     [Fact]
@@ -72,6 +62,7 @@ public class ErrorMessageRepublishSpike
         @"{
     ""RoutingKey"":""originalRoutingKey"",
     ""Exchange"":""orginalExchange"",
+    ""Queue"":""originalQueue"",
     ""Exception"":""System.Exception: I just threw!"",
     ""Message"":""{ Text:\""Hello World\""}"",
     ""DateTime"":""\/Date(1312196313848+0100)\/"",

@@ -1,28 +1,29 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.IntegrationTests.Utils;
-using FluentAssertions;
-using Xunit;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.IntegrationTests.SendReceive;
 
 [Collection("RabbitMQ")]
 public class When_send_receive_multiple_message_types : IDisposable
 {
+    private readonly ServiceProvider serviceProvider;
+    private readonly IBus bus;
+
     public When_send_receive_multiple_message_types(RabbitMQFixture fixture)
     {
-        bus = RabbitHutch.CreateBus($"host={fixture.Host};prefetchCount=1;timeout=-1");
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddEasyNetQ($"host={fixture.Host};prefetchCount=1;timeout=-1");
+
+        serviceProvider = serviceCollection.BuildServiceProvider();
+        bus = serviceProvider.GetRequiredService<IBus>();
     }
 
     public void Dispose()
     {
-        bus.Dispose();
+        serviceProvider?.Dispose();
     }
 
     private const int MessagesCount = 10;
-
-    private readonly IBus bus;
 
     [Fact]
     public async Task Test()

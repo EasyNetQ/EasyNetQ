@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace EasyNetQ.IntegrationTests.Utils;
 
 public static class MessagesFactories

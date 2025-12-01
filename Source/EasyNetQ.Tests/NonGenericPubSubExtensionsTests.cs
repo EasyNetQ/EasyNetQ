@@ -1,11 +1,6 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.Consumer;
 using EasyNetQ.Internals;
 using EasyNetQ.Topology;
-using NSubstitute;
-using Xunit;
 
 namespace EasyNetQ.Tests;
 
@@ -14,7 +9,7 @@ public class NonGenericPubSubExtensionsTests
     private readonly Action<IPublishConfiguration> publishConfigure = _ => { };
     private readonly Action<ISubscriptionConfiguration> subscribeConfigure = _ => { };
     private readonly IPubSub pubSub;
-    private readonly AwaitableDisposable<SubscriptionResult> subscribeResult;
+    private readonly Task<SubscriptionResult> subscribeResult;
 
     public NonGenericPubSubExtensionsTests()
     {
@@ -23,10 +18,8 @@ public class NonGenericPubSubExtensionsTests
         var exchange = new Exchange("test");
         var queue = new Queue("test");
 
-        subscribeResult = new AwaitableDisposable<SubscriptionResult>(
-            Task.FromResult(
-                new SubscriptionResult(exchange, queue, DisposableAction.Create(_ => { }, 42))
-            )
+        subscribeResult = Task.FromResult(
+            new SubscriptionResult(exchange, queue, DisposableAction.Create(_ => { }, 42))
         );
     }
 

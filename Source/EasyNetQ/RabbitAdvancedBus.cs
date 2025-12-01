@@ -1,13 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
-using EasyNetQ.DI;
 using EasyNetQ.Events;
-using EasyNetQ.Interception;
 using EasyNetQ.Internals;
 using EasyNetQ.Logging;
 using EasyNetQ.Persistent;
@@ -17,11 +10,13 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ;
 
-/// <inheritdoc />
-public class RabbitAdvancedBus : IAdvancedBus
+/// <inheritdoc cref="IAdvancedBus"/>
+public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 {
     private readonly IPersistentChannelDispatcher persistentChannelDispatcher;
     private readonly ConnectionConfiguration configuration;
+    private readonly ConsumePipelineBuilder consumePipelineBuilder;
+    private readonly IServiceProvider serviceResolver;
     private readonly IPublishConfirmationListener confirmationListener;
     private readonly ILogger logger;
     private readonly IProducerConnection producerConnection;
@@ -31,12 +26,11 @@ public class RabbitAdvancedBus : IAdvancedBus
     private readonly IDisposable[] eventSubscriptions;
     private readonly IHandlerCollectionFactory handlerCollectionFactory;
     private readonly IMessageSerializationStrategy messageSerializationStrategy;
-    private readonly IProduceConsumeInterceptor[] produceConsumeInterceptors;
     private readonly IPullingConsumerFactory pullingConsumerFactory;
     private readonly AdvancedBusEventHandlers advancedBusEventHandlers;
-    private readonly IConsumeScopeProvider consumeScopeProvider;
 
     private volatile bool disposed;
+    private readonly ProduceDelegate produceDelegate;
 
     /// <summary>
     ///     Creates RabbitAdvancedBus
@@ -50,29 +44,15 @@ public class RabbitAdvancedBus : IAdvancedBus
         IPublishConfirmationListener confirmationListener,
         IEventBus eventBus,
         IHandlerCollectionFactory handlerCollectionFactory,
-        IServiceResolver container,
         ConnectionConfiguration configuration,
-        IEnumerable<IProduceConsumeInterceptor> produceConsumeInterceptors,
+        ProducePipelineBuilder producePipelineBuilder,
+        ConsumePipelineBuilder consumePipelineBuilder,
+        IServiceProvider serviceResolver,
         IMessageSerializationStrategy messageSerializationStrategy,
-        IConventions conventions,
         IPullingConsumerFactory pullingConsumerFactory,
-        AdvancedBusEventHandlers advancedBusEventHandlers,
-        IConsumeScopeProvider consumeScopeProvider
+        AdvancedBusEventHandlers advancedBusEventHandlers
     )
     {
-        Preconditions.CheckNotNull(producerConnection, nameof(producerConnection));
-        Preconditions.CheckNotNull(consumerConnection, nameof(consumerConnection));
-        Preconditions.CheckNotNull(consumerFactory, nameof(consumerFactory));
-        Preconditions.CheckNotNull(eventBus, nameof(eventBus));
-        Preconditions.CheckNotNull(handlerCollectionFactory, nameof(handlerCollectionFactory));
-        Preconditions.CheckNotNull(container, nameof(container));
-        Preconditions.CheckNotNull(produceConsumeInterceptors, nameof(produceConsumeInterceptors));
-        Preconditions.CheckNotNull(messageSerializationStrategy, nameof(messageSerializationStrategy));
-        Preconditions.CheckNotNull(configuration, nameof(configuration));
-        Preconditions.CheckNotNull(conventions, nameof(conventions));
-        Preconditions.CheckNotNull(pullingConsumerFactory, nameof(pullingConsumerFactory));
-        Preconditions.CheckNotNull(advancedBusEventHandlers, nameof(advancedBusEventHandlers));
-
         this.logger = logger;
         this.producerConnection = producerConnection;
         this.consumerConnection = consumerConnection;
@@ -81,14 +61,12 @@ public class RabbitAdvancedBus : IAdvancedBus
         this.confirmationListener = confirmationListener;
         this.eventBus = eventBus;
         this.handlerCollectionFactory = handlerCollectionFactory;
-        this.Container = container;
         this.configuration = configuration;
-        this.produceConsumeInterceptors = produceConsumeInterceptors.ToArray();
+        this.consumePipelineBuilder = consumePipelineBuilder;
+        this.serviceResolver = serviceResolver;
         this.messageSerializationStrategy = messageSerializationStrategy;
         this.pullingConsumerFactory = pullingConsumerFactory;
         this.advancedBusEventHandlers = advancedBusEventHandlers;
-        this.Conventions = conventions;
-        this.consumeScopeProvider = consumeScopeProvider;
 
         Connected += advancedBusEventHandlers.Connected;
         Disconnected += advancedBusEventHandlers.Disconnected;
@@ -96,39 +74,39 @@ public class RabbitAdvancedBus : IAdvancedBus
         Unblocked += advancedBusEventHandlers.Unblocked;
         MessageReturned += advancedBusEventHandlers.MessageReturned;
 
-        eventSubscriptions = new[]
-        {
+        eventSubscriptions =
+        [
             this.eventBus.Subscribe<ConnectionCreatedEvent>(OnConnectionCreated),
             this.eventBus.Subscribe<ConnectionRecoveredEvent>(OnConnectionRecovered),
             this.eventBus.Subscribe<ConnectionDisconnectedEvent>(OnConnectionDisconnected),
             this.eventBus.Subscribe<ConnectionBlockedEvent>(OnConnectionBlocked),
             this.eventBus.Subscribe<ConnectionUnblockedEvent>(OnConnectionUnblocked),
-            this.eventBus.Subscribe<ReturnedMessageEvent>(OnMessageReturned),
-        };
+            this.eventBus.Subscribe<ReturnedMessageEvent>(OnMessageReturned)
+        ];
+
+        produceDelegate = producePipelineBuilder.Use(_ => PublishInternalAsync).Build();
     }
 
-
     /// <inheritdoc />
-    public bool IsConnected => producerConnection.IsConnected && consumerConnection.IsConnected;
-
-    /// <inheritdoc />
-    public Task ConnectAsync(CancellationToken cancellationToken = default)
+    public PersistentConnectionStatus GetConnectionStatus(PersistentConnectionType type)
     {
-        producerConnection.Connect();
-        consumerConnection.Connect();
-        return Task.CompletedTask;
+        var connection = GetConnection(type);
+        return connection.Status;
+    }
+
+    /// <inheritdoc />
+    public async Task EnsureConnectedAsync(PersistentConnectionType type, CancellationToken cancellationToken = default)
+    {
+        var connection = GetConnection(type);
+        await connection.ConnectAsync();
     }
 
     #region Consume
 
     /// <inheritdoc />
-    public IDisposable Consume(Action<IConsumeConfiguration> configure)
+    public async Task<IAsyncDisposable> ConsumeAsync(Action<IConsumeConfiguration> configure)
     {
-        Preconditions.CheckNotNull(configure, nameof(configure));
-
-        var consumeConfiguration = new ConsumeConfiguration(
-            configuration.PrefetchCount, handlerCollectionFactory
-        );
+        var consumeConfiguration = new ConsumeConfiguration(configuration.PrefetchCount, handlerCollectionFactory);
         configure(consumeConfiguration);
 
         var consumerConfiguration = new ConsumerConfiguration(
@@ -140,18 +118,10 @@ public class RabbitAdvancedBus : IAdvancedBus
                     x.Item3.ConsumerTag,
                     x.Item3.IsExclusive,
                     x.Item3.Arguments,
-                    async (body, properties, receivedInfo, cancellationToken) =>
-                    {
-                        var rawMessage = produceConsumeInterceptors.OnConsume(
-                            new ConsumedMessage(receivedInfo, properties, body)
-                        );
-                        using var scope = consumeScopeProvider.CreateScope();
-                        return await x.Item2(
-                            rawMessage.Body, rawMessage.Properties, rawMessage.ReceivedInfo, cancellationToken
-                        ).ConfigureAwait(false);
-                    }
-                )
-            ).Union(
+                    consumePipelineBuilder.Use(
+                        _ => ctx => new ValueTask<AckStrategyAsync>(x.Item2(ctx.Body, ctx.Properties, ctx.ReceivedInfo, ctx.CancellationToken))
+                    ).Build()
+                )).Union(
                 consumeConfiguration.PerQueueTypedConsumeConfigurations.ToDictionary(
                     x => x.Item1,
                     x => new PerQueueConsumerConfiguration(
@@ -159,52 +129,21 @@ public class RabbitAdvancedBus : IAdvancedBus
                         x.Item3.ConsumerTag,
                         x.Item3.IsExclusive,
                         x.Item3.Arguments,
-                        async (body, properties, receivedInfo, cancellationToken) =>
-                        {
-                            var rawMessage = produceConsumeInterceptors.OnConsume(
-                                new ConsumedMessage(receivedInfo, properties, body)
-                            );
-                            var deserializedMessage = messageSerializationStrategy.DeserializeMessage(
-                                rawMessage.Properties, rawMessage.Body
-                            );
-                            var handler = x.Item2.GetHandler(deserializedMessage.MessageType);
-                            using var scope = consumeScopeProvider.CreateScope();
-                            return await handler(deserializedMessage, receivedInfo, cancellationToken)
-                                .ConfigureAwait(false);
-                        }
+                        consumePipelineBuilder.Use(
+                            _ => ctx =>
+                            {
+                                var deserializedMessage = messageSerializationStrategy.DeserializeMessage(ctx.Properties, ctx.Body);
+                                var handler = x.Item2.GetHandler(deserializedMessage.MessageType);
+                                return new ValueTask<AckStrategyAsync>(handler(deserializedMessage, ctx.ReceivedInfo, ctx.CancellationToken));
+                            }
+                        ).Build()
                     )
                 )
             ).ToDictionary(x => x.Key, x => x.Value)
         );
         var consumer = consumerFactory.CreateConsumer(consumerConfiguration);
-        consumer.StartConsuming();
+        await consumer.StartConsumingAsync();
         return consumer;
-    }
-
-    #endregion
-
-    /// <inheritdoc />
-    public async Task<QueueStats> GetQueueStatsAsync(string name, CancellationToken cancellationToken)
-    {
-        Preconditions.CheckNotBlank(name, nameof(name));
-
-        using var cts = cancellationToken.WithTimeout(configuration.Timeout);
-
-        var declareResult = await persistentChannelDispatcher.InvokeAsync(
-            x => x.QueueDeclarePassive(name), PersistentChannelDispatchOptions.ConsumerTopology, cts.Token
-        ).ConfigureAwait(false);
-
-        if (logger.IsDebugEnabled())
-        {
-            logger.DebugFormat(
-                "{messagesCount} messages, {consumersCount} consumers in queue {queue}",
-                declareResult.MessageCount,
-                declareResult.ConsumerCount,
-                name
-            );
-        }
-
-        return new QueueStats(declareResult.MessageCount, declareResult.ConsumerCount);
     }
 
     /// <inheritdoc />
@@ -221,6 +160,8 @@ public class RabbitAdvancedBus : IAdvancedBus
         return pullingConsumerFactory.CreateConsumer<T>(queue, options);
     }
 
+    #endregion
+
     /// <inheritdoc />
     public event EventHandler<ConnectedEventArgs> Connected;
 
@@ -235,12 +176,6 @@ public class RabbitAdvancedBus : IAdvancedBus
 
     /// <inheritdoc />
     public event EventHandler<MessageReturnedEventArgs> MessageReturned;
-
-    /// <inheritdoc />
-    public IServiceResolver Container { get; }
-
-    /// <inheritdoc />
-    public IConventions Conventions { get; }
 
     /// <inheritdoc />
     public virtual void Dispose()
@@ -263,154 +198,98 @@ public class RabbitAdvancedBus : IAdvancedBus
 
     /// <inheritdoc />
     public virtual async Task PublishAsync(
-        Exchange exchange,
+        string exchange,
         string routingKey,
-        bool mandatory,
+        bool? mandatory,
+        bool? publisherConfirms,
         IMessage message,
         CancellationToken cancellationToken
     )
     {
-        Preconditions.CheckNotNull(exchange, nameof(exchange));
-        Preconditions.CheckShortString(routingKey, nameof(routingKey));
-        Preconditions.CheckNotNull(message, nameof(message));
-
         using var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
         await PublishAsync(
-            exchange, routingKey, mandatory, serializedMessage.Properties, serializedMessage.Body, cancellationToken
-        ).ConfigureAwait(false);
-    }
-
-    /// <inheritdoc />
-    public virtual async Task PublishAsync<T>(
-        Exchange exchange,
-        string routingKey,
-        bool mandatory,
-        IMessage<T> message,
-        CancellationToken cancellationToken
-    )
-    {
-        Preconditions.CheckShortString(routingKey, "routingKey");
-        Preconditions.CheckNotNull(message, nameof(message));
-
-        using var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
-        await PublishAsync(
-            exchange, routingKey, mandatory, serializedMessage.Properties, serializedMessage.Body, cancellationToken
+            exchange, routingKey, mandatory, publisherConfirms, serializedMessage.Properties, serializedMessage.Body, cancellationToken
         ).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
     public virtual async Task PublishAsync(
-        Exchange exchange,
+        string exchange,
         string routingKey,
-        bool mandatory,
+        bool? mandatory,
+        bool? publisherConfirms,
         MessageProperties properties,
         ReadOnlyMemory<byte> body,
         CancellationToken cancellationToken
     )
     {
-        Preconditions.CheckShortString(routingKey, nameof(routingKey));
-        Preconditions.CheckNotNull(properties, nameof(properties));
-
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-        var rawMessage = produceConsumeInterceptors.OnProduce(new ProducedMessage(properties, body));
-
-        if (configuration.PublisherConfirms)
-        {
-            while (true)
-            {
-                var pendingConfirmation = await persistentChannelDispatcher.InvokeAsync<IPublishPendingConfirmation, BasicPublishWithConfirmsAction>(
-                    new BasicPublishWithConfirmsAction(confirmationListener, exchange, routingKey, mandatory, rawMessage),
-                    PersistentChannelDispatchOptions.ProducerPublishWithConfirms,
-                    cts.Token
-                ).ConfigureAwait(false);
-
-                try
-                {
-                    await pendingConfirmation.WaitAsync(cts.Token).ConfigureAwait(false);
-                    break;
-                }
-                catch (PublishInterruptedException)
-                {
-                }
-            }
-        }
-        else
-        {
-            await persistentChannelDispatcher.InvokeAsync<NoResult, BasicPublishAction>(
-                new BasicPublishAction(exchange, routingKey, mandatory, rawMessage),
-                PersistentChannelDispatchOptions.ProducerPublish,
-                cts.Token
-            ).ConfigureAwait(false);
-        }
-
-        eventBus.Publish(
-            new PublishedMessageEvent(exchange, routingKey, rawMessage.Properties, rawMessage.Body)
-        );
-
-        if (logger.IsDebugEnabled())
-        {
-            logger.DebugFormat(
-                "Published to exchange {exchange} with routingKey={routingKey} and correlationId={correlationId}",
-                exchange.Name,
-                routingKey,
-                properties.CorrelationId
-            );
-        }
+        await produceDelegate(new ProduceContext(exchange, routingKey, mandatory ?? configuration.MandatoryPublish,
+            publisherConfirms ?? configuration.PublisherConfirms, properties, body, serviceResolver, cts.Token)).ConfigureAwait(false);
     }
 
     #endregion
 
-    #region Exchage, Queue, Binding
+    #region Topology
 
     /// <inheritdoc />
-    public Task<Queue> QueueDeclareAsync(CancellationToken cancellationToken)
+    public async Task<QueueStats> GetQueueStatsAsync(string queue, CancellationToken cancellationToken)
     {
-        return QueueDeclareAsync(
-            string.Empty,
-            c => c.AsDurable(true).AsExclusive(true).AsAutoDelete(true),
-            cancellationToken
-        );
-    }
-
-    /// <inheritdoc />
-    public async Task QueueDeclarePassiveAsync(string name, CancellationToken cancellationToken = default)
-    {
-        Preconditions.CheckNotNull(name, nameof(name));
-
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-        await persistentChannelDispatcher.InvokeAsync(
-            x => x.QueueDeclarePassive(name), PersistentChannelDispatchOptions.ConsumerTopology, cts.Token
+        var declareResult = await persistentChannelDispatcher.InvokeAsync(
+            async x => await x.QueueDeclarePassiveAsync(queue, cancellationToken),
+            PersistentChannelDispatchOptions.ConsumerTopology,
+            cts.Token
         ).ConfigureAwait(false);
 
         if (logger.IsDebugEnabled())
         {
-            logger.DebugFormat("Passive declared queue {queue}", name);
+            logger.DebugFormat(
+                "{queue} has {messagesCount} messages and {consumersCount} consumers.",
+                queue,
+                declareResult.MessageCount,
+                declareResult.ConsumerCount
+            );
+        }
+
+        return new QueueStats(declareResult.MessageCount, declareResult.ConsumerCount);
+    }
+
+    /// <inheritdoc />
+    public async Task QueueDeclarePassiveAsync(string queue, CancellationToken cancellationToken = default)
+    {
+        using var cts = cancellationToken.WithTimeout(configuration.Timeout);
+
+        await persistentChannelDispatcher.InvokeAsync(
+            async x => await x.QueueDeclarePassiveAsync(queue, cancellationToken),
+            PersistentChannelDispatchOptions.ConsumerTopology,
+            cts.Token
+        ).ConfigureAwait(false);
+
+        if (logger.IsDebugEnabled())
+        {
+            logger.Debug("Passive declared queue {queue}", queue);
         }
     }
 
     /// <inheritdoc />
     public async Task<Queue> QueueDeclareAsync(
-        string name,
-        Action<IQueueDeclareConfiguration> configure,
-        CancellationToken cancellationToken = default
+        string queue,
+        bool durable,
+        bool exclusive,
+        bool autoDelete,
+        IDictionary<string, object> arguments,
+        CancellationToken cancellationToken
     )
     {
-        Preconditions.CheckNotNull(name, nameof(name));
-        Preconditions.CheckNotNull(configure, nameof(configure));
-
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-        var queueDeclareConfiguration = new QueueDeclareConfiguration();
-        configure(queueDeclareConfiguration);
-        var isDurable = queueDeclareConfiguration.IsDurable;
-        var isExclusive = queueDeclareConfiguration.IsExclusive;
-        var isAutoDelete = queueDeclareConfiguration.IsAutoDelete;
-        var arguments = queueDeclareConfiguration.Arguments;
+        IDictionary<string, object> nullableArguments = arguments?.ToDictionary(kvp => kvp.Key, kvp => (object)kvp.Value);
 
-        var queueDeclareOk = await persistentChannelDispatcher.InvokeAsync(
-            x => x.QueueDeclare(name, isDurable, isExclusive, isAutoDelete, arguments),
+        var declareResult = await persistentChannelDispatcher.InvokeAsync(
+            async x => await x.QueueDeclareAsync(queue, durable, exclusive, autoDelete, nullableArguments, cancellationToken: cancellationToken),
             PersistentChannelDispatchOptions.ConsumerTopology,
             cts.Token
         ).ConfigureAwait(false);
@@ -419,193 +298,153 @@ public class RabbitAdvancedBus : IAdvancedBus
         {
             logger.DebugFormat(
                 "Declared queue {queue}: durable={durable}, exclusive={exclusive}, autoDelete={autoDelete}, arguments={arguments}",
-                queueDeclareOk.QueueName,
-                isDurable,
-                isExclusive,
-                isAutoDelete,
+                declareResult.QueueName,
+                durable,
+                exclusive,
+                autoDelete,
                 arguments?.Stringify()
             );
         }
 
-        return new Queue(queueDeclareOk.QueueName, isDurable, isExclusive, isAutoDelete, arguments);
+        return new Queue(declareResult.QueueName, durable, exclusive, autoDelete, arguments);
     }
 
     /// <inheritdoc />
     public virtual async Task QueueDeleteAsync(
-        string name, bool ifUnused = false, bool ifEmpty = false, CancellationToken cancellationToken = default)
+        string queue, bool ifUnused = false, bool ifEmpty = false, CancellationToken cancellationToken = default
+    )
     {
-        Preconditions.CheckNotBlank(name, nameof(name));
-
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         await persistentChannelDispatcher.InvokeAsync(
-            x => x.QueueDelete(name, ifUnused, ifEmpty),
+            async x => await x.QueueDeleteAsync(queue, ifUnused, ifEmpty, cancellationToken: cancellationToken),
             PersistentChannelDispatchOptions.ConsumerTopology,
             cts.Token
         ).ConfigureAwait(false);
 
         if (logger.IsDebugEnabled())
         {
-            logger.DebugFormat("Deleted queue {queue}", name);
+            logger.DebugFormat("Deleted queue {queue}", queue);
         }
     }
 
     /// <inheritdoc />
-    public virtual async Task QueuePurgeAsync(string name, CancellationToken cancellationToken)
+    public virtual async Task QueuePurgeAsync(string queue, CancellationToken cancellationToken)
     {
-        Preconditions.CheckNotBlank(name, nameof(name));
-
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         await persistentChannelDispatcher.InvokeAsync(
-            x => x.QueuePurge(name),
+            async x => await x.QueuePurgeAsync(queue, cancellationToken),
             PersistentChannelDispatchOptions.ConsumerTopology,
             cts.Token
         ).ConfigureAwait(false);
 
         if (logger.IsDebugEnabled())
         {
-            logger.DebugFormat("Purged queue {queue}", name);
+            logger.DebugFormat("Purged queue {queue}", queue);
         }
     }
 
     /// <inheritdoc />
-    public async Task ExchangeDeclarePassiveAsync(string name, CancellationToken cancellationToken = default)
+    public async Task ExchangeDeclarePassiveAsync(string exchange, CancellationToken cancellationToken = default)
     {
-        Preconditions.CheckShortString(name, "name");
-
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         await persistentChannelDispatcher.InvokeAsync(
-            x => x.ExchangeDeclarePassive(name), PersistentChannelDispatchOptions.ProducerTopology, cts.Token
+            async x => await x.ExchangeDeclarePassiveAsync(exchange, cancellationToken),
+            PersistentChannelDispatchOptions.ProducerTopology,
+            cts.Token
         ).ConfigureAwait(false);
 
         if (logger.IsDebugEnabled())
         {
-            logger.DebugFormat("Passive declared exchange {exchange}", name);
+            logger.DebugFormat("Passive declared exchange {exchange}", exchange);
         }
     }
 
     /// <inheritdoc />
     public async Task<Exchange> ExchangeDeclareAsync(
-        string name,
-        Action<IExchangeDeclareConfiguration> configure,
-        CancellationToken cancellationToken = default
+        string exchange,
+        string type,
+        bool durable,
+        bool autoDelete,
+        IDictionary<string, object> arguments,
+        CancellationToken cancellationToken
     )
     {
-        Preconditions.CheckShortString(name, "name");
-
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-        var exchangeDeclareConfiguration = new ExchangeDeclareConfiguration();
-        configure(exchangeDeclareConfiguration);
-        var type = exchangeDeclareConfiguration.Type;
-        var isDurable = exchangeDeclareConfiguration.IsDurable;
-        var isAutoDelete = exchangeDeclareConfiguration.IsAutoDelete;
-        var arguments = exchangeDeclareConfiguration.Arguments;
+        IDictionary<string, object> nullableArguments = arguments?.ToDictionary(kvp => kvp.Key, kvp => (object)kvp.Value);
 
         await persistentChannelDispatcher.InvokeAsync(
-            x => x.ExchangeDeclare(name, type, isDurable, isAutoDelete, arguments),
+            async x => await x.ExchangeDeclareAsync(exchange, type, durable, autoDelete, nullableArguments, cancellationToken: cancellationToken),
             PersistentChannelDispatchOptions.ProducerTopology,
             cts.Token
         ).ConfigureAwait(false);
 
         if (logger.IsDebugEnabled())
         {
-            logger.DebugFormat(
+            logger.Debug(
                 "Declared exchange {exchange}: type={type}, durable={durable}, autoDelete={autoDelete}, arguments={arguments}",
-                name,
+                exchange,
                 type,
-                isDurable,
-                isAutoDelete,
+                durable,
+                autoDelete,
                 arguments?.Stringify()
             );
         }
 
-        return new Exchange(name, type, isDurable, isAutoDelete, arguments);
+        return new Exchange(exchange, type, durable, autoDelete, arguments);
     }
 
     /// <inheritdoc />
     public virtual async Task ExchangeDeleteAsync(
-        Exchange exchange, bool ifUnused = false, CancellationToken cancellationToken = default
+        string exchange, bool ifUnused = false, CancellationToken cancellationToken = default
     )
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         await persistentChannelDispatcher.InvokeAsync(
-            x => x.ExchangeDelete(exchange.Name, ifUnused), PersistentChannelDispatchOptions.ProducerTopology, cts.Token
+            async x => await x.ExchangeDeleteAsync(exchange, ifUnused, cancellationToken: cancellationToken),
+            PersistentChannelDispatchOptions.ProducerTopology,
+            cts.Token
         ).ConfigureAwait(false);
 
         if (logger.IsDebugEnabled())
         {
-            logger.DebugFormat("Deleted exchange {exchange}", exchange.Name);
+            logger.DebugFormat("Deleted exchange {exchange}", exchange);
         }
     }
 
     /// <inheritdoc />
-    public async Task<Binding<Queue>> BindAsync(
-        Exchange exchange,
-        Queue queue,
+    public virtual async Task QueueBindAsync(
+        string queue,
+        string exchange,
         string routingKey,
         IDictionary<string, object> arguments,
         CancellationToken cancellationToken
     )
     {
-        Preconditions.CheckShortString(routingKey, "routingKey");
-
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
+        IDictionary<string, object> nullableArguments = arguments?.ToDictionary(kvp => kvp.Key, kvp => (object)kvp.Value);
+
         await persistentChannelDispatcher.InvokeAsync(
-            x => x.QueueBind(queue.Name, exchange.Name, routingKey, arguments),
+            async x => await x.QueueBindAsync(queue, exchange, routingKey, nullableArguments, cancellationToken: cancellationToken),
             PersistentChannelDispatchOptions.ConsumerTopology,
             cts.Token
         ).ConfigureAwait(false);
 
         if (logger.IsDebugEnabled())
         {
-            logger.DebugFormat(
-                "Bound queue {queue} to exchange {exchange} with routingKey={routingKey} and arguments={arguments}",
-                queue.Name,
-                exchange.Name,
+            logger.Debug(
+                "Bound queue {queue} to exchange {exchange} with routing key {routingKey} and arguments {arguments}",
+                queue,
+                exchange,
                 routingKey,
                 arguments?.Stringify()
             );
         }
-
-        return new Binding<Queue>(exchange, queue, routingKey, arguments);
-    }
-
-    /// <inheritdoc />
-    public async Task<Binding<Exchange>> BindAsync(
-        Exchange source,
-        Exchange destination,
-        string routingKey,
-        IDictionary<string, object> arguments,
-        CancellationToken cancellationToken
-    )
-    {
-        Preconditions.CheckShortString(routingKey, "routingKey");
-
-        using var cts = cancellationToken.WithTimeout(configuration.Timeout);
-
-        await persistentChannelDispatcher.InvokeAsync(
-            x => x.ExchangeBind(destination.Name, source.Name, routingKey, arguments),
-            PersistentChannelDispatchOptions.ProducerTopology,
-            cts.Token
-        ).ConfigureAwait(false);
-
-        if (logger.IsDebugEnabled())
-        {
-            logger.DebugFormat(
-                "Bound destination exchange {destinationExchange} to source exchange {sourceExchange} with routingKey={routingKey} and arguments={arguments}",
-                destination.Name,
-                source.Name,
-                routingKey,
-                arguments?.Stringify()
-            );
-        }
-
-        return new Binding<Exchange>(source, destination, routingKey, arguments);
     }
 
     /// <inheritdoc />
@@ -619,18 +458,51 @@ public class RabbitAdvancedBus : IAdvancedBus
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
+        IDictionary<string, object> nullableArguments = arguments?.ToDictionary(kvp => kvp.Key, kvp => (object)kvp.Value);
+
         await persistentChannelDispatcher.InvokeAsync(
-            x => x.QueueUnbind(queue, exchange, routingKey, arguments),
+            async x => await x.QueueUnbindAsync(queue, exchange, routingKey, nullableArguments, cancellationToken),
             PersistentChannelDispatchOptions.ConsumerTopology,
             cts.Token
         ).ConfigureAwait(false);
 
         if (logger.IsDebugEnabled())
         {
-            logger.DebugFormat(
+            logger.Debug(
                 "Unbound queue {queue} from exchange {exchange} with routing key {routingKey} and arguments {arguments}",
                 queue,
                 exchange,
+                routingKey,
+                arguments?.Stringify()
+            );
+        }
+    }
+
+    /// <inheritdoc />
+    public virtual async Task ExchangeBindAsync(
+        string destinationExchange,
+        string sourceExchange,
+        string routingKey,
+        IDictionary<string, object> arguments,
+        CancellationToken cancellationToken
+    )
+    {
+        using var cts = cancellationToken.WithTimeout(configuration.Timeout);
+
+        IDictionary<string, object> nullableArguments = arguments?.ToDictionary(kvp => kvp.Key, kvp => (object)kvp.Value);
+
+        await persistentChannelDispatcher.InvokeAsync(
+            async x => await x.ExchangeBindAsync(destinationExchange, sourceExchange, routingKey, nullableArguments, cancellationToken: cancellationToken),
+            PersistentChannelDispatchOptions.ProducerTopology,
+            cts.Token
+        ).ConfigureAwait(false);
+
+        if (logger.IsDebugEnabled())
+        {
+            logger.Debug(
+                "Bound destination exchange {destinationExchange} to source exchange {sourceExchange} with routing key {routingKey} and arguments {arguments}",
+                destinationExchange,
+                sourceExchange,
                 routingKey,
                 arguments?.Stringify()
             );
@@ -648,15 +520,17 @@ public class RabbitAdvancedBus : IAdvancedBus
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
+        IDictionary<string, object> nullableArguments = arguments?.ToDictionary(kvp => kvp.Key, kvp => (object)kvp.Value);
+
         await persistentChannelDispatcher.InvokeAsync(
-            x => x.ExchangeUnbind(destinationExchange, sourceExchange, routingKey, arguments),
+            async x => await x.ExchangeUnbindAsync(destinationExchange, sourceExchange, routingKey, nullableArguments, cancellationToken: cancellationToken),
             PersistentChannelDispatchOptions.ProducerTopology,
             cts.Token
         ).ConfigureAwait(false);
 
         if (logger.IsDebugEnabled())
         {
-            logger.DebugFormat(
+            logger.Debug(
                 "Unbound destination exchange {destinationExchange} from source exchange {sourceExchange} with routing key {routingKey} and arguments {arguments}",
                 destinationExchange,
                 sourceExchange,
@@ -668,108 +542,182 @@ public class RabbitAdvancedBus : IAdvancedBus
 
     #endregion
 
+    private IPersistentConnection GetConnection(PersistentConnectionType type) =>
+        type switch
+        {
+            PersistentConnectionType.Producer => producerConnection,
+            PersistentConnectionType.Consumer => consumerConnection,
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
 
-    private void OnConnectionCreated(in ConnectionCreatedEvent @event)
+    private Task OnConnectionCreated(ConnectionCreatedEvent messageEvent)
     {
         Connected?.Invoke(
             this,
-            new ConnectedEventArgs(@event.Type, @event.Endpoint.HostName, @event.Endpoint.Port)
+            new ConnectedEventArgs(messageEvent.Type, messageEvent.Endpoint.HostName, messageEvent.Endpoint.Port)
         );
+        return Task.CompletedTask;
     }
 
-    private void OnConnectionRecovered(in ConnectionRecoveredEvent @event)
+    private Task OnConnectionRecovered(ConnectionRecoveredEvent messageEvent)
     {
         Connected?.Invoke(
             this,
-            new ConnectedEventArgs(@event.Type, @event.Endpoint.HostName, @event.Endpoint.Port)
+            new ConnectedEventArgs(messageEvent.Type, messageEvent.Endpoint.HostName, messageEvent.Endpoint.Port)
         );
+        return Task.CompletedTask;
     }
 
-    private void OnConnectionDisconnected(in ConnectionDisconnectedEvent @event)
+    private Task OnConnectionDisconnected(ConnectionDisconnectedEvent messageEvent)
     {
         Disconnected?.Invoke(
             this,
-            new DisconnectedEventArgs(@event.Type, @event.Endpoint.HostName, @event.Endpoint.Port, @event.Reason)
+            new DisconnectedEventArgs(messageEvent.Type, messageEvent.Endpoint.HostName, messageEvent.Endpoint.Port, messageEvent.Reason)
+        );
+        return Task.CompletedTask;
+    }
+
+    private Task OnConnectionBlocked(ConnectionBlockedEvent messageEvent)
+    {
+        Blocked?.Invoke(this, new BlockedEventArgs(messageEvent.Type, messageEvent.Reason));
+        return Task.CompletedTask;
+    }
+
+    private Task OnConnectionUnblocked(ConnectionUnblockedEvent messageEvent)
+    {
+        Unblocked?.Invoke(this, new UnblockedEventArgs(messageEvent.Type));
+        return Task.CompletedTask;
+    }
+
+    private Task OnMessageReturned(ReturnedMessageEvent messageEvent)
+    {
+        MessageReturned?.Invoke(this, new MessageReturnedEventArgs(messageEvent.Body, messageEvent.Properties, messageEvent.Info));
+        return Task.CompletedTask;
+    }
+
+    private async ValueTask PublishInternalAsync(ProduceContext context)
+    {
+        if (context.PublisherConfirms)
+        {
+            while (true)
+            {
+                var pendingConfirmation = await persistentChannelDispatcher.InvokeAsync<IPublishPendingConfirmation, BasicPublishWithConfirmsAction>(
+                    new BasicPublishWithConfirmsAction(
+                        confirmationListener, context.Exchange, context.RoutingKey, context.Mandatory, context.Properties, context.Body
+                    ),
+                    PersistentChannelDispatchOptions.ProducerPublishWithConfirms,
+                    context.CancellationToken
+                ).ConfigureAwait(false);
+
+                try
+                {
+                    await pendingConfirmation.WaitAsync(context.CancellationToken).ConfigureAwait(false);
+                    break;
+                }
+                catch (PublishInterruptedException)
+                {
+                }
+            }
+        }
+        else
+        {
+            await persistentChannelDispatcher.InvokeAsync<bool, BasicPublishAction>(
+                new BasicPublishAction(context.Exchange, context.RoutingKey, context.Mandatory, context.Properties, context.Body),
+                PersistentChannelDispatchOptions.ProducerPublish,
+                context.CancellationToken
+            ).ConfigureAwait(false);
+        }
+
+        if (logger.IsDebugEnabled())
+        {
+            logger.Debug(
+                "Published to exchange {exchange} with routingKey={routingKey} and correlationId={correlationId}",
+                context.Exchange,
+                context.RoutingKey,
+                context.Properties.CorrelationId
+            );
+        }
+
+        await eventBus.PublishAsync(
+            new PublishedMessageEvent(context.Exchange, context.RoutingKey, context.Properties, context.Body)
         );
     }
 
-    private void OnConnectionBlocked(in ConnectionBlockedEvent @event)
+    private readonly struct BasicPublishAction : IPersistentChannelAction<bool>
     {
-        Blocked?.Invoke(this, new BlockedEventArgs(@event.Type, @event.Reason));
-    }
-
-    private void OnConnectionUnblocked(in ConnectionUnblockedEvent @event)
-    {
-        Unblocked?.Invoke(this, new UnblockedEventArgs(@event.Type));
-    }
-
-    private void OnMessageReturned(in ReturnedMessageEvent @event)
-    {
-        MessageReturned?.Invoke(this, new MessageReturnedEventArgs(@event.Body, @event.Properties, @event.Info));
-    }
-
-    private readonly struct BasicPublishAction : IPersistentChannelAction<NoResult>
-    {
-        private readonly Exchange exchange;
+        private readonly string exchange;
         private readonly string routingKey;
         private readonly bool mandatory;
-        private readonly ProducedMessage message;
+        private readonly MessageProperties properties;
+        private readonly ReadOnlyMemory<byte> body;
 
-        public BasicPublishAction(in Exchange exchange, string routingKey, bool mandatory, in ProducedMessage message)
+        public BasicPublishAction(
+            string exchange,
+            string routingKey,
+            bool mandatory,
+            in MessageProperties properties,
+            in ReadOnlyMemory<byte> body
+        )
         {
             this.exchange = exchange;
             this.routingKey = routingKey;
             this.mandatory = mandatory;
-            this.message = message;
+            this.properties = properties;
+            this.body = body;
         }
 
-        public NoResult Invoke(IModel model)
+        public async Task<bool> InvokeAsync(IChannel channel, CancellationToken cancellationToken = default)
         {
-            var basicProperties = model.CreateBasicProperties();
-            message.Properties.CopyTo(basicProperties);
-            model.BasicPublish(exchange.Name, routingKey, mandatory, basicProperties, message.Body);
-            return NoResult.Instance;
+            var basicProperties = new BasicProperties();
+            properties.CopyTo(basicProperties);
+
+            await channel.BasicPublishAsync(exchange, routingKey, mandatory, basicProperties, body, cancellationToken);
+            return true;
         }
     }
 
     private readonly struct BasicPublishWithConfirmsAction : IPersistentChannelAction<IPublishPendingConfirmation>
     {
         private readonly IPublishConfirmationListener confirmationListener;
-        private readonly Exchange exchange;
+        private readonly string exchange;
         private readonly string routingKey;
         private readonly bool mandatory;
-        private readonly ProducedMessage message;
+        private readonly MessageProperties properties;
+        private readonly ReadOnlyMemory<byte> body;
 
         public BasicPublishWithConfirmsAction(
             IPublishConfirmationListener confirmationListener,
-            in Exchange exchange,
+            string exchange,
             string routingKey,
             bool mandatory,
-            in ProducedMessage message
+            in MessageProperties properties,
+            in ReadOnlyMemory<byte> body
         )
         {
             this.confirmationListener = confirmationListener;
             this.exchange = exchange;
             this.routingKey = routingKey;
             this.mandatory = mandatory;
-            this.message = message;
+            this.properties = properties;
+            this.body = body;
         }
 
-        public IPublishPendingConfirmation Invoke(IModel model)
+        public async Task<IPublishPendingConfirmation> InvokeAsync(IChannel channel, CancellationToken cancellationToken = default)
         {
-            var confirmation = confirmationListener.CreatePendingConfirmation(model);
-            message.Properties.SetConfirmationId(confirmation.Id);
-            var basicProperties = model.CreateBasicProperties();
-            message.Properties.CopyTo(basicProperties);
+            var confirmation = await confirmationListener.CreatePendingConfirmationAsync(channel, cancellationToken);
+            var basicProperties = new BasicProperties();
+            properties.SetConfirmationId(confirmation.Id).CopyTo(basicProperties);
+
             try
             {
-                model.BasicPublish(exchange.Name, routingKey, mandatory, basicProperties, message.Body);
+                await channel.BasicPublishAsync(exchange, routingKey, mandatory, basicProperties, body, cancellationToken);
             }
             catch (Exception)
             {
                 confirmation.Cancel();
                 throw;
             }
+
             return confirmation;
         }
     }
