@@ -35,6 +35,10 @@ public readonly struct SubscriptionResult : IAsyncDisposable
     private IAsyncDisposable ConsumerCancellation { get; }
 
     /// <inheritdoc />
-    public ValueTask DisposeAsync() => ConsumerCancellation.DisposeAsync();
-
+    public ValueTask DisposeAsync()
+    {
+#pragma warning disable IDISP007 // Don't dispose injected
+        return ConsumerCancellation.DisposeAsync();
+#pragma warning restore IDISP007 // Don't dispose injected
+    }
 }

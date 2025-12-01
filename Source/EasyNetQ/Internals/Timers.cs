@@ -20,7 +20,9 @@ public static class Timers
     {
 #if NET8_0_OR_GREATER
         PeriodicTimer timer = new PeriodicTimer(period);
+#pragma warning disable CS4014 // Don't dispose injected
         StartAsync(timer, callback, logger);
+#pragma warning restore CS4014 // Don't dispose injected
         return timer;
 #else
         var callbackLock = new object();

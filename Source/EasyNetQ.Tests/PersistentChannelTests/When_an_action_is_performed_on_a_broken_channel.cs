@@ -79,8 +79,9 @@ public class When_an_action_is_performed_and_channel_reopens
 
         await brokenChannel.Received().ExchangeDeclareAsync("MyExchange", "direct");
         await brokenChannel.Received().CloseAsync();
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         brokenChannel.Received().DisposeAsync();
-
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         await channel.Received().ExchangeDeclareAsync("MyExchange", "direct");
     }
 
@@ -107,7 +108,9 @@ public class When_an_action_is_performed_and_channel_reopens
 
         await brokenChannel.Received().ExchangeDeclareAsync("MyExchange", "direct");
         await brokenChannel.Received().CloseAsync();
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         brokenChannel.Received().DisposeAsync();
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
     }
 
     [Fact]

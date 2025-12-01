@@ -42,8 +42,9 @@ public sealed class ModelCleanupTests : IAsyncLifetime
     {
         await bus.PubSub.PublishAsync(new TestMessage());
         await mockBuilder.DisposeAsync();
-
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         mockBuilder.Channels[0].Received().DisposeAsync();
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
     }
 
     [Fact]
@@ -67,8 +68,10 @@ public sealed class ModelCleanupTests : IAsyncLifetime
         var signalReceived = are.WaitOne(waitTime);
         Assert.True(signalReceived, $"Set event was not received within {waitTime.TotalSeconds} seconds");
 
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         mockBuilder.Channels[0].Received().DisposeAsync();
         mockBuilder.Channels[1].Received().DisposeAsync();
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
     }
 
     [Fact]
@@ -89,9 +92,10 @@ public sealed class ModelCleanupTests : IAsyncLifetime
 
         var signalReceived = are.WaitOne(waitTime);
         Assert.True(signalReceived, $"Set event was not received within {waitTime.TotalSeconds} seconds");
-
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         mockBuilder.Channels[0].Received().DisposeAsync();
         mockBuilder.Channels[1].Received().DisposeAsync();
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
     }
 
     [Fact]
@@ -106,9 +110,10 @@ public sealed class ModelCleanupTests : IAsyncLifetime
 
         var signalReceived = are.WaitOne(waitTime);
         Assert.True(signalReceived, $"Set event was not received within {waitTime.TotalSeconds} seconds");
-
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         mockBuilder.Channels[0].Received().DisposeAsync();
         mockBuilder.Channels[1].Received().DisposeAsync();
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
     }
 
     [Fact]
@@ -123,8 +128,9 @@ public sealed class ModelCleanupTests : IAsyncLifetime
 
         var signalReceived = are.WaitOne(waitTime);
         Assert.True(signalReceived, $"Set event was not received within {waitTime.TotalSeconds} seconds");
-
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         mockBuilder.Channels[0].Received().DisposeAsync();
         mockBuilder.Channels[1].Received().DisposeAsync();
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
     }
 }
