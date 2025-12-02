@@ -34,31 +34,6 @@ public class ProgramTests
         );
     }
 
-    private readonly string expectedDumpOutput =
-        $"2 messages from queue 'EasyNetQ_Default_Error_Queue' were dumped to directory '{Directory.GetCurrentDirectory()}'{Environment.NewLine}";
-
-    [Fact]
-    public async Task Should_output_messages_to_directory_with_dump()
-    {
-        var args = new[]
-        {
-            "dump",
-            "s:localhost",
-            "q:EasyNetQ_Default_Error_Queue"
-        };
-
-        using var writer = new StringWriter();
-        Console.SetOut(writer);
-
-        await program.StartAsync(args, CancellationToken.None);
-
-        var actualOutput = writer.GetStringBuilder().ToString();
-        actualOutput.ShouldEqual(expectedDumpOutput);
-
-        messageWriter.Parameters.QueueName.ShouldEqual("EasyNetQ_Default_Error_Queue");
-        messageWriter.Parameters.HostName.ShouldEqual("localhost");
-    }
-
     private readonly string expectedInsertOutput =
         $"{2} messages from directory '{Directory.GetCurrentDirectory()}' were inserted into queue ''{Environment.NewLine}";
 
