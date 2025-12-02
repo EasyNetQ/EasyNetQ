@@ -6,12 +6,6 @@
     <CentralPackageFloatingVersionsEnabled>true</CentralPackageFloatingVersionsEnabled>
   </PropertyGroup>
   <ItemGroup>
-    <GlobalPackageReference Include="IDisposableAnalyzers" Version="4.0.8">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </GlobalPackageReference>
-  </ItemGroup>
-  <ItemGroup>
     <PackageVersion Include="docker.dotnet" Version="3.125.15" />
     <PackageVersion Include="EasyNetQ.Management.Client" Version="3.0.0" />
     <PackageVersion Include="FluentAssertions" Version="8.8.0" />

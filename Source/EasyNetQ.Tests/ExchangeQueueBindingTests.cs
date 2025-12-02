@@ -9,20 +9,22 @@ public class When_a_queue_is_declared : IAsyncLifetime
     public When_a_queue_is_declared()
     {
         mockBuilder = new MockBuilder();
-
-        queue = mockBuilder.Bus.Advanced.QueueDeclare(
-            queue: "my_queue",
-            durable: false,
-            exclusive: true,
-            autoDelete: true,
-            arguments: new Dictionary<string, object>()
-                .WithMessageTtl(TimeSpan.FromSeconds(1))
-                .WithExpires(TimeSpan.FromSeconds(2))
-                .WithMaxPriority(10)
-        );
     }
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public async Task InitializeAsync()
+    {
+        queue = await mockBuilder.Bus.Advanced.QueueDeclareAsync(
+    queue: "my_queue",
+    durable: false,
+    exclusive: true,
+    autoDelete: true,
+    arguments: new Dictionary<string, object>()
+        .WithMessageTtl(TimeSpan.FromSeconds(1))
+        .WithExpires(TimeSpan.FromSeconds(2))
+        .WithMaxPriority(10)
+);
+    }
+
 
     public async Task DisposeAsync()
     {
@@ -30,7 +32,7 @@ public class When_a_queue_is_declared : IAsyncLifetime
     }
 
     private readonly MockBuilder mockBuilder;
-    private readonly Queue queue;
+    private Queue queue;
 
     [Fact]
     public async Task Should_declare_the_queue()
@@ -65,8 +67,12 @@ public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange : IAsyncLi
     {
         mockBuilder = new MockBuilder();
 
+    }
+
+    public async Task InitializeAsync()
+    {
         var advancedBus = mockBuilder.Bus.Advanced;
-        queue = advancedBus.QueueDeclare(
+        queue = await advancedBus.QueueDeclareAsync(
             queue: "my_queue",
             durable: false,
             exclusive: true,
@@ -80,15 +86,13 @@ public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange : IAsyncLi
         );
     }
 
-    public Task InitializeAsync() => Task.CompletedTask;
-
     public async Task DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }
 
     private readonly MockBuilder mockBuilder;
-    private readonly Queue queue;
+    private Queue queue;
 
     [Fact]
     public async Task Should_declare_the_queue()
@@ -124,22 +128,24 @@ public class When_a_queue_is_declared_With_EmptyDeadLetterExchange : IAsyncLifet
     public When_a_queue_is_declared_With_EmptyDeadLetterExchange()
     {
         mockBuilder = new MockBuilder();
-
-        queue = mockBuilder.Bus.Advanced.QueueDeclare(
-            queue: "my_queue",
-            durable: false,
-            exclusive: true,
-            autoDelete: true,
-            arguments: new Dictionary<string, object>()
-                .WithMessageTtl(TimeSpan.FromSeconds(1))
-                .WithExpires(TimeSpan.FromSeconds(2))
-                .WithMaxPriority(10)
-                .WithDeadLetterExchange(Exchange.DefaultName)
-                .WithDeadLetterRoutingKey("my_queue2")
-        );
     }
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public async Task InitializeAsync()
+    {
+        queue = await mockBuilder.Bus.Advanced.QueueDeclareAsync(
+    queue: "my_queue",
+    durable: false,
+    exclusive: true,
+    autoDelete: true,
+    arguments: new Dictionary<string, object>()
+        .WithMessageTtl(TimeSpan.FromSeconds(1))
+        .WithExpires(TimeSpan.FromSeconds(2))
+        .WithMaxPriority(10)
+        .WithDeadLetterExchange(Exchange.DefaultName)
+        .WithDeadLetterRoutingKey("my_queue2")
+);
+    }
+
 
     public async Task DisposeAsync()
     {
@@ -147,7 +153,7 @@ public class When_a_queue_is_declared_With_EmptyDeadLetterExchange : IAsyncLifet
     }
 
     private readonly MockBuilder mockBuilder;
-    private readonly Queue queue;
+    private Queue queue;
 
     [Fact]
     public async Task Should_declare_the_queue()

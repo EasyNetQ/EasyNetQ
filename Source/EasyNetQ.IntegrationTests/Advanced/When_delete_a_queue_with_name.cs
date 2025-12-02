@@ -31,7 +31,7 @@ public class When_delete_a_queue_with_name : IDisposable, IAsyncLifetime
         await bus.Advanced.QueueDeclarePassiveAsync(queueName, cts.Token);
         await bus.Advanced.QueueDeleteAsync(queueName, cancellationToken: cts.Token);
 
-        var exception = Assert.Throws<OperationInterruptedException>(() => bus.Advanced.QueueDeclarePassive(queueName, cts.Token));
+        var exception = Assert.Throws<OperationInterruptedException>(() => bus.Advanced.QueueDeclarePassiveAsync(queueName, cts.Token).GetAwaiter().GetResult());
         Assert.Equal(404, exception.ShutdownReason.ReplyCode);
     }
 

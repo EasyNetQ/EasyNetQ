@@ -136,11 +136,6 @@ public class Program
     {
         var count = 0;
         await messageWriter.WriteAsync(WithEachAsync(queueRetrieval.GetMessagesFromQueueAsync(parameters, cancellationToken), () => count++), parameters, cancellationToken);
-
-        Console.WriteLine(
-            "{0} messages from queue '{1}' were dumped to directory '{2}'",
-            count, parameters.QueueName, parameters.MessagesOutputDirectory
-        );
     }
 
     private async Task InsertAsync(QueueParameters parameters, CancellationToken cancellationToken)
