@@ -38,14 +38,13 @@ public class DockerProxy : IDisposable
 
     public async Task PullImageAsync(string image, string tag, CancellationToken token = default)
     {
-        await Task.CompletedTask;
-        /*var createParameters = new ImagesCreateParameters
+        var createParameters = new ImagesCreateParameters
         {
             FromImage = image,
             Tag = tag
         };
         var progress = new Progress<JSONMessage>(_ => { });
-        await client.Images.CreateImageAsync(createParameters, null, progress, token);*/
+        await client.Images.CreateImageAsync(createParameters, null, progress, token);
     }
 
     public async Task<string> CreateContainerAsync(string image, string name,
