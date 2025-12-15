@@ -140,8 +140,7 @@ public class InternalConsumer : IInternalConsumer
                 }
 
                 consumers.Clear();
-                if (channel != null)
-                    await channel.DisposeAsync();
+                await channel.DisposeAsync();
                 channel = null;
             }
 

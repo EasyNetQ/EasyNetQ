@@ -75,7 +75,7 @@ public class ExchangeDeclareStrategyTests
 
         using var exchangeDeclareStrategy = new DefaultExchangeDeclareStrategy(Substitute.For<IConventions>(), advancedBus);
 
-        var _ = await exchangeDeclareStrategy.DeclareExchangeAsync(exchangeName, ExchangeType.Topic);
+        await exchangeDeclareStrategy.DeclareExchangeAsync(exchangeName, ExchangeType.Topic);
         var declaredExchange = await exchangeDeclareStrategy.DeclareExchangeAsync(exchangeName, ExchangeType.Topic);
 
         await advancedBus.Received().ExchangeDeclareAsync(exchangeName);

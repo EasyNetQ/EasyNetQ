@@ -10,7 +10,7 @@ public class When_auto_subscribing_async_with_subscription_configuration_attribu
     private Action<ISubscriptionConfiguration> capturedAction;
     private readonly IPubSub pubSub;
     private bool disposed;
-    AutoSubscriber autoSubscriber;
+    readonly AutoSubscriber autoSubscriber;
     public When_auto_subscribing_async_with_subscription_configuration_attribute()
     {
         pubSub = Substitute.For<IPubSub>();
@@ -100,7 +100,7 @@ public class When_auto_subscribing_async_explicit_implementation_with_subscripti
     private Action<ISubscriptionConfiguration> capturedAction;
     private readonly IPubSub pubSub;
     private bool disposed;
-    AutoSubscriber autoSubscriber;
+    readonly AutoSubscriber autoSubscriber;
     public When_auto_subscribing_async_explicit_implementation_with_subscription_configuration_attribute()
     {
         pubSub = Substitute.For<IPubSub>();

@@ -10,7 +10,7 @@ public class When_auto_subscribing_with_subscription_configuration_attribute : I
     private Action<ISubscriptionConfiguration> capturedAction;
     private readonly IPubSub pubSub;
     private bool disposed;
-    AutoSubscriber autoSubscriber;
+    readonly AutoSubscriber autoSubscriber;
     public When_auto_subscribing_with_subscription_configuration_attribute()
     {
         pubSub = Substitute.For<IPubSub>();

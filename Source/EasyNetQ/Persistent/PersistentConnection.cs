@@ -16,7 +16,7 @@ public class PersistentConnection : IPersistentConnection
     private volatile IConnection initializedConnection;
     private volatile bool disposed;
     private volatile PersistentConnectionStatus status;
-    private SemaphoreSlim mutex = new SemaphoreSlim(1);
+    readonly SemaphoreSlim mutex = new SemaphoreSlim(1);
     /// <summary>
     ///     Creates PersistentConnection
     /// </summary>

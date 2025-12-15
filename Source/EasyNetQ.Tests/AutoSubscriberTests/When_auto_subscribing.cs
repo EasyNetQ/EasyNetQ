@@ -9,7 +9,7 @@ public class When_auto_subscribing : IAsyncLifetime
 {
     private readonly MockBuilder mockBuilder;
     private readonly ServiceProvider serviceProvider;
-    AutoSubscriber autoSubscriber;
+    readonly AutoSubscriber autoSubscriber;
     private const string expectedQueueName1 =
         "EasyNetQ.Tests.AutoSubscriberTests.When_auto_subscribing+MessageA, EasyNetQ.Tests_my_app:835d4f0895343085408382191aee841c";
 
@@ -59,7 +59,6 @@ public class When_auto_subscribing : IAsyncLifetime
             );
         }
 
-        var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, serviceProvider, "my_app");
         await autoSubscriber.SubscribeAsync([typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>)]);
 
         await AssertQueueDeclared(expectedQueueName1);
@@ -82,7 +81,6 @@ public class When_auto_subscribing : IAsyncLifetime
             );
         }
 
-        var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, serviceProvider, "my_app");
         await autoSubscriber.SubscribeAsync([typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>)]);
 
         await AssertConsumerStarted(1, expectedQueueName1, "#");

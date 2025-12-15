@@ -9,7 +9,7 @@ public class When_auto_subscribing_with_explicit_implementation : IAsyncLifetime
 {
     private readonly MockBuilder mockBuilder;
     private readonly ServiceProvider serviceProvider;
-    AutoSubscriber autoSubscriber;
+    readonly AutoSubscriber autoSubscriber;
     private const string expectedQueueName1 =
         "EasyNetQ.Tests.AutoSubscriberTests.When_auto_subscribing_with_explicit_implementation+MessageA, EasyNetQ.Tests_my_app:552bba04667af93e428cfdc296acb6d4";
 
