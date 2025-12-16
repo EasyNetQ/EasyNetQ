@@ -105,7 +105,7 @@ public class When_publish_and_subscribe_with_default_options : IDisposable, IAsy
         }
     }
 
-    [Fact(Skip ="Hang on")]
+    [Fact(Skip = "Hang on")]
     public async Task Should_survive_restart()
     {
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
