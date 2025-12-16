@@ -101,9 +101,9 @@ public class When_an_action_is_performed_and_channel_reopens
         await using var persistentChannel = new PersistentChannel(
             new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, Substitute.For<IEventBus>()
         );
-        Assert.Throws(
+        await Assert.ThrowsAsync(
             exception.GetType(),
-            () => persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", "direct")).GetAwaiter().GetResult()
+            async () => await persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", "direct"))
         );
 
         await brokenChannel.Received().ExchangeDeclareAsync("MyExchange", "direct");
@@ -153,8 +153,8 @@ public class When_an_action_is_performed_and_channel_reopens
             new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, Substitute.For<IEventBus>()
         );
 
-        Assert.Throws<BrokerUnreachableException>(
-            () => persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", "direct")).GetAwaiter().GetResult()
+        await Assert.ThrowsAsync<BrokerUnreachableException>(
+            async () => await persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", "direct"))
         );
 
         await channel.DidNotReceive().ExchangeDeclareAsync("MyExchange", "direct");
