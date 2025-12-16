@@ -44,7 +44,7 @@ public class When_pull_messages : IDisposable, IAsyncLifetime
         await using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
 
         {
-            using var pullResult = await consumer.PullAsync(cts.Token);
+            var pullResult = await consumer.PullAsync(cts.Token);
             pullResult.IsAvailable.Should().BeTrue();
             await consumer.AckAsync(
                 pullResult.ReceivedInfo.DeliveryTag, cts.Token
@@ -52,7 +52,7 @@ public class When_pull_messages : IDisposable, IAsyncLifetime
         }
 
         {
-            using var pullResult = await consumer.PullAsync(cts.Token);
+            var pullResult = await consumer.PullAsync(cts.Token);
             pullResult.IsAvailable.Should().BeFalse();
         }
     }
@@ -72,7 +72,7 @@ public class When_pull_messages : IDisposable, IAsyncLifetime
         await using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
 
         {
-            using var pullResult = await consumer.PullAsync(cts.Token);
+            var pullResult = await consumer.PullAsync(cts.Token);
             pullResult.IsAvailable.Should().BeTrue();
             await consumer.RejectAsync(
                 pullResult.ReceivedInfo.DeliveryTag, false, cts.Token
@@ -80,7 +80,7 @@ public class When_pull_messages : IDisposable, IAsyncLifetime
         }
 
         {
-            using var pullResult = await consumer.PullAsync(cts.Token);
+            var pullResult = await consumer.PullAsync(cts.Token);
             pullResult.IsAvailable.Should().BeFalse();
         }
     }
@@ -100,7 +100,7 @@ public class When_pull_messages : IDisposable, IAsyncLifetime
         await using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
 
         {
-            using var pullResult = await consumer.PullAsync(cts.Token);
+            var pullResult = await consumer.PullAsync(cts.Token);
             pullResult.IsAvailable.Should().BeTrue();
             await consumer.RejectAsync(
                 pullResult.ReceivedInfo.DeliveryTag, true, cts.Token
@@ -108,7 +108,7 @@ public class When_pull_messages : IDisposable, IAsyncLifetime
         }
 
         {
-            using var pullResult = await consumer.PullAsync(cts.Token);
+            var pullResult = await consumer.PullAsync(cts.Token);
             pullResult.IsAvailable.Should().BeTrue();
         }
     }
@@ -128,12 +128,12 @@ public class When_pull_messages : IDisposable, IAsyncLifetime
         await using var consumer = bus.Advanced.CreatePullingConsumer(queue);
 
         {
-            using var pullResult = await consumer.PullAsync(cts.Token);
+            var pullResult = await consumer.PullAsync(cts.Token);
             pullResult.IsAvailable.Should().BeTrue();
         }
 
         {
-            using var pullResult = await consumer.PullAsync(cts.Token);
+            var pullResult = await consumer.PullAsync(cts.Token);
             pullResult.IsAvailable.Should().BeFalse();
         }
     }

@@ -44,7 +44,7 @@ public sealed class When_pull_messages_batch : IAsyncLifetime
         await using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
 
         {
-            using var pullResult = await consumer.PullBatchAsync(2, cts.Token);
+            var pullResult = await consumer.PullBatchAsync(2, cts.Token);
             pullResult.Messages.Should().HaveCount(2);
             await consumer.AckBatchAsync(
                 pullResult.DeliveryTag, cts.Token
@@ -52,7 +52,7 @@ public sealed class When_pull_messages_batch : IAsyncLifetime
         }
 
         {
-            using var pullResult = await consumer.PullBatchAsync(2, cts.Token);
+            var pullResult = await consumer.PullBatchAsync(2, cts.Token);
             pullResult.Messages.Should().HaveCount(0);
         }
     }
@@ -75,7 +75,7 @@ public sealed class When_pull_messages_batch : IAsyncLifetime
         await using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
 
         {
-            using var pullResult = await consumer.PullBatchAsync(2, cts.Token);
+            var pullResult = await consumer.PullBatchAsync(2, cts.Token);
             pullResult.Messages.Should().HaveCount(2);
             await consumer.RejectBatchAsync(
                 pullResult.DeliveryTag, false, cts.Token
@@ -83,7 +83,7 @@ public sealed class When_pull_messages_batch : IAsyncLifetime
         }
 
         {
-            using var pullResult = await consumer.PullBatchAsync(2, cts.Token);
+            var pullResult = await consumer.PullBatchAsync(2, cts.Token);
             pullResult.Messages.Should().HaveCount(0);
         }
     }
@@ -106,7 +106,7 @@ public sealed class When_pull_messages_batch : IAsyncLifetime
         await using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
 
         {
-            using var pullResult = await consumer.PullBatchAsync(2, cts.Token);
+            var pullResult = await consumer.PullBatchAsync(2, cts.Token);
             pullResult.Messages.Should().HaveCount(2);
             await consumer.RejectBatchAsync(
                 pullResult.DeliveryTag, true, cts.Token
@@ -114,7 +114,7 @@ public sealed class When_pull_messages_batch : IAsyncLifetime
         }
 
         {
-            using var pullResult = await consumer.PullBatchAsync(2, cts.Token);
+            var pullResult = await consumer.PullBatchAsync(2, cts.Token);
             pullResult.Messages.Should().HaveCount(2);
         }
     }
@@ -137,12 +137,12 @@ public sealed class When_pull_messages_batch : IAsyncLifetime
         await using var consumer = bus.Advanced.CreatePullingConsumer(queue);
 
         {
-            using var pullResult = await consumer.PullBatchAsync(2, cts.Token);
+            var pullResult = await consumer.PullBatchAsync(2, cts.Token);
             pullResult.Messages.Should().HaveCount(2);
         }
 
         {
-            using var pullResult = await consumer.PullBatchAsync(0, cts.Token);
+            var pullResult = await consumer.PullBatchAsync(0, cts.Token);
             pullResult.Messages.Should().HaveCount(0);
         }
     }

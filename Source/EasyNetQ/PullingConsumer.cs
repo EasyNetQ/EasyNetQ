@@ -9,7 +9,7 @@ namespace EasyNetQ;
 /// <summary>
 ///     Represents a result of a pull
 /// </summary>
-public interface IPullResult : IDisposable
+public interface IPullResult
 {
     /// <summary>
     ///     <see langword="true"/> if a message is available
@@ -38,12 +38,11 @@ public readonly struct PullResult : IPullResult
     private readonly MessageProperties properties;
     private readonly ReadOnlyMemory<byte> body;
     private readonly ulong messagesCount;
-    private readonly IDisposable disposable;
 
     /// <summary>
     ///     Represents a result when no message is available
     /// </summary>
-    public static PullResult NotAvailable { get; } = new(false, 0, default, default, null, null);
+    public static PullResult NotAvailable { get; } = new(false, 0, default, default, null);
 
     /// <summary>
     ///     Represents a result when a message is available
@@ -53,11 +52,10 @@ public readonly struct PullResult : IPullResult
         ulong messagesCount,
         in MessageReceivedInfo receivedInfo,
         in MessageProperties properties,
-        in ReadOnlyMemory<byte> body,
-        IDisposable disposable
+        in ReadOnlyMemory<byte> body
     )
     {
-        return new PullResult(true, messagesCount, receivedInfo, properties, body, disposable);
+        return new PullResult(true, messagesCount, receivedInfo, properties, body);
     }
 
     private PullResult(
@@ -65,8 +63,7 @@ public readonly struct PullResult : IPullResult
         ulong messagesCount,
         in MessageReceivedInfo receivedInfo,
         in MessageProperties properties,
-        in ReadOnlyMemory<byte> body,
-        IDisposable disposable
+        in ReadOnlyMemory<byte> body
     )
     {
         IsAvailable = isAvailable;
@@ -74,7 +71,6 @@ public readonly struct PullResult : IPullResult
         this.receivedInfo = receivedInfo;
         this.properties = properties;
         this.body = body;
-        this.disposable = disposable;
     }
 
     /// <summary>
@@ -140,14 +136,6 @@ public readonly struct PullResult : IPullResult
 
             return body;
         }
-    }
-
-    /// <inheritdoc />
-    public void Dispose()
-    {
-#pragma warning disable IDISP007 // the injected here is created in the calling method so it should be disposed
-        disposable?.Dispose();
-#pragma warning restore IDISP007
     }
 }
 
@@ -237,11 +225,6 @@ public readonly struct PullResult<T> : IPullResult
 
             return message!;
         }
-    }
-
-    /// <inheritdoc />
-    public void Dispose()
-    {
     }
 }
 
@@ -361,8 +344,7 @@ public sealed class PullingConsumer : IPullingConsumer<PullResult>
             messagesCount,
             interceptedMessage.ReceivedInfo,
             interceptedMessage.Properties,
-            interceptedMessage.Body,
-            null
+            interceptedMessage.Body
         );
     }
 
@@ -481,7 +463,6 @@ public sealed class PullingConsumer<T> : IPullingConsumer<PullResult<T>>
         var pullResult = await consumer.PullAsync(cancellationToken).ConfigureAwait(false);
         if (!pullResult.IsAvailable)
         {
-            pullResult.Dispose();
             return PullResult<T>.NotAvailable;
         }
 
