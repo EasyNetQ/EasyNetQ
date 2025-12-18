@@ -251,7 +251,7 @@ public class InternalConsumer : IInternalConsumer
                     try
                     {
                         if (channel != null)
-                            await channel.BasicCancelAsync(consumerTag, false, cancellationToken);
+                            await channel.BasicCancelAsync(consumerTag, true, cancellationToken);
                     }
                     catch (Exception exception)
                     {
