@@ -12,7 +12,7 @@ public static class DelayedExchangeExtensions
     /// <param name="exchangeType">The exchange type</param>
     public static IExchangeDeclareConfiguration AsDelayedExchange(
         this IExchangeDeclareConfiguration configuration, string exchangeType = ExchangeType.Fanout
-    ) => configuration.WithType("x-delayed-message").WithArgument("x-delayed-type", exchangeType);
+    ) => configuration.WithType(ExchangeType.DelayedMessage).WithArgument(Argument.DelayedType, exchangeType);
 
     /// <summary>
     ///     Add the delay to the message properties to be used by delayed exchange

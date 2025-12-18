@@ -54,7 +54,7 @@ public class When_send_receive_with_default_options : IDisposable, IAsyncLifetim
         }
     }
 
-    [Fact(Skip = "Hang on")]
+    [Fact]
     public async Task Should_survive_restart()
     {
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
