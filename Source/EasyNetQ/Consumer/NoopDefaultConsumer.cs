@@ -11,7 +11,7 @@ internal sealed class NoopDefaultConsumer : IAsyncBasicConsumer
 
     public IChannel Channel => throw new NotSupportedException();
 
-    public static event AsyncEventHandler<ConsumerEventArgs> ConsumerCancelled
+    public event AsyncEventHandler<ConsumerEventArgs> ConsumerCancelled
     {
         add { }
         remove { }
