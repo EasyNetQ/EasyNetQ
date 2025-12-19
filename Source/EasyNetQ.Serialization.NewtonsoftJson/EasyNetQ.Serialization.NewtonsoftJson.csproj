@@ -13,10 +13,7 @@
     <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
   <ItemGroup>
-    <PackageVersion Update="MinVer" Version="6.0.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Update="MinVer">
+    <PackageReference Include="MinVer">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
