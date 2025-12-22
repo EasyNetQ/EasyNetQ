@@ -155,7 +155,7 @@ public class DefaultConsumerErrorStrategy : IConsumerErrorStrategy
         }
 
         model.QueueDeclare(queueName, true, false, false, queueArgs);
-        model.ExchangeDeclare(exchangeName, ExchangeType.Direct, true);
+        model.ExchangeDeclare(exchangeName, exchangeType, true);
         model.QueueBind(queueName, exchangeName, routingKey);
     }
 
