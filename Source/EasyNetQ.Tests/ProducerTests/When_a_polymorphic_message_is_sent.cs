@@ -36,7 +36,7 @@ public class When_a_polymorphic_message_is_sent : IAsyncLifetime
     {
         await mockBuilder.Channels[0].Received().ExchangeDeclareAsync(
             Arg.Is(interfaceTypeName),
-            Arg.Is("topic"),
+            Arg.Is(ExchangeType.Topic),
             Arg.Is(true),
             Arg.Is(false),
             Arg.Any<IDictionary<string, object>>(),

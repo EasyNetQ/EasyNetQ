@@ -32,7 +32,7 @@ public class When_an_action_is_performed_on_a_closed_channel_that_doesnt_open_ag
         await Assert.ThrowsAsync<TaskCanceledException>(async () =>
         {
             using var cts = new CancellationTokenSource(1000);
-            await persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", "direct"), cts.Token);
+            await persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", ExchangeType.Direct), cts.Token);
         });
     }
 

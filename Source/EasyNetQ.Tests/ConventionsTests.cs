@@ -189,7 +189,7 @@ public class When_publishing_a_message : IAsyncLifetime
     {
         await mockBuilder.Channels[0].Received().ExchangeDeclareAsync(
             Arg.Is("CustomExchangeNamingConvention"),
-            Arg.Is("topic"),
+            Arg.Is(ExchangeType.Topic),
             Arg.Is(true),
             Arg.Is(false),
             Arg.Is((IDictionary<string, object>)null),
@@ -253,7 +253,7 @@ public class When_registering_response_handler : IAsyncLifetime
     {
         await mockBuilder.Channels[0].Received().ExchangeDeclareAsync(
             Arg.Is("CustomRpcExchangeName"),
-            Arg.Is("direct"),
+            Arg.Is(ExchangeType.Direct),
             Arg.Is(true),
             Arg.Is(false),
             Arg.Is((IDictionary<string, object>)null),

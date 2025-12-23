@@ -64,7 +64,7 @@ public class When_an_action_is_performed_and_channel_reopens
     {
         using var persistentConnection = Substitute.For<IPersistentConnection>();
         var brokenChannel = Substitute.For<IChannel, IRecoverable>();
-        brokenChannel.When(async x => await x.ExchangeDeclareAsync("MyExchange", "direct"))
+        brokenChannel.When(async x => await x.ExchangeDeclareAsync("MyExchange", ExchangeType.Direct))
             .Do(_ => throw exception);
         var channel = Substitute.For<IChannel, IRecoverable>();
 #pragma warning disable IDISP004
@@ -75,14 +75,14 @@ public class When_an_action_is_performed_and_channel_reopens
             new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, Substitute.For<IEventBus>()
         );
 
-        await persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", "direct"));
+        await persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", ExchangeType.Direct));
 
-        await brokenChannel.Received().ExchangeDeclareAsync("MyExchange", "direct");
+        await brokenChannel.Received().ExchangeDeclareAsync("MyExchange", ExchangeType.Direct);
         await brokenChannel.Received().CloseAsync();
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         brokenChannel.Received().DisposeAsync();
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-        await channel.Received().ExchangeDeclareAsync("MyExchange", "direct");
+        await channel.Received().ExchangeDeclareAsync("MyExchange", ExchangeType.Direct);
     }
 
     [Theory]
@@ -91,7 +91,7 @@ public class When_an_action_is_performed_and_channel_reopens
     {
         using var persistentConnection = Substitute.For<IPersistentConnection>();
         var brokenChannel = Substitute.For<IChannel, IRecoverable>();
-        brokenChannel.When(async x => await x.ExchangeDeclareAsync("MyExchange", "direct"))
+        brokenChannel.When(async x => await x.ExchangeDeclareAsync("MyExchange", ExchangeType.Direct))
             .Do(_ => throw exception);
 
 #pragma warning disable IDISP004
@@ -103,10 +103,10 @@ public class When_an_action_is_performed_and_channel_reopens
         );
         await Assert.ThrowsAsync(
             exception.GetType(),
-            async () => await persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", "direct"))
+            async () => await persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", ExchangeType.Direct))
         );
 
-        await brokenChannel.Received().ExchangeDeclareAsync("MyExchange", "direct");
+        await brokenChannel.Received().ExchangeDeclareAsync("MyExchange", ExchangeType.Direct);
         await brokenChannel.Received().CloseAsync();
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         brokenChannel.Received().DisposeAsync();
@@ -131,9 +131,9 @@ public class When_an_action_is_performed_and_channel_reopens
             new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, Substitute.For<IEventBus>()
         );
 
-        await persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", "direct"));
+        await persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", ExchangeType.Direct));
 
-        await channel.Received().ExchangeDeclareAsync("MyExchange", "direct");
+        await channel.Received().ExchangeDeclareAsync("MyExchange", ExchangeType.Direct);
     }
 
     [Fact]
@@ -154,9 +154,9 @@ public class When_an_action_is_performed_and_channel_reopens
         );
 
         await Assert.ThrowsAsync<BrokerUnreachableException>(
-            async () => await persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", "direct"))
+            async () => await persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", ExchangeType.Direct))
         );
 
-        await channel.DidNotReceive().ExchangeDeclareAsync("MyExchange", "direct");
+        await channel.DidNotReceive().ExchangeDeclareAsync("MyExchange", ExchangeType.Direct);
     }
 }

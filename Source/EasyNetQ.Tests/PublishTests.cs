@@ -71,7 +71,7 @@ public class When_publish_is_called : IAsyncLifetime
     {
         await mockBuilder.Channels[0].Received().ExchangeDeclareAsync(
             Arg.Is("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
-            Arg.Is("topic"),
+            Arg.Is(ExchangeType.Topic),
             Arg.Is(true),
             Arg.Is(false),
             Arg.Is((IDictionary<string, object>)null),

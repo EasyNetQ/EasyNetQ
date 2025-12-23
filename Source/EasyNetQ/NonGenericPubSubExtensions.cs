@@ -114,7 +114,7 @@ public static class NonGenericPubSubExtensions
     /// Ack'd.
     /// </param>
     /// <param name="configure">
-    /// Fluent configuration e.g. x => x.WithTopic("uk.london").WithArgument("x-message-ttl", "60")
+    /// Fluent configuration e.g. x => x.WithTopic("uk.london").WithArgument(Argument.MessageTtl, "60")
     /// </param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>

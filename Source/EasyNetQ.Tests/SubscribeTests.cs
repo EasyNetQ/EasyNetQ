@@ -68,7 +68,7 @@ public class When_subscribe_is_called : IAsyncLifetime
     {
         await mockBuilder.Channels[0].Received().ExchangeDeclareAsync(
             Arg.Is(typeName),
-            Arg.Is("topic"),
+            Arg.Is(ExchangeType.Topic),
             Arg.Is(true),
             Arg.Is(false),
             Arg.Is((IDictionary<string, object>)null),
@@ -193,10 +193,10 @@ public class When_subscribe_with_configuration_is_called
             Arg.Is(false),
             Arg.Is(autoDelete),
             Arg.Is<IDictionary<string, object>>(
-                x => (!expires.HasValue || expires.Value == (int)x["x-expires"]) &&
-                     (!maxPriority.HasValue || maxPriority.Value == (byte)x["x-max-priority"]) &&
-                     (!maxLength.HasValue || maxLength.Value == (int)x["x-max-length"]) &&
-                     (!maxLengthBytes.HasValue || maxLengthBytes.Value == (int)x["x-max-length-bytes"])
+                x => (!expires.HasValue || expires.Value == (int)x[Argument.Expires]) &&
+                     (!maxPriority.HasValue || maxPriority.Value == (byte)x[Argument.MaxPriority]) &&
+                     (!maxLength.HasValue || maxLength.Value == (int)x[Argument.MaxLength]) &&
+                     (!maxLengthBytes.HasValue || maxLengthBytes.Value == (int)x[Argument.MaxLengthBytes])
             ),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()

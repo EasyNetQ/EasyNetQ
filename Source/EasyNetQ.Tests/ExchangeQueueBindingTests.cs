@@ -43,9 +43,9 @@ public class When_a_queue_is_declared : IAsyncLifetime
             Arg.Is(true),
             Arg.Is(true),
             Arg.Is<IDictionary<string, object>>(
-                args => (int)args["x-message-ttl"] == 1000 &&
-                        (int)args["x-expires"] == 2000 &&
-                        (byte)args["x-max-priority"] == 10
+                args => (int)args[Argument.MessageTtl] == 1000 &&
+                        (int)args[Argument.Expires] == 2000 &&
+                        (byte)args[Argument.MaxPriority] == 10
             ),
             Arg.Any<bool>(),
             Arg.Any<bool>(),
@@ -103,11 +103,11 @@ public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange : IAsyncLi
             Arg.Is(true),
             Arg.Is(true),
             Arg.Is<IDictionary<string, object>>(
-                args => (int)args["x-message-ttl"] == 1000 &&
-                        (int)args["x-expires"] == 2000 &&
-                        (byte)args["x-max-priority"] == 10 &&
-                        (string)args["x-dead-letter-exchange"] == "my_exchange" &&
-                        (string)args["x-dead-letter-routing-key"] == "my_routing_key"
+                args => (int)args[Argument.MessageTtl] == 1000 &&
+                        (int)args[Argument.Expires] == 2000 &&
+                        (byte)args[Argument.MaxPriority] == 10 &&
+                        (string)args[Argument.DeadLetterExchange] == "my_exchange" &&
+                        (string)args[Argument.DeadLetterRoutingKey] == "my_routing_key"
             ),
             Arg.Any<bool>(),
             Arg.Any<bool>(),
@@ -164,11 +164,11 @@ public class When_a_queue_is_declared_With_EmptyDeadLetterExchange : IAsyncLifet
             Arg.Is(true),
             Arg.Is(true),
             Arg.Is<IDictionary<string, object>>(
-                args => (int)args["x-message-ttl"] == 1000 &&
-                        (int)args["x-expires"] == 2000 &&
-                        (byte)args["x-max-priority"] == 10 &&
-                        (string)args["x-dead-letter-exchange"] == "" &&
-                        (string)args["x-dead-letter-routing-key"] == "my_queue2"
+                args => (int)args[Argument.MessageTtl] == 1000 &&
+                        (int)args[Argument.Expires] == 2000 &&
+                        (byte)args[Argument.MaxPriority] == 10 &&
+                        (string)args[Argument.DeadLetterExchange] == "" &&
+                        (string)args[Argument.DeadLetterRoutingKey] == "my_queue2"
             ),
             Arg.Any<bool>(),
             Arg.Any<bool>(),
@@ -266,7 +266,7 @@ public class When_an_exchange_is_declared : IAsyncLifetime
     {
         await mockBuilder.Channels[0].Received().ExchangeDeclareAsync(
             Arg.Is("my_exchange"),
-            Arg.Is("direct"),
+            Arg.Is(ExchangeType.Direct),
             Arg.Is(false),
             Arg.Is(true),
             Arg.Is<IDictionary<string, object>>(c => (string)c["alternate-exchange"] == "my.alternate.exchange"),

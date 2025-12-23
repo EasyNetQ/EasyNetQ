@@ -65,7 +65,7 @@ public class When_a_request_is_sent : IAsyncLifetime
     {
         await mockBuilder.Channels[1].Received().ExchangeDeclareAsync(
             Arg.Is("easy_net_q_rpc"),
-            Arg.Is("direct"),
+            Arg.Is(ExchangeType.Direct),
             Arg.Is(true),
             Arg.Is(false),
             Arg.Any<IDictionary<string, object>>(),

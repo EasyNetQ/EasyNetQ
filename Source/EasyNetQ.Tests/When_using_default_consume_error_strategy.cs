@@ -57,13 +57,13 @@ public class When_using_default_consume_error_strategy
 
         Assert.Same(AckStrategies.AckAsync, errorAckStrategy);
 
-        await mockBuilder.Channels[0].Received().ExchangeDeclareAsync("CustomErrorExchangePrefixName.originalRoutingKey", "topic", true);
+        await mockBuilder.Channels[0].Received().ExchangeDeclareAsync("CustomErrorExchangePrefixName.originalRoutingKey", ExchangeType.Topic, true);
         await mockBuilder.Channels[0].Received().QueueDeclareAsync(
             "CustomEasyNetQErrorQueueName",
             true,
             false,
             false,
-            Arg.Is<IDictionary<string, object>>(x => x.ContainsKey("x-queue-type") && x["x-queue-type"].Equals(QueueType.Quorum))
+            Arg.Is<IDictionary<string, object>>(x => x.ContainsKey(Argument.QueueType) && x[Argument.QueueType].Equals(QueueType.Quorum))
         );
         await mockBuilder.Channels[0].Received().QueueBindAsync(
             "CustomEasyNetQErrorQueueName",
@@ -94,13 +94,13 @@ public class When_using_default_consume_error_strategy
 
         Assert.Same(AckStrategies.AckAsync, errorAckStrategy);
 
-        await mockBuilder.Channels[0].Received().ExchangeDeclareAsync("CustomErrorExchangePrefixName.originalRoutingKey", "topic", true);
+        await mockBuilder.Channels[0].Received().ExchangeDeclareAsync("CustomErrorExchangePrefixName.originalRoutingKey", ExchangeType.Topic, true);
         await mockBuilder.Channels[0].Received().QueueDeclareAsync(
             "CustomEasyNetQErrorQueueName",
             true,
             Arg.Is(false),
             Arg.Is(false),
-            Arg.Is<IDictionary<string, object>>(x => x.ContainsKey("x-queue-type") && x["x-queue-type"].Equals(QueueType.Quorum)),
+            Arg.Is<IDictionary<string, object>>(x => x.ContainsKey(Argument.QueueType) && x[Argument.QueueType].Equals(QueueType.Quorum)),
             Arg.Any<bool>(),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()

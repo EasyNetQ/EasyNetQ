@@ -131,7 +131,7 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
     )
     {
         var queueArgs = queueType != null
-            ? new Dictionary<string, object> { { "x-queue-type", queueType } }
+            ? new Dictionary<string, object> { { Argument.QueueType, queueType } }
             : null;
 
         await channel.QueueDeclareAsync(queueName, true, false, false, queueArgs, cancellationToken: cancellationToken);

@@ -33,7 +33,7 @@ public class When_an_action_is_performed_on_a_closed_channel_that_then_opens : I
         await using var persistentChannel = new PersistentChannel(
             new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, eventBus
         );
-        await persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", "direct"));
+        await persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", ExchangeType.Direct));
     }
 
     private readonly IChannel channel;
@@ -41,7 +41,7 @@ public class When_an_action_is_performed_on_a_closed_channel_that_then_opens : I
     [Fact]
     public async Task Should_run_action_on_channel()
     {
-        await channel.Received().ExchangeDeclareAsync("MyExchange", "direct");
+        await channel.Received().ExchangeDeclareAsync("MyExchange", ExchangeType.Direct);
     }
 
     public Task DisposeAsync() => Task.CompletedTask;
