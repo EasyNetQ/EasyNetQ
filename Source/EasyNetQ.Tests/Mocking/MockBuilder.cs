@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using EasyNetQ.Consumer;
 using EasyNetQ.Producer;
 using Microsoft.Extensions.DependencyInjection;
@@ -5,15 +6,15 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.Mocking;
 
-public class MockBuilder : IDisposable
+[SuppressMessage("IDisposableAnalyzers.Correctness", "IDISP004:Don't ignore created IDisposable")]
+public sealed class MockBuilder : IAsyncDisposable
 {
     private readonly IServiceProvider serviceProvider;
     private readonly IBus bus;
 
-    private readonly IBasicProperties basicProperties = new BasicProperties();
-    private readonly Stack<IModel> channelPool = new();
-    private readonly List<IModel> channels = new();
-    private readonly IConnection connection = Substitute.For<IAutorecoveringConnection>();
+    private readonly Stack<IChannel> channelPool = new();
+    private readonly List<IChannel> channels = new();
+    private readonly IConnection connection = Substitute.For<IConnection>();
     private readonly IConnectionFactory connectionFactory = Substitute.For<IConnectionFactory>();
     private readonly List<AsyncDefaultBasicConsumer> consumers = new();
 
@@ -32,40 +33,37 @@ public class MockBuilder : IDisposable
     public MockBuilder(string connectionString, Action<IServiceCollection> registerServices)
     {
         for (var i = 0; i < 10; i++)
-            channelPool.Push(Substitute.For<IModel, IRecoverable>());
+            channelPool.Push(Substitute.For<IChannel, IRecoverable>());
 
-        connectionFactory.CreateConnection(Arg.Any<IList<AmqpTcpEndpoint>>()).Returns(connection);
+        connectionFactory.CreateConnectionAsync(Arg.Any<IList<AmqpTcpEndpoint>>()).Returns(Task.FromResult(connection));
+
         connection.IsOpen.Returns(true);
         connection.Endpoint.Returns(new AmqpTcpEndpoint("localhost"));
-
-        connection.CreateModel().Returns(_ =>
+        connection.CreateChannelAsync(default, default).ReturnsForAnyArgs(async _ =>
         {
             var channel = channelPool.Pop();
             channels.Add(channel);
-            channel.CreateBasicProperties().Returns(basicProperties);
             channel.IsOpen.Returns(true);
-            channel.BasicConsume(null, false, null, true, false, null, null)
-                .ReturnsForAnyArgs(consumeInvocation =>
+            channel.BasicConsumeAsync(Arg.Any<string>(), false, Arg.Any<string>(), true, false, Arg.Any<IDictionary<string, object>>(), Arg.Any<IAsyncBasicConsumer>(), default)
+                .ReturnsForAnyArgs(async consumeInvocation =>
                 {
                     var queueName = (string)consumeInvocation[0];
                     var consumerTag = (string)consumeInvocation[2];
                     var consumer = (AsyncDefaultBasicConsumer)consumeInvocation[6];
 
                     ConsumerQueueNames.Add(queueName);
-                    consumer.HandleBasicConsumeOk(consumerTag)
-                        .GetAwaiter()
-                        .GetResult();
+                    await consumer.HandleBasicConsumeOkAsync(consumerTag);
                     consumers.Add(consumer);
                     return string.Empty;
                 });
-            channel.QueueDeclare(null, true, false, false, null)
-                .ReturnsForAnyArgs(queueDeclareInvocation =>
-                {
-                    var queueName = (string)queueDeclareInvocation[0];
-                    return new QueueDeclareOk(queueName, 0, 0);
-                });
-            channel.WaitForConfirms(default).ReturnsForAnyArgs(true);
+            channel.QueueDeclareAsync(null, true, false, false, null, default)
+                .ReturnsForAnyArgs(async queueDeclareInvocation =>
+               {
+                   var queueName = (string)queueDeclareInvocation[0];
+                   return await Task.FromResult(new QueueDeclareOk(queueName, 0, 0));
+               });
 
+            await Task.Yield();
             return channel;
         });
 
@@ -84,11 +82,11 @@ public class MockBuilder : IDisposable
 
     public IConnection Connection => connection;
 
-    public List<IModel> Channels => channels;
+    public List<IChannel> Channels => channels;
 
     public List<AsyncDefaultBasicConsumer> Consumers => consumers;
 
-    public IModel NextModel => channelPool.Peek();
+    public IChannel NextModel => channelPool.Peek();
 
     public IPubSub PubSub => serviceProvider.GetRequiredService<IPubSub>();
 
@@ -113,5 +111,11 @@ public class MockBuilder : IDisposable
 
     public List<string> ConsumerQueueNames { get; } = new();
 
-    public void Dispose() => (serviceProvider as IDisposable)?.Dispose();
+    public async ValueTask DisposeAsync()
+    {
+        if (serviceProvider is IAsyncDisposable sp)
+        {
+            await sp.DisposeAsync();
+        }
+    }
 }

@@ -2,15 +2,16 @@ namespace EasyNetQ.Tests.ConsumerTests;
 
 public class When_disposed : Given_a_сonsumer
 {
-    public When_disposed()
+    protected override async Task InitializeAsyncCore()
     {
-        consumer.StartConsuming();
-        consumer.Dispose();
+        await consumer.StartConsumingAsync();
+        await consumer.DisposeAsync();
+        await base.InitializeAsyncCore();
     }
 
     [Fact]
-    public void Should_dispose_the_internal_consumer()
+    public async Task Should_dispose_the_internal_consumer()
     {
-        internalConsumers[0].Received().Dispose();
+        await internalConsumers[0].Received().DisposeAsync();
     }
 }

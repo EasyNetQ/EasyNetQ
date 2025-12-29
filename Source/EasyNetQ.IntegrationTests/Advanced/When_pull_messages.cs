@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace EasyNetQ.IntegrationTests.Advanced;
 
 [Collection("RabbitMQ")]
-public class When_pull_messages : IDisposable
+public class When_pull_messages : IDisposable, IAsyncLifetime
 {
     private readonly ServiceProvider serviceProvider;
     private readonly IBus bus;
@@ -17,10 +17,16 @@ public class When_pull_messages : IDisposable
         serviceProvider = serviceCollection.BuildServiceProvider();
         bus = serviceProvider.GetRequiredService<IBus>();
     }
+    public Task InitializeAsync() => Task.CompletedTask;
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         serviceProvider?.Dispose();
+    }
+
+    public async Task DisposeAsync()
+    {
+        await serviceProvider.DisposeAsync();
     }
 
     [Fact]
@@ -35,10 +41,10 @@ public class When_pull_messages : IDisposable
             Exchange.Default, queue.Name, false, true, MessageProperties.Empty, Array.Empty<byte>(), cts.Token
         );
 
-        using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
+        await using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
 
         {
-            using var pullResult = await consumer.PullAsync(cts.Token);
+            var pullResult = await consumer.PullAsync(cts.Token);
             pullResult.IsAvailable.Should().BeTrue();
             await consumer.AckAsync(
                 pullResult.ReceivedInfo.DeliveryTag, cts.Token
@@ -46,7 +52,7 @@ public class When_pull_messages : IDisposable
         }
 
         {
-            using var pullResult = await consumer.PullAsync(cts.Token);
+            var pullResult = await consumer.PullAsync(cts.Token);
             pullResult.IsAvailable.Should().BeFalse();
         }
     }
@@ -63,10 +69,10 @@ public class When_pull_messages : IDisposable
             Exchange.Default, queue.Name, false, false, MessageProperties.Empty, Array.Empty<byte>(), cts.Token
         );
 
-        using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
+        await using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
 
         {
-            using var pullResult = await consumer.PullAsync(cts.Token);
+            var pullResult = await consumer.PullAsync(cts.Token);
             pullResult.IsAvailable.Should().BeTrue();
             await consumer.RejectAsync(
                 pullResult.ReceivedInfo.DeliveryTag, false, cts.Token
@@ -74,7 +80,7 @@ public class When_pull_messages : IDisposable
         }
 
         {
-            using var pullResult = await consumer.PullAsync(cts.Token);
+            var pullResult = await consumer.PullAsync(cts.Token);
             pullResult.IsAvailable.Should().BeFalse();
         }
     }
@@ -91,10 +97,10 @@ public class When_pull_messages : IDisposable
             Exchange.Default, queue.Name, false, false, MessageProperties.Empty, Array.Empty<byte>(), cts.Token
         );
 
-        using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
+        await using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
 
         {
-            using var pullResult = await consumer.PullAsync(cts.Token);
+            var pullResult = await consumer.PullAsync(cts.Token);
             pullResult.IsAvailable.Should().BeTrue();
             await consumer.RejectAsync(
                 pullResult.ReceivedInfo.DeliveryTag, true, cts.Token
@@ -102,7 +108,7 @@ public class When_pull_messages : IDisposable
         }
 
         {
-            using var pullResult = await consumer.PullAsync(cts.Token);
+            var pullResult = await consumer.PullAsync(cts.Token);
             pullResult.IsAvailable.Should().BeTrue();
         }
     }
@@ -119,15 +125,15 @@ public class When_pull_messages : IDisposable
             Exchange.Default, queue.Name, false, false, MessageProperties.Empty, Array.Empty<byte>(), cts.Token
         );
 
-        using var consumer = bus.Advanced.CreatePullingConsumer(queue);
+        await using var consumer = bus.Advanced.CreatePullingConsumer(queue);
 
         {
-            using var pullResult = await consumer.PullAsync(cts.Token);
+            var pullResult = await consumer.PullAsync(cts.Token);
             pullResult.IsAvailable.Should().BeTrue();
         }
 
         {
-            using var pullResult = await consumer.PullAsync(cts.Token);
+            var pullResult = await consumer.PullAsync(cts.Token);
             pullResult.IsAvailable.Should().BeFalse();
         }
     }

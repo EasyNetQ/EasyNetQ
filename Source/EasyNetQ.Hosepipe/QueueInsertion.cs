@@ -1,4 +1,5 @@
 using EasyNetQ.Consumer;
+using RabbitMQ.Client;
 
 namespace EasyNetQ.Hosepipe;
 
@@ -11,26 +12,33 @@ public class QueueInsertion : IQueueInsertion
         this.errorMessageSerializer = errorMessageSerializer;
     }
 
-    public void PublishMessagesToQueue(IEnumerable<HosepipeMessage> messages, QueueParameters parameters)
+    public async Task PublishMessagesToQueueAsync(
+        IAsyncEnumerable<HosepipeMessage> messages,
+        QueueParameters parameters,
+        CancellationToken cancellationToken = default)
     {
-        using var connection = HosepipeConnection.FromParameters(parameters);
-        using var channel = connection.CreateModel();
+        using var connection = await HosepipeConnection.FromParametersAsync(parameters, cancellationToken);
+        using var channel = await connection.CreateChannelAsync(new CreateChannelOptions(true, true), cancellationToken: cancellationToken);
 
-        channel.ConfirmSelect();
-
-        foreach (var message in messages)
+        await foreach (var message in messages)
         {
             var body = errorMessageSerializer.Deserialize(message.Body);
 
-            var properties = channel.CreateBasicProperties();
+            var properties = new BasicProperties();
             message.Properties.CopyTo(properties);
 
             var queueName = string.IsNullOrEmpty(parameters.QueueName)
                 ? message.Info.Queue
                 : parameters.QueueName;
-            channel.BasicPublish("", queueName, true, properties, body);
 
-            channel.WaitForConfirmsOrDie(parameters.ConfirmsTimeout);
+            await channel.BasicPublishAsync(
+                exchange: "",
+                routingKey: queueName,
+                mandatory: true,
+                basicProperties: properties,
+                body: body,
+                cancellationToken: cancellationToken
+            );
         }
     }
 }

@@ -67,9 +67,9 @@ public class AutoSubscriber
     /// </summary>
     /// <param name="consumerTypes">The types to register as consumers.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    public virtual async Task<IDisposable> SubscribeAsync(Type[] consumerTypes, CancellationToken cancellationToken = default)
+    public virtual async Task<IAsyncDisposable> SubscribeAsync(Type[] consumerTypes, CancellationToken cancellationToken = default)
     {
-        var subscriptions = new List<IDisposable>();
+        var subscriptions = new List<IAsyncDisposable>();
 
         foreach (var subscriberConsumerInfo in GetSubscriberConsumerInfos(consumerTypes, typeof(IConsumeAsync<>)))
         {
@@ -93,17 +93,17 @@ public class AutoSubscriber
         return new AutoSubscribeDisposable(subscriptions);
     }
 
-    private sealed class AutoSubscribeDisposable : IDisposable
+    private sealed class AutoSubscribeDisposable : IAsyncDisposable
     {
-        private readonly List<IDisposable> subscriptions;
+        private readonly List<IAsyncDisposable> subscriptions;
 
-        public AutoSubscribeDisposable(List<IDisposable> subscriptions) => this.subscriptions = subscriptions;
+        public AutoSubscribeDisposable(List<IAsyncDisposable> subscriptions) => this.subscriptions = subscriptions;
 
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
             foreach (var subscription in subscriptions)
             {
-                subscription.Dispose();
+                await subscription.DisposeAsync();
             }
         }
     }
@@ -213,7 +213,7 @@ public class AutoSubscriber
         };
     }
 
-    private static SubscriptionConfigurationAttribute? GetSubscriptionConfigurationAttributeValue(AutoSubscriberConsumerInfo subscriptionInfo)
+    private static SubscriptionConfigurationAttribute GetSubscriptionConfigurationAttributeValue(AutoSubscriberConsumerInfo subscriptionInfo)
     {
         var customAttributes = subscriptionInfo.ConsumeMethod.GetCustomAttributes(typeof(SubscriptionConfigurationAttribute), true);
         return customAttributes
@@ -221,7 +221,7 @@ public class AutoSubscriber
             .FirstOrDefault();
     }
 
-    protected virtual AutoSubscriberConsumerAttribute? GetSubscriptionAttribute(AutoSubscriberConsumerInfo consumerInfo)
+    protected virtual AutoSubscriberConsumerAttribute GetSubscriptionAttribute(AutoSubscriberConsumerInfo consumerInfo)
     {
         return consumerInfo.ConsumeMethod
             .GetCustomAttributes(typeof(AutoSubscriberConsumerAttribute), true)

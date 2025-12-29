@@ -13,7 +13,7 @@ public class QueueInsertionTests
     /// </summary>
     [Fact]
     [Traits.Explicit("Needs a RabbitMQ server on localhost")]
-    public void Should_be_able_to_inset_messages_onto_a_queue()
+    public async Task Should_be_able_to_inset_messages_onto_a_queue()
     {
         var messages = new[]
         {
@@ -27,7 +27,16 @@ public class QueueInsertionTests
             QueueName = "Hosepipe_test_queue"
         };
 
-        queueInsertion.PublishMessagesToQueue(messages, parameters);
+        await queueInsertion.PublishMessagesToQueueAsync(GetMessagesAsync(messages), parameters);
+    }
+
+    private async IAsyncEnumerable<HosepipeMessage> GetMessagesAsync(HosepipeMessage[] messages)
+    {
+        foreach (var message in messages)
+        {
+            yield return message;
+            await Task.Yield();
+        }
     }
 }
 

@@ -2,7 +2,7 @@ using EasyNetQ;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-var cts = new CancellationTokenSource();
+using var cts = new CancellationTokenSource();
 Console.CancelKeyPress += (_, _) => cts.Cancel();
 
 var serviceCollection = new ServiceCollection();
@@ -12,11 +12,11 @@ serviceCollection.AddEasyNetQ("host=localhost")
     .UseNewtonsoftJson()
     .UseLegacyConventions();
 
-var provider = serviceCollection.BuildServiceProvider();
+using var provider = serviceCollection.BuildServiceProvider();
 
 var bus = provider.GetRequiredService<IBus>();
 
-using var _ = await bus.Rpc.RespondAsync<Request, Response>(r => new Response(r.Id), cts.Token);
+await using var _ = await bus.Rpc.RespondAsync<Request, Response>(r => new Response(r.Id), cts.Token);
 
 while (!cts.IsCancellationRequested)
 {

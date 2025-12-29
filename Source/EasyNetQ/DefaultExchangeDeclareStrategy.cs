@@ -4,10 +4,11 @@ using EasyNetQ.Topology;
 namespace EasyNetQ;
 
 /// <inheritdoc />
-public class DefaultExchangeDeclareStrategy : IExchangeDeclareStrategy
+public class DefaultExchangeDeclareStrategy : IExchangeDeclareStrategy, IDisposable
 {
     private readonly IConventions conventions;
     private readonly AsyncCache<ExchangeKey, Exchange> declaredExchanges;
+    private bool disposed;
 
     public DefaultExchangeDeclareStrategy(IConventions conventions, IAdvancedBus advancedBus)
     {
@@ -26,6 +27,14 @@ public class DefaultExchangeDeclareStrategy : IExchangeDeclareStrategy
     {
         var exchangeName = conventions.ExchangeNamingConvention(messageType);
         return DeclareExchangeAsync(exchangeName, exchangeType, cancellationToken);
+    }
+
+    public virtual void Dispose()
+    {
+        if (disposed)
+            return;
+        disposed = true;
+        declaredExchanges.Dispose();
     }
 
     private readonly record struct ExchangeKey(string Name, string Type);

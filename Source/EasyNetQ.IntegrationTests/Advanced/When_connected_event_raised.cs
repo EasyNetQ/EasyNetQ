@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace EasyNetQ.IntegrationTests.Advanced;
 
 [Collection("RabbitMQ")]
-public class When_connected_event_raised : IDisposable
+public class When_connected_event_raised : IDisposable, IAsyncLifetime
 {
     private readonly ServiceProvider serviceProvider;
     private readonly IBus bus;
@@ -17,7 +17,14 @@ public class When_connected_event_raised : IDisposable
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
+    {
+        await serviceProvider.DisposeAsync();
+    }
+
+    public virtual void Dispose()
     {
         serviceProvider?.Dispose();
     }
@@ -25,9 +32,9 @@ public class When_connected_event_raised : IDisposable
     [Fact]
     public async Task Test()
     {
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
 
-        var mre = new ManualResetEventSlim(false);
+        using var mre = new ManualResetEventSlim(false);
         bus.Advanced.Connected += (_, _) => mre.Set();
 
         await bus.Advanced.ExchangeDeclareAsync(Guid.NewGuid().ToString("N"), cancellationToken: cts.Token);

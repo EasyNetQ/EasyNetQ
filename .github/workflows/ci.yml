@@ -35,13 +35,13 @@ jobs:
         dotnet-version: ${{ matrix.dotnet }}
 
     - name: Install dependencies
-      run: dotnet restore ${{ github.workspace }}/Source/EasyNetQ.sln
+      run: dotnet restore ${{ github.workspace }}/Source/EasyNetQ.slnx
 
     - name: Check formatting
-      run: dotnet format --no-restore --verify-no-changes --severity warn ./Source/EasyNetQ.sln || (echo "Run 'dotnet format' to fix issues" && exit 1)
+      run: dotnet format --no-restore --verify-no-changes --severity warn ./Source/EasyNetQ.slnx || (echo "Run 'dotnet format' to fix issues" && exit 1)
 
     - name: Build
-      run: dotnet build ${{ github.workspace }}/Source/EasyNetQ.sln --configuration Release
+      run: dotnet build ${{ github.workspace }}/Source/EasyNetQ.slnx --configuration Release
 
     - name: Tests
       run: |
@@ -83,10 +83,10 @@ jobs:
         with:
           dotnet-version: '8.*'
       - name: Install dependencies
-        run: dotnet restore ${{ github.workspace }}/Source/EasyNetQ.sln
+        run: dotnet restore ${{ github.workspace }}/Source/EasyNetQ.slnx
       - name: Build
-        run: dotnet build ${{ github.workspace }}/Source/EasyNetQ.sln --configuration Release
+        run: dotnet build ${{ github.workspace }}/Source/EasyNetQ.slnx --configuration Release
       - name: Pack
-        run: dotnet pack ${{ github.workspace }}/Source/EasyNetQ.sln --configuration Release --no-build --include-symbols -p:PackageOutputPath="${{ github.workspace }}/Packages"
+        run: dotnet pack ${{ github.workspace }}/Source/EasyNetQ.slnx --configuration Release --no-build --include-symbols -p:PackageOutputPath="${{ github.workspace }}/Packages"
       - name: Publish
         run: dotnet nuget push '${{ github.workspace }}/Packages/*.*' --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_TOKEN }}

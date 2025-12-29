@@ -7,12 +7,12 @@ namespace EasyNetQ;
 /// The result of an <see cref="IBus"/> Subscribe or SubscribeAsync operation.
 /// In order to cancel the subscription, call dispose on this object or on ConsumerCancellation.
 /// </summary>
-public readonly struct SubscriptionResult : IDisposable
+public readonly struct SubscriptionResult : IAsyncDisposable
 {
     /// <summary>
     /// The <see cref="IConsumer"/> cancellation, which can be disposed to cancel the subscription.
     /// </summary>
-    public SubscriptionResult(in Exchange exchange, in Queue queue, IDisposable consumerCancellation)
+    public SubscriptionResult(in Exchange exchange, in Queue queue, IAsyncDisposable consumerCancellation)
     {
         Exchange = exchange;
         Queue = queue;
@@ -32,8 +32,13 @@ public readonly struct SubscriptionResult : IDisposable
     /// <summary>
     /// The <see cref="IConsumer"/> cancellation, which can be disposed to cancel the subscription.
     /// </summary>
-    private IDisposable ConsumerCancellation { get; }
+    private IAsyncDisposable ConsumerCancellation { get; }
 
     /// <inheritdoc />
-    public void Dispose() => ConsumerCancellation.Dispose();
+    public ValueTask DisposeAsync()
+    {
+#pragma warning disable IDISP007 // Don't dispose injected
+        return ConsumerCancellation.DisposeAsync();
+#pragma warning restore IDISP007 // Don't dispose injected
+    }
 }

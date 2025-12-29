@@ -16,8 +16,15 @@ public static class Timers
     ///     any release. You should only use it directly in your code with extreme caution and knowing that
     ///     doing so can result in application failures when updating to a new EasyNetQ release.
     /// </summary>
-    public static IDisposable Start(Action callback, TimeSpan dueTime, TimeSpan period, ILogger logger)
+    public static IDisposable Start(Func<Task> callback, TimeSpan period, ILogger logger)
     {
+#if NET8_0_OR_GREATER
+        PeriodicTimer timer = new PeriodicTimer(period);
+#pragma warning disable CS4014 // Don't dispose injected
+        StartAsync(timer, callback, logger);
+#pragma warning restore CS4014 // Don't dispose injected
+        return timer;
+#else
         var callbackLock = new object();
         var timer = new Timer(_ =>
         {
@@ -35,7 +42,24 @@ public static class Timers
                 Monitor.Exit(callbackLock);
             }
         });
-        timer.Change(dueTime, period);
+        timer.Change(period, period);
         return timer;
+#endif
     }
+#if NET8_0_OR_GREATER
+    private async static Task StartAsync(PeriodicTimer timer, Func<Task> callback, ILogger logger)
+    {
+        while (await timer.WaitForNextTickAsync())
+        {
+            try
+            {
+            await callback();
+            }
+            catch (Exception exception)
+            {
+                logger.LogError(exception, "Error from timer callback");
+            }
+        }
+    }
+#endif
 }

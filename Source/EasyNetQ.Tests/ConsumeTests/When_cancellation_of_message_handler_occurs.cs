@@ -4,22 +4,24 @@ namespace EasyNetQ.Tests.ConsumeTests;
 
 public class When_cancellation_of_message_handler_occurs : ConsumerTestBase
 {
-    protected override void AdditionalSetUp()
+    protected override async Task InitializeAsyncCore()
     {
         ConsumeErrorStrategy.HandleCancelledAsync(default)
-            .ReturnsForAnyArgs(new ValueTask<AckStrategy>(AckStrategies.NackWithRequeue));
+            .ReturnsForAnyArgs(new ValueTask<AckStrategyAsync>(AckStrategies.NackWithRequeueAsync));
 
-        var are = new AutoResetEvent(false);
-        var consumer = StartConsumer((_, _, _, ct) =>
+        using var are = new AutoResetEvent(false);
+        Task deliverTask;
+        await using (await StartConsumerAsync((_, _, _, ct) =>
         {
             are.Set();
             Task.Delay(-1, ct).GetAwaiter().GetResult();
-            return AckStrategies.Ack;
-        });
-        var deliverTask = DeliverMessageAsync();
-        are.WaitOne();
-        consumer.Dispose();
-        deliverTask.GetAwaiter().GetResult();
+            return AckStrategies.AckAsync;
+        }))
+        {
+            deliverTask = DeliverMessageAsync();
+            are.WaitOne();
+        }
+        await deliverTask;
     }
 
     [Fact]
@@ -36,8 +38,8 @@ public class When_cancellation_of_message_handler_occurs : ConsumerTestBase
     }
 
     [Fact]
-    public void Should_nack_with_requeue()
+    public async Task Should_nack_with_requeue()
     {
-        MockBuilder.Channels[0].Received().BasicNack(DeliverTag, false, true);
+        await MockBuilder.Channels[0].Received().BasicNackAsync(DeliverTag, false, true);
     }
 }

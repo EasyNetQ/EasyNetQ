@@ -1,3 +1,4 @@
+using System;
 using EasyNetQ.Tests.Mocking;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
@@ -144,7 +145,7 @@ public class When_using_QueueAttribute
     }
 }
 
-public class When_publishing_a_message : IDisposable
+public class When_publishing_a_message : IAsyncLifetime
 {
     public When_publishing_a_message()
     {
@@ -157,55 +158,62 @@ public class When_publishing_a_message : IDisposable
         };
 
         mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(customConventions));
-        mockBuilder.PubSub.Publish(new TestMessage());
+
     }
 
-    public void Dispose()
+    public Task InitializeAsync() => mockBuilder.PubSub.PublishAsync(new TestMessage());
+
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     private readonly MockBuilder mockBuilder;
     private readonly ITypeNameSerializer typeNameSerializer;
 
     [Fact]
-    public void Should_use_exchange_name_from_conventions_as_the_exchange_to_publish_to()
+    public async Task Should_use_exchange_name_from_conventions_as_the_exchange_to_publish_to()
     {
-        mockBuilder.Channels[1].Received().BasicPublish(
+        await mockBuilder.Channels[1].Received().BasicPublishAsync(
             Arg.Is("CustomExchangeNamingConvention"),
             Arg.Any<string>(),
             Arg.Is(false),
-            Arg.Any<IBasicProperties>(),
-            Arg.Any<ReadOnlyMemory<byte>>()
+            Arg.Any<RabbitMQ.Client.BasicProperties>(),
+            Arg.Any<ReadOnlyMemory<byte>>(),
+            Arg.Any<CancellationToken>()
         );
     }
 
     [Fact]
-    public void Should_use_exchange_name_from_conventions_to_create_the_exchange()
+    public async Task Should_use_exchange_name_from_conventions_to_create_the_exchange()
     {
-        mockBuilder.Channels[0].Received().ExchangeDeclare(
+        await mockBuilder.Channels[0].Received().ExchangeDeclareAsync(
             Arg.Is("CustomExchangeNamingConvention"),
-            Arg.Is("topic"),
+            Arg.Is(ExchangeType.Topic),
             Arg.Is(true),
             Arg.Is(false),
-            Arg.Is((IDictionary<string, object>)null)
+            Arg.Is((IDictionary<string, object>)null),
+            Arg.Any<bool>(),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>()
         );
     }
 
     [Fact]
-    public void Should_use_topic_name_from_conventions_as_the_topic_to_publish_to()
+    public async Task Should_use_topic_name_from_conventions_as_the_topic_to_publish_to()
     {
-        mockBuilder.Channels[1].Received().BasicPublish(
+        await mockBuilder.Channels[1].Received().BasicPublishAsync(
             Arg.Any<string>(),
             Arg.Is("CustomTopicNamingConvention"),
             Arg.Is(false),
-            Arg.Any<IBasicProperties>(),
-            Arg.Any<ReadOnlyMemory<byte>>()
+            Arg.Any<RabbitMQ.Client.BasicProperties>(),
+            Arg.Any<ReadOnlyMemory<byte>>(),
+            Arg.Any<CancellationToken>()
         );
     }
 }
 
-public class When_registering_response_handler : IDisposable
+public class When_registering_response_handler : IAsyncLifetime
 {
     public When_registering_response_handler()
     {
@@ -216,37 +224,42 @@ public class When_registering_response_handler : IDisposable
         };
 
         mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(customConventions));
-
-        mockBuilder.Rpc.Respond<TestMessage, TestMessage>(_ => new TestMessage());
     }
 
-    public void Dispose()
+    public Task InitializeAsync() => mockBuilder.Rpc.RespondAsync<TestMessage, TestMessage>(_ => new TestMessage());
+
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     private readonly MockBuilder mockBuilder;
 
     [Fact]
-    public void Should_correctly_bind_using_new_conventions()
+    public async Task Should_correctly_bind_using_new_conventions()
     {
-        mockBuilder.Channels[1].Received().QueueBind(
+        await mockBuilder.Channels[1].Received().QueueBindAsync(
             Arg.Is("CustomRpcRoutingKeyName"),
             Arg.Is("CustomRpcExchangeName"),
             Arg.Is("CustomRpcRoutingKeyName"),
-            Arg.Is((IDictionary<string, object>)null)
+            Arg.Is((IDictionary<string, object>)null),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>()
         );
     }
 
     [Fact]
-    public void Should_declare_correct_exchange()
+    public async Task Should_declare_correct_exchange()
     {
-        mockBuilder.Channels[0].Received().ExchangeDeclare(
+        await mockBuilder.Channels[0].Received().ExchangeDeclareAsync(
             Arg.Is("CustomRpcExchangeName"),
-            Arg.Is("direct"),
+            Arg.Is(ExchangeType.Direct),
             Arg.Is(true),
             Arg.Is(false),
-            Arg.Is((IDictionary<string, object>)null)
+            Arg.Is((IDictionary<string, object>)null),
+            Arg.Any<bool>(),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>()
         );
     }
 }

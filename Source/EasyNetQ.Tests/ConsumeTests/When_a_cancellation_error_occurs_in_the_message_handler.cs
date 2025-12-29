@@ -6,15 +6,17 @@ public class When_a_cancellation_error_occurs_in_the_message_handler : ConsumerT
 {
     private Exception exception;
 
-    protected override void AdditionalSetUp()
+    protected override async Task InitializeAsyncCore()
     {
         exception = new OperationCanceledException("I've had a bad day :(");
 
         ConsumeErrorStrategy.HandleErrorAsync(default, exception)
-            .ReturnsForAnyArgs(new ValueTask<AckStrategy>(AckStrategies.Ack));
+            .ReturnsForAnyArgs(new ValueTask<AckStrategyAsync>(AckStrategies.AckAsync));
 
-        StartConsumer((_, _, _, _) => throw exception);
-        DeliverMessage();
+#pragma warning disable IDISP004
+        await StartConsumerAsync((_, _, _, _) => throw exception);
+#pragma warning restore IDISP004
+        await DeliverMessageAsync();
     }
 
     [Fact]
@@ -30,8 +32,8 @@ public class When_a_cancellation_error_occurs_in_the_message_handler : ConsumerT
     }
 
     [Fact]
-    public void Should_ack()
+    public async Task Should_ack()
     {
-        MockBuilder.Channels[0].Received().BasicAck(DeliverTag, false);
+        await MockBuilder.Channels[0].Received().BasicAckAsync(DeliverTag, false);
     }
 }

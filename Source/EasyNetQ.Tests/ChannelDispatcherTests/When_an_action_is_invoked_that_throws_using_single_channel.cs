@@ -6,7 +6,7 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.ChannelDispatcherTests;
 
-public class When_an_action_is_invoked_that_throws_using_single_channel : IDisposable
+public class When_an_action_is_invoked_that_throws_using_single_channel : IAsyncLifetime
 {
     private readonly SinglePersistentChannelDispatcher dispatcher;
 
@@ -16,18 +16,25 @@ public class When_an_action_is_invoked_that_throws_using_single_channel : IDispo
         var producerConnection = Substitute.For<IProducerConnection>();
         var consumerConnection = Substitute.For<IConsumerConnection>();
         var channel = Substitute.For<IPersistentChannel>();
-        var model = Substitute.For<IModel>();
+        var model = Substitute.For<IChannel>();
 
+#pragma warning disable IDISP004
         channelFactory.CreatePersistentChannel(producerConnection, new PersistentChannelOptions()).Returns(channel);
+#pragma warning restore IDISP004
         channel.InvokeChannelActionAsync<int, FuncBasedPersistentChannelAction<int>>(default)
-            .ReturnsForAnyArgs(x => ((FuncBasedPersistentChannelAction<int>)x[0]).Invoke(model));
+            .ReturnsForAnyArgs(x => new ValueTask<int>(((FuncBasedPersistentChannelAction<int>)x[0]).InvokeAsync(model, CancellationToken.None).Result));
 
         dispatcher = new SinglePersistentChannelDispatcher(producerConnection, consumerConnection, channelFactory);
     }
 
-    public void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+
+
+
+    public async Task DisposeAsync()
     {
-        dispatcher.Dispose();
+        await dispatcher.DisposeAsync();
     }
 
     [Fact]
@@ -45,7 +52,7 @@ public class When_an_action_is_invoked_that_throws_using_single_channel : IDispo
             () => dispatcher.InvokeAsync<int>(_ => throw new Exception(), PersistentChannelDispatchOptions.ProducerTopology).AsTask()
         );
 
-        var result = await dispatcher.InvokeAsync(_ => 42, PersistentChannelDispatchOptions.ProducerTopology);
+        var result = await dispatcher.InvokeAsync(_ => Task.FromResult(42), PersistentChannelDispatchOptions.ProducerTopology);
         result.Should().Be(42);
     }
 

@@ -25,7 +25,7 @@ public class MessageTypeProperty
         alternativeTypes.RemoveAt(0);
     }
 
-    private MessageTypeProperty(ITypeNameSerializer typeNameSerializer, string firstAlternativeMessageType, string? alternativeTypesHeader)
+    private MessageTypeProperty(ITypeNameSerializer typeNameSerializer, string firstAlternativeMessageType, string alternativeTypesHeader)
     {
         this.typeNameSerializer = typeNameSerializer;
         this.firstAlternativeMessageType = firstAlternativeMessageType;
@@ -83,7 +83,7 @@ public class MessageTypeProperty
         return new MessageTypeProperty(typeNameSerializer, messageType, alternativeTypesHeader);
     }
 
-    private bool TryDeserializeType(string typeString, out Type? messageType)
+    private bool TryDeserializeType(string typeString, out Type messageType)
     {
         try
         {

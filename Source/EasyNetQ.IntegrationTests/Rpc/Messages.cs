@@ -85,7 +85,7 @@ public class RabbitResponse : Response
     }
 }
 
-
+[Serializable]
 public class RequestFailedException : Exception
 {
     public RequestFailedException()

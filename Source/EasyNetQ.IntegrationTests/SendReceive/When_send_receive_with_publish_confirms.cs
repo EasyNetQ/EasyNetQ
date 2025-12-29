@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace EasyNetQ.IntegrationTests.SendReceive;
 
 [Collection("RabbitMQ")]
-public class When_send_receive_with_publish_confirms : IDisposable
+public class When_send_receive_with_publish_confirms : IDisposable, IAsyncLifetime
 {
     private readonly ServiceProvider serviceProvider;
     private readonly IBus bus;
@@ -18,9 +18,16 @@ public class When_send_receive_with_publish_confirms : IDisposable
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public virtual void Dispose()
     {
         serviceProvider?.Dispose();
+    }
+
+    public async Task DisposeAsync()
+    {
+        await serviceProvider.DisposeAsync();
     }
 
     private const int MessagesCount = 10;
@@ -33,7 +40,7 @@ public class When_send_receive_with_publish_confirms : IDisposable
         var queue = Guid.NewGuid().ToString();
         var messagesSink = new MessagesSink(MessagesCount);
         var messages = MessagesFactories.Create(MessagesCount);
-        using (
+        await using (
             await bus.SendReceive.ReceiveAsync(queue, x => x.Add<Message>(messagesSink.Receive), cts.Token)
         )
         {

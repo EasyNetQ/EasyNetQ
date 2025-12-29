@@ -4,7 +4,7 @@ using RabbitMQ.Client.Exceptions;
 namespace EasyNetQ.IntegrationTests.Advanced;
 
 [Collection("RabbitMQ")]
-public class When_delete_a_queue_with_name : IDisposable
+public class When_delete_a_queue_with_name : IDisposable, IAsyncLifetime
 {
     private readonly ServiceProvider serviceProvider;
     private readonly IBus bus;
@@ -18,6 +18,8 @@ public class When_delete_a_queue_with_name : IDisposable
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
+    public Task InitializeAsync() => Task.CompletedTask;
+
     [Fact]
     public async Task Should_delete_existing_queue()
     {
@@ -29,11 +31,16 @@ public class When_delete_a_queue_with_name : IDisposable
         await bus.Advanced.QueueDeclarePassiveAsync(queueName, cts.Token);
         await bus.Advanced.QueueDeleteAsync(queueName, cancellationToken: cts.Token);
 
-        var exception = Assert.Throws<OperationInterruptedException>(() => bus.Advanced.QueueDeclarePassive(queueName, cts.Token));
+        var exception = await Assert.ThrowsAsync<OperationInterruptedException>(() => bus.Advanced.QueueDeclarePassiveAsync(queueName, cts.Token));
         Assert.Equal(404, exception.ShutdownReason.ReplyCode);
     }
 
-    public void Dispose()
+    public async Task DisposeAsync()
+    {
+        await serviceProvider.DisposeAsync();
+    }
+
+    public virtual void Dispose()
     {
         serviceProvider?.Dispose();
     }

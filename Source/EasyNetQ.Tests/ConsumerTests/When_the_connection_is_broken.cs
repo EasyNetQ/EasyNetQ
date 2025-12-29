@@ -7,17 +7,20 @@ namespace EasyNetQ.Tests.ConsumerTests;
 
 public class When_the_connection_is_broken : Given_a_сonsumer
 {
-    public When_the_connection_is_broken()
+    protected override async Task InitializeAsyncCore()
     {
-        consumer.StartConsuming();
-        eventBus.Publish(new ConnectionRecoveredEvent(PersistentConnectionType.Consumer, new AmqpTcpEndpoint()));
+        await consumer.StartConsumingAsync();
+        await eventBus.PublishAsync(new ConnectionRecoveredEvent(PersistentConnectionType.Consumer, new AmqpTcpEndpoint()));
+        await base.InitializeAsyncCore();
     }
 
     [Fact]
     public void Should_re_create_internal_consumer()
     {
+#pragma warning disable IDISP004
         internalConsumerFactory.Received(1).CreateConsumer(Arg.Any<ConsumerConfiguration>());
+#pragma warning restore IDISP004
         internalConsumers.Count.Should().Be(1);
-        internalConsumers[0].Received(2).StartConsuming(Arg.Any<bool>());
+        internalConsumers[0].Received(2).StartConsumingAsync(Arg.Any<bool>());
     }
 }

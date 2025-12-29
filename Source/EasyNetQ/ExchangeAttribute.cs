@@ -5,5 +5,5 @@ public sealed class ExchangeAttribute : Attribute
 {
     internal static readonly ExchangeAttribute Default = new();
 
-    public string? Name { get; set; }
+    public string Name { get; set; }
 }

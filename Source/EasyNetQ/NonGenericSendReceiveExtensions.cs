@@ -83,45 +83,4 @@ public static class NonGenericSendReceiveExtensions
         });
         return sendDelegate(sendReceive, queue, message, messageType, configure, cancellationToken);
     }
-
-    /// <summary>
-    /// Send a message directly to a queue
-    /// </summary>
-    /// <param name="sendReceive">The sendReceive instance</param>
-    /// <param name="queue">The queue to send to</param>
-    /// <param name="message">The message</param>
-    /// <param name="messageType">The message type</param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    public static void Send(
-        this ISendReceive sendReceive,
-        string queue,
-        object message,
-        Type messageType,
-        CancellationToken cancellationToken = default
-    ) => sendReceive.Send(queue, message, messageType, _ => { }, cancellationToken);
-
-    /// <summary>
-    /// Send a message directly to a queue
-    /// </summary>
-    /// <param name="sendReceive">The sendReceive instance</param>
-    /// <param name="queue">The queue to send to</param>
-    /// <param name="message">The message</param>
-    /// <param name="messageType">The message type</param>
-    /// <param name="configure">
-    ///     Fluent configuration e.g. x => x.WithPriority(2)
-    /// </param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    public static void Send(
-        this ISendReceive sendReceive,
-        string queue,
-        object message,
-        Type messageType,
-        Action<ISendConfiguration> configure,
-        CancellationToken cancellationToken = default
-    )
-    {
-        sendReceive.SendAsync(queue, message, messageType, configure, cancellationToken)
-            .GetAwaiter()
-            .GetResult();
-    }
 }

@@ -6,7 +6,7 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 
-public abstract class ConsumerTestBase : IDisposable
+public abstract class ConsumerTestBase : IAsyncLifetime
 {
     protected const string ConsumerTag = "the_consumer_tag";
     protected const ulong DeliverTag = 10101;
@@ -21,28 +21,29 @@ public abstract class ConsumerTestBase : IDisposable
     // populated when a message is delivered
     protected IBasicProperties OriginalProperties;
 
-    public ConsumerTestBase()
+    protected ConsumerTestBase()
     {
         ConsumeErrorStrategy = Substitute.For<IConsumeErrorStrategy>();
         MockBuilder = new MockBuilder(x => x.AddSingleton(ConsumeErrorStrategy));
-        AdditionalSetUp();
     }
 
-    public void Dispose()
+    public Task InitializeAsync() => InitializeAsyncCore();
+
+    protected virtual Task InitializeAsyncCore() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
     {
-        MockBuilder.Dispose();
+        await MockBuilder.DisposeAsync();
     }
 
-    protected abstract void AdditionalSetUp();
-
-    protected IDisposable StartConsumer(
-        Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, CancellationToken, AckStrategy> handler,
+    protected async Task<IAsyncDisposable> StartConsumerAsync(
+        Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, CancellationToken, AckStrategyAsync> handler,
         bool autoAck = false
     )
     {
         ConsumerWasInvoked = false;
         var queue = new Queue("my_queue", false);
-        return MockBuilder.Bus.Advanced.Consume(
+        return await MockBuilder.Bus.Advanced.ConsumeAsync(
             queue,
             (body, properties, messageInfo, ct) =>
             {
@@ -66,21 +67,16 @@ public abstract class ConsumerTestBase : IDisposable
         );
     }
 
-    protected void DeliverMessage()
-    {
-        DeliverMessageAsync().GetAwaiter().GetResult();
-    }
-
     protected Task DeliverMessageAsync()
     {
-        OriginalProperties = new BasicProperties
+        OriginalProperties = new RabbitMQ.Client.BasicProperties
         {
             Type = "the_message_type",
             CorrelationId = "the_correlation_id",
         };
         OriginalBody = "Hello World"u8.ToArray();
 
-        return MockBuilder.Consumers[0].HandleBasicDeliver(
+        return MockBuilder.Consumers[0].HandleBasicDeliverAsync(
             ConsumerTag,
             DeliverTag,
             false,

@@ -9,7 +9,7 @@ public class QueueRetrievalTests
 {
     [Fact]
     [Traits.Explicit("Requires a RabbitMQ server on localhost")]
-    public void TryGetMessagesFromQueue()
+    public async Task TryGetMessagesFromQueueAsync()
     {
         const string queue = "EasyNetQ_Hosepipe_Tests_QueueRetrievalTests+TestMessage:EasyNetQ_Hosepipe_Tests_hosepipe";
 
@@ -20,7 +20,7 @@ public class QueueRetrievalTests
             Purge = false
         };
 
-        foreach (var message in queueRetrieval.GetMessagesFromQueue(parameters))
+        await foreach (var message in queueRetrieval.GetMessagesFromQueueAsync(parameters))
         {
             Console.Out.WriteLine("message:\n{0}", message.Body);
             Console.Out.WriteLine("properties correlation id:\n{0}", message.Properties.CorrelationId);
@@ -31,7 +31,7 @@ public class QueueRetrievalTests
 
     [Fact]
     [Traits.Explicit("Requires a RabbitMQ server on localhost")]
-    public void PublishSomeMessages()
+    public async Task PublishSomeMessages()
     {
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddEasyNetQ("host=localhost");
@@ -42,26 +42,24 @@ public class QueueRetrievalTests
 
         for (var i = 0; i < 10; i++)
         {
-            bus.PubSub.Publish(new TestMessage { Text = string.Format("\n>>>>>> Message {0}\n", i) });
+            await bus.PubSub.PublishAsync(new TestMessage { Text = string.Format("\n>>>>>> Message {0}\n", i) });
         }
     }
 
     [Fact]
     [Traits.Explicit("Requires a RabbitMQ server on localhost")]
-    public void ConsumeMessages()
+    public async Task ConsumeMessages()
     {
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddEasyNetQ("host=localhost");
 
-        var provider = serviceCollection.BuildServiceProvider();
+        await using var provider = serviceCollection.BuildServiceProvider();
 
         var bus = provider.GetRequiredService<IBus>();
+        await using var subscription = await bus.PubSub.SubscribeAsync<TestMessage>("hosepipe", message => Console.WriteLine(message.Text));
 
-        bus.PubSub.Subscribe<TestMessage>("hosepipe", message => Console.WriteLine(message.Text));
 
         Thread.Sleep(1000);
-
-        provider.Dispose();
     }
 
     private sealed class TestMessage

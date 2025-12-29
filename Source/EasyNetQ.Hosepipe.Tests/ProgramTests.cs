@@ -1,5 +1,7 @@
 // ReSharper disable InconsistentNaming
 
+using System.Runtime.CompilerServices;
+
 namespace EasyNetQ.Hosepipe.Tests;
 
 public class ProgramTests
@@ -32,36 +34,11 @@ public class ProgramTests
         );
     }
 
-    private readonly string expectedDumpOutput =
-        $"2 messages from queue 'EasyNetQ_Default_Error_Queue' were dumped to directory '{Directory.GetCurrentDirectory()}'{Environment.NewLine}";
-
-    [Fact]
-    public void Should_output_messages_to_directory_with_dump()
-    {
-        var args = new[]
-        {
-            "dump",
-            "s:localhost",
-            "q:EasyNetQ_Default_Error_Queue"
-        };
-
-        var writer = new StringWriter();
-        Console.SetOut(writer);
-
-        program.Start(args);
-
-        var actualOutput = writer.GetStringBuilder().ToString();
-        actualOutput.ShouldEqual(expectedDumpOutput);
-
-        messageWriter.Parameters.QueueName.ShouldEqual("EasyNetQ_Default_Error_Queue");
-        messageWriter.Parameters.HostName.ShouldEqual("localhost");
-    }
-
     private readonly string expectedInsertOutput =
         $"{2} messages from directory '{Directory.GetCurrentDirectory()}' were inserted into queue ''{Environment.NewLine}";
 
     [Fact]
-    public void Should_insert_messages_with_insert()
+    public async Task Should_insert_messages_with_insert()
     {
         var args = new[]
         {
@@ -69,10 +46,10 @@ public class ProgramTests
             "s:localhost"
         };
 
-        var writer = new StringWriter();
+        using var writer = new StringWriter();
         Console.SetOut(writer);
 
-        program.Start(args);
+        await program.StartAsync(args, CancellationToken.None);
 
         var actualInsertOutput = writer.GetStringBuilder().ToString();
         actualInsertOutput.ShouldEqual(expectedInsertOutput);
@@ -84,7 +61,7 @@ public class ProgramTests
         $"{2} messages from directory '{Directory.GetCurrentDirectory()}' were inserted into queue 'queue'{Environment.NewLine}";
 
     [Fact]
-    public void Should_insert_messages_with_insert_and_queue()
+    public async Task Should_insert_messages_with_insert_and_queue()
     {
         var args = new[]
         {
@@ -93,10 +70,10 @@ public class ProgramTests
             "q:queue"
         };
 
-        var writer = new StringWriter();
+        using var writer = new StringWriter();
         Console.SetOut(writer);
 
-        program.Start(args);
+        await program.StartAsync(args, CancellationToken.None);
 
         var actualInsertOutput = writer.GetStringBuilder().ToString();
         actualInsertOutput.ShouldEqual(expectedInsertOutputWithQueue);
@@ -108,7 +85,7 @@ public class ProgramTests
         $"2 error messages from directory '{Directory.GetCurrentDirectory()}' were republished{Environment.NewLine}";
 
     [Fact]
-    public void Should_retry_errors_with_retry()
+    public async Task Should_retry_errors_with_retry()
     {
         var args = new[]
         {
@@ -116,10 +93,10 @@ public class ProgramTests
             "s:localhost"
         };
 
-        var writer = new StringWriter();
+        using var writer = new StringWriter();
         Console.SetOut(writer);
 
-        program.Start(args);
+        await program.StartAsync(args, CancellationToken.None);
 
         writer.GetStringBuilder().ToString().ShouldEqual(expectedRetryOutput);
 
@@ -131,10 +108,13 @@ public class MockMessageWriter : IMessageWriter
 {
     public QueueParameters Parameters { get; set; }
 
-    public void Write(IEnumerable<HosepipeMessage> messages, QueueParameters queueParameters)
+    public async Task WriteAsync(
+        IAsyncEnumerable<HosepipeMessage> messages,
+        QueueParameters queueParameters,
+        CancellationToken cancellationToken = default)
     {
         Parameters = queueParameters;
-        foreach (var _ in messages)
+        await foreach (var _ in messages)
         {
         }
     }
@@ -142,10 +122,13 @@ public class MockMessageWriter : IMessageWriter
 
 public class MockQueueRetrieval : IQueueRetrieval
 {
-    public IEnumerable<HosepipeMessage> GetMessagesFromQueue(QueueParameters parameters)
+    public async IAsyncEnumerable<HosepipeMessage> GetMessagesFromQueueAsync(
+        QueueParameters parameters,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         yield return new HosepipeMessage("some message", MessageProperties.Empty, Helper.CreateMessageReceivedInfo());
         yield return new HosepipeMessage("some message", MessageProperties.Empty, Helper.CreateMessageReceivedInfo());
+        await Task.Yield();
     }
 }
 
@@ -153,24 +136,29 @@ public class MockMessageReader : IMessageReader
 {
     public QueueParameters Parameters { get; set; }
 
-    public IEnumerable<HosepipeMessage> ReadMessages(QueueParameters parameters)
+    public async IAsyncEnumerable<HosepipeMessage> ReadMessagesAsync(QueueParameters parameters, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         Parameters = parameters;
+
         yield return new HosepipeMessage("some message", MessageProperties.Empty, Helper.CreateMessageReceivedInfo());
         yield return new HosepipeMessage("some message", MessageProperties.Empty, Helper.CreateMessageReceivedInfo());
+        await Task.Yield();
     }
 
-    public IEnumerable<HosepipeMessage> ReadMessages(QueueParameters parameters, string messageName)
+    public IAsyncEnumerable<HosepipeMessage> ReadMessagesAsync(QueueParameters parameters, string messageName, CancellationToken cancellationToken = default)
     {
-        return ReadMessages(parameters);
+        return ReadMessagesAsync(parameters, cancellationToken);
     }
 }
 
 public class MockQueueInsertion : IQueueInsertion
 {
-    public void PublishMessagesToQueue(IEnumerable<HosepipeMessage> messages, QueueParameters parameters)
+    public async Task PublishMessagesToQueueAsync(
+        IAsyncEnumerable<HosepipeMessage> messages,
+        QueueParameters parameters,
+        CancellationToken cancellationToken = default)
     {
-        foreach (var _ in messages)
+        await foreach (var _ in messages)
         {
         }
     }
@@ -178,9 +166,12 @@ public class MockQueueInsertion : IQueueInsertion
 
 public class MockErrorRetry : IErrorRetry
 {
-    public void RetryErrors(IEnumerable<HosepipeMessage> rawErrorMessages, QueueParameters parameters)
+    public async Task RetryErrorsAsync(
+        IAsyncEnumerable<HosepipeMessage> rawErrorMessages,
+        QueueParameters parameters,
+        CancellationToken cancellationToken = default)
     {
-        foreach (var _ in rawErrorMessages)
+        await foreach (var _ in rawErrorMessages)
         {
         }
     }

@@ -19,18 +19,8 @@ public class DefaultAutoSubscriberMessageDispatcher(IServiceProvider resolver) :
         where TMessage : class
         where TAsyncConsumer : class, IConsumeAsync<TMessage>
     {
-        var scope = resolver.CreateScope();
-        try
-        {
-            var asyncConsumer = scope.ServiceProvider.GetRequiredService<TAsyncConsumer>();
-            await asyncConsumer.ConsumeAsync(message, cancellationToken).ConfigureAwait(false);
-        }
-        finally
-        {
-            if (scope is IAsyncDisposable ad)
-                await ad.DisposeAsync().ConfigureAwait(false);
-            else
-                scope.Dispose();
-        }
+        using var scope = resolver.CreateScope();
+        var asyncConsumer = scope.ServiceProvider.GetRequiredService<TAsyncConsumer>();
+        await asyncConsumer.ConsumeAsync(message, cancellationToken).ConfigureAwait(false);
     }
 }

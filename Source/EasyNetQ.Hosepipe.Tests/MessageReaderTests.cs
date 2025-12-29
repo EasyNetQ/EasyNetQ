@@ -14,15 +14,15 @@ public class MessageReaderTests
     /// </summary>
     [Fact]
     [Traits.Explicit(@"Needs message files in 'C:\temp\MessageOutput'")]
-    public void Should_be_able_to_read_messages_from_disk()
+    public async Task Should_be_able_to_read_messages_from_disk()
     {
         var parameters = new QueueParameters
         {
             MessagesOutputDirectory = @"C:\temp\MessageOutput"
         };
 
-        var messages = messageReader.ReadMessages(parameters);
-        foreach (var message in messages)
+        var messages = messageReader.ReadMessagesAsync(parameters);
+        await foreach (var message in messages)
         {
             Console.WriteLine("\nBody:\n{0}\n", message.Body);
             Console.WriteLine("\nProperties:\n{0}\n", message.Properties);
@@ -33,15 +33,15 @@ public class MessageReaderTests
 
     [Fact]
     [Traits.Explicit(@"Needs message files in 'C:\temp\MessageOutput'")]
-    public void Should_be_able_to_read_only_error_messages()
+    public async Task Should_be_able_to_read_only_error_messages()
     {
         var parameters = new QueueParameters
         {
             MessagesOutputDirectory = @"C:\temp\MessageOutput"
         };
 
-        var messages = messageReader.ReadMessages(parameters, conventions.ErrorQueueNamingConvention(default));
-        foreach (var message in messages)
+        var messages = messageReader.ReadMessagesAsync(parameters, conventions.ErrorQueueNamingConvention(default));
+        await foreach (var message in messages)
         {
             Console.WriteLine(message.Body);
         }

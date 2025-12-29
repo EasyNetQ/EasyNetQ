@@ -20,7 +20,7 @@ public delegate string QueueNameConvention(Type messageType, string subscriberId
 /// <summary>
 ///     Convention for queue type
 /// </summary>
-public delegate string? QueueTypeConvention(Type messageType);
+public delegate string QueueTypeConvention(Type messageType);
 
 /// <summary>
 ///     Convention for error queue routing key naming
@@ -30,7 +30,7 @@ public delegate string ErrorQueueNameConvention(MessageReceivedInfo receivedInfo
 /// <summary>
 ///     Convention for error queue type
 /// </summary>
-public delegate string? ErrorQueueTypeConvention();
+public delegate string ErrorQueueTypeConvention();
 
 /// <summary>
 ///     Convention for error exchange naming

@@ -4,7 +4,6 @@ using EasyNetQ.Topology;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.Consumer;
 
@@ -42,10 +41,10 @@ public readonly struct InternalConsumerStatus
 /// <summary>
 ///     Represents an internal consumer's cancelled event
 /// </summary>
-public class InternalConsumerCancelledEventArgs : EventArgs
+public class InternalConsumerCancelledEventArgs : AsyncEventArgs
 {
     /// <inheritdoc />
-    public InternalConsumerCancelledEventArgs(in Queue cancelled, IReadOnlyCollection<Queue> active)
+    public InternalConsumerCancelledEventArgs(Queue cancelled, IReadOnlyCollection<Queue> active)
     {
         Cancelled = cancelled;
         Active = active;
@@ -63,28 +62,35 @@ public class InternalConsumerCancelledEventArgs : EventArgs
 }
 
 /// <summary>
+///     Asynchronous event handler delegate
+/// </summary>
+public delegate Task AsyncEventHandler<TEventArgs>(object sender, TEventArgs e) where TEventArgs : AsyncEventArgs;
+
+/// <summary>
 ///     Consumer which starts/stops raw consumers
 /// </summary>
-public interface IInternalConsumer : IDisposable
+public interface IInternalConsumer : IAsyncDisposable
 {
     /// <summary>
     ///     Starts consuming
     /// </summary>
-    InternalConsumerStatus StartConsuming(bool firstStart = true);
+    Task<InternalConsumerStatus> StartConsumingAsync(bool firstStart = true, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Stops consuming
     /// </summary>
-    void StopConsuming();
+    Task StopConsumingAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Raised when consumer is cancelled
     /// </summary>
-    event EventHandler<InternalConsumerCancelledEventArgs>? Cancelled;
+    event AsyncEventHandler<InternalConsumerCancelledEventArgs> CancelledAsync;
 }
 
 /// <inheritdoc />
+#pragma warning disable IDISP026
 public class InternalConsumer : IInternalConsumer
+#pragma warning restore IDISP026
 {
     private readonly Dictionary<string, AsyncBasicConsumer> consumers = new();
     private readonly AsyncLock mutex = new();
@@ -93,10 +99,10 @@ public class InternalConsumer : IInternalConsumer
     private readonly IConsumerConnection connection;
     private readonly IEventBus eventBus;
     private readonly IServiceProvider serviceResolver;
-    private readonly ILogger logger;
+    private readonly ILogger<InternalConsumer> logger;
 
     private volatile bool disposed;
-    private IModel? model;
+    private IChannel channel;
 
     /// <summary>
     ///     Creates InternalConsumer
@@ -117,178 +123,199 @@ public class InternalConsumer : IInternalConsumer
     }
 
     /// <inheritdoc />
-    public InternalConsumerStatus StartConsuming(bool firstStart)
+    public async Task<InternalConsumerStatus> StartConsumingAsync(bool firstStart, CancellationToken cancellationToken = default)
     {
         if (disposed) throw new ObjectDisposedException(nameof(InternalConsumer));
 
-        using var _ = mutex.Acquire();
-
-        if (IsModelClosedWithSoftError(model))
+        using (await mutex.AcquireAsync(cancellationToken))
         {
-            logger.LogInformation("Model has shutdown with soft error and will be recreated");
-
-            foreach (var consumer in consumers.Values)
+            if (IsChannelClosedWithSoftError(channel))
             {
-                consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
-                consumer.Dispose();
+                logger.LogInformation("Channel has shutdown with soft error and will be recreated");
+
+                foreach (var consumer in consumers.Values)
+                {
+                    consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
+                    await consumer.DisposeAsync();
+                }
+
+                consumers.Clear();
+                await channel.DisposeAsync();
+                channel = null;
             }
 
-            consumers.Clear();
-
-            model?.Dispose();
-            model = null;
-        }
-
-        if (model == null)
-        {
-            try
-            {
-                model = connection.CreateModel();
-                model.DefaultConsumer = NoopDefaultConsumer.Instance;
-                model.BasicQos(0, configuration.PrefetchCount, false);
-            }
-            catch (Exception exception)
-            {
-                model?.Dispose();
-                model = null;
-
-                logger.LogError(exception, "Failed to create model");
-                return new InternalConsumerStatus(Array.Empty<Queue>(), Array.Empty<Queue>(), Array.Empty<Queue>());
-            }
-        }
-
-        var startedQueues = new HashSet<Queue>();
-        var activeQueues = new HashSet<Queue>();
-        var failedQueues = new HashSet<Queue>();
-
-        foreach (var kvp in configuration.PerQueueConfigurations)
-        {
-            var queue = kvp.Key;
-            var perQueueConfiguration = kvp.Value;
-
-            if (
-                consumers.TryGetValue(queue.Name, out var alreadyStartedConsumer)
-                && (!queue.IsExclusive || alreadyStartedConsumer.IsRunning)
-            )
-            {
-                activeQueues.Add(queue);
-                continue;
-            }
-
-            if (queue.IsExclusive && !firstStart)
-            {
-                failedQueues.Add(queue);
-                continue;
-            }
-
-            try
-            {
-                var consumer = new AsyncBasicConsumer(
-                    serviceResolver,
-                    logger,
-                    model,
-                    queue,
-                    perQueueConfiguration.AutoAck,
-                    eventBus,
-                    perQueueConfiguration.ConsumeDelegate
-                );
-                consumer.ConsumerCancelled += AsyncBasicConsumerOnConsumerCancelled;
-                var consumerTag = model.BasicConsume(
-                    queue.Name, // queue
-                    perQueueConfiguration.AutoAck, // noAck
-                    perQueueConfiguration.ConsumerTag, // consumerTag
-                    true, // noLocal
-                    perQueueConfiguration.IsExclusive, // exclusive
-                    perQueueConfiguration.Arguments, // arguments
-                    consumer // consumer
-                );
-                consumers.Add(queue.Name, consumer);
-
-                logger.LogInformation(
-                    "Declared consumer with consumerTag {consumerTag} on queue {queue}",
-                    consumerTag,
-                    queue.Name
-                );
-
-                startedQueues.Add(queue);
-                activeQueues.Add(queue);
-            }
-            catch (Exception exception)
-            {
-                logger.LogError(
-                    exception,
-                    "Failed to declare consumer on queue {queue}",
-                    queue.Name
-                );
-
-                failedQueues.Add(queue);
-            }
-        }
-
-        return new InternalConsumerStatus(startedQueues, activeQueues, failedQueues);
-    }
-
-    /// <inheritdoc />
-    public void StopConsuming()
-    {
-        if (disposed) throw new ObjectDisposedException(nameof(InternalConsumer));
-
-        using var _ = mutex.Acquire();
-
-        foreach (var consumer in consumers.Values)
-        {
-            consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
-            foreach (var consumerTag in consumer.ConsumerTags)
+            if (channel == null)
             {
                 try
                 {
-                    model?.BasicCancelNoWait(consumerTag);
+                    channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
+                    await channel.BasicQosAsync(0, configuration.PrefetchCount, false, cancellationToken);
                 }
-                catch (AlreadyClosedException)
+                catch (Exception exception)
                 {
+                    if (channel != null)
+                        await channel.DisposeAsync();
+                    channel = null;
+
+                    logger.LogError(exception, "Failed to create channel");
+                    return new InternalConsumerStatus(Array.Empty<Queue>(), Array.Empty<Queue>(), Array.Empty<Queue>());
                 }
             }
 
-            consumer.Dispose();
-        }
+            var startedQueues = new HashSet<Queue>();
+            var activeQueues = new HashSet<Queue>();
+            var failedQueues = new HashSet<Queue>();
 
-        consumers.Clear();
+            foreach (var kvp in configuration.PerQueueConfigurations)
+            {
+                var queue = kvp.Key;
+                var perQueueConfiguration = kvp.Value;
+
+                if (
+                    consumers.TryGetValue(queue.Name, out var alreadyStartedConsumer)
+                    && (!queue.IsExclusive || alreadyStartedConsumer.IsRunning)
+                )
+                {
+                    activeQueues.Add(queue);
+                    continue;
+                }
+
+                if (queue.IsExclusive && !firstStart)
+                {
+                    failedQueues.Add(queue);
+                    continue;
+                }
+
+                try
+                {
+                    var consumer = new AsyncBasicConsumer(
+                        serviceResolver,
+                        logger,
+                        channel,
+                        queue,
+                        perQueueConfiguration.AutoAck,
+                        eventBus,
+                        perQueueConfiguration.ConsumeDelegate
+                    );
+                    var arguments = perQueueConfiguration.Arguments ?? new Dictionary<string, object>();
+                    consumer.ConsumerCancelled += AsyncBasicConsumerOnConsumerCancelled;
+                    var consumerTag = await channel.BasicConsumeAsync(
+                        queue.Name, // queue
+                        perQueueConfiguration.AutoAck, // noAck
+                        perQueueConfiguration.ConsumerTag, // consumerTag
+                        true, // noLocal
+                        perQueueConfiguration.IsExclusive, // exclusive
+                        arguments, // arguments
+                        consumer, // consumer
+                        cancellationToken // cancellationToken
+                    );
+                    consumers.Add(queue.Name, consumer);
+
+                    logger.LogInformation(
+                        "Declared consumer with consumerTag {consumerTag} on queue {queue}",
+                        consumerTag,
+                        queue.Name
+                    );
+
+                    startedQueues.Add(queue);
+                    activeQueues.Add(queue);
+                }
+                catch (Exception exception)
+                {
+                    logger.LogError(
+                        exception,
+                        "Failed to declare consumer on queue {queue}",
+                        queue.Name
+                    );
+
+                    failedQueues.Add(queue);
+                }
+            }
+
+            return new InternalConsumerStatus(startedQueues, activeQueues, failedQueues);
+        }
     }
 
     /// <inheritdoc />
-    public event EventHandler<InternalConsumerCancelledEventArgs>? Cancelled;
+    public async Task StopConsumingAsync(CancellationToken cancellationToken = default)
+    {
+        if (disposed) throw new ObjectDisposedException(nameof(InternalConsumer));
+
+        using (await mutex.AcquireAsync(cancellationToken))
+        {
+            foreach (var consumer in consumers.Values)
+            {
+                consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
+                foreach (var consumerTag in consumer.ConsumerTags)
+                {
+                    try
+                    {
+                        if (channel != null)
+                            await channel.BasicCancelAsync(consumerTag, true, cancellationToken);
+                    }
+                    catch (Exception exception)
+                    {
+                        logger.LogError(
+                            exception,
+                            "Failed to stop consuming on consumerTag {consumerTag}",
+                            consumerTag
+                        );
+                    }
+                }
+
+                await consumer.DisposeAsync();
+            }
+
+            consumers.Clear();
+        }
+    }
 
     /// <inheritdoc />
-    public void Dispose()
+    public event AsyncEventHandler<InternalConsumerCancelledEventArgs> CancelledAsync;
+
+    public virtual async ValueTask DisposeAsync()
     {
         if (disposed) return;
 
         disposed = true;
 
-        using var _ = mutex.Acquire();
-
-        foreach (var consumer in consumers.Values)
+        using (await mutex.AcquireAsync())
         {
-            consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
-            foreach (var consumerTag in consumer.ConsumerTags)
+            foreach (var consumer in consumers.Values)
             {
-                try
+                consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
+                foreach (var consumerTag in consumer.ConsumerTags)
                 {
-                    model?.BasicCancelNoWait(consumerTag);
+                    try
+                    {
+                        if (channel != null)
+                            await channel.BasicCancelAsync(consumerTag);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(
+                            ex,
+                            "Failed to dispose on consumerTag {consumerTag}",
+                            consumerTag
+                        );
+                    }
                 }
-                catch (AlreadyClosedException)
-                {
-                }
+
+                await consumer.DisposeAsync();
             }
 
-            consumer.Dispose();
+            consumers.Clear();
+            if (channel != null)
+                await channel.DisposeAsync();
         }
-
-        consumers.Clear();
-        model?.Dispose();
     }
 
-    private async Task AsyncBasicConsumerOnConsumerCancelled(object sender, ConsumerEventArgs @event)
+    private void AsyncBasicConsumerOnConsumerCancelled(object sender, ConsumerEventArgs messageEvent)
+    {
+        _ = HandleConsumerCancelledAsync(sender, messageEvent);
+    }
+
+    private async Task HandleConsumerCancelledAsync(object sender, ConsumerEventArgs messageEvent)
     {
         Queue cancelled;
         IReadOnlyCollection<Queue> active;
@@ -297,11 +324,12 @@ public class InternalConsumer : IInternalConsumer
             if (sender is AsyncBasicConsumer consumer && consumers.Remove(consumer.Queue.Name))
             {
                 consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
-                consumer.Dispose();
                 cancelled = consumer.Queue;
                 active = consumers.Select(x => x.Value.Queue).ToList();
-
-                if (IsModelClosedWithSoftError(model)) return;
+#pragma warning disable IDISP007 // Don't dispose injected
+                await consumer.DisposeAsync();
+#pragma warning restore IDISP007 // Don't dispose injected
+                if (IsChannelClosedWithSoftError(channel)) return;
             }
             else
             {
@@ -309,12 +337,15 @@ public class InternalConsumer : IInternalConsumer
             }
         }
 
-        Cancelled?.Invoke(this, new InternalConsumerCancelledEventArgs(cancelled, active));
+        if (CancelledAsync != null)
+        {
+            await CancelledAsync.Invoke(this, new InternalConsumerCancelledEventArgs(cancelled, active));
+        }
     }
 
-    private static bool IsModelClosedWithSoftError(IModel? model)
+    private static bool IsChannelClosedWithSoftError(IChannel channel)
     {
-        var closeReason = model?.CloseReason;
+        var closeReason = channel?.CloseReason;
         if (closeReason == null) return false;
 
         return closeReason.ReplyCode switch

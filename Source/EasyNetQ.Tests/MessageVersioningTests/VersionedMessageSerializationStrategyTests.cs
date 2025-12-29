@@ -19,7 +19,7 @@ public class VersionedMessageSerializationStrategyTests
         var message = new Message<MyMessage>(new MyMessage());
         var serializationStrategy = CreateSerializationStrategy(message, messageTypes, serializedMessageBody, correlationId);
 
-        var serializedMessage = serializationStrategy.SerializeMessage(message);
+        using var serializedMessage = serializationStrategy.SerializeMessage(message);
 
         AssertMessageSerializedCorrectly(serializedMessage, serializedMessageBody, p => AssertDefaultMessagePropertiesCorrect(p, messageType, correlationId));
     }
@@ -41,7 +41,7 @@ public class VersionedMessageSerializationStrategyTests
         );
         var serializationStrategy = CreateSerializationStrategy(message, messageTypes, serializedMessageBody, "SomeOtherCorrelationId");
 
-        var serializedMessage = serializationStrategy.SerializeMessage(message);
+        using var serializedMessage = serializationStrategy.SerializeMessage(message);
 
         AssertMessageSerializedCorrectly(serializedMessage, serializedMessageBody, p => AssertDefaultMessagePropertiesCorrect(p, messageType, correlationId));
     }
@@ -90,7 +90,7 @@ public class VersionedMessageSerializationStrategyTests
 
         var messageBody = new MyMessage { Text = "Hello world!" };
         var message = new Message<MyMessage>(messageBody);
-        var serializedMessage = serializationStrategy.SerializeMessage(message);
+        using var serializedMessage = serializationStrategy.SerializeMessage(message);
         var deserializedMessage = serializationStrategy.DeserializeMessage(serializedMessage.Properties, serializedMessage.Body);
 
         Assert.Equal(deserializedMessage.MessageType, message.Body.GetType());
@@ -113,7 +113,7 @@ public class VersionedMessageSerializationStrategyTests
         var message = new Message<MyMessageV2>(new MyMessageV2());
         var serializationStrategy = CreateSerializationStrategy(message, messageTypes, serializedMessageBody, correlationId);
 
-        var serializedMessage = serializationStrategy.SerializeMessage(message);
+        using var serializedMessage = serializationStrategy.SerializeMessage(message);
 
         AssertMessageSerializedCorrectly(
             serializedMessage,
@@ -138,7 +138,7 @@ public class VersionedMessageSerializationStrategyTests
         var message = new Message<MyMessageV2>(new MyMessageV2(), new MessageProperties { CorrelationId = correlationId });
         var serializationStrategy = CreateSerializationStrategy(message, messageTypes, serializedMessageBody, "SomeOtherCorrelationId");
 
-        var serializedMessage = serializationStrategy.SerializeMessage(message);
+        using var serializedMessage = serializationStrategy.SerializeMessage(message);
 
         AssertMessageSerializedCorrectly(
             serializedMessage,
@@ -198,7 +198,7 @@ public class VersionedMessageSerializationStrategyTests
 
         var messageBody = new MyMessageV2 { Text = "Hello world!", Number = 5 };
         var message = new Message<MyMessageV2>(messageBody);
-        var serializedMessage = serializationStrategy.SerializeMessage(message);
+        using var serializedMessage = serializationStrategy.SerializeMessage(message);
 
         var deserializedMessage = serializationStrategy.DeserializeMessage(serializedMessage.Properties, serializedMessage.Body);
 
@@ -219,7 +219,7 @@ public class VersionedMessageSerializationStrategyTests
 
         var messageBody = new MyMessageV2 { Text = "Hello world!", Number = 5 };
         var message = new Message<MyMessageV2>(messageBody);
-        var serializedMessage = serializationStrategy.SerializeMessage(message);
+        using var serializedMessage = serializationStrategy.SerializeMessage(message);
 
         // Mess with the properties to mimic a message serialized as MyMessageV3
         var messageType = serializedMessage.Properties.Type;
@@ -279,11 +279,16 @@ public class VersionedMessageSerializationStrategyTests
         }
 
         var serializer = Substitute.For<ISerializer>();
-        var serializedMessage = Substitute.For<IMemoryOwner<byte>>();
+        using var serializedMessage = Substitute.For<IMemoryOwner<byte>>();
         serializedMessage.Memory.Returns(messageBody);
+#pragma warning disable IDISP004
         serializer.MessageToBytes(typeof(T), message.GetBody()).Returns(serializedMessage);
+#pragma warning restore IDISP004
 
-        return new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
+        using (serializedMessage)
+        {
+            return new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
+        }
     }
 
     private static VersionedMessageSerializationStrategy CreateDeserializationStrategy<T>(

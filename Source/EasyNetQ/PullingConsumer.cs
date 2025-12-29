@@ -9,7 +9,7 @@ namespace EasyNetQ;
 /// <summary>
 ///     Represents a result of a pull
 /// </summary>
-public interface IPullResult : IDisposable
+public interface IPullResult
 {
     /// <summary>
     ///     <see langword="true"/> if a message is available
@@ -38,12 +38,11 @@ public readonly struct PullResult : IPullResult
     private readonly MessageProperties properties;
     private readonly ReadOnlyMemory<byte> body;
     private readonly ulong messagesCount;
-    private readonly IDisposable? disposable;
 
     /// <summary>
     ///     Represents a result when no message is available
     /// </summary>
-    public static PullResult NotAvailable { get; } = new(false, 0, default, default, null, null);
+    public static PullResult NotAvailable { get; } = new(false, 0, default, default, null);
 
     /// <summary>
     ///     Represents a result when a message is available
@@ -53,11 +52,10 @@ public readonly struct PullResult : IPullResult
         ulong messagesCount,
         in MessageReceivedInfo receivedInfo,
         in MessageProperties properties,
-        in ReadOnlyMemory<byte> body,
-        IDisposable? disposable
+        in ReadOnlyMemory<byte> body
     )
     {
-        return new PullResult(true, messagesCount, receivedInfo, properties, body, disposable);
+        return new PullResult(true, messagesCount, receivedInfo, properties, body);
     }
 
     private PullResult(
@@ -65,8 +63,7 @@ public readonly struct PullResult : IPullResult
         ulong messagesCount,
         in MessageReceivedInfo receivedInfo,
         in MessageProperties properties,
-        in ReadOnlyMemory<byte> body,
-        IDisposable? disposable
+        in ReadOnlyMemory<byte> body
     )
     {
         IsAvailable = isAvailable;
@@ -74,7 +71,6 @@ public readonly struct PullResult : IPullResult
         this.receivedInfo = receivedInfo;
         this.properties = properties;
         this.body = body;
-        this.disposable = disposable;
     }
 
     /// <summary>
@@ -141,12 +137,6 @@ public readonly struct PullResult : IPullResult
             return body;
         }
     }
-
-    /// <inheritdoc />
-    public void Dispose()
-    {
-        disposable?.Dispose();
-    }
 }
 
 /// <summary>
@@ -155,7 +145,7 @@ public readonly struct PullResult : IPullResult
 public readonly struct PullResult<T> : IPullResult
 {
     private readonly MessageReceivedInfo receivedInfo;
-    private readonly IMessage<T>? message;
+    private readonly IMessage<T> message;
     private readonly ulong messagesCount;
 
     /// <summary>
@@ -178,7 +168,7 @@ public readonly struct PullResult<T> : IPullResult
         bool isAvailable,
         ulong messagesCount,
         in MessageReceivedInfo receivedInfo,
-        IMessage<T>? message
+        IMessage<T> message
     )
     {
         IsAvailable = isAvailable;
@@ -236,18 +226,13 @@ public readonly struct PullResult<T> : IPullResult
             return message!;
         }
     }
-
-    /// <inheritdoc />
-    public void Dispose()
-    {
-    }
 }
 
 
 /// <summary>
 ///     Allows to receive messages by pulling them one by one
 /// </summary>
-public interface IPullingConsumer<TPullResult> : IDisposable where TPullResult : IPullResult
+public interface IPullingConsumer<TPullResult> : IAsyncDisposable where TPullResult : IPullResult
 {
     /// <summary>
     ///     Receives a single message
@@ -304,7 +289,7 @@ public readonly struct PullingConsumerOptions
 }
 
 /// <inheritdoc />
-public class PullingConsumer : IPullingConsumer<PullResult>
+public sealed class PullingConsumer : IPullingConsumer<PullResult>
 {
     private readonly IPersistentChannel channel;
     private readonly IProduceConsumeInterceptor[] produceConsumeInterceptors;
@@ -336,7 +321,7 @@ public class PullingConsumer : IPullingConsumer<PullResult>
     {
         using var cts = cancellationToken.WithTimeout(options.Timeout);
 
-        var basicGetResult = await channel.InvokeChannelActionAsync<BasicGetResult?, BasicGetAction>(
+        var basicGetResult = await channel.InvokeChannelActionAsync<BasicGetResult, BasicGetAction>(
             new BasicGetAction(queue, options.AutoAck), cts.Token
         ).ConfigureAwait(false);
 
@@ -359,8 +344,7 @@ public class PullingConsumer : IPullingConsumer<PullResult>
             messagesCount,
             interceptedMessage.ReceivedInfo,
             interceptedMessage.Properties,
-            interceptedMessage.Body,
-            null
+            interceptedMessage.Body
         );
     }
 
@@ -393,12 +377,14 @@ public class PullingConsumer : IPullingConsumer<PullResult>
     }
 
     /// <inheritdoc />
-    public void Dispose()
+    public ValueTask DisposeAsync()
     {
-        channel.Dispose();
+#pragma warning disable IDISP007 // the injected here is created in the calling method so it should be disposed
+        return channel.DisposeAsync();
+#pragma warning restore IDISP007
     }
 
-    private readonly struct BasicGetAction : IPersistentChannelAction<BasicGetResult?>
+    private readonly struct BasicGetAction : IPersistentChannelAction<BasicGetResult>
     {
         private readonly Queue queue;
         private readonly bool autoAck;
@@ -409,7 +395,10 @@ public class PullingConsumer : IPullingConsumer<PullResult>
             this.autoAck = autoAck;
         }
 
-        public BasicGetResult? Invoke(IModel model) => model.BasicGet(queue.Name, autoAck);
+        public async Task<BasicGetResult> InvokeAsync(IChannel channel, CancellationToken cancellationToken = default)
+        {
+            return await channel.BasicGetAsync(queue.Name, autoAck, cancellationToken);
+        }
     }
 
     private readonly struct BasicAckAction : IPersistentChannelAction<bool>
@@ -423,9 +412,9 @@ public class PullingConsumer : IPullingConsumer<PullResult>
             this.multiple = multiple;
         }
 
-        public bool Invoke(IModel model)
+        public async Task<bool> InvokeAsync(IChannel channel, CancellationToken cancellationToken = default)
         {
-            model.BasicAck(deliveryTag, multiple);
+            await channel.BasicAckAsync(deliveryTag, multiple, cancellationToken);
             return true;
         }
     }
@@ -443,16 +432,16 @@ public class PullingConsumer : IPullingConsumer<PullResult>
             this.requeue = requeue;
         }
 
-        public bool Invoke(IModel model)
+        public async Task<bool> InvokeAsync(IChannel channel, CancellationToken cancellationToken = default)
         {
-            model.BasicNack(deliveryTag, multiple, requeue);
+            await channel.BasicNackAsync(deliveryTag, multiple, requeue, cancellationToken);
             return true;
         }
     }
 }
 
 /// <inheritdoc />
-public class PullingConsumer<T> : IPullingConsumer<PullResult<T>>
+public sealed class PullingConsumer<T> : IPullingConsumer<PullResult<T>>
 {
     private readonly IPullingConsumer<PullResult> consumer;
     private readonly IMessageSerializationStrategy messageSerializationStrategy;
@@ -474,7 +463,6 @@ public class PullingConsumer<T> : IPullingConsumer<PullResult<T>>
         var pullResult = await consumer.PullAsync(cancellationToken).ConfigureAwait(false);
         if (!pullResult.IsAvailable)
         {
-            pullResult.Dispose();
             return PullResult<T>.NotAvailable;
         }
 
@@ -483,7 +471,7 @@ public class PullingConsumer<T> : IPullingConsumer<PullResult<T>>
             return PullResult<T>.Available(
                 pullResult.MessagesCount,
                 pullResult.ReceivedInfo,
-                new Message<T>((T?)message.GetBody(), message.Properties)
+                new Message<T>((T)message.GetBody(), message.Properties)
             );
 
         throw new EasyNetQException(
@@ -506,8 +494,10 @@ public class PullingConsumer<T> : IPullingConsumer<PullResult<T>>
     }
 
     /// <inheritdoc />
-    public void Dispose()
+    public ValueTask DisposeAsync()
     {
-        consumer.Dispose();
+#pragma warning disable IDISP007 // the injected here is created in the calling method so it should be disposed
+        return consumer.DisposeAsync();
+#pragma warning restore IDISP007
     }
 }

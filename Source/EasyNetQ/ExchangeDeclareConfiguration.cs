@@ -46,7 +46,7 @@ internal class ExchangeDeclareConfiguration : IExchangeDeclareConfiguration
 
     public string Type { get; private set; } = ExchangeType.Topic;
 
-    public IDictionary<string, object>? Arguments { get; private set; }
+    public IDictionary<string, object> Arguments { get; private set; }
 
     public IExchangeDeclareConfiguration AsDurable(bool isDurable)
     {

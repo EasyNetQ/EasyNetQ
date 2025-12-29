@@ -5,7 +5,7 @@ namespace EasyNetQ.ChannelDispatcher;
 /// <summary>
 ///     Responsible for invoking client commands.
 /// </summary>
-public interface IPersistentChannelDispatcher
+public interface IPersistentChannelDispatcher : IAsyncDisposable
 {
     /// <summary>
     /// Invokes an action on top of model

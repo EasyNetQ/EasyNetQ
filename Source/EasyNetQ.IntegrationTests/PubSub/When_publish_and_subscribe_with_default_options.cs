@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace EasyNetQ.IntegrationTests.PubSub;
 
 [Collection("RabbitMQ")]
-public class When_publish_and_subscribe_with_default_options : IDisposable
+public class When_publish_and_subscribe_with_default_options : IDisposable, IAsyncLifetime
 {
     private readonly RabbitMQFixture rmqFixture;
 
@@ -21,9 +21,16 @@ public class When_publish_and_subscribe_with_default_options : IDisposable
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public virtual void Dispose()
     {
         serviceProvider?.Dispose();
+    }
+
+    public async Task DisposeAsync()
+    {
+        await serviceProvider.DisposeAsync();
     }
 
     private const int MessagesCount = 10;
@@ -37,7 +44,7 @@ public class When_publish_and_subscribe_with_default_options : IDisposable
         var messagesSink = new MessagesSink(MessagesCount);
         var messages = MessagesFactories.Create(MessagesCount);
 
-        using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive))
+        await using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, cancellationToken: cts.Token))
         {
             await bus.PubSub.PublishBatchAsync(messages, cts.Token);
 
@@ -55,12 +62,12 @@ public class When_publish_and_subscribe_with_default_options : IDisposable
         var secondConsumerMessagesSink = new MessagesSink(MessagesCount);
         var messages = MessagesFactories.Create(MessagesCount);
 
-        using (
+        await using (
             await bus.PubSub.SubscribeAsync<Message>(
                 Guid.NewGuid().ToString(), firstConsumerMessagesSink.Receive, cts.Token
             )
         )
-        using (
+        await using (
             await bus.PubSub.SubscribeAsync<Message>(
                 Guid.NewGuid().ToString(), secondConsumerMessagesSink.Receive, cts.Token
             )
@@ -87,9 +94,9 @@ public class When_publish_and_subscribe_with_default_options : IDisposable
         var messagesSink = new MessagesSink(MessagesCount);
         var messages = MessagesFactories.Create(MessagesCount);
 
-        using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, cts.Token))
-        using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, cts.Token))
-        using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, cts.Token))
+        await using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, cts.Token))
+        await using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, cts.Token))
+        await using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, cts.Token))
         {
             await bus.PubSub.PublishBatchAsync(messages, cts.Token);
 
@@ -105,7 +112,7 @@ public class When_publish_and_subscribe_with_default_options : IDisposable
 
         var subscriptionId = Guid.NewGuid().ToString();
         var messagesSink = new MessagesSink(2);
-        using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, cts.Token))
+        await using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, cts.Token))
         {
             var message = new Message(0);
             await bus.PubSub.PublishAsync(message, cts.Token);

@@ -3,11 +3,12 @@ using EasyNetQ.Tests.Mocking;
 
 namespace EasyNetQ.Tests;
 
-public class ModelCleanupTests
+public sealed class ModelCleanupTests : IAsyncLifetime
 {
     private readonly IBus bus;
     private readonly MockBuilder mockBuilder;
     private readonly TimeSpan waitTime;
+    private bool disposed;
 
     public ModelCleanupTests()
     {
@@ -16,93 +17,120 @@ public class ModelCleanupTests
         waitTime = TimeSpan.FromSeconds(10);
     }
 
-    private AutoResetEvent WaitForConsumerModelDisposedMessage()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
+    {
+        if (disposed)
+            return;
+
+        disposed = true;
+        await mockBuilder.DisposeAsync();
+    }
+
+    private AutoResetEvent WaitForConsumerChannelDisposedMessage()
     {
         var are = new AutoResetEvent(false);
-        mockBuilder.EventBus.Subscribe((in ConsumerModelDisposedEvent _) => are.Set());
+#pragma warning disable IDISP004
+        mockBuilder.EventBus.Subscribe((ConsumerChannelDisposedEvent _) => Task.FromResult(are.Set()));
+#pragma warning restore IDISP004
         return are;
     }
 
     [Fact]
-    public void Should_cleanup_publish_model()
+    public async Task Should_cleanup_publish_model()
     {
-        bus.PubSub.Publish(new TestMessage());
-        mockBuilder.Dispose();
-
-        mockBuilder.Channels[0].Received().Dispose();
+        await bus.PubSub.PublishAsync(new TestMessage());
+        await mockBuilder.DisposeAsync();
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+        mockBuilder.Channels[0].Received().DisposeAsync();
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
     }
 
     [Fact]
-    public void Should_cleanup_request_response_model()
+    public async Task Should_cleanup_request_response_model()
     {
-        var waiter = new CountdownEvent(2);
+        using var waiter = new CountdownEvent(2);
 
-        mockBuilder.EventBus.Subscribe((in PublishedMessageEvent _) => waiter.Signal());
-        mockBuilder.EventBus.Subscribe((in StartConsumingSucceededEvent _) => waiter.Signal());
+#pragma warning disable IDISP004
+        mockBuilder.EventBus.Subscribe((PublishedMessageEvent _) => Task.FromResult(waiter.Signal()));
+        mockBuilder.EventBus.Subscribe((StartConsumingSucceededEvent _) => Task.FromResult(waiter.Signal()));
+#pragma warning restore IDISP004
 
-        bus.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
+        _ = bus.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
         if (!waiter.Wait(5000))
             throw new TimeoutException();
 
-        var are = WaitForConsumerModelDisposedMessage();
+        using var are = WaitForConsumerChannelDisposedMessage();
 
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
 
         var signalReceived = are.WaitOne(waitTime);
         Assert.True(signalReceived, $"Set event was not received within {waitTime.TotalSeconds} seconds");
 
-        mockBuilder.Channels[0].Received().Dispose();
-        mockBuilder.Channels[1].Received().Dispose();
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+        mockBuilder.Channels[0].Received().DisposeAsync();
+        mockBuilder.Channels[1].Received().DisposeAsync();
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
     }
 
     [Fact]
-    public void Should_cleanup_respond_model()
+    public async Task Should_cleanup_respond_model()
     {
-        var waiter = new CountdownEvent(1);
-        mockBuilder.EventBus.Subscribe((in StartConsumingSucceededEvent _) => waiter.Signal());
+        using var waiter = new CountdownEvent(1);
+#pragma warning disable IDISP004
+        mockBuilder.EventBus.Subscribe((StartConsumingSucceededEvent _) => Task.FromResult(waiter.Signal()));
 
-        bus.Rpc.Respond<TestRequestMessage, TestResponseMessage>(_ => (TestResponseMessage)null);
+        await bus.Rpc.RespondAsync<TestRequestMessage, TestResponseMessage>(_ => (TestResponseMessage)null);
+#pragma warning restore IDISP004
         if (!waiter.Wait(5000))
             throw new TimeoutException();
 
-        var are = WaitForConsumerModelDisposedMessage();
+        using var are = WaitForConsumerChannelDisposedMessage();
 
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
 
         var signalReceived = are.WaitOne(waitTime);
         Assert.True(signalReceived, $"Set event was not received within {waitTime.TotalSeconds} seconds");
-
-        mockBuilder.Channels[0].Received().Dispose();
-        mockBuilder.Channels[1].Received().Dispose();
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+        mockBuilder.Channels[0].Received().DisposeAsync();
+        mockBuilder.Channels[1].Received().DisposeAsync();
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
     }
 
     [Fact]
-    public void Should_cleanup_subscribe_async_model()
+    public async Task Should_cleanup_subscribe_async_model()
     {
-        bus.PubSub.Subscribe<TestMessage>("abc", _ => { });
-        var are = WaitForConsumerModelDisposedMessage();
+#pragma warning disable IDISP004
+        await bus.PubSub.SubscribeAsync<TestMessage>("abc", _ => { });
+#pragma warning restore IDISP004
+        using var are = WaitForConsumerChannelDisposedMessage();
 
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
 
         var signalReceived = are.WaitOne(waitTime);
         Assert.True(signalReceived, $"Set event was not received within {waitTime.TotalSeconds} seconds");
-
-        mockBuilder.Channels[0].Received().Dispose();
-        mockBuilder.Channels[1].Received().Dispose();
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+        mockBuilder.Channels[0].Received().DisposeAsync();
+        mockBuilder.Channels[1].Received().DisposeAsync();
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
     }
 
     [Fact]
-    public void Should_cleanup_subscribe_model()
+    public async Task Should_cleanup_subscribe_model()
     {
-        bus.PubSub.Subscribe<TestMessage>("abc", _ => { });
-        var are = WaitForConsumerModelDisposedMessage();
+#pragma warning disable IDISP004
+        await bus.PubSub.SubscribeAsync<TestMessage>("abc", _ => { });
+#pragma warning restore IDISP004
+        using var are = WaitForConsumerChannelDisposedMessage();
 
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
 
         var signalReceived = are.WaitOne(waitTime);
         Assert.True(signalReceived, $"Set event was not received within {waitTime.TotalSeconds} seconds");
-
-        mockBuilder.Channels[0].Received().Dispose();
-        mockBuilder.Channels[1].Received().Dispose();
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+        mockBuilder.Channels[0].Received().DisposeAsync();
+        mockBuilder.Channels[1].Received().DisposeAsync();
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
     }
 }

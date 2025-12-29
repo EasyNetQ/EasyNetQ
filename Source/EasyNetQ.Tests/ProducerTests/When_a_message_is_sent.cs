@@ -3,7 +3,7 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.ProducerTests;
 
-public class When_a_message_is_sent : IDisposable
+public class When_a_message_is_sent : IAsyncLifetime
 {
     private readonly MockBuilder mockBuilder;
     private const string queueName = "the_queue_name";
@@ -12,23 +12,25 @@ public class When_a_message_is_sent : IDisposable
     {
         mockBuilder = new MockBuilder();
 
-        mockBuilder.SendReceive.Send(queueName, new MyMessage { Text = "Hello World" });
     }
 
-    public void Dispose()
+    public Task InitializeAsync() => mockBuilder.SendReceive.SendAsync(queueName, new MyMessage { Text = "Hello World" });
+
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     [Fact]
-    public void Should_publish_the_message()
+    public async Task Should_publish_the_message()
     {
-        mockBuilder.Channels[0].Received().BasicPublish(
+        await mockBuilder.Channels[0].Received().BasicPublishAsync(
             Arg.Is(""),
             Arg.Is(queueName),
             Arg.Is(false),
-            Arg.Any<IBasicProperties>(),
-            Arg.Any<ReadOnlyMemory<byte>>()
+            Arg.Any<RabbitMQ.Client.BasicProperties>(),
+            Arg.Any<ReadOnlyMemory<byte>>(),
+            Arg.Any<CancellationToken>()
         );
     }
 }

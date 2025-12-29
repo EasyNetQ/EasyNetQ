@@ -2,9 +2,10 @@ using EasyNetQ.Topology;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.IntegrationTests.Advanced;
+#pragma warning disable IDISP006
 
 [Collection("RabbitMQ")]
-public class When_pull_messages_batch : IDisposable
+public sealed class When_pull_messages_batch : IAsyncLifetime
 {
     private readonly ServiceProvider serviceProvider;
     private readonly IBus bus;
@@ -18,9 +19,11 @@ public class When_pull_messages_batch : IDisposable
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
     {
-        serviceProvider?.Dispose();
+        await serviceProvider.DisposeAsync();
     }
 
     [Fact]
@@ -38,10 +41,10 @@ public class When_pull_messages_batch : IDisposable
             Exchange.Default, queue.Name, false, true, MessageProperties.Empty, Array.Empty<byte>(), cts.Token
         );
 
-        using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
+        await using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
 
         {
-            using var pullResult = await consumer.PullBatchAsync(2, cts.Token);
+            var pullResult = await consumer.PullBatchAsync(2, cts.Token);
             pullResult.Messages.Should().HaveCount(2);
             await consumer.AckBatchAsync(
                 pullResult.DeliveryTag, cts.Token
@@ -49,7 +52,7 @@ public class When_pull_messages_batch : IDisposable
         }
 
         {
-            using var pullResult = await consumer.PullBatchAsync(2, cts.Token);
+            var pullResult = await consumer.PullBatchAsync(2, cts.Token);
             pullResult.Messages.Should().HaveCount(0);
         }
     }
@@ -69,10 +72,10 @@ public class When_pull_messages_batch : IDisposable
             Exchange.Default, queue.Name, false, true, MessageProperties.Empty, Array.Empty<byte>(), cts.Token
         );
 
-        using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
+        await using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
 
         {
-            using var pullResult = await consumer.PullBatchAsync(2, cts.Token);
+            var pullResult = await consumer.PullBatchAsync(2, cts.Token);
             pullResult.Messages.Should().HaveCount(2);
             await consumer.RejectBatchAsync(
                 pullResult.DeliveryTag, false, cts.Token
@@ -80,7 +83,7 @@ public class When_pull_messages_batch : IDisposable
         }
 
         {
-            using var pullResult = await consumer.PullBatchAsync(2, cts.Token);
+            var pullResult = await consumer.PullBatchAsync(2, cts.Token);
             pullResult.Messages.Should().HaveCount(0);
         }
     }
@@ -100,10 +103,10 @@ public class When_pull_messages_batch : IDisposable
             Exchange.Default, queue.Name, false, true, MessageProperties.Empty, Array.Empty<byte>(), cts.Token
         );
 
-        using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
+        await using var consumer = bus.Advanced.CreatePullingConsumer(queue, false);
 
         {
-            using var pullResult = await consumer.PullBatchAsync(2, cts.Token);
+            var pullResult = await consumer.PullBatchAsync(2, cts.Token);
             pullResult.Messages.Should().HaveCount(2);
             await consumer.RejectBatchAsync(
                 pullResult.DeliveryTag, true, cts.Token
@@ -111,7 +114,7 @@ public class When_pull_messages_batch : IDisposable
         }
 
         {
-            using var pullResult = await consumer.PullBatchAsync(2, cts.Token);
+            var pullResult = await consumer.PullBatchAsync(2, cts.Token);
             pullResult.Messages.Should().HaveCount(2);
         }
     }
@@ -131,15 +134,15 @@ public class When_pull_messages_batch : IDisposable
             Exchange.Default, queue.Name, false, true, MessageProperties.Empty, Array.Empty<byte>(), cts.Token
         );
 
-        using var consumer = bus.Advanced.CreatePullingConsumer(queue);
+        await using var consumer = bus.Advanced.CreatePullingConsumer(queue);
 
         {
-            using var pullResult = await consumer.PullBatchAsync(2, cts.Token);
+            var pullResult = await consumer.PullBatchAsync(2, cts.Token);
             pullResult.Messages.Should().HaveCount(2);
         }
 
         {
-            using var pullResult = await consumer.PullBatchAsync(0, cts.Token);
+            var pullResult = await consumer.PullBatchAsync(0, cts.Token);
             pullResult.Messages.Should().HaveCount(0);
         }
     }

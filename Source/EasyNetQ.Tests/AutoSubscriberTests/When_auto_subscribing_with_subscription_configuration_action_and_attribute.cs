@@ -1,15 +1,17 @@
+using System;
 using EasyNetQ.AutoSubscribe;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests;
 
-public class When_auto_subscribing_with_subscription_configuration_action_and_attribute
+public class When_auto_subscribing_with_subscription_configuration_action_and_attribute : IDisposable, IAsyncLifetime
 {
     private readonly IBus bus;
     private readonly ServiceProvider serviceProvider;
     private Action<ISubscriptionConfiguration> capturedAction;
     private readonly IPubSub pubSub;
-
+    private bool disposed;
+    readonly AutoSubscriber autoSubscriber;
     public When_auto_subscribing_with_subscription_configuration_action_and_attribute()
     {
         pubSub = Substitute.For<IPubSub>();
@@ -19,7 +21,7 @@ public class When_auto_subscribing_with_subscription_configuration_action_and_at
         var services = new ServiceCollection();
         serviceProvider = services.BuildServiceProvider();
 
-        var autoSubscriber = new AutoSubscriber(bus, serviceProvider, "my_app")
+        autoSubscriber = new AutoSubscriber(bus, serviceProvider, "my_app")
         {
             ConfigureSubscriptionConfiguration =
                 c => c.WithAutoDelete(false)
@@ -28,7 +30,9 @@ public class When_auto_subscribing_with_subscription_configuration_action_and_at
                     .WithPriority(11)
         };
 
+#pragma warning disable IDISP004
         pubSub.SubscribeAsync(
+#pragma warning restore IDISP004
                 Arg.Is("MyActionAndAttributeTest"),
                 Arg.Any<Func<MessageA, CancellationToken, Task>>(),
                 Arg.Any<Action<ISubscriptionConfiguration>>()
@@ -36,13 +40,20 @@ public class When_auto_subscribing_with_subscription_configuration_action_and_at
             .Returns(Task.FromResult(new SubscriptionResult()))
             .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
 
-        autoSubscriber.Subscribe([typeof(MyConsumerWithActionAndAttribute)]);
+#pragma warning disable IDISP004
+
+#pragma warning restore IDISP004
     }
 
+    public Task InitializeAsync() => autoSubscriber.SubscribeAsync([typeof(MyConsumerWithActionAndAttribute)]);
+
+    public Task DisposeAsync() => Task.CompletedTask;
     [Fact]
     public void Should_have_called_subscribe()
     {
+#pragma warning disable IDISP004
         pubSub.Received().SubscribeAsync(
+#pragma warning restore IDISP004
             Arg.Any<string>(),
             Arg.Any<Func<MessageA, CancellationToken, Task>>(),
             Arg.Any<Action<ISubscriptionConfiguration>>()
@@ -59,7 +70,16 @@ public class When_auto_subscribing_with_subscription_configuration_action_and_at
         subscriptionConfiguration.AutoDelete.Should().BeTrue();
         subscriptionConfiguration.PrefetchCount.Should().Be(10);
         subscriptionConfiguration.Priority.Should().Be(10);
-        subscriptionConfiguration.QueueArguments.Should().BeEquivalentTo(new Dictionary<string, object> { { "x-expires", 10 } });
+        subscriptionConfiguration.QueueArguments.Should().BeEquivalentTo(new Dictionary<string, object> { { Argument.Expires, 10 } });
+    }
+
+    public virtual void Dispose()
+    {
+        if (disposed)
+            return;
+
+        disposed = true;
+        serviceProvider?.Dispose();
     }
 
     // Discovered by reflection over test assembly, do not remove.

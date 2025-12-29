@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace EasyNetQ.IntegrationTests.Scheduler;
 
 [Collection("RabbitMQ")]
-public class When_publish_and_subscribe_with_delay_using_dead_letter_exchange_with_topic : IDisposable
+public class When_publish_and_subscribe_with_delay_using_dead_letter_exchange_with_topic : IDisposable, IAsyncLifetime
 {
     private readonly ServiceProvider serviceProvider;
     private readonly IBus bus;
@@ -20,9 +20,16 @@ public class When_publish_and_subscribe_with_delay_using_dead_letter_exchange_wi
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public virtual void Dispose()
     {
         serviceProvider?.Dispose();
+    }
+
+    public async Task DisposeAsync()
+    {
+        await serviceProvider.DisposeAsync();
     }
 
     private const int MessagesCount = 10;
@@ -36,8 +43,8 @@ public class When_publish_and_subscribe_with_delay_using_dead_letter_exchange_wi
         var firstTopicMessages = MessagesFactories.Create(MessagesCount);
         var secondTopicMessagesSink = new MessagesSink(MessagesCount);
         var secondTopicMessages = MessagesFactories.Create(MessagesCount, MessagesCount);
-        using (await bus.PubSub.SubscribeAsync<Message>(Guid.NewGuid().ToString(), firstTopicMessagesSink.Receive, x => x.WithTopic("first")))
-        using (await bus.PubSub.SubscribeAsync<Message>(Guid.NewGuid().ToString(), secondTopicMessagesSink.Receive, x => x.WithTopic("second")))
+        await using (await bus.PubSub.SubscribeAsync<Message>(Guid.NewGuid().ToString(), firstTopicMessagesSink.Receive, x => x.WithTopic("first"), cancellationToken: cts.Token))
+        await using (await bus.PubSub.SubscribeAsync<Message>(Guid.NewGuid().ToString(), secondTopicMessagesSink.Receive, x => x.WithTopic("second"), cancellationToken: cts.Token))
         {
             await Task.WhenAll(
                 bus.Scheduler.FuturePublishBatchAsync(firstTopicMessages, TimeSpan.FromSeconds(5), "first", cts.Token),

@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace EasyNetQ.IntegrationTests.Rpc;
 
 [Collection("RabbitMQ")]
-public class When_request_and_respond_with_legacy_options : IDisposable
+public class When_request_and_respond_with_legacy_options : IAsyncLifetime
 {
     private readonly ServiceProvider serviceProvider;
     private readonly IBus bus;
@@ -18,9 +18,12 @@ public class When_request_and_respond_with_legacy_options : IDisposable
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
     {
-        serviceProvider?.Dispose();
+        if (serviceProvider != null)
+            await serviceProvider.DisposeAsync();
     }
 
     [Fact]
@@ -28,7 +31,7 @@ public class When_request_and_respond_with_legacy_options : IDisposable
     {
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
-        using (
+        await using (
             await bus.Rpc.RespondAsync<Request, Response>(_ =>
                     Task.FromException<Response>(new RequestFailedException("Oops")), cts.Token
             )
@@ -46,7 +49,7 @@ public class When_request_and_respond_with_legacy_options : IDisposable
     {
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
-        using (await bus.Rpc.RespondAsync<Request, Response>(x => new Response(x.Id), cts.Token))
+        await using (await bus.Rpc.RespondAsync<Request, Response>(x => new Response(x.Id), cts.Token))
         {
             var response = await bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token);
             response.Should().Be(new Response(42));

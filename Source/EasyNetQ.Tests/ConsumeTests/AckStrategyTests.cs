@@ -4,23 +4,28 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 
-public class Ack_strategy
+public class Ack_strategy : IAsyncLifetime
 {
     public Ack_strategy()
     {
-        model = Substitute.For<IModel, IRecoverable>();
-
-        result = AckStrategies.Ack(model, deliveryTag);
+        channel = Substitute.For<IChannel, IRecoverable>();
     }
 
-    private readonly IModel model;
-    private readonly AckResult result;
+    private readonly IChannel channel;
+    private AckResult result;
     private const ulong deliveryTag = 1234;
 
-    [Fact]
-    public void Should_ack_message()
+    public async Task InitializeAsync()
     {
-        model.Received().BasicAck(deliveryTag, false);
+        result = await AckStrategies.AckAsync(channel, deliveryTag, CancellationToken.None);
+    }
+
+    public Task DisposeAsync() => Task.CompletedTask;
+
+    [Fact]
+    public async Task Should_ack_message()
+    {
+        await channel.Received().BasicAckAsync(deliveryTag, false);
     }
 
     [Fact]
@@ -30,23 +35,28 @@ public class Ack_strategy
     }
 }
 
-public class NackWithoutRequeue_strategy
+public class NackWithoutRequeue_strategy : IAsyncLifetime
 {
     public NackWithoutRequeue_strategy()
     {
-        model = Substitute.For<IModel, IRecoverable>();
-
-        result = AckStrategies.NackWithoutRequeue(model, deliveryTag);
+        channel = Substitute.For<IChannel, IRecoverable>();
     }
 
-    private readonly IModel model;
-    private readonly AckResult result;
+    private readonly IChannel channel;
+    private AckResult result;
     private const ulong deliveryTag = 1234;
 
-    [Fact]
-    public void Should_nack_message_and_not_requeue()
+    public async Task InitializeAsync()
     {
-        model.Received().BasicNack(deliveryTag, false, false);
+        result = await AckStrategies.NackWithoutRequeueAsync(channel, deliveryTag, CancellationToken.None);
+    }
+
+    public Task DisposeAsync() => Task.CompletedTask;
+
+    [Fact]
+    public async Task Should_nack_message_and_not_requeue()
+    {
+        await channel.Received().BasicNackAsync(deliveryTag, false, false);
     }
 
     [Fact]
@@ -56,28 +66,22 @@ public class NackWithoutRequeue_strategy
     }
 }
 
-public class NackWithRequeue_strategy
+public class NackWithRequeue_trategy
 {
-    public NackWithRequeue_strategy()
-    {
-        model = Substitute.For<IModel, IRecoverable>();
-
-        result = AckStrategies.NackWithRequeue(model, deliveryTag);
-    }
-
-    private readonly IModel model;
-    private readonly AckResult result;
+    private readonly IChannel channel;
     private const ulong deliveryTag = 1234;
 
-    [Fact]
-    public void Should_nack_message_and_requeue()
+    public NackWithRequeue_trategy()
     {
-        model.Received().BasicNack(deliveryTag, false, true);
+        channel = Substitute.For<IChannel, IRecoverable>();
     }
 
     [Fact]
-    public void Should_return_Nack()
+    public async Task Should_nack_message_and_requeue()
     {
+        var result = await AckStrategies.NackWithRequeueAsync(channel, deliveryTag, CancellationToken.None);
+
+        await channel.Received().BasicNackAsync(deliveryTag, false, true);
         Assert.Equal(AckResult.Nack, result);
     }
 }

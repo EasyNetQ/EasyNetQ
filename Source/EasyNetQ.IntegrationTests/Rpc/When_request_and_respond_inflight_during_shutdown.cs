@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace EasyNetQ.IntegrationTests.Rpc;
 
 [Collection("RabbitMQ")]
-public class When_request_and_respond_in_flight_during_shutdown : IDisposable
+public class When_request_and_respond_in_flight_during_shutdown : IAsyncLifetime
 {
     private readonly ServiceProvider serviceProvider;
     private readonly IBus bus;
@@ -22,7 +22,7 @@ public class When_request_and_respond_in_flight_during_shutdown : IDisposable
     {
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
-        var requestArrived = new ManualResetEventSlim(false);
+        using var requestArrived = new ManualResetEventSlim(false);
         var responder = await bus.Rpc.RespondAsync<Request, Response>(
             async (r, c) =>
             {
@@ -36,15 +36,18 @@ public class When_request_and_respond_in_flight_during_shutdown : IDisposable
         var requestTask = bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token);
         requestArrived.Wait(cts.Token);
 #pragma warning disable CS4014
-        Task.Run(() => responder.Dispose(), cts.Token);
+        Task.Run(() => responder.DisposeAsync().GetAwaiter().GetResult(), cts.Token);
 #pragma warning restore CS4014
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await requestTask);
         cts.IsCancellationRequested.Should().BeTrue();
     }
 
-    public void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
     {
-        serviceProvider?.Dispose();
+        if (serviceProvider != null)
+            await serviceProvider.DisposeAsync();
     }
 }

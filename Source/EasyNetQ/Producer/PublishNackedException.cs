@@ -21,12 +21,12 @@ public class PublishNackedException : Exception
     }
 
     /// <inheritdoc />
-    public PublishNackedException(string? message) : base(message)
+    public PublishNackedException(string message) : base(message)
     {
     }
 
     /// <inheritdoc />
-    public PublishNackedException(string? message, Exception? inner) : base(message, inner)
+    public PublishNackedException(string message, Exception inner) : base(message, inner)
     {
     }
 }

@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace EasyNetQ.IntegrationTests.Rpc;
 
 [Collection("RabbitMQ")]
-public class When_request_and_respond_with_default_options : IDisposable
+public class When_request_and_respond_with_default_options : IAsyncLifetime
 {
     private readonly RabbitMQFixture rmqFixture;
 
@@ -21,9 +21,12 @@ public class When_request_and_respond_with_default_options : IDisposable
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
     {
-        serviceProvider?.Dispose();
+        if (serviceProvider != null)
+            await serviceProvider.DisposeAsync();
     }
 
     [Fact]
@@ -31,7 +34,7 @@ public class When_request_and_respond_with_default_options : IDisposable
     {
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
-        using (
+        await using (
             await bus.Rpc.RespondAsync<Request, Response>(
                 _ => Task.FromException<Response>(new RequestFailedException()), cts.Token
             )
@@ -48,7 +51,7 @@ public class When_request_and_respond_with_default_options : IDisposable
     {
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
 
-        using var _ = await bus.Rpc.RespondAsync<Request, Response>(x => new Response(x.Id), cts.Token);
+        await using var _ = await bus.Rpc.RespondAsync<Request, Response>(x => new Response(x.Id), cts.Token);
 
         {
             var response = await bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token);
@@ -68,7 +71,7 @@ public class When_request_and_respond_with_default_options : IDisposable
     {
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
-        using (await bus.Rpc.RespondAsync<Request, Response>(x => Task.FromResult(new Response(x.Id)), cts.Token))
+        await using (await bus.Rpc.RespondAsync<Request, Response>(x => Task.FromResult(new Response(x.Id)), cts.Token))
         {
             await bus.Rpc.RequestAsync<Request, Response>(new Request(42), cts.Token);
 

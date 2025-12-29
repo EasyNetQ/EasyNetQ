@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace EasyNetQ.IntegrationTests.SendReceive;
 
 [Collection("RabbitMQ")]
-public class When_send_receive_multiple_message_types : IDisposable
+public class When_send_receive_multiple_message_types : IDisposable, IAsyncLifetime
 {
     private readonly ServiceProvider serviceProvider;
     private readonly IBus bus;
@@ -18,9 +18,16 @@ public class When_send_receive_multiple_message_types : IDisposable
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public virtual void Dispose()
     {
         serviceProvider?.Dispose();
+    }
+
+    public async Task DisposeAsync()
+    {
+        await serviceProvider.DisposeAsync();
     }
 
     private const int MessagesCount = 10;
@@ -35,7 +42,7 @@ public class When_send_receive_multiple_message_types : IDisposable
         var rabbitsSink = new MessagesSink(MessagesCount);
         var bunnies = MessagesFactories.Create(MessagesCount, i => new BunnyMessage(i));
         var rabbits = MessagesFactories.Create(MessagesCount, i => new RabbitMessage(i));
-        using (
+        await using (
             await bus.SendReceive.ReceiveAsync(
                 queue,
                 x => x.Add<BunnyMessage>(bunniesSink.Receive).Add<RabbitMessage>(rabbitsSink.Receive),

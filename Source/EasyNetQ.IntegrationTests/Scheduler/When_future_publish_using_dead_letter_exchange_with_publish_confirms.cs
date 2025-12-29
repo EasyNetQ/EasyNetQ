@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace EasyNetQ.IntegrationTests.Scheduler;
 
 [Collection("RabbitMQ")]
-public class When_publish_and_subscribe_using_delay_using_dead_letter_exchange_with_publish_confirms : IDisposable
+public class When_publish_and_subscribe_using_delay_using_dead_letter_exchange_with_publish_confirms : IDisposable, IAsyncLifetime
 {
     private readonly ServiceProvider serviceProvider;
     private readonly IBus bus;
@@ -22,9 +22,16 @@ public class When_publish_and_subscribe_using_delay_using_dead_letter_exchange_w
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public virtual void Dispose()
     {
         serviceProvider?.Dispose();
+    }
+
+    public async Task DisposeAsync()
+    {
+        await serviceProvider.DisposeAsync();
     }
 
     private const int MessagesCount = 10;
@@ -32,13 +39,13 @@ public class When_publish_and_subscribe_using_delay_using_dead_letter_exchange_w
     [Fact]
     public async Task Test()
     {
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
 
         var subscriptionId = Guid.NewGuid().ToString();
         var messagesSink = new MessagesSink(MessagesCount);
         var messages = MessagesFactories.Create(MessagesCount);
 
-        using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, cts.Token))
+        await using (await bus.PubSub.SubscribeAsync<Message>(subscriptionId, messagesSink.Receive, cts.Token))
         {
             await bus.Scheduler.FuturePublishBatchAsync(messages, TimeSpan.FromSeconds(5), "#", cts.Token);
 

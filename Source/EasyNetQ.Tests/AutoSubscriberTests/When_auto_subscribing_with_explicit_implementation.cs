@@ -4,11 +4,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Tests.AutoSubscriberTests;
 
-public class When_auto_subscribing_with_explicit_implementation : IDisposable
+#pragma warning disable IDISP006
+public class When_auto_subscribing_with_explicit_implementation : IAsyncLifetime
 {
     private readonly MockBuilder mockBuilder;
     private readonly ServiceProvider serviceProvider;
-
+    readonly AutoSubscriber autoSubscriber;
     private const string expectedQueueName1 =
         "EasyNetQ.Tests.AutoSubscriberTests.When_auto_subscribing_with_explicit_implementation+MessageA, EasyNetQ.Tests_my_app:552bba04667af93e428cfdc296acb6d4";
 
@@ -25,46 +26,58 @@ public class When_auto_subscribing_with_explicit_implementation : IDisposable
         var services = new ServiceCollection();
         serviceProvider = services.BuildServiceProvider();
 
-        var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, serviceProvider, "my_app");
-        autoSubscriber.Subscribe([typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>)]);
+        autoSubscriber = new AutoSubscriber(mockBuilder.Bus, serviceProvider, "my_app");
+#pragma warning disable IDISP004
+
+#pragma warning restore IDISP004
     }
 
-    public void Dispose()
+    public Task InitializeAsync() => autoSubscriber.SubscribeAsync([typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>)]);
+
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
+        await serviceProvider.DisposeAsync();
     }
 
     [Fact]
-    public void Should_have_declared_the_queues()
+    public async Task Should_have_declared_the_queues()
     {
-        Action<string> assertQueueDeclared = queueName =>
-            mockBuilder.Channels[1].Received().QueueDeclare(
+        Func<string, Task> assertQueueDeclared = async queueName =>
+        {
+            await mockBuilder.Channels[1].Received().QueueDeclareAsync(
                 Arg.Is(queueName),
                 Arg.Is(true),
                 Arg.Is(false),
                 Arg.Is(false),
-                Arg.Is((IDictionary<string, object>)null)
+                Arg.Is((IDictionary<string, object>)null),
+                default,
+                default,
+                Arg.Any<CancellationToken>()
             );
+        };
 
-        assertQueueDeclared(expectedQueueName1);
-        assertQueueDeclared(expectedQueueName2);
-        assertQueueDeclared(expectedQueueName3);
+        await assertQueueDeclared(expectedQueueName1);
+        await assertQueueDeclared(expectedQueueName2);
+        await assertQueueDeclared(expectedQueueName3);
     }
 
     [Fact]
-    public void Should_have_bound_to_queues()
+    public async Task Should_have_bound_to_queues()
     {
-        Action<int, string, string> assertConsumerStarted =
-            (_, queueName, topicName) => mockBuilder.Channels[1].Received().QueueBind(
+        Func<int, string, string, Task> assertConsumerStarted =
+            (_, queueName, topicName) => mockBuilder.Channels[1].Received().QueueBindAsync(
                 Arg.Is(queueName),
                 Arg.Any<string>(),
                 Arg.Is(topicName),
-                Arg.Is((IDictionary<string, object>)null)
+                Arg.Is((IDictionary<string, object>)null),
+                default,
+                Arg.Any<CancellationToken>()
             );
 
-        assertConsumerStarted(1, expectedQueueName1, "#");
-        assertConsumerStarted(2, expectedQueueName2, "#");
-        assertConsumerStarted(3, expectedQueueName3, "Important");
+        await assertConsumerStarted(1, expectedQueueName1, "#");
+        await assertConsumerStarted(2, expectedQueueName2, "#");
+        await assertConsumerStarted(3, expectedQueueName3, "Important");
     }
 
     [Fact]

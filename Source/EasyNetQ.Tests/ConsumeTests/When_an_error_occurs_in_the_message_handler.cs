@@ -6,15 +6,18 @@ public class When_an_error_occurs_in_the_message_handler : ConsumerTestBase
 {
     private Exception exception;
 
-    protected override void AdditionalSetUp()
+    protected override async Task InitializeAsyncCore()
+
     {
         exception = new Exception("I've had a bad day :(");
 
         ConsumeErrorStrategy.HandleErrorAsync(default, exception)
-            .ReturnsForAnyArgs(new ValueTask<AckStrategy>(AckStrategies.Ack));
+            .ReturnsForAnyArgs(new ValueTask<AckStrategyAsync>(AckStrategies.AckAsync));
 
-        StartConsumer((_, _, _, _) => throw exception);
-        DeliverMessage();
+#pragma warning disable IDISP004
+        await StartConsumerAsync((_, _, _, _) => throw exception);
+#pragma warning restore IDISP004
+        await DeliverMessageAsync();
     }
 
     [Fact]
@@ -30,8 +33,8 @@ public class When_an_error_occurs_in_the_message_handler : ConsumerTestBase
     }
 
     [Fact]
-    public void Should_ack()
+    public async Task Should_ack()
     {
-        MockBuilder.Channels[0].Received().BasicAck(DeliverTag, false);
+        await MockBuilder.Channels[0].Received().BasicAckAsync(DeliverTag, false);
     }
 }

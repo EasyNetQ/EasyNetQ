@@ -51,7 +51,7 @@ public class DelayedExchangeScheduler : IScheduler
         var futureExchange = await advancedBus.ExchangeDeclareAsync(
             exchange: futureExchangeName,
             type: ExchangeType.DelayedMessage,
-            arguments: new Dictionary<string, object>().WithDelayedType(ExchangeType.Topic),
+            arguments: new Dictionary<string, object>().WithDelayedType(ExchangeType.Direct),
             cancellationToken: cts.Token
         ).ConfigureAwait(false);
 

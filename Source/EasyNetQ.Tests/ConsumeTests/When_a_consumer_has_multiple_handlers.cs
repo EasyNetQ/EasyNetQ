@@ -4,7 +4,7 @@ using EasyNetQ.Topology;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 
-public class When_a_consumer_has_multiple_handlers : IDisposable
+public class When_a_consumer_has_multiple_handlers : IAsyncLifetime
 {
     private readonly MockBuilder mockBuilder;
     private IAnimal animalResult;
@@ -15,12 +15,17 @@ public class When_a_consumer_has_multiple_handlers : IDisposable
     public When_a_consumer_has_multiple_handlers()
     {
         mockBuilder = new MockBuilder();
+    }
 
+    public async Task InitializeAsync()
+    {
         var queue = new Queue("test_queue", false);
 
-        var countdownEvent = new CountdownEvent(3);
+        using var countdownEvent = new CountdownEvent(3);
 
-        mockBuilder.Bus.Advanced.Consume(
+#pragma warning disable IDISP004
+        await mockBuilder.Bus.Advanced.ConsumeAsync(
+#pragma warning restore IDISP004
             queue,
             x => x.Add<MyMessage>((message, _) =>
                 {
@@ -36,22 +41,21 @@ public class When_a_consumer_has_multiple_handlers : IDisposable
                 {
                     animalResult = message.Body;
                     countdownEvent.Signal();
-                })
-        );
+                }));
 
-        Deliver(new MyMessage { Text = "Hello Polymorphs!" });
-        Deliver(new MyOtherMessage { Text = "Hello Isomorphs!" });
-        Deliver(new Dog());
+        await DeliverAsync(new MyMessage { Text = "Hello Polymorphs!" });
+        await DeliverAsync(new MyOtherMessage { Text = "Hello Isomorphs!" });
+        await DeliverAsync(new Dog());
 
         if (!countdownEvent.Wait(5000)) throw new TimeoutException();
     }
 
-    public void Dispose()
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
-    private void Deliver<T>(T message) where T : class
+    private async Task DeliverAsync<T>(T message) where T : class
     {
         using var serializedMessage = new ReflectionBasedNewtonsoftJsonSerializer().MessageToBytes(typeof(T), message);
         var properties = new BasicProperties
@@ -59,7 +63,7 @@ public class When_a_consumer_has_multiple_handlers : IDisposable
             Type = new DefaultTypeNameSerializer().Serialize(typeof(T))
         };
 
-        mockBuilder.Consumers[0].HandleBasicDeliver(
+        await mockBuilder.Consumers[0].HandleBasicDeliverAsync(
             "consumer_tag",
             0,
             false,
@@ -67,7 +71,7 @@ public class When_a_consumer_has_multiple_handlers : IDisposable
             "routing_key",
             properties,
             serializedMessage.Memory
-        ).GetAwaiter().GetResult();
+        );
     }
 
     [Fact]

@@ -8,7 +8,7 @@ public class FileMessageWriterTests
 
     [Fact]
     [Traits.Explicit("Writes files to the file system")]
-    public void WriteSomeFiles()
+    public async Task WriteSomeFiles()
     {
         var directory = new DirectoryInfo(tempDirectory);
 
@@ -40,11 +40,20 @@ public class FileMessageWriterTests
             MessagesOutputDirectory = tempDirectory
         };
 
-        writer.Write(messages, parameters);
+        await writer.WriteAsync(GetMessagesAsync(messages), parameters);
 
         foreach (var file in directory.EnumerateFiles())
         {
             Console.Out.WriteLine("{0}", file.Name);
+        }
+    }
+
+    private static async IAsyncEnumerable<HosepipeMessage> GetMessagesAsync(IEnumerable<HosepipeMessage> messages)
+    {
+        foreach (var message in messages)
+        {
+            yield return message;
+            await Task.Yield();
         }
     }
 

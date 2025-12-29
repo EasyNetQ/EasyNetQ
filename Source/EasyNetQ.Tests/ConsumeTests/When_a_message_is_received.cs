@@ -3,7 +3,7 @@ using EasyNetQ.Tests.Mocking;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 
-public class When_a_message_is_received : IDisposable
+public class When_a_message_is_received : IAsyncLifetime
 {
     private readonly MockBuilder mockBuilder;
     private MyMessage deliveredMyMessage;
@@ -12,19 +12,24 @@ public class When_a_message_is_received : IDisposable
     public When_a_message_is_received()
     {
         mockBuilder = new MockBuilder();
+    }
 
-        mockBuilder.SendReceive.Receive("the_queue", x => x
+    public async Task InitializeAsync()
+    {
+#pragma warning disable IDISP004
+        await mockBuilder.SendReceive.ReceiveAsync("the_queue", x => x
+#pragma warning restore IDISP004
             .Add<MyMessage>(message => deliveredMyMessage = message)
             .Add<MyOtherMessage>(message => deliveredMyOtherMessage = message));
 
-        DeliverMessage("{ Text: \"Hello World :)\" }", "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests");
-        DeliverMessage("{ Text: \"Goodbye Cruel World!\" }", "EasyNetQ.Tests.MyOtherMessage, EasyNetQ.Tests");
-        DeliverMessage("{ Text: \"Shouldn't get this\" }", "EasyNetQ.Tests.Unknown, EasyNetQ.Tests");
+        await DeliverMessageAsync("{ Text: \"Hello World :)\" }", "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests");
+        await DeliverMessageAsync("{ Text: \"Goodbye Cruel World!\" }", "EasyNetQ.Tests.MyOtherMessage, EasyNetQ.Tests");
+        await DeliverMessageAsync("{ Text: \"Shouldn't get this\" }", "EasyNetQ.Tests.Unknown, EasyNetQ.Tests");
     }
 
-    public void Dispose()
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     [Fact]
@@ -41,7 +46,7 @@ public class When_a_message_is_received : IDisposable
         deliveredMyOtherMessage.Text.Should().Be("Goodbye Cruel World!");
     }
 
-    private void DeliverMessage(string message, string type)
+    private async Task DeliverMessageAsync(string message, string type)
     {
         var properties = new BasicProperties
         {
@@ -50,7 +55,7 @@ public class When_a_message_is_received : IDisposable
         };
         var body = Encoding.UTF8.GetBytes(message);
 
-        mockBuilder.Consumers[0].HandleBasicDeliver(
+        await mockBuilder.Consumers[0].HandleBasicDeliverAsync(
             "consumer tag",
             0,
             false,
@@ -58,6 +63,6 @@ public class When_a_message_is_received : IDisposable
             "the_routing_key",
             properties,
             body
-        ).GetAwaiter().GetResult();
+        );
     }
 }

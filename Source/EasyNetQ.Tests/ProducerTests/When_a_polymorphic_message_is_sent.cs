@@ -4,7 +4,7 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.ProducerTests;
 
-public class When_a_polymorphic_message_is_sent : IDisposable
+public class When_a_polymorphic_message_is_sent : IAsyncLifetime
 {
     private readonly MockBuilder mockBuilder;
     private const string interfaceTypeName = "EasyNetQ.Tests.ProducerTests.IMyMessageInterface, EasyNetQ.Tests";
@@ -14,45 +14,51 @@ public class When_a_polymorphic_message_is_sent : IDisposable
     {
         mockBuilder = new MockBuilder();
 
+    }
+
+    public async Task InitializeAsync()
+    {
         var message = new MyImplementation
         {
             Text = "Hello Polymorphs!",
             NotInInterface = "Hi"
         };
-
-        mockBuilder.PubSub.Publish<IMyMessageInterface>(message);
+        await mockBuilder.PubSub.PublishAsync<IMyMessageInterface>(message);
     }
 
-    public void Dispose()
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     [Fact]
-    public void Should_name_exchange_after_interface()
+    public async Task Should_name_exchange_after_interface()
     {
-        mockBuilder.Channels[0].Received().ExchangeDeclare(
+        await mockBuilder.Channels[0].Received().ExchangeDeclareAsync(
             Arg.Is(interfaceTypeName),
-            Arg.Is("topic"),
+            Arg.Is(ExchangeType.Topic),
             Arg.Is(true),
             Arg.Is(false),
-            Arg.Any<IDictionary<string, object>>()
+            Arg.Any<IDictionary<string, object>>(),
+            Arg.Any<bool>(),
+            Arg.Any<CancellationToken>()
         );
     }
 
     [Fact]
-    public void Should_publish_to_correct_exchange()
+    public async Task Should_publish_to_correct_exchange()
     {
-        mockBuilder.Channels[1].Received().BasicPublish(
+        await mockBuilder.Channels[1].Received().BasicPublishAsync(
             Arg.Is(interfaceTypeName),
             Arg.Is(""),
             Arg.Is(false),
-            Arg.Is<IBasicProperties>(x => x.Type == implementationTypeName),
+            Arg.Is<RabbitMQ.Client.BasicProperties>(x => x.Type == implementationTypeName),
             Arg.Is<ReadOnlyMemory<byte>>(
                 x => x.ToArray().SequenceEqual(
                     Encoding.UTF8.GetBytes("{\"Text\":\"Hello Polymorphs!\",\"NotInInterface\":\"Hi\"}")
                 )
-            )
+            ),
+            Arg.Any<CancellationToken>()
         );
     }
 }

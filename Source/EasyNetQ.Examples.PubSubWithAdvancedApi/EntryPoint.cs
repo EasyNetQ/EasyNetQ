@@ -3,7 +3,7 @@ using EasyNetQ.Topology;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-var cts = new CancellationTokenSource();
+using var cts = new CancellationTokenSource();
 Console.CancelKeyPress += (_, _) => cts.Cancel();
 
 var serviceCollection = new ServiceCollection();
@@ -13,7 +13,7 @@ serviceCollection.AddEasyNetQ("host=localhost;publisherConfirms=True")
     .UseNewtonsoftJson()
     .UseAlwaysNackWithoutRequeueConsumerErrorStrategy();
 
-var provider = serviceCollection.BuildServiceProvider();
+using var provider = serviceCollection.BuildServiceProvider();
 
 var bus = provider.GetRequiredService<IBus>();
 var eventQueue = await bus.Advanced.QueueDeclareAsync(
@@ -24,7 +24,7 @@ var eventQueue = await bus.Advanced.QueueDeclareAsync(
     cancellationToken: cts.Token
 );
 
-using var eventsConsumer = bus.Advanced.Consume(eventQueue, (_, _, _) => { });
+await using var eventsConsumer = await bus.Advanced.ConsumeAsync(eventQueue, (_, _, _) => { });
 
 while (!cts.IsCancellationRequested)
 {

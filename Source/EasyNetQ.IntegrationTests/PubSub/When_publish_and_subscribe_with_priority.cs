@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace EasyNetQ.IntegrationTests.PubSub;
 
 [Collection("RabbitMQ")]
-public class When_publish_and_subscribe_with_priority : IDisposable
+public class When_publish_and_subscribe_with_priority : IDisposable, IAsyncLifetime
 {
     private readonly ServiceProvider serviceProvider;
     private readonly IBus bus;
@@ -18,9 +18,16 @@ public class When_publish_and_subscribe_with_priority : IDisposable
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public virtual void Dispose()
     {
         serviceProvider?.Dispose();
+    }
+
+    public async Task DisposeAsync()
+    {
+        await serviceProvider.DisposeAsync();
     }
 
     private const byte LowPriority = 1;
@@ -37,7 +44,7 @@ public class When_publish_and_subscribe_with_priority : IDisposable
         var lowPriorityMessages = MessagesFactories.Create(MessagesCount, MessagesCount);
 
         var subscriptionId = Guid.NewGuid().ToString();
-        using (
+        await using (
             await bus.PubSub.SubscribeAsync<Message>(
                 subscriptionId, messagesSink.Receive, x => x.WithMaxPriority(2), cts.Token
             )
@@ -52,7 +59,7 @@ public class When_publish_and_subscribe_with_priority : IDisposable
             highPriorityMessages, x => x.WithPriority(HighPriority), cts.Token
         );
 
-        using (
+        await using (
             await bus.PubSub.SubscribeAsync<Message>(
                 subscriptionId, messagesSink.Receive, x => x.WithMaxPriority(2), cts.Token
             )

@@ -7,6 +7,7 @@ namespace EasyNetQ.Persistent;
 /// </summary>
 public interface IPersistentConnection : IDisposable
 {
+
     /// <summary>
     ///     <see langword="true"/> if a connection is connected
     /// </summary>
@@ -15,11 +16,11 @@ public interface IPersistentConnection : IDisposable
     /// <summary>
     ///     Establish a connection
     /// </summary>
-    void EnsureConnected();
+    Task ConnectAsync();
 
     /// <summary>
     ///     Creates a new channel
     /// </summary>
     /// <returns>New channel</returns>
-    IModel CreateModel();
+    Task<IChannel> CreateChannelAsync(CreateChannelOptions options = null, CancellationToken cancellationToken = default);
 }

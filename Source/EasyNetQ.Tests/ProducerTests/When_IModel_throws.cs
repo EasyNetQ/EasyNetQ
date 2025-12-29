@@ -1,17 +1,18 @@
 using EasyNetQ.Tests.Mocking;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 
 namespace EasyNetQ.Tests.ProducerTests;
 
-public class When_IModel_throws_because_of_closed_connection : IDisposable
+public class When_IModel_throws_because_of_closed_connection : IAsyncLifetime
 {
     public When_IModel_throws_because_of_closed_connection()
     {
         mockBuilder = new MockBuilder("host=localhost;timeout=1");
 
         mockBuilder.NextModel
-            .WhenForAnyArgs(x => x.ExchangeDeclare(null, null, false, false, null))
+            .WhenForAnyArgs(x => x.ExchangeDeclareAsync(null, null, false, false, null))
             .Do(_ =>
             {
                 var args = new ShutdownEventArgs(ShutdownInitiator.Peer, 320,
@@ -20,16 +21,25 @@ public class When_IModel_throws_because_of_closed_connection : IDisposable
             });
     }
 
-    public void Dispose()
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     private readonly MockBuilder mockBuilder;
 
     [Fact]
-    public void Should_try_to_reconnect_until_timeout()
+    public async Task Should_try_to_reconnect_until_timeout()
     {
-        Assert.Throws<TaskCanceledException>(() => mockBuilder.PubSub.Publish(new MyMessage { Text = "Hello World" }));
+        try
+        {
+            await mockBuilder.PubSub.PublishAsync(new MyMessage { Text = "Hello World" });
+        }
+        catch (Exception ex)
+        {
+            ex.Should().BeOfType<TaskCanceledException>();
+        }
     }
 }

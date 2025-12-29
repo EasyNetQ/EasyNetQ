@@ -1,5 +1,6 @@
 using EasyNetQ.Consumer;
 using EasyNetQ.SystemMessages;
+using RabbitMQ.Client;
 
 namespace EasyNetQ.Hosepipe;
 
@@ -15,21 +16,31 @@ public class ErrorRetry : IErrorRetry
         this.errorMessageSerializer = errorMessageSerializer;
     }
 
-    public void RetryErrors(IEnumerable<HosepipeMessage> rawErrorMessages, QueueParameters parameters)
+    public async Task RetryErrorsAsync(
+        IAsyncEnumerable<HosepipeMessage> rawErrorMessages,
+        QueueParameters parameters,
+        CancellationToken cancellationToken = default)
     {
-        using var connection = HosepipeConnection.FromParameters(parameters);
-        using var model = connection.CreateModel();
+        using var connection = await HosepipeConnection.FromParametersAsync(parameters, cancellationToken);
+        using var channel = await connection.CreateChannelAsync(new CreateChannelOptions(true, true), cancellationToken);
 
-        model.ConfirmSelect();
-
-        foreach (var rawErrorMessage in rawErrorMessages)
+        await foreach (var rawErrorMessage in rawErrorMessages)
         {
             var error = (Error)serializer.BytesToMessage(typeof(Error), errorMessageSerializer.Deserialize(rawErrorMessage.Body));
-            var properties = model.CreateBasicProperties();
+            var properties = new BasicProperties();
             error.BasicProperties.CopyTo(properties);
-            var body = errorMessageSerializer.Deserialize(error.Message);
-            model.BasicPublish("", error.Queue, true, properties, body);
-            model.WaitForConfirmsOrDie();
+            var body = errorMessageSerializer.Deserialize(error.Message).AsMemory();
+
+            await channel.BasicPublishAsync(
+                exchange: "",
+                routingKey: error.Queue,
+                mandatory: true,
+                basicProperties: properties,
+                body: body,
+                cancellationToken: cancellationToken
+            );
+
+            // await channel.WaitForConfirmsOrDieAsync(cancellationToken);
         }
     }
 }

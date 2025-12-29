@@ -30,7 +30,7 @@ public interface IRpc
     /// <param name="responder">A function that performs the response</param>
     /// <param name="configure">A function that performs the configuration</param>
     /// <param name="cancellationToken">The cancellation token</param>
-    Task<IDisposable> RespondAsync<TRequest, TResponse>(
+    Task<IAsyncDisposable> RespondAsync<TRequest, TResponse>(
         Func<TRequest, CancellationToken, Task<TResponse>> responder,
         Action<IResponderConfiguration> configure,
         CancellationToken cancellationToken = default

@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
@@ -57,7 +58,7 @@ public class AdvancedBusEventHandlersTests : IDisposable
         );
     }
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         advancedBus.Dispose();
     }
@@ -75,41 +76,41 @@ public class AdvancedBusEventHandlersTests : IDisposable
     private DisconnectedEventArgs disconnectedEventArgs;
 
     [Fact]
-    public void AdvancedBusEventHandlers_Blocked_handler_is_called()
+    public async Task AdvancedBusEventHandlers_Blocked_handler_is_called()
     {
         var @event = new ConnectionBlockedEvent(PersistentConnectionType.Producer, "a random reason");
 
-        eventBus.Publish(@event);
+        await eventBus.PublishAsync(@event);
         blockedCalled.Should().BeTrue();
         blockedEventArgs.Should().NotBeNull();
         blockedEventArgs.Reason.Should().Be(@event.Reason);
     }
 
     [Fact]
-    public void AdvancedBusEventHandlers_Connected_handler_is_called_when_connection_recovered()
+    public async Task AdvancedBusEventHandlers_Connected_handler_is_called_when_connection_recovered()
     {
-        eventBus.Publish(new ConnectionRecoveredEvent(PersistentConnectionType.Producer, new AmqpTcpEndpoint()));
+        await eventBus.PublishAsync(new ConnectionRecoveredEvent(PersistentConnectionType.Producer, new AmqpTcpEndpoint()));
         connectedCalled.Should().BeTrue();
         connectedEventArgs.Hostname.Should().Be("localhost");
         connectedEventArgs.Port.Should().Be(5672);
     }
 
     [Fact]
-    public void AdvancedBusEventHandlers_Connected_handler_is_called_when_connection_created()
+    public async Task AdvancedBusEventHandlers_Connected_handler_is_called_when_connection_created()
     {
-        eventBus.Publish(new ConnectionCreatedEvent(PersistentConnectionType.Producer, new AmqpTcpEndpoint()));
+        await eventBus.PublishAsync(new ConnectionCreatedEvent(PersistentConnectionType.Producer, new AmqpTcpEndpoint()));
         connectedCalled.Should().BeTrue();
         connectedEventArgs.Hostname.Should().Be("localhost");
         connectedEventArgs.Port.Should().Be(5672);
     }
 
     [Fact]
-    public void AdvancedBusEventHandlers_Disconnected_handler_is_called()
+    public async Task AdvancedBusEventHandlers_Disconnected_handler_is_called()
     {
         var @event = new ConnectionDisconnectedEvent(
             PersistentConnectionType.Producer, new AmqpTcpEndpoint(), "a random reason"
         );
-        eventBus.Publish(@event);
+        await eventBus.PublishAsync(@event);
         disconnectedCalled.Should().BeTrue();
         disconnectedEventArgs.Should().NotBeNull();
         disconnectedEventArgs.Hostname.Should().Be("localhost");
@@ -118,16 +119,16 @@ public class AdvancedBusEventHandlersTests : IDisposable
     }
 
     [Fact]
-    public void AdvancedBusEventHandlers_MessageReturned_handler_is_called()
+    public async Task AdvancedBusEventHandlers_MessageReturned_handler_is_called()
     {
         var @event = new ReturnedMessageEvent(
-            Substitute.For<IModel>(),
+            Substitute.For<IChannel>(),
             Array.Empty<byte>(),
             MessageProperties.Empty,
             new MessageReturnedInfo("my.exchange", "routing.key", "reason")
         );
 
-        eventBus.Publish(@event);
+        await eventBus.PublishAsync(@event);
         messageReturnedCalled.Should().BeTrue();
         messageReturnedEventArgs.Should().NotBeNull();
         messageReturnedEventArgs.MessageBody.ToArray().Should().Equal(@event.Body.ToArray());
@@ -136,9 +137,9 @@ public class AdvancedBusEventHandlersTests : IDisposable
     }
 
     [Fact]
-    public void AdvancedBusEventHandlers_Unblocked_handler_is_called()
+    public async Task AdvancedBusEventHandlers_Unblocked_handler_is_called()
     {
-        eventBus.Publish(new ConnectionUnblockedEvent(PersistentConnectionType.Producer));
+        await eventBus.PublishAsync(new ConnectionUnblockedEvent(PersistentConnectionType.Producer));
         unBlockedCalled.Should().BeTrue();
     }
 }

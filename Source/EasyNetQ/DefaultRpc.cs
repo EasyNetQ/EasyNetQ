@@ -11,19 +11,20 @@ namespace EasyNetQ;
 /// <summary>
 ///     Default implementation of EasyNetQ's request-response pattern
 /// </summary>
-public class DefaultRpc : IRpc, IDisposable
+
+public sealed class DefaultRpc : IRpc, IAsyncDisposable
 {
-    protected const string IsFaultedKey = "IsFaulted";
-    protected const string ExceptionMessageKey = "ExceptionMessage";
-    protected readonly IAdvancedBus advancedBus;
+    const string IsFaultedKey = "IsFaulted";
+    const string ExceptionMessageKey = "ExceptionMessage";
+    readonly IAdvancedBus advancedBus;
     private readonly ILogger<DefaultRpc> logger;
     private readonly ConnectionConfiguration configuration;
-    protected readonly IConventions conventions;
+    readonly IConventions conventions;
     private readonly ICorrelationIdGenerationStrategy correlationIdGenerationStrategy;
     private readonly IDisposable eventSubscription;
-    protected readonly IExchangeDeclareStrategy exchangeDeclareStrategy;
+    readonly IExchangeDeclareStrategy exchangeDeclareStrategy;
 
-    protected readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
+    readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
 
     private readonly ConcurrentDictionary<string, ResponseAction> responseActions = new();
 
@@ -57,7 +58,7 @@ public class DefaultRpc : IRpc, IDisposable
     }
 
     /// <inheritdoc />
-    public virtual async Task<TResponse> RequestAsync<TRequest, TResponse>(
+    public async Task<TResponse> RequestAsync<TRequest, TResponse>(
         TRequest request,
         Action<IRequestConfiguration> configure,
         CancellationToken cancellationToken = default
@@ -99,7 +100,7 @@ public class DefaultRpc : IRpc, IDisposable
     }
 
     /// <inheritdoc />
-    public virtual Task<IDisposable> RespondAsync<TRequest, TResponse>(
+    public Task<IAsyncDisposable> RespondAsync<TRequest, TResponse>(
         Func<TRequest, CancellationToken, Task<TResponse>> responder,
         Action<IResponderConfiguration> configure,
         CancellationToken cancellationToken = default
@@ -115,17 +116,17 @@ public class DefaultRpc : IRpc, IDisposable
     }
 
     /// <inheritdoc />
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         eventSubscription.Dispose();
         foreach (var responseSubscription in responseSubscriptions.Values)
-            responseSubscription.Unsubscribe();
+            await responseSubscription.Unsubscribe();
     }
 
-    private void OnConnectionRecovered(in ConnectionRecoveredEvent @event)
+    private Task OnConnectionRecovered(ConnectionRecoveredEvent messageEvent)
     {
-        if (@event.Type != PersistentConnectionType.Consumer)
-            return;
+        if (messageEvent.Type != PersistentConnectionType.Consumer)
+            return Task.CompletedTask;
 
         var responseActionsValues = responseActions.Values;
         var responseSubscriptionsValues = responseSubscriptions.Values;
@@ -135,14 +136,15 @@ public class DefaultRpc : IRpc, IDisposable
 
         foreach (var responseAction in responseActionsValues) responseAction.OnFailure();
         foreach (var responseSubscription in responseSubscriptionsValues) responseSubscription.Unsubscribe();
+        return Task.CompletedTask;
     }
 
-    protected void DeRegisterResponseActions(string correlationId)
+    void DeRegisterResponseActions(string correlationId)
     {
-        responseActions.Remove(correlationId);
+        responseActions.TryRemove(correlationId, out _);
     }
 
-    protected void RegisterResponseActions<TResponse>(string correlationId, TaskCompletionSource<TResponse> tcs)
+    void RegisterResponseActions<TResponse>(string correlationId, TaskCompletionSource<TResponse> tcs)
     {
         var responseAction = new ResponseAction(
             message =>
@@ -175,7 +177,7 @@ public class DefaultRpc : IRpc, IDisposable
         responseActions.TryAdd(correlationId, responseAction);
     }
 
-    protected virtual async Task<string> SubscribeToResponseAsync<TRequest, TResponse>(
+    async Task<string> SubscribeToResponseAsync<TRequest, TResponse>(
         CancellationToken cancellationToken
     )
     {
@@ -209,7 +211,7 @@ public class DefaultRpc : IRpc, IDisposable
             await advancedBus.BindAsync(exchange, queue, queue.Name, cancellationToken).ConfigureAwait(false);
         }
 
-        var subscription = advancedBus.Consume<TResponse>(
+        var subscription = await advancedBus.ConsumeAsync<TResponse>(
             queue,
             (message, _) =>
             {
@@ -224,7 +226,7 @@ public class DefaultRpc : IRpc, IDisposable
         return queue.Name;
     }
 
-    protected virtual async Task RequestPublishAsync<TRequest>(
+    async Task RequestPublishAsync<TRequest>(
         TRequest request,
         string routingKey,
         string returnQueueName,
@@ -233,7 +235,7 @@ public class DefaultRpc : IRpc, IDisposable
         byte? priority,
         bool? mandatory,
         bool? publisherConfirms,
-        IDictionary<string, object?>? headers,
+        IDictionary<string, object> headers,
         CancellationToken cancellationToken
     )
     {
@@ -259,7 +261,7 @@ public class DefaultRpc : IRpc, IDisposable
             .ConfigureAwait(false);
     }
 
-    private async Task<IDisposable> RespondAsyncInternal<TRequest, TResponse>(
+    private async Task<IAsyncDisposable> RespondAsyncInternal<TRequest, TResponse>(
         Func<TRequest, CancellationToken, Task<TResponse>> responder,
         Action<IResponderConfiguration> configure,
         CancellationToken cancellationToken
@@ -287,7 +289,7 @@ public class DefaultRpc : IRpc, IDisposable
 
         await advancedBus.BindAsync(exchange, queue, routingKey, cancellationToken).ConfigureAwait(false);
 
-        return advancedBus.Consume<TRequest>(
+        return await advancedBus.ConsumeAsync<TRequest>(
             queue,
             (message, _, cancellation) => RespondToMessageAsync(responder, message, cancellation),
             c => c.WithPrefetchCount(responderConfiguration.PrefetchCount)
@@ -342,7 +344,7 @@ public class DefaultRpc : IRpc, IDisposable
                 {
                     CorrelationId = requestMessage.Properties.CorrelationId,
                     DeliveryMode = MessageDeliveryMode.NonPersistent,
-                    Headers = new Dictionary<string, object?>
+                    Headers = new Dictionary<string, object>
                     {
                         { IsFaultedKey, true },
                         { ExceptionMessageKey, Encoding.UTF8.GetBytes(exception.Message) }
@@ -362,9 +364,9 @@ public class DefaultRpc : IRpc, IDisposable
         }
     }
 
-    protected readonly record struct RpcKey(Type RequestType, Type ResponseType);
+    readonly record struct RpcKey(Type RequestType, Type ResponseType);
 
-    protected readonly struct ResponseAction
+    readonly struct ResponseAction
     {
         public ResponseAction(Action<object> onSuccess, Action onFailure)
         {
@@ -376,15 +378,15 @@ public class DefaultRpc : IRpc, IDisposable
         public Action OnFailure { get; }
     }
 
-    protected readonly struct ResponseSubscription
+    readonly struct ResponseSubscription
     {
-        public ResponseSubscription(string queueName, IDisposable subscription)
+        public ResponseSubscription(string queueName, IAsyncDisposable subscription)
         {
             QueueName = queueName;
-            Unsubscribe = subscription.Dispose;
+            Unsubscribe = subscription.DisposeAsync;
         }
 
         public string QueueName { get; }
-        public Action Unsubscribe { get; }
+        public Func<ValueTask> Unsubscribe { get; }
     }
 }

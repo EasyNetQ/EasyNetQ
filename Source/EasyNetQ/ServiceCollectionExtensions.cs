@@ -22,7 +22,6 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton(s =>
         {
             var configuration = connectionConfigurationFactory(s);
-
             configuration.SetDefaultProperties();
             return configuration;
         });
@@ -64,7 +63,7 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<IScheduler, DeadLetterExchangeAndMessageTtlScheduler>();
         services.TryAddSingleton<IBus, RabbitBus>();
         services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
-        services.TryAddSingleton<ILoggerFactory>(new NullLoggerFactory());
+        services.TryAddSingleton<ILoggerFactory>(_ => NullLoggerFactory.Instance);
         return services;
     }
 }

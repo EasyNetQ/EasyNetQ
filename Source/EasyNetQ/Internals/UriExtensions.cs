@@ -13,7 +13,7 @@ public static class UriExtensions
     /// There could be multiple values per key, but it doesn't matter for configuration purposes
     /// </summary>
     /// <returns>A collection of parsed keys and values, null if there are no entries.</returns>
-    public static Dictionary<string, string>? ParseQuery(this Uri uri)
+    public static Dictionary<string, string> ParseQuery(this Uri uri)
     {
         var queryString = uri.Query;
         if (string.IsNullOrEmpty(queryString) || queryString == "?")

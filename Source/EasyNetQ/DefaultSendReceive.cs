@@ -56,14 +56,14 @@ public class DefaultSendReceive : ISendReceive
     }
 
     /// <inheritdoc />
-    public Task<IDisposable> ReceiveAsync(
+    public Task<IAsyncDisposable> ReceiveAsync(
         string queue,
         Action<IReceiveRegistration> addHandlers,
         Action<IReceiveConfiguration> configure,
         CancellationToken cancellationToken
     ) => ReceiveInternalAsync(queue, addHandlers, configure, cancellationToken);
 
-    private async Task<IDisposable> ReceiveInternalAsync(
+    private async Task<IAsyncDisposable> ReceiveInternalAsync(
         string queueName,
         Action<IReceiveRegistration> addHandlers,
         Action<IReceiveConfiguration> configure,
@@ -83,7 +83,7 @@ public class DefaultSendReceive : ISendReceive
             cancellationToken: cts.Token
         ).ConfigureAwait(false);
 
-        return advancedBus.Consume(
+        return await advancedBus.ConsumeAsync(
             queue,
             c => addHandlers(new HandlerAdder(c)),
             c => c.WithPrefetchCount(receiveConfiguration.PrefetchCount)

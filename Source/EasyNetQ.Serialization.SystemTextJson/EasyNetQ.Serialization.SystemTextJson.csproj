@@ -1,14 +1,19 @@
-<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-      <Description>An adaptor to allow EasyNetQ to use System.Text.Json serializer</Description>
-      <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
-      <Nullable>enable</Nullable>
-      <ImplicitUsings>enable</ImplicitUsings>
-    </PropertyGroup>
-    <ItemGroup>
-      <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
-    </ItemGroup>
-    <ItemGroup Condition="'$(TargetFramework)'== 'netstandard2.0'">
-      <PackageReference Include="System.Text.Json" />
-    </ItemGroup>
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>An adaptor to allow EasyNetQ to use System.Text.Json serializer</Description>
+    <TargetFrameworks>netstandard2.0;net8.0;net9.0;net10.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)'== 'netstandard2.0'">
+    <PackageReference Include="System.Text.Json" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MinVer">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
 </Project>

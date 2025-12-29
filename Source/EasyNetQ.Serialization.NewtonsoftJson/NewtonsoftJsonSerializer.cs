@@ -66,7 +66,7 @@ public sealed class NewtonsoftJsonSerializer : ISerializer
 
         public T[] Rent(int minimumLength) => ArrayPool<T>.Shared.Rent(minimumLength);
 
-        public void Return(T[]? array)
+        public void Return(T[] array)
         {
             if (array == null) return;
 

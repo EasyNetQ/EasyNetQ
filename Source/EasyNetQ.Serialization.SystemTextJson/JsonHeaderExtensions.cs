@@ -7,19 +7,22 @@ namespace EasyNetQ.Serialization.SystemTextJson;
 
 internal static class JsonHeaderExtensions
 {
-    public static Dictionary<string, object?> ConvertJsonToHeaders(this JsonElement jsonElement, JsonSerializerOptions options)
+    public static Dictionary<string, object> ConvertJsonToHeaders(this JsonElement jsonElement, JsonSerializerOptions options)
     {
-        var headers = new Dictionary<string, object?>();
-        foreach (var property in jsonElement.EnumerateObject())
+        var headers = new Dictionary<string, object>();
+        using (var enumerator = jsonElement.EnumerateObject())
         {
-            var type = property.Value.GetProperty(options.ConvertName("Type")).GetInt32();
-            var value = property.Value.GetProperty(options.ConvertName("Value"));
-            headers.Add(property.Name, (type, value).ConvertJsonToObject(options));
+            foreach (var property in enumerator)
+            {
+                var type = property.Value.GetProperty(options.ConvertName("Type")).GetInt32();
+                var value = property.Value.GetProperty(options.ConvertName("Value"));
+                headers.Add(property.Name, (type, value).ConvertJsonToObject(options));
+            }
         }
         return headers;
     }
 
-    public static void AddHeaderToJson(this JsonObject json, string name, object? value, JsonSerializerOptions options)
+    public static void AddHeaderToJson(this JsonObject json, string name, object value, JsonSerializerOptions options)
     {
         var (valueType, valueJson) = value.ConvertToTypeAndJson(options);
         var valueContainer = new JsonObject
@@ -30,7 +33,7 @@ internal static class JsonHeaderExtensions
         json.Add(name, valueContainer);
     }
 
-    private static (int, JsonNode?) ConvertToTypeAndJson(this object? value, JsonSerializerOptions options)
+    private static (int, JsonNode) ConvertToTypeAndJson(this object value, JsonSerializerOptions options)
     {
         switch (value)
         {
@@ -96,7 +99,7 @@ internal static class JsonHeaderExtensions
         throw new InternalBufferOverflowException();
     }
 
-    private static object? ConvertJsonToObject(this (int Type, JsonElement Value) valueContainer, JsonSerializerOptions options)
+    private static object ConvertJsonToObject(this (int Type, JsonElement Value) valueContainer, JsonSerializerOptions options)
     {
         var (type, json) = valueContainer;
         switch (type)
@@ -130,22 +133,27 @@ internal static class JsonHeaderExtensions
             case JsonHeaderType.AmqpTimestamp:
                 return new AmqpTimestamp(json.GetInt64());
             case JsonHeaderType.List:
-                var list = new List<object?>();
-                foreach (var arrayItem in json.EnumerateArray())
+                var list = new List<object>();
+                using (var enumerator = json.EnumerateArray())
                 {
-                    var arrayItemType = arrayItem.GetProperty(options.ConvertName("Type")).GetInt32();
-                    var arrayItemValue = arrayItem.GetProperty(options.ConvertName("Value"));
-                    list.Add((arrayItemType, arrayItemValue).ConvertJsonToObject(options));
+                    foreach (var arrayItem in enumerator)
+                    {
+                        var arrayItemType = arrayItem.GetProperty(options.ConvertName("Type")).GetInt32();
+                        var arrayItemValue = arrayItem.GetProperty(options.ConvertName("Value"));
+                        list.Add((arrayItemType, arrayItemValue).ConvertJsonToObject(options));
+                    }
                 }
-
                 return list;
             case JsonHeaderType.Dictionary:
-                var dictionary = new Dictionary<string, object?>();
-                foreach (var objectItem in json.EnumerateObject())
+                var dictionary = new Dictionary<string, object>();
+                using (var enumerator = json.EnumerateObject())
                 {
-                    var objectItemType = objectItem.Value.GetProperty(options.ConvertName("Type")).GetInt32();
-                    var objectItemValue = objectItem.Value.GetProperty(options.ConvertName("Value"));
-                    dictionary.Add(objectItem.Name, (objectItemType, objectItemValue).ConvertJsonToObject(options));
+                    foreach (var objectItem in enumerator)
+                    {
+                        var objectItemType = objectItem.Value.GetProperty(options.ConvertName("Type")).GetInt32();
+                        var objectItemValue = objectItem.Value.GetProperty(options.ConvertName("Value"));
+                        dictionary.Add(objectItem.Name, (objectItemType, objectItemValue).ConvertJsonToObject(options));
+                    }
                 }
                 return dictionary;
             case JsonHeaderType.BinaryTable:

@@ -4,23 +4,28 @@ using EasyNetQ.Topology;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 
-public class When_a_consumer_is_cancelled_by_the_user : IDisposable
+public class When_a_consumer_is_cancelled_by_the_user : IAsyncLifetime
 {
     private readonly MockBuilder mockBuilder;
 
+#pragma warning disable IDISP017
     public When_a_consumer_is_cancelled_by_the_user()
     {
         mockBuilder = new MockBuilder();
-
+    }
+#pragma warning restore IDISP004
+    public async Task InitializeAsync()
+    {
         var queue = new Queue("my_queue", false);
 
-        var cancelSubscription = mockBuilder.Bus.Advanced
-            .Consume(queue, (_, _, _) => Task.Run(() => { }));
+        var cancelSubscription = await mockBuilder.Bus.Advanced
+            .ConsumeAsync(queue, async (_, _, _) => await Task.Run(() => { }));
 
-        var are = new AutoResetEvent(false);
-        mockBuilder.EventBus.Subscribe((in ConsumerModelDisposedEvent _) => are.Set());
+        using var are = new AutoResetEvent(false);
 
-        cancelSubscription.Dispose();
+        using var _ = mockBuilder.EventBus.Subscribe((ConsumerChannelDisposedEvent _) => Task.FromResult(are.Set()));
+
+        await cancelSubscription.DisposeAsync();
 
         if (!are.WaitOne(5000))
         {
@@ -28,14 +33,14 @@ public class When_a_consumer_is_cancelled_by_the_user : IDisposable
         }
     }
 
-    public void Dispose()
+    public async Task DisposeAsync()
     {
-        mockBuilder.Dispose();
+        await mockBuilder.DisposeAsync();
     }
 
     [Fact]
     public void Should_dispose_the_model()
     {
-        mockBuilder.Consumers[0].Model.Received().Dispose();
+        mockBuilder.Consumers[0].Channel.Received().DisposeAsync();
     }
 }

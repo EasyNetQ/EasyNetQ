@@ -3,70 +3,37 @@ using RabbitMQ.Client.Events;
 
 namespace EasyNetQ.Consumer;
 
-internal sealed class NoopDefaultConsumer : IBasicConsumer, IAsyncBasicConsumer
+internal sealed class NoopDefaultConsumer : IAsyncBasicConsumer
 {
     internal static readonly NoopDefaultConsumer Instance = new();
 
     private NoopDefaultConsumer() { }
 
-    public IModel Model => throw new NotSupportedException();
+    public IChannel Channel => throw new NotSupportedException();
 
-    event AsyncEventHandler<ConsumerEventArgs> IAsyncBasicConsumer.ConsumerCancelled
+    public event AsyncEventHandler<ConsumerEventArgs> ConsumerCancelled
     {
         add { }
         remove { }
     }
 
-    event EventHandler<ConsumerEventArgs> IBasicConsumer.ConsumerCancelled
-    {
-        add { }
-        remove { }
-    }
+    public Task HandleBasicCancelAsync(string consumerTag, CancellationToken cancellationToken = default) => Task.CompletedTask;
 
-    void IBasicConsumer.HandleBasicCancel(string consumerTag)
-    {
-    }
+    public Task HandleBasicCancelOkAsync(string consumerTag, CancellationToken cancellationToken = default) => Task.CompletedTask;
 
-    void IBasicConsumer.HandleBasicCancelOk(string consumerTag)
-    {
-    }
+    public Task HandleBasicConsumeOkAsync(string consumerTag, CancellationToken cancellationToken = default) => Task.CompletedTask;
 
-    void IBasicConsumer.HandleBasicConsumeOk(string consumerTag)
-    {
-    }
-
-    void IBasicConsumer.HandleBasicDeliver(
+    public Task HandleBasicDeliverAsync(
         string consumerTag,
         ulong deliveryTag,
         bool redelivered,
         string exchange,
         string routingKey,
-        IBasicProperties properties,
-        ReadOnlyMemory<byte> body
-    )
-    {
-    }
-
-
-    void IBasicConsumer.HandleModelShutdown(object model, ShutdownEventArgs reason)
-    {
-    }
-
-    Task IAsyncBasicConsumer.HandleBasicCancel(string consumerTag) => Task.CompletedTask;
-
-    Task IAsyncBasicConsumer.HandleBasicCancelOk(string consumerTag) => Task.CompletedTask;
-
-    Task IAsyncBasicConsumer.HandleBasicConsumeOk(string consumerTag) => Task.CompletedTask;
-
-    Task IAsyncBasicConsumer.HandleBasicDeliver(
-        string consumerTag,
-        ulong deliveryTag,
-        bool redelivered,
-        string exchange,
-        string routingKey,
-        IBasicProperties properties,
-        ReadOnlyMemory<byte> body
+        IReadOnlyBasicProperties properties,
+        ReadOnlyMemory<byte> body,
+        CancellationToken cancellationToken = default
     ) => Task.CompletedTask;
 
-    Task IAsyncBasicConsumer.HandleModelShutdown(object model, ShutdownEventArgs reason) => Task.CompletedTask;
+
+    public Task HandleChannelShutdownAsync(object channel, ShutdownEventArgs reason) => Task.CompletedTask;
 }

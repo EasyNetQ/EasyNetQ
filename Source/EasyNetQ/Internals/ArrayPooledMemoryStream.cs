@@ -14,6 +14,7 @@ public sealed class ArrayPooledMemoryStream : Stream, IMemoryOwner<byte>
     private byte[] rentBuffer;
     private int length;
     private int position;
+    private bool disposed;
 
     /// <inheritdoc />
     public ArrayPooledMemoryStream()
@@ -21,6 +22,7 @@ public sealed class ArrayPooledMemoryStream : Stream, IMemoryOwner<byte>
         rentBuffer = [];
         length = 0;
         position = 0;
+        disposed = false;
     }
 
     /// <inheritdoc />
@@ -124,15 +126,22 @@ public sealed class ArrayPooledMemoryStream : Stream, IMemoryOwner<byte>
     /// <inheritdoc />
     protected override void Dispose(bool disposing)
     {
-        base.Dispose(disposing);
-        if (rentBuffer != Array.Empty<byte>())
+        if (disposed) return;
+
+        if (disposing)
         {
-            ArrayPool<byte>.Shared.Return(rentBuffer);
-            rentBuffer = [];
+            if (rentBuffer != Array.Empty<byte>())
+            {
+                ArrayPool<byte>.Shared.Return(rentBuffer);
+                rentBuffer = [];
+            }
+
+            length = 0;
+            position = 0;
         }
 
-        length = 0;
-        position = 0;
+        disposed = true;
+        base.Dispose(disposing);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -16,18 +16,19 @@ public class RabbitAdvancedBusTests
     [InlineData(true, true, true)]
     public async Task Should_use_mandatory_per_request_if_not_null_else_from_settings(bool mandatoryFromSettings, bool? mandatoryPerRequest, bool expected)
     {
-        var mockBuilder = new MockBuilder(
+        await using var mockBuilder = new MockBuilder(
             x => x.AddSingleton(new ConnectionConfiguration { MandatoryPublish = mandatoryFromSettings })
         );
 
         await mockBuilder.Bus.Advanced.PublishAsync("", "", mandatoryPerRequest, null, new Message<object>(null));
 
-        mockBuilder.Channels[0].Received().BasicPublish(
+        await mockBuilder.Channels[0].Received().BasicPublishAsync(
             Arg.Any<string>(),
             Arg.Any<string>(),
             Arg.Is(expected),
-            Arg.Any<IBasicProperties>(),
-            Arg.Any<ReadOnlyMemory<byte>>()
+            Arg.Any<RabbitMQ.Client.BasicProperties>(),
+            Arg.Any<ReadOnlyMemory<byte>>(),
+            Arg.Any<CancellationToken>()
         );
     }
 
@@ -41,7 +42,7 @@ public class RabbitAdvancedBusTests
     public async Task Should_use_confirms_per_request_if_not_null_else_from_settings(bool confirmsFromSettings, bool? confirmsPerRequest, int expected)
     {
         var xxx = Substitute.For<IPublishConfirmationListener>();
-        var mockBuilder = new MockBuilder(
+        await using var mockBuilder = new MockBuilder(
             x =>
             {
                 x.AddSingleton(new ConnectionConfiguration { PublisherConfirms = confirmsFromSettings });
@@ -50,13 +51,14 @@ public class RabbitAdvancedBusTests
 
         await mockBuilder.Bus.Advanced.PublishAsync("", "", null, confirmsPerRequest, new Message<object>(null));
 
-        xxx.Received(expected).CreatePendingConfirmation(Arg.Any<IModel>());
-        mockBuilder.Channels[0].Received().BasicPublish(
+        await xxx.Received(expected).CreatePendingConfirmationAsync(Arg.Any<IChannel>(), Arg.Any<CancellationToken>());
+        await mockBuilder.Channels[0].Received().BasicPublishAsync(
             Arg.Any<string>(),
             Arg.Any<string>(),
             Arg.Any<bool>(),
-            Arg.Any<IBasicProperties>(),
-            Arg.Any<ReadOnlyMemory<byte>>()
+            Arg.Any<RabbitMQ.Client.BasicProperties>(),
+            Arg.Any<ReadOnlyMemory<byte>>(),
+            Arg.Any<CancellationToken>()
         );
     }
 }

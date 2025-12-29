@@ -4,10 +4,12 @@ namespace EasyNetQ.Tests.ConsumeTests;
 
 public class When_a_message_is_delivered_to_the_consumer : ConsumerTestBase
 {
-    protected override void AdditionalSetUp()
+    protected override async Task InitializeAsyncCore()
     {
-        StartConsumer((_, _, _, _) => AckStrategies.Ack);
-        DeliverMessage();
+#pragma warning disable IDISP004
+        await StartConsumerAsync((_, _, _, _) => AckStrategies.AckAsync);
+#pragma warning restore IDISP004
+        await DeliverMessageAsync();
     }
 
     [Fact]
@@ -59,8 +61,8 @@ public class When_a_message_is_delivered_to_the_consumer : ConsumerTestBase
     }
 
     [Fact]
-    public void Should_ack_the_message()
+    public async Task Should_ack_the_message()
     {
-        MockBuilder.Channels[0].Received().BasicAck(DeliverTag, false);
+        await MockBuilder.Channels[0].Received().BasicAckAsync(DeliverTag, false);
     }
 }

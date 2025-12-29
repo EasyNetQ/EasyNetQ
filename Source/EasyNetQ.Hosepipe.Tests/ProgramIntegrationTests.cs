@@ -8,7 +8,7 @@ public class ProgramIntegrationTests
     private const string outputPath = @"C:\Temp\MessageOutput";
     private const string queue = "EasyNetQ_Hosepipe_Tests_ProgramIntegrationTests+TestMessage:EasyNetQ_Hosepipe_Tests_hosepipe";
 
-    public void DumpMessages()
+    public async Task DumpMessagesAsync()
     {
         ClearDirectory();
 
@@ -20,12 +20,12 @@ public class ProgramIntegrationTests
             string.Format("o:{0}", outputPath)
         };
 
-        Program.Main(args);
+        await Program.Main(args);
 
         ListDirectory();
     }
 
-    public void InsertMessages()
+    public async Task InsertMessagesAsync()
     {
         var args = new[]
         {
@@ -34,7 +34,7 @@ public class ProgramIntegrationTests
             string.Format("o:{0}", outputPath)
         };
 
-        Program.Main(args);
+        await Program.Main(args);
     }
 
     public void ListDirectory()
@@ -55,31 +55,27 @@ public class ProgramIntegrationTests
         }
     }
 
-    public void PublishSomeMessages()
+    public async Task PublishSomeMessagesAsync()
     {
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddEasyNetQ("host=localhost");
-
         using var provider = serviceCollection.BuildServiceProvider();
-
         var bus = provider.GetRequiredService<IBus>();
-
         for (var i = 0; i < 10; i++)
         {
-            bus.PubSub.Publish(new TestMessage { Text = string.Format("\n>>>>>> Message {0}\n", i) });
+            await bus.PubSub.PublishAsync(new TestMessage { Text = string.Format("\n>>>>>> Message {0}\n", i) });
         }
     }
 
-    public void ConsumeMessages()
+    public async Task ConsumeMessagesAsync()
     {
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddEasyNetQ("host=localhost");
 
-        using var provider = serviceCollection.BuildServiceProvider();
+        await using var provider = serviceCollection.BuildServiceProvider();
         var bus = provider.GetRequiredService<IBus>();
-        bus.PubSub.Subscribe<TestMessage>("hosepipe", message => Console.WriteLine(message.Text));
-
-        Thread.Sleep(1000);
+        await using var subscription = await bus.PubSub.SubscribeAsync<TestMessage>("hosepipe", message => Console.WriteLine(message.Text));
+        await Task.Delay(1000);
     }
 
     private sealed class TestMessage
