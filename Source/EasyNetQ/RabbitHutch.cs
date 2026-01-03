@@ -9,7 +9,7 @@ namespace EasyNetQ;
 public static class RabbitHutch
 {
     /// <summary>
-    /// Registers a new instance of <see cref="RabbitBus"/> (the same as AddEasyNetQ for backward compatibility)/>.
+    /// Registers a new instance of <see cref="RabbitBus"/>.
     /// </summary>
     /// <param name="services">
     /// the service collection to register the bus in.
@@ -36,6 +36,9 @@ public static class RabbitHutch
     /// <summary>
     /// Registers a new instance of <see cref="RabbitBus"/> using all default dependencies.
     /// </summary>
+    /// <param name="services">
+    /// the service collection to register the bus in.
+    /// </param>
     public static IEasyNetQBuilder AddEasyNetQ(this IServiceCollection services)
     {
         services.RegisterDefaultServices(_ => new ConnectionConfiguration());
@@ -48,6 +51,7 @@ public static class RabbitHutch
     /// <param name="configurator">
     /// </param>
     /// <param name="services">
+    /// the service collection to register the bus in.
     /// </param>
     public static IEasyNetQBuilder AddEasyNetQ(this IServiceCollection services, Action<ConnectionConfiguration> configurator)
     {
@@ -65,8 +69,10 @@ public static class RabbitHutch
     /// Registers a new instance of <see cref="RabbitBus"/> using the specified connection configuration in the service collection.
     /// </summary>
     /// <param name="connectionConfigurationFactory">
+    /// Factory function that receives an IServiceProvider and returns a ConnectionConfiguration
     /// </param>
     /// <param name="services">
+    /// the service collection to register the bus in.
     /// </param>
     public static IEasyNetQBuilder AddEasyNetQ(this IServiceCollection services, Func<IServiceProvider, ConnectionConfiguration> connectionConfigurationFactory)
     {
