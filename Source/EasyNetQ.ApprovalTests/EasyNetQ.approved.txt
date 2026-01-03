@@ -857,8 +857,8 @@ namespace EasyNetQ
     {
         public static EasyNetQ.IEasyNetQBuilder AddEasyNetQ(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
         public static EasyNetQ.IEasyNetQBuilder AddEasyNetQ(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Action<EasyNetQ.ConnectionConfiguration> configurator) { }
+        public static EasyNetQ.IEasyNetQBuilder AddEasyNetQ(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Func<System.IServiceProvider, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory) { }
         public static EasyNetQ.IEasyNetQBuilder AddEasyNetQ(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, string connectionString) { }
-        public static EasyNetQ.IEasyNetQBuilder RegisterEasyNetQ(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, string connectionString) { }
     }
     public static class ReceiveRegistrationExtensions
     {
@@ -901,10 +901,6 @@ namespace EasyNetQ
         public System.ReadOnlyMemory<byte> Body { get; }
         public EasyNetQ.MessageProperties Properties { get; }
         public void Dispose() { }
-    }
-    public static class ServiceCollectionExtensions
-    {
-        public static Microsoft.Extensions.DependencyInjection.IServiceCollection RegisterDefaultServices(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Func<System.IServiceProvider, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory) { }
     }
     public static class SimpleConsumeConfigurationExtensions
     {
