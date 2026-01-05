@@ -12,9 +12,9 @@ using RabbitMQ.Client;
 
 namespace EasyNetQ;
 
-internal static class ServiceCollectionExtensions
+public static class ServiceCollectionExtensions
 {
-    internal static IServiceCollection RegisterDefaultServices(
+    public static IServiceCollection RegisterDefaultServices(
         this IServiceCollection services,
         Func<IServiceProvider, ConnectionConfiguration> connectionConfigurationFactory
     )
