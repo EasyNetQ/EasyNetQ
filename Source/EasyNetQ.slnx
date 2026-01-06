@@ -19,7 +19,6 @@
   </Folder>
   <Folder Name="/Serialization/">
     <Project Path="EasyNetQ.Serialization.NewtonsoftJson/EasyNetQ.Serialization.NewtonsoftJson.csproj" />
-    <Project Path="EasyNetQ.Serialization.SystemTextJson/EasyNetQ.Serialization.SystemTextJson.csproj" />
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="EasyNetQ.ApprovalTests/EasyNetQ.ApprovalTests.csproj" />

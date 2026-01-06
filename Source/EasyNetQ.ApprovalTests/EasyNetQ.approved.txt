@@ -255,6 +255,13 @@ namespace EasyNetQ
         public static EasyNetQ.Consumer.ConsumePipelineBuilder UseScope(this EasyNetQ.Consumer.ConsumePipelineBuilder pipelineBuilder) { }
         public static EasyNetQ.IEasyNetQBuilder UseVersionedMessage(this EasyNetQ.IEasyNetQBuilder builder) { }
     }
+    public static class EasyNetQBuilderSystemTextJsonExtensions
+    {
+        public static EasyNetQ.IEasyNetQBuilder UseSystemTextJson(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder UseSystemTextJson(this EasyNetQ.IEasyNetQBuilder builder, System.Text.Json.JsonSerializerOptions options) { }
+        public static EasyNetQ.IEasyNetQBuilder UseSystemTextJsonV2(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder UseSystemTextJsonV2(this EasyNetQ.IEasyNetQBuilder builder, System.Text.Json.JsonSerializerOptions options) { }
+    }
     public class EasyNetQException : System.Exception
     {
         public EasyNetQException() { }
@@ -1674,6 +1681,35 @@ namespace EasyNetQ.Producer
         public PublishReturnedException() { }
         public PublishReturnedException(string message) { }
         public PublishReturnedException(string message, System.Exception inner) { }
+    }
+}
+namespace EasyNetQ.Serialization.SystemTextJson
+{
+    public class MessagePropertiesConverter : System.Text.Json.Serialization.JsonConverter<EasyNetQ.MessageProperties>
+    {
+        public MessagePropertiesConverter() { }
+        public override EasyNetQ.MessageProperties Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options) { }
+        public override void Write(System.Text.Json.Utf8JsonWriter writer, EasyNetQ.MessageProperties value, System.Text.Json.JsonSerializerOptions options) { }
+    }
+    public class SystemObjectNewtonsoftCompatibleConverter : System.Text.Json.Serialization.JsonConverter<object>
+    {
+        public SystemObjectNewtonsoftCompatibleConverter() { }
+        public override object Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options) { }
+        public override void Write(System.Text.Json.Utf8JsonWriter writer, object value, System.Text.Json.JsonSerializerOptions options) { }
+    }
+    public sealed class SystemTextJsonSerializer : EasyNetQ.ISerializer
+    {
+        public SystemTextJsonSerializer() { }
+        public SystemTextJsonSerializer(System.Text.Json.JsonSerializerOptions options) { }
+        public object BytesToMessage(System.Type messageType, in System.ReadOnlyMemory<byte> bytes) { }
+        public System.Buffers.IMemoryOwner<byte> MessageToBytes(System.Type messageType, object message) { }
+    }
+    public sealed class SystemTextJsonSerializerV2 : EasyNetQ.ISerializer
+    {
+        public SystemTextJsonSerializerV2() { }
+        public SystemTextJsonSerializerV2(System.Text.Json.JsonSerializerOptions options) { }
+        public object BytesToMessage(System.Type messageType, in System.ReadOnlyMemory<byte> bytes) { }
+        public System.Buffers.IMemoryOwner<byte> MessageToBytes(System.Type messageType, object message) { }
     }
 }
 namespace EasyNetQ.SystemMessages
