@@ -14,7 +14,7 @@ public interface IInternalConsumerFactory
 /// <inheritdoc />
 public class InternalConsumerFactory : IInternalConsumerFactory
 {
-    private readonly IServiceProvider serviceResolver;
+    private readonly IServiceProvider services;
     private readonly ILogger<InternalConsumer> logger;
     private readonly IConsumerConnection connection;
     private readonly IEventBus eventBus;
@@ -23,13 +23,13 @@ public class InternalConsumerFactory : IInternalConsumerFactory
     ///     Creates InternalConsumerFactory
     /// </summary>
     public InternalConsumerFactory(
-        IServiceProvider serviceResolver,
+        IServiceProvider services,
         ILogger<InternalConsumer> logger,
         IConsumerConnection connection,
         IEventBus eventBus
     )
     {
-        this.serviceResolver = serviceResolver;
+        this.services = services;
         this.logger = logger;
         this.connection = connection;
         this.eventBus = eventBus;
@@ -37,5 +37,5 @@ public class InternalConsumerFactory : IInternalConsumerFactory
 
     /// <inheritdoc />
     public IInternalConsumer CreateConsumer(ConsumerConfiguration configuration)
-        => new InternalConsumer(serviceResolver, logger, configuration, connection, eventBus);
+        => new InternalConsumer(services, logger, configuration, connection, eventBus);
 }

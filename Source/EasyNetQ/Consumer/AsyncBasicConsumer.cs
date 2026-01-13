@@ -12,7 +12,7 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
     private readonly CancellationTokenSource cts = new();
     private readonly IEventBus eventBus;
     private readonly ConsumeDelegate consumeDelegate;
-    private readonly IServiceProvider serviceResolver;
+    private readonly IServiceProvider services;
     private readonly ILogger<InternalConsumer> logger;
     private readonly Queue queue;
     private readonly bool autoAck;
@@ -20,7 +20,7 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
     private volatile bool disposed;
 
     public AsyncBasicConsumer(
-        IServiceProvider serviceResolver,
+        IServiceProvider services,
         ILogger<InternalConsumer> logger,
         IChannel channel,
         Queue queue,
@@ -29,7 +29,7 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
         ConsumeDelegate consumeDelegate
     ) : base(channel)
     {
-        this.serviceResolver = serviceResolver;
+        this.services = services;
         this.logger = logger;
         this.queue = queue;
         this.autoAck = autoAck;
@@ -87,7 +87,7 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
         var messageProperties = new MessageProperties(properties);
         await eventBus.PublishAsync(new DeliveredMessageEvent(messageReceivedInfo, messageProperties, messageBody));
 
-        var ackStrategy = await consumeDelegate(new ConsumeContext(messageReceivedInfo, messageProperties, messageBody, serviceResolver, cts.Token)).ConfigureAwait(false);
+        var ackStrategy = await consumeDelegate(new ConsumeContext(messageReceivedInfo, messageProperties, messageBody, services, cts.Token)).ConfigureAwait(false);
         if (!autoAck)
         {
             var ackResult = await AckAsync(ackStrategy, messageReceivedInfo, cancellationToken);

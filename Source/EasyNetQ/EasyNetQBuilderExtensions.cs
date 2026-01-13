@@ -88,7 +88,7 @@ public static class EasyNetQBuilderExtensions
     {
         return pipelineBuilder.Use(next => ctx =>
         {
-            var interceptors = ctx.ServiceResolver.GetRequiredService<IEnumerable<IProduceConsumeInterceptor>>()
+            var interceptors = ctx.Services.GetRequiredService<IEnumerable<IProduceConsumeInterceptor>>()
                 .ToArray();
             var producedMessage = interceptors.OnProduce(new ProducedMessage(ctx.Properties, ctx.Body));
             return next(ctx with { Properties = producedMessage.Properties, Body = producedMessage.Body });
@@ -99,7 +99,7 @@ public static class EasyNetQBuilderExtensions
     {
         return pipelineBuilder.Use(next => ctx =>
         {
-            var interceptors = ctx.ServiceResolver.GetRequiredService<IEnumerable<IProduceConsumeInterceptor>>()
+            var interceptors = ctx.Services.GetRequiredService<IEnumerable<IProduceConsumeInterceptor>>()
                 .ToArray();
             var consumedMessage =
                 interceptors.OnConsume(new ConsumedMessage(ctx.ReceivedInfo, ctx.Properties, ctx.Body));
@@ -116,8 +116,8 @@ public static class EasyNetQBuilderExtensions
     {
         return pipelineBuilder.Use(next => async ctx =>
         {
-            using var scopedResolver = ctx.ServiceResolver.CreateScope();
-            return await next(ctx with { ServiceResolver = scopedResolver.ServiceProvider }).ConfigureAwait(false);
+            using var scopedResolver = ctx.Services.CreateScope();
+            return await next(ctx with { Services = scopedResolver.ServiceProvider }).ConfigureAwait(false);
         });
     }
 
@@ -125,8 +125,8 @@ public static class EasyNetQBuilderExtensions
     {
         return pipelineBuilder.Use(next => async ctx =>
         {
-            var errorStrategy = ctx.ServiceResolver.GetRequiredService<IConsumeErrorStrategy>();
-            var logger = ctx.ServiceResolver.GetRequiredService<ILogger<IConsumeErrorStrategy>>();
+            var errorStrategy = ctx.Services.GetRequiredService<IConsumeErrorStrategy>();
+            var logger = ctx.Services.GetRequiredService<ILogger<IConsumeErrorStrategy>>();
 
             try
             {
