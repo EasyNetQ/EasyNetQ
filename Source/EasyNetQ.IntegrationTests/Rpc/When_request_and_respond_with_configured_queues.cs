@@ -17,7 +17,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
             var serviceCollection = new ServiceCollection();
             serviceCollection.AddEasyNetQ($"host={fixture.Host};prefetchCount=1;timeout=-1");
 
-            var serviceProvider = serviceCollection.BuildServiceProvider();
+            serviceProvider = serviceCollection.BuildServiceProvider();
             bus = serviceProvider.GetRequiredService<IBus>();
             this.fixture = fixture;
         }
@@ -32,17 +32,13 @@ namespace EasyNetQ.IntegrationTests.Rpc
         }
 
         [Fact]
-        public async Task Should_create_classic_queues_by_defualt()
+        public async Task Should_create_classic_queues_by_default()
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
             await using (await bus.Rpc.RespondAsync<RabbitRequest, RabbitResponse>((x, ct) =>
             {
-                return x switch
-                {
-                    RabbitRequest b => Task.FromResult(new RabbitResponse(b.Id)),
-                    _ => throw new ArgumentOutOfRangeException(nameof(x), x, null)
-                };
+                return Task.FromResult(new RabbitResponse(x.Id));
             },
             c => { },
             cts.Token))
@@ -69,11 +65,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
 
             await using (await bus.Rpc.RespondAsync<BunnyRequest, BunnyResponse>((x, ct) =>
             {
-                return x switch
-                {
-                    BunnyRequest b => Task.FromResult(new BunnyResponse(b.Id)),
-                    _ => throw new ArgumentOutOfRangeException(nameof(x), x, null)
-                };
+                return Task.FromResult(new BunnyResponse(x.Id));
             },
             c => c.WithQueueType("quorum"),
             cts.Token))
@@ -94,17 +86,13 @@ namespace EasyNetQ.IntegrationTests.Rpc
         }
 
         [Fact]
-        public async Task Should_use_attribure_queues_by_defualt()
+        public async Task Should_use_attribute_queues_by_defualt()
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
             await using (await bus.Rpc.RespondAsync<RabbitQuorumRequest, RabbitQuorumResponse>((x, ct) =>
             {
-                return x switch
-                {
-                    RabbitQuorumRequest b => Task.FromResult(new RabbitQuorumResponse(b.Id)),
-                    _ => throw new ArgumentOutOfRangeException(nameof(x), x, null)
-                };
+                return Task.FromResult(new RabbitQuorumResponse(x.Id));
             },
             c => { },
             cts.Token))
