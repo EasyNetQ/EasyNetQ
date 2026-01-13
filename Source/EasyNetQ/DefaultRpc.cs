@@ -67,7 +67,8 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
         var requestType = typeof(TRequest);
         var requestConfiguration = new RequestConfiguration(
             conventions.RpcRoutingKeyNamingConvention(requestType),
-            configuration.Timeout
+            configuration.Timeout,
+            conventions.QueueTypeConvention(requestType)
         );
         configure(requestConfiguration);
 
@@ -75,10 +76,10 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
 
         var correlationId = correlationIdGenerationStrategy.GetCorrelationId();
         var tcs = new TaskCompletionSource<TResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
-        RegisterResponseActions(correlationId, tcs);
+        RegisterResponseActions(correlationId, tcs, requestConfiguration.QueueType == QueueType.Quorum);
         using var callback = DisposableAction.Create(DeRegisterResponseActions, correlationId);
 
-        var queueName = await SubscribeToResponseAsync<TRequest, TResponse>(cts.Token).ConfigureAwait(false);
+        var queueName = await SubscribeToResponseAsync<TRequest, TResponse>(requestConfiguration.QueueType, cts.Token).ConfigureAwait(false);
         var routingKey = requestConfiguration.QueueName;
         var expiration = requestConfiguration.Expiration;
         var priority = requestConfiguration.Priority;
@@ -128,14 +129,26 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
         if (messageEvent.Type != PersistentConnectionType.Consumer)
             return Task.CompletedTask;
 
-        var responseActionsValues = responseActions.Values;
-        var responseSubscriptionsValues = responseSubscriptions.Values;
+        List<KeyValuePair<RpcKey, ResponseSubscription>> subEntries = responseSubscriptions.ToList();
+        List<KeyValuePair<string, ResponseAction>> actionEntries = responseActions.ToList();
 
-        responseActions.Clear();
-        responseSubscriptions.Clear();
+        foreach (KeyValuePair<RpcKey, ResponseSubscription> subEntry in subEntries)
+        {
+            if (!subEntry.Value.QueueIsDurable)
+            {
+                responseSubscriptions.TryRemove(subEntry.Key, out _);
+                subEntry.Value.Unsubscribe();
+            }
+        }
 
-        foreach (var responseAction in responseActionsValues) responseAction.OnFailure();
-        foreach (var responseSubscription in responseSubscriptionsValues) responseSubscription.Unsubscribe();
+        foreach (KeyValuePair<string, ResponseAction> actionEntry in actionEntries)
+        {
+            if (!actionEntry.Value.QueueIsDurable)
+            {
+                DeRegisterResponseActions(actionEntry.Key);
+                actionEntry.Value.OnFailure();
+            }
+        }
         return Task.CompletedTask;
     }
 
@@ -144,7 +157,7 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
         responseActions.TryRemove(correlationId, out _);
     }
 
-    void RegisterResponseActions<TResponse>(string correlationId, TaskCompletionSource<TResponse> tcs)
+    void RegisterResponseActions<TResponse>(string correlationId, TaskCompletionSource<TResponse> tcs, bool queueIsDurable)
     {
         var responseAction = new ResponseAction(
             message =>
@@ -171,13 +184,13 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
                 new EasyNetQException(
                     $"Connection lost while request was in-flight. CorrelationId: {correlationId}"
                 )
-            )
+            ), queueIsDurable
         );
 
         responseActions.TryAdd(correlationId, responseAction);
     }
 
-    async Task<string> SubscribeToResponseAsync<TRequest, TResponse>(
+    async Task<string> SubscribeToResponseAsync<TRequest, TResponse>(string queueType,
         CancellationToken cancellationToken
     )
     {
@@ -193,12 +206,12 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
 
         if (responseSubscriptions.TryGetValue(rpcKey, out responseSubscription))
             return responseSubscription.QueueName;
-
+        bool queueIsQuorum = queueType == QueueType.Quorum;
         var queue = await advancedBus.QueueDeclareAsync(
             conventions.RpcReturnQueueNamingConvention(responseType),
-            durable: false,
-            exclusive: true,
-            autoDelete: true,
+            durable: queueIsQuorum,
+            exclusive: !queueIsQuorum,
+            autoDelete: !queueIsQuorum,
             cancellationToken: cancellationToken
         ).ConfigureAwait(false);
 
@@ -219,7 +232,7 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
                     responseAction.OnSuccess(message);
             }
         );
-        responseSubscriptions.TryAdd(rpcKey, new ResponseSubscription(queue.Name, subscription));
+        responseSubscriptions.TryAdd(rpcKey, new ResponseSubscription(queue.Name, subscription, queueIsQuorum));
 
         logger.LogDebug("Subscription for {requestType}/{responseType} is created", requestType, responseType);
 
@@ -368,24 +381,27 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
 
     readonly struct ResponseAction
     {
-        public ResponseAction(Action<object> onSuccess, Action onFailure)
+        public ResponseAction(Action<object> onSuccess, Action onFailure, bool queueIsDurable)
         {
             OnSuccess = onSuccess;
             OnFailure = onFailure;
+            QueueIsDurable = queueIsDurable;
         }
 
+        public bool QueueIsDurable { get; }
         public Action<object> OnSuccess { get; }
         public Action OnFailure { get; }
     }
 
     readonly struct ResponseSubscription
     {
-        public ResponseSubscription(string queueName, IAsyncDisposable subscription)
+        public ResponseSubscription(string queueName, IAsyncDisposable subscription, bool queueIsDurable)
         {
+            QueueIsDurable = queueIsDurable;
             QueueName = queueName;
             Unsubscribe = subscription.DisposeAsync;
         }
-
+        public bool QueueIsDurable { get; }
         public string QueueName { get; }
         public Func<ValueTask> Unsubscribe { get; }
     }

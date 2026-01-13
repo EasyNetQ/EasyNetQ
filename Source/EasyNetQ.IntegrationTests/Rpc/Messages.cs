@@ -1,6 +1,6 @@
 namespace EasyNetQ.IntegrationTests.Rpc;
 
-public class Request
+public record Request
 {
     public Request(int id)
     {
@@ -8,41 +8,31 @@ public class Request
     }
 
     public int Id { get; }
-
-    protected bool Equals(Request other)
-    {
-        return Id.Equals(other.Id);
-    }
-
-    public override bool Equals(object obj)
-    {
-        if (ReferenceEquals(null, obj)) return false;
-        if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != GetType()) return false;
-        return Equals((Request)obj);
-    }
-
-    public override int GetHashCode()
-    {
-        return Id.GetHashCode();
-    }
 }
 
-public class BunnyRequest : Request
+public record BunnyRequest : Request
 {
     public BunnyRequest(int id) : base(id)
     {
     }
 }
 
-public class RabbitRequest : Request
+
+public record RabbitRequest : Request
 {
     public RabbitRequest(int id) : base(id)
     {
     }
 }
+[Queue(Type =QueueType.Quorum)]
+public record RabbitQuorumRequest : Request
+{
+    public RabbitQuorumRequest(int id) : base(id)
+    {
+    }
+}
 
-public class Response
+public record Response
 {
     public Response(int id)
     {
@@ -51,40 +41,29 @@ public class Response
 
     public int Id { get; }
 
-    protected bool Equals(Response other)
-    {
-        return Id.Equals(other.Id);
-    }
-
-    public override bool Equals(object obj)
-    {
-        if (ReferenceEquals(null, obj)) return false;
-        if (ReferenceEquals(this, obj)) return true;
-        if (obj.GetType() != GetType()) return false;
-        return Equals((Response)obj);
-    }
-
-    public override int GetHashCode()
-    {
-        return Id.GetHashCode();
-    }
 }
 
 
-public class BunnyResponse : Response
+public record BunnyResponse : Response
 {
     public BunnyResponse(int id) : base(id)
     {
     }
 }
 
-public class RabbitResponse : Response
+public record RabbitResponse : Response
 {
     public RabbitResponse(int id) : base(id)
     {
     }
 }
-
+[Queue(Type = QueueType.Quorum)]
+public record RabbitQuorumResponse : Response
+{
+    public RabbitQuorumResponse(int id) : base(id)
+    {
+    }
+}
 [Serializable]
 public class RequestFailedException : Exception
 {
