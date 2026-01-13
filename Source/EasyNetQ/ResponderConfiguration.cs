@@ -108,6 +108,7 @@ internal class ResponderConfiguration : IResponderConfiguration
 
     public IResponderConfiguration WithQueueType(string queueType = EasyNetQ.QueueType.Classic)
     {
+        QueueType = queueType;
         InitializedQueueArguments.WithQueueType(queueType);
         return this;
     }
