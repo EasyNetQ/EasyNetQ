@@ -24,7 +24,7 @@ public record RabbitRequest : Request
     {
     }
 }
-[Queue(Type =QueueType.Quorum)]
+[Queue(Type = QueueType.Quorum)]
 public record RabbitQuorumRequest : Request
 {
     public RabbitQuorumRequest(int id) : base(id)
