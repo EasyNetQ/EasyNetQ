@@ -490,6 +490,7 @@ namespace EasyNetQ
         EasyNetQ.IRequestConfiguration WithPriority(byte priority);
         EasyNetQ.IRequestConfiguration WithPublisherConfirms(bool publisherConfirms);
         EasyNetQ.IRequestConfiguration WithQueueName(string queueName);
+        EasyNetQ.IRequestConfiguration WithQueueType(string queueType = "classic");
     }
     public interface IResponderConfiguration
     {
