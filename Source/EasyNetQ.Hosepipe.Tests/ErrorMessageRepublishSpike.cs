@@ -10,7 +10,7 @@ namespace EasyNetQ.Hosepipe.Tests;
 public class ErrorMessageRepublishSpike
 {
     private readonly ITestOutputHelper testOutputHelper;
-    private readonly ISerializer serializer = new ReflectionBasedNewtonsoftJsonSerializer();
+    private readonly ISerializer serializer = new Serialization.SystemTextJson.SystemTextJsonSerializerV2();
 
     public ErrorMessageRepublishSpike(ITestOutputHelper testOutputHelper)
     {
