@@ -22,7 +22,7 @@ public class When_a_polymorphic_message_is_delivered_to_the_consumer : IAsyncLif
 #pragma warning restore IDISP004
 
         var publishedMessage = new Implementation { Text = "Hello Polymorphs!" };
-        using var serializedMessage = new Serialization.SystemTextJson.SystemTextJsonSerializerV2().MessageToBytes(typeof(Implementation), publishedMessage);
+        using var serializedMessage = new Serialization.NewtonsoftJson.NewtonsoftJsonSerializer().MessageToBytes(typeof(Implementation), publishedMessage);
         var properties = new BasicProperties
         {
             Type = new DefaultTypeNameSerializer().Serialize(typeof(Implementation))
