@@ -286,16 +286,18 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         bool exclusive,
         bool autoDelete,
         IDictionary<string, object> arguments,
-        CancellationToken cancellationToken
+        CancellationToken cancellationToken,
+        PersistentConnectionType persistentConnectionType
+
     )
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         IDictionary<string, object> nullableArguments = arguments?.ToDictionary(kvp => kvp.Key, kvp => (object)kvp.Value);
-
+        var dispatchOptions = persistentConnectionType == PersistentConnectionType.Consumer ? PersistentChannelDispatchOptions.ConsumerTopology : PersistentChannelDispatchOptions.ProducerTopology;
         var declareResult = await persistentChannelDispatcher.InvokeAsync(
             async x => await x.QueueDeclareAsync(queue, durable, exclusive, autoDelete, nullableArguments, cancellationToken: cancellationToken),
-            PersistentChannelDispatchOptions.ConsumerTopology,
+            dispatchOptions,
             cts.Token
         ).ConfigureAwait(false);
 
