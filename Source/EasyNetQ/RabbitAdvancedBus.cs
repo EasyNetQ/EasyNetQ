@@ -252,7 +252,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         if (logger.IsEnabled(LogLevel.Debug))
         {
             logger.LogDebug(
-                "{queue} has {messagesCount} messages and {consumersCount} consumers.",
+                "{Queue} has {MessagesCount} messages and {ConsumersCount} consumers.",
                 queue,
                 declareResult.MessageCount,
                 declareResult.ConsumerCount
@@ -275,7 +275,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 
         if (logger.IsEnabled(LogLevel.Debug))
         {
-            logger.LogDebug("Passive declared queue {queue}", queue);
+            logger.LogDebug("Passive declared queue {Queue}", queue);
         }
     }
 
@@ -302,7 +302,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         if (logger.IsEnabled(LogLevel.Debug))
         {
             logger.LogDebug(
-                "Declared queue {queue}: durable={durable}, exclusive={exclusive}, autoDelete={autoDelete}, arguments={arguments}",
+                "Declared queue {Queue}: durable={Durable}, exclusive={Exclusive}, autoDelete={AutoDelete}, arguments={Arguments}",
                 declareResult.QueueName,
                 durable,
                 exclusive,
@@ -329,7 +329,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 
         if (logger.IsEnabled(LogLevel.Debug))
         {
-            logger.LogDebug("Deleted queue {queue}", queue);
+            logger.LogDebug("Deleted queue {Queue}", queue);
         }
     }
 
@@ -346,7 +346,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 
         if (logger.IsEnabled(LogLevel.Debug))
         {
-            logger.LogDebug("Purged queue {queue}", queue);
+            logger.LogDebug("Purged queue {Queue}", queue);
         }
     }
 
@@ -363,7 +363,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 
         if (logger.IsEnabled(LogLevel.Debug))
         {
-            logger.LogDebug("Passive declared exchange {exchange}", exchange);
+            logger.LogDebug("Passive declared exchange {Exchange}", exchange);
         }
     }
 
@@ -390,7 +390,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         if (logger.IsEnabled(LogLevel.Debug))
         {
             logger.LogDebug(
-                "Declared exchange {exchange}: type={type}, durable={durable}, autoDelete={autoDelete}, arguments={arguments}",
+                "Declared exchange {Exchange}: type={Type}, durable={Durable}, autoDelete={AutoDelete}, arguments={Arguments}",
                 exchange,
                 type,
                 durable,
@@ -417,7 +417,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 
         if (logger.IsEnabled(LogLevel.Debug))
         {
-            logger.LogDebug("Deleted exchange {exchange}", exchange);
+            logger.LogDebug("Deleted exchange {Exchange}", exchange);
         }
     }
 
@@ -443,7 +443,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         if (logger.IsEnabled(LogLevel.Debug))
         {
             logger.LogDebug(
-                "Bound queue {queue} to exchange {exchange} with routing key {routingKey} and arguments {arguments}",
+                "Bound queue {Queue} to exchange {Exchange} with routing key {RoutingKey} and arguments {Arguments}",
                 queue,
                 exchange,
                 routingKey,
@@ -474,7 +474,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         if (logger.IsEnabled(LogLevel.Debug))
         {
             logger.LogDebug(
-                "Unbound queue {queue} from exchange {exchange} with routing key {routingKey} and arguments {arguments}",
+                "Unbound queue {Queue} from exchange {Exchange} with routing key {RoutingKey} and arguments {Arguments}",
                 queue,
                 exchange,
                 routingKey,
@@ -505,7 +505,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         if (logger.IsEnabled(LogLevel.Debug))
         {
             logger.LogDebug(
-                "Bound destination exchange {destinationExchange} to source exchange {sourceExchange} with routing key {routingKey} and arguments {arguments}",
+                "Bound destination exchange {DestinationExchange} to source exchange {SourceExchange} with routing key {RoutingKey} and arguments {Arguments}",
                 destinationExchange,
                 sourceExchange,
                 routingKey,
@@ -536,7 +536,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         if (logger.IsEnabled(LogLevel.Debug))
         {
             logger.LogDebug(
-                "Unbound destination exchange {destinationExchange} from source exchange {sourceExchange} with routing key {routingKey} and arguments {arguments}",
+                "Unbound destination exchange {DestinationExchange} from source exchange {SourceExchange} with routing key {RoutingKey} and arguments {Arguments}",
                 destinationExchange,
                 sourceExchange,
                 routingKey,
@@ -636,7 +636,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         if (logger.IsEnabled(LogLevel.Debug))
         {
             logger.LogDebug(
-                "Published to exchange {exchange} with routingKey={routingKey} and correlationId={correlationId}",
+                "Published to exchange {Exchange} with routingKey={RoutingKey} and correlationId={CorrelationId}",
                 context.Exchange,
                 context.RoutingKey,
                 context.Properties.CorrelationId
