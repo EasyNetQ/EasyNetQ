@@ -286,8 +286,8 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         bool exclusive,
         bool autoDelete,
         IDictionary<string, object> arguments,
-        CancellationToken cancellationToken,
-        PersistentConnectionType persistentConnectionType
+        PersistentConnectionType persistentConnectionType = PersistentConnectionType.Consumer,
+        CancellationToken cancellationToken = default
 
     )
     {

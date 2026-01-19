@@ -13,8 +13,8 @@ public static partial class AdvancedBusExtensions
     /// <param name="bus">The bus instance</param>
     /// <param name="queue">The name of the queue</param>
     /// <param name="configure">Delegate to configure the queue</param>
-    /// <param name="cancellationToken">The cancellation token</param>
     /// <param name="persistentConnectionType">Persistent connection type</param>
+    /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>
     /// The queue
     /// </returns>
@@ -22,7 +22,7 @@ public static partial class AdvancedBusExtensions
         this IAdvancedBus bus,
         string queue,
         Action<IQueueDeclareConfiguration> configure,
-        EasyNetQ.Persistent.PersistentConnectionType persistentConnectionType,
+        EasyNetQ.Persistent.PersistentConnectionType persistentConnectionType = Persistent.PersistentConnectionType.Consumer,
         CancellationToken cancellationToken = default
     )
     {
@@ -35,8 +35,8 @@ public static partial class AdvancedBusExtensions
             exclusive: queueDeclareConfiguration.IsExclusive,
             autoDelete: queueDeclareConfiguration.IsAutoDelete,
             arguments: queueDeclareConfiguration.Arguments,
-            cancellationToken: cancellationToken,
-            persistentConnectionType
+            persistentConnectionType,
+            cancellationToken: cancellationToken
         );
     }
     /// <summary>

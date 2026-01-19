@@ -103,8 +103,8 @@ public interface IAdvancedBus
     /// <param name="exclusive"></param>
     /// <param name="autoDelete"></param>
     /// <param name="arguments"></param>
-    /// <param name="cancellationToken">The cancellation token</param>
     /// <param name="persistentConnectionType">Persistent connection type</param>
+    /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>The queue</returns>
     Task<Queue> QueueDeclareAsync(
         string queue,
@@ -112,8 +112,8 @@ public interface IAdvancedBus
         bool exclusive = false,
         bool autoDelete = false,
         IDictionary<string, object> arguments = null,
-        CancellationToken cancellationToken = default,
-        PersistentConnectionType persistentConnectionType = PersistentConnectionType.Consumer 
+        PersistentConnectionType persistentConnectionType = PersistentConnectionType.Consumer,
+        CancellationToken cancellationToken = default
     );
 
     /// <summary>
