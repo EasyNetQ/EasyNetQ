@@ -63,11 +63,15 @@ internal class ResponderConfiguration : IResponderConfiguration
         PrefetchCount = defaultPrefetchCount;
 
         if (queueType != null)
+        {
             QueueArguments = new Dictionary<string, object> { { Argument.QueueType, queueType } };
+            QueueType = queueType;
+        }
     }
 
     public ushort PrefetchCount { get; private set; }
     public string QueueName { get; private set; }
+    public string QueueType { get; private set; }
     public bool Durable { get; private set; } = true;
 
     public IDictionary<string, object> QueueArguments { get; private set; }
@@ -102,8 +106,9 @@ internal class ResponderConfiguration : IResponderConfiguration
         return this;
     }
 
-    public IResponderConfiguration WithQueueType(string queueType = QueueType.Classic)
+    public IResponderConfiguration WithQueueType(string queueType = EasyNetQ.QueueType.Classic)
     {
+        QueueType = queueType;
         InitializedQueueArguments.WithQueueType(queueType);
         return this;
     }
