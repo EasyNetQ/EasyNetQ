@@ -10,31 +10,49 @@ public static partial class AdvancedBusExtensions
     /// <summary>
     /// Declare a queue. If the queue already exists this method does nothing
     /// </summary>
-    /// <param name="bus">The bus instance</param>
+    /// <param name="advancedBus">The bus instance</param>
     /// <param name="queue">The name of the queue</param>
-    /// <param name="configure">Delegate to configure the queue</param>
     /// <param name="cancellationToken">The cancellation token</param>
-    /// <returns>
-    /// The queue
-    /// </returns>
     public static Task<Queue> QueueDeclareAsync(
-        this IAdvancedBus bus,
+        this IAdvancedBus advancedBus,
         string queue,
-        Action<IQueueDeclareConfiguration> configure,
-        CancellationToken cancellationToken = default
-    )
+        CancellationToken cancellationToken = default)
     {
-        var queueDeclareConfiguration = new QueueDeclareConfiguration();
-        configure(queueDeclareConfiguration);
+        return advancedBus.QueueDeclareAsync(queue, options => { }, cancellationToken);
+    }
+    /// <summary>
+    /// Declare a queue. If the queue already exists this method does nothing
+    /// </summary>
+    /// <param name="advancedBus">The bus instance</param>
+    /// <param name="durable"></param>
+    /// <param name="exclusive"></param>
+    /// <param name="autoDelete"></param>
+    /// <param name="arguments"></param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    public static Task<Queue> QueueDeclareAsync(
+        this IAdvancedBus advancedBus,
+        string queue,
+        bool durable = true,
+        bool exclusive = false,
+        bool autoDelete = false,
+        IDictionary<string, object> arguments = null,
+        CancellationToken cancellationToken = default)
+    {
+        return advancedBus.QueueDeclareAsync(
+          queue,
+          options =>
+          {
+              options.AsDurable(durable).AsExclusive(exclusive).AsAutoDelete(autoDelete);
+              if (arguments != null)
+              {
+                  foreach (var item in arguments)
+                  {
+                      options.WithArgument(item.Key, item.Value);
+                  }
+              }
 
-        return bus.QueueDeclareAsync(
-            queue: queue,
-            durable: queueDeclareConfiguration.IsDurable,
-            exclusive: queueDeclareConfiguration.IsExclusive,
-            autoDelete: queueDeclareConfiguration.IsAutoDelete,
-            arguments: queueDeclareConfiguration.Arguments,
-            cancellationToken: cancellationToken
-        );
+          },
+          cancellationToken);
     }
     /// <summary>
     /// Declare an exchange

@@ -99,18 +99,12 @@ public interface IAdvancedBus
     /// Declare a queue. If the queue already exists this method does nothing
     /// </summary>
     /// <param name="queue">The name of the queue</param>
-    /// <param name="durable"></param>
-    /// <param name="exclusive"></param>
-    /// <param name="autoDelete"></param>
-    /// <param name="arguments"></param>
+    /// <param name="configure">Action to configure queue</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>The queue</returns>
     Task<Queue> QueueDeclareAsync(
         string queue,
-        bool durable = true,
-        bool exclusive = false,
-        bool autoDelete = false,
-        IDictionary<string, object> arguments = null,
+        Action<IQueueDeclareConfiguration> configure,
         CancellationToken cancellationToken = default
     );
 

@@ -282,20 +282,18 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     /// <inheritdoc />
     public async Task<Queue> QueueDeclareAsync(
         string queue,
-        bool durable,
-        bool exclusive,
-        bool autoDelete,
-        IDictionary<string, object> arguments,
-        CancellationToken cancellationToken
+        Action<IQueueDeclareConfiguration> configure,
+        CancellationToken cancellationToken = default
     )
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-        IDictionary<string, object> nullableArguments = arguments?.ToDictionary(kvp => kvp.Key, kvp => (object)kvp.Value);
-
+        var options = new QueueDeclareConfiguration();
+        configure?.Invoke(options);
+        var dispatchOptions = options.PersistentConnectionType == PersistentConnectionType.Consumer ? PersistentChannelDispatchOptions.ConsumerTopology : PersistentChannelDispatchOptions.ProducerTopology;
         var declareResult = await persistentChannelDispatcher.InvokeAsync(
-            async x => await x.QueueDeclareAsync(queue, durable, exclusive, autoDelete, nullableArguments, cancellationToken: cancellationToken),
-            PersistentChannelDispatchOptions.ConsumerTopology,
+            async x => await x.QueueDeclareAsync(queue, options.IsDurable, options.IsExclusive, options.IsAutoDelete, options.Arguments, cancellationToken: cancellationToken),
+            dispatchOptions,
             cts.Token
         ).ConfigureAwait(false);
 
@@ -304,14 +302,14 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             logger.LogDebug(
                 "Declared queue {Queue}: durable={Durable}, exclusive={Exclusive}, autoDelete={AutoDelete}, arguments={Arguments}",
                 declareResult.QueueName,
-                durable,
-                exclusive,
-                autoDelete,
-                arguments?.Stringify()
+                options.IsDurable,
+                options.IsExclusive,
+                options.IsAutoDelete,
+                options.Arguments?.Stringify()
             );
         }
 
-        return new Queue(declareResult.QueueName, durable, exclusive, autoDelete, arguments);
+        return new Queue(declareResult.QueueName, options.IsDurable, options.IsExclusive, options.IsAutoDelete, options.Arguments);
     }
 
     /// <inheritdoc />
