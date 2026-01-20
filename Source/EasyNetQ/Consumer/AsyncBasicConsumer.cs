@@ -49,7 +49,7 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(
-                "Consumer with consumerTags {consumerTags} has cancelled",
+                "Consumer with consumerTags {ConsumerTags} has cancelled",
                 string.Join(", ", consumerTags)
             );
         }
@@ -74,7 +74,7 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
         if (logger.IsEnabled(LogLevel.Debug))
         {
             logger.LogDebug(
-                "Message delivered to consumer {consumerTag} with deliveryTag {deliveryTag}",
+                "Message delivered to consumer {ConsumerTag} with deliveryTag {DeliveryTag}",
                 consumerTag,
                 deliveryTag
             );
@@ -122,7 +122,7 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
         {
             logger.LogInformation(
                 alreadyClosedException,
-                "Failed to ACK or NACK, message will be retried, receivedInfo={receivedInfo}",
+                "Failed to ACK or NACK, message will be retried, receivedInfo={ReceivedInfo}",
                 receivedInfo
             );
         }
@@ -130,7 +130,7 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
         {
             logger.LogInformation(
                 ioException,
-                "Failed to ACK or NACK, message will be retried, receivedInfo={receivedInfo}",
+                "Failed to ACK or NACK, message will be retried, receivedInfo={ReceivedInfo}",
                 receivedInfo
             );
         }
@@ -138,7 +138,7 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
         {
             logger.LogError(
                 exception,
-                "Unexpected exception when attempting to ACK or NACK, receivedInfo={receivedInfo}",
+                "Unexpected exception when attempting to ACK or NACK, receivedInfo={ReceivedInfo}",
                 receivedInfo
             );
         }

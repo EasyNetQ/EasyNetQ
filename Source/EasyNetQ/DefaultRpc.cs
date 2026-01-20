@@ -187,7 +187,7 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
         if (responseSubscriptions.TryGetValue(rpcKey, out var responseSubscription))
             return responseSubscription.QueueName;
 
-        logger.LogDebug("Subscribing for {requestType}/{responseType}", requestType, responseType);
+        logger.LogDebug("Subscribing for {RequestType}/{ResponseType}", requestType, responseType);
 
         using var _ = await responseSubscriptionsLock.AcquireAsync(cancellationToken).ConfigureAwait(false);
 
@@ -221,7 +221,7 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
         );
         responseSubscriptions.TryAdd(rpcKey, new ResponseSubscription(queue.Name, subscription));
 
-        logger.LogDebug("Subscription for {requestType}/{responseType} is created", requestType, responseType);
+        logger.LogDebug("Subscription for {RequestType}/{ResponseType} is created", requestType, responseType);
 
         return queue.Name;
     }

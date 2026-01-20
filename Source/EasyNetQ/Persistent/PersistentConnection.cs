@@ -107,7 +107,7 @@ public class PersistentConnection : IPersistentConnection
 
         status = status.ToConnected();
         logger.LogInformation(
-            "Connection {type} established to broker {broker}, port {port}",
+            "Connection {Type} established to broker {Broker}, port {Port}",
             type,
             connection.Endpoint.HostName,
             connection.Endpoint.Port
@@ -157,7 +157,7 @@ public class PersistentConnection : IPersistentConnection
         status = status.ToConnected();
         var connection = (IConnection)sender!;
         logger.LogInformation(
-            "Connection {type} recovered to broker {host}:{port}",
+            "Connection {Type} recovered to broker {Host}:{Port}",
             type,
             connection.Endpoint.HostName,
             connection.Endpoint.Port
@@ -171,7 +171,7 @@ public class PersistentConnection : IPersistentConnection
         var connection = (IConnection)sender!;
         logger.LogDebug(
             e.Cause as Exception,
-            "Connection {type} disconnected from broker {host}:{port} because of {reason}",
+            "Connection {Type} disconnected from broker {Host}:{Port} because of {Reason}",
             type,
             connection.Endpoint.HostName,
             connection.Endpoint.Port,
@@ -182,13 +182,13 @@ public class PersistentConnection : IPersistentConnection
 
     private async Task OnConnectionBlocked(object sender, ConnectionBlockedEventArgs e)
     {
-        logger.LogInformation("Connection {type} blocked with reason {reason}", type, e.Reason);
+        logger.LogInformation("Connection {Type} blocked with reason {Reason}", type, e.Reason);
         await eventBus.PublishAsync(new ConnectionBlockedEvent(type, e.Reason ?? "Unknown reason"));
     }
 
     private async Task OnConnectionUnblocked(object sender, AsyncEventArgs e)
     {
-        logger.LogInformation("Connection {type} unblocked", type);
+        logger.LogInformation("Connection {Type} unblocked", type);
         await eventBus.PublishAsync(new ConnectionUnblockedEvent(type));
     }
 
