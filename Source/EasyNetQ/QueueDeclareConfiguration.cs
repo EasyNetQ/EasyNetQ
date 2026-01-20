@@ -1,3 +1,5 @@
+using EasyNetQ.Persistent;
+
 namespace EasyNetQ;
 
 /// <summary>
@@ -36,6 +38,12 @@ public interface IQueueDeclareConfiguration
     /// <param name="value">The argument value to set</param>
     /// <returns>IQueueDeclareConfiguration</returns>
     IQueueDeclareConfiguration WithArgument(string name, object value);
+    /// <summary>
+    /// Sets a connection type for query declaration
+    /// </summary>
+    /// <param name="persistentConnectionType">Persistent connection type</param>
+    /// <returns>IQueueDeclareConfiguration</returns>
+    IQueueDeclareConfiguration WithConnectionType(PersistentConnectionType persistentConnectionType);
 }
 
 internal class QueueDeclareConfiguration : IQueueDeclareConfiguration
@@ -45,6 +53,7 @@ internal class QueueDeclareConfiguration : IQueueDeclareConfiguration
     public bool IsAutoDelete { get; private set; }
 
     public IDictionary<string, object> Arguments { get; private set; }
+    public PersistentConnectionType PersistentConnectionType { get; private set; } = PersistentConnectionType.Consumer;
 
     public IQueueDeclareConfiguration AsDurable(bool isDurable)
     {
@@ -67,6 +76,11 @@ internal class QueueDeclareConfiguration : IQueueDeclareConfiguration
     public IQueueDeclareConfiguration WithArgument(string name, object value)
     {
         (Arguments ??= new Dictionary<string, object>())[name] = value;
+        return this;
+    }
+    public IQueueDeclareConfiguration WithConnectionType(PersistentConnectionType persistentConnectionType)
+    {
+        PersistentConnectionType = persistentConnectionType;
         return this;
     }
 }

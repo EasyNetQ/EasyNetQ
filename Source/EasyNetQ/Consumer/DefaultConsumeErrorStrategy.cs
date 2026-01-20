@@ -64,7 +64,7 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
 
         logger.LogError(
             exception,
-            "Exception thrown by subscription callback, receivedInfo={receivedInfo}, properties={properties}, message={message}",
+            "Exception thrown by subscription callback, receivedInfo={ReceivedInfo}, properties={Properties}, message={Message}",
             receivedInfo,
             properties,
             Convert.ToBase64String(body)
