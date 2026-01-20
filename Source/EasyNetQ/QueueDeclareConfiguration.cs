@@ -39,7 +39,7 @@ public interface IQueueDeclareConfiguration
     /// <returns>IQueueDeclareConfiguration</returns>
     IQueueDeclareConfiguration WithArgument(string name, object value);
     /// <summary>
-    /// Sets a connectiom type for query declaration
+    /// Sets a connection type for query declaration
     /// </summary>
     /// <param name="persistentConnectionType">Persistent connection type</param>
     /// <returns>IQueueDeclareConfiguration</returns>

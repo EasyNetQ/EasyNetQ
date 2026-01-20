@@ -14,9 +14,9 @@ public static partial class AdvancedBusExtensions
     /// <param name="queue">The name of the queue</param>
     /// <param name="cancellationToken">The cancellation token</param>
     public static Task<Queue> QueueDeclareAsync(
-  this IAdvancedBus advancedBus,
-  string queue,
-  CancellationToken cancellationToken = default)
+        this IAdvancedBus advancedBus,
+        string queue,
+        CancellationToken cancellationToken = default)
     {
         return advancedBus.QueueDeclareAsync(queue, options => { }, cancellationToken);
     }
@@ -30,13 +30,13 @@ public static partial class AdvancedBusExtensions
     /// <param name="arguments"></param>
     /// <param name="cancellationToken">The cancellation token</param>
     public static Task<Queue> QueueDeclareAsync(
-  this IAdvancedBus advancedBus,
-  string queue,
-  bool durable = true,
-  bool exclusive = false,
-  bool autoDelete = false,
-  IDictionary<string, object> arguments = null,
-  CancellationToken cancellationToken = default)
+        this IAdvancedBus advancedBus,
+        string queue,
+        bool durable = true,
+        bool exclusive = false,
+        bool autoDelete = false,
+        IDictionary<string, object> arguments = null,
+        CancellationToken cancellationToken = default)
     {
         return advancedBus.QueueDeclareAsync(
           queue,
