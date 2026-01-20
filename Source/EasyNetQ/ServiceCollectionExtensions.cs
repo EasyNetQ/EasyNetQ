@@ -28,7 +28,7 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<IConnectionStringParser>(
             _ => new CompositeConnectionStringParser(new AmqpConnectionStringParser(), new ConnectionStringParser())
         );
-        services.TryAddSingleton<ISerializer>(_ => new ReflectionBasedNewtonsoftJsonSerializer());
+        services.TryAddSingleton<ISerializer>(_ => new Serialization.SystemTextJson.SystemTextJsonSerializerV2());
         services.TryAddSingleton<IConventions, Conventions>();
         services.TryAddSingleton<IEventBus, EventBus>();
         services.TryAddSingleton<ITypeNameSerializer, DefaultTypeNameSerializer>();

@@ -7,7 +7,7 @@ public readonly record struct ProduceContext(
     in bool PublisherConfirms,
     in MessageProperties Properties,
     in ReadOnlyMemory<byte> Body,
-    in IServiceProvider ServiceResolver,
+    in IServiceProvider Services,
     in CancellationToken CancellationToken
 );
 

@@ -67,7 +67,7 @@ public class Program
             new FileMessageWriter(),
             new MessageReader(),
             new QueueInsertion(errorMessageSerializer),
-            new ErrorRetry(new ReflectionBasedNewtonsoftJsonSerializer(), errorMessageSerializer),
+            new ErrorRetry(new Serialization.SystemTextJson.SystemTextJsonSerializerV2(), errorMessageSerializer),
             new Conventions(typeNameSerializer)
         );
 

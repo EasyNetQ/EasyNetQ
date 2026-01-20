@@ -57,7 +57,7 @@ public class When_a_consumer_has_multiple_handlers : IAsyncLifetime
 
     private async Task DeliverAsync<T>(T message) where T : class
     {
-        using var serializedMessage = new ReflectionBasedNewtonsoftJsonSerializer().MessageToBytes(typeof(T), message);
+        using var serializedMessage = new Serialization.SystemTextJson.SystemTextJsonSerializerV2().MessageToBytes(typeof(T), message);
         var properties = new BasicProperties
         {
             Type = new DefaultTypeNameSerializer().Serialize(typeof(T))

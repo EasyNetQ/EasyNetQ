@@ -98,7 +98,7 @@ public class InternalConsumer : IInternalConsumer
     private readonly ConsumerConfiguration configuration;
     private readonly IConsumerConnection connection;
     private readonly IEventBus eventBus;
-    private readonly IServiceProvider serviceResolver;
+    private readonly IServiceProvider services;
     private readonly ILogger<InternalConsumer> logger;
 
     private volatile bool disposed;
@@ -108,14 +108,14 @@ public class InternalConsumer : IInternalConsumer
     ///     Creates InternalConsumer
     /// </summary>
     public InternalConsumer(
-        IServiceProvider serviceResolver,
+        IServiceProvider services,
         ILogger<InternalConsumer> logger,
         ConsumerConfiguration configuration,
         IConsumerConnection connection,
         IEventBus eventBus
     )
     {
-        this.serviceResolver = serviceResolver;
+        this.services = services;
         this.logger = logger;
         this.configuration = configuration;
         this.connection = connection;
@@ -189,7 +189,7 @@ public class InternalConsumer : IInternalConsumer
                 try
                 {
                     var consumer = new AsyncBasicConsumer(
-                        serviceResolver,
+                        services,
                         logger,
                         channel,
                         queue,

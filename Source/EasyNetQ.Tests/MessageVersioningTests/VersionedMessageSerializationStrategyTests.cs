@@ -81,7 +81,7 @@ public class VersionedMessageSerializationStrategyTests
     public void When_using_the_versioned_serialization_strategy_messages_are_correctly_round_tripped()
     {
         var typeNameSerializer = new DefaultTypeNameSerializer();
-        var serializer = new ReflectionBasedNewtonsoftJsonSerializer();
+        var serializer = new Serialization.SystemTextJson.SystemTextJsonSerializerV2();
 
         const string correlationId = "CorrelationId";
 
@@ -190,7 +190,7 @@ public class VersionedMessageSerializationStrategyTests
     public void When_using_the_versioned_serialization_strategy_versioned_messages_are_correctly_round_tripped()
     {
         var typeNameSerializer = new DefaultTypeNameSerializer();
-        var serializer = new ReflectionBasedNewtonsoftJsonSerializer();
+        var serializer = new Serialization.SystemTextJson.SystemTextJsonSerializerV2();
         const string correlationId = "CorrelationId";
 
         var serializationStrategy =
@@ -211,7 +211,7 @@ public class VersionedMessageSerializationStrategyTests
     public void When_deserializing_versioned_message_use_first_available_message_type()
     {
         var typeNameSerializer = new DefaultTypeNameSerializer();
-        var serializer = new ReflectionBasedNewtonsoftJsonSerializer();
+        var serializer = new Serialization.SystemTextJson.SystemTextJsonSerializerV2();
         const string correlationId = "CorrelationId";
 
         var serializationStrategy =

@@ -17,7 +17,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     private readonly IPersistentChannelDispatcher persistentChannelDispatcher;
     private readonly ConnectionConfiguration configuration;
     private readonly ConsumePipelineBuilder consumePipelineBuilder;
-    private readonly IServiceProvider serviceResolver;
+    private readonly IServiceProvider services;
     private readonly IPublishConfirmationListener confirmationListener;
     private readonly ILogger logger;
     private readonly IProducerConnection producerConnection;
@@ -48,7 +48,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         ConnectionConfiguration configuration,
         ProducePipelineBuilder producePipelineBuilder,
         ConsumePipelineBuilder consumePipelineBuilder,
-        IServiceProvider serviceResolver,
+        IServiceProvider services,
         IMessageSerializationStrategy messageSerializationStrategy,
         IPullingConsumerFactory pullingConsumerFactory,
         AdvancedBusEventHandlers advancedBusEventHandlers
@@ -64,7 +64,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         this.handlerCollectionFactory = handlerCollectionFactory;
         this.configuration = configuration;
         this.consumePipelineBuilder = consumePipelineBuilder;
-        this.serviceResolver = serviceResolver;
+        this.services = services;
         this.messageSerializationStrategy = messageSerializationStrategy;
         this.pullingConsumerFactory = pullingConsumerFactory;
         this.advancedBusEventHandlers = advancedBusEventHandlers;
@@ -231,7 +231,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
         await produceDelegate(new ProduceContext(exchange, routingKey, mandatory ?? configuration.MandatoryPublish,
-            publisherConfirms ?? configuration.PublisherConfirms, properties, body, serviceResolver, cts.Token)).ConfigureAwait(false);
+            publisherConfirms ?? configuration.PublisherConfirms, properties, body, services, cts.Token)).ConfigureAwait(false);
     }
 
     #endregion

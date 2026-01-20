@@ -132,7 +132,6 @@ public class SerializerTests
     public static IEnumerable<object[]> GetSerializers()
     {
         yield return ["Newtonsoft", new NewtonsoftJsonSerializer()];
-        yield return ["Default", new ReflectionBasedNewtonsoftJsonSerializer()];
         yield return ["SystemTextJson", new SystemTextJsonSerializer()];
         yield return ["SystemTextJsonV2", new SystemTextJsonSerializerV2()];
     }

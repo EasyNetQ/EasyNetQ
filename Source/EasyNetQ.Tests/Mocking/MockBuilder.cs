@@ -70,7 +70,7 @@ public sealed class MockBuilder : IAsyncDisposable
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddSingleton(connectionFactory);
 
-        serviceCollection.AddEasyNetQ(connectionString);
+        serviceCollection.AddEasyNetQ(connectionString).UseNewtonsoftJson();
         registerServices(serviceCollection);
         serviceProvider = serviceCollection.BuildServiceProvider();
         bus = serviceProvider.GetRequiredService<IBus>();

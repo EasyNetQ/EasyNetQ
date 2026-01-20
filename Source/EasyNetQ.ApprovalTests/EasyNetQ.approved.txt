@@ -256,6 +256,13 @@ namespace EasyNetQ
         public static EasyNetQ.Consumer.ConsumePipelineBuilder UseScope(this EasyNetQ.Consumer.ConsumePipelineBuilder pipelineBuilder) { }
         public static EasyNetQ.IEasyNetQBuilder UseVersionedMessage(this EasyNetQ.IEasyNetQBuilder builder) { }
     }
+    public static class EasyNetQBuilderSystemTextJsonExtensions
+    {
+        public static EasyNetQ.IEasyNetQBuilder UseSystemTextJson(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder UseSystemTextJson(this EasyNetQ.IEasyNetQBuilder builder, System.Text.Json.JsonSerializerOptions options) { }
+        public static EasyNetQ.IEasyNetQBuilder UseSystemTextJsonV2(this EasyNetQ.IEasyNetQBuilder builder) { }
+        public static EasyNetQ.IEasyNetQBuilder UseSystemTextJsonV2(this EasyNetQ.IEasyNetQBuilder builder, System.Text.Json.JsonSerializerOptions options) { }
+    }
     public class EasyNetQException : System.Exception
     {
         public EasyNetQException() { }
@@ -819,7 +826,7 @@ namespace EasyNetQ
     public delegate string QueueTypeConvention(System.Type messageType);
     public class RabbitAdvancedBus : EasyNetQ.IAdvancedBus, System.IDisposable
     {
-        public RabbitAdvancedBus(Microsoft.Extensions.Logging.ILogger<EasyNetQ.RabbitAdvancedBus> logger, EasyNetQ.Producer.IProducerConnection producerConnection, EasyNetQ.Consumer.IConsumerConnection consumerConnection, EasyNetQ.Consumer.IConsumerFactory consumerFactory, EasyNetQ.ChannelDispatcher.IPersistentChannelDispatcher persistentChannelDispatcher, EasyNetQ.Producer.IPublishConfirmationListener confirmationListener, EasyNetQ.IEventBus eventBus, EasyNetQ.Consumer.IHandlerCollectionFactory handlerCollectionFactory, EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.Producer.ProducePipelineBuilder producePipelineBuilder, EasyNetQ.Consumer.ConsumePipelineBuilder consumePipelineBuilder, System.IServiceProvider serviceResolver, EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy, EasyNetQ.IPullingConsumerFactory pullingConsumerFactory, EasyNetQ.AdvancedBusEventHandlers advancedBusEventHandlers) { }
+        public RabbitAdvancedBus(Microsoft.Extensions.Logging.ILogger<EasyNetQ.RabbitAdvancedBus> logger, EasyNetQ.Producer.IProducerConnection producerConnection, EasyNetQ.Consumer.IConsumerConnection consumerConnection, EasyNetQ.Consumer.IConsumerFactory consumerFactory, EasyNetQ.ChannelDispatcher.IPersistentChannelDispatcher persistentChannelDispatcher, EasyNetQ.Producer.IPublishConfirmationListener confirmationListener, EasyNetQ.IEventBus eventBus, EasyNetQ.Consumer.IHandlerCollectionFactory handlerCollectionFactory, EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.Producer.ProducePipelineBuilder producePipelineBuilder, EasyNetQ.Consumer.ConsumePipelineBuilder consumePipelineBuilder, System.IServiceProvider services, EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy, EasyNetQ.IPullingConsumerFactory pullingConsumerFactory, EasyNetQ.AdvancedBusEventHandlers advancedBusEventHandlers) { }
         public bool IsConnected { get; }
         public event System.EventHandler<EasyNetQ.BlockedEventArgs> Blocked;
         public event System.EventHandler<EasyNetQ.ConnectedEventArgs> Connected;
@@ -867,12 +874,6 @@ namespace EasyNetQ
     {
         public static EasyNetQ.IReceiveRegistration Add<T>(this EasyNetQ.IReceiveRegistration receiveRegistration, System.Action<T> onMessage) { }
         public static EasyNetQ.IReceiveRegistration Add<T>(this EasyNetQ.IReceiveRegistration receiveRegistration, System.Func<T, System.Threading.Tasks.Task> onMessage) { }
-    }
-    public sealed class ReflectionBasedNewtonsoftJsonSerializer : EasyNetQ.ISerializer
-    {
-        public ReflectionBasedNewtonsoftJsonSerializer(object serializerSettings = null) { }
-        public object BytesToMessage(System.Type messageType, in System.ReadOnlyMemory<byte> bytes) { }
-        public System.Buffers.IMemoryOwner<byte> MessageToBytes(System.Type messageType, object message) { }
     }
     public delegate string RpcExchangeNameConvention(System.Type messageType);
     public static class RpcExtensions
@@ -1076,12 +1077,12 @@ namespace EasyNetQ.Consumer
     }
     public readonly struct ConsumeContext : System.IEquatable<EasyNetQ.Consumer.ConsumeContext>
     {
-        public ConsumeContext(in EasyNetQ.MessageReceivedInfo ReceivedInfo, in EasyNetQ.MessageProperties Properties, in System.ReadOnlyMemory<byte> Body, in System.IServiceProvider ServiceResolver, in System.Threading.CancellationToken CancellationToken) { }
+        public ConsumeContext(in EasyNetQ.MessageReceivedInfo ReceivedInfo, in EasyNetQ.MessageProperties Properties, in System.ReadOnlyMemory<byte> Body, in System.IServiceProvider Services, in System.Threading.CancellationToken CancellationToken) { }
         public System.ReadOnlyMemory<byte> Body { get; init; }
         public System.Threading.CancellationToken CancellationToken { get; init; }
         public EasyNetQ.MessageProperties Properties { get; init; }
         public EasyNetQ.MessageReceivedInfo ReceivedInfo { get; init; }
-        public System.IServiceProvider ServiceResolver { get; init; }
+        public System.IServiceProvider Services { get; init; }
     }
     public delegate System.Threading.Tasks.ValueTask<EasyNetQ.Consumer.AckStrategyAsync> ConsumeDelegate(EasyNetQ.Consumer.ConsumeContext context);
     public sealed class ConsumePipelineBuilder
@@ -1196,7 +1197,7 @@ namespace EasyNetQ.Consumer
     public delegate System.Threading.Tasks.Task<EasyNetQ.Consumer.AckStrategyAsync> IMessageHandler<in T>(EasyNetQ.IMessage<T> message, EasyNetQ.MessageReceivedInfo receivedInfo, System.Threading.CancellationToken cancellationToken);
     public class InternalConsumer : EasyNetQ.Consumer.IInternalConsumer, System.IAsyncDisposable
     {
-        public InternalConsumer(System.IServiceProvider serviceResolver, Microsoft.Extensions.Logging.ILogger<EasyNetQ.Consumer.InternalConsumer> logger, EasyNetQ.Consumer.ConsumerConfiguration configuration, EasyNetQ.Consumer.IConsumerConnection connection, EasyNetQ.IEventBus eventBus) { }
+        public InternalConsumer(System.IServiceProvider services, Microsoft.Extensions.Logging.ILogger<EasyNetQ.Consumer.InternalConsumer> logger, EasyNetQ.Consumer.ConsumerConfiguration configuration, EasyNetQ.Consumer.IConsumerConnection connection, EasyNetQ.IEventBus eventBus) { }
         public event EasyNetQ.Consumer.AsyncEventHandler<EasyNetQ.Consumer.InternalConsumerCancelledEventArgs> CancelledAsync;
         public virtual System.Threading.Tasks.ValueTask DisposeAsync() { }
         public System.Threading.Tasks.Task<EasyNetQ.Consumer.InternalConsumerStatus> StartConsumingAsync(bool firstStart, System.Threading.CancellationToken cancellationToken = default) { }
@@ -1210,7 +1211,7 @@ namespace EasyNetQ.Consumer
     }
     public class InternalConsumerFactory : EasyNetQ.Consumer.IInternalConsumerFactory
     {
-        public InternalConsumerFactory(System.IServiceProvider serviceResolver, Microsoft.Extensions.Logging.ILogger<EasyNetQ.Consumer.InternalConsumer> logger, EasyNetQ.Consumer.IConsumerConnection connection, EasyNetQ.IEventBus eventBus) { }
+        public InternalConsumerFactory(System.IServiceProvider services, Microsoft.Extensions.Logging.ILogger<EasyNetQ.Consumer.InternalConsumer> logger, EasyNetQ.Consumer.IConsumerConnection connection, EasyNetQ.IEventBus eventBus) { }
         public EasyNetQ.Consumer.IInternalConsumer CreateConsumer(EasyNetQ.Consumer.ConsumerConfiguration configuration) { }
     }
     public readonly struct InternalConsumerStatus
@@ -1633,7 +1634,7 @@ namespace EasyNetQ.Producer
     }
     public readonly struct ProduceContext : System.IEquatable<EasyNetQ.Producer.ProduceContext>
     {
-        public ProduceContext(in string Exchange, in string RoutingKey, in bool Mandatory, in bool PublisherConfirms, in EasyNetQ.MessageProperties Properties, in System.ReadOnlyMemory<byte> Body, in System.IServiceProvider ServiceResolver, in System.Threading.CancellationToken CancellationToken) { }
+        public ProduceContext(in string Exchange, in string RoutingKey, in bool Mandatory, in bool PublisherConfirms, in EasyNetQ.MessageProperties Properties, in System.ReadOnlyMemory<byte> Body, in System.IServiceProvider Services, in System.Threading.CancellationToken CancellationToken) { }
         public System.ReadOnlyMemory<byte> Body { get; init; }
         public System.Threading.CancellationToken CancellationToken { get; init; }
         public string Exchange { get; init; }
@@ -1641,7 +1642,7 @@ namespace EasyNetQ.Producer
         public EasyNetQ.MessageProperties Properties { get; init; }
         public bool PublisherConfirms { get; init; }
         public string RoutingKey { get; init; }
-        public System.IServiceProvider ServiceResolver { get; init; }
+        public System.IServiceProvider Services { get; init; }
     }
     public delegate System.Threading.Tasks.ValueTask ProduceDelegate(EasyNetQ.Producer.ProduceContext context);
     public sealed class ProducePipelineBuilder
@@ -1677,6 +1678,35 @@ namespace EasyNetQ.Producer
         public PublishReturnedException() { }
         public PublishReturnedException(string message) { }
         public PublishReturnedException(string message, System.Exception inner) { }
+    }
+}
+namespace EasyNetQ.Serialization.SystemTextJson
+{
+    public class MessagePropertiesConverter : System.Text.Json.Serialization.JsonConverter<EasyNetQ.MessageProperties>
+    {
+        public MessagePropertiesConverter() { }
+        public override EasyNetQ.MessageProperties Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options) { }
+        public override void Write(System.Text.Json.Utf8JsonWriter writer, EasyNetQ.MessageProperties value, System.Text.Json.JsonSerializerOptions options) { }
+    }
+    public class SystemObjectNewtonsoftCompatibleConverter : System.Text.Json.Serialization.JsonConverter<object>
+    {
+        public SystemObjectNewtonsoftCompatibleConverter() { }
+        public override object Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options) { }
+        public override void Write(System.Text.Json.Utf8JsonWriter writer, object value, System.Text.Json.JsonSerializerOptions options) { }
+    }
+    public sealed class SystemTextJsonSerializer : EasyNetQ.ISerializer
+    {
+        public SystemTextJsonSerializer() { }
+        public SystemTextJsonSerializer(System.Text.Json.JsonSerializerOptions options) { }
+        public object BytesToMessage(System.Type messageType, in System.ReadOnlyMemory<byte> bytes) { }
+        public System.Buffers.IMemoryOwner<byte> MessageToBytes(System.Type messageType, object message) { }
+    }
+    public sealed class SystemTextJsonSerializerV2 : EasyNetQ.ISerializer
+    {
+        public SystemTextJsonSerializerV2() { }
+        public SystemTextJsonSerializerV2(System.Text.Json.JsonSerializerOptions options) { }
+        public object BytesToMessage(System.Type messageType, in System.ReadOnlyMemory<byte> bytes) { }
+        public System.Buffers.IMemoryOwner<byte> MessageToBytes(System.Type messageType, object message) { }
     }
 }
 namespace EasyNetQ.SystemMessages
