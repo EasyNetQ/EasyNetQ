@@ -212,7 +212,7 @@ public class InternalConsumer : IInternalConsumer
                     consumers.Add(queue.Name, consumer);
 
                     logger.LogInformation(
-                        "Declared consumer with consumerTag {consumerTag} on queue {queue}",
+                        "Declared consumer with consumerTag {ConsumerTag} on queue {Queue}",
                         consumerTag,
                         queue.Name
                     );
@@ -224,7 +224,7 @@ public class InternalConsumer : IInternalConsumer
                 {
                     logger.LogError(
                         exception,
-                        "Failed to declare consumer on queue {queue}",
+                        "Failed to declare consumer on queue {Queue}",
                         queue.Name
                     );
 
@@ -257,7 +257,7 @@ public class InternalConsumer : IInternalConsumer
                     {
                         logger.LogError(
                             exception,
-                            "Failed to stop consuming on consumerTag {consumerTag}",
+                            "Failed to stop consuming on consumerTag {ConsumerTag}",
                             consumerTag
                         );
                     }
@@ -295,7 +295,7 @@ public class InternalConsumer : IInternalConsumer
                     {
                         logger.LogError(
                             ex,
-                            "Failed to dispose on consumerTag {consumerTag}",
+                            "Failed to dispose on consumerTag {ConsumerTag}",
                             consumerTag
                         );
                     }
