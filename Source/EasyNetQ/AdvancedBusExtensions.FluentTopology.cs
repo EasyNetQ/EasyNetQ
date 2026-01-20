@@ -24,6 +24,7 @@ public static partial class AdvancedBusExtensions
     /// Declare a queue. If the queue already exists this method does nothing
     /// </summary>
     /// <param name="advancedBus">The bus instance</param>
+    /// <param name="queue">The name of the queue</param>
     /// <param name="durable"></param>
     /// <param name="exclusive"></param>
     /// <param name="autoDelete"></param>
