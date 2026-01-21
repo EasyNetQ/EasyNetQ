@@ -32,14 +32,14 @@ public interface IQueueDeclareConfiguration
     IQueueDeclareConfiguration AsAutoDelete(bool isAutoDelete);
 
     /// <summary>
-    /// Sets a raw argument for query declaration
+    /// Sets a raw argument for queue declaration
     /// </summary>
     /// <param name="name">The argument name to set</param>
     /// <param name="value">The argument value to set</param>
     /// <returns>IQueueDeclareConfiguration</returns>
     IQueueDeclareConfiguration WithArgument(string name, object value);
     /// <summary>
-    /// Sets a connection type for query declaration
+    /// Sets a connection type for queue declaration
     /// </summary>
     /// <param name="persistentConnectionType">Persistent connection type</param>
     /// <returns>IQueueDeclareConfiguration</returns>
