@@ -27,6 +27,9 @@
     <Project Path="EasyNetQ.Serialization.Tests/EasyNetQ.Serialization.Tests.csproj" />
     <Project Path="EasyNetQ.Tests/EasyNetQ.Tests.csproj" />
   </Folder>
+  <Folder Name="/Benchmarks/">
+    <Project Path="EasyNetQ.Benchmarks/EasyNetQ.Benchmarks.csproj" />
+  </Folder>
   <Project Path="EasyNetQ.Hosepipe/EasyNetQ.Hosepipe.csproj" />
   <Project Path="EasyNetQ/EasyNetQ.csproj" />
 </Solution>
