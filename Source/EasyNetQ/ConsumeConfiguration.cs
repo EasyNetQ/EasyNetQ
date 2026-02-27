@@ -166,20 +166,20 @@ public interface ISimpleConsumeConfiguration
     /// <summary>
     ///     Automatically acknowledge a message
     /// </summary>
-    /// <returns></returns>
+    /// <returns>ISimpleConsumeConfiguration</returns>
     ISimpleConsumeConfiguration WithAutoAck();
 
     /// <summary>
     /// Sets consumer tag
     /// </summary>
     /// <param name="consumerTag">The consumerTag to set</param>
-    /// <returns>IPerQueueConsumeConfiguration</returns>
+    /// <returns>ISimpleConsumeConfiguration</returns>
     ISimpleConsumeConfiguration WithConsumerTag(string consumerTag);
 
     /// <summary>
     ///     Switch a consumer to exclusive mode
     /// </summary>
-    /// <returns>IPerQueueConsumeConfiguration</returns>
+    /// <returns>ISimpleConsumeConfiguration</returns>
     ISimpleConsumeConfiguration WithExclusive(bool isExclusive = true);
 
     /// <summary>
@@ -187,13 +187,13 @@ public interface ISimpleConsumeConfiguration
     /// </summary>
     /// <param name="name">The argument name to set</param>
     /// <param name="value">The argument value to set</param>
-    /// <returns>IPerQueueConsumeConfiguration</returns>
+    /// <returns>ISimpleConsumeConfiguration</returns>
     ISimpleConsumeConfiguration WithArgument(string name, object value);
 
     /// <summary>
     ///     Sets prefetch count
     /// </summary>
     /// <param name="prefetchCount">The prefetchCount to set</param>
-    /// <returns>IConsumerConfiguration</returns>
+    /// <returns>ISimpleConsumeConfiguration</returns>
     ISimpleConsumeConfiguration WithPrefetchCount(ushort prefetchCount);
 }
