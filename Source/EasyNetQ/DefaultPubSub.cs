@@ -100,10 +100,15 @@ public class DefaultPubSub : IPubSub
         var consumerCancellation = await advancedBus.ConsumeAsync<T>(
             queue,
             (message, _, cancellation) => onMessage(message.Body!, cancellation),
-            c => c.WithPrefetchCount(subscriptionConfiguration.PrefetchCount)
+            c =>
+            {
+                c.WithPrefetchCount(subscriptionConfiguration.PrefetchCount)
                 .WithPriority(subscriptionConfiguration.Priority)
                 .WithExclusive(subscriptionConfiguration.IsExclusive)
-                .WithConsumerTag(conventions.ConsumerTagConvention())
+                .WithConsumerTag(conventions.ConsumerTagConvention());
+                if (subscriptionConfiguration.AutoAck)
+                    c.WithAutoAck();
+            }
         );
 
         return new SubscriptionResult(exchange, queue, consumerCancellation);

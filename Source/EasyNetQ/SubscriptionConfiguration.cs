@@ -127,6 +127,11 @@ public interface ISubscriptionConfiguration
     /// <param name="singleActiveConsumer">Queue's single-active-consumer flag</param>
     /// <returns>Returns a reference to itself</returns>
     ISubscriptionConfiguration WithSingleActiveConsumer(bool singleActiveConsumer = true);
+    /// <summary>
+    ///     Automatically acknowledge a message
+    /// </summary>
+    /// <returns></returns>
+    ISubscriptionConfiguration WithAutoAck();
 }
 
 internal class SubscriptionConfiguration : ISubscriptionConfiguration
@@ -141,6 +146,7 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
     public string ExchangeType { get; private set; } = EasyNetQ.ExchangeType.Topic;
     public IDictionary<string, object> QueueArguments { get; private set; }
     public IDictionary<string, object> ExchangeArguments { get; private set; }
+    public bool AutoAck { get; private set; }
 
     public SubscriptionConfiguration(ushort defaultPrefetchCount, string queueType = null)
     {
@@ -152,6 +158,11 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
         Durable = true;
         if (queueType != null)
             QueueArguments = new Dictionary<string, object> { { Argument.QueueType, queueType } };
+    }
+    public ISubscriptionConfiguration WithAutoAck()
+    {
+        AutoAck = true;
+        return this;
     }
 
     public ISubscriptionConfiguration WithTopic(string topic)

@@ -548,6 +548,7 @@ namespace EasyNetQ
     {
         EasyNetQ.ISubscriptionConfiguration AsExclusive(bool isExclusive = true);
         EasyNetQ.ISubscriptionConfiguration WithAlternateExchange(string alternateExchange);
+        EasyNetQ.ISubscriptionConfiguration WithAutoAck();
         EasyNetQ.ISubscriptionConfiguration WithAutoDelete(bool autoDelete = true);
         EasyNetQ.ISubscriptionConfiguration WithDurable(bool durable = true);
         EasyNetQ.ISubscriptionConfiguration WithExchangeType(string exchangeType);
