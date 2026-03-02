@@ -24,10 +24,10 @@
     </PackageVersion>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
-    <PackageVersion Include="System.Text.Json" Version="8.0.6" />
+    <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.3" />
+    <PackageVersion Include="System.Text.Json" Version="10.0.3" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.3" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="8.0.1" />
   </ItemGroup>
