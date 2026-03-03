@@ -1,5 +1,6 @@
 // ReSharper disable InconsistentNaming
 
+using System.Text.Json.Serialization;
 using EasyNetQ.Serialization.NewtonsoftJson;
 using EasyNetQ.Serialization.SystemTextJson;
 using RabbitMQ.Client;
@@ -121,9 +122,6 @@ public class SerializerTests
     [MemberData(nameof(GetSerializers))]
     public void Should_be_able_to_serialize_and_deserialize_polymorphic_properties(string name, ISerializer serializer)
     {
-        if (name == "SystemTextJson") return; // Polymorphic deserialization doesn't work out of the box
-        if (name == "SystemTextJsonV2") return; // Polymorphic deserialization doesn't work out of the box
-
         using var serializedMessage = serializer.MessageToBytes(typeof(PolyMessage), new PolyMessage { AorB = new B() });
         var result = (PolyMessage)serializer.BytesToMessage(typeof(PolyMessage), serializedMessage.Memory);
         Assert.IsType<B>(result.AorB);
@@ -135,7 +133,8 @@ public class SerializerTests
         yield return ["SystemTextJson", new SystemTextJsonSerializer()];
         yield return ["SystemTextJsonV2", new SystemTextJsonSerializerV2()];
     }
-
+    [JsonDerivedType(typeof(A), typeDiscriminator: "a")]
+    [JsonDerivedType(typeof(B), typeDiscriminator: "b")]
     private class A
     {
     }

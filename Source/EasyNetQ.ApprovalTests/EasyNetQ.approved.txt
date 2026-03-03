@@ -294,7 +294,8 @@ namespace EasyNetQ
     public sealed class ExchangeAttribute : System.Attribute
     {
         public ExchangeAttribute() { }
-        public string Name { get; set; }
+        public ExchangeAttribute(string name) { }
+        public string Name { get; init; }
     }
     public static class ExchangeDeclareConfigurationExtensions
     {
@@ -780,8 +781,9 @@ namespace EasyNetQ
     public sealed class QueueAttribute : System.Attribute
     {
         public QueueAttribute() { }
-        public string Name { get; set; }
-        public string Type { get; set; }
+        public QueueAttribute(string name, string type = null) { }
+        public string Name { get; init; }
+        public string Type { get; init; }
     }
     public static class QueueDeclareConfigurationExtensions
     {
@@ -949,7 +951,8 @@ namespace EasyNetQ.AutoSubscribe
     public class AutoSubscriberConsumerAttribute : System.Attribute
     {
         public AutoSubscriberConsumerAttribute() { }
-        public string SubscriptionId { get; set; }
+        public AutoSubscriberConsumerAttribute(string subscriptionId) { }
+        public string SubscriptionId { get; init; }
     }
     public class AutoSubscriberConsumerInfo
     {
@@ -976,7 +979,7 @@ namespace EasyNetQ.AutoSubscribe
     public class ForTopicAttribute : System.Attribute
     {
         public ForTopicAttribute(string topic) { }
-        public string Topic { get; set; }
+        public string Topic { get; init; }
     }
     public interface IAutoSubscriberMessageDispatcher
     {
