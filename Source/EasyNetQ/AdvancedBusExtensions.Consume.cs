@@ -127,6 +127,8 @@ public static partial class AdvancedBusExtensions
                 handler,
                 p =>
                 {
+                    if (consumeConfiguration.AutoAck)
+                        p.WithAutoAck();
                     if (consumeConfiguration.ConsumerTag != null)
                         p.WithConsumerTag(consumeConfiguration.ConsumerTag);
                     if (consumeConfiguration.IsExclusive.HasValue)
@@ -177,6 +179,8 @@ public static partial class AdvancedBusExtensions
                 addHandlers,
                 p =>
                 {
+                    if (consumeConfiguration.AutoAck)
+                        p.WithAutoAck();
                     if (consumeConfiguration.ConsumerTag != null)
                         p.WithConsumerTag(consumeConfiguration.ConsumerTag);
                     if (consumeConfiguration.IsExclusive.HasValue)
