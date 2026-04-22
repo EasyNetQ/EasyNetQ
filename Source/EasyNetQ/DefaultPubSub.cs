@@ -74,19 +74,19 @@ public class DefaultPubSub : IPubSub
     )
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
-
-        var subscriptionConfiguration = new SubscriptionConfiguration(configuration.PrefetchCount, conventions.QueueTypeConvention(typeof(T)), conventions.ExchangeTypeConvention(typeof(T)));
+        var messageType = typeof(T);
+        var subscriptionConfiguration = new SubscriptionConfiguration(configuration.PrefetchCount, conventions.QueueTypeConvention(messageType), conventions.ExchangeTypeConvention(messageType));
         configure(subscriptionConfiguration);
 
         var exchange = await advancedBus.ExchangeDeclareAsync(
-            exchange: conventions.ExchangeNamingConvention(typeof(T)),
+            exchange: conventions.ExchangeNamingConvention(messageType),
             type: subscriptionConfiguration.ExchangeType,
             arguments: subscriptionConfiguration.ExchangeArguments,
             cancellationToken: cts.Token
         ).ConfigureAwait(false);
 
         var queue = await advancedBus.QueueDeclareAsync(
-            queue: subscriptionConfiguration.QueueName ?? conventions.QueueNamingConvention(typeof(T), subscriptionId),
+            queue: subscriptionConfiguration.QueueName ?? conventions.QueueNamingConvention(messageType, subscriptionId),
             durable: subscriptionConfiguration.Durable,
             autoDelete: subscriptionConfiguration.AutoDelete,
             arguments: subscriptionConfiguration.QueueArguments,
