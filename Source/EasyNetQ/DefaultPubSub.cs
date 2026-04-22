@@ -51,7 +51,7 @@ public class DefaultPubSub : IPubSub
         };
         var advancedMessage = new Message<T>(message, advancedMessageProperties);
         var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(
-            messageType, conventions.ExchangeTypingConvention(messageType), cts.Token
+            messageType, conventions.ExchangeTypeConvention(messageType), cts.Token
         ).ConfigureAwait(false);
         await advancedBus.PublishAsync(
             exchange.Name, publishConfiguration.Topic, null, publishConfiguration.PublisherConfirms, advancedMessage, cts.Token
@@ -75,7 +75,7 @@ public class DefaultPubSub : IPubSub
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-        var subscriptionConfiguration = new SubscriptionConfiguration(configuration.PrefetchCount, conventions.QueueTypeConvention(typeof(T)), conventions.ExchangeTypingConvention(typeof(T)));
+        var subscriptionConfiguration = new SubscriptionConfiguration(configuration.PrefetchCount, conventions.QueueTypeConvention(typeof(T)), conventions.ExchangeTypeConvention(typeof(T)));
         configure(subscriptionConfiguration);
 
         var exchange = await advancedBus.ExchangeDeclareAsync(

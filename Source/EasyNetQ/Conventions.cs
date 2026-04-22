@@ -83,7 +83,7 @@ public interface IConventions
     /// <summary>
     ///     Convention for exchange type
     /// </summary>
-    ExchangeTypeConvention ExchangeTypingConvention { get; }
+    ExchangeTypeConvention ExchangeTypeConvention { get; }
 
     /// <summary>
     ///     Convention for topic naming
@@ -164,7 +164,7 @@ public class Conventions : IConventions
             var attr = GetExchangeAttribute(type);
             return attr.Name ?? typeNameSerializer.Serialize(type);
         };
-        ExchangeTypingConvention = type =>
+        ExchangeTypeConvention = type =>
         {
             var attr = GetExchangeAttribute(type);
             return attr.ExchangeType ?? ExchangeType.Topic;
@@ -222,7 +222,7 @@ public class Conventions : IConventions
     /// <inheritdoc />
     public ExchangeNameConvention ExchangeNamingConvention { get; set; }
     /// <inheritdoc />
-    public ExchangeTypeConvention ExchangeTypingConvention { get; set; }
+    public ExchangeTypeConvention ExchangeTypeConvention { get; set; }
     /// <inheritdoc />
     public TopicNameConvention TopicNamingConvention { get; set; }
 

@@ -154,7 +154,7 @@ namespace EasyNetQ
         public EasyNetQ.ErrorQueueNameConvention ErrorQueueNamingConvention { get; set; }
         public EasyNetQ.ErrorQueueTypeConvention ErrorQueueTypeConvention { get; set; }
         public EasyNetQ.ExchangeNameConvention ExchangeNamingConvention { get; set; }
-        public EasyNetQ.ExchangeTypeConvention ExchangeTypingConvention { get; set; }
+        public EasyNetQ.ExchangeTypeConvention ExchangeTypeConvention { get; set; }
         public EasyNetQ.QueueNameConvention QueueNamingConvention { get; set; }
         public EasyNetQ.QueueTypeConvention QueueTypeConvention { get; set; }
         public EasyNetQ.RpcExchangeNameConvention RpcRequestExchangeNamingConvention { get; set; }
@@ -370,7 +370,7 @@ namespace EasyNetQ
         EasyNetQ.ErrorQueueNameConvention ErrorQueueNamingConvention { get; }
         EasyNetQ.ErrorQueueTypeConvention ErrorQueueTypeConvention { get; }
         EasyNetQ.ExchangeNameConvention ExchangeNamingConvention { get; }
-        EasyNetQ.ExchangeTypeConvention ExchangeTypingConvention { get; }
+        EasyNetQ.ExchangeTypeConvention ExchangeTypeConvention { get; }
         EasyNetQ.QueueNameConvention QueueNamingConvention { get; }
         EasyNetQ.QueueTypeConvention QueueTypeConvention { get; }
         EasyNetQ.RpcExchangeNameConvention RpcRequestExchangeNamingConvention { get; }
