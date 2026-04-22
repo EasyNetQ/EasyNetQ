@@ -143,12 +143,12 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
     public bool IsExclusive { get; private set; }
     public bool Durable { get; private set; }
     public string QueueName { get; private set; }
-    public string ExchangeType { get; private set; } = EasyNetQ.ExchangeType.Topic;
+    public string ExchangeType { get; private set; }
     public IDictionary<string, object> QueueArguments { get; private set; }
     public IDictionary<string, object> ExchangeArguments { get; private set; }
     public bool AutoAck { get; private set; }
 
-    public SubscriptionConfiguration(ushort defaultPrefetchCount, string queueType = null)
+    public SubscriptionConfiguration(ushort defaultPrefetchCount, string queueType = null, string exchangeType = null)
     {
         Topics = new List<string>();
         AutoDelete = false;
@@ -158,6 +158,7 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
         Durable = true;
         if (queueType != null)
             QueueArguments = new Dictionary<string, object> { { Argument.QueueType, queueType } };
+        ExchangeType = exchangeType ?? EasyNetQ.ExchangeType.Topic;
     }
     public ISubscriptionConfiguration WithAutoAck()
     {
