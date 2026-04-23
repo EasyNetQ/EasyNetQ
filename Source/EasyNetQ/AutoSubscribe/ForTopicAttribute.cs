@@ -8,5 +8,5 @@ public class ForTopicAttribute : Attribute
         Topic = topic;
     }
 
-    public string Topic { get; set; }
+    public string Topic { get; init; }
 }
