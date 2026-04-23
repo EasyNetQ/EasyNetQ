@@ -6,7 +6,10 @@ namespace EasyNetQ;
 ///     Convention for exchange naming
 /// </summary>
 public delegate string ExchangeNameConvention(Type messageType);
-
+/// <summary>
+///     Convention for exchange type
+/// </summary>
+public delegate string ExchangeTypeConvention(Type messageType);
 /// <summary>
 ///     Convention for topic naming
 /// </summary>
@@ -77,6 +80,10 @@ public interface IConventions
     ///     Convention for exchange naming
     /// </summary>
     ExchangeNameConvention ExchangeNamingConvention { get; }
+    /// <summary>
+    ///     Convention for exchange type
+    /// </summary>
+    ExchangeTypeConvention ExchangeTypeConvention { get; }
 
     /// <summary>
     ///     Convention for topic naming
@@ -157,7 +164,11 @@ public class Conventions : IConventions
             var attr = GetExchangeAttribute(type);
             return attr.Name ?? typeNameSerializer.Serialize(type);
         };
-
+        ExchangeTypeConvention = type =>
+        {
+            var attr = GetExchangeAttribute(type);
+            return attr.ExchangeType ?? ExchangeType.Topic;
+        };
         QueueTypeConvention = type =>
         {
             var attr = GetQueueAttribute(type);
@@ -210,7 +221,8 @@ public class Conventions : IConventions
 
     /// <inheritdoc />
     public ExchangeNameConvention ExchangeNamingConvention { get; set; }
-
+    /// <inheritdoc />
+    public ExchangeTypeConvention ExchangeTypeConvention { get; set; }
     /// <inheritdoc />
     public TopicNameConvention TopicNamingConvention { get; set; }
 

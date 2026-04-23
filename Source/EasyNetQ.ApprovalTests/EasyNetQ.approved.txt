@@ -154,6 +154,7 @@ namespace EasyNetQ
         public EasyNetQ.ErrorQueueNameConvention ErrorQueueNamingConvention { get; set; }
         public EasyNetQ.ErrorQueueTypeConvention ErrorQueueTypeConvention { get; set; }
         public EasyNetQ.ExchangeNameConvention ExchangeNamingConvention { get; set; }
+        public EasyNetQ.ExchangeTypeConvention ExchangeTypeConvention { get; set; }
         public EasyNetQ.QueueNameConvention QueueNamingConvention { get; set; }
         public EasyNetQ.QueueTypeConvention QueueTypeConvention { get; set; }
         public EasyNetQ.RpcExchangeNameConvention RpcRequestExchangeNamingConvention { get; set; }
@@ -294,7 +295,8 @@ namespace EasyNetQ
     public sealed class ExchangeAttribute : System.Attribute
     {
         public ExchangeAttribute() { }
-        public ExchangeAttribute(string name) { }
+        public ExchangeAttribute(string name, string exchangeType = null) { }
+        public string ExchangeType { get; init; }
         public string Name { get; init; }
     }
     public static class ExchangeDeclareConfigurationExtensions
@@ -310,6 +312,7 @@ namespace EasyNetQ
         public const string Header = "headers";
         public const string Topic = "topic";
     }
+    public delegate string ExchangeTypeConvention(System.Type messageType);
     public class HostConfiguration
     {
         public HostConfiguration(string host, ushort port) { }
@@ -367,6 +370,7 @@ namespace EasyNetQ
         EasyNetQ.ErrorQueueNameConvention ErrorQueueNamingConvention { get; }
         EasyNetQ.ErrorQueueTypeConvention ErrorQueueTypeConvention { get; }
         EasyNetQ.ExchangeNameConvention ExchangeNamingConvention { get; }
+        EasyNetQ.ExchangeTypeConvention ExchangeTypeConvention { get; }
         EasyNetQ.QueueNameConvention QueueNamingConvention { get; }
         EasyNetQ.QueueTypeConvention QueueTypeConvention { get; }
         EasyNetQ.RpcExchangeNameConvention RpcRequestExchangeNamingConvention { get; }

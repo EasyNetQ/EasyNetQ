@@ -38,11 +38,10 @@ public class DefaultPubSub : IPubSub
     public virtual async Task PublishAsync<T>(T message, Action<IPublishConfiguration> configure, CancellationToken cancellationToken)
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
-
-        var publishConfiguration = new PublishConfiguration(conventions.TopicNamingConvention(typeof(T)));
+        var messageType = typeof(T);
+        var publishConfiguration = new PublishConfiguration(conventions.TopicNamingConvention(messageType));
         configure(publishConfiguration);
 
-        var messageType = typeof(T);
         var advancedMessageProperties = new MessageProperties
         {
             Priority = publishConfiguration.Priority ?? 0,
@@ -52,7 +51,7 @@ public class DefaultPubSub : IPubSub
         };
         var advancedMessage = new Message<T>(message, advancedMessageProperties);
         var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(
-            messageType, ExchangeType.Topic, cts.Token
+            messageType, conventions.ExchangeTypeConvention(messageType), cts.Token
         ).ConfigureAwait(false);
         await advancedBus.PublishAsync(
             exchange.Name, publishConfiguration.Topic, null, publishConfiguration.PublisherConfirms, advancedMessage, cts.Token
@@ -75,19 +74,19 @@ public class DefaultPubSub : IPubSub
     )
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
-
-        var subscriptionConfiguration = new SubscriptionConfiguration(configuration.PrefetchCount, conventions.QueueTypeConvention(typeof(T)));
+        var messageType = typeof(T);
+        var subscriptionConfiguration = new SubscriptionConfiguration(configuration.PrefetchCount, conventions.QueueTypeConvention(messageType), conventions.ExchangeTypeConvention(messageType));
         configure(subscriptionConfiguration);
 
         var exchange = await advancedBus.ExchangeDeclareAsync(
-            exchange: conventions.ExchangeNamingConvention(typeof(T)),
+            exchange: conventions.ExchangeNamingConvention(messageType),
             type: subscriptionConfiguration.ExchangeType,
             arguments: subscriptionConfiguration.ExchangeArguments,
             cancellationToken: cts.Token
         ).ConfigureAwait(false);
 
         var queue = await advancedBus.QueueDeclareAsync(
-            queue: subscriptionConfiguration.QueueName ?? conventions.QueueNamingConvention(typeof(T), subscriptionId),
+            queue: subscriptionConfiguration.QueueName ?? conventions.QueueNamingConvention(messageType, subscriptionId),
             durable: subscriptionConfiguration.Durable,
             autoDelete: subscriptionConfiguration.AutoDelete,
             arguments: subscriptionConfiguration.QueueArguments,
