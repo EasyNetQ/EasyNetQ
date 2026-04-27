@@ -72,7 +72,7 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
 
         try
         {
-            var channel = await connection.CreateChannelAsync(
+            using var channel = await connection.CreateChannelAsync(
                 new CreateChannelOptions(configuration.PublisherConfirms, configuration.PublisherConfirms),
                 cancellationToken);
 
