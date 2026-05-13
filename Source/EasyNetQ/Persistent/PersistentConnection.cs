@@ -126,10 +126,9 @@ public class PersistentConnection : IPersistentConnection
             return new AmqpTcpEndpoint(x.Host, x.Port, ssl);
         }).ToList();
 
-        if (await connectionFactory.CreateConnectionAsync(endpoints, cancellationToken) is not IConnection connection)
-            // review this: the return type is IConnection, so this code is practically unreachable, check with pliner
-            throw new NotSupportedException("Non-recoverable connection is not supported");
-
+        var connection = await connectionFactory.CreateConnectionAsync(endpoints, cancellationToken);
+        if (connection == null)
+            throw new NotSupportedException("Null connection is not supported");
         connection.ConnectionShutdownAsync += OnConnectionShutdown;
         connection.ConnectionBlockedAsync += OnConnectionBlocked;
         connection.ConnectionUnblockedAsync += OnConnectionUnblocked;
