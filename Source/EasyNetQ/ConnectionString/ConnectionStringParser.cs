@@ -11,12 +11,9 @@ public class ConnectionStringParser : IConnectionStringParser
         try
         {
             var updater = ConnectionStringGrammar.ParseConnectionString(connectionString);
-            ConnectionConfiguration config = updater.Aggregate(
+            return updater.Aggregate(
                 new ConnectionConfiguration(), (current, updateFunction) => updateFunction(current)
             );
-            if (config.Ssl.Enabled)
-                config.Ssl.ServerName = config.Hosts.First().Host;
-            return config;
         }
         catch (ParseException parseException)
         {
