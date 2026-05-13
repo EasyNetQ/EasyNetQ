@@ -29,6 +29,7 @@ public class ConnectionStringParserTests
         configuration.MandatoryPublish.Should().BeTrue();
         configuration.ConsumerDispatcherConcurrency.Should().Be(1);
         configuration.Ssl.Enabled.Should().BeTrue();
+        configuration.Ssl.ServerName.Should().Be("192.168.1.1");
     }
 
     [Fact]

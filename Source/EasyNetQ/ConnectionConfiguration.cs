@@ -43,7 +43,7 @@ public class ConnectionConfiguration
 
         Hosts = new List<HostConfiguration>();
 
-        Ssl = new SslOption();
+        Ssl = new SslOption(null);
         ClientProperties = new Dictionary<string, object>();
     }
 
@@ -178,5 +178,5 @@ public class HostConfiguration
     /// <summary>
     ///     TSL configuration of the host
     /// </summary>
-    public SslOption Ssl { get; } = new();
+    public SslOption Ssl { get; } = new(null);
 }
