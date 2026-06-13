@@ -1,3 +1,4 @@
+using EasyNetQ.ConnectionString;
 using EasyNetQ.Persistent;
 using EasyNetQ.Tests.Mocking;
 using Microsoft.Extensions.Logging;
@@ -98,5 +99,29 @@ public class PersistentConnectionTests
 
         connection.Status.State.Should().Be(PersistentConnectionState.Connected);
         await mockBuilder.ConnectionFactory.Received(1).CreateConnectionAsync(Arg.Any<IList<AmqpTcpEndpoint>>());
+    }
+
+    [Fact]
+    public async Task Should_pass_ssl_servername_the_same_as_hostname()
+    {
+        var config = new ConnectionStringParser().Parse("host=test-host:5671;ssl=true");
+
+        await using var mockBuilder = new MockBuilder();
+        using var connection = new PersistentConnection(
+            PersistentConnectionType.Producer,
+            Substitute.For<ILogger<IPersistentConnection>>(),
+            config,
+            mockBuilder.ConnectionFactory,
+            mockBuilder.EventBus
+        );
+
+        connection.Status.State.Should().Be(PersistentConnectionState.NotInitialised);
+
+        await connection.CreateChannelAsync();
+
+        await mockBuilder.ConnectionFactory.Received(1)
+            .CreateConnectionAsync(Arg.Is<IList<AmqpTcpEndpoint>>(eps => eps.Single().Ssl.ServerName == eps.Single().HostName));
+
+        connection.Status.State.Should().Be(PersistentConnectionState.Connected);
     }
 }
