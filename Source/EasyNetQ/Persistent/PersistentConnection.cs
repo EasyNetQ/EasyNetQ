@@ -203,7 +203,7 @@ public class PersistentConnection : IPersistentConnection
             CertificateValidationCallback = option.CertificateValidationCallback,
             CheckCertificateRevocation = option.CheckCertificateRevocation,
             Enabled = option.Enabled,
-            ServerName = option.ServerName ?? host,
+            ServerName = string.IsNullOrEmpty(option.ServerName) ? host : option.ServerName,
             Version = option.Version,
         };
 }
