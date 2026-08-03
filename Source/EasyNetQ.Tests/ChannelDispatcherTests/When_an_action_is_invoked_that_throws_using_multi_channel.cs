@@ -38,7 +38,7 @@ public class When_an_action_is_invoked_that_throws_using_multi_channel : IAsyncL
     public async Task Should_raise_the_exception_on_the_calling_thread()
     {
         await Assert.ThrowsAsync<CrazyTestOnlyException>(
-            () => dispatcher.InvokeAsync<int>(_ => throw new CrazyTestOnlyException(), PersistentChannelDispatchOptions.ProducerTopology, cancellationToken: TestContext.Current.CancellationToken).AsTask()
+            () => dispatcher.InvokeAsync<int>(_ => throw new CrazyTestOnlyException(), PersistentChannelDispatchOptions.ProducerTopology, cancellationToken: default).AsTask()
         );
     }
 
@@ -46,10 +46,10 @@ public class When_an_action_is_invoked_that_throws_using_multi_channel : IAsyncL
     public async Task Should_call_action_when_previous_threw_an_exception()
     {
         await Assert.ThrowsAsync<Exception>(
-            () => dispatcher.InvokeAsync<int>(_ => throw new Exception(), PersistentChannelDispatchOptions.ProducerTopology, cancellationToken: TestContext.Current.CancellationToken).AsTask()
+            () => dispatcher.InvokeAsync<int>(_ => throw new Exception(), PersistentChannelDispatchOptions.ProducerTopology, cancellationToken: default).AsTask()
         );
 
-        var result = await dispatcher.InvokeAsync(_ => Task.FromResult(42), PersistentChannelDispatchOptions.ProducerTopology, cancellationToken: TestContext.Current.CancellationToken);
+        var result = await dispatcher.InvokeAsync(_ => Task.FromResult(42), PersistentChannelDispatchOptions.ProducerTopology, cancellationToken: default);
         result.Should().Be(42);
     }
 

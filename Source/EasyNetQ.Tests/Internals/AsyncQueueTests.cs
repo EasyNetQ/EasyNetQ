@@ -35,9 +35,9 @@ public class AsyncQueueTests
     public async Task Should_complete_dequeue_task_in_order()
     {
         using var queue = new AsyncQueue<int>();
-        var firstTask = queue.DequeueAsync(TestContext.Current.CancellationToken);
-        var secondTask = queue.DequeueAsync(TestContext.Current.CancellationToken);
-        var thirdTask = queue.DequeueAsync(TestContext.Current.CancellationToken);
+        var firstTask = queue.DequeueAsync(default);
+        var secondTask = queue.DequeueAsync(default);
+        var thirdTask = queue.DequeueAsync(default);
         queue.Enqueue(1);
         queue.Enqueue(2);
         queue.Enqueue(3);

@@ -27,7 +27,7 @@ public class QueueInsertionTests
             QueueName = "Hosepipe_test_queue"
         };
 
-        await queueInsertion.PublishMessagesToQueueAsync(GetMessagesAsync(messages), parameters, cancellationToken: TestContext.Current.CancellationToken);
+        await queueInsertion.PublishMessagesToQueueAsync(GetMessagesAsync(messages), parameters, cancellationToken: default);
     }
 
     private async IAsyncEnumerable<HosepipeMessage> GetMessagesAsync(HosepipeMessage[] messages)

@@ -28,13 +28,13 @@ public class When_an_error_occurs_in_the_message_handler : ConsumerTestBase
                                            args.ReceivedInfo.DeliveryTag == DeliverTag &&
                                            args.ReceivedInfo.Exchange == "the_exchange" &&
                                            args.Body.ToArray().SequenceEqual(OriginalBody)),
-            Arg.Is<Exception>(e => e == exception), cancellationToken: TestContext.Current.CancellationToken
+            Arg.Is<Exception>(e => e == exception), cancellationToken: default
         );
     }
 
     [Fact]
     public async Task Should_ack()
     {
-        await MockBuilder.Channels[0].Received().BasicAckAsync(DeliverTag, false, cancellationToken: TestContext.Current.CancellationToken);
+        await MockBuilder.Channels[0].Received().BasicAckAsync(DeliverTag, false, cancellationToken: default);
     }
 }

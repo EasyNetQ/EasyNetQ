@@ -35,13 +35,13 @@ public class When_an_action_is_invoked : IAsyncLifetime
     [Fact]
     public async Task Should_open_a_channel()
     {
-        await persistentConnection.Received().CreateChannelAsync(Arg.Any<CreateChannelOptions>(), TestContext.Current.CancellationToken);
+        await persistentConnection.Received().CreateChannelAsync(Arg.Any<CreateChannelOptions>(), default);
     }
 
     [Fact]
     public async Task Should_run_action_on_channel()
     {
-        await channel.Received().ExchangeDeclareAsync("MyExchange", ExchangeType.Direct, cancellationToken: TestContext.Current.CancellationToken);
+        await channel.Received().ExchangeDeclareAsync("MyExchange", ExchangeType.Direct, cancellationToken: default);
     }
 
     public async ValueTask DisposeAsync()

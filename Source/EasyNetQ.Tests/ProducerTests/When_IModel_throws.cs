@@ -35,7 +35,7 @@ public class When_IModel_throws_because_of_closed_connection : IAsyncLifetime
     {
         try
         {
-            await mockBuilder.PubSub.PublishAsync(new MyMessage { Text = "Hello World" }, cancellationToken: TestContext.Current.CancellationToken);
+            await mockBuilder.PubSub.PublishAsync(new MyMessage { Text = "Hello World" }, cancellationToken: default);
         }
         catch (Exception ex)
         {

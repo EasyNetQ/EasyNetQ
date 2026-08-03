@@ -68,21 +68,21 @@ public class When_an_action_is_performed_and_channel_reopens
             .Do(_ => throw exception);
         var channel = Substitute.For<IChannel, IRecoverable>();
 #pragma warning disable IDISP004
-        persistentConnection.CreateChannelAsync(Arg.Any<CreateChannelOptions>(), cancellationToken: TestContext.Current.CancellationToken).Returns(_ => brokenChannel, _ => channel);
+        persistentConnection.CreateChannelAsync(Arg.Any<CreateChannelOptions>(), cancellationToken: default).Returns(_ => brokenChannel, _ => channel);
 #pragma warning restore IDISP004
 
         await using var persistentChannel = new PersistentChannel(
             new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, Substitute.For<IEventBus>()
         );
 
-        await persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", ExchangeType.Direct), cancellationToken: TestContext.Current.CancellationToken);
+        await persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", ExchangeType.Direct), cancellationToken: default);
 
-        await brokenChannel.Received().ExchangeDeclareAsync("MyExchange", ExchangeType.Direct, cancellationToken: TestContext.Current.CancellationToken);
-        await brokenChannel.Received().CloseAsync(cancellationToken: TestContext.Current.CancellationToken);
+        await brokenChannel.Received().ExchangeDeclareAsync("MyExchange", ExchangeType.Direct, cancellationToken: default);
+        await brokenChannel.Received().CloseAsync(cancellationToken: default);
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         brokenChannel.Received().DisposeAsync();
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-        await channel.Received().ExchangeDeclareAsync("MyExchange", ExchangeType.Direct, cancellationToken: TestContext.Current.CancellationToken);
+        await channel.Received().ExchangeDeclareAsync("MyExchange", ExchangeType.Direct, cancellationToken: default);
     }
 
     [Theory]
@@ -95,7 +95,7 @@ public class When_an_action_is_performed_and_channel_reopens
             .Do(_ => throw exception);
 
 #pragma warning disable IDISP004
-        persistentConnection.CreateChannelAsync(Arg.Any<CreateChannelOptions>(), cancellationToken: TestContext.Current.CancellationToken).Returns(_ => brokenChannel);
+        persistentConnection.CreateChannelAsync(Arg.Any<CreateChannelOptions>(), cancellationToken: default).Returns(_ => brokenChannel);
 #pragma warning restore IDISP004
 
         await using var persistentChannel = new PersistentChannel(
@@ -103,11 +103,11 @@ public class When_an_action_is_performed_and_channel_reopens
         );
         await Assert.ThrowsAsync(
             exception.GetType(),
-            async () => await persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", ExchangeType.Direct), cancellationToken: TestContext.Current.CancellationToken)
+            async () => await persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", ExchangeType.Direct), cancellationToken: default)
         );
 
-        await brokenChannel.Received().ExchangeDeclareAsync("MyExchange", ExchangeType.Direct, cancellationToken: TestContext.Current.CancellationToken);
-        await brokenChannel.Received().CloseAsync(cancellationToken: TestContext.Current.CancellationToken);
+        await brokenChannel.Received().ExchangeDeclareAsync("MyExchange", ExchangeType.Direct, cancellationToken: default);
+        await brokenChannel.Received().CloseAsync(cancellationToken: default);
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         brokenChannel.Received().DisposeAsync();
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
@@ -120,7 +120,7 @@ public class When_an_action_is_performed_and_channel_reopens
 
         var channel = Substitute.For<IChannel, IRecoverable>();
 #pragma warning disable IDISP004
-        persistentConnection.CreateChannelAsync(Arg.Any<CreateChannelOptions>(), cancellationToken: TestContext.Current.CancellationToken)
+        persistentConnection.CreateChannelAsync(Arg.Any<CreateChannelOptions>(), cancellationToken: default)
 #pragma warning restore IDISP004
             .Returns(
                 _ => throw new BrokerUnreachableException(new Exception("Oops")),
@@ -131,9 +131,9 @@ public class When_an_action_is_performed_and_channel_reopens
             new PersistentChannelOptions(), Substitute.For<ILogger<PersistentChannel>>(), persistentConnection, Substitute.For<IEventBus>()
         );
 
-        await persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", ExchangeType.Direct), cancellationToken: TestContext.Current.CancellationToken);
+        await persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", ExchangeType.Direct), cancellationToken: default);
 
-        await channel.Received().ExchangeDeclareAsync("MyExchange", ExchangeType.Direct, cancellationToken: TestContext.Current.CancellationToken);
+        await channel.Received().ExchangeDeclareAsync("MyExchange", ExchangeType.Direct, cancellationToken: default);
     }
 
     [Fact]
@@ -142,7 +142,7 @@ public class When_an_action_is_performed_and_channel_reopens
         using var persistentConnection = Substitute.For<IPersistentConnection>();
         var channel = Substitute.For<IChannel, IRecoverable>();
 #pragma warning disable IDISP004
-        persistentConnection.CreateChannelAsync(Arg.Any<CreateChannelOptions>(), cancellationToken: TestContext.Current.CancellationToken)
+        persistentConnection.CreateChannelAsync(Arg.Any<CreateChannelOptions>(), cancellationToken: default)
 #pragma warning restore IDISP004
             .Returns(
                 _ => throw new BrokerUnreachableException(new AuthenticationFailureException("Oops")),
@@ -154,9 +154,9 @@ public class When_an_action_is_performed_and_channel_reopens
         );
 
         await Assert.ThrowsAsync<BrokerUnreachableException>(
-            async () => await persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", ExchangeType.Direct), cancellationToken: TestContext.Current.CancellationToken)
+            async () => await persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", ExchangeType.Direct), cancellationToken: default)
         );
 
-        await channel.DidNotReceive().ExchangeDeclareAsync("MyExchange", ExchangeType.Direct, cancellationToken: TestContext.Current.CancellationToken);
+        await channel.DidNotReceive().ExchangeDeclareAsync("MyExchange", ExchangeType.Direct, cancellationToken: default);
     }
 }

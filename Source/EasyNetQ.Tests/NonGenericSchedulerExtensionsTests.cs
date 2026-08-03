@@ -11,7 +11,7 @@ public class NonGenericSchedulerExtensionsTests
     {
         var message = DateTime.UtcNow;
         var messageType = typeof(DateTime);
-        await scheduler.FuturePublishAsync(message, messageType, delay, configure, cancellationToken: TestContext.Current.CancellationToken);
+        await scheduler.FuturePublishAsync(message, messageType, delay, configure, cancellationToken: default);
 
 #pragma warning disable 4014
         scheduler.Received()
@@ -30,7 +30,7 @@ public class NonGenericSchedulerExtensionsTests
         var message = new Dog();
         var messageType = typeof(Dog);
 
-        await scheduler.FuturePublishAsync(message, messageType, delay, configure, cancellationToken: TestContext.Current.CancellationToken);
+        await scheduler.FuturePublishAsync(message, messageType, delay, configure, cancellationToken: default);
 
 #pragma warning disable 4014
         scheduler.Received()
@@ -49,7 +49,7 @@ public class NonGenericSchedulerExtensionsTests
         var message = (IAnimal)new Dog();
         var messageType = typeof(IAnimal);
 
-        await scheduler.FuturePublishAsync(message, messageType, delay, configure, cancellationToken: TestContext.Current.CancellationToken);
+        await scheduler.FuturePublishAsync(message, messageType, delay, configure, cancellationToken: default);
 
 #pragma warning disable 4014
         scheduler.Received()

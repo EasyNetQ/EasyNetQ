@@ -42,8 +42,8 @@ public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : IA
             mockBuilder.EventBus.Subscribe((StartConsumingSucceededEvent _) => Task.FromResult(waiter.Signal()));
 #pragma warning restore IDISP004
 
-            var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage, cancellationToken: TestContext.Current.CancellationToken);
-            if (!waiter.Wait(5000, cancellationToken: TestContext.Current.CancellationToken))
+            var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage, cancellationToken: default);
+            if (!waiter.Wait(5000, cancellationToken: default))
                 throw new TimeoutException();
 
             await DeliverMessageAsync(null);
@@ -63,8 +63,8 @@ public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : IA
             mockBuilder.EventBus.Subscribe((StartConsumingSucceededEvent _) => Task.FromResult(waiter.Signal()));
 #pragma warning restore IDISP004
 
-            var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage, cancellationToken: TestContext.Current.CancellationToken);
-            if (!waiter.Wait(5000, cancellationToken: TestContext.Current.CancellationToken))
+            var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(requestMessage, cancellationToken: default);
+            if (!waiter.Wait(5000, cancellationToken: default))
                 throw new TimeoutException();
 
             await DeliverMessageAsync("Why you are so bad with me?");

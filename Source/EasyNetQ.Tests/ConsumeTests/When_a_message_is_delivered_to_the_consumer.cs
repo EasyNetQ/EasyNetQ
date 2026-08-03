@@ -63,6 +63,6 @@ public class When_a_message_is_delivered_to_the_consumer : ConsumerTestBase
     [Fact]
     public async Task Should_ack_the_message()
     {
-        await MockBuilder.Channels[0].Received().BasicAckAsync(DeliverTag, false, cancellationToken: TestContext.Current.CancellationToken);
+        await MockBuilder.Channels[0].Received().BasicAckAsync(DeliverTag, false, cancellationToken: default);
     }
 }

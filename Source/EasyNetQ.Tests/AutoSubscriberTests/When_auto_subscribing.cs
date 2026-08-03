@@ -59,7 +59,7 @@ public class When_auto_subscribing : IAsyncLifetime
             );
         }
 
-        await autoSubscriber.SubscribeAsync([typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>)], cancellationToken: TestContext.Current.CancellationToken);
+        await autoSubscriber.SubscribeAsync([typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>)], cancellationToken: default);
 
         await AssertQueueDeclared(expectedQueueName1);
         await AssertQueueDeclared(expectedQueueName2);
@@ -81,7 +81,7 @@ public class When_auto_subscribing : IAsyncLifetime
             );
         }
 
-        await autoSubscriber.SubscribeAsync([typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>)], cancellationToken: TestContext.Current.CancellationToken);
+        await autoSubscriber.SubscribeAsync([typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>)], cancellationToken: default);
 
         await AssertConsumerStarted(1, expectedQueueName1, "#");
         await AssertConsumerStarted(2, expectedQueueName2, "#");

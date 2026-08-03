@@ -52,7 +52,7 @@ public class When_auto_subscribing_async_with_subscription_configuration_action 
 #pragma warning restore IDISP004
             Arg.Any<string>(),
             Arg.Any<Func<MessageA, CancellationToken, Task>>(),
-            Arg.Any<Action<ISubscriptionConfiguration>>(), cancellationToken: TestContext.Current.CancellationToken
+            Arg.Any<Action<ISubscriptionConfiguration>>(), cancellationToken: default
         );
     }
 

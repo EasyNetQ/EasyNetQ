@@ -40,7 +40,7 @@ public sealed class ModelCleanupTests : IAsyncLifetime
     [Fact]
     public async Task Should_cleanup_publish_model()
     {
-        await bus.PubSub.PublishAsync(new TestMessage(), cancellationToken: TestContext.Current.CancellationToken);
+        await bus.PubSub.PublishAsync(new TestMessage(), cancellationToken: default);
         await mockBuilder.DisposeAsync();
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         mockBuilder.Channels[0].Received().DisposeAsync();
@@ -57,8 +57,8 @@ public sealed class ModelCleanupTests : IAsyncLifetime
         mockBuilder.EventBus.Subscribe((StartConsumingSucceededEvent _) => Task.FromResult(waiter.Signal()));
 #pragma warning restore IDISP004
 
-        _ = bus.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage(), cancellationToken: TestContext.Current.CancellationToken);
-        if (!waiter.Wait(5000, TestContext.Current.CancellationToken))
+        _ = bus.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage(), cancellationToken: default);
+        if (!waiter.Wait(5000, default))
             throw new TimeoutException();
 
         using var are = WaitForConsumerChannelDisposedMessage();
@@ -81,9 +81,9 @@ public sealed class ModelCleanupTests : IAsyncLifetime
 #pragma warning disable IDISP004
         mockBuilder.EventBus.Subscribe((StartConsumingSucceededEvent _) => Task.FromResult(waiter.Signal()));
 
-        await bus.Rpc.RespondAsync<TestRequestMessage, TestResponseMessage>(_ => (TestResponseMessage)null, cancellationToken: TestContext.Current.CancellationToken);
+        await bus.Rpc.RespondAsync<TestRequestMessage, TestResponseMessage>(_ => (TestResponseMessage)null, cancellationToken: default);
 #pragma warning restore IDISP004
-        if (!waiter.Wait(5000, TestContext.Current.CancellationToken))
+        if (!waiter.Wait(5000, default))
             throw new TimeoutException();
 
         using var are = WaitForConsumerChannelDisposedMessage();
@@ -102,7 +102,7 @@ public sealed class ModelCleanupTests : IAsyncLifetime
     public async Task Should_cleanup_subscribe_async_model()
     {
 #pragma warning disable IDISP004
-        await bus.PubSub.SubscribeAsync<TestMessage>("abc", _ => { }, cancellationToken: TestContext.Current.CancellationToken);
+        await bus.PubSub.SubscribeAsync<TestMessage>("abc", _ => { }, cancellationToken: default);
 #pragma warning restore IDISP004
         using var are = WaitForConsumerChannelDisposedMessage();
 
@@ -120,7 +120,7 @@ public sealed class ModelCleanupTests : IAsyncLifetime
     public async Task Should_cleanup_subscribe_model()
     {
 #pragma warning disable IDISP004
-        await bus.PubSub.SubscribeAsync<TestMessage>("abc", _ => { }, cancellationToken: TestContext.Current.CancellationToken);
+        await bus.PubSub.SubscribeAsync<TestMessage>("abc", _ => { }, cancellationToken: default);
 #pragma warning restore IDISP004
         using var are = WaitForConsumerChannelDisposedMessage();
 

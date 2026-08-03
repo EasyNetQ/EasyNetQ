@@ -43,7 +43,7 @@ public class When_a_responder_is_cancelled : IAsyncLifetime
     [Fact]
     public async Task Should_NACK_with_requeue()
     {
-        await mockBuilder.Channels[2].Received().BasicNackAsync(0, false, true, cancellationToken: TestContext.Current.CancellationToken);
+        await mockBuilder.Channels[2].Received().BasicNackAsync(0, false, true, cancellationToken: default);
     }
 
     private async Task DeliverMessageAsync(RpcRequest request)

@@ -39,18 +39,18 @@ public class ErrorMessageRepublishSpike
             Password = "guest"
         };
 
-        using var connection = await connectionFactory.CreateConnectionAsync(cancellationToken: TestContext.Current.CancellationToken);
-        using var channel = await connection.CreateChannelAsync(cancellationToken: TestContext.Current.CancellationToken);
+        using var connection = await connectionFactory.CreateConnectionAsync(cancellationToken: default);
+        using var channel = await connection.CreateChannelAsync(cancellationToken: default);
         try
         {
-            await channel.ExchangeDeclarePassiveAsync(error.Exchange, cancellationToken: TestContext.Current.CancellationToken);
+            await channel.ExchangeDeclarePassiveAsync(error.Exchange, cancellationToken: default);
 
             var properties = new BasicProperties();
             error.BasicProperties.CopyTo(properties);
 
             var body = Encoding.UTF8.GetBytes(error.Message);
 
-            await channel.BasicPublishAsync(error.Exchange, error.RoutingKey, false, properties, body, cancellationToken: TestContext.Current.CancellationToken);
+            await channel.BasicPublishAsync(error.Exchange, error.RoutingKey, false, properties, body, cancellationToken: default);
         }
         catch (OperationInterruptedException)
         {
