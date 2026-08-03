@@ -57,7 +57,7 @@ public class When_using_default_consume_error_strategy
 
         Assert.Same(AckStrategies.AckAsync, errorAckStrategy);
 
-        await mockBuilder.Channels[0].Received().ExchangeDeclareAsync("CustomErrorExchangePrefixName.originalRoutingKey", ExchangeType.Topic, true,cancellationToken: TestContext.Current.CancellationToken);
+        await mockBuilder.Channels[0].Received().ExchangeDeclareAsync("CustomErrorExchangePrefixName.originalRoutingKey", ExchangeType.Topic, true, cancellationToken: TestContext.Current.CancellationToken);
         await mockBuilder.Channels[0].Received().QueueDeclareAsync(
             "CustomEasyNetQErrorQueueName",
             true,

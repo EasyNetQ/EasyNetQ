@@ -41,7 +41,7 @@ public class When_an_action_is_invoked : IAsyncLifetime
     [Fact]
     public async Task Should_run_action_on_channel()
     {
-        await channel.Received().ExchangeDeclareAsync("MyExchange", ExchangeType.Direct,cancellationToken: TestContext.Current.CancellationToken);
+        await channel.Received().ExchangeDeclareAsync("MyExchange", ExchangeType.Direct, cancellationToken: TestContext.Current.CancellationToken);
     }
 
     public async ValueTask DisposeAsync()
