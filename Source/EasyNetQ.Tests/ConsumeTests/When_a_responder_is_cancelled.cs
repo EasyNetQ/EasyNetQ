@@ -12,7 +12,7 @@ public class When_a_responder_is_cancelled : IAsyncLifetime
         mockBuilder = new MockBuilder();
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         using var cde = new AsyncCountdownEvent(1);
 
@@ -35,7 +35,7 @@ public class When_a_responder_is_cancelled : IAsyncLifetime
         await deliverTask;
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }
@@ -43,7 +43,7 @@ public class When_a_responder_is_cancelled : IAsyncLifetime
     [Fact]
     public async Task Should_NACK_with_requeue()
     {
-        await mockBuilder.Channels[2].Received().BasicNackAsync(0, false, true);
+        await mockBuilder.Channels[2].Received().BasicNackAsync(0, false, true, cancellationToken: TestContext.Current.CancellationToken);
     }
 
     private async Task DeliverMessageAsync(RpcRequest request)

@@ -29,14 +29,14 @@ public class When_auto_subscribing : IAsyncLifetime
 
 
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
 #pragma warning disable IDISP004
         await autoSubscriber.SubscribeAsync([typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>)]);
 #pragma warning disable IDISP004
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
         await serviceProvider.DisposeAsync();
@@ -59,7 +59,7 @@ public class When_auto_subscribing : IAsyncLifetime
             );
         }
 
-        await autoSubscriber.SubscribeAsync([typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>)]);
+        await autoSubscriber.SubscribeAsync([typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>)], cancellationToken: TestContext.Current.CancellationToken);
 
         await AssertQueueDeclared(expectedQueueName1);
         await AssertQueueDeclared(expectedQueueName2);
@@ -81,7 +81,7 @@ public class When_auto_subscribing : IAsyncLifetime
             );
         }
 
-        await autoSubscriber.SubscribeAsync([typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>)]);
+        await autoSubscriber.SubscribeAsync([typeof(MyConsumer), typeof(MyGenericAbstractConsumer<>)], cancellationToken: TestContext.Current.CancellationToken);
 
         await AssertConsumerStarted(1, expectedQueueName1, "#");
         await AssertConsumerStarted(2, expectedQueueName2, "#");

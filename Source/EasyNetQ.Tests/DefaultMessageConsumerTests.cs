@@ -18,7 +18,7 @@ public class DefaultMessageConsumerTests
         var consumedMessage = (MyMessage)null;
 
         MyMessageConsumer.ConsumedMessageFunc = m => consumedMessage = m;
-        consumer.Dispatch<MyMessage, MyMessageConsumer>(message);
+        consumer.Dispatch<MyMessage, MyMessageConsumer>(message, cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Same(message, consumedMessage);
     }

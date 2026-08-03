@@ -45,9 +45,9 @@ public class When_auto_subscribing_with_subscription_configuration_action_and_at
 #pragma warning restore IDISP004
     }
 
-    public Task InitializeAsync() => autoSubscriber.SubscribeAsync([typeof(MyConsumerWithActionAndAttribute)]);
+    public async ValueTask InitializeAsync() => await autoSubscriber.SubscribeAsync([typeof(MyConsumerWithActionAndAttribute)]);
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     [Fact]
     public void Should_have_called_subscribe()
     {
@@ -56,7 +56,7 @@ public class When_auto_subscribing_with_subscription_configuration_action_and_at
 #pragma warning restore IDISP004
             Arg.Any<string>(),
             Arg.Any<Func<MessageA, CancellationToken, Task>>(),
-            Arg.Any<Action<ISubscriptionConfiguration>>()
+            Arg.Any<Action<ISubscriptionConfiguration>>(), cancellationToken: TestContext.Current.CancellationToken
         );
     }
 

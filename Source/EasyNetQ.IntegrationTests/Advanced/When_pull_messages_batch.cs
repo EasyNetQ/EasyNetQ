@@ -19,9 +19,9 @@ public sealed class When_pull_messages_batch : IAsyncLifetime
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await serviceProvider.DisposeAsync();
     }

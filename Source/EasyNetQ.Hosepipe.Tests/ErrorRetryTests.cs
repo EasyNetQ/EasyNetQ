@@ -29,9 +29,9 @@ public class ErrorRetryTests
         };
 
         var rawErrorMessages = new MessageReader()
-           .ReadMessagesAsync(parameters, conventions.ErrorQueueNamingConvention(default));
+           .ReadMessagesAsync(parameters, conventions.ErrorQueueNamingConvention(default), cancellationToken: TestContext.Current.CancellationToken);
 
-        await errorRetry.RetryErrorsAsync(rawErrorMessages, parameters);
+        await errorRetry.RetryErrorsAsync(rawErrorMessages, parameters, cancellationToken: TestContext.Current.CancellationToken);
     }
 }
 

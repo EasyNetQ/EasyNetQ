@@ -33,7 +33,7 @@ public class When_consume_is_called : ConsumerTestBase
             Arg.Is(true),
             Arg.Is(false),
             Arg.Any<IDictionary<string, object>>(),
-            Arg.Is(MockBuilder.Consumers[0])
+            Arg.Is(MockBuilder.Consumers[0]), cancellationToken: TestContext.Current.CancellationToken
         );
     }
 }

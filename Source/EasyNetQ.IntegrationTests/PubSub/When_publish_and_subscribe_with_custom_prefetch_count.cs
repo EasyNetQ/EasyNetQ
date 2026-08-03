@@ -19,14 +19,14 @@ public class When_publish_and_subscribe_with_custom_prefetch_count : IDisposable
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
     public virtual void Dispose()
     {
         serviceProvider?.Dispose();
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await serviceProvider.DisposeAsync();
     }

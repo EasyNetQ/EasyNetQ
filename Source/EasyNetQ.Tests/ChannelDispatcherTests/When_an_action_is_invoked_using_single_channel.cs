@@ -30,12 +30,12 @@ public class When_an_action_is_invoked_using_single_channel : IAsyncLifetime
         dispatcher = new SinglePersistentChannelDispatcher(producerConnection, consumerConnection, channelFactory);
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         actionResult = await dispatcher.InvokeAsync(action, PersistentChannelDispatchOptions.ProducerTopology);
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await dispatcher.DisposeAsync();
     }

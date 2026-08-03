@@ -18,14 +18,14 @@ public class When_declare_an_exchange_with_different_properties : IDisposable, I
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
     public virtual void Dispose()
     {
         serviceProvider?.Dispose();
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await serviceProvider.DisposeAsync();
     }

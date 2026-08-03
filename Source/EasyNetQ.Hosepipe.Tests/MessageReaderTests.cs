@@ -21,7 +21,7 @@ public class MessageReaderTests
             MessagesOutputDirectory = @"C:\temp\MessageOutput"
         };
 
-        var messages = messageReader.ReadMessagesAsync(parameters);
+        var messages = messageReader.ReadMessagesAsync(parameters, cancellationToken: TestContext.Current.CancellationToken);
         await foreach (var message in messages)
         {
             Console.WriteLine("\nBody:\n{0}\n", message.Body);
@@ -40,7 +40,7 @@ public class MessageReaderTests
             MessagesOutputDirectory = @"C:\temp\MessageOutput"
         };
 
-        var messages = messageReader.ReadMessagesAsync(parameters, conventions.ErrorQueueNamingConvention(default));
+        var messages = messageReader.ReadMessagesAsync(parameters, conventions.ErrorQueueNamingConvention(default), cancellationToken: TestContext.Current.CancellationToken);
         await foreach (var message in messages)
         {
             Console.WriteLine(message.Body);

@@ -13,7 +13,7 @@ public class PersistentConnectionTests
     {
         await using var mockBuilder = new MockBuilder();
 #pragma warning disable IDISP004
-        mockBuilder.ConnectionFactory.CreateConnectionAsync(Arg.Any<IList<AmqpTcpEndpoint>>())
+        mockBuilder.ConnectionFactory.CreateConnectionAsync(Arg.Any<IList<AmqpTcpEndpoint>>(), cancellationToken: TestContext.Current.CancellationToken)
 #pragma warning restore IDISP004
             .Returns(Task.FromException<IConnection>(new Exception("Test")));
 
@@ -27,10 +27,10 @@ public class PersistentConnectionTests
 
         connection.Status.State.Should().Be(PersistentConnectionState.NotInitialised);
 
-        await Assert.ThrowsAsync<Exception>(async () => await connection.EnsureConnectedAsync());
+        await Assert.ThrowsAsync<Exception>(async () => await connection.EnsureConnectedAsync(TestContext.Current.CancellationToken));
 
         connection.Status.State.Should().Be(PersistentConnectionState.Disconnected);
-        await mockBuilder.ConnectionFactory.Received().CreateConnectionAsync(Arg.Any<IList<AmqpTcpEndpoint>>());
+        await mockBuilder.ConnectionFactory.Received().CreateConnectionAsync(Arg.Any<IList<AmqpTcpEndpoint>>(), cancellationToken: TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -47,10 +47,10 @@ public class PersistentConnectionTests
 
         connection.Status.State.Should().Be(PersistentConnectionState.NotInitialised);
 
-        await connection.EnsureConnectedAsync();
+        await connection.EnsureConnectedAsync(TestContext.Current.CancellationToken);
 
         connection.Status.State.Should().Be(PersistentConnectionState.Connected);
-        await mockBuilder.ConnectionFactory.Received(1).CreateConnectionAsync(Arg.Any<IList<AmqpTcpEndpoint>>());
+        await mockBuilder.ConnectionFactory.Received(1).CreateConnectionAsync(Arg.Any<IList<AmqpTcpEndpoint>>(), cancellationToken: TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -58,7 +58,7 @@ public class PersistentConnectionTests
     {
         await using var mockBuilder = new MockBuilder();
 #pragma warning disable IDISP004 // Don't ignore created IDisposable
-        mockBuilder.ConnectionFactory.CreateConnectionAsync(Arg.Any<IList<AmqpTcpEndpoint>>())
+        mockBuilder.ConnectionFactory.CreateConnectionAsync(Arg.Any<IList<AmqpTcpEndpoint>>(), cancellationToken: TestContext.Current.CancellationToken)
 #pragma warning restore IDISP004 // Don't ignore created IDisposable
             .Returns(Task.FromException<IConnection>(new Exception("Test")));
 
@@ -74,11 +74,11 @@ public class PersistentConnectionTests
 
         await Assert.ThrowsAsync<Exception>(async () =>
            {
-               using var channel = await connection.CreateChannelAsync();
+               using var channel = await connection.CreateChannelAsync(cancellationToken: TestContext.Current.CancellationToken);
            });
 
         connection.Status.State.Should().Be(PersistentConnectionState.Disconnected);
-        await mockBuilder.ConnectionFactory.Received().CreateConnectionAsync(Arg.Any<IList<AmqpTcpEndpoint>>());
+        await mockBuilder.ConnectionFactory.Received().CreateConnectionAsync(Arg.Any<IList<AmqpTcpEndpoint>>(), cancellationToken: TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -95,10 +95,10 @@ public class PersistentConnectionTests
 
         connection.Status.State.Should().Be(PersistentConnectionState.NotInitialised);
 
-        await connection.CreateChannelAsync();
+        await connection.CreateChannelAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         connection.Status.State.Should().Be(PersistentConnectionState.Connected);
-        await mockBuilder.ConnectionFactory.Received(1).CreateConnectionAsync(Arg.Any<IList<AmqpTcpEndpoint>>());
+        await mockBuilder.ConnectionFactory.Received(1).CreateConnectionAsync(Arg.Any<IList<AmqpTcpEndpoint>>(), cancellationToken: TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -117,10 +117,10 @@ public class PersistentConnectionTests
 
         connection.Status.State.Should().Be(PersistentConnectionState.NotInitialised);
 
-        await connection.CreateChannelAsync();
+        await connection.CreateChannelAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         await mockBuilder.ConnectionFactory.Received(1)
-            .CreateConnectionAsync(Arg.Is<IList<AmqpTcpEndpoint>>(eps => eps.Single().Ssl.ServerName == eps.Single().HostName));
+            .CreateConnectionAsync(Arg.Is<IList<AmqpTcpEndpoint>>(eps => eps.Single().Ssl.ServerName == eps.Single().HostName), cancellationToken: TestContext.Current.CancellationToken);
 
         connection.Status.State.Should().Be(PersistentConnectionState.Connected);
     }

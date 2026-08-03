@@ -45,9 +45,9 @@ public class When_consumer_callback_does_not_respect_ct : IAsyncLifetime
             await allMessagesReceived.WaitAsync(cts.Token);
     }
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await serviceProvider.DisposeAsync();
     }

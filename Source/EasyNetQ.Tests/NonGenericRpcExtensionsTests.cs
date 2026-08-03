@@ -11,9 +11,9 @@ public class NonGenericRpcExtensionsTests
         var request = DateTime.UtcNow;
         var requestType = typeof(DateTime);
         var responseType = typeof(long);
-        rpc.RequestAsync<DateTime, long>(Arg.Any<DateTime>(), configure).Returns(42);
+        rpc.RequestAsync<DateTime, long>(Arg.Any<DateTime>(), configure, cancellationToken: TestContext.Current.CancellationToken).Returns(42);
 
-        var response = await rpc.RequestAsync(request, requestType, responseType, configure);
+        var response = await rpc.RequestAsync(request, requestType, responseType, configure, cancellationToken: TestContext.Current.CancellationToken);
         response.Should().Be(42);
 
 #pragma warning disable 4014
@@ -32,9 +32,9 @@ public class NonGenericRpcExtensionsTests
         var request = new Dog();
         var requestType = typeof(Dog);
         var responseType = typeof(string);
-        rpc.RequestAsync<Dog, string>(Arg.Any<Dog>(), configure).Returns("dog");
+        rpc.RequestAsync<Dog, string>(Arg.Any<Dog>(), configure, cancellationToken: TestContext.Current.CancellationToken).Returns("dog");
 
-        var response = await rpc.RequestAsync(request, requestType, responseType, configure);
+        var response = await rpc.RequestAsync(request, requestType, responseType, configure, cancellationToken: TestContext.Current.CancellationToken);
         response.Should().Be("dog");
 
 #pragma warning disable 4014
@@ -53,9 +53,9 @@ public class NonGenericRpcExtensionsTests
         var request = (IAnimal)new Dog();
         var requestType = typeof(IAnimal);
         var responseType = typeof(IAnimal);
-        rpc.RequestAsync<IAnimal, IAnimal>(Arg.Any<IAnimal>(), configure).Returns(request);
+        rpc.RequestAsync<IAnimal, IAnimal>(Arg.Any<IAnimal>(), configure, cancellationToken: TestContext.Current.CancellationToken).Returns(request);
 
-        var response = await rpc.RequestAsync(request, requestType, responseType, configure);
+        var response = await rpc.RequestAsync(request, requestType, responseType, configure, cancellationToken: TestContext.Current.CancellationToken);
         response.Should().Be(request);
 
 #pragma warning disable 4014

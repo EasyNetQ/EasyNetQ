@@ -1440,7 +1440,7 @@ namespace EasyNetQ.Internals
         public readonly struct ValueCancellationTokenSource : System.IDisposable
         {
             public ValueCancellationTokenSource(System.Threading.CancellationToken cancellationToken, System.TimeSpan timeout) { }
-            public System.Threading.CancellationToken Token { get; }
+            public System.Threading.CancellationToken cancellationToken { get; }
             public void Dispose() { }
         }
     }
@@ -1605,7 +1605,7 @@ namespace EasyNetQ.Persistent
         public System.Threading.Tasks.Task ConnectAsync() { }
         public System.Threading.Tasks.Task<RabbitMQ.Client.IChannel> CreateChannelAsync(RabbitMQ.Client.CreateChannelOptions options = null, System.Threading.CancellationToken cancellationToken = default) { }
         public virtual void Dispose() { }
-        public System.Threading.Tasks.Task EnsureConnectedAsync(System.Threading.CancellationToken token = default) { }
+        public System.Threading.Tasks.Task EnsureConnectedAsync(System.Threading.CancellationToken cancellationToken = default) { }
     }
     public enum PersistentConnectionState
     {

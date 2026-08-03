@@ -52,7 +52,7 @@ public class When_auto_subscribing_async_with_subscription_configuration_action 
 #pragma warning restore IDISP004
             Arg.Any<string>(),
             Arg.Any<Func<MessageA, CancellationToken, Task>>(),
-            Arg.Any<Action<ISubscriptionConfiguration>>()
+            Arg.Any<Action<ISubscriptionConfiguration>>(), cancellationToken: TestContext.Current.CancellationToken
         );
     }
 
@@ -80,9 +80,9 @@ public class When_auto_subscribing_async_with_subscription_configuration_action 
         serviceProvider?.Dispose();
     }
 
-    public Task InitializeAsync() => autoSubscriber.SubscribeAsync([typeof(MyConsumerWithAction)]);
+    public async ValueTask InitializeAsync() => await autoSubscriber.SubscribeAsync([typeof(MyConsumerWithAction)]);
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
     // Discovered by reflection over test assembly, do not remove.
     // ReSharper disable once UnusedMember.Local

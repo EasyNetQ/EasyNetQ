@@ -40,7 +40,7 @@ public class FileMessageWriterTests
             MessagesOutputDirectory = tempDirectory
         };
 
-        await writer.WriteAsync(GetMessagesAsync(messages), parameters);
+        await writer.WriteAsync(GetMessagesAsync(messages), parameters, cancellationToken: TestContext.Current.CancellationToken);
 
         foreach (var file in directory.EnumerateFiles())
         {

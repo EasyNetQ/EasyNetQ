@@ -13,7 +13,7 @@ public class When_a_polymorphic_message_is_delivered_to_the_consumer : IAsyncLif
         mockBuilder = new MockBuilder();
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         var queue = new Queue("test_queue", false);
 
@@ -39,7 +39,7 @@ public class When_a_polymorphic_message_is_delivered_to_the_consumer : IAsyncLif
         );
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }

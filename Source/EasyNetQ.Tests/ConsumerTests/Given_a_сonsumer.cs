@@ -52,7 +52,7 @@ public abstract class Given_a_сonsumer : IAsyncLifetime
         );
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         if (disposed)
             return;
@@ -61,7 +61,7 @@ public abstract class Given_a_сonsumer : IAsyncLifetime
         await consumer.DisposeAsync();
     }
 
-    public Task InitializeAsync() => InitializeAsyncCore();
+    public async ValueTask InitializeAsync() => await InitializeAsyncCore();
 
     protected virtual Task InitializeAsyncCore() => Task.CompletedTask;
 }

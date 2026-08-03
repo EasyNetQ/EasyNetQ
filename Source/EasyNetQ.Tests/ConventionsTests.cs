@@ -161,9 +161,9 @@ public class When_publishing_a_message : IAsyncLifetime
 
     }
 
-    public Task InitializeAsync() => mockBuilder.PubSub.PublishAsync(new TestMessage());
+    public async ValueTask InitializeAsync() => await mockBuilder.PubSub.PublishAsync(new TestMessage());
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }
@@ -226,9 +226,9 @@ public class When_registering_response_handler : IAsyncLifetime
         mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(customConventions));
     }
 
-    public Task InitializeAsync() => mockBuilder.Rpc.RespondAsync<TestMessage, TestMessage>(_ => new TestMessage());
+    public async ValueTask InitializeAsync() => await mockBuilder.Rpc.RespondAsync<TestMessage, TestMessage>(_ => new TestMessage());
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }

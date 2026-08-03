@@ -6,9 +6,9 @@ public class When_a_request_is_sent_but_no_reply_is_received : IAsyncLifetime
 {
     private readonly MockBuilder mockBuilder = new("host=localhost;timeout=1");
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }
@@ -18,7 +18,7 @@ public class When_a_request_is_sent_but_no_reply_is_received : IAsyncLifetime
     {
         return Assert.ThrowsAsync<TaskCanceledException>(
             () => mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(
-                new TestRequestMessage(), _ => { }
+                new TestRequestMessage(), _ => { }, cancellationToken: TestContext.Current.CancellationToken
             )
         );
     }

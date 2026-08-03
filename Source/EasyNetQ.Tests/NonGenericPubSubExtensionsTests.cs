@@ -35,7 +35,7 @@ public class NonGenericPubSubExtensionsTests
     {
         var message = DateTime.UtcNow;
         var messageType = typeof(DateTime);
-        await pubSub.PublishAsync(message, messageType, publishConfigure);
+        await pubSub.PublishAsync(message, messageType, publishConfigure, cancellationToken: TestContext.Current.CancellationToken);
 
 #pragma warning disable 4014
         pubSub.Received()
@@ -53,7 +53,7 @@ public class NonGenericPubSubExtensionsTests
         var message = new Dog();
         var messageType = typeof(Dog);
 
-        await pubSub.PublishAsync(message, messageType, publishConfigure);
+        await pubSub.PublishAsync(message, messageType, publishConfigure, cancellationToken: TestContext.Current.CancellationToken);
 
 #pragma warning disable 4014
         pubSub.Received()
@@ -71,7 +71,7 @@ public class NonGenericPubSubExtensionsTests
         var message = (IAnimal)new Dog();
         var messageType = typeof(IAnimal);
 
-        await pubSub.PublishAsync(message, messageType, publishConfigure);
+        await pubSub.PublishAsync(message, messageType, publishConfigure, cancellationToken: TestContext.Current.CancellationToken);
 
 #pragma warning disable 4014
         pubSub.Received()
@@ -95,7 +95,7 @@ public class NonGenericPubSubExtensionsTests
             Arg.Any<Action<ISubscriptionConfiguration>>(),
             Arg.Any<CancellationToken>()
         ).ReturnsForAnyArgs(subscribeResult);
-        await using var _ = await pubSub.SubscribeAsync("Id", messageType, (_, _, _) => Task.FromResult(AckStrategies.AckAsync), subscribeConfigure);
+        await using var _ = await pubSub.SubscribeAsync("Id", messageType, (_, _, _) => Task.FromResult(AckStrategies.AckAsync), subscribeConfigure, cancellationToken: TestContext.Current.CancellationToken);
         await pubSub.Received()
             .SubscribeAsync(Arg.Is("Id"), Arg.Any<Func<Dog, CancellationToken, Task>>(), Arg.Is(subscribeConfigure), Arg.Any<CancellationToken>());
     }
@@ -113,7 +113,7 @@ public class NonGenericPubSubExtensionsTests
             Arg.Any<CancellationToken>()
         ).ReturnsForAnyArgs(subscribeResult);
 
-        await using var _ = await pubSub.SubscribeAsync("Id", messageType, (_, _, _) => Task.FromResult(AckStrategies.AckAsync), subscribeConfigure);
+        await using var _ = await pubSub.SubscribeAsync("Id", messageType, (_, _, _) => Task.FromResult(AckStrategies.AckAsync), subscribeConfigure, cancellationToken: TestContext.Current.CancellationToken);
         await pubSub.Received()
             .SubscribeAsync(Arg.Is("Id"), Arg.Any<Func<IAnimal, CancellationToken, Task>>(), Arg.Is(subscribeConfigure), Arg.Any<CancellationToken>());
     }
@@ -132,7 +132,7 @@ public class NonGenericPubSubExtensionsTests
             Arg.Any<CancellationToken>()
         ).ReturnsForAnyArgs(subscribeResult);
 
-        await using var _ = await pubSub.SubscribeAsync("Id", messageType, (_, _, _) => Task.FromResult(AckStrategies.AckAsync), subscribeConfigure);
+        await using var _ = await pubSub.SubscribeAsync("Id", messageType, (_, _, _) => Task.FromResult(AckStrategies.AckAsync), subscribeConfigure, cancellationToken: TestContext.Current.CancellationToken);
         await pubSub.Received()
             .SubscribeAsync(Arg.Is("Id"), Arg.Any<Func<DateTime, CancellationToken, Task>>(), Arg.Is(subscribeConfigure), Arg.Any<CancellationToken>());
     }

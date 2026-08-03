@@ -42,7 +42,7 @@ public class When_auto_subscribing_with_subscription_configuration_attribute : I
 #pragma warning restore IDISP004
             Arg.Any<string>(),
             Arg.Any<Func<MessageA, CancellationToken, Task>>(),
-            Arg.Any<Action<ISubscriptionConfiguration>>()
+            Arg.Any<Action<ISubscriptionConfiguration>>(), cancellationToken: TestContext.Current.CancellationToken
         );
     }
 
@@ -68,9 +68,9 @@ public class When_auto_subscribing_with_subscription_configuration_attribute : I
         serviceProvider?.Dispose();
     }
 
-    public Task InitializeAsync() => autoSubscriber.SubscribeAsync([typeof(MyConsumerWithAttr)]);
+    public async ValueTask InitializeAsync() => await autoSubscriber.SubscribeAsync([typeof(MyConsumerWithAttr)]);
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
     // Discovered by reflection over test assembly, do not remove.
     private sealed class MyConsumerWithAttr : IConsume<MessageA>

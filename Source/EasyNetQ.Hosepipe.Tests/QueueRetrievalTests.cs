@@ -20,7 +20,7 @@ public class QueueRetrievalTests
             Purge = false
         };
 
-        await foreach (var message in queueRetrieval.GetMessagesFromQueueAsync(parameters))
+        await foreach (var message in queueRetrieval.GetMessagesFromQueueAsync(parameters, cancellationToken: TestContext.Current.CancellationToken))
         {
             Console.Out.WriteLine("message:\n{0}", message.Body);
             Console.Out.WriteLine("properties correlation id:\n{0}", message.Properties.CorrelationId);
@@ -42,7 +42,7 @@ public class QueueRetrievalTests
 
         for (var i = 0; i < 10; i++)
         {
-            await bus.PubSub.PublishAsync(new TestMessage { Text = string.Format("\n>>>>>> Message {0}\n", i) });
+            await bus.PubSub.PublishAsync(new TestMessage { Text = string.Format("\n>>>>>> Message {0}\n", i) }, cancellationToken: TestContext.Current.CancellationToken);
         }
     }
 
@@ -56,7 +56,7 @@ public class QueueRetrievalTests
         await using var provider = serviceCollection.BuildServiceProvider();
 
         var bus = provider.GetRequiredService<IBus>();
-        await using var subscription = await bus.PubSub.SubscribeAsync<TestMessage>("hosepipe", message => Console.WriteLine(message.Text));
+        await using var subscription = await bus.PubSub.SubscribeAsync<TestMessage>("hosepipe", message => Console.WriteLine(message.Text), cancellationToken: TestContext.Current.CancellationToken);
 
 
         Thread.Sleep(1000);

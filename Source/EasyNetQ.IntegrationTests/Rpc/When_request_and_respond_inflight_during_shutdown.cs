@@ -43,9 +43,9 @@ public class When_request_and_respond_in_flight_during_shutdown : IAsyncLifetime
         cts.IsCancellationRequested.Should().BeTrue();
     }
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         if (serviceProvider != null)
             await serviceProvider.DisposeAsync();

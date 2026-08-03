@@ -15,17 +15,17 @@ public class Ack_strategy : IAsyncLifetime
     private AckResult result;
     private const ulong deliveryTag = 1234;
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         result = await AckStrategies.AckAsync(channel, deliveryTag, CancellationToken.None);
     }
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
     [Fact]
     public async Task Should_ack_message()
     {
-        await channel.Received().BasicAckAsync(deliveryTag, false);
+        await channel.Received().BasicAckAsync(deliveryTag, false, cancellationToken: TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -46,17 +46,17 @@ public class NackWithoutRequeue_strategy : IAsyncLifetime
     private AckResult result;
     private const ulong deliveryTag = 1234;
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         result = await AckStrategies.NackWithoutRequeueAsync(channel, deliveryTag, CancellationToken.None);
     }
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
     [Fact]
     public async Task Should_nack_message_and_not_requeue()
     {
-        await channel.Received().BasicNackAsync(deliveryTag, false, false);
+        await channel.Received().BasicNackAsync(deliveryTag, false, false, cancellationToken: TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public class NackWithRequeue_trategy
     {
         var result = await AckStrategies.NackWithRequeueAsync(channel, deliveryTag, CancellationToken.None);
 
-        await channel.Received().BasicNackAsync(deliveryTag, false, true);
+        await channel.Received().BasicNackAsync(deliveryTag, false, true, cancellationToken: TestContext.Current.CancellationToken);
         Assert.Equal(AckResult.Nack, result);
     }
 }

@@ -23,9 +23,9 @@ namespace EasyNetQ.IntegrationTests.Rpc
         }
 
 
-        public Task InitializeAsync() => Task.CompletedTask;
+        public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
-        public async Task DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
             if (serviceProvider != null)
                 await serviceProvider.DisposeAsync();
@@ -52,7 +52,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
             string destinationQueueName = conventions.RpcRoutingKeyNamingConvention.Invoke(typeof(RabbitRequest));
 
             Exception e =
-                await Record.ExceptionAsync(() => bus.Advanced.QueueDeclareAsync(destinationQueueName, c => c.WithQueueType("quorum")));
+                await Record.ExceptionAsync(() => bus.Advanced.QueueDeclareAsync(destinationQueueName, c => c.WithQueueType("quorum"), TestContext.Current.CancellationToken));
 
             e.Should().BeOfType<OperationInterruptedException>();
             e.Message.Should().Contain("inequivalent arg 'x-queue-type' for queue");
@@ -79,7 +79,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
             string destinationQueueName = conventions.RpcRoutingKeyNamingConvention.Invoke(typeof(BunnyRequest));
 
             Exception e =
-                await Record.ExceptionAsync(() => bus.Advanced.QueueDeclareAsync(destinationQueueName, c => c.WithQueueType("classic")));
+                await Record.ExceptionAsync(() => bus.Advanced.QueueDeclareAsync(destinationQueueName, c => c.WithQueueType("classic"), TestContext.Current.CancellationToken));
 
             e.Should().BeOfType<OperationInterruptedException>();
             e.Message.Should().Contain("inequivalent arg 'x-queue-type' for queue");
