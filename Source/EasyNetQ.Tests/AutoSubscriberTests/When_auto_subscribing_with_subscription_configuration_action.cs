@@ -40,7 +40,7 @@ public class When_auto_subscribing_with_subscription_configuration_action : IDis
             .Returns(Task.FromResult(new SubscriptionResult()))
             .AndDoes(a => capturedAction = (Action<ISubscriptionConfiguration>)a.Args()[2]);
     }
-    public async ValueTask InitializeAsync() => await autoSubscriber.SubscribeAsync([typeof(MyConsumerWithAction)], cancellationToken: default);
+    public async ValueTask InitializeAsync() => await autoSubscriber.SubscribeAsync([typeof(MyConsumerWithAction)], cancellationToken: CancellationToken.None);
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     [Fact]
@@ -51,7 +51,7 @@ public class When_auto_subscribing_with_subscription_configuration_action : IDis
 #pragma warning restore IDISP004
             Arg.Any<string>(),
             Arg.Any<Func<MessageA, CancellationToken, Task>>(),
-            Arg.Any<Action<ISubscriptionConfiguration>>(), cancellationToken: default
+            Arg.Any<Action<ISubscriptionConfiguration>>(), cancellationToken: CancellationToken.None
         );
     }
 

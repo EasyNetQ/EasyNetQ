@@ -33,13 +33,13 @@ public class When_cancellation_of_message_handler_occurs : ConsumerTestBase
                         args.ReceivedInfo.DeliveryTag == DeliverTag &&
                         args.ReceivedInfo.Exchange == "the_exchange" &&
                         args.Body.ToArray().SequenceEqual(OriginalBody)
-            ), cancellationToken: default
+            ), cancellationToken: CancellationToken.None
         );
     }
 
     [Fact]
     public async Task Should_nack_with_requeue()
     {
-        await MockBuilder.Channels[0].Received().BasicNackAsync(DeliverTag, false, true, cancellationToken: default);
+        await MockBuilder.Channels[0].Received().BasicNackAsync(DeliverTag, false, true, cancellationToken: CancellationToken.None);
     }
 }

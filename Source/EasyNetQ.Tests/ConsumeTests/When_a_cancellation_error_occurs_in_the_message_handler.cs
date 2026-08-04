@@ -27,13 +27,13 @@ public class When_a_cancellation_error_occurs_in_the_message_handler : ConsumerT
                                            args.ReceivedInfo.DeliveryTag == DeliverTag &&
                                            args.ReceivedInfo.Exchange == "the_exchange" &&
                                            args.Body.ToArray().SequenceEqual(OriginalBody)),
-            Arg.Is<Exception>(e => e == exception), cancellationToken: default
+            Arg.Is<Exception>(e => e == exception), cancellationToken: CancellationToken.None
         );
     }
 
     [Fact]
     public async Task Should_ack()
     {
-        await MockBuilder.Channels[0].Received().BasicAckAsync(DeliverTag, false, cancellationToken: default);
+        await MockBuilder.Channels[0].Received().BasicAckAsync(DeliverTag, false, cancellationToken: CancellationToken.None);
     }
 }

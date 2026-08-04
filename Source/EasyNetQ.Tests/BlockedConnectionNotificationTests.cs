@@ -12,7 +12,7 @@ public class When_a_connection_becomes_blocked
     {
         AsyncEventHandler<ConnectionBlockedEventArgs> blockedHandlers = null;
         mockBuilder.Connection.ConnectionBlockedAsync += Arg.Do<AsyncEventHandler<ConnectionBlockedEventArgs>>(h => blockedHandlers += h);
-        await using var _ = await mockBuilder.ProducerConnection.CreateChannelAsync(cancellationToken: default);
+        await using var _ = await mockBuilder.ProducerConnection.CreateChannelAsync(cancellationToken: CancellationToken.None);
         var blocked = false;
         mockBuilder.Bus.Advanced.Blocked += (_, _) => blocked = true;
         await blockedHandlers?.Invoke(this, new ConnectionBlockedEventArgs("some reason"));
@@ -30,7 +30,7 @@ public class When_a_connection_becomes_unblocked
         AsyncEventHandler<AsyncEventArgs> unblockedHandlers = null;
         mockBuilder.Connection.ConnectionUnblockedAsync += Arg.Do<AsyncEventHandler<AsyncEventArgs>>(h => unblockedHandlers += h);
 
-        await using var _ = await mockBuilder.ProducerConnection.CreateChannelAsync(cancellationToken: default);
+        await using var _ = await mockBuilder.ProducerConnection.CreateChannelAsync(cancellationToken: CancellationToken.None);
 
         var blocked = true;
         mockBuilder.Bus.Advanced.Unblocked += (_, _) => blocked = false;

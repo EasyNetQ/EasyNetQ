@@ -43,7 +43,7 @@ public class When_using_default_consume_error_strategy
     {
         await using var mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(customConventions));
 
-        var cancelAckStrategy = await mockBuilder.ConsumeErrorStrategy.HandleCancelledAsync(consumerExecutionContext, default);
+        var cancelAckStrategy = await mockBuilder.ConsumeErrorStrategy.HandleCancelledAsync(consumerExecutionContext, CancellationToken.None);
 
         Assert.Same(AckStrategies.NackWithRequeueAsync, cancelAckStrategy);
     }
@@ -53,24 +53,24 @@ public class When_using_default_consume_error_strategy
     {
         await using var mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(customConventions));
 
-        var errorAckStrategy = await mockBuilder.ConsumeErrorStrategy.HandleErrorAsync(consumerExecutionContext, new Exception(), default);
+        var errorAckStrategy = await mockBuilder.ConsumeErrorStrategy.HandleErrorAsync(consumerExecutionContext, new Exception(), CancellationToken.None);
 
         Assert.Same(AckStrategies.AckAsync, errorAckStrategy);
 
-        await mockBuilder.Channels[0].Received().ExchangeDeclareAsync("CustomErrorExchangePrefixName.originalRoutingKey", ExchangeType.Topic, true, cancellationToken: default);
+        await mockBuilder.Channels[0].Received().ExchangeDeclareAsync("CustomErrorExchangePrefixName.originalRoutingKey", ExchangeType.Topic, true, cancellationToken: CancellationToken.None);
         await mockBuilder.Channels[0].Received().QueueDeclareAsync(
             "CustomEasyNetQErrorQueueName",
             true,
             false,
             false,
             Arg.Is<IDictionary<string, object>>(x => x.ContainsKey(Argument.QueueType) && x[Argument.QueueType].Equals(QueueType.Quorum)),
-            cancellationToken: default
+            cancellationToken: CancellationToken.None
         );
         await mockBuilder.Channels[0].Received().QueueBindAsync(
             "CustomEasyNetQErrorQueueName",
             "CustomErrorExchangePrefixName.originalRoutingKey",
             "CustomRoutingKey",
-            null, cancellationToken: default
+            null, cancellationToken: CancellationToken.None
         );
 
         await mockBuilder.Channels[0].Received().BasicPublishAsync(
@@ -91,11 +91,11 @@ public class When_using_default_consume_error_strategy
                 .AddSingleton(_ => new ConnectionConfiguration { PublisherConfirms = true })
         );
 
-        var errorAckStrategy = await mockBuilder.ConsumeErrorStrategy.HandleErrorAsync(consumerExecutionContext, new Exception(), default);
+        var errorAckStrategy = await mockBuilder.ConsumeErrorStrategy.HandleErrorAsync(consumerExecutionContext, new Exception(), CancellationToken.None);
 
         Assert.Same(AckStrategies.AckAsync, errorAckStrategy);
 
-        await mockBuilder.Channels[0].Received().ExchangeDeclareAsync("CustomErrorExchangePrefixName.originalRoutingKey", ExchangeType.Topic, true, cancellationToken: default);
+        await mockBuilder.Channels[0].Received().ExchangeDeclareAsync("CustomErrorExchangePrefixName.originalRoutingKey", ExchangeType.Topic, true, cancellationToken: CancellationToken.None);
         await mockBuilder.Channels[0].Received().QueueDeclareAsync(
             "CustomEasyNetQErrorQueueName",
             true,
@@ -110,7 +110,7 @@ public class When_using_default_consume_error_strategy
             "CustomEasyNetQErrorQueueName",
             "CustomErrorExchangePrefixName.originalRoutingKey",
             "CustomRoutingKey",
-            null, cancellationToken: default
+            null, cancellationToken: CancellationToken.None
         );
 
         await mockBuilder.Channels[0].Received().BasicPublishAsync(

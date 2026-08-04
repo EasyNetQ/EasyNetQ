@@ -41,7 +41,7 @@ public class When_an_action_is_performed_on_a_closed_channel_that_then_opens : I
     [Fact]
     public async Task Should_run_action_on_channel()
     {
-        await channel.Received().ExchangeDeclareAsync("MyExchange", ExchangeType.Direct, cancellationToken: default);
+        await channel.Received().ExchangeDeclareAsync("MyExchange", ExchangeType.Direct, cancellationToken: CancellationToken.None);
     }
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;

@@ -13,7 +13,7 @@ public class WhenAСonsumerStartsConsuming : Given_a_сonsumer
     [Fact]
     public void Should_ask_the_internal_consumer_to_start_consuming()
     {
-        internalConsumers[0].Received().StartConsumingAsync(cancellationToken: default);
+        internalConsumers[0].Received().StartConsumingAsync(cancellationToken: CancellationToken.None);
     }
 
     [Fact]

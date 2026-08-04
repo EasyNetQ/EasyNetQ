@@ -34,7 +34,7 @@ public class When_consume_is_called_with_auto_ack : ConsumerTestBase
            Arg.Is(false),
            Arg.Any<IDictionary<string, object>>(),
            Arg.Is(MockBuilder.Consumers[0]),
-           cancellationToken: default
+           cancellationToken: CancellationToken.None
        );
     }
 }

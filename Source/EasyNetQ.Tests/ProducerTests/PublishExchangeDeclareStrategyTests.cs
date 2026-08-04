@@ -16,7 +16,7 @@ public class ExchangeDeclareStrategyTests
         var advancedBus = Substitute.For<IAdvancedBus>();
         var exchange = new Exchange(exchangeName);
 
-        advancedBus.ExchangeDeclareAsync(exchangeName, cancellationToken: default).Returns(
+        advancedBus.ExchangeDeclareAsync(exchangeName, cancellationToken: CancellationToken.None).Returns(
             _ => Task.FromException(new Exception()),
             _ =>
             {
@@ -27,14 +27,14 @@ public class ExchangeDeclareStrategyTests
         using var exchangeDeclareStrategy = new VersionedExchangeDeclareStrategy(Substitute.For<IConventions>(), advancedBus);
         try
         {
-            await exchangeDeclareStrategy.DeclareExchangeAsync(exchangeName, ExchangeType.Topic, cancellationToken: default);
+            await exchangeDeclareStrategy.DeclareExchangeAsync(exchangeName, ExchangeType.Topic, cancellationToken: CancellationToken.None);
         }
         catch (Exception)
         {
         }
 
-        var declaredExchange = await exchangeDeclareStrategy.DeclareExchangeAsync(exchangeName, ExchangeType.Topic, cancellationToken: default);
-        await advancedBus.Received(2).ExchangeDeclareAsync(exchangeName, cancellationToken: default);
+        var declaredExchange = await exchangeDeclareStrategy.DeclareExchangeAsync(exchangeName, ExchangeType.Topic, cancellationToken: CancellationToken.None);
+        await advancedBus.Received(2).ExchangeDeclareAsync(exchangeName, cancellationToken: CancellationToken.None);
         declaredExchange.Should().BeEquivalentTo(exchange);
         exchangeDeclareCount.Should().Be(1);
     }
@@ -45,7 +45,7 @@ public class ExchangeDeclareStrategyTests
         var exchangeDeclareCount = 0;
         var advancedBus = Substitute.For<IAdvancedBus>();
         var exchange = new Exchange(exchangeName);
-        advancedBus.ExchangeDeclareAsync(exchangeName, cancellationToken: default)
+        advancedBus.ExchangeDeclareAsync(exchangeName, cancellationToken: CancellationToken.None)
             .Returns(_ =>
             {
                 exchangeDeclareCount++;
@@ -54,9 +54,9 @@ public class ExchangeDeclareStrategyTests
 
         using var publishExchangeDeclareStrategy = new DefaultExchangeDeclareStrategy(Substitute.For<IConventions>(), advancedBus);
 
-        var declaredExchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(exchangeName, ExchangeType.Topic, cancellationToken: default);
+        var declaredExchange = await publishExchangeDeclareStrategy.DeclareExchangeAsync(exchangeName, ExchangeType.Topic, cancellationToken: CancellationToken.None);
 
-        await advancedBus.Received().ExchangeDeclareAsync(exchangeName, cancellationToken: default);
+        await advancedBus.Received().ExchangeDeclareAsync(exchangeName, cancellationToken: CancellationToken.None);
         declaredExchange.Should().BeEquivalentTo(exchange);
         exchangeDeclareCount.Should().Be(1);
     }
@@ -67,7 +67,7 @@ public class ExchangeDeclareStrategyTests
         var exchangeDeclareCount = 0;
         var advancedBus = Substitute.For<IAdvancedBus>();
         var exchange = new Exchange(exchangeName);
-        advancedBus.ExchangeDeclareAsync(exchangeName, cancellationToken: default).Returns(_ =>
+        advancedBus.ExchangeDeclareAsync(exchangeName, cancellationToken: CancellationToken.None).Returns(_ =>
         {
             exchangeDeclareCount++;
             return Task.FromResult(exchange);
@@ -75,10 +75,10 @@ public class ExchangeDeclareStrategyTests
 
         using var exchangeDeclareStrategy = new DefaultExchangeDeclareStrategy(Substitute.For<IConventions>(), advancedBus);
 
-        await exchangeDeclareStrategy.DeclareExchangeAsync(exchangeName, ExchangeType.Topic, cancellationToken: default);
-        var declaredExchange = await exchangeDeclareStrategy.DeclareExchangeAsync(exchangeName, ExchangeType.Topic, cancellationToken: default);
+        await exchangeDeclareStrategy.DeclareExchangeAsync(exchangeName, ExchangeType.Topic, cancellationToken: CancellationToken.None);
+        var declaredExchange = await exchangeDeclareStrategy.DeclareExchangeAsync(exchangeName, ExchangeType.Topic, cancellationToken: CancellationToken.None);
 
-        await advancedBus.Received().ExchangeDeclareAsync(exchangeName, cancellationToken: default);
+        await advancedBus.Received().ExchangeDeclareAsync(exchangeName, cancellationToken: CancellationToken.None);
         declaredExchange.Should().BeEquivalentTo(exchange);
         exchangeDeclareCount.Should().Be(1);
     }

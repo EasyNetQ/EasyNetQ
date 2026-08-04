@@ -25,7 +25,7 @@ public class Ack_strategy : IAsyncLifetime
     [Fact]
     public async Task Should_ack_message()
     {
-        await channel.Received().BasicAckAsync(deliveryTag, false, cancellationToken: default);
+        await channel.Received().BasicAckAsync(deliveryTag, false, cancellationToken: CancellationToken.None);
     }
 
     [Fact]
@@ -56,7 +56,7 @@ public class NackWithoutRequeue_strategy : IAsyncLifetime
     [Fact]
     public async Task Should_nack_message_and_not_requeue()
     {
-        await channel.Received().BasicNackAsync(deliveryTag, false, false, cancellationToken: default);
+        await channel.Received().BasicNackAsync(deliveryTag, false, false, cancellationToken: CancellationToken.None);
     }
 
     [Fact]
@@ -81,7 +81,7 @@ public class NackWithRequeue_trategy
     {
         var result = await AckStrategies.NackWithRequeueAsync(channel, deliveryTag, CancellationToken.None);
 
-        await channel.Received().BasicNackAsync(deliveryTag, false, true, cancellationToken: default);
+        await channel.Received().BasicNackAsync(deliveryTag, false, true, cancellationToken: CancellationToken.None);
         Assert.Equal(AckResult.Nack, result);
     }
 }

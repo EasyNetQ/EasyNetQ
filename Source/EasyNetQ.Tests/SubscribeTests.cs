@@ -94,7 +94,7 @@ public class When_subscribe_is_called : IAsyncLifetime
     public async Task Should_set_configured_prefetch_count()
     {
         var connectionConfiguration = new ConnectionConfiguration();
-        await mockBuilder.Channels[2].Received().BasicQosAsync(0, connectionConfiguration.PrefetchCount, false, cancellationToken: default);
+        await mockBuilder.Channels[2].Received().BasicQosAsync(0, connectionConfiguration.PrefetchCount, false, cancellationToken: CancellationToken.None);
     }
 
     [Fact]
@@ -183,7 +183,7 @@ public class When_subscribe_with_configuration_is_called
                 {
                     c.WithMaxLengthBytes(maxLengthBytes.Value);
                 }
-            }, cancellationToken: default
+            }, cancellationToken: CancellationToken.None
         );
 
         // Assert that queue got declared correctly
@@ -215,7 +215,7 @@ public class When_subscribe_with_configuration_is_called
         );
 
         // Assert that QoS got configured correctly
-        await mockBuilder.Channels[2].Received().BasicQosAsync(0, prefetchCount, false, cancellationToken: default);
+        await mockBuilder.Channels[2].Received().BasicQosAsync(0, prefetchCount, false, cancellationToken: CancellationToken.None);
 
         // Assert that binding got configured correctly
         await mockBuilder.Channels[1].Received().QueueBindAsync(
@@ -300,7 +300,7 @@ public class When_a_message_is_delivered : IAsyncLifetime
     [Fact]
     public async Task Should_ack_the_message()
     {
-        await mockBuilder.Channels[2].Received().BasicAckAsync(deliveryTag, false, cancellationToken: default);
+        await mockBuilder.Channels[2].Received().BasicAckAsync(deliveryTag, false, cancellationToken: CancellationToken.None);
     }
 }
 
@@ -377,14 +377,14 @@ public class When_the_handler_throws_an_exception : IAsyncLifetime
     [Fact]
     public async Task Should_ack()
     {
-        await mockBuilder.Channels[2].Received().BasicAckAsync(deliveryTag, false, cancellationToken: default);
+        await mockBuilder.Channels[2].Received().BasicAckAsync(deliveryTag, false, cancellationToken: CancellationToken.None);
     }
 
     [Fact]
     public void Should_invoke_the_consumer_error_strategy()
     {
         consumeErrorStrategy.Received()
-            .HandleErrorAsync(Arg.Any<ConsumeContext>(), Arg.Any<Exception>(), cancellationToken: default);
+            .HandleErrorAsync(Arg.Any<ConsumeContext>(), Arg.Any<Exception>(), cancellationToken: CancellationToken.None);
     }
 
     [Fact]

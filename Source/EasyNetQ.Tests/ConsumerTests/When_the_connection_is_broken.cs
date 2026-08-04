@@ -21,6 +21,6 @@ public class When_the_connection_is_broken : Given_a_сonsumer
         internalConsumerFactory.Received(1).CreateConsumer(Arg.Any<ConsumerConfiguration>());
 #pragma warning restore IDISP004
         internalConsumers.Count.Should().Be(1);
-        internalConsumers[0].Received(2).StartConsumingAsync(Arg.Any<bool>(), cancellationToken: default);
+        internalConsumers[0].Received(2).StartConsumingAsync(Arg.Any<bool>(), cancellationToken: CancellationToken.None);
     }
 }

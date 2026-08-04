@@ -18,7 +18,7 @@ public class When_a_request_is_sent_but_no_reply_is_received : IAsyncLifetime
     {
         return Assert.ThrowsAsync<TaskCanceledException>(
             () => mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(
-                new TestRequestMessage(), _ => { }, cancellationToken: default
+                new TestRequestMessage(), _ => { }, cancellationToken: CancellationToken.None
             )
         );
     }

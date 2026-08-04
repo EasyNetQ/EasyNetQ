@@ -54,35 +54,35 @@ public sealed class InternalConsumerTests : IAsyncLifetime
     [Fact]
     public async Task Should_follow_reconnection_lifecycle_async()
     {
-        var status = await internalConsumer.StartConsumingAsync(true, cancellationToken: default);
+        var status = await internalConsumer.StartConsumingAsync(true, cancellationToken: CancellationToken.None);
         status.Started.Should().BeEquivalentTo(new[] { exclusiveQueue, nonExclusiveQueue });
         status.Active.Should().BeEquivalentTo(new[] { exclusiveQueue, nonExclusiveQueue });
         status.Failed.Should().BeEmpty();
 
-        await internalConsumer.StopConsumingAsync(cancellationToken: default);
+        await internalConsumer.StopConsumingAsync(cancellationToken: CancellationToken.None);
 
-        status = await internalConsumer.StartConsumingAsync(false, cancellationToken: default);
+        status = await internalConsumer.StartConsumingAsync(false, cancellationToken: CancellationToken.None);
         status.Started.Should().BeEquivalentTo(new[] { nonExclusiveQueue });
         status.Active.Should().BeEquivalentTo(new[] { nonExclusiveQueue });
         status.Failed.Should().BeEquivalentTo(new[] { exclusiveQueue });
 
-        await internalConsumer.StopConsumingAsync(cancellationToken: default);
+        await internalConsumer.StopConsumingAsync(cancellationToken: CancellationToken.None);
     }
 
     [Fact]
     public async Task Should_follow_lifecycle_without_reconnections_async()
     {
-        var status = await internalConsumer.StartConsumingAsync(true, cancellationToken: default);
+        var status = await internalConsumer.StartConsumingAsync(true, cancellationToken: CancellationToken.None);
         status.Started.Should().BeEquivalentTo(new[] { exclusiveQueue, nonExclusiveQueue });
         status.Active.Should().BeEquivalentTo(new[] { exclusiveQueue, nonExclusiveQueue });
         status.Failed.Should().BeEmpty();
 
-        status = await internalConsumer.StartConsumingAsync(false, cancellationToken: default);
+        status = await internalConsumer.StartConsumingAsync(false, cancellationToken: CancellationToken.None);
         status.Started.Should().BeEmpty();
         status.Active.Should().BeEquivalentTo(new[] { exclusiveQueue, nonExclusiveQueue });
         status.Failed.Should().BeEmpty();
 
-        await internalConsumer.StopConsumingAsync(cancellationToken: default);
+        await internalConsumer.StopConsumingAsync(cancellationToken: CancellationToken.None);
     }
 
     public ValueTask InitializeAsync() => ValueTask.CompletedTask;
