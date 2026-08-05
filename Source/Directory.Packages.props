@@ -51,7 +51,7 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="8.0.1" />
   </ItemGroup>
   <ItemGroup>
-    <GlobalPackageReference Condition="'$(TargetFramework)'=='netstandard2.0'" Include="PolySharp" Version="1.15.0" />
+    <GlobalPackageReference Condition="'$(TargetFramework)'=='netstandard2.0'" Include="PolySharp" Version="1.16.0" />
   </ItemGroup>
   <ItemGroup Condition="'$(IsPackable)' == 'true'">
     <GlobalPackageReference Include="MinVer" Version="7.0.0" />
