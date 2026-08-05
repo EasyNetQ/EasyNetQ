@@ -49,11 +49,11 @@ public class PersistentConnection : IPersistentConnection
         connection.EnsureIsOpen();
     }
     /// <inheritdoc />
-    public async Task EnsureConnectedAsync(CancellationToken token = default)
+    public async Task EnsureConnectedAsync(CancellationToken cancellationToken = default)
     {
         if (disposed) throw new ObjectDisposedException(nameof(PersistentConnection));
 
-        var connection = await InitializeConnectionAsync(token);
+        var connection = await InitializeConnectionAsync(cancellationToken);
         connection.EnsureIsOpen();
     }
     /// <inheritdoc />

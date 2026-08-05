@@ -22,7 +22,7 @@ public class When_an_action_is_invoked_using_multi_channel : IAsyncLifetime
 
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         var consumerConnection = Substitute.For<IConsumerConnection>();
         var channel = Substitute.For<IPersistentChannel>();
@@ -36,7 +36,7 @@ public class When_an_action_is_invoked_using_multi_channel : IAsyncLifetime
         actionResult = await dispatcher.InvokeAsync(action, PersistentChannelDispatchOptions.ProducerTopology);
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await dispatcher.DisposeAsync();
     }

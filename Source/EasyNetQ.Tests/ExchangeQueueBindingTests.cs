@@ -11,7 +11,7 @@ public class When_a_queue_is_declared : IAsyncLifetime
         mockBuilder = new MockBuilder();
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         queue = await mockBuilder.Bus.Advanced.QueueDeclareAsync(
     queue: "my_queue",
@@ -26,7 +26,7 @@ public class When_a_queue_is_declared : IAsyncLifetime
     }
 
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }
@@ -69,7 +69,7 @@ public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange : IAsyncLi
 
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         var advancedBus = mockBuilder.Bus.Advanced;
         queue = await advancedBus.QueueDeclareAsync(
@@ -86,7 +86,7 @@ public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange : IAsyncLi
         );
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }
@@ -130,7 +130,7 @@ public class When_a_queue_is_declared_With_EmptyDeadLetterExchange : IAsyncLifet
         mockBuilder = new MockBuilder();
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         queue = await mockBuilder.Bus.Advanced.QueueDeclareAsync(
     queue: "my_queue",
@@ -147,7 +147,7 @@ public class When_a_queue_is_declared_With_EmptyDeadLetterExchange : IAsyncLifet
     }
 
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }
@@ -192,9 +192,9 @@ public class When_a_queue_is_deleted : IAsyncLifetime
 
     }
 
-    public Task InitializeAsync() => mockBuilder.Bus.Advanced.QueueDeleteAsync("my_queue");
+    public async ValueTask InitializeAsync() => await mockBuilder.Bus.Advanced.QueueDeleteAsync("my_queue");
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }
@@ -204,7 +204,7 @@ public class When_a_queue_is_deleted : IAsyncLifetime
     [Fact]
     public async Task Should_delete_the_queue()
     {
-        await mockBuilder.Channels[0].Received().QueueDeleteAsync("my_queue", false, false);
+        await mockBuilder.Channels[0].Received().QueueDeleteAsync("my_queue", false, false, cancellationToken: CancellationToken.None);
     }
 }
 
@@ -217,9 +217,9 @@ public class When_a_queue_is_deleted_with_name : IAsyncLifetime
 
     }
 
-    public Task InitializeAsync() => mockBuilder.Bus.Advanced.QueueDeleteAsync("my_queue");
+    public async ValueTask InitializeAsync() => await mockBuilder.Bus.Advanced.QueueDeleteAsync("my_queue");
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }
@@ -229,7 +229,7 @@ public class When_a_queue_is_deleted_with_name : IAsyncLifetime
     [Fact]
     public async Task Should_delete_the_queue()
     {
-        await mockBuilder.Channels[0].Received().QueueDeleteAsync("my_queue", false, false);
+        await mockBuilder.Channels[0].Received().QueueDeleteAsync("my_queue", false, false, cancellationToken: CancellationToken.None);
     }
 }
 
@@ -242,7 +242,7 @@ public class When_an_exchange_is_declared : IAsyncLifetime
 
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         exchange = await mockBuilder.Bus.Advanced.ExchangeDeclareAsync(
     "my_exchange",
@@ -253,7 +253,7 @@ public class When_an_exchange_is_declared : IAsyncLifetime
 );
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }
@@ -293,9 +293,9 @@ public class When_an_exchange_is_declared_passively : IAsyncLifetime
 
     }
 
-    public Task InitializeAsync() => mockBuilder.Bus.Advanced.ExchangeDeclarePassiveAsync("my_exchange");
+    public async ValueTask InitializeAsync() => await mockBuilder.Bus.Advanced.ExchangeDeclarePassiveAsync("my_exchange");
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }
@@ -306,7 +306,7 @@ public class When_an_exchange_is_declared_passively : IAsyncLifetime
     public async Task Should_passively_declare_exchange()
     {
         mockBuilder.Channels.Count.Should().Be(1);
-        await mockBuilder.Channels[0].Received().ExchangeDeclarePassiveAsync(Arg.Is("my_exchange"));
+        await mockBuilder.Channels[0].Received().ExchangeDeclarePassiveAsync(Arg.Is("my_exchange"), cancellationToken: CancellationToken.None);
     }
 }
 
@@ -319,13 +319,13 @@ public class When_an_exchange_is_deleted : IAsyncLifetime
 
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         var exchange = new Exchange("my_exchange");
         await mockBuilder.Bus.Advanced.ExchangeDeleteAsync(exchange);
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }
@@ -335,7 +335,7 @@ public class When_an_exchange_is_deleted : IAsyncLifetime
     [Fact]
     public async Task Should_delete_the_queue()
     {
-        await mockBuilder.Channels[0].Received().ExchangeDeleteAsync("my_exchange", false);
+        await mockBuilder.Channels[0].Received().ExchangeDeleteAsync("my_exchange", false, cancellationToken: CancellationToken.None);
     }
 }
 
@@ -347,14 +347,14 @@ public class When_a_queue_is_bound_to_an_exchange : IAsyncLifetime
         advancedBus = mockBuilder.Bus.Advanced;
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         var exchange = new Exchange("my_exchange");
         var queue = new Queue("my_queue", false);
         binding = await advancedBus.BindAsync(exchange, queue, "my_routing_key");
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }
@@ -395,7 +395,7 @@ public class When_a_queue_is_bound_to_an_exchange_with_headers : IAsyncLifetime
         advancedBus = mockBuilder.Bus.Advanced;
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
 
         var exchange = new Exchange("my_exchange");
@@ -404,7 +404,7 @@ public class When_a_queue_is_bound_to_an_exchange_with_headers : IAsyncLifetime
         binding = await advancedBus.BindAsync(exchange, queue, "my_routing_key", new Dictionary<string, object> { ["header1"] = "value1" });
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }
@@ -448,7 +448,7 @@ public class When_a_queue_is_unbound_from_an_exchange : IAsyncLifetime
         advancedBus = mockBuilder.Bus.Advanced;
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
 
         var exchange = new Exchange("my_exchange");
@@ -457,7 +457,7 @@ public class When_a_queue_is_unbound_from_an_exchange : IAsyncLifetime
         await advancedBus.UnbindAsync(binding);
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }
@@ -469,6 +469,6 @@ public class When_a_queue_is_unbound_from_an_exchange : IAsyncLifetime
     [Fact]
     public async Task Should_unbind_the_exchange()
     {
-        await mockBuilder.Channels[0].Received().QueueUnbindAsync("my_queue", "my_exchange", "my_routing_key", null);
+        await mockBuilder.Channels[0].Received().QueueUnbindAsync("my_queue", "my_exchange", "my_routing_key", null, cancellationToken: CancellationToken.None);
     }
 }

@@ -1605,7 +1605,7 @@ namespace EasyNetQ.Persistent
         public System.Threading.Tasks.Task ConnectAsync() { }
         public System.Threading.Tasks.Task<RabbitMQ.Client.IChannel> CreateChannelAsync(RabbitMQ.Client.CreateChannelOptions options = null, System.Threading.CancellationToken cancellationToken = default) { }
         public virtual void Dispose() { }
-        public System.Threading.Tasks.Task EnsureConnectedAsync(System.Threading.CancellationToken token = default) { }
+        public System.Threading.Tasks.Task EnsureConnectedAsync(System.Threading.CancellationToken cancellationToken = default) { }
     }
     public enum PersistentConnectionState
     {

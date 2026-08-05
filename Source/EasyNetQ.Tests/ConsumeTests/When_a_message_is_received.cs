@@ -14,7 +14,7 @@ public class When_a_message_is_received : IAsyncLifetime
         mockBuilder = new MockBuilder();
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
 #pragma warning disable IDISP004
         await mockBuilder.SendReceive.ReceiveAsync("the_queue", x => x
@@ -27,7 +27,7 @@ public class When_a_message_is_received : IAsyncLifetime
         await DeliverMessageAsync("{ Text: \"Shouldn't get this\" }", "EasyNetQ.Tests.Unknown, EasyNetQ.Tests");
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }

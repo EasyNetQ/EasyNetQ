@@ -16,7 +16,7 @@ public class When_a_polymorphic_message_is_sent : IAsyncLifetime
 
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         var message = new MyImplementation
         {
@@ -26,7 +26,7 @@ public class When_a_polymorphic_message_is_sent : IAsyncLifetime
         await mockBuilder.PubSub.PublishAsync<IMyMessageInterface>(message);
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }

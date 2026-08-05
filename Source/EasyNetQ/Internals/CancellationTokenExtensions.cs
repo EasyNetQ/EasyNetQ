@@ -26,7 +26,7 @@ public static class CancellationTokenExtensions
     public readonly struct ValueCancellationTokenSource : IDisposable
     {
         private readonly CancellationTokenSource cts = null;
-        private readonly CancellationToken cancellationToken;
+        private readonly CancellationToken _cancellationToken;
 
         /// <summary>
         /// Attaches a timeout to a cancellation token
@@ -35,7 +35,7 @@ public static class CancellationTokenExtensions
         /// <param name="timeout">The timeout.</param>
         public ValueCancellationTokenSource(CancellationToken cancellationToken, TimeSpan timeout)
         {
-            this.cancellationToken = cancellationToken;
+            _cancellationToken = cancellationToken;
 
             if (timeout != Timeout.InfiniteTimeSpan)
             {
@@ -54,7 +54,7 @@ public static class CancellationTokenExtensions
         /// <summary>
         /// Gets cancellation token associated with this <see cref="ValueCancellationTokenSource"/>.
         /// </summary>
-        public CancellationToken Token => cts?.Token ?? cancellationToken;
+        public CancellationToken Token => cts?.Token ?? _cancellationToken;
 
         /// <inheritdoc />
         public void Dispose() => cts?.Dispose();

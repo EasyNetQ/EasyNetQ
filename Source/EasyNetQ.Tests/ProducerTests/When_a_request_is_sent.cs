@@ -10,7 +10,7 @@ public class When_a_request_is_sent : IAsyncLifetime
     private MockBuilder mockBuilder;
     private TestResponseMessage responseMessage;
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         var correlationId = Guid.NewGuid().ToString();
         mockBuilder = new MockBuilder(
@@ -35,7 +35,7 @@ public class When_a_request_is_sent : IAsyncLifetime
         responseMessage = await task;
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }

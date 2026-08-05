@@ -21,22 +21,22 @@ public class DockerProxy : IDisposable
         dockerConfiguration.Dispose();
     }
 
-    public async Task<OSPlatform> GetDockerEngineOsAsync(CancellationToken token = default)
+    public async Task<OSPlatform> GetDockerEngineOsAsync(CancellationToken cancellationToken = default)
     {
-        var response = await client.System.GetSystemInfoAsync(token);
+        var response = await client.System.GetSystemInfoAsync(cancellationToken);
         return OSPlatform.Create(response.OSType.ToUpper());
     }
 
-    public async Task CreateNetworkAsync(string name, CancellationToken token = default)
+    public async Task CreateNetworkAsync(string name, CancellationToken cancellationToken = default)
     {
         var networksCreateParameters = new NetworksCreateParameters
         {
             Name = name
         };
-        await client.Networks.CreateNetworkAsync(networksCreateParameters, token);
+        await client.Networks.CreateNetworkAsync(networksCreateParameters, cancellationToken);
     }
 
-    public async Task PullImageAsync(string image, string tag, CancellationToken token = default)
+    public async Task PullImageAsync(string image, string tag, CancellationToken cancellationToken = default)
     {
         var createParameters = new ImagesCreateParameters
         {
@@ -44,12 +44,12 @@ public class DockerProxy : IDisposable
             Tag = tag
         };
         var progress = new Progress<JSONMessage>(_ => { });
-        await client.Images.CreateImageAsync(createParameters, null, progress, token);
+        await client.Images.CreateImageAsync(createParameters, null, progress, cancellationToken);
     }
 
     public async Task<string> CreateContainerAsync(string image, string name,
         IDictionary<string, ISet<string>> portMappings, string networkName = null, IList<string> envVars = null,
-        CancellationToken token = default)
+        CancellationToken cancellationToken = default)
     {
         var createParameters = new CreateContainerParameters
         {
@@ -64,50 +64,50 @@ public class DockerProxy : IDisposable
             },
             ExposedPorts = portMappings.ToDictionary(x => x.Key, _ => new EmptyStruct())
         };
-        var response = await client.Containers.CreateContainerAsync(createParameters, token);
+        var response = await client.Containers.CreateContainerAsync(createParameters, cancellationToken);
         return response.ID;
     }
 
-    public async Task StartContainerAsync(string id, CancellationToken token = default)
+    public async Task StartContainerAsync(string id, CancellationToken cancellationToken = default)
     {
-        await client.Containers.StartContainerAsync(id, new ContainerStartParameters(), token)
+        await client.Containers.StartContainerAsync(id, new ContainerStartParameters(), cancellationToken)
             ;
     }
 
-    public async Task<string> GetContainerIpAsync(string id, CancellationToken token = default)
+    public async Task<string> GetContainerIpAsync(string id, CancellationToken cancellationToken = default)
     {
-        var response = await client.Containers.InspectContainerAsync(id, token);
+        var response = await client.Containers.InspectContainerAsync(id, cancellationToken);
         var networks = response.NetworkSettings.Networks;
         return networks.Select(x => x.Value.IPAddress).First(x => !string.IsNullOrEmpty(x));
     }
 
-    public async Task StopContainerAsync(string name, CancellationToken token = default)
+    public async Task StopContainerAsync(string name, CancellationToken cancellationToken = default)
     {
         var ids = await FindContainerIdsAsync(name);
         var stopTasks = ids.Select(x =>
-            client.Containers.StopContainerAsync(x, new ContainerStopParameters(), token)
+            client.Containers.StopContainerAsync(x, new ContainerStopParameters(), cancellationToken)
         );
         await Task.WhenAll(stopTasks);
     }
 
-    public Task StopContainerByIdAsync(string id, CancellationToken token = default)
+    public Task StopContainerByIdAsync(string id, CancellationToken cancellationToken = default)
     {
-        return client.Containers.StopContainerAsync(id, new ContainerStopParameters(), token);
+        return client.Containers.StopContainerAsync(id, new ContainerStopParameters(), cancellationToken);
     }
 
-    public async Task RemoveContainerAsync(string name, CancellationToken token = default)
+    public async Task RemoveContainerAsync(string name, CancellationToken cancellationToken = default)
     {
         var ids = await FindContainerIdsAsync(name);
         var containerRemoveParameters = new ContainerRemoveParameters { Force = true, RemoveVolumes = true };
         var removeTasks =
-            ids.Select(x => client.Containers.RemoveContainerAsync(x, containerRemoveParameters, token));
+            ids.Select(x => client.Containers.RemoveContainerAsync(x, containerRemoveParameters, cancellationToken));
         await Task.WhenAll(removeTasks);
     }
 
-    public async Task DeleteNetworkAsync(string name, CancellationToken token = default)
+    public async Task DeleteNetworkAsync(string name, CancellationToken cancellationToken = default)
     {
         var ids = await FindNetworkIdsAsync(name);
-        var deleteTasks = ids.Select(x => client.Networks.DeleteNetworkAsync(x, token));
+        var deleteTasks = ids.Select(x => client.Networks.DeleteNetworkAsync(x, cancellationToken));
         await Task.WhenAll(deleteTasks);
     }
 

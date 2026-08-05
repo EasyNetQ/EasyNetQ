@@ -14,9 +14,9 @@ public class When_a_message_is_sent : IAsyncLifetime
 
     }
 
-    public Task InitializeAsync() => mockBuilder.SendReceive.SendAsync(queueName, new MyMessage { Text = "Hello World" });
+    public async ValueTask InitializeAsync() => await mockBuilder.SendReceive.SendAsync(queueName, new MyMessage { Text = "Hello World" });
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }

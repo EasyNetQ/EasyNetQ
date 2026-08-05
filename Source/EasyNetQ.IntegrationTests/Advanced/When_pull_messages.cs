@@ -17,14 +17,14 @@ public class When_pull_messages : IDisposable, IAsyncLifetime
         serviceProvider = serviceCollection.BuildServiceProvider();
         bus = serviceProvider.GetRequiredService<IBus>();
     }
-    public Task InitializeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
     public virtual void Dispose()
     {
         serviceProvider?.Dispose();
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await serviceProvider.DisposeAsync();
     }

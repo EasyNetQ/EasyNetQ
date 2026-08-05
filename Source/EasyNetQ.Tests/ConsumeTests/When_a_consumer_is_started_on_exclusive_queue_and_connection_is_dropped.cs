@@ -15,7 +15,7 @@ public class When_a_consumer_is_started_on_exclusive_queue_and_connection_is_dro
         mockBuilder = new MockBuilder();
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         var queue = new Queue("my_queue", false, true);
         await using var cancelSubscription = await mockBuilder.Bus.Advanced
@@ -35,7 +35,7 @@ public class When_a_consumer_is_started_on_exclusive_queue_and_connection_is_dro
         }
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }

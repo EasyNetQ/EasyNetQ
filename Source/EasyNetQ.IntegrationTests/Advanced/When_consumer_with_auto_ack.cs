@@ -52,9 +52,9 @@ public class When_consumer_with_auto_ack : IDisposable, IAsyncLifetime
         serviceProvider?.Dispose();
     }
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await serviceProvider.DisposeAsync();
     }

@@ -14,7 +14,7 @@ public class When_a_consumer_is_cancelled_by_the_user : IAsyncLifetime
         mockBuilder = new MockBuilder();
     }
 #pragma warning restore IDISP004
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         var queue = new Queue("my_queue", false);
 
@@ -33,7 +33,7 @@ public class When_a_consumer_is_cancelled_by_the_user : IAsyncLifetime
         }
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }

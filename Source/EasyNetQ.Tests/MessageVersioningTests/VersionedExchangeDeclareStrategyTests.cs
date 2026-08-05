@@ -15,7 +15,7 @@ public class VersionedExchangeDeclareStrategyTests
         var advancedBus = Substitute.For<IAdvancedBus>();
         var exchange = new Exchange(exchangeName);
 
-        advancedBus.ExchangeDeclareAsync(exchangeName).Returns(
+        advancedBus.ExchangeDeclareAsync(exchangeName, cancellationToken: CancellationToken.None).Returns(
             _ => Task.FromException(new Exception()),
             _ =>
             {
@@ -29,14 +29,14 @@ public class VersionedExchangeDeclareStrategyTests
         using var exchangeDeclareStrategy = new VersionedExchangeDeclareStrategy(conventions, advancedBus);
         try
         {
-            await exchangeDeclareStrategy.DeclareExchangeAsync(exchangeName, ExchangeType.Topic);
+            await exchangeDeclareStrategy.DeclareExchangeAsync(exchangeName, ExchangeType.Topic, cancellationToken: CancellationToken.None);
         }
         catch (Exception)
         {
         }
 
-        var declaredExchange = await exchangeDeclareStrategy.DeclareExchangeAsync(exchangeName, ExchangeType.Topic);
-        await advancedBus.Received(2).ExchangeDeclareAsync(exchangeName);
+        var declaredExchange = await exchangeDeclareStrategy.DeclareExchangeAsync(exchangeName, ExchangeType.Topic, cancellationToken: CancellationToken.None);
+        await advancedBus.Received(2).ExchangeDeclareAsync(exchangeName, cancellationToken: CancellationToken.None);
         declaredExchange.Should().BeEquivalentTo(exchange);
         exchangeDeclareCount.Should().Be(1);
     }
@@ -49,7 +49,7 @@ public class VersionedExchangeDeclareStrategyTests
         var exchanges = new List<Exchange>();
         var boundExchanges = new Dictionary<string, string>();
         var advancedBus = Substitute.For<IAdvancedBus>();
-        advancedBus.ExchangeDeclareAsync(Arg.Any<string>())
+        advancedBus.ExchangeDeclareAsync(Arg.Any<string>(), cancellationToken: CancellationToken.None)
             .ReturnsForAnyArgs(mi =>
             {
                 var exchange = new Exchange((string)mi[0]);
@@ -57,7 +57,7 @@ public class VersionedExchangeDeclareStrategyTests
                 return Task.FromResult(exchange);
             });
 
-        advancedBus.ExchangeBindAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Is("#"), Arg.Any<IDictionary<string, object>>())
+        advancedBus.ExchangeBindAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Is("#"), Arg.Any<IDictionary<string, object>>(), cancellationToken: CancellationToken.None)
             .Returns(mi =>
             {
                 var source = (string)mi[0];
@@ -71,7 +71,7 @@ public class VersionedExchangeDeclareStrategyTests
 
         using var publishExchangeStrategy = new VersionedExchangeDeclareStrategy(conventions, advancedBus);
 
-        await publishExchangeStrategy.DeclareExchangeAsync(typeof(MyMessage), ExchangeType.Topic);
+        await publishExchangeStrategy.DeclareExchangeAsync(typeof(MyMessage), ExchangeType.Topic, cancellationToken: CancellationToken.None);
 
         Assert.True(exchanges.Count == 1); //, "Single exchange should have been created" );
         Assert.Equal("MyMessage", exchanges[0].Name); //, "Exchange should have used naming convection to name the exchange" );
@@ -84,7 +84,7 @@ public class VersionedExchangeDeclareStrategyTests
         var exchanges = new List<string>();
         var boundExchanges = new Dictionary<string, string>();
         var advancedBus = Substitute.For<IAdvancedBus>();
-        advancedBus.ExchangeDeclareAsync(Arg.Any<string>())
+        advancedBus.ExchangeDeclareAsync(Arg.Any<string>(), cancellationToken: CancellationToken.None)
             .ReturnsForAnyArgs(mi =>
             {
                 var exchange = (string)mi[0];
@@ -92,7 +92,7 @@ public class VersionedExchangeDeclareStrategyTests
                 return Task.FromResult(new Exchange(exchange));
             });
 
-        advancedBus.ExchangeBindAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Is("#"), Arg.Any<IDictionary<string, object>>())
+        advancedBus.ExchangeBindAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Is("#"), Arg.Any<IDictionary<string, object>>(), cancellationToken: CancellationToken.None)
             .Returns(mi =>
             {
                 var destination = (string)mi[0];
@@ -106,7 +106,7 @@ public class VersionedExchangeDeclareStrategyTests
 
         using var publishExchangeStrategy = new VersionedExchangeDeclareStrategy(conventions, advancedBus);
 
-        await publishExchangeStrategy.DeclareExchangeAsync(typeof(MyMessageV2), ExchangeType.Topic);
+        await publishExchangeStrategy.DeclareExchangeAsync(typeof(MyMessageV2), ExchangeType.Topic, cancellationToken: CancellationToken.None);
 
         Assert.Equal(2, exchanges.Count); //, "Two exchanges should have been created" );
         Assert.Equal("MyMessage", exchanges[0]); //, "Superseded message exchange should been created first" );

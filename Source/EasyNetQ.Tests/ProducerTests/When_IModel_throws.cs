@@ -21,9 +21,9 @@ public class When_IModel_throws_because_of_closed_connection : IAsyncLifetime
             });
     }
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }
@@ -35,7 +35,7 @@ public class When_IModel_throws_because_of_closed_connection : IAsyncLifetime
     {
         try
         {
-            await mockBuilder.PubSub.PublishAsync(new MyMessage { Text = "Hello World" });
+            await mockBuilder.PubSub.PublishAsync(new MyMessage { Text = "Hello World" }, cancellationToken: CancellationToken.None);
         }
         catch (Exception ex)
         {
