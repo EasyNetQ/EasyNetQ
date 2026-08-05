@@ -36,9 +36,9 @@ public class When_an_action_is_performed_on_a_closed_channel_that_doesnt_open_ag
         });
     }
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await persistentChannel.DisposeAsync();
     }

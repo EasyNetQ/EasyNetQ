@@ -17,7 +17,7 @@ public class When_a_consumer_has_multiple_handlers : IAsyncLifetime
         mockBuilder = new MockBuilder();
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         var queue = new Queue("test_queue", false);
 
@@ -50,7 +50,7 @@ public class When_a_consumer_has_multiple_handlers : IAsyncLifetime
         if (!countdownEvent.Wait(5000)) throw new TimeoutException();
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }

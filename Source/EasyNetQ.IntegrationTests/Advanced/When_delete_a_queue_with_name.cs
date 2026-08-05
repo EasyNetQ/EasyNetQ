@@ -18,7 +18,7 @@ public class When_delete_a_queue_with_name : IDisposable, IAsyncLifetime
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
     [Fact]
     public async Task Should_delete_existing_queue()
@@ -35,7 +35,7 @@ public class When_delete_a_queue_with_name : IDisposable, IAsyncLifetime
         Assert.Equal(404, exception.ShutdownReason.ReplyCode);
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await serviceProvider.DisposeAsync();
     }

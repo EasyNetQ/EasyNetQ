@@ -11,7 +11,7 @@ public class NonGenericSendReceiveExtensionsTests
     {
         var message = DateTime.UtcNow;
         var messageType = typeof(DateTime);
-        await sendReceive.SendAsync(Queue, message, messageType, configure);
+        await sendReceive.SendAsync(Queue, message, messageType, configure, cancellationToken: CancellationToken.None);
 
 #pragma warning disable 4014
         sendReceive.Received()
@@ -30,7 +30,7 @@ public class NonGenericSendReceiveExtensionsTests
         var message = new Dog();
         var messageType = typeof(Dog);
 
-        await sendReceive.SendAsync(Queue, message, messageType, configure);
+        await sendReceive.SendAsync(Queue, message, messageType, configure, cancellationToken: CancellationToken.None);
 
 #pragma warning disable 4014
         sendReceive.Received()
@@ -49,7 +49,7 @@ public class NonGenericSendReceiveExtensionsTests
         var message = (IAnimal)new Dog();
         var messageType = typeof(IAnimal);
 
-        await sendReceive.SendAsync(Queue, message, messageType, configure);
+        await sendReceive.SendAsync(Queue, message, messageType, configure, cancellationToken: CancellationToken.None);
 
 #pragma warning disable 4014
         sendReceive.Received()

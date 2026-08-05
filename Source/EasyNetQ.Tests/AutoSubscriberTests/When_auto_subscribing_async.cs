@@ -27,7 +27,7 @@ public class When_auto_subscribing_async : IAsyncLifetime
         serviceProvider = services.BuildServiceProvider();
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         var autoSubscriber = new AutoSubscriber(mockBuilder.Bus, serviceProvider, "my_app");
 #pragma warning disable IDISP004
@@ -35,7 +35,7 @@ public class When_auto_subscribing_async : IAsyncLifetime
 #pragma warning restore IDISP004
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
         await serviceProvider.DisposeAsync();

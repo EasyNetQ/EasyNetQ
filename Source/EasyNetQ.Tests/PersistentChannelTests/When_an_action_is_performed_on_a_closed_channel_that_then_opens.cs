@@ -12,7 +12,7 @@ public class When_an_action_is_performed_on_a_closed_channel_that_then_opens : I
     {
         channel = Substitute.For<IChannel, IRecoverable>();
     }
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         using var persistentConnection = Substitute.For<IPersistentConnection>();
         var eventBus = new EventBus(Substitute.For<ILogger<EventBus>>());
@@ -41,8 +41,8 @@ public class When_an_action_is_performed_on_a_closed_channel_that_then_opens : I
     [Fact]
     public async Task Should_run_action_on_channel()
     {
-        await channel.Received().ExchangeDeclareAsync("MyExchange", ExchangeType.Direct);
+        await channel.Received().ExchangeDeclareAsync("MyExchange", ExchangeType.Direct, cancellationToken: CancellationToken.None);
     }
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 }

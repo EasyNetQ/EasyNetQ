@@ -21,9 +21,9 @@ public class When_connection_state_changed_raised : IDisposable, IAsyncLifetime
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await serviceProvider.DisposeAsync();
     }

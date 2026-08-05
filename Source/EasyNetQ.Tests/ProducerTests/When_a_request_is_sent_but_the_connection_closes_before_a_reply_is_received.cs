@@ -6,9 +6,9 @@ namespace EasyNetQ.Tests.ProducerTests;
 
 public class When_a_request_is_sent_but_the_connection_closes_before_a_reply_is_received : IAsyncLifetime
 {
-    public Task InitializeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }
@@ -24,7 +24,7 @@ public class When_a_request_is_sent_but_the_connection_closes_before_a_reply_is_
             AsyncEventHandler<AsyncEventArgs> recoveryHandlers = null;
             mockBuilder.Connection.ConnectionShutdownAsync += Arg.Do<AsyncEventHandler<ShutdownEventArgs>>(h => shutdownHandlers += h);
             mockBuilder.Connection.RecoverySucceededAsync += Arg.Do<AsyncEventHandler<AsyncEventArgs>>(h => recoveryHandlers += h);
-            var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage());
+            var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(new TestRequestMessage(), cancellationToken: CancellationToken.None);
             await shutdownHandlers?.Invoke(mockBuilder.Connection, new ShutdownEventArgs(ShutdownInitiator.Application, 0, "replyText", "cause"));
             await recoveryHandlers?.Invoke(mockBuilder.Connection, AsyncEventArgs.Empty);
             await task;

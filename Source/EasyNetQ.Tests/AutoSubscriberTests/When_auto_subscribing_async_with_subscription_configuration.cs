@@ -36,12 +36,12 @@ public class When_auto_subscribing_async_with_subscription_configuration_attribu
 
 #pragma warning restore IDISP004
     }
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         await autoSubscriber.SubscribeAsync([typeof(MyConsumerWithAttr)]);
     }
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     [Fact]
     public void Should_have_called_subscribe()
     {
@@ -50,7 +50,7 @@ public class When_auto_subscribing_async_with_subscription_configuration_attribu
 #pragma warning restore IDISP004
             Arg.Any<string>(),
             Arg.Any<Func<MessageA, CancellationToken, Task>>(),
-            Arg.Any<Action<ISubscriptionConfiguration>>()
+            Arg.Any<Action<ISubscriptionConfiguration>>(), cancellationToken: CancellationToken.None
         );
     }
 
@@ -125,12 +125,12 @@ public class When_auto_subscribing_async_explicit_implementation_with_subscripti
 #pragma warning disable IDISP004
 #pragma warning restore IDISP004
     }
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
-        await autoSubscriber.SubscribeAsync([typeof(MyConsumerWithAttr)]);
+        await autoSubscriber.SubscribeAsync([typeof(MyConsumerWithAttr)], cancellationToken: CancellationToken.None);
     }
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     [Fact]
     public void Should_have_called_subscribe()
     {
@@ -139,7 +139,7 @@ public class When_auto_subscribing_async_explicit_implementation_with_subscripti
 #pragma warning restore IDISP004
             Arg.Any<string>(),
             Arg.Any<Func<MessageA, CancellationToken, Task>>(),
-            Arg.Any<Action<ISubscriptionConfiguration>>()
+            Arg.Any<Action<ISubscriptionConfiguration>>(), cancellationToken: CancellationToken.None
         );
     }
 

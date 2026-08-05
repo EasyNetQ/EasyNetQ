@@ -17,9 +17,9 @@ public class When_request_and_respond_polymorphic : IAsyncLifetime
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         if (serviceProvider != null)
             await serviceProvider.DisposeAsync();

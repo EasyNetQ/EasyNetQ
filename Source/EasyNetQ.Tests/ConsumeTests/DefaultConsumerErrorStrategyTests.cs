@@ -14,12 +14,12 @@ public class DefaultConsumerErrorStrategyTests
         using var persistedConnectionMock = Substitute.For<IConsumerConnection>();
         var channelMock = Substitute.For<IChannel>();
 #pragma warning disable IDISP004
-        persistedConnectionMock.CreateChannelAsync(Arg.Is<CreateChannelOptions>(it => it.PublisherConfirmationTrackingEnabled && it.PublisherConfirmationsEnabled), default).Returns(channelMock);
+        persistedConnectionMock.CreateChannelAsync(Arg.Is<CreateChannelOptions>(it => it.PublisherConfirmationTrackingEnabled && it.PublisherConfirmationsEnabled), cancellationToken: CancellationToken.None).Returns(channelMock);
 #pragma warning restore IDISP004
         var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock, true);
 
         var ackStrategy = await consumerErrorStrategy.HandleErrorAsync(
-            CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!")
+            CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!"), cancellationToken: CancellationToken.None
         );
 
         Assert.Equal(AckStrategies.AckAsync, ackStrategy);
@@ -41,13 +41,12 @@ public class DefaultConsumerErrorStrategyTests
                 .Returns(ValueTask.FromException(new PublishException(42, default)));
 
 #pragma warning disable IDISP004
-        persistedConnectionMock.CreateChannelAsync(Arg.Is<CreateChannelOptions>(it => it.PublisherConfirmationTrackingEnabled && it.PublisherConfirmationsEnabled), default).Returns(channelMock);
+        persistedConnectionMock.CreateChannelAsync(Arg.Is<CreateChannelOptions>(it => it.PublisherConfirmationTrackingEnabled && it.PublisherConfirmationsEnabled), cancellationToken: CancellationToken.None).Returns(channelMock);
 #pragma warning restore IDISP004
         var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock, true);
 
         var ackStrategy = await consumerErrorStrategy.HandleErrorAsync(
-            CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!")
-        );
+            CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!"), cancellationToken: CancellationToken.None);
 
         Assert.Equal(AckStrategies.NackWithRequeueAsync, ackStrategy);
     }
@@ -58,13 +57,13 @@ public class DefaultConsumerErrorStrategyTests
         using var persistedConnectionMock = Substitute.For<IConsumerConnection>();
         var modelMock = Substitute.For<IChannel>();
 #pragma warning disable IDISP004
-        persistedConnectionMock.CreateChannelAsync(new CreateChannelOptions(false, false), default)
+        persistedConnectionMock.CreateChannelAsync(new CreateChannelOptions(false, false), cancellationToken: CancellationToken.None)
             .Returns(modelMock);
 #pragma warning restore IDISP004
         var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock);
 
         var ackStrategy = await consumerErrorStrategy.HandleErrorAsync(
-            CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!"));
+            CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!"), cancellationToken: CancellationToken.None);
 
         Assert.Equal(AckStrategies.AckAsync, ackStrategy);
     }

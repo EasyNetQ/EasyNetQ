@@ -15,7 +15,7 @@ public class When_a_consumer_is_cancelled_via_soft_error : IAsyncLifetime
         mockBuilder = new MockBuilder();
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         var queue = new Queue("my_queue", false);
 
@@ -35,7 +35,7 @@ public class When_a_consumer_is_cancelled_via_soft_error : IAsyncLifetime
         await Task.Delay(TimeSpan.FromSeconds(10));
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }

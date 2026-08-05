@@ -29,12 +29,12 @@ public class When_subscribe_is_called : IAsyncLifetime
         );
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         subscriptionResult = await mockBuilder.PubSub.SubscribeAsync<MyMessage>(subscriptionId, _ => { });
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await subscriptionResult.DisposeAsync();
 
@@ -94,7 +94,7 @@ public class When_subscribe_is_called : IAsyncLifetime
     public async Task Should_set_configured_prefetch_count()
     {
         var connectionConfiguration = new ConnectionConfiguration();
-        await mockBuilder.Channels[2].Received().BasicQosAsync(0, connectionConfiguration.PrefetchCount, false);
+        await mockBuilder.Channels[2].Received().BasicQosAsync(0, connectionConfiguration.PrefetchCount, false, cancellationToken: CancellationToken.None);
     }
 
     [Fact]
@@ -183,7 +183,7 @@ public class When_subscribe_with_configuration_is_called
                 {
                     c.WithMaxLengthBytes(maxLengthBytes.Value);
                 }
-            }
+            }, cancellationToken: CancellationToken.None
         );
 
         // Assert that queue got declared correctly
@@ -215,7 +215,7 @@ public class When_subscribe_with_configuration_is_called
         );
 
         // Assert that QoS got configured correctly
-        await mockBuilder.Channels[2].Received().BasicQosAsync(0, prefetchCount, false);
+        await mockBuilder.Channels[2].Received().BasicQosAsync(0, prefetchCount, false, cancellationToken: CancellationToken.None);
 
         // Assert that binding got configured correctly
         await mockBuilder.Channels[1].Received().QueueBindAsync(
@@ -252,7 +252,7 @@ public class When_a_message_is_delivered : IAsyncLifetime
 
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
 #pragma warning disable IDISP004
         await mockBuilder.PubSub.SubscribeAsync<MyMessage>(subscriptionId, message => { deliveredMessage = message; });
@@ -279,7 +279,7 @@ public class When_a_message_is_delivered : IAsyncLifetime
         );
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }
@@ -300,7 +300,7 @@ public class When_a_message_is_delivered : IAsyncLifetime
     [Fact]
     public async Task Should_ack_the_message()
     {
-        await mockBuilder.Channels[2].Received().BasicAckAsync(deliveryTag, false);
+        await mockBuilder.Channels[2].Received().BasicAckAsync(deliveryTag, false, cancellationToken: CancellationToken.None);
     }
 }
 
@@ -343,7 +343,7 @@ public class When_the_handler_throws_an_exception : IAsyncLifetime
         );
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
 #pragma warning disable IDISP004
         await mockBuilder.PubSub.SubscribeAsync<MyMessage>(subscriptionId, _ => throw originalException);
@@ -369,7 +369,7 @@ public class When_the_handler_throws_an_exception : IAsyncLifetime
             serializedMessage.Memory
         );
     }
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }
@@ -377,14 +377,14 @@ public class When_the_handler_throws_an_exception : IAsyncLifetime
     [Fact]
     public async Task Should_ack()
     {
-        await mockBuilder.Channels[2].Received().BasicAckAsync(deliveryTag, false);
+        await mockBuilder.Channels[2].Received().BasicAckAsync(deliveryTag, false, cancellationToken: CancellationToken.None);
     }
 
     [Fact]
     public void Should_invoke_the_consumer_error_strategy()
     {
         consumeErrorStrategy.Received()
-            .HandleErrorAsync(Arg.Any<ConsumeContext>(), Arg.Any<Exception>());
+            .HandleErrorAsync(Arg.Any<ConsumeContext>(), Arg.Any<Exception>(), cancellationToken: CancellationToken.None);
     }
 
     [Fact]
@@ -420,7 +420,7 @@ public class When_a_subscription_is_cancelled_by_the_user : IAsyncLifetime
 
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         await using var subscriptionResult = await mockBuilder.PubSub.SubscribeAsync<MyMessage>(subscriptionId, _ => { });
         using var are = new AutoResetEvent(false);
@@ -430,7 +430,7 @@ public class When_a_subscription_is_cancelled_by_the_user : IAsyncLifetime
         are.WaitOne(500);
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }

@@ -31,7 +31,7 @@ public class RabbitMQFixture : IAsyncLifetime, IDisposable
         }
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         using var cts = new CancellationTokenSource(InitializationTimeout);
         dockerEngineOsPlatform = await dockerProxy.GetDockerEngineOsAsync(cts.Token);
@@ -46,7 +46,7 @@ public class RabbitMQFixture : IAsyncLifetime, IDisposable
         await WaitForRabbitMqReadyAsync(cts.Token);
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await DisposeAsync(default);
     }

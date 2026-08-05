@@ -27,11 +27,11 @@ public abstract class ConsumerTestBase : IAsyncLifetime
         MockBuilder = new MockBuilder(x => x.AddSingleton(ConsumeErrorStrategy));
     }
 
-    public Task InitializeAsync() => InitializeAsyncCore();
+    public async ValueTask InitializeAsync() => await InitializeAsyncCore();
 
     protected virtual Task InitializeAsyncCore() => Task.CompletedTask;
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await MockBuilder.DisposeAsync();
     }

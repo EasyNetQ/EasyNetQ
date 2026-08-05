@@ -1,4 +1,4 @@
-using Xunit.Sdk;
+using Xunit.v3;
 
 namespace EasyNetQ.Hosepipe.Tests.Traits;
 
@@ -9,7 +9,6 @@ namespace EasyNetQ.Hosepipe.Tests.Traits;
 /// From xUnit sample about Trait extensibility:
 /// https://github.com/xunit/samples.xunit/blob/master/TraitExtensibility/CategoryAttribute.cs
 /// </remarks>
-[TraitDiscoverer("EasyNetQ.Hosepipe.Tests.Traits.CategoryDiscoverer", "EasyNetQ.Hosepipe.Tests")]
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
 public class CategoryAttribute : Attribute, ITraitAttribute
 {
@@ -19,4 +18,9 @@ public class CategoryAttribute : Attribute, ITraitAttribute
     }
 
     public Category Category { get; set; }
+
+    public IReadOnlyCollection<KeyValuePair<string, string>> GetTraits()
+    {
+        return [new("Category", Category.ToString())];
+    }
 }

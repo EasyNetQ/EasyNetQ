@@ -19,14 +19,14 @@ public class When_publish_is_called : IAsyncLifetime
         );
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         var message = new MyMessage { Text = "Hiya!" };
         await mockBuilder.PubSub.PublishAsync(message);
         WaitForMessageToPublish();
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }
@@ -89,14 +89,14 @@ public class When_publish_with_topic_is_called : IAsyncLifetime
         mockBuilder = new MockBuilder();
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         var message = new MyMessage { Text = "Hiya!" };
         await mockBuilder.PubSub.PublishAsync(message, c => c.WithTopic("X.A"));
         WaitForMessageToPublish();
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await mockBuilder.DisposeAsync();
     }

@@ -27,7 +27,7 @@ public class When_an_action_is_invoked : IAsyncLifetime
         );
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         await persistentChannel.InvokeChannelActionAsync(async x => await x.ExchangeDeclareAsync("MyExchange", ExchangeType.Direct));
     }
@@ -35,16 +35,16 @@ public class When_an_action_is_invoked : IAsyncLifetime
     [Fact]
     public async Task Should_open_a_channel()
     {
-        await persistentConnection.Received().CreateChannelAsync(Arg.Any<CreateChannelOptions>(), default);
+        await persistentConnection.Received().CreateChannelAsync(Arg.Any<CreateChannelOptions>(), CancellationToken.None);
     }
 
     [Fact]
     public async Task Should_run_action_on_channel()
     {
-        await channel.Received().ExchangeDeclareAsync("MyExchange", ExchangeType.Direct);
+        await channel.Received().ExchangeDeclareAsync("MyExchange", ExchangeType.Direct, cancellationToken: CancellationToken.None);
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await persistentChannel.DisposeAsync();
     }
