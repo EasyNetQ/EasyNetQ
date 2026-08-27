@@ -329,7 +329,17 @@ public class InternalConsumer : IInternalConsumer
 #pragma warning disable IDISP007 // Don't dispose injected
                 await consumer.DisposeAsync();
 #pragma warning restore IDISP007 // Don't dispose injected
-                if (IsChannelClosedWithSoftError(channel)) return;
+
+                // A channel shutdown cancels every consumer on that channel, so this handler also
+                // runs when the connection or the channel simply went away. That is not a
+                // broker-side cancellation: the consumer is expected to come back once the
+                // connection recovers. Reporting it as cancelled would make Consumer treat the
+                // subscription as finished and dispose it, together with the event subscriptions
+                // and the timer that would otherwise restart it.
+                if (consumer.ShutdownReason is not null)
+                {
+                    return;
+                }
             }
             else
             {

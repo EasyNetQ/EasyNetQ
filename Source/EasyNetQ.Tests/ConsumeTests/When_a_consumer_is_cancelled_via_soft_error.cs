@@ -27,10 +27,11 @@ public class When_a_consumer_is_cancelled_via_soft_error : IAsyncLifetime
             c => c.WithConsumerTag("consumer_tag")
         );
 
-        mockBuilder.Consumers[0].Channel.CloseReason.Returns(
-            new ShutdownEventArgs(ShutdownInitiator.Application, AmqpErrorCodes.PreconditionFailed, "Oops")
-        );
-        await mockBuilder.Consumers[0].HandleBasicCancelAsync("consumer_tag");
+        var closeReason = new ShutdownEventArgs(ShutdownInitiator.Peer, AmqpErrorCodes.PreconditionFailed, "Oops");
+        mockBuilder.Consumers[0].Channel.CloseReason.Returns(closeReason);
+        // A channel-level error closes the channel, so the broker never sends Basic.Cancel:
+        // the consumer learns about it through the channel shutdown notification.
+        await mockBuilder.Consumers[0].HandleChannelShutdownAsync(mockBuilder.Consumers[0].Channel, closeReason);
         // Wait for a periodic consumer restart
         await Task.Delay(TimeSpan.FromSeconds(10));
     }
