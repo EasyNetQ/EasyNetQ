@@ -1,5 +1,12 @@
 namespace EasyNetQ
 {
+    public enum AckDecision : byte
+    {
+        Ack = 0,
+        NackRequeue = 1,
+        NackDiscard = 2,
+        Handled = 3,
+    }
     public class AdvancedBusEventHandlers
     {
         public AdvancedBusEventHandlers(System.EventHandler<EasyNetQ.ConnectedEventArgs> connected = null, System.EventHandler<EasyNetQ.DisconnectedEventArgs> disconnected = null, System.EventHandler<EasyNetQ.BlockedEventArgs> blocked = null, System.EventHandler<EasyNetQ.UnblockedEventArgs> unblocked = null, System.EventHandler<EasyNetQ.MessageReturnedEventArgs> messageReturned = null) { }
@@ -19,13 +26,13 @@ namespace EasyNetQ
         public static System.Threading.Tasks.Task<System.IAsyncDisposable> ConsumeAsync(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue queue, System.Action<EasyNetQ.Consumer.IHandlerRegistration> addHandlers) { }
         public static System.Threading.Tasks.Task<System.IAsyncDisposable> ConsumeAsync(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue queue, System.Action<System.ReadOnlyMemory<byte>, EasyNetQ.MessageProperties, EasyNetQ.MessageReceivedInfo> handler) { }
         public static System.Threading.Tasks.Task<System.IAsyncDisposable> ConsumeAsync(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue queue, System.Func<System.ReadOnlyMemory<byte>, EasyNetQ.MessageProperties, EasyNetQ.MessageReceivedInfo, System.Threading.Tasks.Task> handler) { }
-        public static System.Threading.Tasks.Task<System.IAsyncDisposable> ConsumeAsync(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue queue, System.Func<System.ReadOnlyMemory<byte>, EasyNetQ.MessageProperties, EasyNetQ.MessageReceivedInfo, System.Threading.Tasks.Task<EasyNetQ.Consumer.AckStrategyAsync>> handler) { }
+        public static System.Threading.Tasks.Task<System.IAsyncDisposable> ConsumeAsync(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue queue, System.Func<System.ReadOnlyMemory<byte>, EasyNetQ.MessageProperties, EasyNetQ.MessageReceivedInfo, System.Threading.Tasks.ValueTask<EasyNetQ.AckDecision>> handler) { }
         public static System.Threading.Tasks.Task<System.IAsyncDisposable> ConsumeAsync(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue queue, System.Func<System.ReadOnlyMemory<byte>, EasyNetQ.MessageProperties, EasyNetQ.MessageReceivedInfo, System.Threading.CancellationToken, System.Threading.Tasks.Task> handler) { }
         public static System.Threading.Tasks.Task<System.IAsyncDisposable> ConsumeAsync(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue queue, EasyNetQ.Consumer.MessageHandler handler, System.Action<EasyNetQ.ISimpleConsumeConfiguration> configure) { }
         public static System.Threading.Tasks.Task<System.IAsyncDisposable> ConsumeAsync(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue queue, System.Action<EasyNetQ.Consumer.IHandlerRegistration> addHandlers, System.Action<EasyNetQ.ISimpleConsumeConfiguration> configure) { }
         public static System.Threading.Tasks.Task<System.IAsyncDisposable> ConsumeAsync(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue queue, System.Action<System.ReadOnlyMemory<byte>, EasyNetQ.MessageProperties, EasyNetQ.MessageReceivedInfo> handler, System.Action<EasyNetQ.ISimpleConsumeConfiguration> configure) { }
         public static System.Threading.Tasks.Task<System.IAsyncDisposable> ConsumeAsync(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue queue, System.Func<System.ReadOnlyMemory<byte>, EasyNetQ.MessageProperties, EasyNetQ.MessageReceivedInfo, System.Threading.Tasks.Task> handler, System.Action<EasyNetQ.ISimpleConsumeConfiguration> configure) { }
-        public static System.Threading.Tasks.Task<System.IAsyncDisposable> ConsumeAsync(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue queue, System.Func<System.ReadOnlyMemory<byte>, EasyNetQ.MessageProperties, EasyNetQ.MessageReceivedInfo, System.Threading.Tasks.Task<EasyNetQ.Consumer.AckStrategyAsync>> handler, System.Action<EasyNetQ.ISimpleConsumeConfiguration> configure) { }
+        public static System.Threading.Tasks.Task<System.IAsyncDisposable> ConsumeAsync(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue queue, System.Func<System.ReadOnlyMemory<byte>, EasyNetQ.MessageProperties, EasyNetQ.MessageReceivedInfo, System.Threading.Tasks.ValueTask<EasyNetQ.AckDecision>> handler, System.Action<EasyNetQ.ISimpleConsumeConfiguration> configure) { }
         public static System.Threading.Tasks.Task<System.IAsyncDisposable> ConsumeAsync(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue queue, System.Func<System.ReadOnlyMemory<byte>, EasyNetQ.MessageProperties, EasyNetQ.MessageReceivedInfo, System.Threading.CancellationToken, System.Threading.Tasks.Task> handler, System.Action<EasyNetQ.ISimpleConsumeConfiguration> configure) { }
         public static System.Threading.Tasks.Task<System.IAsyncDisposable> ConsumeAsync<T>(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue queue, System.Action<EasyNetQ.IMessage<T>, EasyNetQ.MessageReceivedInfo> handler) { }
         public static System.Threading.Tasks.Task<System.IAsyncDisposable> ConsumeAsync<T>(this EasyNetQ.IAdvancedBus bus, EasyNetQ.Topology.Queue queue, System.Func<EasyNetQ.IMessage<T>, EasyNetQ.MessageReceivedInfo, System.Threading.Tasks.Task> handler) { }
@@ -246,15 +253,11 @@ namespace EasyNetQ
         public static EasyNetQ.IEasyNetQBuilder UseAlwaysAckConsumerErrorStrategy(this EasyNetQ.IEasyNetQBuilder builder) { }
         public static EasyNetQ.IEasyNetQBuilder UseAlwaysNackWithRequeueConsumerErrorStrategy(this EasyNetQ.IEasyNetQBuilder builder) { }
         public static EasyNetQ.IEasyNetQBuilder UseAlwaysNackWithoutRequeueConsumerErrorStrategy(this EasyNetQ.IEasyNetQBuilder builder) { }
-        public static EasyNetQ.Consumer.ConsumePipelineBuilder UseConsumeErrorStrategy(this EasyNetQ.Consumer.ConsumePipelineBuilder pipelineBuilder) { }
-        public static EasyNetQ.Consumer.ConsumePipelineBuilder UseConsumeInterceptors(this EasyNetQ.Consumer.ConsumePipelineBuilder pipelineBuilder) { }
         public static EasyNetQ.IEasyNetQBuilder UseDelayedExchangeScheduler(this EasyNetQ.IEasyNetQBuilder builder) { }
         public static EasyNetQ.IEasyNetQBuilder UseLegacyConventions(this EasyNetQ.IEasyNetQBuilder builder) { }
         public static EasyNetQ.IEasyNetQBuilder UseLegacyRpcConventions(this EasyNetQ.IEasyNetQBuilder builder) { }
         public static EasyNetQ.IEasyNetQBuilder UseLegacyTypeNaming(this EasyNetQ.IEasyNetQBuilder builder) { }
         public static EasyNetQ.IEasyNetQBuilder UseMultiChannelClientCommandDispatcher(this EasyNetQ.IEasyNetQBuilder builder, int channelsCount) { }
-        public static EasyNetQ.Producer.ProducePipelineBuilder UseProduceInterceptors(this EasyNetQ.Producer.ProducePipelineBuilder pipelineBuilder) { }
-        public static EasyNetQ.Consumer.ConsumePipelineBuilder UseScope(this EasyNetQ.Consumer.ConsumePipelineBuilder pipelineBuilder) { }
         public static EasyNetQ.IEasyNetQBuilder UseVersionedMessage(this EasyNetQ.IEasyNetQBuilder builder) { }
     }
     public static class EasyNetQBuilderSystemTextJsonExtensions
@@ -833,7 +836,7 @@ namespace EasyNetQ
     public delegate string QueueTypeConvention(System.Type messageType);
     public class RabbitAdvancedBus : EasyNetQ.IAdvancedBus, System.IDisposable
     {
-        public RabbitAdvancedBus(Microsoft.Extensions.Logging.ILogger<EasyNetQ.RabbitAdvancedBus> logger, EasyNetQ.Producer.IProducerConnection producerConnection, EasyNetQ.Consumer.IConsumerConnection consumerConnection, EasyNetQ.Consumer.IConsumerFactory consumerFactory, EasyNetQ.ChannelDispatcher.IPersistentChannelDispatcher persistentChannelDispatcher, EasyNetQ.Producer.IPublishConfirmationListener confirmationListener, EasyNetQ.IEventBus eventBus, EasyNetQ.Consumer.IHandlerCollectionFactory handlerCollectionFactory, EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.Producer.ProducePipelineBuilder producePipelineBuilder, EasyNetQ.Consumer.ConsumePipelineBuilder consumePipelineBuilder, System.IServiceProvider services, EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy, EasyNetQ.IPullingConsumerFactory pullingConsumerFactory, EasyNetQ.AdvancedBusEventHandlers advancedBusEventHandlers) { }
+        public RabbitAdvancedBus(Microsoft.Extensions.Logging.ILogger<EasyNetQ.RabbitAdvancedBus> logger, EasyNetQ.Producer.IProducerConnection producerConnection, EasyNetQ.Consumer.IConsumerConnection consumerConnection, EasyNetQ.Consumer.IConsumerFactory consumerFactory, EasyNetQ.ChannelDispatcher.IPersistentChannelDispatcher persistentChannelDispatcher, EasyNetQ.Producer.IPublishConfirmationListener confirmationListener, EasyNetQ.IEventBus eventBus, EasyNetQ.Consumer.IHandlerCollectionFactory handlerCollectionFactory, EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.PublishContext> publishPipelineBuilder, EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> consumePipelineBuilder, System.IServiceProvider services, EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy, EasyNetQ.IPullingConsumerFactory pullingConsumerFactory, EasyNetQ.AdvancedBusEventHandlers advancedBusEventHandlers) { }
         public bool IsConnected { get; }
         public event System.EventHandler<EasyNetQ.BlockedEventArgs> Blocked;
         public event System.EventHandler<EasyNetQ.ConnectedEventArgs> Connected;
@@ -1029,18 +1032,16 @@ namespace EasyNetQ.ChannelDispatcher
         public System.Threading.Tasks.ValueTask<TResult> InvokeAsync<TResult, TChannelAction>(TChannelAction channelAction, EasyNetQ.ChannelDispatcher.PersistentChannelDispatchOptions options, System.Threading.CancellationToken cancellationToken = default)
             where TChannelAction :  struct, EasyNetQ.Persistent.IPersistentChannelAction<TResult> { }
     }
-    public class PersistentChannelDispatchOptions
+    public readonly struct PersistentChannelDispatchOptions : System.IEquatable<EasyNetQ.ChannelDispatcher.PersistentChannelDispatchOptions>
     {
         public static readonly EasyNetQ.ChannelDispatcher.PersistentChannelDispatchOptions ConsumerTopology;
         public static readonly EasyNetQ.ChannelDispatcher.PersistentChannelDispatchOptions ProducerPublish;
         public static readonly EasyNetQ.ChannelDispatcher.PersistentChannelDispatchOptions ProducerPublishWithConfirms;
         public static readonly EasyNetQ.ChannelDispatcher.PersistentChannelDispatchOptions ProducerTopology;
-        public EasyNetQ.Persistent.PersistentConnectionType ConnectionType { get; }
-        public string Name { get; }
-        public bool PublisherConfirms { get; }
-        protected bool Equals(EasyNetQ.ChannelDispatcher.PersistentChannelDispatchOptions other) { }
-        public override bool Equals(object obj) { }
-        public override int GetHashCode() { }
+        public PersistentChannelDispatchOptions(string Name, EasyNetQ.Persistent.PersistentConnectionType ConnectionType, bool PublisherConfirms = false) { }
+        public EasyNetQ.Persistent.PersistentConnectionType ConnectionType { get; init; }
+        public string Name { get; init; }
+        public bool PublisherConfirms { get; init; }
     }
     public sealed class SinglePersistentChannelDispatcher : EasyNetQ.ChannelDispatcher.IPersistentChannelDispatcher, System.IAsyncDisposable
     {
@@ -1069,35 +1070,12 @@ namespace EasyNetQ.ConnectionString
 }
 namespace EasyNetQ.Consumer
 {
-    public static class AckStrategies
-    {
-        public static readonly EasyNetQ.Consumer.AckStrategyAsync AckAsync;
-        public static readonly EasyNetQ.Consumer.AckStrategyAsync NackWithRequeueAsync;
-        public static readonly EasyNetQ.Consumer.AckStrategyAsync NackWithoutRequeueAsync;
-    }
-    public delegate System.Threading.Tasks.Task<EasyNetQ.Events.AckResult> AckStrategyAsync(RabbitMQ.Client.IChannel model, ulong deliveryTag, System.Threading.CancellationToken cancellationToken);
     public delegate System.Threading.Tasks.Task AsyncEventHandler<TEventArgs>(object sender, TEventArgs e);
     public class Base64ErrorMessageSerializer : EasyNetQ.Consumer.IErrorMessageSerializer
     {
         public Base64ErrorMessageSerializer() { }
         public byte[] Deserialize(string messageBody) { }
         public string Serialize(byte[] messageBody) { }
-    }
-    public readonly struct ConsumeContext : System.IEquatable<EasyNetQ.Consumer.ConsumeContext>
-    {
-        public ConsumeContext(in EasyNetQ.MessageReceivedInfo ReceivedInfo, in EasyNetQ.MessageProperties Properties, in System.ReadOnlyMemory<byte> Body, in System.IServiceProvider Services, in System.Threading.CancellationToken CancellationToken) { }
-        public System.ReadOnlyMemory<byte> Body { get; init; }
-        public System.Threading.CancellationToken CancellationToken { get; init; }
-        public EasyNetQ.MessageProperties Properties { get; init; }
-        public EasyNetQ.MessageReceivedInfo ReceivedInfo { get; init; }
-        public System.IServiceProvider Services { get; init; }
-    }
-    public delegate System.Threading.Tasks.ValueTask<EasyNetQ.Consumer.AckStrategyAsync> ConsumeDelegate(EasyNetQ.Consumer.ConsumeContext context);
-    public sealed class ConsumePipelineBuilder
-    {
-        public ConsumePipelineBuilder() { }
-        public EasyNetQ.Consumer.ConsumeDelegate Build() { }
-        public EasyNetQ.Consumer.ConsumePipelineBuilder Use(System.Func<EasyNetQ.Consumer.ConsumeDelegate, EasyNetQ.Consumer.ConsumeDelegate> middleware) { }
     }
     public sealed class Consumer : EasyNetQ.Consumer.IConsumer, System.IAsyncDisposable
     {
@@ -1125,8 +1103,8 @@ namespace EasyNetQ.Consumer
     public class DefaultConsumeErrorStrategy : EasyNetQ.Consumer.IConsumeErrorStrategy
     {
         public DefaultConsumeErrorStrategy(Microsoft.Extensions.Logging.ILogger<EasyNetQ.Consumer.DefaultConsumeErrorStrategy> logger, EasyNetQ.Consumer.IConsumerConnection connection, EasyNetQ.ISerializer serializer, EasyNetQ.IConventions conventions, EasyNetQ.ITypeNameSerializer typeNameSerializer, EasyNetQ.Consumer.IErrorMessageSerializer errorMessageSerializer, EasyNetQ.ConnectionConfiguration configuration) { }
-        public virtual System.Threading.Tasks.ValueTask<EasyNetQ.Consumer.AckStrategyAsync> HandleCancelledAsync(EasyNetQ.Consumer.ConsumeContext context, System.Threading.CancellationToken cancellationToken = default) { }
-        public virtual System.Threading.Tasks.ValueTask<EasyNetQ.Consumer.AckStrategyAsync> HandleErrorAsync(EasyNetQ.Consumer.ConsumeContext context, System.Exception exception, System.Threading.CancellationToken cancellationToken = default) { }
+        public virtual System.Threading.Tasks.ValueTask<EasyNetQ.AckDecision> HandleCancelledAsync(EasyNetQ.Pipeline.ConsumeContext context, System.Threading.CancellationToken cancellationToken = default) { }
+        public virtual System.Threading.Tasks.ValueTask<EasyNetQ.AckDecision> HandleErrorAsync(EasyNetQ.Pipeline.ConsumeContext context, System.Exception exception, System.Threading.CancellationToken cancellationToken = default) { }
     }
     public class DefaultErrorMessageSerializer : EasyNetQ.Consumer.IErrorMessageSerializer
     {
@@ -1155,13 +1133,13 @@ namespace EasyNetQ.Consumer
     {
         public static EasyNetQ.Consumer.IHandlerRegistration Add<T>(this EasyNetQ.Consumer.IHandlerRegistration handlerRegistration, System.Action<EasyNetQ.IMessage<T>, EasyNetQ.MessageReceivedInfo> handler) { }
         public static EasyNetQ.Consumer.IHandlerRegistration Add<T>(this EasyNetQ.Consumer.IHandlerRegistration handlerRegistration, System.Func<EasyNetQ.IMessage<T>, EasyNetQ.MessageReceivedInfo, System.Threading.Tasks.Task> handler) { }
-        public static EasyNetQ.Consumer.IHandlerRegistration Add<T>(this EasyNetQ.Consumer.IHandlerRegistration handlerRegistration, System.Func<EasyNetQ.IMessage<T>, EasyNetQ.MessageReceivedInfo, System.Threading.Tasks.Task<EasyNetQ.Consumer.AckStrategyAsync>> handler) { }
+        public static EasyNetQ.Consumer.IHandlerRegistration Add<T>(this EasyNetQ.Consumer.IHandlerRegistration handlerRegistration, System.Func<EasyNetQ.IMessage<T>, EasyNetQ.MessageReceivedInfo, System.Threading.Tasks.ValueTask<EasyNetQ.AckDecision>> handler) { }
         public static EasyNetQ.Consumer.IHandlerRegistration Add<T>(this EasyNetQ.Consumer.IHandlerRegistration handlerRegistration, System.Func<EasyNetQ.IMessage<T>, EasyNetQ.MessageReceivedInfo, System.Threading.CancellationToken, System.Threading.Tasks.Task> handler) { }
     }
     public interface IConsumeErrorStrategy
     {
-        System.Threading.Tasks.ValueTask<EasyNetQ.Consumer.AckStrategyAsync> HandleCancelledAsync(EasyNetQ.Consumer.ConsumeContext context, System.Threading.CancellationToken cancellationToken = default);
-        System.Threading.Tasks.ValueTask<EasyNetQ.Consumer.AckStrategyAsync> HandleErrorAsync(EasyNetQ.Consumer.ConsumeContext context, System.Exception exception, System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.ValueTask<EasyNetQ.AckDecision> HandleCancelledAsync(EasyNetQ.Pipeline.ConsumeContext context, System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.ValueTask<EasyNetQ.AckDecision> HandleErrorAsync(EasyNetQ.Pipeline.ConsumeContext context, System.Exception exception, System.Threading.CancellationToken cancellationToken = default);
     }
     public interface IConsumer : System.IAsyncDisposable
     {
@@ -1201,8 +1179,8 @@ namespace EasyNetQ.Consumer
     {
         EasyNetQ.Consumer.IInternalConsumer CreateConsumer(EasyNetQ.Consumer.ConsumerConfiguration configuration);
     }
-    public delegate System.Threading.Tasks.Task<EasyNetQ.Consumer.AckStrategyAsync> IMessageHandler(EasyNetQ.IMessage message, EasyNetQ.MessageReceivedInfo receivedInfo, System.Threading.CancellationToken cancellationToken);
-    public delegate System.Threading.Tasks.Task<EasyNetQ.Consumer.AckStrategyAsync> IMessageHandler<in T>(EasyNetQ.IMessage<T> message, EasyNetQ.MessageReceivedInfo receivedInfo, System.Threading.CancellationToken cancellationToken);
+    public delegate System.Threading.Tasks.ValueTask<EasyNetQ.AckDecision> IMessageHandler(EasyNetQ.IMessage message, EasyNetQ.MessageReceivedInfo receivedInfo, System.Threading.CancellationToken cancellationToken);
+    public delegate System.Threading.Tasks.ValueTask<EasyNetQ.AckDecision> IMessageHandler<in T>(EasyNetQ.IMessage<T> message, EasyNetQ.MessageReceivedInfo receivedInfo, System.Threading.CancellationToken cancellationToken);
     public class InternalConsumer : EasyNetQ.Consumer.IInternalConsumer, System.IAsyncDisposable
     {
         public InternalConsumer(System.IServiceProvider services, Microsoft.Extensions.Logging.ILogger<EasyNetQ.Consumer.InternalConsumer> logger, EasyNetQ.Consumer.ConsumerConfiguration configuration, EasyNetQ.Consumer.IConsumerConnection connection, EasyNetQ.IEventBus eventBus) { }
@@ -1229,14 +1207,14 @@ namespace EasyNetQ.Consumer
         public System.Collections.Generic.IReadOnlyCollection<EasyNetQ.Topology.Queue> Failed { get; }
         public System.Collections.Generic.IReadOnlyCollection<EasyNetQ.Topology.Queue> Started { get; }
     }
-    public delegate System.Threading.Tasks.Task<EasyNetQ.Consumer.AckStrategyAsync> MessageHandler(System.ReadOnlyMemory<byte> body, EasyNetQ.MessageProperties properties, EasyNetQ.MessageReceivedInfo receivedInfo, System.Threading.CancellationToken cancellationToken);
+    public delegate System.Threading.Tasks.ValueTask<EasyNetQ.AckDecision> MessageHandler(System.ReadOnlyMemory<byte> body, EasyNetQ.MessageProperties properties, EasyNetQ.MessageReceivedInfo receivedInfo, System.Threading.CancellationToken cancellationToken);
     public class PerQueueConsumerConfiguration
     {
-        public PerQueueConsumerConfiguration(bool autoAck, string consumerTag, bool isExclusive, System.Collections.Generic.IDictionary<string, object> arguments, EasyNetQ.Consumer.ConsumeDelegate consumeDelegate) { }
+        public PerQueueConsumerConfiguration(bool autoAck, string consumerTag, bool isExclusive, System.Collections.Generic.IDictionary<string, object> arguments, EasyNetQ.Pipeline.ConsumerContext context) { }
         public System.Collections.Generic.IDictionary<string, object> Arguments { get; }
         public bool AutoAck { get; }
-        public EasyNetQ.Consumer.ConsumeDelegate ConsumeDelegate { get; }
         public string ConsumerTag { get; }
+        public EasyNetQ.Pipeline.ConsumerContext Context { get; }
         public bool IsExclusive { get; }
     }
     public sealed class SimpleConsumeErrorStrategy : EasyNetQ.Consumer.IConsumeErrorStrategy
@@ -1244,26 +1222,12 @@ namespace EasyNetQ.Consumer
         public static readonly EasyNetQ.Consumer.SimpleConsumeErrorStrategy Ack;
         public static readonly EasyNetQ.Consumer.SimpleConsumeErrorStrategy NackWithRequeue;
         public static readonly EasyNetQ.Consumer.SimpleConsumeErrorStrategy NackWithoutRequeue;
-        public System.Threading.Tasks.ValueTask<EasyNetQ.Consumer.AckStrategyAsync> HandleCancelledAsync(EasyNetQ.Consumer.ConsumeContext context, System.Threading.CancellationToken cancellationToken = default) { }
-        public System.Threading.Tasks.ValueTask<EasyNetQ.Consumer.AckStrategyAsync> HandleErrorAsync(EasyNetQ.Consumer.ConsumeContext context, System.Exception exception, System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.ValueTask<EasyNetQ.AckDecision> HandleCancelledAsync(EasyNetQ.Pipeline.ConsumeContext context, System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.ValueTask<EasyNetQ.AckDecision> HandleErrorAsync(EasyNetQ.Pipeline.ConsumeContext context, System.Exception exception, System.Threading.CancellationToken cancellationToken = default) { }
     }
 }
 namespace EasyNetQ.Events
 {
-    public readonly struct AckEvent : System.IEquatable<EasyNetQ.Events.AckEvent>
-    {
-        public AckEvent(in EasyNetQ.MessageReceivedInfo ReceiveInfo, in EasyNetQ.MessageProperties Properties, in System.ReadOnlyMemory<byte> Body, EasyNetQ.Events.AckResult AckResult) { }
-        public EasyNetQ.Events.AckResult AckResult { get; init; }
-        public System.ReadOnlyMemory<byte> Body { get; init; }
-        public EasyNetQ.MessageProperties Properties { get; init; }
-        public EasyNetQ.MessageReceivedInfo ReceiveInfo { get; init; }
-    }
-    public enum AckResult
-    {
-        Ack = 0,
-        Nack = 1,
-        Exception = 2,
-    }
     public readonly struct ChannelRecoveredEvent : System.IEquatable<EasyNetQ.Events.ChannelRecoveredEvent>
     {
         public ChannelRecoveredEvent(RabbitMQ.Client.IChannel Channel) { }
@@ -1309,13 +1273,6 @@ namespace EasyNetQ.Events
         public ConsumerChannelDisposedEvent(System.Collections.Generic.IReadOnlyCollection<string> ConsumerTags) { }
         public System.Collections.Generic.IReadOnlyCollection<string> ConsumerTags { get; init; }
     }
-    public readonly struct DeliveredMessageEvent : System.IEquatable<EasyNetQ.Events.DeliveredMessageEvent>
-    {
-        public DeliveredMessageEvent(in EasyNetQ.MessageReceivedInfo Info, in EasyNetQ.MessageProperties Properties, in System.ReadOnlyMemory<byte> Body) { }
-        public System.ReadOnlyMemory<byte> Body { get; init; }
-        public EasyNetQ.MessageReceivedInfo Info { get; init; }
-        public EasyNetQ.MessageProperties Properties { get; init; }
-    }
     public readonly struct MessageConfirmationEvent : System.IEquatable<EasyNetQ.Events.MessageConfirmationEvent>
     {
         public MessageConfirmationEvent(RabbitMQ.Client.IChannel Channel, ulong DeliveryTag, bool Multiple, bool IsNack) { }
@@ -1325,14 +1282,6 @@ namespace EasyNetQ.Events
         public bool Multiple { get; init; }
         public static EasyNetQ.Events.MessageConfirmationEvent Ack(RabbitMQ.Client.IChannel channel, ulong deliveryTag, bool multiple) { }
         public static EasyNetQ.Events.MessageConfirmationEvent Nack(RabbitMQ.Client.IChannel channel, ulong deliveryTag, bool multiple) { }
-    }
-    public readonly struct PublishedMessageEvent : System.IEquatable<EasyNetQ.Events.PublishedMessageEvent>
-    {
-        public PublishedMessageEvent(string Exchange, string RoutingKey, in EasyNetQ.MessageProperties Properties, in System.ReadOnlyMemory<byte> Body) { }
-        public System.ReadOnlyMemory<byte> Body { get; init; }
-        public string Exchange { get; init; }
-        public EasyNetQ.MessageProperties Properties { get; init; }
-        public string RoutingKey { get; init; }
     }
     public readonly struct ReturnedMessageEvent : System.IEquatable<EasyNetQ.Events.ReturnedMessageEvent>
     {
@@ -1627,6 +1576,190 @@ namespace EasyNetQ.Persistent
         Consumer = 1,
     }
 }
+namespace EasyNetQ.Pipeline
+{
+    public sealed class ChannelContext : EasyNetQ.Pipeline.LayerContext, EasyNetQ.Pipeline.IChannelView, EasyNetQ.Pipeline.IReadOnlyProperties
+    {
+        public ChannelContext(EasyNetQ.Pipeline.ConnectionContext connection) { }
+        public EasyNetQ.Pipeline.IConnectionView Connection { get; }
+    }
+    public sealed class ConnectionContext : EasyNetQ.Pipeline.LayerContext, EasyNetQ.Pipeline.IConnectionView, EasyNetQ.Pipeline.IReadOnlyProperties
+    {
+        public ConnectionContext(string name, System.IServiceProvider services) { }
+        public string Name { get; }
+    }
+    public class ConsumeContext : EasyNetQ.Pipeline.LayerContext
+    {
+        public ConsumeContext(EasyNetQ.Pipeline.ConsumerContext consumer) { }
+        public EasyNetQ.AckDecision Ack { get; set; }
+        public System.ReadOnlyMemory<byte> Body { get; set; }
+        public System.Threading.CancellationToken CancellationToken { get; set; }
+        public EasyNetQ.Pipeline.IChannelView Channel { get; }
+        public EasyNetQ.Pipeline.IConnectionView Connection { get; }
+        public EasyNetQ.Pipeline.IConsumerView Consumer { get; }
+        public System.Exception? Error { get; set; }
+        public EasyNetQ.MessageProperties Properties { get; set; }
+        public EasyNetQ.MessageReceivedInfo ReceivedInfo { get; set; }
+        protected override void Reset() { }
+    }
+    public sealed class ConsumerContext : EasyNetQ.Pipeline.LayerContext, EasyNetQ.Pipeline.IConsumerView, EasyNetQ.Pipeline.IReadOnlyProperties
+    {
+        public ConsumerContext(EasyNetQ.Pipeline.ChannelContext channel, string queue, System.Func<EasyNetQ.Pipeline.ConsumerContext, EasyNetQ.Pipeline.ConsumeContext>? messageContextFactory = null) { }
+        public bool AutoAck { get; set; }
+        public EasyNetQ.Pipeline.IChannelView Channel { get; }
+        public EasyNetQ.Pipeline.PipelineStep<EasyNetQ.Pipeline.ConsumeContext> MessagePipeline { get; set; }
+        public ushort PrefetchCount { get; set; }
+        public string Queue { get; }
+        public EasyNetQ.Pipeline.ConsumeContext RentMessageContext() { }
+        public void ReturnMessageContext(EasyNetQ.Pipeline.ConsumeContext context) { }
+    }
+    public sealed class ContextPool<TContext>
+        where TContext : EasyNetQ.Pipeline.LayerContext
+    {
+        public ContextPool(System.Func<TContext> factory, int? maxRetained = default) { }
+        public TContext Rent() { }
+        public void Return(TContext context) { }
+    }
+    public interface IChannelView : EasyNetQ.Pipeline.IReadOnlyProperties
+    {
+        EasyNetQ.Pipeline.IConnectionView Connection { get; }
+    }
+    public interface IConnectionView : EasyNetQ.Pipeline.IReadOnlyProperties
+    {
+        string Name { get; }
+    }
+    public interface IConsumerView : EasyNetQ.Pipeline.IReadOnlyProperties
+    {
+        bool AutoAck { get; }
+        EasyNetQ.Pipeline.IChannelView Channel { get; }
+        ushort PrefetchCount { get; }
+        string Queue { get; }
+    }
+    public interface IMiddleware<TContext>
+        where TContext : EasyNetQ.Pipeline.LayerContext
+    {
+        System.Threading.Tasks.ValueTask InvokeAsync(TContext context, EasyNetQ.Pipeline.PipelineStep<TContext> next);
+    }
+    public interface IProperties : EasyNetQ.Pipeline.IReadOnlyProperties
+    {
+        bool Remove<T>(EasyNetQ.Pipeline.PropertyKey<T> key);
+        void Set<T>(EasyNetQ.Pipeline.PropertyKey<T> key, T value);
+    }
+    public interface IReadOnlyProperties
+    {
+        bool TryGet<T>(EasyNetQ.Pipeline.PropertyKey<T> key, out T value);
+    }
+    public abstract class LayerContext : EasyNetQ.Pipeline.IProperties, EasyNetQ.Pipeline.IReadOnlyProperties
+    {
+        protected LayerContext(EasyNetQ.Pipeline.LayerContext parent) { }
+        protected LayerContext(System.IServiceProvider services) { }
+        public bool IsDetached { get; }
+        public EasyNetQ.Pipeline.IReadOnlyProperties? Parent { get; }
+        public System.IServiceProvider Services { get; set; }
+        public void Detach() { }
+        public bool Remove<T>(EasyNetQ.Pipeline.PropertyKey<T> key) { }
+        protected virtual void Reset() { }
+        public void Set<T>(EasyNetQ.Pipeline.PropertyKey<T> key, T value) { }
+        public bool TryGet<T>(EasyNetQ.Pipeline.PropertyKey<T> key, out T value) { }
+        public bool TryGetLocal<T>(EasyNetQ.Pipeline.PropertyKey<T> key, out T value) { }
+    }
+    public static class PipelineBuilderExtensions
+    {
+        public static EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> UseConsumeErrorStrategy(this EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> builder) { }
+        public static EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> UseConsumeInterceptors(this EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> builder) { }
+        public static EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.PublishContext> UseProduceInterceptors(this EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.PublishContext> builder) { }
+        public static EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> UseScope(this EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> builder) { }
+    }
+    public sealed class PipelineBuilder<TContext>
+        where TContext : EasyNetQ.Pipeline.LayerContext
+    {
+        public PipelineBuilder() { }
+        public System.Collections.Generic.IReadOnlyList<string> Steps { get; }
+        public EasyNetQ.Pipeline.PipelineStep<TContext> Build(System.IServiceProvider services, EasyNetQ.Pipeline.PipelineStep<TContext>? terminal = null) { }
+        public EasyNetQ.Pipeline.PipelineBuilder<TContext> Clone() { }
+        public EasyNetQ.Pipeline.PipelineBuilder<TContext> InsertAfter<TMarker>(EasyNetQ.Pipeline.IMiddleware<TContext> middleware)
+            where TMarker : EasyNetQ.Pipeline.IMiddleware<TContext> { }
+        public EasyNetQ.Pipeline.PipelineBuilder<TContext> InsertBefore<TMarker>(EasyNetQ.Pipeline.IMiddleware<TContext> middleware)
+            where TMarker : EasyNetQ.Pipeline.IMiddleware<TContext> { }
+        public EasyNetQ.Pipeline.PipelineBuilder<TContext> Remove(string name) { }
+        public EasyNetQ.Pipeline.PipelineBuilder<TContext> Remove<TMarker>()
+            where TMarker : EasyNetQ.Pipeline.IMiddleware<TContext> { }
+        public EasyNetQ.Pipeline.PipelineBuilder<TContext> Replace<TMarker>(EasyNetQ.Pipeline.IMiddleware<TContext> replacement)
+            where TMarker : EasyNetQ.Pipeline.IMiddleware<TContext> { }
+        public EasyNetQ.Pipeline.PipelineBuilder<TContext> Use(EasyNetQ.Pipeline.IMiddleware<TContext> middleware, string? name = null) { }
+        public EasyNetQ.Pipeline.PipelineBuilder<TContext> Use(string name, System.Func<TContext, EasyNetQ.Pipeline.PipelineStep<TContext>, System.Threading.Tasks.ValueTask> step) { }
+        public EasyNetQ.Pipeline.PipelineBuilder<TContext> Use<TMiddleware>()
+            where TMiddleware :  class, EasyNetQ.Pipeline.IMiddleware<TContext> { }
+        public EasyNetQ.Pipeline.PipelineBuilder<TContext> Use<TMiddleware>(System.Func<System.IServiceProvider, TMiddleware> factory)
+            where TMiddleware :  class, EasyNetQ.Pipeline.IMiddleware<TContext> { }
+    }
+    public delegate System.Threading.Tasks.ValueTask PipelineStep<in TContext>(TContext context);
+    public static class PropertiesExtensions
+    {
+        public static bool Contains<T>(this EasyNetQ.Pipeline.IReadOnlyProperties properties, EasyNetQ.Pipeline.PropertyKey<T> key) { }
+        public static T Get<T>(this EasyNetQ.Pipeline.IReadOnlyProperties properties, EasyNetQ.Pipeline.PropertyKey<T> key) { }
+        public static T GetOrDefault<T>(this EasyNetQ.Pipeline.IReadOnlyProperties properties, EasyNetQ.Pipeline.PropertyKey<T> key, T fallback = default) { }
+    }
+    public struct PropertyBag
+    {
+        public int Count { get; }
+        public void Clear() { }
+        public bool Remove<T>(EasyNetQ.Pipeline.PropertyKey<T> key) { }
+        public void Set<T>(EasyNetQ.Pipeline.PropertyKey<T> key, T value) { }
+        public bool TryGet<T>(EasyNetQ.Pipeline.PropertyKey<T> key, out T value) { }
+    }
+    public readonly struct PropertyKey<T> : System.IEquatable<EasyNetQ.Pipeline.PropertyKey<T>>
+    {
+        public PropertyKey(string name) { }
+        public int Id { get; }
+        public string Name { get; }
+        public bool Equals(EasyNetQ.Pipeline.PropertyKey<T> other) { }
+        public override bool Equals(object? obj) { }
+        public override int GetHashCode() { }
+        public override string ToString() { }
+        public static bool operator !=(EasyNetQ.Pipeline.PropertyKey<T> left, EasyNetQ.Pipeline.PropertyKey<T> right) { }
+        public static bool operator ==(EasyNetQ.Pipeline.PropertyKey<T> left, EasyNetQ.Pipeline.PropertyKey<T> right) { }
+    }
+    public class PublishContext : EasyNetQ.Pipeline.LayerContext
+    {
+        public PublishContext(EasyNetQ.Pipeline.ChannelContext channel) { }
+        public System.ReadOnlyMemory<byte> Body { get; set; }
+        public System.Threading.CancellationToken CancellationToken { get; set; }
+        public EasyNetQ.Pipeline.IChannelView Channel { get; }
+        public EasyNetQ.Pipeline.IConnectionView Connection { get; }
+        public string Exchange { get; set; }
+        public bool Mandatory { get; set; }
+        public EasyNetQ.MessageProperties Properties { get; set; }
+        public bool PublisherConfirms { get; set; }
+        public string RoutingKey { get; set; }
+        protected override void Reset() { }
+    }
+}
+namespace EasyNetQ.Pipeline.Middleware
+{
+    public sealed class ConsumeInterceptorMiddleware : EasyNetQ.Pipeline.IMiddleware<EasyNetQ.Pipeline.ConsumeContext>
+    {
+        public ConsumeInterceptorMiddleware(System.Collections.Generic.IEnumerable<EasyNetQ.Interception.IProduceConsumeInterceptor> interceptors) { }
+        public System.Threading.Tasks.ValueTask InvokeAsync(EasyNetQ.Pipeline.ConsumeContext context, EasyNetQ.Pipeline.PipelineStep<EasyNetQ.Pipeline.ConsumeContext> next) { }
+    }
+    public sealed class ErrorHandlingMiddleware : EasyNetQ.Pipeline.IMiddleware<EasyNetQ.Pipeline.ConsumeContext>
+    {
+        public ErrorHandlingMiddleware(EasyNetQ.Consumer.IConsumeErrorStrategy errorStrategy, Microsoft.Extensions.Logging.ILogger<EasyNetQ.Pipeline.Middleware.ErrorHandlingMiddleware> logger) { }
+        [System.Runtime.CompilerServices.AsyncMethodBuilder(typeof(System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder))]
+        public System.Threading.Tasks.ValueTask InvokeAsync(EasyNetQ.Pipeline.ConsumeContext context, EasyNetQ.Pipeline.PipelineStep<EasyNetQ.Pipeline.ConsumeContext> next) { }
+    }
+    public sealed class ProduceInterceptorMiddleware : EasyNetQ.Pipeline.IMiddleware<EasyNetQ.Pipeline.PublishContext>
+    {
+        public ProduceInterceptorMiddleware(System.Collections.Generic.IEnumerable<EasyNetQ.Interception.IProduceConsumeInterceptor> interceptors) { }
+        public System.Threading.Tasks.ValueTask InvokeAsync(EasyNetQ.Pipeline.PublishContext context, EasyNetQ.Pipeline.PipelineStep<EasyNetQ.Pipeline.PublishContext> next) { }
+    }
+    public sealed class ScopeMiddleware : EasyNetQ.Pipeline.IMiddleware<EasyNetQ.Pipeline.ConsumeContext>
+    {
+        public ScopeMiddleware() { }
+        [System.Runtime.CompilerServices.AsyncMethodBuilder(typeof(System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder))]
+        public System.Threading.Tasks.ValueTask InvokeAsync(EasyNetQ.Pipeline.ConsumeContext context, EasyNetQ.Pipeline.PipelineStep<EasyNetQ.Pipeline.ConsumeContext> next) { }
+    }
+}
 namespace EasyNetQ.Producer
 {
     public interface IProducerConnection : EasyNetQ.Persistent.IPersistentConnection, System.IDisposable { }
@@ -1639,25 +1772,6 @@ namespace EasyNetQ.Producer
         ulong Id { get; }
         void Cancel();
         System.Threading.Tasks.Task WaitAsync(System.Threading.CancellationToken cancellationToken = default);
-    }
-    public readonly struct ProduceContext : System.IEquatable<EasyNetQ.Producer.ProduceContext>
-    {
-        public ProduceContext(in string Exchange, in string RoutingKey, in bool Mandatory, in bool PublisherConfirms, in EasyNetQ.MessageProperties Properties, in System.ReadOnlyMemory<byte> Body, in System.IServiceProvider Services, in System.Threading.CancellationToken CancellationToken) { }
-        public System.ReadOnlyMemory<byte> Body { get; init; }
-        public System.Threading.CancellationToken CancellationToken { get; init; }
-        public string Exchange { get; init; }
-        public bool Mandatory { get; init; }
-        public EasyNetQ.MessageProperties Properties { get; init; }
-        public bool PublisherConfirms { get; init; }
-        public string RoutingKey { get; init; }
-        public System.IServiceProvider Services { get; init; }
-    }
-    public delegate System.Threading.Tasks.ValueTask ProduceDelegate(EasyNetQ.Producer.ProduceContext context);
-    public sealed class ProducePipelineBuilder
-    {
-        public ProducePipelineBuilder() { }
-        public EasyNetQ.Producer.ProduceDelegate Build() { }
-        public EasyNetQ.Producer.ProducePipelineBuilder Use(System.Func<EasyNetQ.Producer.ProduceDelegate, EasyNetQ.Producer.ProduceDelegate> middleware) { }
     }
     public sealed class ProducerConnection : EasyNetQ.Persistent.PersistentConnection, EasyNetQ.Persistent.IPersistentConnection, EasyNetQ.Producer.IProducerConnection, System.IDisposable
     {

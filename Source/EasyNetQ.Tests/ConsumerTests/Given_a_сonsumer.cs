@@ -42,7 +42,7 @@ public abstract class Given_a_сonsumer : IAsyncLifetime
                     {
                         queue,
                         new PerQueueConsumerConfiguration(
-                            false, "", false, null, _ => new(AckStrategies.AckAsync)
+                            false, "", false, null, TestContexts.Consumer(queue.Name)
                         )
                     }
                 }

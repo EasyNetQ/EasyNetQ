@@ -1,3 +1,4 @@
+using EasyNetQ.Pipeline;
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.ConnectionString;
 using EasyNetQ.Consumer;
@@ -32,9 +33,9 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<IConventions, Conventions>();
         services.TryAddSingleton<IEventBus, EventBus>();
         services.TryAddSingleton<ITypeNameSerializer, DefaultTypeNameSerializer>();
-        services.TryAddSingleton<ProducePipelineBuilder>(_ => new ProducePipelineBuilder().UseProduceInterceptors());
-        services.TryAddSingleton<ConsumePipelineBuilder>(_ =>
-            new ConsumePipelineBuilder().UseConsumeErrorStrategy().UseConsumeInterceptors());
+        services.TryAddSingleton<PipelineBuilder<PublishContext>>(_ => new PipelineBuilder<PublishContext>().UseProduceInterceptors());
+        services.TryAddSingleton<PipelineBuilder<ConsumeContext>>(_ =>
+            new PipelineBuilder<ConsumeContext>().UseConsumeErrorStrategy().UseConsumeInterceptors());
         services.TryAddSingleton<ICorrelationIdGenerationStrategy, DefaultCorrelationIdGenerationStrategy>();
         services.TryAddSingleton<IMessageSerializationStrategy, DefaultMessageSerializationStrategy>();
         services.TryAddSingleton<IMessageDeliveryModeStrategy, MessageDeliveryModeStrategy>();

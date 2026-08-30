@@ -3,7 +3,7 @@ namespace EasyNetQ.Consumer;
 /// <summary>
 ///     Represents a delegate which is called by consumer for every message
 /// </summary>
-public delegate Task<AckStrategyAsync> MessageHandler(
+public delegate ValueTask<AckDecision> MessageHandler(
     ReadOnlyMemory<byte> body,
     MessageProperties properties,
     MessageReceivedInfo receivedInfo,
@@ -13,7 +13,7 @@ public delegate Task<AckStrategyAsync> MessageHandler(
 /// <summary>
 ///     Represents a delegate which is called by consumer for every message
 /// </summary>
-public delegate Task<AckStrategyAsync> IMessageHandler(
+public delegate ValueTask<AckDecision> IMessageHandler(
     IMessage message,
     MessageReceivedInfo receivedInfo,
     CancellationToken cancellationToken
@@ -22,7 +22,7 @@ public delegate Task<AckStrategyAsync> IMessageHandler(
 /// <summary>
 ///     Represents a delegate which is called by consumer for every message
 /// </summary>
-public delegate Task<AckStrategyAsync> IMessageHandler<in T>(
+public delegate ValueTask<AckDecision> IMessageHandler<in T>(
     IMessage<T> message,
     MessageReceivedInfo receivedInfo,
     CancellationToken cancellationToken
