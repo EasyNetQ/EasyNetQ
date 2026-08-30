@@ -115,8 +115,10 @@ public class When_connection_state_changed_raised : IDisposable, IAsyncLifetime
 
             await managementClient.KillAllConnectionsAsync(cts.Token);
 
-            var producerStatus = advanced.GetConnectionStatus(PersistentConnectionType.Producer);
-            var consumerStatus = advanced.GetConnectionStatus(PersistentConnectionType.Consumer);
+            // The broker closes the sockets asynchronously and the client recovers automatically a few seconds later,
+            // so capture each connection's status the moment it reports the disconnect
+            var producerStatus = await WaitForStateAsync(advanced, PersistentConnectionType.Producer, PersistentConnectionState.Disconnected, cts.Token);
+            var consumerStatus = await WaitForStateAsync(advanced, PersistentConnectionType.Consumer, PersistentConnectionState.Disconnected, cts.Token);
 
             producerStatus.Should().BeEquivalentTo(
                 new PersistentConnectionStatus(
@@ -134,6 +136,18 @@ public class When_connection_state_changed_raised : IDisposable, IAsyncLifetime
                 ),
                 c => c.Excluding(x => x.ConnectedAt)
             );
+        }
+    }
+
+    private static async Task<PersistentConnectionStatus> WaitForStateAsync(
+        IAdvancedBus advanced, PersistentConnectionType type, PersistentConnectionState state, CancellationToken cancellationToken
+    )
+    {
+        while (true)
+        {
+            var status = advanced.GetConnectionStatus(type);
+            if (status.State == state) return status;
+            await Task.Delay(50, cancellationToken);
         }
     }
 }
