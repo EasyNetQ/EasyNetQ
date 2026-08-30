@@ -329,7 +329,7 @@ public sealed class PullingConsumer : IPullingConsumer<PullResult>
             return PullResult.NotAvailable;
 
         var messagesCount = basicGetResult.MessageCount;
-        var messageProperties = new MessageProperties(basicGetResult.BasicProperties);
+        var messageProperties = BasicPropertiesMapper.FromBasicProperties(basicGetResult.BasicProperties);
         var messageReceivedInfo = new MessageReceivedInfo(
             "",
             basicGetResult.DeliveryTag,

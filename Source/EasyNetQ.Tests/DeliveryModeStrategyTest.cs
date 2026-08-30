@@ -22,7 +22,7 @@ public class DeliveryModeStrategyTest
     [InlineData(typeof(MessageWithoutDeliveryAttribute), true)]
     public void TestWhenPersistentMessagesIsTrue(Type messageType, bool isPersistent)
     {
-        var deliveryModeStrategy = new MessageDeliveryModeStrategy(new ConnectionConfiguration { PersistentMessages = true }, new MessageTypeRegistry(new DefaultTypeNameSerializer()));
+        var deliveryModeStrategy = new MessageDeliveryModeStrategy(new BusOptions { PersistentMessages = true }, new MessageTypeRegistry(new DefaultTypeNameSerializer()));
         Assert.Equal(isPersistent ? MessageDeliveryMode.Persistent : MessageDeliveryMode.NonPersistent, deliveryModeStrategy.GetDeliveryMode(messageType));
     }
 
@@ -32,7 +32,7 @@ public class DeliveryModeStrategyTest
     [InlineData(typeof(MessageWithoutDeliveryAttribute), false)]
     public void TestWhenPersistentMessagesIsFalse(Type messageType, bool isPersistent)
     {
-        var deliveryModeStrategy = new MessageDeliveryModeStrategy(new ConnectionConfiguration { PersistentMessages = false }, new MessageTypeRegistry(new DefaultTypeNameSerializer()));
+        var deliveryModeStrategy = new MessageDeliveryModeStrategy(new BusOptions { PersistentMessages = false }, new MessageTypeRegistry(new DefaultTypeNameSerializer()));
         Assert.Equal(isPersistent ? MessageDeliveryMode.Persistent : MessageDeliveryMode.NonPersistent, deliveryModeStrategy.GetDeliveryMode(messageType));
     }
 }

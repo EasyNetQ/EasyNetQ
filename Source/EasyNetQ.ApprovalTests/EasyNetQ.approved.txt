@@ -94,11 +94,24 @@ namespace EasyNetQ
         public static System.Collections.Generic.IDictionary<string, object> WithQueueType(this System.Collections.Generic.IDictionary<string, object> arguments, string queueType) { }
         public static System.Collections.Generic.IDictionary<string, object> WithSingleActiveConsumer(this System.Collections.Generic.IDictionary<string, object> arguments, bool singleActiveConsumer = true) { }
     }
+    public static class BasicPropertiesMapper
+    {
+        public static void CopyTo(this in EasyNetQ.MessageProperties source, RabbitMQ.Client.IBasicProperties basicProperties) { }
+        public static EasyNetQ.MessageProperties FromBasicProperties(RabbitMQ.Client.IReadOnlyBasicProperties basicProperties) { }
+    }
     public class BlockedEventArgs : System.EventArgs
     {
         public BlockedEventArgs(EasyNetQ.Persistent.PersistentConnectionType type, string reason) { }
         public string Reason { get; }
         public EasyNetQ.Persistent.PersistentConnectionType Type { get; }
+    }
+    public sealed class BusOptions : System.IEquatable<EasyNetQ.BusOptions>
+    {
+        public BusOptions() { }
+        public bool PersistentMessages { get; init; }
+        public ushort PrefetchCount { get; init; }
+        public bool PublisherConfirms { get; init; }
+        public System.TimeSpan Timeout { get; init; }
     }
     public class ConnectedEventArgs : System.EventArgs
     {
@@ -177,7 +190,7 @@ namespace EasyNetQ
     }
     public class DeadLetterExchangeAndMessageTtlScheduler : EasyNetQ.IScheduler
     {
-        public DeadLetterExchangeAndMessageTtlScheduler(EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.IAdvancedBus advancedBus, EasyNetQ.IConventions conventions, EasyNetQ.IMessageDeliveryModeStrategy messageDeliveryModeStrategy, EasyNetQ.IExchangeDeclareStrategy exchangeDeclareStrategy) { }
+        public DeadLetterExchangeAndMessageTtlScheduler(EasyNetQ.BusOptions configuration, EasyNetQ.IAdvancedBus advancedBus, EasyNetQ.IConventions conventions, EasyNetQ.IMessageDeliveryModeStrategy messageDeliveryModeStrategy, EasyNetQ.IExchangeDeclareStrategy exchangeDeclareStrategy) { }
         public System.Threading.Tasks.Task FuturePublishAsync<T>(T message, System.TimeSpan delay, System.Action<EasyNetQ.IFuturePublishConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
     }
     public static class DeadLetterStrategy
@@ -206,20 +219,20 @@ namespace EasyNetQ
     }
     public class DefaultPubSub : EasyNetQ.IPubSub
     {
-        public DefaultPubSub(EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.IConventions conventions, EasyNetQ.IExchangeDeclareStrategy exchangeDeclareStrategy, EasyNetQ.IMessageDeliveryModeStrategy messageDeliveryModeStrategy, EasyNetQ.IAdvancedBus advancedBus) { }
+        public DefaultPubSub(EasyNetQ.BusOptions configuration, EasyNetQ.IConventions conventions, EasyNetQ.IExchangeDeclareStrategy exchangeDeclareStrategy, EasyNetQ.IMessageDeliveryModeStrategy messageDeliveryModeStrategy, EasyNetQ.IAdvancedBus advancedBus) { }
         public virtual System.Threading.Tasks.Task PublishAsync<T>(T message, System.Action<EasyNetQ.IPublishConfiguration> configure, System.Threading.CancellationToken cancellationToken) { }
         public virtual System.Threading.Tasks.Task<EasyNetQ.SubscriptionResult> SubscribeAsync<T>(string subscriptionId, System.Func<T, System.Threading.CancellationToken, System.Threading.Tasks.Task> onMessage, System.Action<EasyNetQ.ISubscriptionConfiguration> configure, System.Threading.CancellationToken cancellationToken) { }
     }
     public sealed class DefaultRpc : EasyNetQ.IRpc, System.IAsyncDisposable
     {
-        public DefaultRpc(Microsoft.Extensions.Logging.ILogger<EasyNetQ.DefaultRpc> logger, EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.IAdvancedBus advancedBus, EasyNetQ.IEventBus eventBus, EasyNetQ.IConventions conventions, EasyNetQ.IExchangeDeclareStrategy exchangeDeclareStrategy, EasyNetQ.IMessageDeliveryModeStrategy messageDeliveryModeStrategy, EasyNetQ.ITypeNameSerializer typeNameSerializer, EasyNetQ.ICorrelationIdGenerationStrategy correlationIdGenerationStrategy) { }
+        public DefaultRpc(Microsoft.Extensions.Logging.ILogger<EasyNetQ.DefaultRpc> logger, EasyNetQ.BusOptions configuration, EasyNetQ.IAdvancedBus advancedBus, EasyNetQ.IEventBus eventBus, EasyNetQ.IConventions conventions, EasyNetQ.IExchangeDeclareStrategy exchangeDeclareStrategy, EasyNetQ.IMessageDeliveryModeStrategy messageDeliveryModeStrategy, EasyNetQ.ITypeNameSerializer typeNameSerializer, EasyNetQ.ICorrelationIdGenerationStrategy correlationIdGenerationStrategy) { }
         public System.Threading.Tasks.ValueTask DisposeAsync() { }
         public System.Threading.Tasks.Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, System.Action<EasyNetQ.IRequestConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
         public System.Threading.Tasks.Task<System.IAsyncDisposable> RespondAsync<TRequest, TResponse>(System.Func<TRequest, System.Threading.CancellationToken, System.Threading.Tasks.Task<TResponse>> responder, System.Action<EasyNetQ.IResponderConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
     }
     public class DefaultSendReceive : EasyNetQ.ISendReceive
     {
-        public DefaultSendReceive(EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.IConventions conventions, EasyNetQ.IAdvancedBus advancedBus, EasyNetQ.IMessageDeliveryModeStrategy messageDeliveryModeStrategy) { }
+        public DefaultSendReceive(EasyNetQ.BusOptions configuration, EasyNetQ.IConventions conventions, EasyNetQ.IAdvancedBus advancedBus, EasyNetQ.IMessageDeliveryModeStrategy messageDeliveryModeStrategy) { }
         public System.Threading.Tasks.Task<System.IAsyncDisposable> ReceiveAsync(string queue, System.Action<EasyNetQ.IReceiveRegistration> addHandlers, System.Action<EasyNetQ.IReceiveConfiguration> configure, System.Threading.CancellationToken cancellationToken) { }
         public System.Threading.Tasks.Task SendAsync<T>(string queue, T message, System.Action<EasyNetQ.ISendConfiguration> configure, System.Threading.CancellationToken cancellationToken) { }
     }
@@ -236,7 +249,7 @@ namespace EasyNetQ
     }
     public class DelayedExchangeScheduler : EasyNetQ.IScheduler
     {
-        public DelayedExchangeScheduler(EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.IAdvancedBus advancedBus, EasyNetQ.IConventions conventions, EasyNetQ.IMessageDeliveryModeStrategy messageDeliveryModeStrategy) { }
+        public DelayedExchangeScheduler(EasyNetQ.BusOptions configuration, EasyNetQ.IAdvancedBus advancedBus, EasyNetQ.IConventions conventions, EasyNetQ.IMessageDeliveryModeStrategy messageDeliveryModeStrategy) { }
         public System.Threading.Tasks.Task FuturePublishAsync<T>(T message, System.TimeSpan delay, System.Action<EasyNetQ.IFuturePublishConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
     }
     [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Interface)]
@@ -653,7 +666,7 @@ namespace EasyNetQ
     }
     public class MessageDeliveryModeStrategy : EasyNetQ.IMessageDeliveryModeStrategy
     {
-        public MessageDeliveryModeStrategy(EasyNetQ.ConnectionConfiguration connectionConfiguration, EasyNetQ.IMessageTypeRegistry messageTypeRegistry) { }
+        public MessageDeliveryModeStrategy(EasyNetQ.BusOptions busOptions, EasyNetQ.IMessageTypeRegistry messageTypeRegistry) { }
         public byte GetDeliveryMode(System.Type messageType) { }
     }
     public delegate System.Threading.Tasks.ValueTask<EasyNetQ.AckDecision> MessageHandler<in T>(T body, EasyNetQ.Pipeline.ConsumeContext context);
@@ -691,7 +704,6 @@ namespace EasyNetQ
     }
     public static class MessagePropertiesExtensions
     {
-        public static void CopyTo(this in EasyNetQ.MessageProperties source, RabbitMQ.Client.IBasicProperties basicProperties) { }
         public static EasyNetQ.MessageProperties SetHeader(this in EasyNetQ.MessageProperties source, string key, object value) { }
     }
     public readonly struct MessageReceivedInfo : System.IEquatable<EasyNetQ.MessageReceivedInfo>
@@ -1043,6 +1055,8 @@ namespace EasyNetQ
     }
     public static class ServiceCollectionExtensions
     {
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection AddEasyNetQCoreServices(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
+        public static Microsoft.Extensions.DependencyInjection.IServiceCollection AddRabbitMqServices(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Func<System.IServiceProvider, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory) { }
         public static Microsoft.Extensions.DependencyInjection.IServiceCollection RegisterDefaultServices(this Microsoft.Extensions.DependencyInjection.IServiceCollection services, System.Func<System.IServiceProvider, EasyNetQ.ConnectionConfiguration> connectionConfigurationFactory) { }
     }
     public static class SimpleConsumeConfigurationExtensions
@@ -1388,6 +1402,11 @@ namespace EasyNetQ.Events
     {
         public ConnectionRecoveredEvent(EasyNetQ.Persistent.PersistentConnectionType Type, RabbitMQ.Client.AmqpTcpEndpoint Endpoint) { }
         public RabbitMQ.Client.AmqpTcpEndpoint Endpoint { get; init; }
+        public EasyNetQ.Persistent.PersistentConnectionType Type { get; init; }
+    }
+    public readonly struct ConnectionRestoredEvent : System.IEquatable<EasyNetQ.Events.ConnectionRestoredEvent>
+    {
+        public ConnectionRestoredEvent(EasyNetQ.Persistent.PersistentConnectionType Type) { }
         public EasyNetQ.Persistent.PersistentConnectionType Type { get; init; }
     }
     public readonly struct ConnectionUnblockedEvent : System.IEquatable<EasyNetQ.Events.ConnectionUnblockedEvent>
@@ -1982,6 +2001,8 @@ namespace EasyNetQ.Serialization.SystemTextJson
         public SystemTextJsonMessageSerializer(System.Text.Json.JsonSerializerOptions options) { }
         public SystemTextJsonMessageSerializer(System.Text.Json.Serialization.JsonSerializerContext context) { }
         public SystemTextJsonMessageSerializer(System.Text.Json.Serialization.Metadata.IJsonTypeInfoResolver resolver) { }
+        public SystemTextJsonMessageSerializer(System.Text.Json.JsonSerializerOptions options, System.Collections.Generic.IEnumerable<System.Text.Json.Serialization.JsonConverter>? extraConverters) { }
+        public SystemTextJsonMessageSerializer(System.Text.Json.Serialization.Metadata.IJsonTypeInfoResolver resolver, System.Collections.Generic.IEnumerable<System.Text.Json.Serialization.JsonConverter>? extraConverters) { }
         public T? Deserialize<T>(in System.ReadOnlyMemory<byte> body, EasyNetQ.MessageTypeDescriptor<T> descriptor) { }
         public System.Buffers.IMemoryOwner<byte> Serialize<T>(T body, EasyNetQ.MessageTypeDescriptor<T> descriptor) { }
     }

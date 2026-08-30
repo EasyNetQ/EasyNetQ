@@ -1,5 +1,3 @@
-using RabbitMQ.Client;
-
 namespace EasyNetQ;
 
 /// <summary>
@@ -8,26 +6,6 @@ namespace EasyNetQ;
 public readonly record struct MessageProperties
 {
     public static MessageProperties Empty => default;
-
-    internal MessageProperties(IReadOnlyBasicProperties basicProperties)
-    {
-        ContentType = basicProperties.ContentType;
-        ContentEncoding = basicProperties.ContentEncoding;
-        DeliveryMode = (byte)basicProperties.DeliveryMode;
-        Priority = basicProperties.Priority;
-        CorrelationId = basicProperties.CorrelationId;
-        ReplyTo = basicProperties.ReplyTo;
-        Expiration = int.TryParse(basicProperties.Expiration, out var expirationMilliseconds)
-            ? TimeSpan.FromMilliseconds(expirationMilliseconds)
-            : null;
-        MessageId = basicProperties.MessageId;
-        Timestamp = basicProperties.Timestamp.UnixTime;
-        Type = basicProperties.Type;
-        UserId = basicProperties.UserId;
-        AppId = basicProperties.AppId;
-        ClusterId = basicProperties.ClusterId;
-        Headers = basicProperties.Headers;
-    }
 
     /// <summary>
     ///     MIME Content type

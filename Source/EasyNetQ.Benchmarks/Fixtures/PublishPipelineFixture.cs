@@ -24,7 +24,7 @@ public sealed class PublishPipelineFixture
             registry, serializer, new DefaultCorrelationIdGenerationStrategy()
         );
         Conventions = new Conventions(typeNameSerializer, registry);
-        DeliveryModeStrategy = new MessageDeliveryModeStrategy(new ConnectionConfiguration(), registry);
+        DeliveryModeStrategy = new MessageDeliveryModeStrategy(new BusOptions(), registry);
         Services = new ServiceCollection().BuildServiceProvider();
 
         pipeline = new PipelineBuilder<PublishContext>()

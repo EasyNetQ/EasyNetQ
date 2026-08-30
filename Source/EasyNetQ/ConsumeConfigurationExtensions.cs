@@ -133,18 +133,3 @@ public static class ConsumeConfigurationExtensions
         Action<IPerQueueConsumeConfiguration> configure
     ) => configuration.ForQueue(queue, x => x.Add(handler), configure);
 }
-
-/// <summary>
-///     Various extensions for <see cref="ISimpleConsumeConfiguration"/>
-/// </summary>
-public static class SimpleConsumeConfigurationExtensions
-{
-    /// <summary>
-    ///     Sets priority
-    /// </summary>
-    /// <param name="configuration">The configuration instance</param>
-    /// <param name="priority">The priority to set</param>
-    /// <returns>The same <paramref name="configuration"/></returns>
-    public static ISimpleConsumeConfiguration WithPriority(this ISimpleConsumeConfiguration configuration, int priority)
-        => configuration.WithArgument("x-priority", priority);
-}

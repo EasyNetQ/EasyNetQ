@@ -104,7 +104,7 @@ public class PublishConfirmationListenerTest : IDisposable
         {
             Headers = new Dictionary<string, object>
             {
-                { MessagePropertiesExtensions.ConfirmationIdHeader, Encoding.UTF8.GetBytes(confirmation1.Id.ToString()) }
+                { BasicPropertiesMapper.ConfirmationIdHeader, Encoding.UTF8.GetBytes(confirmation1.Id.ToString()) }
             }
         };
         await eventBus.PublishAsync(

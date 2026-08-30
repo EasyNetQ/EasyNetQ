@@ -16,7 +16,8 @@ public static class EasyNetQBuilderSystemTextJsonExtensions
     /// </summary>
     public static IEasyNetQBuilder UseSystemTextJson(this IEasyNetQBuilder builder)
     {
-        builder.Services.AddSingleton<IMessageSerializer>(new SystemTextJsonMessageSerializer());
+        builder.Services.AddSingleton<IMessageSerializer>(sp => new SystemTextJsonMessageSerializer(
+            new JsonSerializerOptions(JsonSerializerDefaults.General), sp.GetServices<JsonConverter>()));
         return builder;
     }
 
@@ -25,7 +26,7 @@ public static class EasyNetQBuilderSystemTextJsonExtensions
     /// </summary>
     public static IEasyNetQBuilder UseSystemTextJson(this IEasyNetQBuilder builder, JsonSerializerOptions options)
     {
-        builder.Services.AddSingleton<IMessageSerializer>(new SystemTextJsonMessageSerializer(options));
+        builder.Services.AddSingleton<IMessageSerializer>(sp => new SystemTextJsonMessageSerializer(options, sp.GetServices<JsonConverter>()));
         return builder;
     }
 
@@ -35,7 +36,7 @@ public static class EasyNetQBuilderSystemTextJsonExtensions
     /// </summary>
     public static IEasyNetQBuilder UseSystemTextJson(this IEasyNetQBuilder builder, JsonSerializerContext context)
     {
-        builder.Services.AddSingleton<IMessageSerializer>(new SystemTextJsonMessageSerializer(context));
+        builder.Services.AddSingleton<IMessageSerializer>(sp => new SystemTextJsonMessageSerializer(context, sp.GetServices<JsonConverter>()));
         return builder;
     }
 

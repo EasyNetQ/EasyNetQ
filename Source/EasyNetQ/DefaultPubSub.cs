@@ -6,7 +6,7 @@ namespace EasyNetQ;
 public class DefaultPubSub : IPubSub
 {
     private readonly IAdvancedBus advancedBus;
-    private readonly ConnectionConfiguration configuration;
+    private readonly BusOptions configuration;
     private readonly IConventions conventions;
     private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
     private readonly IExchangeDeclareStrategy exchangeDeclareStrategy;
@@ -20,7 +20,7 @@ public class DefaultPubSub : IPubSub
     /// <param name="messageDeliveryModeStrategy">The message delivery mode strategy</param>
     /// <param name="advancedBus">The advanced bus</param>
     public DefaultPubSub(
-        ConnectionConfiguration configuration,
+        BusOptions configuration,
         IConventions conventions,
         IExchangeDeclareStrategy exchangeDeclareStrategy,
         IMessageDeliveryModeStrategy messageDeliveryModeStrategy,

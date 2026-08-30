@@ -154,6 +154,7 @@ public class PersistentConnection : IPersistentConnection
         var connection = (IConnection)sender!;
         logger.ConnectionRecovered(type, connection.Endpoint.HostName, connection.Endpoint.Port);
         await eventBus.PublishAsync(new ConnectionRecoveredEvent(type, connection.Endpoint));
+        await eventBus.PublishAsync(new ConnectionRestoredEvent(type));
     }
 
     private async Task OnConnectionShutdown(object sender, ShutdownEventArgs e)

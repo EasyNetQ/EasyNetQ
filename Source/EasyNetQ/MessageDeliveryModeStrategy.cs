@@ -7,19 +7,19 @@ public interface IMessageDeliveryModeStrategy
 
 public class MessageDeliveryModeStrategy : IMessageDeliveryModeStrategy
 {
-    private readonly ConnectionConfiguration connectionConfiguration;
+    private readonly BusOptions busOptions;
     private readonly IMessageTypeRegistry messageTypeRegistry;
 
-    public MessageDeliveryModeStrategy(ConnectionConfiguration connectionConfiguration, IMessageTypeRegistry messageTypeRegistry)
+    public MessageDeliveryModeStrategy(BusOptions busOptions, IMessageTypeRegistry messageTypeRegistry)
     {
-        this.connectionConfiguration = connectionConfiguration;
+        this.busOptions = busOptions;
         this.messageTypeRegistry = messageTypeRegistry;
     }
 
     /// <inheritdoc />
     public byte GetDeliveryMode(Type messageType)
     {
-        var isPersistent = messageTypeRegistry.GetOrAdd(messageType).IsPersistent ?? connectionConfiguration.PersistentMessages;
+        var isPersistent = messageTypeRegistry.GetOrAdd(messageType).IsPersistent ?? busOptions.PersistentMessages;
         return isPersistent ? MessageDeliveryMode.Persistent : MessageDeliveryMode.NonPersistent;
     }
 }

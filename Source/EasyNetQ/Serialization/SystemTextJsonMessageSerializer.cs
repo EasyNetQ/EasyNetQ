@@ -27,9 +27,20 @@ public sealed class SystemTextJsonMessageSerializer : IMessageSerializer
     ///     Creates the serializer with custom options
     /// </summary>
     public SystemTextJsonMessageSerializer(JsonSerializerOptions options)
+        : this(options, null)
+    {
+    }
+
+    /// <summary>
+    ///     Creates the serializer with custom options plus additional converters (e.g. the transport package's
+    ///     MessageProperties converter, registered as JsonConverter services)
+    /// </summary>
+    public SystemTextJsonMessageSerializer(JsonSerializerOptions options, IEnumerable<JsonConverter>? extraConverters)
     {
         this.options = new JsonSerializerOptions(options);
-        this.options.Converters.Add(new MessagePropertiesConverter());
+        if (extraConverters is not null)
+            foreach (var converter in extraConverters)
+                this.options.Converters.Add(converter);
         this.options.MakeReadOnly(populateMissingResolver: true);
     }
 
@@ -46,9 +57,20 @@ public sealed class SystemTextJsonMessageSerializer : IMessageSerializer
     ///     combined via <see cref="JsonTypeInfoResolver.Combine" /> (reflection-free, AOT-safe)
     /// </summary>
     public SystemTextJsonMessageSerializer(IJsonTypeInfoResolver resolver)
+        : this(resolver, null)
+    {
+    }
+
+    /// <summary>
+    ///     Creates the serializer with an explicit contract resolver plus additional converters (reflection-free,
+    ///     AOT-safe)
+    /// </summary>
+    public SystemTextJsonMessageSerializer(IJsonTypeInfoResolver resolver, IEnumerable<JsonConverter>? extraConverters)
     {
         options = new JsonSerializerOptions(JsonSerializerDefaults.General) { TypeInfoResolver = resolver };
-        options.Converters.Add(new MessagePropertiesConverter());
+        if (extraConverters is not null)
+            foreach (var converter in extraConverters)
+                options.Converters.Add(converter);
         options.MakeReadOnly(populateMissingResolver: false);
     }
 

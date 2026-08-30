@@ -73,7 +73,7 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
         try
         {
             context.ReceivedInfo = new MessageReceivedInfo(consumerTag, deliveryTag, redelivered, exchange, routingKey, queue.Name);
-            context.Properties = new MessageProperties(properties);
+            context.Properties = BasicPropertiesMapper.FromBasicProperties(properties);
             context.Body = body;
             context.CancellationToken = cts.Token;
 

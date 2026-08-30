@@ -7,7 +7,7 @@ namespace EasyNetQ;
 /// </summary>
 public class DelayedExchangeScheduler : IScheduler
 {
-    private readonly ConnectionConfiguration configuration;
+    private readonly BusOptions configuration;
     private readonly IAdvancedBus advancedBus;
     private readonly IConventions conventions;
     private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
@@ -20,7 +20,7 @@ public class DelayedExchangeScheduler : IScheduler
     /// <param name="conventions">The conventions</param>
     /// <param name="messageDeliveryModeStrategy">The message delivery mode strategy</param>
     public DelayedExchangeScheduler(
-        ConnectionConfiguration configuration,
+        BusOptions configuration,
         IAdvancedBus advancedBus,
         IConventions conventions,
         IMessageDeliveryModeStrategy messageDeliveryModeStrategy

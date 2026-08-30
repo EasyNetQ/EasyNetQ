@@ -7,7 +7,7 @@ namespace EasyNetQ;
 /// </summary>
 public class DeadLetterExchangeAndMessageTtlScheduler : IScheduler
 {
-    private readonly ConnectionConfiguration configuration;
+    private readonly BusOptions configuration;
     private readonly IAdvancedBus advancedBus;
     private readonly IConventions conventions;
     private readonly IExchangeDeclareStrategy exchangeDeclareStrategy;
@@ -22,7 +22,7 @@ public class DeadLetterExchangeAndMessageTtlScheduler : IScheduler
     /// <param name="messageDeliveryModeStrategy">The message delivery mode strategy</param>
     /// <param name="exchangeDeclareStrategy">The exchange declare strategy</param>
     public DeadLetterExchangeAndMessageTtlScheduler(
-        ConnectionConfiguration configuration,
+        BusOptions configuration,
         IAdvancedBus advancedBus,
         IConventions conventions,
         IMessageDeliveryModeStrategy messageDeliveryModeStrategy,

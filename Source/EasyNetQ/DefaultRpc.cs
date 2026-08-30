@@ -18,7 +18,7 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
     const string ExceptionMessageKey = "ExceptionMessage";
     readonly IAdvancedBus advancedBus;
     private readonly ILogger<DefaultRpc> logger;
-    private readonly ConnectionConfiguration configuration;
+    private readonly BusOptions configuration;
     readonly IConventions conventions;
     private readonly ICorrelationIdGenerationStrategy correlationIdGenerationStrategy;
     private readonly IDisposable eventSubscription;
@@ -35,7 +35,7 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
 
     public DefaultRpc(
         ILogger<DefaultRpc> logger,
-        ConnectionConfiguration configuration,
+        BusOptions configuration,
         IAdvancedBus advancedBus,
         IEventBus eventBus,
         IConventions conventions,
@@ -54,7 +54,7 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
         this.typeNameSerializer = typeNameSerializer;
         this.correlationIdGenerationStrategy = correlationIdGenerationStrategy;
 
-        eventSubscription = eventBus.Subscribe<ConnectionRecoveredEvent>(OnConnectionRecovered);
+        eventSubscription = eventBus.Subscribe<ConnectionRestoredEvent>(OnConnectionRestored);
     }
 
     /// <inheritdoc />
@@ -124,7 +124,7 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
             await responseSubscription.Unsubscribe();
     }
 
-    private Task OnConnectionRecovered(ConnectionRecoveredEvent messageEvent)
+    private Task OnConnectionRestored(ConnectionRestoredEvent messageEvent)
     {
         if (messageEvent.Type != PersistentConnectionType.Consumer)
             return Task.CompletedTask;

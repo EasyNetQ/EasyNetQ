@@ -9,7 +9,7 @@ namespace EasyNetQ;
 /// </summary>
 public class DefaultSendReceive : ISendReceive
 {
-    private readonly ConnectionConfiguration configuration;
+    private readonly BusOptions configuration;
     private readonly IConventions conventions;
     private readonly IAdvancedBus advancedBus;
     private readonly IMessageDeliveryModeStrategy messageDeliveryModeStrategy;
@@ -22,7 +22,7 @@ public class DefaultSendReceive : ISendReceive
     /// <param name="advancedBus">The advanced bus</param>
     /// <param name="messageDeliveryModeStrategy">The message delivery mode strategy</param>
     public DefaultSendReceive(
-        ConnectionConfiguration configuration,
+        BusOptions configuration,
         IConventions conventions,
         IAdvancedBus advancedBus,
         IMessageDeliveryModeStrategy messageDeliveryModeStrategy
