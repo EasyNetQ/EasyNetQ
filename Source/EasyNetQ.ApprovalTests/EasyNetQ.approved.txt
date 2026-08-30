@@ -158,7 +158,7 @@ namespace EasyNetQ
     public delegate string ConsumerTagConvention();
     public class Conventions : EasyNetQ.IConventions
     {
-        public Conventions(EasyNetQ.ITypeNameSerializer typeNameSerializer) { }
+        public Conventions(EasyNetQ.ITypeNameSerializer typeNameSerializer, EasyNetQ.IMessageTypeRegistry messageTypeRegistry) { }
         public EasyNetQ.ConsumerTagConvention ConsumerTagConvention { get; set; }
         public EasyNetQ.ErrorExchangeNameConvention ErrorExchangeNamingConvention { get; set; }
         public EasyNetQ.ErrorExchangeRoutingKeyConvention ErrorExchangeRoutingKeyConvention { get; set; }
@@ -266,6 +266,11 @@ namespace EasyNetQ
         public static EasyNetQ.IEasyNetQBuilder UseMultiChannelClientCommandDispatcher(this EasyNetQ.IEasyNetQBuilder builder, int channelsCount) { }
         public static EasyNetQ.IEasyNetQBuilder UseVersionedMessage(this EasyNetQ.IEasyNetQBuilder builder) { }
     }
+    public static class EasyNetQBuilderModuleExtensions
+    {
+        public static EasyNetQ.IEasyNetQBuilder AddModule<TModule>(this EasyNetQ.IEasyNetQBuilder builder, TModule module)
+            where TModule : EasyNetQ.IEasyNetQModule { }
+    }
     public static class EasyNetQBuilderSystemTextJsonExtensions
     {
         public static EasyNetQ.IEasyNetQBuilder UseSystemTextJson(this EasyNetQ.IEasyNetQBuilder builder) { }
@@ -280,6 +285,18 @@ namespace EasyNetQ
         public EasyNetQException(string message) { }
         public EasyNetQException(string format, params object[] args) { }
         public EasyNetQException(string message, System.Exception inner) { }
+    }
+    [System.AttributeUsage(System.AttributeTargets.Assembly, AllowMultiple=true)]
+    public sealed class EasyNetQMessagesAttribute : System.Attribute
+    {
+        public EasyNetQMessagesAttribute(params System.Type[] messageTypes) { }
+        public System.Type[] MessageTypes { get; }
+    }
+    [System.AttributeUsage(System.AttributeTargets.Assembly, AllowMultiple=true)]
+    public sealed class EasyNetQModuleAttribute : System.Attribute
+    {
+        public EasyNetQModuleAttribute(System.Type moduleType) { }
+        public System.Type ModuleType { get; }
     }
     public class EasyNetQResponderException : EasyNetQ.EasyNetQException
     {
@@ -412,6 +429,10 @@ namespace EasyNetQ
     {
         Microsoft.Extensions.DependencyInjection.IServiceCollection Services { get; }
     }
+    public interface IEasyNetQModule
+    {
+        void Register(Microsoft.Extensions.DependencyInjection.IServiceCollection services);
+    }
     public interface IEventBus
     {
         System.Threading.Tasks.Task PublishAsync<TEvent>(TEvent messageEvent)
@@ -465,6 +486,10 @@ namespace EasyNetQ
         EasyNetQ.MessageTypeDescriptor GetOrAdd(System.Type type);
         EasyNetQ.MessageTypeDescriptor<T> GetOrAdd<T>();
         bool TryGetByWireName(string wireName, out EasyNetQ.MessageTypeDescriptor descriptor);
+    }
+    public interface IMessageTypeRegistryInitializer
+    {
+        void Initialize(EasyNetQ.IMessageTypeRegistry registry);
     }
     public interface IMessage<out T> : EasyNetQ.IMessage
     {
@@ -613,7 +638,7 @@ namespace EasyNetQ
     }
     public class LegacyRpcConventions : EasyNetQ.Conventions
     {
-        public LegacyRpcConventions(EasyNetQ.ITypeNameSerializer typeNameSerializer) { }
+        public LegacyRpcConventions(EasyNetQ.ITypeNameSerializer typeNameSerializer, EasyNetQ.IMessageTypeRegistry messageTypeRegistry) { }
     }
     public class LegacyTypeNameSerializer : EasyNetQ.ITypeNameSerializer
     {
@@ -628,7 +653,7 @@ namespace EasyNetQ
     }
     public class MessageDeliveryModeStrategy : EasyNetQ.IMessageDeliveryModeStrategy
     {
-        public MessageDeliveryModeStrategy(EasyNetQ.ConnectionConfiguration connectionConfiguration) { }
+        public MessageDeliveryModeStrategy(EasyNetQ.ConnectionConfiguration connectionConfiguration, EasyNetQ.IMessageTypeRegistry messageTypeRegistry) { }
         public byte GetDeliveryMode(System.Type messageType) { }
     }
     public delegate System.Threading.Tasks.ValueTask<EasyNetQ.AckDecision> MessageHandler<in T>(T body, EasyNetQ.Pipeline.ConsumeContext context);
@@ -696,6 +721,11 @@ namespace EasyNetQ
     public abstract class MessageTypeDescriptor
     {
         public string DisplayName { get; }
+        public string? ExchangeName { get; set; }
+        public string? ExchangeType { get; set; }
+        public bool? IsPersistent { get; set; }
+        public string? QueueName { get; set; }
+        public string? QueueType { get; set; }
         public object? SerializerState { get; set; }
         public System.Type Type { get; }
         public string WireName { get; }
@@ -713,6 +743,7 @@ namespace EasyNetQ
     public sealed class MessageTypeRegistry : EasyNetQ.IMessageTypeRegistry
     {
         public MessageTypeRegistry(EasyNetQ.ITypeNameSerializer typeNameSerializer) { }
+        public MessageTypeRegistry(EasyNetQ.ITypeNameSerializer typeNameSerializer, System.Collections.Generic.IEnumerable<EasyNetQ.IMessageTypeRegistryInitializer>? initializers) { }
         public EasyNetQ.MessageTypeDescriptor GetByWireName(string wireName) { }
         public EasyNetQ.MessageTypeDescriptor GetOrAdd(System.Type type) { }
         public EasyNetQ.MessageTypeDescriptor<T> GetOrAdd<T>() { }
@@ -730,24 +761,44 @@ namespace EasyNetQ
     }
     public static class NonGenericPubSubExtensions
     {
+        [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Non-generic messaging APIs close generic methods over runtime types. Use the gene" +
+            "ric APIs for AOT-compatible applications.")]
         public static System.Threading.Tasks.Task PublishAsync(this EasyNetQ.IPubSub pubSub, object message, System.Type messageType, System.Threading.CancellationToken cancellationToken = default) { }
+        [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Non-generic messaging APIs close generic methods over runtime types. Use the gene" +
+            "ric APIs for AOT-compatible applications.")]
         public static System.Threading.Tasks.Task PublishAsync(this EasyNetQ.IPubSub pubSub, object message, System.Type messageType, System.Action<EasyNetQ.IPublishConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
+        [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Non-generic messaging APIs close generic methods over runtime types. Use the gene" +
+            "ric APIs for AOT-compatible applications.")]
         public static System.Threading.Tasks.Task PublishAsync(this EasyNetQ.IPubSub pubSub, object message, System.Type messageType, string topic, System.Threading.CancellationToken cancellationToken = default) { }
+        [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Non-generic messaging APIs close generic methods over runtime types. Use the gene" +
+            "ric APIs for AOT-compatible applications.")]
         public static System.Threading.Tasks.Task<EasyNetQ.SubscriptionResult> SubscribeAsync(this EasyNetQ.IPubSub pubSub, string subscriptionId, System.Type messageType, System.Func<object, System.Type, System.Threading.CancellationToken, System.Threading.Tasks.Task> onMessage, System.Action<EasyNetQ.ISubscriptionConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
     }
     public static class NonGenericRpcExtensions
     {
+        [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Non-generic messaging APIs close generic methods over runtime types. Use the gene" +
+            "ric APIs for AOT-compatible applications.")]
         public static System.Threading.Tasks.Task<object> RequestAsync(this EasyNetQ.IRpc rpc, object request, System.Type requestType, System.Type responseType, System.Threading.CancellationToken cancellationToken = default) { }
+        [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Non-generic messaging APIs close generic methods over runtime types. Use the gene" +
+            "ric APIs for AOT-compatible applications.")]
         public static System.Threading.Tasks.Task<object> RequestAsync(this EasyNetQ.IRpc rpc, object request, System.Type requestType, System.Type responseType, System.Action<EasyNetQ.IRequestConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
     }
     public static class NonGenericSchedulerExtensions
     {
+        [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Non-generic messaging APIs close generic methods over runtime types. Use the gene" +
+            "ric APIs for AOT-compatible applications.")]
         public static System.Threading.Tasks.Task FuturePublishAsync(this EasyNetQ.IScheduler scheduler, object message, System.Type messageType, System.TimeSpan delay, System.Threading.CancellationToken cancellationToken = default) { }
+        [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Non-generic messaging APIs close generic methods over runtime types. Use the gene" +
+            "ric APIs for AOT-compatible applications.")]
         public static System.Threading.Tasks.Task FuturePublishAsync(this EasyNetQ.IScheduler scheduler, object message, System.Type messageType, System.TimeSpan delay, System.Action<EasyNetQ.IFuturePublishConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
     }
     public static class NonGenericSendReceiveExtensions
     {
+        [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Non-generic messaging APIs close generic methods over runtime types. Use the gene" +
+            "ric APIs for AOT-compatible applications.")]
         public static System.Threading.Tasks.Task SendAsync(this EasyNetQ.ISendReceive sendReceive, string queue, object message, System.Type messageType, System.Threading.CancellationToken cancellationToken = default) { }
+        [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Non-generic messaging APIs close generic methods over runtime types. Use the gene" +
+            "ric APIs for AOT-compatible applications.")]
         public static System.Threading.Tasks.Task SendAsync(this EasyNetQ.ISendReceive sendReceive, string queue, object message, System.Type messageType, System.Action<EasyNetQ.ISendConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
     }
     public static class OverflowType
@@ -1504,13 +1555,6 @@ namespace EasyNetQ.Internals
         public override void SetLength(long value) { }
         public override void Write(byte[] buffer, int offset, int count) { }
     }
-    public static class ReflectionHelpers
-    {
-        public static TAttribute GetAttribute<TAttribute>(this System.Type type)
-            where TAttribute : System.Attribute { }
-        public static System.Collections.Generic.IEnumerable<TAttribute> GetAttributes<TAttribute>(this System.Type type)
-            where TAttribute : System.Attribute { }
-    }
     public static class StringExtensions
     {
         public static string Trim(this string s, int start, int length) { }
@@ -1937,6 +1981,7 @@ namespace EasyNetQ.Serialization.SystemTextJson
         public SystemTextJsonMessageSerializer() { }
         public SystemTextJsonMessageSerializer(System.Text.Json.JsonSerializerOptions options) { }
         public SystemTextJsonMessageSerializer(System.Text.Json.Serialization.JsonSerializerContext context) { }
+        public SystemTextJsonMessageSerializer(System.Text.Json.Serialization.Metadata.IJsonTypeInfoResolver resolver) { }
         public T? Deserialize<T>(in System.ReadOnlyMemory<byte> body, EasyNetQ.MessageTypeDescriptor<T> descriptor) { }
         public System.Buffers.IMemoryOwner<byte> Serialize<T>(T body, EasyNetQ.MessageTypeDescriptor<T> descriptor) { }
     }

@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
+    <ProjectReference Include="..\EasyNetQ.Generators\EasyNetQ.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" UndefineProperties="PublishAot;RuntimeIdentifier;SelfContained;NativeLib" />
   </ItemGroup>
 
 </Project>

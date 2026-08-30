@@ -157,42 +157,20 @@ public class Conventions : IConventions
     /// <summary>
     ///     Creates Conventions
     /// </summary>
-    public Conventions(ITypeNameSerializer typeNameSerializer)
+    public Conventions(ITypeNameSerializer typeNameSerializer, IMessageTypeRegistry messageTypeRegistry)
     {
-        ExchangeNamingConvention = type =>
-        {
-            var attr = GetExchangeAttribute(type);
-            return attr.Name ?? typeNameSerializer.Serialize(type);
-        };
-        ExchangeTypeConvention = type =>
-        {
-            var attr = GetExchangeAttribute(type);
-            return attr.ExchangeType ?? ExchangeType.Topic;
-        };
-        QueueTypeConvention = type =>
-        {
-            var attr = GetQueueAttribute(type);
-            return attr.Type;
-        };
+        // Naming metadata comes from the message-type descriptor (populated once per type from attributes or by
+        // generated registrations), so no attribute reflection happens per publish/subscribe
+        ExchangeNamingConvention = type => messageTypeRegistry.GetOrAdd(type).ExchangeName ?? typeNameSerializer.Serialize(type);
+        ExchangeTypeConvention = type => messageTypeRegistry.GetOrAdd(type).ExchangeType ?? ExchangeType.Topic;
+        QueueTypeConvention = type => messageTypeRegistry.GetOrAdd(type).QueueType;
 
         TopicNamingConvention = _ => "";
 
         QueueNamingConvention = (type, subscriptionId) =>
         {
-            var attr = GetQueueAttribute(type);
-
-            if (attr.Name == null)
-            {
-                var typeName = typeNameSerializer.Serialize(type);
-
-                return string.IsNullOrEmpty(subscriptionId)
-                    ? typeName
-                    : $"{typeName}_{subscriptionId}";
-            }
-
-            return string.IsNullOrEmpty(subscriptionId)
-                ? attr.Name
-                : $"{attr.Name}_{subscriptionId}";
+            var queueName = messageTypeRegistry.GetOrAdd(type).QueueName ?? typeNameSerializer.Serialize(type);
+            return string.IsNullOrEmpty(subscriptionId) ? queueName : $"{queueName}_{subscriptionId}";
         };
         RpcRoutingKeyNamingConvention = typeNameSerializer.Serialize;
 
@@ -207,16 +185,6 @@ public class Conventions : IConventions
         RpcReturnQueueNamingConvention = _ => "easynetq.response." + Guid.NewGuid();
 
         ConsumerTagConvention = () => Guid.NewGuid().ToString();
-    }
-
-    private static QueueAttribute GetQueueAttribute(Type messageType)
-    {
-        return messageType.GetAttribute<QueueAttribute>() ?? QueueAttribute.Default;
-    }
-
-    private static ExchangeAttribute GetExchangeAttribute(Type messageType)
-    {
-        return messageType.GetAttribute<ExchangeAttribute>() ?? ExchangeAttribute.Default;
     }
 
     /// <inheritdoc />

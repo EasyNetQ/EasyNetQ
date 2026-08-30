@@ -30,9 +30,19 @@ public static class ServiceCollectionExtensions
             _ => new CompositeConnectionStringParser(new AmqpConnectionStringParser(), new ConnectionStringParser())
         );
         services.TryAddSingleton<IMessageTypeRegistry, MessageTypeRegistry>();
-        services.TryAddSingleton<IMessageSerializer>(sp => sp.GetService<ISerializer>() is { } legacySerializer
-            ? new Serialization.LegacyMessageSerializerAdapter(legacySerializer)
-            : new Serialization.SystemTextJson.SystemTextJsonMessageSerializer());
+        services.TryAddSingleton<IMessageSerializer>(sp =>
+        {
+            if (sp.GetService<ISerializer>() is { } legacySerializer)
+                return new Serialization.LegacyMessageSerializerAdapter(legacySerializer);
+
+            // Source-generated modules register JsonSerializerContexts; combining them keeps serialization
+            // reflection-free (and AOT-safe) for every discovered message type
+            var contexts = sp.GetServices<System.Text.Json.Serialization.JsonSerializerContext>().ToArray();
+            return contexts.Length == 0
+                ? new Serialization.SystemTextJson.SystemTextJsonMessageSerializer()
+                : new Serialization.SystemTextJson.SystemTextJsonMessageSerializer(
+                    System.Text.Json.Serialization.Metadata.JsonTypeInfoResolver.Combine(contexts));
+        });
         services.TryAddSingleton<IConventions, Conventions>();
         services.TryAddSingleton<IEventBus, EventBus>();
         services.TryAddSingleton<ITypeNameSerializer, DefaultTypeNameSerializer>();

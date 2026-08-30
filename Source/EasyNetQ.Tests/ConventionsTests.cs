@@ -10,7 +10,7 @@ public class When_using_default_conventions
     public When_using_default_conventions()
     {
         typeNameSerializer = new DefaultTypeNameSerializer();
-        conventions = new Conventions(typeNameSerializer);
+        conventions = new Conventions(typeNameSerializer, new MessageTypeRegistry(typeNameSerializer));
     }
 
     private readonly Conventions conventions;
@@ -84,7 +84,7 @@ public class When_using_QueueAttribute
     public When_using_QueueAttribute()
     {
         typeNameSerializer = new DefaultTypeNameSerializer();
-        conventions = new Conventions(typeNameSerializer);
+        conventions = new Conventions(typeNameSerializer, new MessageTypeRegistry(typeNameSerializer));
     }
 
     [Theory]
@@ -150,7 +150,7 @@ public class When_publishing_a_message : IAsyncLifetime
     public When_publishing_a_message()
     {
         typeNameSerializer = new DefaultTypeNameSerializer();
-        var customConventions = new Conventions(typeNameSerializer)
+        var customConventions = new Conventions(typeNameSerializer, new MessageTypeRegistry(typeNameSerializer))
         {
             ExchangeNamingConvention = _ => "CustomExchangeNamingConvention",
             QueueNamingConvention = (_, _) => "CustomQueueNamingConvention",
@@ -217,7 +217,7 @@ public class When_registering_response_handler : IAsyncLifetime
 {
     public When_registering_response_handler()
     {
-        var customConventions = new Conventions(new DefaultTypeNameSerializer())
+        var customConventions = new Conventions(new DefaultTypeNameSerializer(), new MessageTypeRegistry(new DefaultTypeNameSerializer()))
         {
             RpcRequestExchangeNamingConvention = _ => "CustomRpcExchangeName",
             RpcRoutingKeyNamingConvention = _ => "CustomRpcRoutingKeyName"

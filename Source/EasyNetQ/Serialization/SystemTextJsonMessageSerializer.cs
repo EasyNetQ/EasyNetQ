@@ -37,8 +37,19 @@ public sealed class SystemTextJsonMessageSerializer : IMessageSerializer
     ///     Creates the serializer with a source-generated contract context (reflection-free, AOT-safe)
     /// </summary>
     public SystemTextJsonMessageSerializer(JsonSerializerContext context)
-        : this(new JsonSerializerOptions(context.Options))
+        : this((IJsonTypeInfoResolver)context)
     {
+    }
+
+    /// <summary>
+    ///     Creates the serializer with an explicit contract resolver, e.g. several source-generated contexts
+    ///     combined via <see cref="JsonTypeInfoResolver.Combine" /> (reflection-free, AOT-safe)
+    /// </summary>
+    public SystemTextJsonMessageSerializer(IJsonTypeInfoResolver resolver)
+    {
+        options = new JsonSerializerOptions(JsonSerializerDefaults.General) { TypeInfoResolver = resolver };
+        options.Converters.Add(new MessagePropertiesConverter());
+        options.MakeReadOnly(populateMissingResolver: false);
     }
 
     /// <inheritdoc />

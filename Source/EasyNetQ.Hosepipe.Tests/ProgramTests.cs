@@ -21,7 +21,7 @@ public class ProgramTests
         messageReader = new MockMessageReader();
         queueInsertion = new MockQueueInsertion();
         errorRetry = new MockErrorRetry();
-        conventions = new Conventions(new LegacyTypeNameSerializer());
+        conventions = new Conventions(new LegacyTypeNameSerializer(), new MessageTypeRegistry(new LegacyTypeNameSerializer()));
 
         program = new Program(
             new ArgParser(),

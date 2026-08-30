@@ -5,7 +5,7 @@ namespace EasyNetQ.Hosepipe.Tests;
 public class MessageReaderTests
 {
     private readonly IMessageReader messageReader = new MessageReader();
-    private readonly IConventions conventions = new Conventions(new LegacyTypeNameSerializer());
+    private readonly IConventions conventions = new Conventions(new LegacyTypeNameSerializer(), new MessageTypeRegistry(new LegacyTypeNameSerializer()));
 
     /// <summary>
     /// 1. Put some messages in C:\temp\MessageOutput

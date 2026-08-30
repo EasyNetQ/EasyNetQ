@@ -1,4 +1,5 @@
 using EasyNetQ.ChannelDispatcher;
+using EasyNetQ.Internals;
 using EasyNetQ.Persistent;
 using EasyNetQ.Pipeline;
 using System.Buffers;
@@ -70,13 +71,12 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
         var properties = context.Properties;
         var body = context.Body.ToArray();
 
-        logger.LogError(
-            exception,
-            "Exception thrown by subscription callback, receivedInfo={ReceivedInfo}, properties={Properties}, message={Message}",
-            receivedInfo,
-            properties,
-            Convert.ToBase64String(body)
-        );
+        logger.ConsumeCallbackFailed(exception, receivedInfo.Queue, receivedInfo.RoutingKey, receivedInfo.Exchange, properties.CorrelationId);
+        if (logger.IsEnabled(LogLevel.Error))
+        {
+            // Materialize the base64 body string only when the log will actually be emitted
+            logger.FailedMessageBody(receivedInfo.Queue, Convert.ToBase64String(body));
+        }
 
         try
         {
@@ -112,23 +112,17 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
         catch (BrokerUnreachableException unreachableException)
         {
             // thrown if the broker is unreachable during initial creation.
-            logger.LogError(
-                unreachableException,
-                "Cannot connect to broker while attempting to publish error message"
-            );
+            logger.CannotConnectToBrokerForErrorPublish(unreachableException);
         }
         catch (OperationInterruptedException interruptedException)
         {
             // thrown if the broker connection is broken during declare or publish.
-            logger.LogError(
-                interruptedException,
-                "Broker connection was closed while attempting to publish error message"
-            );
+            logger.BrokerConnectionClosedForErrorPublish(interruptedException);
         }
         catch (Exception unexpectedException)
         {
             // Something else unexpected has gone wrong :(
-            logger.LogError(unexpectedException, "Failed to publish error message");
+            logger.FailedToPublishErrorMessage(unexpectedException);
         }
 
         return AckDecision.NackRequeue;

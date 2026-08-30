@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using EasyNetQ.Consumer;
+using EasyNetQ.Internals;
 using Microsoft.Extensions.Logging;
 
 namespace EasyNetQ.Pipeline.Middleware;
@@ -44,7 +45,7 @@ public sealed class ErrorHandlingMiddleware : IMiddleware<ConsumeContext>
         }
         catch (Exception exception)
         {
-            logger.LogError(exception, "Consume error strategy has failed");
+            logger.ConsumeErrorStrategyFailed(exception);
             context.Ack = AckDecision.NackRequeue;
         }
     }

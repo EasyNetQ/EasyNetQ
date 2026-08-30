@@ -48,4 +48,54 @@ public class ConnectionStringParserTests
     {
         Assert.Throws<EasyNetQException>(() => connectionStringParser.Parse("amqp=Foo"));
     }
+
+    [Fact]
+    public void Should_parse_host_with_port()
+    {
+        var configuration = connectionStringParser.Parse("host=my.host.com:1234");
+
+        configuration.Hosts.Should().ContainSingle();
+        configuration.Hosts[0].Host.Should().Be("my.host.com");
+        configuration.Hosts[0].Port.Should().Be(1234);
+    }
+
+    [Fact]
+    public void Should_parse_host_without_port()
+    {
+        var configuration = connectionStringParser.Parse("host=my.host.com");
+
+        configuration.Hosts.Should().ContainSingle();
+        configuration.Hosts[0].Host.Should().Be("my.host.com");
+        configuration.Hosts[0].Port.Should().Be(0);
+    }
+
+    [Fact]
+    public void Should_parse_list_of_hosts()
+    {
+        var configuration = connectionStringParser.Parse("host=host.one:1001,host.two:1002,host.three:1003");
+
+        configuration.Hosts.Should().HaveCount(3);
+        configuration.Hosts[0].Host.Should().Be("host.one");
+        configuration.Hosts[0].Port.Should().Be(1001);
+        configuration.Hosts[1].Host.Should().Be("host.two");
+        configuration.Hosts[1].Port.Should().Be(1002);
+        configuration.Hosts[2].Host.Should().Be("host.three");
+        configuration.Hosts[2].Port.Should().Be(1003);
+    }
+
+    [Fact]
+    public void Should_throw_when_parsing_empty()
+    {
+        Assert.Throws<EasyNetQException>(() => connectionStringParser.Parse(""));
+    }
+
+    [Theory]
+    [InlineData("requestedHeartbeat=0")]
+    [InlineData("requestedHeartbeat=-1")]
+    public void Should_parse_zero_and_minus_one_heartbeat_as_infinite(string connectionString)
+    {
+        var configuration = connectionStringParser.Parse(connectionString);
+
+        configuration.RequestedHeartbeat.Should().Be(Timeout.InfiniteTimeSpan);
+    }
 }

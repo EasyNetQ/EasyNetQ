@@ -11,7 +11,7 @@ public class When_using_default_consume_error_strategy
 {
     public When_using_default_consume_error_strategy()
     {
-        customConventions = new Conventions(new DefaultTypeNameSerializer())
+        customConventions = new Conventions(new DefaultTypeNameSerializer(), new MessageTypeRegistry(new DefaultTypeNameSerializer()))
         {
             ErrorQueueNamingConvention = _ => "CustomEasyNetQErrorQueueName",
             ErrorExchangeNamingConvention = info => "CustomErrorExchangePrefixName." + info.RoutingKey,

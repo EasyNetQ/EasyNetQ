@@ -1,4 +1,5 @@
 using EasyNetQ.Events;
+using EasyNetQ.Internals;
 using EasyNetQ.Pipeline;
 using EasyNetQ.Topology;
 using Microsoft.Extensions.Logging;
@@ -48,10 +49,7 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
 
         if (logger.IsEnabled(LogLevel.Information))
         {
-            logger.LogInformation(
-                "Consumer with consumerTags {ConsumerTags} has cancelled",
-                string.Join(", ", consumerTags)
-            );
+            logger.ConsumerCancelled(string.Join(", ", consumerTags));
         }
 
         ConsumerCancelled?.Invoke(this, new ConsumerEventArgs(consumerTags));
@@ -70,15 +68,6 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
     {
         if (cts.IsCancellationRequested)
             return;
-
-        if (logger.IsEnabled(LogLevel.Debug))
-        {
-            logger.LogDebug(
-                "Message delivered to consumer {ConsumerTag} with deliveryTag {DeliveryTag}",
-                consumerTag,
-                deliveryTag
-            );
-        }
 
         var context = consumerContext.RentMessageContext();
         try
@@ -136,27 +125,15 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
         }
         catch (AlreadyClosedException alreadyClosedException)
         {
-            logger.LogInformation(
-                alreadyClosedException,
-                "Failed to ACK or NACK, message will be retried, receivedInfo={ReceivedInfo}",
-                receivedInfo
-            );
+            logger.FailedToAckOrNack(alreadyClosedException, receivedInfo.ConsumerTag, receivedInfo.DeliveryTag, receivedInfo.Queue);
         }
         catch (IOException ioException)
         {
-            logger.LogInformation(
-                ioException,
-                "Failed to ACK or NACK, message will be retried, receivedInfo={ReceivedInfo}",
-                receivedInfo
-            );
+            logger.FailedToAckOrNack(ioException, receivedInfo.ConsumerTag, receivedInfo.DeliveryTag, receivedInfo.Queue);
         }
         catch (Exception exception)
         {
-            logger.LogError(
-                exception,
-                "Unexpected exception when attempting to ACK or NACK, receivedInfo={ReceivedInfo}",
-                receivedInfo
-            );
+            logger.UnexpectedExceptionOnAckOrNack(exception, receivedInfo.ConsumerTag, receivedInfo.DeliveryTag, receivedInfo.Queue);
         }
     }
 }
