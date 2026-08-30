@@ -11,8 +11,8 @@ namespace EasyNetQ.ChannelDispatcher;
 /// </summary>
 public sealed class SinglePersistentChannelDispatcher : IPersistentChannelDispatcher
 {
-    private readonly ConcurrentDictionary<PersistentChannelDispatchOptions, IPersistentChannel> channelPerOptions;
-    private readonly Func<PersistentChannelDispatchOptions, IPersistentChannel> createChannelFactory;
+    private readonly ConcurrentDictionary<PersistentChannelDispatchOptions, Lazy<IPersistentChannel>> channelPerOptions;
+    private readonly Func<PersistentChannelDispatchOptions, Lazy<IPersistentChannel>> createChannelFactory;
 
     /// <summary>
     /// Creates a dispatcher
@@ -23,8 +23,8 @@ public sealed class SinglePersistentChannelDispatcher : IPersistentChannelDispat
         IPersistentChannelFactory channelFactory
     )
     {
-        channelPerOptions = new ConcurrentDictionary<PersistentChannelDispatchOptions, IPersistentChannel>();
-        createChannelFactory = o =>
+        channelPerOptions = new ConcurrentDictionary<PersistentChannelDispatchOptions, Lazy<IPersistentChannel>>();
+        createChannelFactory = o => new Lazy<IPersistentChannel>(() =>
         {
             var options = new PersistentChannelOptions(o.PublisherConfirms);
             return o.ConnectionType switch
@@ -37,7 +37,7 @@ public sealed class SinglePersistentChannelDispatcher : IPersistentChannelDispat
                 ),
                 _ => throw new ArgumentOutOfRangeException()
             };
-        };
+        });
     }
 
     /// <inheritdoc />
@@ -47,8 +47,8 @@ public sealed class SinglePersistentChannelDispatcher : IPersistentChannelDispat
         CancellationToken cancellationToken = default
     ) where TChannelAction : struct, IPersistentChannelAction<TResult>
     {
-        // TODO createChannelFactory could be called multiple time, fix it
-        var channel = channelPerOptions.GetOrAdd(options, createChannelFactory);
+        // Lazy guarantees the factory runs once per options even when GetOrAdd races
+        var channel = channelPerOptions.GetOrAdd(options, createChannelFactory).Value;
         return channel.InvokeChannelActionAsync<TResult, TChannelAction>(channelAction, cancellationToken);
     }
 
@@ -57,7 +57,8 @@ public sealed class SinglePersistentChannelDispatcher : IPersistentChannelDispat
     {
         foreach (var item in channelPerOptions)
         {
-            await item.Value.DisposeAsync();
+            if (item.Value.IsValueCreated)
+                await item.Value.Value.DisposeAsync();
         }
         channelPerOptions.Clear();
     }

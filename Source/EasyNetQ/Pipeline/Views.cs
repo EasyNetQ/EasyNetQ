@@ -46,4 +46,9 @@ public interface IConsumerView : IReadOnlyProperties
     ///     <see langword="true" /> when the transport acknowledges messages on delivery, ignoring the pipeline's decision
     /// </summary>
     bool AutoAck { get; }
+
+    /// <summary>
+    ///     The typed handlers of this consumer; <see langword="null" /> for raw (untyped) consumers
+    /// </summary>
+    HandlerTable? Handlers { get; }
 }

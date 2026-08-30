@@ -11,8 +11,6 @@ namespace EasyNetQ.Persistent;
 /// <inheritdoc />
 public sealed class PersistentChannel : IPersistentChannel
 {
-    private const string RequestPipeliningForbiddenMessage = "Pipelining of requests forbidden";
-
     private const int MinRetryTimeoutMs = 50;
     private const int MaxRetryTimeoutMs = 5000;
     private readonly IPersistentConnection connection;
@@ -196,8 +194,6 @@ public sealed class PersistentChannel : IPersistentChannel
 
         if (channel is IRecoverable recoverable)
             recoverable.RecoveryAsync += OnChannelRecovered;
-        else
-            throw new NotSupportedException("Non-recoverable channel is not supported");
     }
 
     private void DetachChannelEvents(IChannel channel)
@@ -263,11 +259,6 @@ public sealed class PersistentChannel : IPersistentChannel
                     AmqpErrorCodes.InternalErrors => ExceptionVerdict.SuppressAndCloseChannel,
                     _ => ExceptionVerdict.Throw
                 };
-            case NotSupportedException e:
-                var isRequestPipeliningForbiddenException = e.Message.Contains(RequestPipeliningForbiddenMessage);
-                return isRequestPipeliningForbiddenException
-                    ? ExceptionVerdict.SuppressAndCloseChannel
-                    : ExceptionVerdict.Throw;
             case BrokerUnreachableException e:
                 var isAuthenticationFailureException = e.InnerException is AuthenticationFailureException;
                 return isAuthenticationFailureException

@@ -147,6 +147,58 @@ public static partial class AdvancedBusExtensions
     /// <param name="queue">The queue to take messages from</param>
     /// <param name="addHandlers">A function to add handlers to the consumer</param>
     /// <returns>A disposable to cancel the consumer</returns>
+    /// <summary>
+    /// Consume a stream of messages, handling the deserialized body (no IMessage envelope is allocated)
+    /// </summary>
+    /// <typeparam name="T">The message type</typeparam>
+    /// <param name="bus">The bus instance</param>
+    /// <param name="queue">The queue to take messages from</param>
+    /// <param name="handler">The message handler</param>
+    /// <returns>A disposable to cancel the consumer</returns>
+    public static Task<IAsyncDisposable> ConsumeAsync<T>(this IAdvancedBus bus, Queue queue, MessageHandler<T> handler)
+        => bus.ConsumeAsync(queue, handler, _ => { });
+
+    /// <summary>
+    /// Consume a stream of messages, handling the deserialized body (no IMessage envelope is allocated)
+    /// </summary>
+    /// <typeparam name="T">The message type</typeparam>
+    /// <param name="bus">The bus instance</param>
+    /// <param name="queue">The queue to take messages from</param>
+    /// <param name="handler">The message handler</param>
+    /// <param name="configure">Fluent configuration e.g. x => x.WithPriority(10)</param>
+    /// <returns>A disposable to cancel the consumer</returns>
+    public static Task<IAsyncDisposable> ConsumeAsync<T>(
+        this IAdvancedBus bus,
+        Queue queue,
+        MessageHandler<T> handler,
+        Action<ISimpleConsumeConfiguration> configure
+    )
+    {
+        var consumeConfiguration = new SimpleConsumeConfiguration();
+        configure(consumeConfiguration);
+
+        return bus.ConsumeAsync(c =>
+        {
+            if (consumeConfiguration.PrefetchCount.HasValue)
+                c.WithPrefetchCount(consumeConfiguration.PrefetchCount.Value);
+            c.ForQueue(
+                queue,
+                handler,
+                p =>
+                {
+                    if (consumeConfiguration.AutoAck)
+                        p.WithAutoAck();
+                    if (consumeConfiguration.ConsumerTag != null)
+                        p.WithConsumerTag(consumeConfiguration.ConsumerTag);
+                    if (consumeConfiguration.IsExclusive.HasValue)
+                        p.WithExclusive(consumeConfiguration.IsExclusive.Value);
+                    if (consumeConfiguration.Arguments != null)
+                        p.WithArguments(consumeConfiguration.Arguments);
+                }
+            );
+        });
+    }
+
     public static Task<IAsyncDisposable> ConsumeAsync(this IAdvancedBus bus, Queue queue, Action<IHandlerRegistration> addHandlers)
         => bus.ConsumeAsync(queue, addHandlers, _ => { });
 

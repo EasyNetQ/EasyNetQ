@@ -54,6 +54,7 @@ public class AdvancedBusEventHandlersTests : IDisposable
             new PipelineBuilder<ConsumeContext>(),
             Substitute.For<IServiceProvider>(),
             Substitute.For<IMessageSerializationStrategy>(),
+            Substitute.For<IMessageSerializer>(),
             Substitute.For<IPullingConsumerFactory>(),
             advancedBusEventHandlers
         );

@@ -5,13 +5,35 @@ namespace EasyNetQ.Consumer;
 /// <inheritdoc />
 public class HandlerCollection : IHandlerCollection
 {
-    private static readonly IMessageHandler NoopHandler = static (_, _, _) => new ValueTask<AckDecision>(AckDecision.Ack);
-
     private readonly ConcurrentDictionary<Type, IMessageHandler> handlers = new();
+
+    /// <summary>
+    ///     Creates a handler collection backed by a <see cref="HandlerTable" />
+    /// </summary>
+    public HandlerCollection(IMessageTypeRegistry registry)
+    {
+        Table = new HandlerTable(registry);
+    }
+
+    /// <summary>
+    ///     The table the consume pipeline dispatches through
+    /// </summary>
+    public HandlerTable Table { get; }
+
+    /// <summary>
+    ///     Registers a handler for the deserialized body (no <see cref="IMessage" /> envelope is allocated)
+    /// </summary>
+    public HandlerCollection Add<T>(MessageHandler<T> handler)
+    {
+        Table.Add(handler);
+        return this;
+    }
 
     /// <inheritdoc />
     public IHandlerRegistration Add<T>(IMessageHandler<T> handler)
     {
+        // envelope-style handler: the entry materializes the IMessage<T> the handler expects
+        Table.Add<T>((body, context) => handler(new Message<T>(body, context.Properties), context.ReceivedInfo, context.CancellationToken));
         if (!handlers.TryAdd(typeof(T), (m, i, c) => handler((IMessage<T>)m, i, c)))
             throw new EasyNetQException("There is already a handler for message type '{0}'", typeof(T).Name);
         return this;
@@ -31,9 +53,13 @@ public class HandlerCollection : IHandlerCollection
         if (ThrowOnNoMatchingHandler)
             throw new EasyNetQException("No handler found for message type {0}", messageType.Name);
 
-        return NoopHandler;
+        return static (_, _, _) => new ValueTask<AckDecision>(AckDecision.Ack);
     }
 
     /// <inheritdoc />
-    public bool ThrowOnNoMatchingHandler { get; set; } = true;
+    public bool ThrowOnNoMatchingHandler
+    {
+        get => Table.ThrowOnNoMatchingHandler;
+        set => Table.ThrowOnNoMatchingHandler = value;
+    }
 }

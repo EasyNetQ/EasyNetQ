@@ -29,7 +29,10 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<IConnectionStringParser>(
             _ => new CompositeConnectionStringParser(new AmqpConnectionStringParser(), new ConnectionStringParser())
         );
-        services.TryAddSingleton<ISerializer>(_ => new Serialization.SystemTextJson.SystemTextJsonSerializerV2());
+        services.TryAddSingleton<IMessageTypeRegistry, MessageTypeRegistry>();
+        services.TryAddSingleton<IMessageSerializer>(sp => sp.GetService<ISerializer>() is { } legacySerializer
+            ? new Serialization.LegacyMessageSerializerAdapter(legacySerializer)
+            : new Serialization.SystemTextJson.SystemTextJsonMessageSerializer());
         services.TryAddSingleton<IConventions, Conventions>();
         services.TryAddSingleton<IEventBus, EventBus>();
         services.TryAddSingleton<ITypeNameSerializer, DefaultTypeNameSerializer>();

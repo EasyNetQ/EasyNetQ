@@ -86,7 +86,7 @@ public class VersionedMessageSerializationStrategyTests
         const string correlationId = "CorrelationId";
 
         var serializationStrategy =
-            new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
+            new VersionedMessageSerializationStrategy(typeNameSerializer, new MessageTypeRegistry(typeNameSerializer), Adapt(serializer), new StaticCorrelationIdGenerationStrategy(correlationId));
 
         var messageBody = new MyMessage { Text = "Hello world!" };
         var message = new Message<MyMessage>(messageBody);
@@ -194,7 +194,7 @@ public class VersionedMessageSerializationStrategyTests
         const string correlationId = "CorrelationId";
 
         var serializationStrategy =
-            new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
+            new VersionedMessageSerializationStrategy(typeNameSerializer, new MessageTypeRegistry(typeNameSerializer), Adapt(serializer), new StaticCorrelationIdGenerationStrategy(correlationId));
 
         var messageBody = new MyMessageV2 { Text = "Hello world!", Number = 5 };
         var message = new Message<MyMessageV2>(messageBody);
@@ -215,7 +215,7 @@ public class VersionedMessageSerializationStrategyTests
         const string correlationId = "CorrelationId";
 
         var serializationStrategy =
-            new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
+            new VersionedMessageSerializationStrategy(typeNameSerializer, new MessageTypeRegistry(typeNameSerializer), Adapt(serializer), new StaticCorrelationIdGenerationStrategy(correlationId));
 
         var messageBody = new MyMessageV2 { Text = "Hello world!", Number = 5 };
         var message = new Message<MyMessageV2>(messageBody);
@@ -267,6 +267,8 @@ public class VersionedMessageSerializationStrategyTests
         Assert.Equal(Encoding.UTF8.GetString((byte[])properties.Headers[AlternativeMessageTypesHeaderKey]), alternativeTypes);
     }
 
+    private static IMessageSerializer Adapt(ISerializer serializer) => new EasyNetQ.Serialization.LegacyMessageSerializerAdapter(serializer);
+
     private static VersionedMessageSerializationStrategy CreateSerializationStrategy<T>(
         IMessage<T> message, IEnumerable<KeyValuePair<string, Type>> messageTypes, byte[] messageBody, string correlationId
     ) where T : class
@@ -287,7 +289,7 @@ public class VersionedMessageSerializationStrategyTests
 
         using (serializedMessage)
         {
-            return new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
+            return new VersionedMessageSerializationStrategy(typeNameSerializer, new MessageTypeRegistry(typeNameSerializer), Adapt(serializer), new StaticCorrelationIdGenerationStrategy(correlationId));
         }
     }
 
@@ -300,11 +302,12 @@ public class VersionedMessageSerializationStrategyTests
         {
             var localMessageType = messageType;
             typeNameSerializer.Deserialize(localMessageType.Key).Returns(localMessageType.Value);
+            typeNameSerializer.Serialize(localMessageType.Value).Returns(localMessageType.Key);
         }
 
         var serializer = Substitute.For<ISerializer>();
         serializer.BytesToMessage(expectedMessageType, messageBody).Returns(message);
 
-        return new VersionedMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(string.Empty));
+        return new VersionedMessageSerializationStrategy(typeNameSerializer, new MessageTypeRegistry(typeNameSerializer), Adapt(serializer), new StaticCorrelationIdGenerationStrategy(string.Empty));
     }
 }

@@ -45,6 +45,27 @@ public class ConsumeContext : LayerContext
     public ReadOnlyMemory<byte> Body { get; set; }
 
     /// <summary>
+    ///     The message type resolved from the wire type name, set by <see cref="Middleware.ResolveMessageTypeStep" />
+    /// </summary>
+    public MessageTypeDescriptor? MessageType { get; set; }
+
+    /// <summary>
+    ///     The handler resolved for <see cref="MessageType" />, set by <see cref="Middleware.ResolveHandlerStep" />
+    /// </summary>
+    public HandlerEntry? Handler { get; set; }
+
+    /// <summary>
+    ///     The serializer for this message, set by <see cref="Middleware.SelectSerializerStep" />
+    /// </summary>
+    public IMessageSerializer? Serializer { get; set; }
+
+    /// <summary>
+    ///     The deserialized message body, set by <see cref="Middleware.DeserializeStep" />; middleware between
+    ///     deserialization and dispatch can inspect or replace it
+    /// </summary>
+    public object? Message { get; set; }
+
+    /// <summary>
     ///     The acknowledgement the transport applies once the pipeline completes. Defaults to <see cref="AckDecision.Ack" />;
     ///     handlers and error handling set it to something else.
     /// </summary>
@@ -67,6 +88,10 @@ public class ConsumeContext : LayerContext
         ReceivedInfo = default;
         Properties = default;
         Body = default;
+        MessageType = null;
+        Handler = null;
+        Serializer = null;
+        Message = null;
         Ack = AckDecision.Ack;
         Error = null;
         CancellationToken = default;
