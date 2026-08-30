@@ -5,6 +5,8 @@ namespace EasyNetQ.Consumer;
 /// <inheritdoc />
 public class HandlerCollection : IHandlerCollection
 {
+    private static readonly IMessageHandler NoopHandler = static (_, _, _) => new ValueTask<AckDecision>(AckDecision.Ack);
+
     private readonly ConcurrentDictionary<Type, IMessageHandler> handlers = new();
 
     /// <inheritdoc />
@@ -29,7 +31,7 @@ public class HandlerCollection : IHandlerCollection
         if (ThrowOnNoMatchingHandler)
             throw new EasyNetQException("No handler found for message type {0}", messageType.Name);
 
-        return (_, _, _) => Task.FromResult(AckStrategies.AckAsync);
+        return NoopHandler;
     }
 
     /// <inheritdoc />

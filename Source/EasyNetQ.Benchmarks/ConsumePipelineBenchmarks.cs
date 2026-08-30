@@ -1,6 +1,5 @@
 using BenchmarkDotNet.Attributes;
 using EasyNetQ.Benchmarks.Fixtures;
-using EasyNetQ.Consumer;
 
 namespace EasyNetQ.Benchmarks;
 
@@ -10,27 +9,26 @@ namespace EasyNetQ.Benchmarks;
 [MemoryDiagnoser]
 public class ConsumePipelineBenchmarks
 {
-    private ConsumeDelegate consumeDelegate = null!;
-    private ConsumeContext smallContext;
-    private ConsumeContext mediumContext;
-    private ConsumeContext largeContext;
+    private ConsumePipelineFixture fixture = null!;
+    private (MessageProperties Properties, ReadOnlyMemory<byte> Body) small;
+    private (MessageProperties Properties, ReadOnlyMemory<byte> Body) medium;
+    private (MessageProperties Properties, ReadOnlyMemory<byte> Body) large;
 
     [GlobalSetup]
     public void GlobalSetup()
     {
-        var fixture = new ConsumePipelineFixture();
-        consumeDelegate = fixture.ConsumeDelegate;
-        smallContext = fixture.CreateContext(SampleMessages.CreateSmall());
-        mediumContext = fixture.CreateContext(SampleMessages.CreateMedium());
-        largeContext = fixture.CreateContext(SampleMessages.CreateLarge());
+        fixture = new ConsumePipelineFixture();
+        small = fixture.Serialize(SampleMessages.CreateSmall());
+        medium = fixture.Serialize(SampleMessages.CreateMedium());
+        large = fixture.Serialize(SampleMessages.CreateLarge());
     }
 
     [Benchmark]
-    public ValueTask<AckStrategyAsync> Consume_Small() => consumeDelegate(smallContext);
+    public ValueTask Consume_Small() => fixture.ConsumeAsync(small.Properties, small.Body);
 
     [Benchmark]
-    public ValueTask<AckStrategyAsync> Consume_Medium() => consumeDelegate(mediumContext);
+    public ValueTask Consume_Medium() => fixture.ConsumeAsync(medium.Properties, medium.Body);
 
     [Benchmark]
-    public ValueTask<AckStrategyAsync> Consume_Large() => consumeDelegate(largeContext);
+    public ValueTask Consume_Large() => fixture.ConsumeAsync(large.Properties, large.Body);
 }

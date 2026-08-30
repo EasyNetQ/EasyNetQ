@@ -1,3 +1,4 @@
+using EasyNetQ.Pipeline;
 using System.Buffers;
 using System.Collections.Concurrent;
 using EasyNetQ.SystemMessages;
@@ -53,7 +54,7 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
     }
 
     /// <inheritdoc />
-    public virtual async ValueTask<AckStrategyAsync> HandleErrorAsync(
+    public virtual async ValueTask<AckDecision> HandleErrorAsync(
         ConsumeContext context,
         Exception exception,
         CancellationToken cancellationToken = default)
@@ -87,7 +88,7 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
             };
 
             await channel.BasicPublishAsync(errorExchange, receivedInfo.RoutingKey, false, errorProperties, message.Memory, cancellationToken).ConfigureAwait(false);
-            return AckStrategies.AckAsync;
+            return AckDecision.Ack;
         }
         catch (BrokerUnreachableException unreachableException)
         {
@@ -111,13 +112,13 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
             logger.LogError(unexpectedException, "Failed to publish error message");
         }
 
-        return AckStrategies.NackWithRequeueAsync;
+        return AckDecision.NackRequeue;
     }
 
     /// <inheritdoc />
-    public virtual ValueTask<AckStrategyAsync> HandleCancelledAsync(ConsumeContext context, CancellationToken cancellationToken = default)
+    public virtual ValueTask<AckDecision> HandleCancelledAsync(ConsumeContext context, CancellationToken cancellationToken = default)
     {
-        return new(AckStrategies.NackWithRequeueAsync);
+        return new(AckDecision.NackRequeue);
     }
 
     private static async Task DeclareAndBindErrorExchangeWithErrorQueueAsync(

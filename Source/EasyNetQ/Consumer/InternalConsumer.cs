@@ -189,13 +189,12 @@ public class InternalConsumer : IInternalConsumer
                 try
                 {
                     var consumer = new AsyncBasicConsumer(
-                        services,
                         logger,
                         channel,
                         queue,
                         perQueueConfiguration.AutoAck,
                         eventBus,
-                        perQueueConfiguration.ConsumeDelegate
+                        perQueueConfiguration.Context
                     );
                     var arguments = perQueueConfiguration.Arguments ?? new Dictionary<string, object>();
                     consumer.ConsumerCancelled += AsyncBasicConsumerOnConsumerCancelled;

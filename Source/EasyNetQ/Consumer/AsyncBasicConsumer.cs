@@ -1,4 +1,5 @@
 using EasyNetQ.Events;
+using EasyNetQ.Pipeline;
 using EasyNetQ.Topology;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
@@ -11,8 +12,8 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
 {
     private readonly CancellationTokenSource cts = new();
     private readonly IEventBus eventBus;
-    private readonly ConsumeDelegate consumeDelegate;
-    private readonly IServiceProvider services;
+    private readonly ConsumerContext consumerContext;
+    private readonly PipelineStep<ConsumeContext> pipeline;
     private readonly ILogger<InternalConsumer> logger;
     private readonly Queue queue;
     private readonly bool autoAck;
@@ -20,21 +21,20 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
     private volatile bool disposed;
 
     public AsyncBasicConsumer(
-        IServiceProvider services,
         ILogger<InternalConsumer> logger,
         IChannel channel,
         Queue queue,
         bool autoAck,
         IEventBus eventBus,
-        ConsumeDelegate consumeDelegate
+        ConsumerContext consumerContext
     ) : base(channel)
     {
-        this.services = services;
         this.logger = logger;
         this.queue = queue;
         this.autoAck = autoAck;
         this.eventBus = eventBus;
-        this.consumeDelegate = consumeDelegate;
+        this.consumerContext = consumerContext;
+        pipeline = consumerContext.MessagePipeline;
     }
 
     public Queue Queue => queue;
@@ -80,18 +80,22 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
             );
         }
 
-        var messageBody = body;
-        var messageReceivedInfo = new MessageReceivedInfo(
-            consumerTag, deliveryTag, redelivered, exchange, routingKey, queue.Name
-        );
-        var messageProperties = new MessageProperties(properties);
-        await eventBus.PublishAsync(new DeliveredMessageEvent(messageReceivedInfo, messageProperties, messageBody));
-
-        var ackStrategy = await consumeDelegate(new ConsumeContext(messageReceivedInfo, messageProperties, messageBody, services, cts.Token)).ConfigureAwait(false);
-        if (!autoAck)
+        var context = consumerContext.RentMessageContext();
+        try
         {
-            var ackResult = await AckAsync(ackStrategy, messageReceivedInfo, cancellationToken);
-            await eventBus.PublishAsync(new AckEvent(messageReceivedInfo, messageProperties, messageBody, ackResult));
+            context.ReceivedInfo = new MessageReceivedInfo(consumerTag, deliveryTag, redelivered, exchange, routingKey, queue.Name);
+            context.Properties = new MessageProperties(properties);
+            context.Body = body;
+            context.CancellationToken = cts.Token;
+
+            await pipeline(context).ConfigureAwait(false);
+
+            if (!autoAck)
+                await ApplyAckAsync(context.Ack, context.ReceivedInfo, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            consumerContext.ReturnMessageContext(context);
         }
     }
 
@@ -109,14 +113,26 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
     }
 #pragma warning restore CS1998
 
-    private async Task<AckResult> AckAsync(
-        AckStrategyAsync ackStrategy,
-        MessageReceivedInfo receivedInfo,
-        CancellationToken cancellationToken = default)
+    private async ValueTask ApplyAckAsync(AckDecision decision, MessageReceivedInfo receivedInfo, CancellationToken cancellationToken)
     {
         try
         {
-            return await ackStrategy(Channel, receivedInfo.DeliveryTag, cancellationToken);
+            switch (decision)
+            {
+                case AckDecision.Ack:
+                    await Channel.BasicAckAsync(receivedInfo.DeliveryTag, false, cancellationToken).ConfigureAwait(false);
+                    break;
+                case AckDecision.NackRequeue:
+                    await Channel.BasicNackAsync(receivedInfo.DeliveryTag, false, true, cancellationToken).ConfigureAwait(false);
+                    break;
+                case AckDecision.NackDiscard:
+                    await Channel.BasicNackAsync(receivedInfo.DeliveryTag, false, false, cancellationToken).ConfigureAwait(false);
+                    break;
+                case AckDecision.Handled:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(decision), decision, "Unknown ack decision");
+            }
         }
         catch (AlreadyClosedException alreadyClosedException)
         {
@@ -142,7 +158,5 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
                 receivedInfo
             );
         }
-
-        return AckResult.Exception;
     }
 }
