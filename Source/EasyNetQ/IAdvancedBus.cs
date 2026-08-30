@@ -63,6 +63,28 @@ public interface IAdvancedBus
     );
 
     /// <summary>
+    ///     Publishes a body whose runtime type is its static type - the reflection-free fast path (no IMessage
+    ///     envelope is allocated)
+    /// </summary>
+    /// <typeparam name="T">The message type</typeparam>
+    /// <param name="exchange">The exchange to publish to</param>
+    /// <param name="routingKey">The routing key</param>
+    /// <param name="mandatory">The mandatory flag; null means the configured default</param>
+    /// <param name="publisherConfirms">The publisher confirms flag; null means the configured default</param>
+    /// <param name="properties">The message properties</param>
+    /// <param name="body">The message body</param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    Task PublishAsync<T>(
+        string exchange,
+        string routingKey,
+        bool? mandatory,
+        bool? publisherConfirms,
+        MessageProperties properties,
+        T body,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Publish a message as a .NET type when the type is only known at runtime.
     /// Task completes after publish has completed.
     /// If publisher confirms enabled the task completes after an ACK is received.

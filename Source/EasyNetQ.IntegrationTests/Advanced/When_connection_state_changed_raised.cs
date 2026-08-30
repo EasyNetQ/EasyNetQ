@@ -116,9 +116,12 @@ public class When_connection_state_changed_raised : IDisposable, IAsyncLifetime
             await managementClient.KillAllConnectionsAsync(cts.Token);
 
             // The broker closes the sockets asynchronously and the client recovers automatically a few seconds later,
-            // so capture each connection's status the moment it reports the disconnect
-            var producerStatus = await WaitForStateAsync(advanced, PersistentConnectionType.Producer, PersistentConnectionState.Disconnected, cts.Token);
-            var consumerStatus = await WaitForStateAsync(advanced, PersistentConnectionType.Consumer, PersistentConnectionState.Disconnected, cts.Token);
+            // so poll both connections concurrently and capture each status the moment it reports the disconnect
+            // (waiting sequentially would let the second connection recover before its poll starts)
+            var producerStatusTask = WaitForStateAsync(advanced, PersistentConnectionType.Producer, PersistentConnectionState.Disconnected, cts.Token);
+            var consumerStatusTask = WaitForStateAsync(advanced, PersistentConnectionType.Consumer, PersistentConnectionState.Disconnected, cts.Token);
+            var producerStatus = await producerStatusTask;
+            var consumerStatus = await consumerStatusTask;
 
             producerStatus.Should().BeEquivalentTo(
                 new PersistentConnectionStatus(

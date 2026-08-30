@@ -76,6 +76,37 @@ public static class ConsumeConfigurationExtensions
         Action<IPerQueueConsumeConfiguration> configure
     ) => configuration.ForQueue(queue, x => x.Add(handler), configure);
 
+    /// <summary>
+    ///     Adds a handler for the deserialized body (no IMessage envelope is allocated)
+    /// </summary>
+    public static IConsumeConfiguration ForQueue<T>(
+        this IConsumeConfiguration configuration,
+        in Queue queue,
+        MessageHandler<T> handler
+    ) => configuration.ForQueue(queue, handler, _ => { });
+
+    /// <summary>
+    ///     Adds a handler for the deserialized body (no IMessage envelope is allocated)
+    /// </summary>
+    public static IConsumeConfiguration ForQueue<T>(
+        this IConsumeConfiguration configuration,
+        in Queue queue,
+        MessageHandler<T> handler,
+        Action<IPerQueueConsumeConfiguration> configure
+    ) => configuration.ForQueue(
+        queue,
+        x =>
+        {
+            if (x is HandlerCollection handlerCollection)
+                handlerCollection.Add(handler);
+            else
+                throw new NotSupportedException(
+                    "Body handlers require the built-in HandlerCollection; register an IMessage-based handler with this custom IHandlerCollectionFactory"
+                );
+        },
+        configure
+    );
+
     public static IConsumeConfiguration ForQueue<T>(
         this IConsumeConfiguration configuration,
         in Queue queue,

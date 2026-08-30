@@ -17,10 +17,10 @@ public sealed class PublishPipelineFixture
 
     public PublishPipelineFixture()
     {
-        var serializer = new SystemTextJsonSerializerV2();
+        var serializer = new SystemTextJsonMessageSerializer();
         var typeNameSerializer = new DefaultTypeNameSerializer();
         SerializationStrategy = new DefaultMessageSerializationStrategy(
-            typeNameSerializer, serializer, new DefaultCorrelationIdGenerationStrategy()
+            new MessageTypeRegistry(typeNameSerializer), serializer, new DefaultCorrelationIdGenerationStrategy()
         );
         Conventions = new Conventions(typeNameSerializer);
         DeliveryModeStrategy = new MessageDeliveryModeStrategy(new ConnectionConfiguration());
@@ -50,7 +50,7 @@ public sealed class PublishPipelineFixture
     /// </summary>
     public ValueTask PublishAdvanced<T>(T message)
     {
-        var serialized = SerializationStrategy.SerializeMessage(new Message<T>(message));
+        var serialized = SerializationStrategy.SerializeMessage(message, MessageProperties.Empty);
         var result = Publish("exchange", "routing.key", false, serialized.Properties, serialized.Body);
         serialized.Dispose();
         return result;
@@ -72,7 +72,7 @@ public sealed class PublishPipelineFixture
         };
         var exchangeName = Conventions.ExchangeNamingConvention(messageType);
 
-        var serialized = SerializationStrategy.SerializeMessage(new Message<T>(message, properties));
+        var serialized = SerializationStrategy.SerializeMessage(message, properties);
         var result = Publish(exchangeName, publishConfiguration.Topic, publishConfiguration.PublisherConfirms, serialized.Properties, serialized.Body);
         serialized.Dispose();
         return result;

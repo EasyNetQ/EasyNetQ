@@ -146,7 +146,8 @@ public class ConnectionConfiguration
 
     /// <summary>
     ///     Value greater than one enables concurrent processing for consumers.
-    /// If it is not set, a value of <seealso cref="PrefetchCount"/> is used due to backward compatibility
+    ///     Defaults to 1 so messages are processed in the order they are received; set it explicitly for
+    ///     concurrent processing (before 9.0 the default was <seealso cref="PrefetchCount"/>).
     /// </summary>
     /// <remarks>For concurrency greater than one, the consumers could process messages in any order, not in the order they receive them</remarks>
     public ushort? ConsumerDispatcherConcurrency { get; set; } = null;

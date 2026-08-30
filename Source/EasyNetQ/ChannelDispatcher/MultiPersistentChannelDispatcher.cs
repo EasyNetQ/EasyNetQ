@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
+using System.Threading.Channels;
 using EasyNetQ.Consumer;
-using EasyNetQ.Internals;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
 
@@ -11,8 +11,8 @@ namespace EasyNetQ.ChannelDispatcher;
 /// </summary>
 public sealed class MultiPersistentChannelDispatcher : IPersistentChannelDispatcher
 {
-    private readonly ConcurrentDictionary<PersistentChannelDispatchOptions, AsyncQueue<IPersistentChannel>> channelsPoolPerOptions;
-    private readonly Func<PersistentChannelDispatchOptions, AsyncQueue<IPersistentChannel>> channelsPoolFactory;
+    private readonly ConcurrentDictionary<PersistentChannelDispatchOptions, Channel<IPersistentChannel>> channelsPoolPerOptions;
+    private readonly Func<PersistentChannelDispatchOptions, Channel<IPersistentChannel>> channelsPoolFactory;
 
     /// <summary>
     ///     Creates a dispatcher
@@ -24,25 +24,23 @@ public sealed class MultiPersistentChannelDispatcher : IPersistentChannelDispatc
         IPersistentChannelFactory channelFactory
     )
     {
-        channelsPoolPerOptions = new ConcurrentDictionary<PersistentChannelDispatchOptions, AsyncQueue<IPersistentChannel>>();
+        channelsPoolPerOptions = new ConcurrentDictionary<PersistentChannelDispatchOptions, Channel<IPersistentChannel>>();
         channelsPoolFactory = o =>
         {
             var options = new PersistentChannelOptions(o.PublisherConfirms);
-            return new AsyncQueue<IPersistentChannel>(
-                Enumerable.Range(0, channelsCount)
-                    .Select(
-                        _ => o.ConnectionType switch
-                        {
-                            PersistentConnectionType.Producer => channelFactory.CreatePersistentChannel(
-                                producerConnection, options
-                            ),
-                            PersistentConnectionType.Consumer => channelFactory.CreatePersistentChannel(
-                                consumerConnection, options
-                            ),
-                            _ => throw new ArgumentOutOfRangeException()
-                        }
-                    )
-            );
+            var pool = Channel.CreateUnbounded<IPersistentChannel>();
+            for (var i = 0; i < channelsCount; i++)
+            {
+                pool.Writer.TryWrite(
+                    o.ConnectionType switch
+                    {
+                        PersistentConnectionType.Producer => channelFactory.CreatePersistentChannel(producerConnection, options),
+                        PersistentConnectionType.Consumer => channelFactory.CreatePersistentChannel(consumerConnection, options),
+                        _ => throw new ArgumentOutOfRangeException()
+                    }
+                );
+            }
+            return pool;
         };
     }
 
@@ -51,9 +49,9 @@ public sealed class MultiPersistentChannelDispatcher : IPersistentChannelDispatc
     {
         foreach (var item in channelsPoolPerOptions)
         {
-            if (item.Value.TryDequeue(out var channel))
+            item.Value.Writer.TryComplete();
+            while (item.Value.Reader.TryRead(out var channel))
                 await channel.DisposeAsync();
-            item.Value.Dispose();
         }
         channelsPoolPerOptions.Clear();
     }
@@ -66,14 +64,14 @@ public sealed class MultiPersistentChannelDispatcher : IPersistentChannelDispatc
     ) where TChannelAction : struct, IPersistentChannelAction<TResult>
     {
         var channelsPool = channelsPoolPerOptions.GetOrAdd(options, channelsPoolFactory);
-        var channel = await channelsPool.DequeueAsync(cancellationToken).ConfigureAwait(false);
+        var channel = await channelsPool.Reader.ReadAsync(cancellationToken).ConfigureAwait(false);
         try
         {
             return await channel.InvokeChannelActionAsync<TResult, TChannelAction>(channelAction, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
-            channelsPool.Enqueue(channel);
+            channelsPool.Writer.TryWrite(channel);
         }
     }
 }

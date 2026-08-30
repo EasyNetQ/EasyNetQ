@@ -5,23 +5,20 @@ namespace EasyNetQ;
 /// <inheritdoc />
 public class DefaultMessageSerializationStrategy : IMessageSerializationStrategy
 {
-    private readonly ITypeNameSerializer typeNameSerializer;
-    private readonly ISerializer serializer;
+    private readonly IMessageTypeRegistry registry;
+    private readonly IMessageSerializer serializer;
     private readonly ICorrelationIdGenerationStrategy correlationIdGenerator;
 
     /// <summary>
     ///     Creates DefaultMessageSerializationStrategy
     /// </summary>
-    /// <param name="typeNameSerializer">The type name serialized</param>
-    /// <param name="serializer">The serializer</param>
-    /// <param name="correlationIdGenerator">The correlation id generator</param>
     public DefaultMessageSerializationStrategy(
-        ITypeNameSerializer typeNameSerializer,
-        ISerializer serializer,
+        IMessageTypeRegistry registry,
+        IMessageSerializer serializer,
         ICorrelationIdGenerationStrategy correlationIdGenerator
     )
     {
-        this.typeNameSerializer = typeNameSerializer;
+        this.registry = registry;
         this.serializer = serializer;
         this.correlationIdGenerator = correlationIdGenerator;
     }
@@ -29,26 +26,38 @@ public class DefaultMessageSerializationStrategy : IMessageSerializationStrategy
     /// <inheritdoc />
     public SerializedMessage SerializeMessage(IMessage message)
     {
-        var typeName = typeNameSerializer.Serialize(message.MessageType);
-        var messageBody = message.GetBody() is null
-            ? EmptyMemoryOwner.Instance
-            : serializer.MessageToBytes(message.MessageType, message.GetBody()!);
-        var messageProperties = message.Properties with
-        {
-            Type = typeName,
-            CorrelationId = string.IsNullOrEmpty(message.Properties.CorrelationId)
-                ? correlationIdGenerator.GetCorrelationId()
-                : message.Properties.CorrelationId
-        };
-        return new SerializedMessage(messageProperties, messageBody);
+        var descriptor = registry.GetOrAdd(message.MessageType);
+        var body = message.GetBody();
+        var messageBody = body is null
+            ? Internals.EmptyMemoryOwner.Instance
+            : descriptor.SerializeBody(serializer, body);
+        return new SerializedMessage(StampProperties(message.Properties, descriptor), messageBody);
+    }
+
+    /// <inheritdoc />
+    public SerializedMessage SerializeMessage<T>(T body, in MessageProperties properties)
+    {
+        if (body is null || body.GetType() != typeof(T))
+            return SerializeMessage(new Message<T>(body!, properties));
+
+        var descriptor = registry.GetOrAdd<T>();
+        return new SerializedMessage(StampProperties(properties, descriptor), serializer.Serialize(body, descriptor));
     }
 
     /// <inheritdoc />
     public IMessage DeserializeMessage(in MessageProperties properties, in ReadOnlyMemory<byte> body)
     {
-        var messageType = typeNameSerializer.Deserialize(properties.Type!);
-        var messageBody = body.IsEmpty ? null : serializer.BytesToMessage(messageType, body);
-        return MessageFactory.CreateInstance(messageType, messageBody, properties);
+        var descriptor = registry.GetByWireName(properties.Type!);
+        var messageBody = body.IsEmpty ? null : descriptor.DeserializeBody(serializer, body);
+        return descriptor.CreateMessage(messageBody, properties);
     }
-}
 
+    private MessageProperties StampProperties(in MessageProperties properties, MessageTypeDescriptor descriptor)
+        => properties with
+        {
+            Type = descriptor.WireName,
+            CorrelationId = string.IsNullOrEmpty(properties.CorrelationId)
+                ? correlationIdGenerator.GetCorrelationId()
+                : properties.CorrelationId
+        };
+}

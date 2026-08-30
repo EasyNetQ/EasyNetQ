@@ -1,3 +1,5 @@
+using EasyNetQ.ChannelDispatcher;
+using EasyNetQ.Persistent;
 using EasyNetQ.Pipeline;
 using System.Buffers;
 using System.Collections.Concurrent;
@@ -23,12 +25,14 @@ namespace EasyNetQ.Consumer;
 public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
 {
     private readonly ILogger<DefaultConsumeErrorStrategy> logger;
-    private readonly IConsumerConnection connection;
+    private readonly IPersistentChannelDispatcher channelDispatcher;
+    private readonly PersistentChannelDispatchOptions errorDispatchOptions;
     private readonly IConventions conventions;
     private readonly IErrorMessageSerializer errorMessageSerializer;
+    private readonly Producer.IPublishConfirmationListener confirmationListener;
     private readonly ConcurrentDictionary<string, bool> existingErrorExchangesWithQueues = new();
-    private readonly ISerializer serializer;
-    private readonly ITypeNameSerializer typeNameSerializer;
+    private readonly IMessageSerializer serializer;
+    private readonly MessageTypeDescriptor<Error> errorMessageDescriptor;
     private readonly ConnectionConfiguration configuration;
 
     /// <summary>
@@ -36,20 +40,23 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
     /// </summary>
     public DefaultConsumeErrorStrategy(
         ILogger<DefaultConsumeErrorStrategy> logger,
-        IConsumerConnection connection,
-        ISerializer serializer,
+        IPersistentChannelDispatcher channelDispatcher,
+        IMessageSerializer serializer,
+        IMessageTypeRegistry registry,
         IConventions conventions,
-        ITypeNameSerializer typeNameSerializer,
         IErrorMessageSerializer errorMessageSerializer,
+        Producer.IPublishConfirmationListener confirmationListener,
         ConnectionConfiguration configuration
     )
     {
         this.logger = logger;
-        this.connection = connection;
+        this.channelDispatcher = channelDispatcher;
+        errorDispatchOptions = new PersistentChannelDispatchOptions("Error", PersistentConnectionType.Consumer, configuration.PublisherConfirms);
         this.serializer = serializer;
+        errorMessageDescriptor = registry.GetOrAdd<Error>();
         this.conventions = conventions;
-        this.typeNameSerializer = typeNameSerializer;
         this.errorMessageSerializer = errorMessageSerializer;
+        this.confirmationListener = confirmationListener;
         this.configuration = configuration;
     }
 
@@ -73,21 +80,33 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
 
         try
         {
-            using var channel = await connection.CreateChannelAsync(
-                new CreateChannelOptions(configuration.PublisherConfirms, configuration.PublisherConfirms),
-                cancellationToken);
+            // one long-lived channel per bus (with reconnect/retry) instead of a channel per failed message;
+            // with publisher confirms on, the confirmation is awaited outside the channel mutex
+            var pendingConfirmation = await channelDispatcher.InvokeAsync(
+                async channel =>
+                {
+                    var errorExchange = await DeclareErrorExchangeWithQueueAsync(channel, receivedInfo, cancellationToken);
 
-            var errorExchange = await DeclareErrorExchangeWithQueueAsync(channel, receivedInfo, cancellationToken);
+                    using var message = CreateErrorMessage(receivedInfo, properties, body, exception);
 
-            using var message = CreateErrorMessage(receivedInfo, properties, body, exception);
+                    var errorProperties = new BasicProperties
+                    {
+                        Persistent = true,
+                        Type = errorMessageDescriptor.WireName
+                    };
 
-            var errorProperties = new BasicProperties
-            {
-                Persistent = true,
-                Type = typeNameSerializer.Serialize(typeof(Error))
-            };
+                    var confirmation = configuration.PublisherConfirms
+                        ? await confirmationListener.CreatePendingConfirmationAsync(channel, cancellationToken).ConfigureAwait(false)
+                        : null;
+                    await channel.BasicPublishAsync(errorExchange, receivedInfo.RoutingKey, false, errorProperties, message.Memory, cancellationToken).ConfigureAwait(false);
+                    return confirmation;
+                },
+                errorDispatchOptions,
+                cancellationToken
+            ).ConfigureAwait(false);
 
-            await channel.BasicPublishAsync(errorExchange, receivedInfo.RoutingKey, false, errorProperties, message.Memory, cancellationToken).ConfigureAwait(false);
+            if (pendingConfirmation is not null)
+                await pendingConfirmation.WaitAsync(cancellationToken).ConfigureAwait(false);
             return AckDecision.Ack;
         }
         catch (BrokerUnreachableException unreachableException)
@@ -173,6 +192,6 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
             DateTime.UtcNow,
             properties
         );
-        return serializer.MessageToBytes(typeof(Error), error);
+        return serializer.Serialize(error, errorMessageDescriptor);
     }
 }

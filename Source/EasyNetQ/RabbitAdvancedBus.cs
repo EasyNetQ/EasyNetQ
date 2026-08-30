@@ -4,6 +4,7 @@ using EasyNetQ.Events;
 using EasyNetQ.Internals;
 using EasyNetQ.Persistent;
 using EasyNetQ.Pipeline;
+using EasyNetQ.Pipeline.Middleware;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 using Microsoft.Extensions.Logging;
@@ -28,6 +29,10 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     private readonly IDisposable[] eventSubscriptions;
     private readonly IHandlerCollectionFactory handlerCollectionFactory;
     private readonly IMessageSerializationStrategy messageSerializationStrategy;
+    private readonly SelectSerializerStep selectSerializerStep;
+    private static readonly ResolveMessageTypeStep ResolveMessageTypeStep = new();
+    private static readonly ResolveHandlerStep ResolveHandlerStep = new();
+    private static readonly DeserializeStep DeserializeStep = new();
     private readonly IPullingConsumerFactory pullingConsumerFactory;
     private readonly AdvancedBusEventHandlers advancedBusEventHandlers;
 
@@ -54,6 +59,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         PipelineBuilder<ConsumeContext> consumePipelineBuilder,
         IServiceProvider services,
         IMessageSerializationStrategy messageSerializationStrategy,
+        IMessageSerializer messageSerializer,
         IPullingConsumerFactory pullingConsumerFactory,
         AdvancedBusEventHandlers advancedBusEventHandlers
     )
@@ -70,6 +76,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         this.consumePipelineBuilder = consumePipelineBuilder;
         this.services = services;
         this.messageSerializationStrategy = messageSerializationStrategy;
+        selectSerializerStep = new SelectSerializerStep(messageSerializer);
         this.pullingConsumerFactory = pullingConsumerFactory;
         this.advancedBusEventHandlers = advancedBusEventHandlers;
 
@@ -133,7 +140,9 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         foreach (var (queue, handlers, perQueueConfiguration) in consumeConfiguration.PerQueueTypedConsumeConfigurations)
             perQueueConfigurations.Add(
                 queue,
-                CreatePerQueueConfiguration(channelContext, queue, perQueueConfiguration, consumeConfiguration.PrefetchCount, TypedHandlerTerminal(handlers))
+                handlers is HandlerCollection { Table: var table }
+                    ? CreateTypedPerQueueConfiguration(channelContext, queue, perQueueConfiguration, consumeConfiguration.PrefetchCount, table)
+                    : CreatePerQueueConfiguration(channelContext, queue, perQueueConfiguration, consumeConfiguration.PrefetchCount, LegacyTypedHandlerTerminal(handlers))
             );
 
         var consumerConfiguration = new ConsumerConfiguration(consumeConfiguration.PrefetchCount, perQueueConfigurations);
@@ -168,7 +177,39 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     private static PipelineStep<ConsumeContext> RawHandlerTerminal(MessageHandler handler)
         => async context => context.Ack = await handler(context.Body, context.Properties, context.ReceivedInfo, context.CancellationToken).ConfigureAwait(false);
 
-    private PipelineStep<ConsumeContext> TypedHandlerTerminal(IHandlerCollection handlers)
+    private PerQueueConsumerConfiguration CreateTypedPerQueueConfiguration(
+        ChannelContext channelContext,
+        in Queue queue,
+        PerQueueConsumeConfiguration perQueueConfiguration,
+        ushort prefetchCount,
+        HandlerTable table
+    )
+    {
+        var consumerContext = new ConsumerContext(channelContext, queue.Name)
+        {
+            PrefetchCount = prefetchCount,
+            AutoAck = perQueueConfiguration.AutoAck,
+            Handlers = table,
+        };
+        consumerContext.MessagePipeline = consumePipelineBuilder.Clone()
+            .Use(ResolveMessageTypeStep)
+            .Use(ResolveHandlerStep)
+            .Use(selectSerializerStep)
+            .Use(DeserializeStep)
+            .Build(services, DispatchTerminal);
+        return new PerQueueConsumerConfiguration(
+            perQueueConfiguration.AutoAck,
+            perQueueConfiguration.ConsumerTag,
+            perQueueConfiguration.IsExclusive,
+            perQueueConfiguration.Arguments,
+            consumerContext
+        );
+    }
+
+    private static async ValueTask DispatchTerminal(ConsumeContext context)
+        => context.Ack = await context.Handler!.InvokeAsync(context).ConfigureAwait(false);
+
+    private PipelineStep<ConsumeContext> LegacyTypedHandlerTerminal(IHandlerCollection handlers)
         => async context =>
         {
             var message = messageSerializationStrategy.DeserializeMessage(context.Properties, context.Body);
@@ -238,6 +279,23 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     )
     {
         using var serializedMessage = messageSerializationStrategy.SerializeMessage(message);
+        await PublishAsync(
+            exchange, routingKey, mandatory, publisherConfirms, serializedMessage.Properties, serializedMessage.Body, cancellationToken
+        ).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    public virtual async Task PublishAsync<T>(
+        string exchange,
+        string routingKey,
+        bool? mandatory,
+        bool? publisherConfirms,
+        MessageProperties properties,
+        T body,
+        CancellationToken cancellationToken
+    )
+    {
+        using var serializedMessage = messageSerializationStrategy.SerializeMessage(body, properties);
         await PublishAsync(
             exchange, routingKey, mandatory, publisherConfirms, serializedMessage.Properties, serializedMessage.Body, cancellationToken
         ).ConfigureAwait(false);

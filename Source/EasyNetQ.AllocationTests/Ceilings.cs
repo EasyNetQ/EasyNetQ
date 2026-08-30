@@ -6,15 +6,17 @@ namespace EasyNetQ.AllocationTests;
 /// </summary>
 public static class Ceilings
 {
-    // Phase 0 baseline (8.x pipeline, .NET 10, arm64). Handlers are no-ops returning a cached task, so consume
-    // numbers are framework overhead + the deserialized message graph; publish numbers stop at BasicProperties.
-    // Phase 1 (layered pipeline, pooled contexts): unchanged — the remaining bytes are Message<T> (144 B) and the
-    // deserialized object / BasicProperties, which Phase 2 removes.
-    public const long ConsumeSmall = 208;
-    public const long ConsumeMedium = 1776;
-    public const long ConsumeLarge = 13664;
-    public const long PublishAdvancedSmall = 408;
-    public const long PublishPubSubSmall = 464;
+    // Phase 0 baseline (8.x pipeline, .NET 10, arm64). Handlers are no-ops, so consume numbers are framework
+    // overhead + the deserialized message graph; publish numbers stop at BasicProperties.
+    // Phase 1 (layered pipeline, pooled contexts): totals unchanged; plumbing gated at 0 B.
+    // Phase 2 (message type registry, typed dispatch, generic serializer): Message<T> (144 B) gone from both paths —
+    // consume small is now exactly the deserialized object (64 B); publish keeps ArrayPooledMemoryStream +
+    // BasicProperties + the correlation-id string (transport-boundary costs, Phases 4/5 targets).
+    public const long ConsumeSmall = 64;
+    public const long ConsumeMedium = 1632;
+    public const long ConsumeLarge = 13520;
+    public const long PublishAdvancedSmall = 264;
+    public const long PublishPubSubSmall = 320;
     public const long EventBusPublishNoSubscribers = 0;
     public const long EventBusPublishOneSubscriber = 0;
 

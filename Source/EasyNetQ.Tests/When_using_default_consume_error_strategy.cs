@@ -89,6 +89,7 @@ public class When_using_default_consume_error_strategy
         await using var mockBuilder = new MockBuilder(
             x => x.AddSingleton<IConventions>(customConventions)
                 .AddSingleton(_ => new ConnectionConfiguration { PublisherConfirms = true })
+                .AddSingleton(Substitute.For<EasyNetQ.Producer.IPublishConfirmationListener>())
         );
 
         var errorAckStrategy = await mockBuilder.ConsumeErrorStrategy.HandleErrorAsync(consumerExecutionContext, new Exception(), CancellationToken.None);
