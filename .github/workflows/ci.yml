@@ -10,6 +10,11 @@ on:
     branches:
       - master
       - develop
+    types: [ opened, synchronize, reopened, labeled ]
+  schedule:
+    # nightly benchmark run on master
+    - cron: '0 3 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -17,22 +22,19 @@ permissions:
 jobs:
   test:
     name: Lint & Test
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    strategy:
-      matrix:
-        dotnet: ['8.*']
-      fail-fast: true
+    timeout-minutes: 20
     steps:
     - name: Checkout
       uses: actions/checkout@v7
       with:
         fetch-depth: 0
 
-    - name: Setup .NET Core ${{ matrix.dotnet }}
+    - name: Setup .NET (global.json)
       uses: actions/setup-dotnet@v6
       with:
-        dotnet-version: ${{ matrix.dotnet }}
+        global-json-file: global.json
 
     - name: Install dependencies
       run: dotnet restore ${{ github.workspace }}/Source/EasyNetQ.slnx
@@ -46,6 +48,11 @@ jobs:
     - name: Tests
       run: |
         cd ${{ github.workspace }}/Source/EasyNetQ.Tests
+        dotnet test --configuration Release --no-build
+
+    - name: Allocation Tests
+      run: |
+        cd ${{ github.workspace }}/Source/EasyNetQ.AllocationTests
         dotnet test --configuration Release --no-build
 
     - name: Serialization.Tests
@@ -68,6 +75,89 @@ jobs:
         cd ${{ github.workspace }}/Source/EasyNetQ.ApprovalTests
         dotnet test --configuration Release --no-build
 
+  aot-smoke:
+    name: Native AOT smoke
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v7
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET (global.json)
+      uses: actions/setup-dotnet@v6
+      with:
+        global-json-file: global.json
+
+    - name: Publish with PublishAot
+      shell: bash
+      run: |
+        set -o pipefail
+        dotnet publish ${{ github.workspace }}/Source/EasyNetQ.Examples.Aot --configuration Release --runtime linux-x64 --output ${{ github.workspace }}/aot-out 2>&1 | tee aot-publish.log
+
+    - name: Summarize trim/AOT warnings
+      shell: bash
+      run: |
+        total=$(grep -cE 'warning IL[23][0-9]{3}' aot-publish.log || true)
+        easynetq=$(grep -E 'warning IL[23][0-9]{3}' aot-publish.log | grep -cE 'EasyNetQ[^/]*\.dll|EasyNetQ[^/]*\.cs' || true)
+        {
+          echo "## Native AOT smoke"
+          echo ""
+          echo "| Trim/AOT warnings | Count |"
+          echo "|---|---|"
+          echo "| total | $total |"
+          echo "| from EasyNetQ assemblies | $easynetq |"
+        } >> "$GITHUB_STEP_SUMMARY"
+        echo "IL warnings: total=$total easynetq=$easynetq"
+
+    - name: Upload publish log
+      uses: actions/upload-artifact@v4
+      with:
+        name: aot-publish-log
+        path: aot-publish.log
+
+  benchmarks:
+    name: Benchmarks
+    if: >-
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'benchmark'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v7
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET (8.x runtime + global.json SDK)
+      uses: actions/setup-dotnet@v6
+      with:
+        dotnet-version: '8.x'
+        global-json-file: global.json
+
+    - name: Run benchmarks (short job)
+      run: >-
+        dotnet run --project ${{ github.workspace }}/Source/EasyNetQ.Benchmarks
+        --configuration Release --framework net10.0 --
+        --filter '*' --job short --artifacts ${{ github.workspace }}/BenchmarkDotNet.Artifacts
+
+    - name: Publish results to job summary
+      shell: bash
+      run: |
+        for f in ${{ github.workspace }}/BenchmarkDotNet.Artifacts/results/*-report-github.md; do
+          cat "$f" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+        done
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: benchmark-results
+        path: ${{ github.workspace }}/BenchmarkDotNet.Artifacts
+
   publish-to-nuget:
     name: Publish to NuGet
     runs-on: ubuntu-latest
@@ -82,10 +172,10 @@ jobs:
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - name: Setup .NET Core 8.x
+      - name: Setup .NET (global.json)
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: '8.*'
+          global-json-file: global.json
       - name: Install dependencies
         run: dotnet restore ${{ github.workspace }}/Source/EasyNetQ.slnx
       - name: Build

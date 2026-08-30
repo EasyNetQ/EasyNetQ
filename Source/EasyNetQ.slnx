@@ -1,10 +1,10 @@
 <Solution>
   <Folder Name="/.Solution Items/">
     <File Path="../.editorconfig" />
-    <File Path="../.github/dependabot.yml" />
     <File Path="../.github/workflows/ci.yml" />
     <File Path="../.github/workflows/depsreview.yaml" />
     <File Path="../.gitignore" />
+    <File Path="../global.json" />
     <File Path="../hall_of_fame.md" />
     <File Path="../licence.txt" />
     <File Path="../README.md" />
@@ -13,6 +13,7 @@
     <File Path="docker-compose.yml" />
   </Folder>
   <Folder Name="/Examples/">
+    <Project Path="EasyNetQ.Examples.Aot/EasyNetQ.Examples.Aot.csproj" />
     <Project Path="EasyNetQ.Examples.DlxRetry/EasyNetQ.Examples.DlxRetry.csproj" />
     <Project Path="EasyNetQ.Examples.PubSubWithAdvancedApi/EasyNetQ.Examples.PubSubWithAdvancedApi.csproj" />
     <Project Path="EasyNetQ.Examples.Rpc/EasyNetQ.Examples.Rpc.csproj" />
@@ -21,6 +22,7 @@
     <Project Path="EasyNetQ.Serialization.NewtonsoftJson/EasyNetQ.Serialization.NewtonsoftJson.csproj" />
   </Folder>
   <Folder Name="/Tests/">
+    <Project Path="EasyNetQ.AllocationTests/EasyNetQ.AllocationTests.csproj" />
     <Project Path="EasyNetQ.ApprovalTests/EasyNetQ.ApprovalTests.csproj" />
     <Project Path="EasyNetQ.Hosepipe.Tests/EasyNetQ.Hosepipe.Tests.csproj" />
     <Project Path="EasyNetQ.IntegrationTests/EasyNetQ.IntegrationTests.csproj" />

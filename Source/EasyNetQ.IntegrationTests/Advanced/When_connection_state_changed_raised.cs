@@ -115,6 +115,11 @@ public class When_connection_state_changed_raised : IDisposable, IAsyncLifetime
 
             await managementClient.KillAllConnectionsAsync(cts.Token);
 
+            // The broker closes the sockets asynchronously; wait until the client has observed both shutdowns
+            while (advanced.GetConnectionStatus(PersistentConnectionType.Producer).State != PersistentConnectionState.Disconnected
+                   || advanced.GetConnectionStatus(PersistentConnectionType.Consumer).State != PersistentConnectionState.Disconnected)
+                await Task.Delay(50, cts.Token);
+
             var producerStatus = advanced.GetConnectionStatus(PersistentConnectionType.Producer);
             var consumerStatus = advanced.GetConnectionStatus(PersistentConnectionType.Consumer);
 
