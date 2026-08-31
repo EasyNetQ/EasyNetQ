@@ -71,6 +71,12 @@ signatures and internals do not.
   the typed queue/exchange/consumer settings; the generic layer stays for portable code.
 - Core-only hosts fall back to `SimpleConsumeErrorStrategy.NackWithRequeue`; the RabbitMQ registration keeps
   the error-queue strategy.
+- Publish routes: `Publish(p => p.Exchange("orders", e => e.Topic()).Message<OrderPlaced>("order.placed"))`
+  or a per-message routing key `Message<OrderPlaced>(o => $"order.{o.Region}")`. Publish through
+  `IMessagePublisher.PublishAsync(message)`; the route decides exchange and routing key, the exchange is
+  declared on first publish. A message type publishes through exactly one route; an unrouted type throws.
+- The publish pipeline serializes inside the pipeline (`SerializeStep`); steps added via
+  `Pipeline(...)`/`InsertAfter<SerializeStep>` see the serialized body (compress/encrypt goes there).
 
 ## Serialization
 

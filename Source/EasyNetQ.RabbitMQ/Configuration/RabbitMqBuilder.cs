@@ -18,6 +18,16 @@ public sealed class RabbitMqBuilder
         builder.RegisterConsumer(new RabbitMqConsumerBuilder(new ConsumerDefinition()), configure);
         return this;
     }
+
+    /// <summary>
+    ///     Registers a publish definition with RabbitMQ-typed exchange settings, used by
+    ///     <see cref="IMessagePublisher" />
+    /// </summary>
+    public RabbitMqBuilder Publish(Action<RabbitMqPublishBuilder> configure)
+    {
+        builder.RegisterPublisher(new RabbitMqPublishBuilder(new PublishDefinition()), configure);
+        return this;
+    }
 }
 
 /// <summary>

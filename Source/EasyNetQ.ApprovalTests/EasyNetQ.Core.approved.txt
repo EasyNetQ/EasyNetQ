@@ -253,6 +253,11 @@ namespace EasyNetQ
     {
         byte GetDeliveryMode(System.Type messageType);
     }
+    public interface IMessagePublisher
+    {
+        System.Threading.Tasks.ValueTask PublishAsync<T>(T message, System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.ValueTask PublishAsync<T>(T message, string routingKey, System.Threading.CancellationToken cancellationToken = default);
+    }
     public interface IMessageSerializationStrategy
     {
         EasyNetQ.IMessage DeserializeMessage(in EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body);
@@ -587,6 +592,13 @@ namespace EasyNetQ
     }
     public delegate System.Threading.Tasks.Task TEventHandler<TEvent>(TEvent messageEvent);
     public delegate string TopicNameConvention(System.Type messageType);
+    public sealed class TransportMessagePublisher : EasyNetQ.IMessagePublisher, System.IAsyncDisposable
+    {
+        public TransportMessagePublisher(System.Collections.Generic.IEnumerable<EasyNetQ.Configuration.PublishDefinition> definitions, EasyNetQ.Transport.ITransport transport, System.IServiceProvider services, EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.PublishContext> publishPipelineBuilder, EasyNetQ.IMessageSerializer messageSerializer, EasyNetQ.IMessageTypeRegistry registry) { }
+        public System.Threading.Tasks.ValueTask DisposeAsync() { }
+        public System.Threading.Tasks.ValueTask PublishAsync<T>(T message, System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.ValueTask PublishAsync<T>(T message, string routingKey, System.Threading.CancellationToken cancellationToken = default) { }
+    }
 }
 namespace EasyNetQ.Configuration
 {
@@ -630,9 +642,62 @@ namespace EasyNetQ.Configuration
         public static EasyNetQ.IEasyNetQBuilder RegisterConsumer<TBuilder>(this EasyNetQ.IEasyNetQBuilder builder, TBuilder consumerBuilder, System.Action<TBuilder> configure)
             where TBuilder : EasyNetQ.Configuration.ConsumerBuilder<TBuilder> { }
     }
+    public static class EasyNetQBuilderPublishExtensions
+    {
+        public static EasyNetQ.IEasyNetQBuilder Publish(this EasyNetQ.IEasyNetQBuilder builder, System.Action<EasyNetQ.Configuration.GenericPublishBuilder> configure) { }
+        public static EasyNetQ.IEasyNetQBuilder RegisterPublisher<TBuilder>(this EasyNetQ.IEasyNetQBuilder builder, TBuilder publishBuilder, System.Action<TBuilder> configure)
+            where TBuilder : EasyNetQ.Configuration.PublishBuilder<TBuilder> { }
+    }
     public sealed class GenericConsumerBuilder : EasyNetQ.Configuration.ConsumerBuilder<EasyNetQ.Configuration.GenericConsumerBuilder>
     {
         public GenericConsumerBuilder(EasyNetQ.Configuration.ConsumerDefinition definition) { }
+    }
+    public sealed class GenericPublishBuilder : EasyNetQ.Configuration.PublishBuilder<EasyNetQ.Configuration.GenericPublishBuilder>
+    {
+        public GenericPublishBuilder(EasyNetQ.Configuration.PublishDefinition definition) { }
+    }
+    public abstract class PublishBuilder<TSelf>
+        where TSelf : EasyNetQ.Configuration.PublishBuilder<TSelf>
+    {
+        protected PublishBuilder(EasyNetQ.Configuration.PublishDefinition definition) { }
+        public EasyNetQ.Configuration.PublishDefinition Definition { get; }
+        public TSelf Exchange(string name) { }
+        public TSelf ExistingExchange(string name) { }
+        public TSelf Mandatory(bool mandatory = true) { }
+        public TSelf Message<T>() { }
+        public TSelf Message<T>(System.Func<T, string> routingKey) { }
+        public TSelf Message<T>(string routingKey) { }
+        public TSelf Pipeline(System.Action<EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.PublishContext>> configure) { }
+        public TSelf PublisherConfirms(bool publisherConfirms = true) { }
+    }
+    public sealed class PublishDefinition
+    {
+        public PublishDefinition() { }
+        public string Exchange { get; set; }
+        public EasyNetQ.Transport.ExchangeDefinition? ExchangeToDeclare { get; set; }
+        public bool? Mandatory { get; set; }
+        public System.Action<EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.PublishContext>>? MessagePipeline { get; set; }
+        public System.Collections.Generic.List<System.Action<EasyNetQ.Configuration.PublishRouteTable>> MessageRegistrations { get; }
+        public bool? PublisherConfirms { get; set; }
+    }
+    public abstract class PublishRoute
+    {
+        public EasyNetQ.Configuration.PublishDefinition Definition { get; }
+        public EasyNetQ.MessageTypeDescriptor Descriptor { get; }
+        public EasyNetQ.Pipeline.PipelineStep<EasyNetQ.Pipeline.PublishContext>? Pipeline { get; set; }
+        public abstract string ResolveRoutingKey(object message);
+    }
+    public sealed class PublishRouteTable
+    {
+        public PublishRouteTable(EasyNetQ.IMessageTypeRegistry registry) { }
+        public System.Collections.Generic.IReadOnlyDictionary<System.Type, EasyNetQ.Configuration.PublishRoute> Routes { get; }
+        public EasyNetQ.Configuration.PublishRouteTable Add<T>(EasyNetQ.Configuration.PublishDefinition definition, System.Func<T, string> routingKeyResolver) { }
+        public EasyNetQ.Configuration.PublishRouteTable Add<T>(EasyNetQ.Configuration.PublishDefinition definition, string? routingKey) { }
+    }
+    public sealed class PublishRoute<T> : EasyNetQ.Configuration.PublishRoute
+    {
+        public string ResolveRoutingKey(T message) { }
+        public override string ResolveRoutingKey(object message) { }
     }
 }
 namespace EasyNetQ.Consumer
@@ -1031,6 +1096,8 @@ namespace EasyNetQ.Pipeline
         public System.Collections.Generic.IReadOnlyList<string> Steps { get; }
         public EasyNetQ.Pipeline.PipelineStep<TContext> Build(System.IServiceProvider services, EasyNetQ.Pipeline.PipelineStep<TContext>? terminal = null) { }
         public EasyNetQ.Pipeline.PipelineBuilder<TContext> Clone() { }
+        public bool Contains<TMarker>()
+            where TMarker : EasyNetQ.Pipeline.IMiddleware<TContext> { }
         public EasyNetQ.Pipeline.PipelineBuilder<TContext> InsertAfter<TMarker>(EasyNetQ.Pipeline.IMiddleware<TContext> middleware)
             where TMarker : EasyNetQ.Pipeline.IMiddleware<TContext> { }
         public EasyNetQ.Pipeline.PipelineBuilder<TContext> InsertBefore<TMarker>(EasyNetQ.Pipeline.IMiddleware<TContext> middleware)
@@ -1084,9 +1151,12 @@ namespace EasyNetQ.Pipeline
         public EasyNetQ.Pipeline.IConnectionView Connection { get; }
         public string Exchange { get; set; }
         public bool Mandatory { get; set; }
+        public object? Message { get; set; }
+        public EasyNetQ.MessageTypeDescriptor? MessageType { get; set; }
         public EasyNetQ.MessageProperties Properties { get; set; }
         public bool PublisherConfirms { get; set; }
         public string RoutingKey { get; set; }
+        public EasyNetQ.IMessageSerializer? Serializer { get; set; }
         protected override void Reset() { }
     }
 }
@@ -1153,6 +1223,11 @@ namespace EasyNetQ.Pipeline.Middleware
     {
         public SelectSerializerStep(EasyNetQ.IMessageSerializer defaultSerializer) { }
         public System.Threading.Tasks.ValueTask InvokeAsync(EasyNetQ.Pipeline.ConsumeContext context, EasyNetQ.Pipeline.PipelineStep<EasyNetQ.Pipeline.ConsumeContext> next) { }
+    }
+    public sealed class SerializeStep : EasyNetQ.Pipeline.IMiddleware<EasyNetQ.Pipeline.PublishContext>
+    {
+        public SerializeStep(EasyNetQ.IMessageSerializer defaultSerializer, EasyNetQ.ICorrelationIdGenerationStrategy correlationIdGenerator, bool persistentMessagesByDefault) { }
+        public System.Threading.Tasks.ValueTask InvokeAsync(EasyNetQ.Pipeline.PublishContext context, EasyNetQ.Pipeline.PipelineStep<EasyNetQ.Pipeline.PublishContext> next) { }
     }
 }
 namespace EasyNetQ.Serialization

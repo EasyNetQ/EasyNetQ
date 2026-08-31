@@ -456,6 +456,7 @@ namespace EasyNetQ.Configuration
     public sealed class RabbitMqBuilder
     {
         public EasyNetQ.Configuration.RabbitMqBuilder Consume(System.Action<EasyNetQ.Configuration.RabbitMqConsumerBuilder> configure) { }
+        public EasyNetQ.Configuration.RabbitMqBuilder Publish(System.Action<EasyNetQ.Configuration.RabbitMqPublishBuilder> configure) { }
     }
     public sealed class RabbitMqConsumerBuilder : EasyNetQ.Configuration.ConsumerBuilder<EasyNetQ.Configuration.RabbitMqConsumerBuilder>
     {
@@ -476,6 +477,11 @@ namespace EasyNetQ.Configuration
         public EasyNetQ.Configuration.RabbitMqExchangeBuilder Durable(bool isDurable = true) { }
         public EasyNetQ.Configuration.RabbitMqExchangeBuilder Fanout() { }
         public EasyNetQ.Configuration.RabbitMqExchangeBuilder Topic() { }
+    }
+    public sealed class RabbitMqPublishBuilder : EasyNetQ.Configuration.PublishBuilder<EasyNetQ.Configuration.RabbitMqPublishBuilder>
+    {
+        public RabbitMqPublishBuilder(EasyNetQ.Configuration.PublishDefinition definition) { }
+        public EasyNetQ.Configuration.RabbitMqPublishBuilder Exchange(string name, System.Action<EasyNetQ.Configuration.RabbitMqExchangeBuilder> configure) { }
     }
     public sealed class RabbitMqQueueBuilder
     {

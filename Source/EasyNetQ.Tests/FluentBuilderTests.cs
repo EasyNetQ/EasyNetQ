@@ -46,4 +46,31 @@ public class FluentBuilderTests
 
         await hostedService.StopAsync(TestContext.Current.CancellationToken);
     }
+
+    [Fact]
+    public async Task Should_declare_typed_exchange_and_publish_via_route()
+    {
+        await using var mockBuilder = new MockBuilder(x =>
+            new TestBuilder(x).UseRabbitMq(rabbit => rabbit
+                .Publish(publish => publish
+                    .Exchange("orders", exchange => exchange.Topic().AlternateExchange("orders.alt"))
+                    .Message<MyMessage>("order.placed")
+                )
+            )
+        );
+
+        var publisher = mockBuilder.ServiceProvider.GetRequiredService<IMessagePublisher>();
+        await publisher.PublishAsync(new MyMessage { Text = "hello" }, TestContext.Current.CancellationToken);
+
+        var calls = mockBuilder.Channels.SelectMany(c => c.ReceivedCalls()).ToList();
+
+        var exchangeDeclare = calls.Single(c => c.GetMethodInfo().Name == "ExchangeDeclareAsync" && Equals(c.GetArguments()[0], "orders"));
+        exchangeDeclare.GetArguments()[1].Should().Be("topic");
+        var arguments = (IDictionary<string, object>)exchangeDeclare.GetArguments()[4]!;
+        arguments["alternate-exchange"].Should().Be("orders.alt");
+
+        var publish = calls.Single(c => c.GetMethodInfo().Name == "BasicPublishAsync");
+        publish.GetArguments()[0].Should().Be("orders");
+        publish.GetArguments()[1].Should().Be("order.placed");
+    }
 }

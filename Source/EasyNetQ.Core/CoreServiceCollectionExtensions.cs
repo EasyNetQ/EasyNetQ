@@ -54,6 +54,7 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<PipelineBuilder<ConsumeContext>>(_ =>
             new PipelineBuilder<ConsumeContext>().UseConsumeMetrics().UseConsumeErrorStrategy().UseConsumeTracing().UseConsumeInterceptors());
         services.TryAddSingleton<ICorrelationIdGenerationStrategy, DefaultCorrelationIdGenerationStrategy>();
+        services.TryAddSingleton<IMessagePublisher, TransportMessagePublisher>();
         services.TryAddSingleton<IMessageSerializationStrategy, DefaultMessageSerializationStrategy>();
         services.TryAddSingleton<IMessageDeliveryModeStrategy, MessageDeliveryModeStrategy>();
         services.TryAddSingleton<IHandlerCollectionFactory, HandlerCollectionFactory>();

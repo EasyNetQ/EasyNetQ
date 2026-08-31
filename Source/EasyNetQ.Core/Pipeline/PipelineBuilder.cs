@@ -112,6 +112,12 @@ public sealed class PipelineBuilder<TContext> where TContext : LayerContext
     }
 
     /// <summary>
+    ///     Whether a middleware is registered as <typeparamref name="TMarker" />
+    /// </summary>
+    public bool Contains<TMarker>() where TMarker : IMiddleware<TContext>
+        => registrations.Exists(r => r.Marker == typeof(TMarker));
+
+    /// <summary>
     ///     Copies the builder so a child scope can add steps without affecting the parent
     /// </summary>
     public PipelineBuilder<TContext> Clone() => new(new List<Registration>(registrations));
