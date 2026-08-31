@@ -35,5 +35,7 @@
   </Folder>
   <Project Path="EasyNetQ.Hosepipe/EasyNetQ.Hosepipe.csproj" />
   <Project Path="EasyNetQ/EasyNetQ.csproj" />
+  <Project Path="EasyNetQ.Core/EasyNetQ.Core.csproj" />
+  <Project Path="EasyNetQ.RabbitMQ/EasyNetQ.RabbitMQ.csproj" />
   <Project Path="EasyNetQ.Generators/EasyNetQ.Generators.csproj" />
 </Solution>

@@ -25,7 +25,7 @@ namespace EasyNetQ.Generators;
 [Generator(LanguageNames.CSharp)]
 public sealed class MessagingModuleGenerator : IIncrementalGenerator
 {
-    private const string EasyNetQAssemblyName = "EasyNetQ";
+    private static readonly ImmutableHashSet<string> EasyNetQAssemblyNames = ImmutableHashSet.Create("EasyNetQ", "EasyNetQ.Core", "EasyNetQ.RabbitMQ");
 
     /// <summary>Containing types (namespace EasyNetQ, assembly EasyNetQ) whose generic-method type arguments are message types.</summary>
     private static readonly ImmutableHashSet<string> HarvestedContainingTypes = ImmutableHashSet.Create(
@@ -106,7 +106,7 @@ public sealed class MessagingModuleGenerator : IIncrementalGenerator
 
         var containingType = method.ContainingType;
         if (containingType is null
-            || containingType.ContainingAssembly?.Name != EasyNetQAssemblyName
+            || !EasyNetQAssemblyNames.Contains(containingType.ContainingAssembly?.Name ?? "")
             || containingType.ContainingNamespace?.ToDisplayString() != "EasyNetQ"
             || !HarvestedContainingTypes.Contains(containingType.Name))
             return ImmutableArray<string>.Empty;
@@ -130,7 +130,7 @@ public sealed class MessagingModuleGenerator : IIncrementalGenerator
         {
             if (iface is { IsGenericType: true, Name: "IConsume" or "IConsumeAsync", TypeArguments.Length: 1 }
                 && iface.ContainingNamespace?.ToDisplayString() == "EasyNetQ.AutoSubscribe"
-                && iface.ContainingAssembly?.Name == EasyNetQAssemblyName
+                && EasyNetQAssemblyNames.Contains(iface.ContainingAssembly?.Name ?? "")
                 && iface.TypeArguments[0] is INamedTypeSymbol messageType
                 && IsEmittable(messageType))
             {
@@ -149,8 +149,8 @@ public sealed class MessagingModuleGenerator : IIncrementalGenerator
 
     private static CompilationFacts GetCompilationFacts(Compilation compilation, System.Threading.CancellationToken ct)
     {
-        var referencesEasyNetQ = compilation.AssemblyName == EasyNetQAssemblyName
-            || compilation.SourceModule.ReferencedAssemblySymbols.Any(a => a.Name == EasyNetQAssemblyName);
+        var referencesEasyNetQ = EasyNetQAssemblyNames.Contains(compilation.AssemblyName ?? "")
+            || compilation.SourceModule.ReferencedAssemblySymbols.Any(a => EasyNetQAssemblyNames.Contains(a.Name));
 
         var optIns = ImmutableArray.CreateBuilder<string>();
         foreach (var attribute in compilation.Assembly.GetAttributes())
@@ -194,7 +194,7 @@ public sealed class MessagingModuleGenerator : IIncrementalGenerator
         if (ctx.SemanticModel.GetSymbolInfo(invocation, ct).Symbol is not IMethodSymbol method
             || method.Name != "AddEasyNetQ"
             || method.ContainingType?.Name != "RabbitHutch"
-            || method.ContainingType.ContainingAssembly?.Name != EasyNetQAssemblyName)
+            || !EasyNetQAssemblyNames.Contains(method.ContainingType.ContainingAssembly?.Name ?? ""))
             return null;
 
 #pragma warning disable RSEXPERIMENTAL002
@@ -248,7 +248,7 @@ public sealed class MessagingModuleGenerator : IIncrementalGenerator
 
     private static void Emit(SourceProductionContext spc, ImmutableArray<string> types, CompilationFacts facts, ImmutableArray<InterceptionSite> interceptSites)
     {
-        if (!facts.ReferencesEasyNetQ || facts.AssemblyName == EasyNetQAssemblyName) return;
+        if (!facts.ReferencesEasyNetQ || EasyNetQAssemblyNames.Contains(facts.AssemblyName)) return;
 
         var messageTypes = types.Concat(facts.OptInTypes).Distinct(StringComparer.Ordinal).OrderBy(t => t, StringComparer.Ordinal).ToList();
         var hasModule = messageTypes.Count > 0;

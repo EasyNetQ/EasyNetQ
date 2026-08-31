@@ -4,7 +4,7 @@ using EasyNetQ.Topology;
 namespace EasyNetQ;
 
 /// <summary>
-/// The result of an <see cref="IBus"/> Subscribe or SubscribeAsync operation.
+/// The result of a bus Subscribe or SubscribeAsync operation.
 /// In order to cancel the subscription, call dispose on this object or on ConsumerCancellation.
 /// </summary>
 public readonly struct SubscriptionResult : IAsyncDisposable

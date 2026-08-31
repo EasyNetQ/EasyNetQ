@@ -25,7 +25,9 @@ public static class GeneratorTestHarness
             })
             .Select(path => (MetadataReference)MetadataReference.CreateFromFile(path))
             .ToList();
-        references.Add(MetadataReference.CreateFromFile(typeof(IBus).Assembly.Location));
+        references.Add(MetadataReference.CreateFromFile(typeof(EasyNetQ.Pipeline.PropertyBag).Assembly.Location)); // EasyNetQ.Core
+        references.Add(MetadataReference.CreateFromFile(typeof(IBus).Assembly.Location)); // EasyNetQ.RabbitMQ
+        references.Add(MetadataReference.CreateFromFile(typeof(EasyNetQ.AutoSubscribe.IConsume<>).Assembly.Location)); // EasyNetQ (bundle)
         references.Add(MetadataReference.CreateFromFile(typeof(Microsoft.Extensions.DependencyInjection.IServiceCollection).Assembly.Location));
         references.Add(MetadataReference.CreateFromFile(typeof(Microsoft.Extensions.DependencyInjection.ServiceCollection).Assembly.Location));
         references.Add(MetadataReference.CreateFromFile(typeof(Microsoft.Extensions.DependencyInjection.Extensions.ServiceCollectionDescriptorExtensions).Assembly.Location));
