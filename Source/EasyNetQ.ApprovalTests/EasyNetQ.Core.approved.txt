@@ -1088,6 +1088,8 @@ namespace EasyNetQ.Pipeline
         public static EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.PublishContext> UsePublishMetrics(this EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.PublishContext> builder) { }
         public static EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.PublishContext> UsePublishTracing(this EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.PublishContext> builder) { }
         public static EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> UseScope(this EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> builder) { }
+        public static EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.PublishContext> UseSerialize(this EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.PublishContext> builder, EasyNetQ.Pipeline.Middleware.SerializeStep serializeStep) { }
+        public static EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> UseTypedDispatch(this EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> builder, EasyNetQ.IMessageSerializer defaultSerializer) { }
     }
     public sealed class PipelineBuilder<TContext>
         where TContext : EasyNetQ.Pipeline.LayerContext
@@ -1226,7 +1228,8 @@ namespace EasyNetQ.Pipeline.Middleware
     }
     public sealed class SerializeStep : EasyNetQ.Pipeline.IMiddleware<EasyNetQ.Pipeline.PublishContext>
     {
-        public SerializeStep(EasyNetQ.IMessageSerializer defaultSerializer, EasyNetQ.ICorrelationIdGenerationStrategy correlationIdGenerator, bool persistentMessagesByDefault) { }
+        public SerializeStep(EasyNetQ.IMessageSerializer defaultSerializer, EasyNetQ.ICorrelationIdGenerationStrategy correlationIdGenerator, bool? persistentMessagesByDefault) { }
+        [System.Runtime.CompilerServices.AsyncMethodBuilder(typeof(System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder))]
         public System.Threading.Tasks.ValueTask InvokeAsync(EasyNetQ.Pipeline.PublishContext context, EasyNetQ.Pipeline.PipelineStep<EasyNetQ.Pipeline.PublishContext> next) { }
     }
 }

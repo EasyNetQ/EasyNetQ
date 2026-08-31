@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace EasyNetQ.Pipeline.Middleware;
 
 /// <summary>
@@ -9,7 +11,7 @@ public sealed class SerializeStep : IMiddleware<PublishContext>
 {
     private readonly IMessageSerializer defaultSerializer;
     private readonly ICorrelationIdGenerationStrategy correlationIdGenerator;
-    private readonly bool persistentMessagesByDefault;
+    private readonly bool? persistentMessagesByDefault;
 
     /// <summary>
     ///     Creates the step with the bus-wide defaults
@@ -17,7 +19,7 @@ public sealed class SerializeStep : IMiddleware<PublishContext>
     public SerializeStep(
         IMessageSerializer defaultSerializer,
         ICorrelationIdGenerationStrategy correlationIdGenerator,
-        bool persistentMessagesByDefault
+        bool? persistentMessagesByDefault
     )
     {
         this.defaultSerializer = defaultSerializer;
@@ -26,6 +28,9 @@ public sealed class SerializeStep : IMiddleware<PublishContext>
     }
 
     /// <inheritdoc />
+#if NET
+    [AsyncMethodBuilder(typeof(PoolingAsyncValueTaskMethodBuilder))]
+#endif
     public async ValueTask InvokeAsync(PublishContext context, PipelineStep<PublishContext> next)
     {
         var descriptor = context.MessageType;
@@ -47,12 +52,10 @@ public sealed class SerializeStep : IMiddleware<PublishContext>
                 ? correlationIdGenerator.GetCorrelationId()
                 : properties.CorrelationId,
         };
-        if (!properties.DeliveryModePresent)
+        if (!properties.DeliveryModePresent && (descriptor.IsPersistent ?? persistentMessagesByDefault) is { } persistent)
             properties = properties with
             {
-                DeliveryMode = descriptor.IsPersistent ?? persistentMessagesByDefault
-                    ? MessageDeliveryMode.Persistent
-                    : MessageDeliveryMode.NonPersistent
+                DeliveryMode = persistent ? MessageDeliveryMode.Persistent : MessageDeliveryMode.NonPersistent
             };
         context.Properties = properties;
 

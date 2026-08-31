@@ -60,4 +60,24 @@ public static class PipelineBuilderExtensions
     /// </summary>
     public static PipelineBuilder<PublishContext> UseProduceInterceptors(this PipelineBuilder<PublishContext> builder)
         => builder.Use(static services => new ProduceInterceptorMiddleware(services.GetServices<IProduceConsumeInterceptor>()));
+
+    /// <summary>
+    ///     Appends the typed dispatch steps of the consume pipeline: resolve message type and handler, select the
+    ///     serializer, deserialize
+    /// </summary>
+    public static PipelineBuilder<ConsumeContext> UseTypedDispatch(this PipelineBuilder<ConsumeContext> builder, IMessageSerializer defaultSerializer)
+        => builder
+            .Use(new ResolveMessageTypeStep())
+            .Use(new ResolveHandlerStep())
+            .Use(new SelectSerializerStep(defaultSerializer))
+            .Use(new DeserializeStep());
+
+    /// <summary>
+    ///     Inserts <paramref name="serializeStep" /> before the produce interceptors so they see the serialized
+    ///     body, or appends it when no interceptor step is registered
+    /// </summary>
+    public static PipelineBuilder<PublishContext> UseSerialize(this PipelineBuilder<PublishContext> builder, SerializeStep serializeStep)
+        => builder.Contains<ProduceInterceptorMiddleware>()
+            ? builder.InsertBefore<ProduceInterceptorMiddleware>(serializeStep)
+            : builder.Use(serializeStep);
 }

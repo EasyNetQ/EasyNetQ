@@ -80,6 +80,11 @@ signatures and internals do not.
   declared on first publish. A message type publishes through exactly one route; an unrouted type throws.
 - The publish pipeline serializes inside the pipeline (`SerializeStep`); steps added via
   `Pipeline(...)`/`InsertAfter<SerializeStep>` see the serialized body (compress/encrypt goes there).
+- `IAdvancedBus.PublishAsync<T>` also runs through `SerializeStep`: pipeline steps see the typed message and
+  its descriptor before serialization. New: a message type declaring `[DeliveryMode]` gets its delivery mode
+  stamped on direct advanced publishes too (previously only the high-level APIs stamped it); types without the
+  attribute are unchanged. Publishing a derived instance through a base type parameter, or registering a custom
+  `IMessageSerializationStrategy` (e.g. message versioning), keeps the 8.x pre-serializing path.
 
 ## Serialization
 

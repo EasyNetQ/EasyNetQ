@@ -28,10 +28,8 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     private readonly IDisposable[] eventSubscriptions;
     private readonly IHandlerCollectionFactory handlerCollectionFactory;
     private readonly IMessageSerializationStrategy messageSerializationStrategy;
-    private readonly SelectSerializerStep selectSerializerStep;
-    private static readonly ResolveMessageTypeStep ResolveMessageTypeStep = new();
-    private static readonly ResolveHandlerStep ResolveHandlerStep = new();
-    private static readonly DeserializeStep DeserializeStep = new();
+    private readonly IMessageSerializer messageSerializer;
+    private readonly IMessageTypeRegistry? registry;
     private readonly IPullingConsumerFactory pullingConsumerFactory;
     private readonly AdvancedBusEventHandlers advancedBusEventHandlers;
 
@@ -44,6 +42,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 
     private volatile bool disposed;
     private readonly PipelineStep<PublishContext> publishPipeline;
+    private readonly PipelineStep<PublishContext> typedPublishPipeline;
     private readonly ContextPool<PublishContext> publishContextPool;
     private readonly ConnectionContext producerConnectionContext;
     private readonly ConnectionContext consumerConnectionContext;
@@ -77,7 +76,8 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         this.consumePipelineBuilder = consumePipelineBuilder;
         this.services = services;
         this.messageSerializationStrategy = messageSerializationStrategy;
-        selectSerializerStep = new SelectSerializerStep(messageSerializer);
+        this.messageSerializer = messageSerializer;
+        registry = services.GetService<IMessageTypeRegistry>();
         this.pullingConsumerFactory = pullingConsumerFactory;
         this.advancedBusEventHandlers = advancedBusEventHandlers;
 
@@ -113,6 +113,10 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 
         publishContextPool = new ContextPool<PublishContext>(() => new PublishContext(publishChannelContext));
         publishPipeline = publishPipelineBuilder.Build(services, PublishInternalAsync);
+        var correlationIdGenerator = services.GetService<ICorrelationIdGenerationStrategy>() ?? new DefaultCorrelationIdGenerationStrategy();
+        typedPublishPipeline = publishPipelineBuilder.Clone()
+            .UseSerialize(new SerializeStep(messageSerializer, correlationIdGenerator, persistentMessagesByDefault: null))
+            .Build(services, PublishInternalAsync);
     }
     public bool IsConnected =>
         (from PersistentConnectionType type in Enum.GetValues(typeof(PersistentConnectionType)) select GetConnection(type))
@@ -216,10 +220,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         };
         SetConsumerConfiguration(consumerContext, queue, perQueueConfiguration);
         consumerContext.MessagePipeline = consumePipelineBuilder.Clone()
-            .Use(ResolveMessageTypeStep)
-            .Use(ResolveHandlerStep)
-            .Use(selectSerializerStep)
-            .Use(DeserializeStep)
+            .UseTypedDispatch(messageSerializer)
             .Build(services, DispatchTerminal);
         return consumerContext;
     }
@@ -313,10 +314,39 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         CancellationToken cancellationToken
     )
     {
-        using var serializedMessage = messageSerializationStrategy.SerializeMessage(body, properties);
-        await PublishAsync(
-            exchange, routingKey, mandatory, publisherConfirms, serializedMessage.Properties, serializedMessage.Body, cancellationToken
-        ).ConfigureAwait(false);
+        // the typed pipeline serializes inside SerializeStep; a custom serialization strategy or a body of a
+        // derived type (serialized with its runtime type in 8.x) keeps the legacy pre-serializing path
+        if (registry is null
+            || messageSerializationStrategy is not DefaultMessageSerializationStrategy
+            || (body is not null && body.GetType() != typeof(T)))
+        {
+            using var serializedMessage = messageSerializationStrategy.SerializeMessage(body, properties);
+            await PublishAsync(
+                exchange, routingKey, mandatory, publisherConfirms, serializedMessage.Properties, serializedMessage.Body, cancellationToken
+            ).ConfigureAwait(false);
+            return;
+        }
+
+        using var cts = cancellationToken.WithTimeout(configuration.Timeout);
+
+        var context = publishContextPool.Rent();
+        try
+        {
+            context.Exchange = exchange;
+            context.RoutingKey = routingKey;
+            context.Mandatory = mandatory ?? configuration.MandatoryPublish;
+            context.PublisherConfirms = publisherConfirms ?? configuration.PublisherConfirms;
+            context.Properties = properties;
+            context.MessageType = registry.GetOrAdd<T>();
+            context.Message = body;
+            context.CancellationToken = cts.Token;
+
+            await typedPublishPipeline(context).ConfigureAwait(false);
+        }
+        finally
+        {
+            publishContextPool.Return(context);
+        }
     }
 
     /// <inheritdoc />

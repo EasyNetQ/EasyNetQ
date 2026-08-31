@@ -123,12 +123,8 @@ public sealed class TransportMessagePublisher : IMessagePublisher, IAsyncDisposa
                 foreach (var registration in definition.MessageRegistrations)
                     registration(table);
 
-                var pipelineBuilder = publishPipelineBuilder.Clone();
-                var serializeStep = new SerializeStep(messageSerializer, correlationIdGenerator, busOptions.PersistentMessages);
-                if (pipelineBuilder.Contains<ProduceInterceptorMiddleware>())
-                    pipelineBuilder.InsertBefore<ProduceInterceptorMiddleware>(serializeStep);
-                else
-                    pipelineBuilder.Use(serializeStep);
+                var pipelineBuilder = publishPipelineBuilder.Clone()
+                    .UseSerialize(new SerializeStep(messageSerializer, correlationIdGenerator, busOptions.PersistentMessages));
                 definition.MessagePipeline?.Invoke(pipelineBuilder);
 
                 pipelines[definition] = pipelineBuilder.Build(services, context => publishChannel.PublishAsync(context));

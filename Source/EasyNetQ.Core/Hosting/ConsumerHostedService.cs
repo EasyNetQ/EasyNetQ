@@ -87,11 +87,7 @@ public sealed class ConsumerHostedService : IHostedService
                 consumerContext.Set(Keys.ConsumerTelemetry, new ConsumerTelemetry(queueName, telemetryOptions.MessagingSystem));
             definition.ConfigureContext?.Invoke(consumerContext);
 
-            var pipelineBuilder = consumePipelineBuilder.Clone()
-                .Use(new ResolveMessageTypeStep())
-                .Use(new ResolveHandlerStep())
-                .Use(new SelectSerializerStep(messageSerializer))
-                .Use(new DeserializeStep());
+            var pipelineBuilder = consumePipelineBuilder.Clone().UseTypedDispatch(messageSerializer);
             definition.MessagePipeline?.Invoke(pipelineBuilder);
             consumerContext.MessagePipeline = pipelineBuilder.Build(services, DispatchTerminal);
 
