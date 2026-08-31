@@ -162,7 +162,11 @@ public sealed class PersistentChannel : IPersistentChannel
 
 
     {
-        createChannelOptions ??= new CreateChannelOptions(options.PublisherConfirms, options.PublisherConfirms);
+        // publisherConfirmationTrackingEnabled must stay FALSE: with tracking enabled the client awaits the broker
+        // confirm inside BasicPublishAsync, which runs while this channel's mutex is held - serializing all confirmed
+        // publishes on the bus to one in flight. EasyNetQ tracks confirms itself (PublishConfirmationListener) and
+        // awaits them outside the mutex. See When_a_channel_is_created_with_publisher_confirms.
+        createChannelOptions ??= new CreateChannelOptions(options.PublisherConfirms, publisherConfirmationTrackingEnabled: false);
         var channel = await connection.CreateChannelAsync(createChannelOptions, cancellationToken).ConfigureAwait(false);
         AttachChannelEvents(channel);
         return channel;
