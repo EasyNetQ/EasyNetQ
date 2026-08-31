@@ -13,6 +13,30 @@ public static class PipelineBuilderExtensions
     /// <summary>
     ///     Adds <see cref="ErrorHandlingMiddleware" />
     /// </summary>
+    /// <summary>
+    ///     Appends the consume metrics step (outermost by default so error handling never hides a delivery)
+    /// </summary>
+    public static PipelineBuilder<ConsumeContext> UseConsumeMetrics(this PipelineBuilder<ConsumeContext> builder)
+        => builder.Use<Middleware.ConsumeMetricsMiddleware>();
+
+    /// <summary>
+    ///     Appends the consume tracing step (inside error handling so failures mark the span)
+    /// </summary>
+    public static PipelineBuilder<ConsumeContext> UseConsumeTracing(this PipelineBuilder<ConsumeContext> builder)
+        => builder.Use<Middleware.ConsumeTracingMiddleware>();
+
+    /// <summary>
+    ///     Appends the publish metrics step
+    /// </summary>
+    public static PipelineBuilder<PublishContext> UsePublishMetrics(this PipelineBuilder<PublishContext> builder)
+        => builder.Use<Middleware.PublishMetricsMiddleware>();
+
+    /// <summary>
+    ///     Appends the publish tracing and context-propagation step
+    /// </summary>
+    public static PipelineBuilder<PublishContext> UsePublishTracing(this PipelineBuilder<PublishContext> builder)
+        => builder.Use<Middleware.PublishTracingMiddleware>();
+
     public static PipelineBuilder<ConsumeContext> UseConsumeErrorStrategy(this PipelineBuilder<ConsumeContext> builder)
         => builder.Use(static services => new ErrorHandlingMiddleware(
             services.GetRequiredService<Consumer.IConsumeErrorStrategy>(),

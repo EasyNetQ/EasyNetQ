@@ -33,9 +33,15 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<IConventions, Conventions>();
         services.TryAddSingleton<IEventBus, EventBus>();
         services.TryAddSingleton<ITypeNameSerializer, DefaultTypeNameSerializer>();
-        services.TryAddSingleton<PipelineBuilder<PublishContext>>(_ => new PipelineBuilder<PublishContext>().UseProduceInterceptors());
+        services.TryAddSingleton<Diagnostics.TelemetryOptions>();
+        services.TryAddSingleton<Pipeline.Middleware.PublishMetricsMiddleware>();
+        services.TryAddSingleton<Pipeline.Middleware.PublishTracingMiddleware>();
+        services.TryAddSingleton<Pipeline.Middleware.ConsumeMetricsMiddleware>();
+        services.TryAddSingleton<Pipeline.Middleware.ConsumeTracingMiddleware>();
+        services.TryAddSingleton<PipelineBuilder<PublishContext>>(_ =>
+            new PipelineBuilder<PublishContext>().UsePublishMetrics().UsePublishTracing().UseProduceInterceptors());
         services.TryAddSingleton<PipelineBuilder<ConsumeContext>>(_ =>
-            new PipelineBuilder<ConsumeContext>().UseConsumeErrorStrategy().UseConsumeInterceptors());
+            new PipelineBuilder<ConsumeContext>().UseConsumeMetrics().UseConsumeErrorStrategy().UseConsumeTracing().UseConsumeInterceptors());
         services.TryAddSingleton<ICorrelationIdGenerationStrategy, DefaultCorrelationIdGenerationStrategy>();
         services.TryAddSingleton<IMessageSerializationStrategy, DefaultMessageSerializationStrategy>();
         services.TryAddSingleton<IMessageDeliveryModeStrategy, MessageDeliveryModeStrategy>();

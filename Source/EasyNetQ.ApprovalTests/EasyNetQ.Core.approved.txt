@@ -639,6 +639,62 @@ namespace EasyNetQ.Consumer
         public System.Threading.Tasks.ValueTask<EasyNetQ.AckDecision> HandleErrorAsync(EasyNetQ.Pipeline.ConsumeContext context, System.Exception exception, System.Threading.CancellationToken cancellationToken = default) { }
     }
 }
+namespace EasyNetQ.Diagnostics
+{
+    public sealed class ConsumerTelemetry
+    {
+        public ConsumerTelemetry(string queue, string messagingSystem) { }
+        public string MessagingSystem { get; }
+        public string Queue { get; }
+        public string SpanName { get; }
+    }
+    public enum ContextPropagationMode
+    {
+        Auto = 0,
+        Always = 1,
+        Never = 2,
+    }
+    public static class EasyNetQDiagnostics
+    {
+        public const string SourceName = "EasyNetQ";
+        public static readonly System.Diagnostics.Metrics.Counter<long> ConsumedMessages;
+        public static readonly System.Diagnostics.Metrics.UpDownCounter<long> ConsumerInFlight;
+        public static readonly System.Diagnostics.Metrics.Counter<long> ConsumerMessages;
+        public static readonly System.Diagnostics.Metrics.Meter Meter;
+        public static readonly System.Diagnostics.Metrics.Histogram<double> OperationDuration;
+        public static readonly System.Diagnostics.Metrics.Histogram<double> ProcessDuration;
+        public static readonly System.Diagnostics.Metrics.Counter<long> SentMessages;
+        public static readonly System.Diagnostics.ActivitySource Source;
+    }
+    public static class MessagingTags
+    {
+        public const string AckDecision = "easynetq.ack.decision";
+        public const string BodySize = "messaging.message.body.size";
+        public const string ConversationId = "messaging.message.conversation_id";
+        public const string DestinationName = "messaging.destination.name";
+        public const string DestinationSubscriptionName = "messaging.destination.subscription.name";
+        public const string ErrorQueue = "easynetq.error.queue";
+        public const string ErrorType = "error.type";
+        public const string MessageId = "messaging.message.id";
+        public const string MessageType = "easynetq.message.type";
+        public const string MessagingSystem = "messaging.system";
+        public const string OperationName = "messaging.operation.name";
+        public const string OperationType = "messaging.operation.type";
+        public const string RabbitMqDeliveryTag = "messaging.rabbitmq.message.delivery_tag";
+        public const string RabbitMqRoutingKey = "messaging.rabbitmq.destination.routing_key";
+        public const string ServerAddress = "server.address";
+        public const string ServerPort = "server.port";
+    }
+    public sealed class TelemetryOptions
+    {
+        public TelemetryOptions() { }
+        public string MessagingSystem { get; set; }
+        public EasyNetQ.Diagnostics.ContextPropagationMode PropagateContext { get; set; }
+        public bool RecordBodySize { get; set; }
+        public bool RecordMessageType { get; set; }
+        public bool RecordRoutingKey { get; set; }
+    }
+}
 namespace EasyNetQ.Events
 {
     public readonly struct ConnectionRestoredEvent : System.IEquatable<EasyNetQ.Events.ConnectionRestoredEvent>
@@ -876,6 +932,7 @@ namespace EasyNetQ.Pipeline
     }
     public static class Keys
     {
+        public static readonly EasyNetQ.Pipeline.PropertyKey<EasyNetQ.Diagnostics.ConsumerTelemetry> ConsumerTelemetry;
         public static readonly EasyNetQ.Pipeline.PropertyKey<EasyNetQ.IMessageSerializer> Serializer;
     }
     public abstract class LayerContext : EasyNetQ.Pipeline.IProperties, EasyNetQ.Pipeline.IReadOnlyProperties
@@ -896,7 +953,11 @@ namespace EasyNetQ.Pipeline
     {
         public static EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> UseConsumeErrorStrategy(this EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> builder) { }
         public static EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> UseConsumeInterceptors(this EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> builder) { }
+        public static EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> UseConsumeMetrics(this EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> builder) { }
+        public static EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> UseConsumeTracing(this EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> builder) { }
         public static EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.PublishContext> UseProduceInterceptors(this EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.PublishContext> builder) { }
+        public static EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.PublishContext> UsePublishMetrics(this EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.PublishContext> builder) { }
+        public static EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.PublishContext> UsePublishTracing(this EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.PublishContext> builder) { }
         public static EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> UseScope(this EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> builder) { }
     }
     public sealed class PipelineBuilder<TContext>
@@ -910,6 +971,7 @@ namespace EasyNetQ.Pipeline
             where TMarker : EasyNetQ.Pipeline.IMiddleware<TContext> { }
         public EasyNetQ.Pipeline.PipelineBuilder<TContext> InsertBefore<TMarker>(EasyNetQ.Pipeline.IMiddleware<TContext> middleware)
             where TMarker : EasyNetQ.Pipeline.IMiddleware<TContext> { }
+        public EasyNetQ.Pipeline.PipelineBuilder<TContext> Prepend(EasyNetQ.Pipeline.IMiddleware<TContext> middleware, string? name = null) { }
         public EasyNetQ.Pipeline.PipelineBuilder<TContext> Remove(string name) { }
         public EasyNetQ.Pipeline.PipelineBuilder<TContext> Remove<TMarker>()
             where TMarker : EasyNetQ.Pipeline.IMiddleware<TContext> { }
@@ -971,6 +1033,16 @@ namespace EasyNetQ.Pipeline.Middleware
         public ConsumeInterceptorMiddleware(System.Collections.Generic.IEnumerable<EasyNetQ.Interception.IProduceConsumeInterceptor> interceptors) { }
         public System.Threading.Tasks.ValueTask InvokeAsync(EasyNetQ.Pipeline.ConsumeContext context, EasyNetQ.Pipeline.PipelineStep<EasyNetQ.Pipeline.ConsumeContext> next) { }
     }
+    public sealed class ConsumeMetricsMiddleware : EasyNetQ.Pipeline.IMiddleware<EasyNetQ.Pipeline.ConsumeContext>
+    {
+        public ConsumeMetricsMiddleware(EasyNetQ.Diagnostics.TelemetryOptions options) { }
+        public System.Threading.Tasks.ValueTask InvokeAsync(EasyNetQ.Pipeline.ConsumeContext context, EasyNetQ.Pipeline.PipelineStep<EasyNetQ.Pipeline.ConsumeContext> next) { }
+    }
+    public sealed class ConsumeTracingMiddleware : EasyNetQ.Pipeline.IMiddleware<EasyNetQ.Pipeline.ConsumeContext>
+    {
+        public ConsumeTracingMiddleware(EasyNetQ.Diagnostics.TelemetryOptions options) { }
+        public System.Threading.Tasks.ValueTask InvokeAsync(EasyNetQ.Pipeline.ConsumeContext context, EasyNetQ.Pipeline.PipelineStep<EasyNetQ.Pipeline.ConsumeContext> next) { }
+    }
     public sealed class DeserializeStep : EasyNetQ.Pipeline.IMiddleware<EasyNetQ.Pipeline.ConsumeContext>
     {
         public DeserializeStep() { }
@@ -985,6 +1057,16 @@ namespace EasyNetQ.Pipeline.Middleware
     public sealed class ProduceInterceptorMiddleware : EasyNetQ.Pipeline.IMiddleware<EasyNetQ.Pipeline.PublishContext>
     {
         public ProduceInterceptorMiddleware(System.Collections.Generic.IEnumerable<EasyNetQ.Interception.IProduceConsumeInterceptor> interceptors) { }
+        public System.Threading.Tasks.ValueTask InvokeAsync(EasyNetQ.Pipeline.PublishContext context, EasyNetQ.Pipeline.PipelineStep<EasyNetQ.Pipeline.PublishContext> next) { }
+    }
+    public sealed class PublishMetricsMiddleware : EasyNetQ.Pipeline.IMiddleware<EasyNetQ.Pipeline.PublishContext>
+    {
+        public PublishMetricsMiddleware(EasyNetQ.Diagnostics.TelemetryOptions options) { }
+        public System.Threading.Tasks.ValueTask InvokeAsync(EasyNetQ.Pipeline.PublishContext context, EasyNetQ.Pipeline.PipelineStep<EasyNetQ.Pipeline.PublishContext> next) { }
+    }
+    public sealed class PublishTracingMiddleware : EasyNetQ.Pipeline.IMiddleware<EasyNetQ.Pipeline.PublishContext>
+    {
+        public PublishTracingMiddleware(EasyNetQ.Diagnostics.TelemetryOptions options) { }
         public System.Threading.Tasks.ValueTask InvokeAsync(EasyNetQ.Pipeline.PublishContext context, EasyNetQ.Pipeline.PipelineStep<EasyNetQ.Pipeline.PublishContext> next) { }
     }
     public sealed class ResolveHandlerStep : EasyNetQ.Pipeline.IMiddleware<EasyNetQ.Pipeline.ConsumeContext>

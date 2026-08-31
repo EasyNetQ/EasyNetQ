@@ -7,6 +7,7 @@ using EasyNetQ.Pipeline;
 using EasyNetQ.Pipeline.Middleware;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
@@ -161,6 +162,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             PrefetchCount = prefetchCount,
             AutoAck = perQueueConfiguration.AutoAck,
         };
+        SetConsumerTelemetry(consumerContext, queue.Name);
         consumerContext.MessagePipeline = consumePipelineBuilder.Build(services, terminal);
         return new PerQueueConsumerConfiguration(
             perQueueConfiguration.AutoAck,
@@ -168,6 +170,15 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             perQueueConfiguration.IsExclusive,
             perQueueConfiguration.Arguments,
             consumerContext
+        );
+    }
+
+    private void SetConsumerTelemetry(ConsumerContext consumerContext, string queue)
+    {
+        var telemetryOptions = services.GetService<EasyNetQ.Diagnostics.TelemetryOptions>();
+        consumerContext.Set(
+            Keys.ConsumerTelemetry,
+            new EasyNetQ.Diagnostics.ConsumerTelemetry(queue, telemetryOptions?.MessagingSystem ?? "rabbitmq")
         );
     }
 
@@ -188,6 +199,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             AutoAck = perQueueConfiguration.AutoAck,
             Handlers = table,
         };
+        SetConsumerTelemetry(consumerContext, queue.Name);
         consumerContext.MessagePipeline = consumePipelineBuilder.Clone()
             .Use(ResolveMessageTypeStep)
             .Use(ResolveHandlerStep)

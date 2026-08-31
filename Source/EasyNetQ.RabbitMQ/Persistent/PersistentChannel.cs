@@ -190,11 +190,27 @@ public sealed class PersistentChannel : IPersistentChannel
     private void AttachChannelEvents(IChannel channel)
     {
         channel.BasicReturnAsync += OnReturn;
+        channel.CallbackExceptionAsync += OnCallbackException;
+        channel.FlowControlAsync += OnFlowControl;
     }
 
     private void DetachChannelEvents(IChannel channel)
     {
+        channel.FlowControlAsync -= OnFlowControl;
+        channel.CallbackExceptionAsync -= OnCallbackException;
         channel.BasicReturnAsync -= OnReturn;
+    }
+
+    private Task OnCallbackException(object sender, CallbackExceptionEventArgs e)
+    {
+        logger.ChannelCallbackError(e.Exception);
+        return Task.CompletedTask;
+    }
+
+    private Task OnFlowControl(object sender, FlowControlEventArgs e)
+    {
+        logger.ChannelFlowControlChanged(e.Active);
+        return Task.CompletedTask;
     }
 
     private Task OnReturn(object sender, BasicReturnEventArgs args)

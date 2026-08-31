@@ -55,6 +55,15 @@ public sealed class PipelineBuilder<TContext> where TContext : LayerContext
         => Append(new Registration(null, name, _ => new DelegateMiddleware(step)));
 
     /// <summary>
+    ///     Inserts a middleware instance at the front of the pipeline (outermost position)
+    /// </summary>
+    public PipelineBuilder<TContext> Prepend(IMiddleware<TContext> middleware, string? name = null)
+    {
+        registrations.Insert(0, new Registration(middleware.GetType(), name ?? middleware.GetType().Name, _ => middleware));
+        return this;
+    }
+
+    /// <summary>
     ///     Replaces the middleware registered as <typeparamref name="TMarker" />
     /// </summary>
     public PipelineBuilder<TContext> Replace<TMarker>(IMiddleware<TContext> replacement) where TMarker : IMiddleware<TContext>

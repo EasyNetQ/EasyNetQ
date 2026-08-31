@@ -24,6 +24,12 @@ internal static partial class Log
     [LoggerMessage(103, LogLevel.Information, "Connection {Type} blocked with reason {Reason}")]
     public static partial void ConnectionBlocked(this ILogger logger, PersistentConnectionType type, string? reason);
 
+    [LoggerMessage(105, LogLevel.Error, "Connection {Type} recovery attempt failed; the client will retry on its recovery interval")]
+    public static partial void ConnectionRecoveryError(this ILogger logger, Exception exception, PersistentConnectionType type);
+
+    [LoggerMessage(106, LogLevel.Error, "Exception escaped a connection {Type} event callback")]
+    public static partial void ConnectionCallbackError(this ILogger logger, Exception exception, PersistentConnectionType type);
+
     [LoggerMessage(104, LogLevel.Information, "Connection {Type} unblocked")]
     public static partial void ConnectionUnblocked(this ILogger logger, PersistentConnectionType type);
 
@@ -39,6 +45,12 @@ internal static partial class Log
 
     [LoggerMessage(202, LogLevel.Error, "Failed to invoke channel action, invocation will be retried")]
     public static partial void FailedToInvokeChannelAction(this ILogger logger, Exception exception);
+
+    [LoggerMessage(203, LogLevel.Error, "Exception escaped a channel event callback")]
+    public static partial void ChannelCallbackError(this ILogger logger, Exception exception);
+
+    [LoggerMessage(204, LogLevel.Information, "Channel flow control changed: active={Active}")]
+    public static partial void ChannelFlowControlChanged(this ILogger logger, bool active);
 
     #endregion
 

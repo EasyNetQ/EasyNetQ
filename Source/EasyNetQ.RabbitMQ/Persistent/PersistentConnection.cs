@@ -130,6 +130,8 @@ public class PersistentConnection : IPersistentConnection
         connection.ConnectionBlockedAsync += OnConnectionBlocked;
         connection.ConnectionUnblockedAsync += OnConnectionUnblocked;
         connection.RecoverySucceededAsync += OnConnectionRecovered;
+        connection.ConnectionRecoveryErrorAsync += OnConnectionRecoveryError;
+        connection.CallbackExceptionAsync += OnCallbackException;
 
         return connection;
     }
@@ -155,6 +157,18 @@ public class PersistentConnection : IPersistentConnection
         logger.ConnectionRecovered(type, connection.Endpoint.HostName, connection.Endpoint.Port);
         await eventBus.PublishAsync(new ConnectionRecoveredEvent(type, connection.Endpoint));
         await eventBus.PublishAsync(new ConnectionRestoredEvent(type));
+    }
+
+    private async Task OnConnectionRecoveryError(object sender, ConnectionRecoveryErrorEventArgs e)
+    {
+        logger.ConnectionRecoveryError(e.Exception, type);
+        await eventBus.PublishAsync(new ConnectionRecoveryErrorEvent(type, e.Exception));
+    }
+
+    private async Task OnCallbackException(object sender, CallbackExceptionEventArgs e)
+    {
+        logger.ConnectionCallbackError(e.Exception, type);
+        await eventBus.PublishAsync(new ConnectionCallbackErrorEvent(type, e.Exception));
     }
 
     private async Task OnConnectionShutdown(object sender, ShutdownEventArgs e)

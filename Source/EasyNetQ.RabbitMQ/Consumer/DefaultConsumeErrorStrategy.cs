@@ -1,4 +1,5 @@
 using EasyNetQ.ChannelDispatcher;
+using EasyNetQ.Diagnostics;
 using EasyNetQ.Internals;
 using EasyNetQ.Persistent;
 using EasyNetQ.Pipeline;
@@ -75,6 +76,19 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
             logger.FailedMessageBody(receivedInfo.Queue, Convert.ToBase64String(body));
         }
 
+        // the republish to the error queue gets its own PRODUCER span so failed messages are visible in traces
+        using var errorPublishActivity = EasyNetQDiagnostics.Source.HasListeners()
+            ? EasyNetQDiagnostics.Source.StartActivity($"send {conventions.ErrorExchangeNamingConvention(receivedInfo)}", System.Diagnostics.ActivityKind.Producer)
+            : null;
+        if (errorPublishActivity is not null)
+        {
+            errorPublishActivity.SetTag(MessagingTags.ErrorQueue, true);
+            errorPublishActivity.SetTag(MessagingTags.DestinationName, conventions.ErrorExchangeNamingConvention(receivedInfo));
+            errorPublishActivity.SetTag(MessagingTags.ErrorType, exception.GetType().FullName);
+            if (properties.CorrelationIdPresent)
+                errorPublishActivity.SetTag(MessagingTags.ConversationId, properties.CorrelationId);
+        }
+
         try
         {
             // one long-lived channel per bus (with reconnect/retry) instead of a channel per failed message;
@@ -118,6 +132,7 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
             logger.FailedToPublishErrorMessage(unexpectedException);
         }
 
+        errorPublishActivity?.SetStatus(System.Diagnostics.ActivityStatusCode.Error, "Error message publish failed");
         return AckDecision.NackRequeue;
     }
 

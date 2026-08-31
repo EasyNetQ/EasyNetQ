@@ -584,6 +584,12 @@ namespace EasyNetQ.Events
         public string Reason { get; init; }
         public EasyNetQ.Persistent.PersistentConnectionType Type { get; init; }
     }
+    public readonly struct ConnectionCallbackErrorEvent : System.IEquatable<EasyNetQ.Events.ConnectionCallbackErrorEvent>
+    {
+        public ConnectionCallbackErrorEvent(EasyNetQ.Persistent.PersistentConnectionType Type, System.Exception Exception) { }
+        public System.Exception Exception { get; init; }
+        public EasyNetQ.Persistent.PersistentConnectionType Type { get; init; }
+    }
     public readonly struct ConnectionCreatedEvent : System.IEquatable<EasyNetQ.Events.ConnectionCreatedEvent>
     {
         public ConnectionCreatedEvent(EasyNetQ.Persistent.PersistentConnectionType Type, RabbitMQ.Client.AmqpTcpEndpoint Endpoint) { }
@@ -601,6 +607,12 @@ namespace EasyNetQ.Events
     {
         public ConnectionRecoveredEvent(EasyNetQ.Persistent.PersistentConnectionType Type, RabbitMQ.Client.AmqpTcpEndpoint Endpoint) { }
         public RabbitMQ.Client.AmqpTcpEndpoint Endpoint { get; init; }
+        public EasyNetQ.Persistent.PersistentConnectionType Type { get; init; }
+    }
+    public readonly struct ConnectionRecoveryErrorEvent : System.IEquatable<EasyNetQ.Events.ConnectionRecoveryErrorEvent>
+    {
+        public ConnectionRecoveryErrorEvent(EasyNetQ.Persistent.PersistentConnectionType Type, System.Exception Exception) { }
+        public System.Exception Exception { get; init; }
         public EasyNetQ.Persistent.PersistentConnectionType Type { get; init; }
     }
     public readonly struct ConnectionUnblockedEvent : System.IEquatable<EasyNetQ.Events.ConnectionUnblockedEvent>
