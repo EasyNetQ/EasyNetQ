@@ -5,8 +5,11 @@ signatures and internals do not.
 
 ## Platform and packaging
 
-- Target frameworks: `net8.0`, `net9.0`, `net10.0`. `netstandard2.0`/.NET Framework support ends; stay on 8.x
-  for those.
+- Target frameworks: `netstandard2.0`, `net8.0`, `net9.0`, `net10.0`. .NET Framework 4.7.2+ works through
+  the `netstandard2.0` assets, but only from SDK-style projects: the required source generator runs in the
+  compiler, so packages.config-era projects cannot use v9 — stay on 8.x there. The `netstandard2.0` binaries
+  trade some publish/consume-path efficiency (no pooled async builders) for reach; `net8.0`+ binaries are
+  unaffected.
 - The `EasyNetQ` package is now a bundle over two new packages: `EasyNetQ.Core` (transport-agnostic) and
   `EasyNetQ.RabbitMQ` (client-coupled). Keep referencing `EasyNetQ` for a drop-in experience. Types moved
   between assemblies, so binary compatibility is gone even where source compatibility remains: recompile.

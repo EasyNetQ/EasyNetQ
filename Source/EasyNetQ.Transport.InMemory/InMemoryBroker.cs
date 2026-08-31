@@ -70,7 +70,9 @@ public sealed class InMemoryBroker
         if (!exchanges.TryGetValue(binding.Source, out var exchange)) return;
         // ConcurrentBag has no remove; rebuild without the binding
         var remaining = exchange.Bindings.Where(b => b != binding).ToList();
-        exchange.Bindings.Clear();
+        while (exchange.Bindings.TryTake(out _))
+        {
+        }
         foreach (var b in remaining) exchange.Bindings.Add(b);
     }
 

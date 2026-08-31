@@ -15,6 +15,7 @@
   <Folder Name="/Examples/">
     <Project Path="EasyNetQ.Examples.Aot/EasyNetQ.Examples.Aot.csproj" />
     <Project Path="EasyNetQ.Examples.DlxRetry/EasyNetQ.Examples.DlxRetry.csproj" />
+    <Project Path="EasyNetQ.Examples.NetFramework/EasyNetQ.Examples.NetFramework.csproj" />
     <Project Path="EasyNetQ.Examples.PubSubWithAdvancedApi/EasyNetQ.Examples.PubSubWithAdvancedApi.csproj" />
     <Project Path="EasyNetQ.Examples.Rpc/EasyNetQ.Examples.Rpc.csproj" />
   </Folder>

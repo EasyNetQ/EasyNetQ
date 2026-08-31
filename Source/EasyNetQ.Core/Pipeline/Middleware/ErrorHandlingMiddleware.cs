@@ -24,7 +24,9 @@ public sealed class ErrorHandlingMiddleware : IMiddleware<ConsumeContext>
     }
 
     /// <inheritdoc />
+#if NET
     [AsyncMethodBuilder(typeof(PoolingAsyncValueTaskMethodBuilder))]
+#endif
     public async ValueTask InvokeAsync(ConsumeContext context, PipelineStep<ConsumeContext> next)
     {
         try

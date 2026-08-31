@@ -61,7 +61,8 @@ public sealed class TransportMessagePublisher : IMessagePublisher, IAsyncDisposa
     /// <inheritdoc />
     public ValueTask PublishAsync<T>(T message, string routingKey, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(routingKey);
+        if (routingKey is null)
+            throw new ArgumentNullException(nameof(routingKey));
         return PublishInternalAsync(message, routingKey, cancellationToken);
     }
 

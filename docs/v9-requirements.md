@@ -17,13 +17,12 @@ Working document for the v9 rewrite. Edit as decisions change; the phase plan de
 
 ## Confirmed decisions
 
-- TFMs: net8.0;net9.0;net10.0. netstandard2.0 dropped; 8.x branch serves .NET Framework users.
-  Re-evaluated 2026-08-31: feasible (RabbitMQ.Client 7.x ships netstandard2.0; Core uses 4 TFM guards and no
-  net8-only types). If demand appears, add netstandard2.0 to the existing csprojs with per-TFM package refs and
-  `#if` — never a separate compat or "latest" assembly. NuGet TFM asset selection is the isolation mechanism;
-  assembly splits break type identity and polyfills cannot cross assemblies. Cost if taken: polyfill packages
-  return, pooled async builders lost on that TFM, a Windows net472 CI leg, and the generator only works for
-  SDK-style consumers. Decision point: phase 6.
+- TFMs: netstandard2.0;net8.0;net9.0;net10.0. netstandard2.0 restored 2026-08-31 (maintainer: key selling
+  point). Mechanism: multi-target the existing csprojs with per-TFM package refs, PolySharp and `#if` — never a
+  separate compat or "latest" assembly (NuGet TFM asset selection is the isolation mechanism; assembly splits
+  break type identity and polyfills cannot cross assemblies). Known limits: .NET Framework consumers need
+  SDK-style projects (the required generator runs in the compiler); pooled async builders are net-only, so the
+  ns2.0 binaries allocate slightly more; net472 compile proof lives in EasyNetQ.Examples.NetFramework.
 - Packages: EasyNetQ.Core + EasyNetQ.RabbitMQ; the EasyNetQ package id becomes the drop-in compat bundle.
 - Compat: best effort. API shape kept, signatures may break; migration guide instead of an 8.x snapshot gate.
 - Source generator: required for any assembly referencing Core.

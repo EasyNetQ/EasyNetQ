@@ -8,7 +8,7 @@ EasyNetQ is a .NET client API for RabbitMQ. It provides a high-level abstraction
 EasyNetQ/
 ├── Assets/                          # Package icon, strong-name key (EasyNetQ.snk)
 ├── Source/
-│   ├── EasyNetQ/                    # Core library (net8.0;net9.0;net10.0)
+│   ├── EasyNetQ/                    # Core library (netstandard2.0;net8.0;net9.0;net10.0)
 │   ├── EasyNetQ.Serialization.NewtonsoftJson/  # Optional Newtonsoft.Json serializer
 │   ├── EasyNetQ.Hosepipe/           # CLI tool for dead-letter message replay
 │   ├── EasyNetQ.Tests/              # Unit tests (xUnit v3, net10.0)

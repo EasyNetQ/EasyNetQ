@@ -18,13 +18,28 @@ public static class Timers
     /// </summary>
     public static IDisposable Start(Func<Task> callback, TimeSpan period, ILogger logger)
     {
+#if NET
         var timer = new PeriodicTimer(period);
 #pragma warning disable CS4014 // Don't dispose injected
         StartAsync(timer, callback, logger);
 #pragma warning restore CS4014 // Don't dispose injected
         return timer;
+#else
+        return new Timer(async _ =>
+        {
+            try
+            {
+                await callback().ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                logger.TimerCallbackError(exception);
+            }
+        }, null, period, period);
+#endif
     }
 
+#if NET
     private static async Task StartAsync(PeriodicTimer timer, Func<Task> callback, ILogger logger)
     {
         while (await timer.WaitForNextTickAsync())
@@ -39,4 +54,5 @@ public static class Timers
             }
         }
     }
+#endif
 }

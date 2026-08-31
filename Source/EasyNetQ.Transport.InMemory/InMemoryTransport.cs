@@ -83,28 +83,30 @@ internal sealed class InMemoryConsumer : ITransportConsumer
         ulong deliveryTag = 0;
         try
         {
-            await foreach (var delivery in queue.Deliveries.Reader.ReadAllAsync(cancellationToken).ConfigureAwait(false))
-            {
-                var context = consumerContext.RentMessageContext();
-                try
+            var reader = queue.Deliveries.Reader;
+            while (await reader.WaitToReadAsync(cancellationToken).ConfigureAwait(false))
+                while (reader.TryRead(out var delivery))
                 {
-                    context.ReceivedInfo = new MessageReceivedInfo(
-                        "inmemory", ++deliveryTag, delivery.Redelivered, delivery.Exchange, delivery.RoutingKey, consumerContext.Queue
-                    );
-                    context.Properties = delivery.Properties;
-                    context.Body = delivery.Body;
-                    context.CancellationToken = cancellationToken;
+                    var context = consumerContext.RentMessageContext();
+                    try
+                    {
+                        context.ReceivedInfo = new MessageReceivedInfo(
+                            "inmemory", ++deliveryTag, delivery.Redelivered, delivery.Exchange, delivery.RoutingKey, consumerContext.Queue
+                        );
+                        context.Properties = delivery.Properties;
+                        context.Body = delivery.Body;
+                        context.CancellationToken = cancellationToken;
 
-                    await pipeline!(context).ConfigureAwait(false);
+                        await pipeline!(context).ConfigureAwait(false);
 
-                    if (!consumerContext.AutoAck && context.Ack == AckDecision.NackRequeue)
-                        broker.Redeliver(consumerContext.Queue, delivery);
+                        if (!consumerContext.AutoAck && context.Ack == AckDecision.NackRequeue)
+                            broker.Redeliver(consumerContext.Queue, delivery);
+                    }
+                    finally
+                    {
+                        consumerContext.ReturnMessageContext(context);
+                    }
                 }
-                finally
-                {
-                    consumerContext.ReturnMessageContext(context);
-                }
-            }
         }
         catch (OperationCanceledException)
         {

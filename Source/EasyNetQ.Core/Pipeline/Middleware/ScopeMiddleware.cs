@@ -10,7 +10,9 @@ namespace EasyNetQ.Pipeline.Middleware;
 public sealed class ScopeMiddleware : IMiddleware<ConsumeContext>
 {
     /// <inheritdoc />
+#if NET
     [AsyncMethodBuilder(typeof(PoolingAsyncValueTaskMethodBuilder))]
+#endif
     public async ValueTask InvokeAsync(ConsumeContext context, PipelineStep<ConsumeContext> next)
     {
         var services = context.Services;

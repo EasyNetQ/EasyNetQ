@@ -43,7 +43,7 @@ public sealed class ConsumeMetricsMiddleware : IMiddleware<ConsumeContext>
         }
         finally
         {
-            var elapsed = Stopwatch.GetElapsedTime(startedAt);
+            var elapsed = Internals.StopwatchHelper.GetElapsedTime(startedAt);
             EasyNetQDiagnostics.ConsumerInFlight.Add(-1);
 
             var tags = new TagList
