@@ -132,7 +132,7 @@ public class When_subscribe_with_configuration_is_called
     [InlineData(null, false, 0, 0, null, false, null, true, "qqq", null, null)]
     [Theory]
     public async Task Queue_should_be_declared_with_correct_options(
-        string topic,
+        string? topic,
         bool autoDelete,
         int priority,
         ushort prefetchCount,

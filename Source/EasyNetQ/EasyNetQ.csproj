@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>A nice .NET API for RabbitMQ</Description>
-    <TargetFrameworks>netstandard2.0;net8.0;net9.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>EasyNetQ</PackageId>
@@ -11,14 +11,12 @@
     <PackageReference Include="RabbitMQ.Client" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" />
-    <PackageReference Include="System.Text.Json" />
-  </ItemGroup>
   <ItemGroup Label="InternalsVisibleTo">
     <InternalsVisibleTo Include="EasyNetQ.Tests" />
     <InternalsVisibleTo Include="EasyNetQ.Hosepipe" />
     <InternalsVisibleTo Include="EasyNetQ.Hosepipe.Tests" />
     <InternalsVisibleTo Include="EasyNetQ.Serialization.Tests" />
+    <InternalsVisibleTo Include="EasyNetQ.Benchmarks" />
+    <InternalsVisibleTo Include="EasyNetQ.AllocationTests" />
   </ItemGroup>
 </Project>

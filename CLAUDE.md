@@ -8,10 +8,10 @@ EasyNetQ is a .NET client API for RabbitMQ. It provides a high-level abstraction
 EasyNetQ/
 ├── Assets/                          # Package icon, strong-name key (EasyNetQ.snk)
 ├── Source/
-│   ├── EasyNetQ/                    # Core library (netstandard2.0;net8.0;net9.0;net10.0)
+│   ├── EasyNetQ/                    # Core library (net8.0;net9.0;net10.0)
 │   ├── EasyNetQ.Serialization.NewtonsoftJson/  # Optional Newtonsoft.Json serializer
 │   ├── EasyNetQ.Hosepipe/           # CLI tool for dead-letter message replay
-│   ├── EasyNetQ.Tests/              # Unit tests (xUnit, net8.0)
+│   ├── EasyNetQ.Tests/              # Unit tests (xUnit v3, net10.0)
 │   ├── EasyNetQ.Serialization.Tests/
 │   ├── EasyNetQ.IntegrationTests/   # Docker-based RabbitMQ integration tests
 │   ├── EasyNetQ.ApprovalTests/      # Public API surface snapshot tests
@@ -53,7 +53,7 @@ dotnet format --verify-no-changes --severity warn Source/EasyNetQ.slnx
 - **Accessibility**: Always explicit (`public`, `private`, etc.)
 - **Readonly**: Enforce `readonly` on fields where possible
 - **Naming**: PascalCase for public members, camelCase for private fields (no underscore prefix), `I` prefix for interfaces
-- **Null guards**: The core `EasyNetQ` project uses Fody NullGuard for automatic null checks
+- **Nullable**: `<Nullable>enable</Nullable>` is on solution-wide (warnings, not errors); no Fody/NullGuard
 - **XML docs**: Generated for all public APIs (`GenerateDocumentationFile=true`)
 
 ## Architecture
@@ -75,12 +75,12 @@ dotnet format --verify-no-changes --severity warn Source/EasyNetQ.slnx
 
 ## Testing Conventions
 
-- **Framework**: xUnit 2.x + FluentAssertions + NSubstitute
+- **Framework**: xUnit v3 + AwesomeAssertions (FluentAssertions-compatible API) + NSubstitute
 - **Naming**: Classes `When_<scenario>`, methods `Should_<expected>`
 - **MockBuilder**: Central test helper in `EasyNetQ.Tests/Mocking/MockBuilder.cs` wires DI with substituted RabbitMQ infrastructure
 - **Integration tests**: Use Docker (RabbitMQ container via `docker.dotnet`)
 - **Approval tests**: `PublicApiGenerator` + `Shouldly` to snapshot public API surface
-- **Global usings**: Test projects use `GlobalUsings.cs` importing xUnit, FluentAssertions, NSubstitute
+- **Global usings**: Test projects use `GlobalUsings.cs` importing xUnit, AwesomeAssertions, NSubstitute
 
 ## CI/CD
 
@@ -88,4 +88,4 @@ dotnet format --verify-no-changes --severity warn Source/EasyNetQ.slnx
 - Runs on: push to `master`/`N.x`, PRs to `master`/`develop`, version tags
 - Steps: restore → format check → build → test (unit + serialization + hosepipe + integration + approval)
 - Publish: tag push triggers `dotnet pack` + `dotnet nuget push` to nuget.org
-- .NET SDK: 8.x in CI
+- .NET SDK: 10.x in CI (pinned via `global.json`); test/example projects target net10.0
