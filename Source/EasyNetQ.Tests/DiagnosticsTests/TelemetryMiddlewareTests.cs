@@ -1,7 +1,9 @@
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using EasyNetQ.Diagnostics;
+using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Tests.DiagnosticsTests;
 
@@ -81,6 +83,46 @@ public class TelemetryMiddlewareTests
         activity.GetTagItem(MessagingTags.DestinationSubscriptionName).Should().Be("telemetry_queue");
         activity.GetTagItem(MessagingTags.AckDecision).Should().Be("ack");
         activity.Status.Should().NotBe(ActivityStatusCode.Error);
+    }
+
+    [Fact]
+    public async Task Should_emit_rpc_client_span_around_request_response()
+    {
+        var activities = new List<Activity>();
+        using var listener = CreateListener(activities);
+
+        var correlationId = Guid.NewGuid().ToString();
+        await using var mockBuilder = new MockBuilder(
+            c => c.AddSingleton<ICorrelationIdGenerationStrategy>(_ => new StaticCorrelationIdGenerationStrategy(correlationId))
+        );
+
+        using var waiter = new CountdownEvent(2);
+#pragma warning disable IDISP004
+        mockBuilder.Published += () => waiter.Signal();
+        mockBuilder.EventBus.Subscribe((StartConsumingSucceededEvent _) => Task.FromResult(waiter.Signal()));
+#pragma warning restore IDISP004
+
+        var task = mockBuilder.Rpc.RequestAsync<TestRequestMessage, TestResponseMessage>(
+            new TestRequestMessage(), TestContext.Current.CancellationToken
+        );
+        waiter.Wait(5000, TestContext.Current.CancellationToken).Should().BeTrue();
+
+        await mockBuilder.Consumers[0].HandleBasicDeliverAsync(
+            "consumer_tag", 0, false, "the_exchange", "the_routing_key",
+            new RabbitMQ.Client.BasicProperties
+            {
+                Type = "EasyNetQ.Tests.TestResponseMessage, EasyNetQ.Tests",
+                CorrelationId = correlationId
+            },
+            "{ Id:12, Text:\"Hello\"}"u8.ToArray(),
+            TestContext.Current.CancellationToken
+        );
+        await task;
+
+        var rpcActivity = activities.Should().ContainSingle(a => a.OperationName.StartsWith("rpc ")).Subject;
+        rpcActivity.Kind.Should().Be(ActivityKind.Client);
+        rpcActivity.GetTagItem(MessagingTags.ConversationId).Should().Be(correlationId);
+        rpcActivity.Status.Should().NotBe(ActivityStatusCode.Error);
     }
 
     [Fact]

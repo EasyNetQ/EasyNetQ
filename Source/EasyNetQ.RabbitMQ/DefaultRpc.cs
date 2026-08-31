@@ -1,5 +1,7 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Text;
+using EasyNetQ.Diagnostics;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
 using EasyNetQ.Persistent;
@@ -75,8 +77,21 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
         using var cts = cancellationToken.WithTimeout(requestConfiguration.Expiration);
 
         var correlationId = correlationIdGenerationStrategy.GetCorrelationId();
+
+        // one CLIENT span for the whole request/response round trip; the response's process span links back
+        using var rpcActivity = EasyNetQDiagnostics.Source.HasListeners()
+            ? EasyNetQDiagnostics.Source.StartActivity($"rpc {requestConfiguration.QueueName}", ActivityKind.Client)
+            : null;
+        if (rpcActivity is not null)
+        {
+            rpcActivity.SetTag(MessagingTags.MessagingSystem, "rabbitmq");
+            rpcActivity.SetTag(MessagingTags.OperationName, "rpc");
+            rpcActivity.SetTag(MessagingTags.DestinationName, requestConfiguration.QueueName);
+            rpcActivity.SetTag(MessagingTags.ConversationId, correlationId);
+        }
+
         var tcs = new TaskCompletionSource<TResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
-        RegisterResponseActions(correlationId, tcs, requestConfiguration.QueueType == QueueType.Quorum);
+        RegisterResponseActions(correlationId, tcs, requestConfiguration.QueueType == QueueType.Quorum, rpcActivity?.Context ?? default);
         using var callback = DisposableAction.Create(DeRegisterResponseActions, correlationId);
 
         var queueName = await SubscribeToResponseAsync<TRequest, TResponse>(requestConfiguration.QueueType, cts.Token).ConfigureAwait(false);
@@ -97,7 +112,24 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
             cts.Token
         ).ConfigureAwait(false);
         tcs.AttachCancellation(cts.Token);
-        return await tcs.Task.ConfigureAwait(false);
+        try
+        {
+            return await tcs.Task.ConfigureAwait(false);
+        }
+        catch (Exception exception) when (MarkRpcFailure(rpcActivity, exception))
+        {
+            throw; // MarkRpcFailure never handles, it only tags the span
+        }
+    }
+
+    private static bool MarkRpcFailure(Activity? activity, Exception exception)
+    {
+        if (activity is not null)
+        {
+            activity.SetTag(MessagingTags.ErrorType, exception.GetType().FullName);
+            activity.SetStatus(ActivityStatusCode.Error, exception.Message);
+        }
+        return false;
     }
 
     /// <inheritdoc />
@@ -157,7 +189,7 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
         responseActions.TryRemove(correlationId, out _);
     }
 
-    void RegisterResponseActions<TResponse>(string correlationId, TaskCompletionSource<TResponse> tcs, bool queueIsDurable)
+    void RegisterResponseActions<TResponse>(string correlationId, TaskCompletionSource<TResponse> tcs, bool queueIsDurable, in ActivityContext requestActivityContext)
     {
         var responseAction = new ResponseAction(
             (properties, body) =>
@@ -182,7 +214,7 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
                 new EasyNetQException(
                     $"Connection lost while request was in-flight. CorrelationId: {correlationId}"
                 )
-            ), queueIsDurable
+            ), queueIsDurable, requestActivityContext
         );
 
         responseActions.TryAdd(correlationId, responseAction);
@@ -228,7 +260,13 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
             {
                 var properties = context.Properties;
                 if (properties.CorrelationId != null && responseActions.TryRemove(properties.CorrelationId, out var responseAction))
+                {
+#if NET9_0_OR_GREATER
+                    if (responseAction.RequestActivityContext != default)
+                        Activity.Current?.AddLink(new ActivityLink(responseAction.RequestActivityContext));
+#endif
                     responseAction.OnSuccess(properties, body);
+                }
                 return new ValueTask<AckDecision>(AckDecision.Ack);
             }
         );
@@ -376,16 +414,18 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
 
     readonly struct ResponseAction
     {
-        public ResponseAction(Action<MessageProperties, object?> onSuccess, Action onFailure, bool queueIsDurable)
+        public ResponseAction(Action<MessageProperties, object?> onSuccess, Action onFailure, bool queueIsDurable, in ActivityContext requestActivityContext)
         {
             OnSuccess = onSuccess;
             OnFailure = onFailure;
             QueueIsDurable = queueIsDurable;
+            RequestActivityContext = requestActivityContext;
         }
 
         public bool QueueIsDurable { get; }
         public Action<MessageProperties, object?> OnSuccess { get; }
         public Action OnFailure { get; }
+        public ActivityContext RequestActivityContext { get; }
     }
 
     readonly struct ResponseSubscription
