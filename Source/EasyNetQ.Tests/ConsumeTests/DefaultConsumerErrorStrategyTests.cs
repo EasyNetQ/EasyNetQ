@@ -1,3 +1,4 @@
+using EasyNetQ.Pipeline;
 using System.Text;
 using EasyNetQ.Consumer;
 using Microsoft.Extensions.Logging;
@@ -22,7 +23,7 @@ public class DefaultConsumerErrorStrategyTests
             CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!"), cancellationToken: CancellationToken.None
         );
 
-        Assert.Equal(AckStrategies.AckAsync, ackStrategy);
+        Assert.Equal(AckDecision.Ack, ackStrategy);
     }
 
     [Fact]
@@ -48,7 +49,7 @@ public class DefaultConsumerErrorStrategyTests
         var ackStrategy = await consumerErrorStrategy.HandleErrorAsync(
             CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!"), cancellationToken: CancellationToken.None);
 
-        Assert.Equal(AckStrategies.NackWithRequeueAsync, ackStrategy);
+        Assert.Equal(AckDecision.NackRequeue, ackStrategy);
     }
 
     [Fact]
@@ -65,7 +66,7 @@ public class DefaultConsumerErrorStrategyTests
         var ackStrategy = await consumerErrorStrategy.HandleErrorAsync(
             CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!"), cancellationToken: CancellationToken.None);
 
-        Assert.Equal(AckStrategies.AckAsync, ackStrategy);
+        Assert.Equal(AckDecision.Ack, ackStrategy);
     }
 
     private static DefaultConsumeErrorStrategy CreateConsumerErrorStrategy(
@@ -86,7 +87,7 @@ public class DefaultConsumerErrorStrategyTests
 
     private static ConsumeContext CreateConsumerExecutionContext(byte[] originalMessageBody)
     {
-        return new ConsumeContext(
+        return TestContexts.Consume(
             new MessageReceivedInfo("consumertag", 0, false, "orginalExchange", "originalRoutingKey", "queue"),
             new MessageProperties
             {
@@ -94,8 +95,7 @@ public class DefaultConsumerErrorStrategyTests
                 AppId = "456"
             },
             originalMessageBody,
-            Substitute.For<IServiceProvider>(),
-            CancellationToken.None
+            Substitute.For<IServiceProvider>()
         );
     }
 

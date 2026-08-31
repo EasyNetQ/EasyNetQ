@@ -1,6 +1,7 @@
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
 using EasyNetQ.Persistent;
+using EasyNetQ.Pipeline;
 using EasyNetQ.Topology;
 using Microsoft.Extensions.Logging;
 
@@ -36,14 +37,14 @@ public class PerQueueConsumerConfiguration
         string consumerTag,
         bool isExclusive,
         IDictionary<string, object> arguments,
-        ConsumeDelegate consumeDelegate
+        ConsumerContext context
     )
     {
         AutoAck = autoAck;
         ConsumerTag = consumerTag;
         IsExclusive = isExclusive;
         Arguments = arguments;
-        ConsumeDelegate = consumeDelegate;
+        Context = context;
     }
 
     /// <summary>
@@ -67,9 +68,9 @@ public class PerQueueConsumerConfiguration
     public IDictionary<string, object> Arguments { get; }
 
     /// <summary>
-    ///     Handler for messages which are received by consumer
+    ///     Consumer-layer context: owns the message pipeline and the pooled message contexts
     /// </summary>
-    public ConsumeDelegate ConsumeDelegate { get; }
+    public ConsumerContext Context { get; }
 }
 
 /// <summary>

@@ -44,6 +44,10 @@ public sealed class MockBuilder : IAsyncDisposable
             var channel = channelPool.Pop();
             channels.Add(channel);
             channel.IsOpen.Returns(true);
+            channel.When(x => x.BasicPublishAsync(
+                    Arg.Any<string>(), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<RabbitMQ.Client.BasicProperties>(), Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>()
+                ))
+                .Do(_ => Published?.Invoke());
             channel.BasicConsumeAsync(Arg.Any<string>(), false, Arg.Any<string>(), true, false, Arg.Any<IDictionary<string, object>>(), Arg.Any<IAsyncBasicConsumer>(), default)
                 .ReturnsForAnyArgs(async consumeInvocation =>
                 {
@@ -110,6 +114,9 @@ public sealed class MockBuilder : IAsyncDisposable
     public IConsumeErrorStrategy ConsumeErrorStrategy => serviceProvider.GetRequiredService<IConsumeErrorStrategy>();
 
     public List<string> ConsumerQueueNames { get; } = new();
+
+    /// <summary>Raised whenever a message is published on any channel (replaces the removed per-message PublishedMessageEvent)</summary>
+    public event Action? Published;
 
     public async ValueTask DisposeAsync()
     {

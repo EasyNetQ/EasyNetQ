@@ -3,6 +3,7 @@ using EasyNetQ.Consumer;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
 using EasyNetQ.Persistent;
+using EasyNetQ.Pipeline;
 using EasyNetQ.Producer;
 using EasyNetQ.Topology;
 using Microsoft.Extensions.Logging;
@@ -16,7 +17,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 {
     private readonly IPersistentChannelDispatcher persistentChannelDispatcher;
     private readonly ConnectionConfiguration configuration;
-    private readonly ConsumePipelineBuilder consumePipelineBuilder;
+    private readonly PipelineBuilder<ConsumeContext> consumePipelineBuilder;
     private readonly IServiceProvider services;
     private readonly IPublishConfirmationListener confirmationListener;
     private readonly ILogger logger;
@@ -31,7 +32,10 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     private readonly AdvancedBusEventHandlers advancedBusEventHandlers;
 
     private volatile bool disposed;
-    private readonly ProduceDelegate produceDelegate;
+    private readonly PipelineStep<PublishContext> publishPipeline;
+    private readonly ContextPool<PublishContext> publishContextPool;
+    private readonly ConnectionContext producerConnectionContext;
+    private readonly ConnectionContext consumerConnectionContext;
 
     /// <summary>
     ///     Creates RabbitAdvancedBus
@@ -46,8 +50,8 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         IEventBus eventBus,
         IHandlerCollectionFactory handlerCollectionFactory,
         ConnectionConfiguration configuration,
-        ProducePipelineBuilder producePipelineBuilder,
-        ConsumePipelineBuilder consumePipelineBuilder,
+        PipelineBuilder<PublishContext> publishPipelineBuilder,
+        PipelineBuilder<ConsumeContext> consumePipelineBuilder,
         IServiceProvider services,
         IMessageSerializationStrategy messageSerializationStrategy,
         IPullingConsumerFactory pullingConsumerFactory,
@@ -85,7 +89,11 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             this.eventBus.Subscribe<ReturnedMessageEvent>(OnMessageReturned)
         ];
 
-        produceDelegate = producePipelineBuilder.Use(_ => PublishInternalAsync).Build();
+        producerConnectionContext = new ConnectionContext("Producer", services);
+        consumerConnectionContext = new ConnectionContext("Consumer", services);
+        var publishChannelContext = new ChannelContext(producerConnectionContext);
+        publishContextPool = new ContextPool<PublishContext>(() => new PublishContext(publishChannelContext));
+        publishPipeline = publishPipelineBuilder.Build(services, PublishInternalAsync);
     }
     public bool IsConnected =>
         (from PersistentConnectionType type in Enum.GetValues(typeof(PersistentConnectionType)) select GetConnection(type))
@@ -113,42 +121,60 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         var consumeConfiguration = new ConsumeConfiguration(configuration.PrefetchCount, handlerCollectionFactory);
         configure(consumeConfiguration);
 
-        var consumerConfiguration = new ConsumerConfiguration(
-            consumeConfiguration.PrefetchCount,
-            consumeConfiguration.PerQueueConsumeConfigurations.ToDictionary(
-                x => x.Item1,
-                x => new PerQueueConsumerConfiguration(
-                    x.Item3.AutoAck,
-                    x.Item3.ConsumerTag,
-                    x.Item3.IsExclusive,
-                    x.Item3.Arguments,
-                    consumePipelineBuilder.Use(
-                        _ => ctx => new ValueTask<AckStrategyAsync>(x.Item2(ctx.Body, ctx.Properties, ctx.ReceivedInfo, ctx.CancellationToken))
-                    ).Build()
-                )).Union(
-                consumeConfiguration.PerQueueTypedConsumeConfigurations.ToDictionary(
-                    x => x.Item1,
-                    x => new PerQueueConsumerConfiguration(
-                        x.Item3.AutoAck,
-                        x.Item3.ConsumerTag,
-                        x.Item3.IsExclusive,
-                        x.Item3.Arguments,
-                        consumePipelineBuilder.Use(
-                            _ => ctx =>
-                            {
-                                var deserializedMessage = messageSerializationStrategy.DeserializeMessage(ctx.Properties, ctx.Body);
-                                var handler = x.Item2.GetHandler(deserializedMessage.MessageType);
-                                return new ValueTask<AckStrategyAsync>(handler(deserializedMessage, ctx.ReceivedInfo, ctx.CancellationToken));
-                            }
-                        ).Build()
-                    )
-                )
-            ).ToDictionary(x => x.Key, x => x.Value)
-        );
+        var channelContext = new ChannelContext(consumerConnectionContext);
+        var perQueueConfigurations = new Dictionary<Queue, PerQueueConsumerConfiguration>();
+
+        foreach (var (queue, handler, perQueueConfiguration) in consumeConfiguration.PerQueueConsumeConfigurations)
+            perQueueConfigurations.Add(
+                queue,
+                CreatePerQueueConfiguration(channelContext, queue, perQueueConfiguration, consumeConfiguration.PrefetchCount, RawHandlerTerminal(handler))
+            );
+
+        foreach (var (queue, handlers, perQueueConfiguration) in consumeConfiguration.PerQueueTypedConsumeConfigurations)
+            perQueueConfigurations.Add(
+                queue,
+                CreatePerQueueConfiguration(channelContext, queue, perQueueConfiguration, consumeConfiguration.PrefetchCount, TypedHandlerTerminal(handlers))
+            );
+
+        var consumerConfiguration = new ConsumerConfiguration(consumeConfiguration.PrefetchCount, perQueueConfigurations);
         var consumer = consumerFactory.CreateConsumer(consumerConfiguration);
         await consumer.StartConsumingAsync();
         return consumer;
     }
+
+    private PerQueueConsumerConfiguration CreatePerQueueConfiguration(
+        ChannelContext channelContext,
+        in Queue queue,
+        PerQueueConsumeConfiguration perQueueConfiguration,
+        ushort prefetchCount,
+        PipelineStep<ConsumeContext> terminal
+    )
+    {
+        var consumerContext = new ConsumerContext(channelContext, queue.Name)
+        {
+            PrefetchCount = prefetchCount,
+            AutoAck = perQueueConfiguration.AutoAck,
+        };
+        consumerContext.MessagePipeline = consumePipelineBuilder.Build(services, terminal);
+        return new PerQueueConsumerConfiguration(
+            perQueueConfiguration.AutoAck,
+            perQueueConfiguration.ConsumerTag,
+            perQueueConfiguration.IsExclusive,
+            perQueueConfiguration.Arguments,
+            consumerContext
+        );
+    }
+
+    private static PipelineStep<ConsumeContext> RawHandlerTerminal(MessageHandler handler)
+        => async context => context.Ack = await handler(context.Body, context.Properties, context.ReceivedInfo, context.CancellationToken).ConfigureAwait(false);
+
+    private PipelineStep<ConsumeContext> TypedHandlerTerminal(IHandlerCollection handlers)
+        => async context =>
+        {
+            var message = messageSerializationStrategy.DeserializeMessage(context.Properties, context.Body);
+            var handler = handlers.GetHandler(message.MessageType);
+            context.Ack = await handler(message, context.ReceivedInfo, context.CancellationToken).ConfigureAwait(false);
+        };
 
     /// <inheritdoc />
     public IPullingConsumer<PullResult> CreatePullingConsumer(in Queue queue, bool autoAck = true)
@@ -230,8 +256,23 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     {
         using var cts = cancellationToken.WithTimeout(configuration.Timeout);
 
-        await produceDelegate(new ProduceContext(exchange, routingKey, mandatory ?? configuration.MandatoryPublish,
-            publisherConfirms ?? configuration.PublisherConfirms, properties, body, services, cts.Token)).ConfigureAwait(false);
+        var context = publishContextPool.Rent();
+        try
+        {
+            context.Exchange = exchange;
+            context.RoutingKey = routingKey;
+            context.Mandatory = mandatory ?? configuration.MandatoryPublish;
+            context.PublisherConfirms = publisherConfirms ?? configuration.PublisherConfirms;
+            context.Properties = properties;
+            context.Body = body;
+            context.CancellationToken = cts.Token;
+
+            await publishPipeline(context).ConfigureAwait(false);
+        }
+        finally
+        {
+            publishContextPool.Return(context);
+        }
     }
 
     #endregion
@@ -598,7 +639,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         return Task.CompletedTask;
     }
 
-    private async ValueTask PublishInternalAsync(ProduceContext context)
+    private async ValueTask PublishInternalAsync(PublishContext context)
     {
         if (context.PublisherConfirms)
         {
@@ -640,10 +681,6 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
                 context.Properties.CorrelationId
             );
         }
-
-        await eventBus.PublishAsync(
-            new PublishedMessageEvent(context.Exchange, context.RoutingKey, context.Properties, context.Body)
-        );
     }
 
     private readonly struct BasicPublishAction : IPersistentChannelAction<bool>

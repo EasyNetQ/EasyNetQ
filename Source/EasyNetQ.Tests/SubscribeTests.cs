@@ -1,3 +1,4 @@
+using EasyNetQ.Pipeline;
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
@@ -332,8 +333,9 @@ public class When_the_handler_throws_an_exception : IAsyncLifetime
                 i =>
                 {
                     basicDeliverEventArgs = (ConsumeContext)i[0];
+                    basicDeliverEventArgs.Detach(); // pooled: keep it alive for the assertions
                     raisedException = (Exception)i[1];
-                    return new ValueTask<AckStrategyAsync>(AckStrategies.AckAsync);
+                    return new ValueTask<AckDecision>(AckDecision.Ack);
                 }
             );
 
@@ -384,7 +386,7 @@ public class When_the_handler_throws_an_exception : IAsyncLifetime
     public void Should_invoke_the_consumer_error_strategy()
     {
         consumeErrorStrategy.Received()
-            .HandleErrorAsync(Arg.Any<ConsumeContext>(), Arg.Any<Exception>(), cancellationToken: CancellationToken.None);
+            .HandleErrorAsync(Arg.Any<ConsumeContext>(), Arg.Any<Exception>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]

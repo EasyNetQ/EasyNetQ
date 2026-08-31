@@ -1,3 +1,4 @@
+using EasyNetQ.Pipeline;
 using EasyNetQ.Consumer;
 
 namespace EasyNetQ.Tests.ConsumeTests;
@@ -7,7 +8,12 @@ public class When_cancellation_of_message_handler_occurs : ConsumerTestBase
     protected override async Task InitializeAsyncCore()
     {
         ConsumeErrorStrategy.HandleCancelledAsync(default)
-            .ReturnsForAnyArgs(new ValueTask<AckStrategyAsync>(AckStrategies.NackWithRequeueAsync));
+            .ReturnsForAnyArgs(i =>
+            {
+                // the context is pooled; keep this instance alive so Received() can inspect it after the delivery
+                ((ConsumeContext)i[0]).Detach();
+                return new ValueTask<AckDecision>(AckDecision.NackRequeue);
+            });
 
         using var are = new AutoResetEvent(false);
         Task deliverTask;
@@ -15,7 +21,7 @@ public class When_cancellation_of_message_handler_occurs : ConsumerTestBase
         {
             are.Set();
             Task.Delay(-1, ct).GetAwaiter().GetResult();
-            return AckStrategies.AckAsync;
+            return AckDecision.Ack;
         }))
         {
             deliverTask = DeliverMessageAsync();
@@ -33,7 +39,7 @@ public class When_cancellation_of_message_handler_occurs : ConsumerTestBase
                         args.ReceivedInfo.DeliveryTag == DeliverTag &&
                         args.ReceivedInfo.Exchange == "the_exchange" &&
                         args.Body.ToArray().SequenceEqual(OriginalBody)
-            ), cancellationToken: CancellationToken.None
+            ), Arg.Any<CancellationToken>()
         );
     }
 
