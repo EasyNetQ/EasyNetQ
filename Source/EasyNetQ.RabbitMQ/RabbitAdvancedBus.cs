@@ -20,7 +20,6 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     private readonly ConnectionConfiguration configuration;
     private readonly PipelineBuilder<ConsumeContext> consumePipelineBuilder;
     private readonly IServiceProvider services;
-    private readonly IPublishConfirmationListener confirmationListener;
     private readonly ILogger logger;
     private readonly IProducerConnection producerConnection;
     private readonly IConsumerConnection consumerConnection;
@@ -51,7 +50,6 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         IConsumerConnection consumerConnection,
         IConsumerFactory consumerFactory,
         IPersistentChannelDispatcher persistentChannelDispatcher,
-        IPublishConfirmationListener confirmationListener,
         IEventBus eventBus,
         IHandlerCollectionFactory handlerCollectionFactory,
         ConnectionConfiguration configuration,
@@ -69,7 +67,6 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         this.consumerConnection = consumerConnection;
         this.consumerFactory = consumerFactory;
         this.persistentChannelDispatcher = persistentChannelDispatcher;
-        this.confirmationListener = confirmationListener;
         this.eventBus = eventBus;
         this.handlerCollectionFactory = handlerCollectionFactory;
         this.configuration = configuration;
@@ -672,24 +669,31 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     {
         if (context.PublisherConfirms)
         {
-            while (true)
-            {
-                var pendingConfirmation = await persistentChannelDispatcher.InvokeAsync<IPublishPendingConfirmation, BasicPublishWithConfirmsAction>(
-                    new BasicPublishWithConfirmsAction(
-                        confirmationListener, context.Exchange, context.RoutingKey, context.Mandatory, context.Properties, context.Body
-                    ),
-                    PersistentChannelDispatchOptions.ProducerPublishWithConfirms,
-                    context.CancellationToken
-                ).ConfigureAwait(false);
+            // The action starts the publish inside the channel mutex and hands back the in-flight task; the
+            // client-side confirmation tracking completes it when the broker confirms. Awaiting it here, outside
+            // the mutex, keeps confirmed publishes concurrent (bounded by the channel's rate limiter).
+            var publishTask = await persistentChannelDispatcher.InvokeAsync<Task, StartConfirmedPublishAction>(
+                new StartConfirmedPublishAction(context.Exchange, context.RoutingKey, context.Mandatory, context.Properties, context.Body),
+                PersistentChannelDispatchOptions.ProducerPublishWithConfirms,
+                context.CancellationToken
+            ).ConfigureAwait(false);
 
-                try
-                {
-                    await pendingConfirmation.WaitAsync(context.CancellationToken).ConfigureAwait(false);
-                    break;
-                }
-                catch (PublishInterruptedException)
-                {
-                }
+            try
+            {
+                await publishTask.ConfigureAwait(false);
+            }
+            catch (PublishReturnException exception)
+            {
+                throw new PublishReturnedException(
+                    $"Broker has returned the message: {exception.ReplyCode} {exception.ReplyText} (exchange={exception.Exchange}, routingKey={exception.RoutingKey})",
+                    exception
+                );
+            }
+            catch (PublishException exception)
+            {
+                throw new PublishNackedException(
+                    $"Broker has signalled that the publish {exception.PublishSequenceNumber} was nacked", exception
+                );
             }
         }
         else
@@ -735,17 +739,15 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         }
     }
 
-    private readonly struct BasicPublishWithConfirmsAction : IPersistentChannelAction<IPublishPendingConfirmation>
+    private readonly struct StartConfirmedPublishAction : IPersistentChannelAction<Task>
     {
-        private readonly IPublishConfirmationListener confirmationListener;
         private readonly string exchange;
         private readonly string routingKey;
         private readonly bool mandatory;
         private readonly MessageProperties properties;
         private readonly ReadOnlyMemory<byte> body;
 
-        public BasicPublishWithConfirmsAction(
-            IPublishConfirmationListener confirmationListener,
+        public StartConfirmedPublishAction(
             string exchange,
             string routingKey,
             bool mandatory,
@@ -753,7 +755,6 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             in ReadOnlyMemory<byte> body
         )
         {
-            this.confirmationListener = confirmationListener;
             this.exchange = exchange;
             this.routingKey = routingKey;
             this.mandatory = mandatory;
@@ -761,23 +762,18 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             this.body = body;
         }
 
-        public async Task<IPublishPendingConfirmation> InvokeAsync(IChannel channel, CancellationToken cancellationToken = default)
+        public Task<Task> InvokeAsync(IChannel channel, CancellationToken cancellationToken = default)
         {
-            var confirmation = await confirmationListener.CreatePendingConfirmationAsync(channel, cancellationToken);
+            // BasicPublishAsync surfaces a dead channel only through the returned task, which is awaited outside
+            // the mutex where the recreate-on-failure verdicts cannot see it - so detect it here, inside the
+            // mutex, and have the channel recreated and the publish retried on a fresh one
+            if (channel.CloseReason is { } closeReason)
+                throw new StaleChannelException(closeReason);
+
             var basicProperties = new BasicProperties();
-            properties.SetConfirmationId(confirmation.Id).CopyTo(basicProperties);
+            properties.CopyTo(basicProperties);
 
-            try
-            {
-                await channel.BasicPublishAsync(exchange, routingKey, mandatory, basicProperties, body, cancellationToken);
-            }
-            catch (Exception)
-            {
-                confirmation.Cancel();
-                throw;
-            }
-
-            return confirmation;
+            return Task.FromResult(channel.BasicPublishAsync(exchange, routingKey, mandatory, basicProperties, body, cancellationToken).AsTask());
         }
     }
 }

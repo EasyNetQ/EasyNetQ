@@ -16,7 +16,9 @@ public static class Ceilings
     public const long ConsumeMedium = 1632;
     public const long ConsumeLarge = 13520;
     public const long PublishAdvancedSmall = 264;
-    public const long PublishPubSubSmall = 320;
+    // +8 B in Phase 4: PublishConfiguration.PublisherConfirms became bool? (padding) so the per-request
+    // value no longer silently overrides the connection-level setting to off
+    public const long PublishPubSubSmall = 328;
     public const long EventBusPublishNoSubscribers = 0;
     public const long EventBusPublishOneSubscriber = 0;
 

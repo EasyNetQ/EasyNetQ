@@ -30,7 +30,6 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
     private readonly PersistentChannelDispatchOptions errorDispatchOptions;
     private readonly IConventions conventions;
     private readonly IErrorMessageSerializer errorMessageSerializer;
-    private readonly Producer.IPublishConfirmationListener confirmationListener;
     private readonly ConcurrentDictionary<string, bool> existingErrorExchangesWithQueues = new();
     private readonly IMessageSerializer serializer;
     private readonly MessageTypeDescriptor<Error> errorMessageDescriptor;
@@ -46,7 +45,6 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
         IMessageTypeRegistry registry,
         IConventions conventions,
         IErrorMessageSerializer errorMessageSerializer,
-        Producer.IPublishConfirmationListener confirmationListener,
         ConnectionConfiguration configuration
     )
     {
@@ -57,7 +55,6 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
         errorMessageDescriptor = registry.GetOrAdd<Error>();
         this.conventions = conventions;
         this.errorMessageSerializer = errorMessageSerializer;
-        this.confirmationListener = confirmationListener;
         this.configuration = configuration;
     }
 
@@ -81,8 +78,9 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
         try
         {
             // one long-lived channel per bus (with reconnect/retry) instead of a channel per failed message;
-            // with publisher confirms on, the confirmation is awaited outside the channel mutex
-            var pendingConfirmation = await channelDispatcher.InvokeAsync(
+            // with publisher confirms on, the client-side tracking completes BasicPublishAsync only when the
+            // broker confirms - serializing error publishes on this channel is fine at error-path volumes
+            await channelDispatcher.InvokeAsync(
                 async channel =>
                 {
                     var errorExchange = await DeclareErrorExchangeWithQueueAsync(channel, receivedInfo, cancellationToken);
@@ -95,18 +93,13 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
                         Type = errorMessageDescriptor.WireName
                     };
 
-                    var confirmation = configuration.PublisherConfirms
-                        ? await confirmationListener.CreatePendingConfirmationAsync(channel, cancellationToken).ConfigureAwait(false)
-                        : null;
                     await channel.BasicPublishAsync(errorExchange, receivedInfo.RoutingKey, false, errorProperties, message.Memory, cancellationToken).ConfigureAwait(false);
-                    return confirmation;
+                    return true;
                 },
                 errorDispatchOptions,
                 cancellationToken
             ).ConfigureAwait(false);
 
-            if (pendingConfirmation is not null)
-                await pendingConfirmation.WaitAsync(cancellationToken).ConfigureAwait(false);
             return AckDecision.Ack;
         }
         catch (BrokerUnreachableException unreachableException)

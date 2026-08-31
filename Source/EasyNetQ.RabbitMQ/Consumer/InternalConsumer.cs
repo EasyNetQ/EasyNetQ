@@ -85,6 +85,12 @@ public interface IInternalConsumer : IAsyncDisposable
     ///     Raised when consumer is cancelled
     /// </summary>
     event AsyncEventHandler<InternalConsumerCancelledEventArgs> CancelledAsync;
+
+    /// <summary>
+    ///     Raised when the consumer's channel shuts down with a channel-level soft error while the connection
+    ///     stays up (connection-level shutdowns are covered by the connection lifecycle events)
+    /// </summary>
+    event AsyncEventHandler<AsyncEventArgs> ChannelFaultedAsync;
 }
 
 /// <inheritdoc />
@@ -140,6 +146,7 @@ public class InternalConsumer : IInternalConsumer
                 }
 
                 consumers.Clear();
+                channel.ChannelShutdownAsync -= OnChannelShutdownAsync;
                 await channel.DisposeAsync();
                 channel = null;
             }
@@ -149,6 +156,7 @@ public class InternalConsumer : IInternalConsumer
                 try
                 {
                     channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
+                    channel.ChannelShutdownAsync += OnChannelShutdownAsync;
                     await channel.BasicQosAsync(0, configuration.PrefetchCount, false, cancellationToken);
                 }
                 catch (Exception exception)
@@ -260,6 +268,18 @@ public class InternalConsumer : IInternalConsumer
     /// <inheritdoc />
     public event AsyncEventHandler<InternalConsumerCancelledEventArgs> CancelledAsync;
 
+    /// <inheritdoc />
+    public event AsyncEventHandler<AsyncEventArgs> ChannelFaultedAsync;
+
+    private Task OnChannelShutdownAsync(object sender, ShutdownEventArgs args)
+    {
+        // Detach from the client's event-dispatch loop before restarting: the restart disposes this channel,
+        // which must not happen from inside its own shutdown callback
+        if (!disposed && IsSoftErrorCode(args.ReplyCode) && ChannelFaultedAsync is { } channelFaulted)
+            _ = Task.Run(() => channelFaulted.Invoke(this, new AsyncEventArgs()));
+        return Task.CompletedTask;
+    }
+
     public virtual async ValueTask DisposeAsync()
     {
         if (disposed) return;
@@ -289,7 +309,10 @@ public class InternalConsumer : IInternalConsumer
 
             consumers.Clear();
             if (channel != null)
+            {
+                channel.ChannelShutdownAsync -= OnChannelShutdownAsync;
                 await channel.DisposeAsync();
+            }
         }
     }
 
@@ -339,15 +362,15 @@ public class InternalConsumer : IInternalConsumer
     private static bool IsChannelClosedWithSoftError(IChannel channel)
     {
         var closeReason = channel?.CloseReason;
-        if (closeReason == null) return false;
-
-        return closeReason.ReplyCode switch
-        {
-            AmqpErrorCodes.PreconditionFailed => true,
-            AmqpErrorCodes.ResourceLocked => true,
-            AmqpErrorCodes.AccessRefused => true,
-            AmqpErrorCodes.NotFound => true,
-            _ => false
-        };
+        return closeReason != null && IsSoftErrorCode(closeReason.ReplyCode);
     }
+
+    private static bool IsSoftErrorCode(ushort replyCode) => replyCode switch
+    {
+        AmqpErrorCodes.PreconditionFailed => true,
+        AmqpErrorCodes.ResourceLocked => true,
+        AmqpErrorCodes.AccessRefused => true,
+        AmqpErrorCodes.NotFound => true,
+        _ => false
+    };
 }

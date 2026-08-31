@@ -75,8 +75,12 @@ namespace EasyNetQ
         public System.Collections.Generic.IDictionary<string, object> ClientProperties { get; }
         public System.TimeSpan ConnectIntervalAttempt { get; set; }
         public ushort? ConsumerDispatcherConcurrency { get; set; }
+        public RabbitMQ.Client.ICredentialsProvider CredentialsProvider { get; set; }
+        public System.Func<System.Collections.Generic.IEnumerable<RabbitMQ.Client.AmqpTcpEndpoint>, RabbitMQ.Client.IEndpointResolver> EndpointResolverFactory { get; set; }
+        public System.TimeSpan? HandshakeContinuationTimeout { get; set; }
         public System.Collections.Generic.IList<EasyNetQ.HostConfiguration> Hosts { get; set; }
         public bool MandatoryPublish { get; set; }
+        public uint? MaxInboundMessageBodySize { get; set; }
         public string Name { get; set; }
         public string Password { get; set; }
         public bool PersistentMessages { get; set; }
@@ -86,7 +90,10 @@ namespace EasyNetQ
         public string Product { get; set; }
         public bool PublisherConfirms { get; set; }
         public ushort RequestedChannelMax { get; set; }
+        public System.TimeSpan? RequestedConnectionTimeout { get; set; }
         public System.TimeSpan RequestedHeartbeat { get; set; }
+        public System.TimeSpan? SocketReadTimeout { get; set; }
+        public System.TimeSpan? SocketWriteTimeout { get; set; }
         public RabbitMQ.Client.SslOption Ssl { get; }
         public System.TimeSpan Timeout { get; set; }
         public string UserName { get; set; }
@@ -363,23 +370,7 @@ namespace EasyNetQ
     }
     public class RabbitAdvancedBus : EasyNetQ.IAdvancedBus, System.IDisposable
     {
-        public RabbitAdvancedBus(
-                    Microsoft.Extensions.Logging.ILogger<EasyNetQ.RabbitAdvancedBus> logger,
-                    EasyNetQ.Producer.IProducerConnection producerConnection,
-                    EasyNetQ.Consumer.IConsumerConnection consumerConnection,
-                    EasyNetQ.Consumer.IConsumerFactory consumerFactory,
-                    EasyNetQ.ChannelDispatcher.IPersistentChannelDispatcher persistentChannelDispatcher,
-                    EasyNetQ.Producer.IPublishConfirmationListener confirmationListener,
-                    EasyNetQ.IEventBus eventBus,
-                    EasyNetQ.Consumer.IHandlerCollectionFactory handlerCollectionFactory,
-                    EasyNetQ.ConnectionConfiguration configuration,
-                    EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.PublishContext> publishPipelineBuilder,
-                    EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> consumePipelineBuilder,
-                    System.IServiceProvider services,
-                    EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy,
-                    EasyNetQ.IMessageSerializer messageSerializer,
-                    EasyNetQ.IPullingConsumerFactory pullingConsumerFactory,
-                    EasyNetQ.AdvancedBusEventHandlers advancedBusEventHandlers) { }
+        public RabbitAdvancedBus(Microsoft.Extensions.Logging.ILogger<EasyNetQ.RabbitAdvancedBus> logger, EasyNetQ.Producer.IProducerConnection producerConnection, EasyNetQ.Consumer.IConsumerConnection consumerConnection, EasyNetQ.Consumer.IConsumerFactory consumerFactory, EasyNetQ.ChannelDispatcher.IPersistentChannelDispatcher persistentChannelDispatcher, EasyNetQ.IEventBus eventBus, EasyNetQ.Consumer.IHandlerCollectionFactory handlerCollectionFactory, EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.PublishContext> publishPipelineBuilder, EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> consumePipelineBuilder, System.IServiceProvider services, EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy, EasyNetQ.IMessageSerializer messageSerializer, EasyNetQ.IPullingConsumerFactory pullingConsumerFactory, EasyNetQ.AdvancedBusEventHandlers advancedBusEventHandlers) { }
         public bool IsConnected { get; }
         public event System.EventHandler<EasyNetQ.BlockedEventArgs> Blocked;
         public event System.EventHandler<EasyNetQ.ConnectedEventArgs> Connected;
@@ -512,7 +503,7 @@ namespace EasyNetQ.Consumer
     }
     public class DefaultConsumeErrorStrategy : EasyNetQ.Consumer.IConsumeErrorStrategy
     {
-        public DefaultConsumeErrorStrategy(Microsoft.Extensions.Logging.ILogger<EasyNetQ.Consumer.DefaultConsumeErrorStrategy> logger, EasyNetQ.ChannelDispatcher.IPersistentChannelDispatcher channelDispatcher, EasyNetQ.IMessageSerializer serializer, EasyNetQ.IMessageTypeRegistry registry, EasyNetQ.IConventions conventions, EasyNetQ.Consumer.IErrorMessageSerializer errorMessageSerializer, EasyNetQ.Producer.IPublishConfirmationListener confirmationListener, EasyNetQ.ConnectionConfiguration configuration) { }
+        public DefaultConsumeErrorStrategy(Microsoft.Extensions.Logging.ILogger<EasyNetQ.Consumer.DefaultConsumeErrorStrategy> logger, EasyNetQ.ChannelDispatcher.IPersistentChannelDispatcher channelDispatcher, EasyNetQ.IMessageSerializer serializer, EasyNetQ.IMessageTypeRegistry registry, EasyNetQ.IConventions conventions, EasyNetQ.Consumer.IErrorMessageSerializer errorMessageSerializer, EasyNetQ.ConnectionConfiguration configuration) { }
         public virtual System.Threading.Tasks.ValueTask<EasyNetQ.AckDecision> HandleCancelledAsync(EasyNetQ.Pipeline.ConsumeContext context, System.Threading.CancellationToken cancellationToken = default) { }
         public virtual System.Threading.Tasks.ValueTask<EasyNetQ.AckDecision> HandleErrorAsync(EasyNetQ.Pipeline.ConsumeContext context, System.Exception exception, System.Threading.CancellationToken cancellationToken = default) { }
     }
@@ -540,6 +531,7 @@ namespace EasyNetQ.Consumer
     public interface IInternalConsumer : System.IAsyncDisposable
     {
         event EasyNetQ.Consumer.AsyncEventHandler<EasyNetQ.Consumer.InternalConsumerCancelledEventArgs> CancelledAsync;
+        event EasyNetQ.Consumer.AsyncEventHandler<RabbitMQ.Client.Events.AsyncEventArgs> ChannelFaultedAsync;
         System.Threading.Tasks.Task<EasyNetQ.Consumer.InternalConsumerStatus> StartConsumingAsync(bool firstStart = true, System.Threading.CancellationToken cancellationToken = default);
         System.Threading.Tasks.Task StopConsumingAsync(System.Threading.CancellationToken cancellationToken = default);
     }
@@ -551,6 +543,7 @@ namespace EasyNetQ.Consumer
     {
         public InternalConsumer(System.IServiceProvider services, Microsoft.Extensions.Logging.ILogger<EasyNetQ.Consumer.InternalConsumer> logger, EasyNetQ.Consumer.ConsumerConfiguration configuration, EasyNetQ.Consumer.IConsumerConnection connection, EasyNetQ.IEventBus eventBus) { }
         public event EasyNetQ.Consumer.AsyncEventHandler<EasyNetQ.Consumer.InternalConsumerCancelledEventArgs> CancelledAsync;
+        public event EasyNetQ.Consumer.AsyncEventHandler<RabbitMQ.Client.Events.AsyncEventArgs> ChannelFaultedAsync;
         public virtual System.Threading.Tasks.ValueTask DisposeAsync() { }
         public System.Threading.Tasks.Task<EasyNetQ.Consumer.InternalConsumerStatus> StartConsumingAsync(bool firstStart, System.Threading.CancellationToken cancellationToken = default) { }
         public System.Threading.Tasks.Task StopConsumingAsync(System.Threading.CancellationToken cancellationToken = default) { }
@@ -585,16 +578,6 @@ namespace EasyNetQ.Consumer
 }
 namespace EasyNetQ.Events
 {
-    public readonly struct ChannelRecoveredEvent : System.IEquatable<EasyNetQ.Events.ChannelRecoveredEvent>
-    {
-        public ChannelRecoveredEvent(RabbitMQ.Client.IChannel Channel) { }
-        public RabbitMQ.Client.IChannel Channel { get; init; }
-    }
-    public readonly struct ChannelShutdownEvent : System.IEquatable<EasyNetQ.Events.ChannelShutdownEvent>
-    {
-        public ChannelShutdownEvent(RabbitMQ.Client.IChannel Channel) { }
-        public RabbitMQ.Client.IChannel Channel { get; init; }
-    }
     public readonly struct ConnectionBlockedEvent : System.IEquatable<EasyNetQ.Events.ConnectionBlockedEvent>
     {
         public ConnectionBlockedEvent(EasyNetQ.Persistent.PersistentConnectionType Type, string Reason) { }
@@ -629,16 +612,6 @@ namespace EasyNetQ.Events
     {
         public ConsumerChannelDisposedEvent(System.Collections.Generic.IReadOnlyCollection<string> ConsumerTags) { }
         public System.Collections.Generic.IReadOnlyCollection<string> ConsumerTags { get; init; }
-    }
-    public readonly struct MessageConfirmationEvent : System.IEquatable<EasyNetQ.Events.MessageConfirmationEvent>
-    {
-        public MessageConfirmationEvent(RabbitMQ.Client.IChannel Channel, ulong DeliveryTag, bool Multiple, bool IsNack) { }
-        public RabbitMQ.Client.IChannel Channel { get; init; }
-        public ulong DeliveryTag { get; init; }
-        public bool IsNack { get; init; }
-        public bool Multiple { get; init; }
-        public static EasyNetQ.Events.MessageConfirmationEvent Ack(RabbitMQ.Client.IChannel channel, ulong deliveryTag, bool multiple) { }
-        public static EasyNetQ.Events.MessageConfirmationEvent Nack(RabbitMQ.Client.IChannel channel, ulong deliveryTag, bool multiple) { }
     }
     public readonly struct ReturnedMessageEvent : System.IEquatable<EasyNetQ.Events.ReturnedMessageEvent>
     {
@@ -742,31 +715,9 @@ namespace EasyNetQ.Persistent
 namespace EasyNetQ.Producer
 {
     public interface IProducerConnection : EasyNetQ.Persistent.IPersistentConnection, System.IDisposable { }
-    public interface IPublishConfirmationListener : System.IDisposable
-    {
-        System.Threading.Tasks.Task<EasyNetQ.Producer.IPublishPendingConfirmation> CreatePendingConfirmationAsync(RabbitMQ.Client.IChannel channel, System.Threading.CancellationToken cancellationToken = default);
-    }
-    public interface IPublishPendingConfirmation
-    {
-        ulong Id { get; }
-        void Cancel();
-        System.Threading.Tasks.Task WaitAsync(System.Threading.CancellationToken cancellationToken = default);
-    }
     public sealed class ProducerConnection : EasyNetQ.Persistent.PersistentConnection, EasyNetQ.Persistent.IPersistentConnection, EasyNetQ.Producer.IProducerConnection, System.IDisposable
     {
         public ProducerConnection(Microsoft.Extensions.Logging.ILogger<EasyNetQ.Producer.ProducerConnection> logger, EasyNetQ.ConnectionConfiguration configuration, RabbitMQ.Client.IConnectionFactory connectionFactory, EasyNetQ.IEventBus eventBus) { }
-    }
-    public class PublishConfirmationListener : EasyNetQ.Producer.IPublishConfirmationListener, System.IDisposable
-    {
-        public PublishConfirmationListener(EasyNetQ.IEventBus eventBus) { }
-        public System.Threading.Tasks.Task<EasyNetQ.Producer.IPublishPendingConfirmation> CreatePendingConfirmationAsync(RabbitMQ.Client.IChannel channel, System.Threading.CancellationToken cancellationToken = default) { }
-        public virtual void Dispose() { }
-    }
-    public class PublishInterruptedException : System.Exception
-    {
-        public PublishInterruptedException() { }
-        public PublishInterruptedException(string message) { }
-        public PublishInterruptedException(string message, System.Exception inner) { }
     }
     public class PublishNackedException : System.Exception
     {

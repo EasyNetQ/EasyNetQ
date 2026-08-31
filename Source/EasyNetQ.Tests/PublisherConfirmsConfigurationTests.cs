@@ -1,5 +1,4 @@
 using EasyNetQ.Events;
-using EasyNetQ.Producer;
 using EasyNetQ.Tests.Mocking;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
@@ -23,13 +22,8 @@ public class PublisherConfirmsConfigurationTests
         bool confirmsFromSettings, bool? confirmsPerRequest, int expected
     )
     {
-        var confirmationListener = Substitute.For<IPublishConfirmationListener>();
         await using var mockBuilder = new MockBuilder(
-            x =>
-            {
-                x.AddSingleton(new ConnectionConfiguration { PublisherConfirms = confirmsFromSettings });
-                x.AddSingleton(confirmationListener);
-            }
+            x => x.AddSingleton(new ConnectionConfiguration { PublisherConfirms = confirmsFromSettings })
         );
 
         await mockBuilder.Bus.PubSub.PublishAsync(
@@ -42,8 +36,9 @@ public class PublisherConfirmsConfigurationTests
             CancellationToken.None
         );
 
-        await confirmationListener.Received(expected).CreatePendingConfirmationAsync(
-            Arg.Any<IChannel>(), Arg.Any<CancellationToken>()
+        // confirms are delegated to the client, so the publish channel's CreateChannelOptions reveal the choice
+        await mockBuilder.Connection.Received(expected).CreateChannelAsync(
+            Arg.Is<CreateChannelOptions>(o => o.PublisherConfirmationTrackingEnabled), Arg.Any<CancellationToken>()
         );
     }
 
@@ -58,13 +53,8 @@ public class PublisherConfirmsConfigurationTests
         bool confirmsFromSettings, bool? confirmsPerRequest, int expected
     )
     {
-        var confirmationListener = Substitute.For<IPublishConfirmationListener>();
         await using var mockBuilder = new MockBuilder(
-            x =>
-            {
-                x.AddSingleton(new ConnectionConfiguration { PublisherConfirms = confirmsFromSettings });
-                x.AddSingleton(confirmationListener);
-            }
+            x => x.AddSingleton(new ConnectionConfiguration { PublisherConfirms = confirmsFromSettings })
         );
 
         await mockBuilder.Bus.SendReceive.SendAsync(
@@ -78,8 +68,9 @@ public class PublisherConfirmsConfigurationTests
             CancellationToken.None
         );
 
-        await confirmationListener.Received(expected).CreatePendingConfirmationAsync(
-            Arg.Any<IChannel>(), Arg.Any<CancellationToken>()
+        // confirms are delegated to the client, so the publish channel's CreateChannelOptions reveal the choice
+        await mockBuilder.Connection.Received(expected).CreateChannelAsync(
+            Arg.Is<CreateChannelOptions>(o => o.PublisherConfirmationTrackingEnabled), Arg.Any<CancellationToken>()
         );
     }
 
@@ -94,13 +85,8 @@ public class PublisherConfirmsConfigurationTests
         bool confirmsFromSettings, bool? confirmsPerRequest, int expected
     )
     {
-        var confirmationListener = Substitute.For<IPublishConfirmationListener>();
         await using var mockBuilder = new MockBuilder(
-            x =>
-            {
-                x.AddSingleton(new ConnectionConfiguration { PublisherConfirms = confirmsFromSettings });
-                x.AddSingleton(confirmationListener);
-            }
+            x => x.AddSingleton(new ConnectionConfiguration { PublisherConfirms = confirmsFromSettings })
         );
 
         await mockBuilder.Bus.Scheduler.FuturePublishAsync(
@@ -114,8 +100,9 @@ public class PublisherConfirmsConfigurationTests
             CancellationToken.None
         );
 
-        await confirmationListener.Received(expected).CreatePendingConfirmationAsync(
-            Arg.Any<IChannel>(), Arg.Any<CancellationToken>()
+        // confirms are delegated to the client, so the publish channel's CreateChannelOptions reveal the choice
+        await mockBuilder.Connection.Received(expected).CreateChannelAsync(
+            Arg.Is<CreateChannelOptions>(o => o.PublisherConfirmationTrackingEnabled), Arg.Any<CancellationToken>()
         );
     }
 
@@ -131,12 +118,10 @@ public class PublisherConfirmsConfigurationTests
     )
     {
         var correlationId = Guid.NewGuid().ToString();
-        var confirmationListener = Substitute.For<IPublishConfirmationListener>();
         await using var mockBuilder = new MockBuilder(
             x =>
             {
                 x.AddSingleton(new ConnectionConfiguration { PublisherConfirms = confirmsFromSettings });
-                x.AddSingleton(confirmationListener);
                 x.AddSingleton<ICorrelationIdGenerationStrategy>(_ => new StaticCorrelationIdGenerationStrategy(correlationId));
             }
         );
@@ -175,8 +160,9 @@ public class PublisherConfirmsConfigurationTests
         );
         await request;
 
-        await confirmationListener.Received(expected).CreatePendingConfirmationAsync(
-            Arg.Any<IChannel>(), Arg.Any<CancellationToken>()
+        // confirms are delegated to the client, so the publish channel's CreateChannelOptions reveal the choice
+        await mockBuilder.Connection.Received(expected).CreateChannelAsync(
+            Arg.Is<CreateChannelOptions>(o => o.PublisherConfirmationTrackingEnabled), Arg.Any<CancellationToken>()
         );
     }
 }

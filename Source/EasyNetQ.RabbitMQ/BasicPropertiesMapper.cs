@@ -10,7 +10,6 @@ namespace EasyNetQ;
 /// </summary>
 public static class BasicPropertiesMapper
 {
-    internal const string ConfirmationIdHeader = "EasyNetQ.Confirmation.Id";
 
     /// <summary>
     ///     Creates <see cref="MessageProperties" /> from a received message's basic properties
@@ -61,15 +60,4 @@ public static class BasicPropertiesMapper
             basicProperties.Headers = source.Headers;
     }
 
-    internal static MessageProperties SetConfirmationId(in this MessageProperties properties, ulong confirmationId)
-        => properties.SetHeader(ConfirmationIdHeader, NumberHelpers.FormatULongToBytes(confirmationId));
-
-    internal static bool TryGetConfirmationId(in this MessageProperties properties, out ulong confirmationId)
-    {
-        confirmationId = 0;
-        return properties.Headers != null &&
-               properties.Headers.TryGetValue(ConfirmationIdHeader, out var value) &&
-               value is byte[] bytesValue &&
-               NumberHelpers.TryParseULongFromBytes(bytesValue, out confirmationId);
-    }
 }

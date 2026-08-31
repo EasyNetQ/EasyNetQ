@@ -68,6 +68,9 @@ internal static partial class Log
     [LoggerMessage(307, LogLevel.Information, "Failed to ACK or NACK, message will be retried, consumerTag={ConsumerTag}, deliveryTag={DeliveryTag}, queue={Queue}")]
     public static partial void FailedToAckOrNack(this ILogger logger, Exception exception, string consumerTag, ulong deliveryTag, string queue);
 
+    [LoggerMessage(309, LogLevel.Error, "Failed to restart consuming after the consumer's channel shut down")]
+    public static partial void FailedToRestartAfterChannelFault(this ILogger logger, Exception exception);
+
     [LoggerMessage(308, LogLevel.Error, "Unexpected exception when attempting to ACK or NACK, consumerTag={ConsumerTag}, deliveryTag={DeliveryTag}, queue={Queue}")]
     public static partial void UnexpectedExceptionOnAckOrNack(this ILogger logger, Exception exception, string consumerTag, ulong deliveryTag, string queue);
 

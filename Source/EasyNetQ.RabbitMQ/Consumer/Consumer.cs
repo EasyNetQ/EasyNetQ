@@ -1,9 +1,11 @@
+using System.Diagnostics;
 using EasyNetQ.Events;
 using EasyNetQ.Internals;
 using EasyNetQ.Persistent;
 using EasyNetQ.Pipeline;
 using EasyNetQ.Topology;
 using Microsoft.Extensions.Logging;
+using RabbitMQ.Client.Events;
 
 namespace EasyNetQ.Consumer;
 
@@ -104,7 +106,14 @@ public class ConsumerConfiguration
 /// <inheritdoc />
 public sealed class Consumer : IConsumer
 {
-    private static readonly TimeSpan RestartConsumingPeriod = TimeSpan.FromSeconds(5);
+    // Safety net only: restarts are event-driven (connection recovered + channel faulted), the timer just
+    // catches anything those events miss
+    private static readonly TimeSpan RestartConsumingPeriod = TimeSpan.FromSeconds(60);
+
+    // A channel-fault restart runs immediately; if faults repeat (e.g. consuming from a deleted queue keeps
+    // soft-erroring the fresh channel) further event-driven attempts are suppressed for this long and the
+    // safety-net timer paces the retries instead of a hot restart -> soft error -> restart loop
+    private static readonly TimeSpan MinChannelFaultRestartInterval = TimeSpan.FromSeconds(5);
 
     private readonly ConsumerConfiguration configuration;
     private readonly IEventBus eventBus;
@@ -114,6 +123,8 @@ public sealed class Consumer : IConsumer
 
     private volatile IInternalConsumer consumer;
     private volatile bool disposed;
+    private long lastChannelFaultRestartTimestamp;
+    private readonly ILogger<Consumer> logger;
     /// <summary>
     ///     Creates Consumer
     /// </summary>
@@ -124,6 +135,7 @@ public sealed class Consumer : IConsumer
         IEventBus eventBus
     )
     {
+        this.logger = logger;
         this.configuration = configuration;
         this.internalConsumerFactory = internalConsumerFactory;
         this.eventBus = eventBus;
@@ -151,6 +163,7 @@ public sealed class Consumer : IConsumer
 
             consumer = internalConsumerFactory.CreateConsumer(configuration);
             consumer.CancelledAsync += InternalConsumerOnCancelledAsync;
+            consumer.ChannelFaultedAsync += InternalConsumerOnChannelFaultedAsync;
         }
 
         var status = await consumer.StartConsumingAsync(cancellationToken: cancellationToken);
@@ -197,21 +210,30 @@ public sealed class Consumer : IConsumer
     {
         if (messageEvent.Type != PersistentConnectionType.Consumer) return;
 
-        var consumerToRestart = consumer;
-        if (consumerToRestart == null) return;
-
-        var status = await consumerToRestart.StartConsumingAsync(false);
-
-        foreach (var queue in status.Started)
-            await eventBus.PublishAsync(new StartConsumingSucceededEvent(this, queue));
-        foreach (var queue in status.Failed)
-            await eventBus.PublishAsync(new StartConsumingFailedEvent(this, queue));
-
-        if (ContainsOnlyFailedExclusiveQueues(status))
-            await DisposeAsync();
+        await RestartConsumingAsync();
     }
 
-    private async Task RestartConsumingPeriodically()
+    private Task RestartConsumingPeriodically() => RestartConsumingAsync();
+
+    private async Task InternalConsumerOnChannelFaultedAsync(object sender, AsyncEventArgs e)
+    {
+        var last = Interlocked.Read(ref lastChannelFaultRestartTimestamp);
+        var now = Stopwatch.GetTimestamp();
+        if (last != 0 && Stopwatch.GetElapsedTime(last, now) < MinChannelFaultRestartInterval) return;
+        if (Interlocked.CompareExchange(ref lastChannelFaultRestartTimestamp, now, last) != last) return;
+
+        try
+        {
+            await RestartConsumingAsync();
+        }
+        catch (Exception exception)
+        {
+            // this runs detached from the channel's event loop - nothing above it observes a failure
+            logger.FailedToRestartAfterChannelFault(exception);
+        }
+    }
+
+    private async Task RestartConsumingAsync()
     {
         var consumerToRestart = consumer;
         if (consumerToRestart == null) return;

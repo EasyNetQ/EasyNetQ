@@ -160,11 +160,17 @@ public sealed class PersistentChannel : IPersistentChannel
 
 
     {
-        // publisherConfirmationTrackingEnabled must stay FALSE: with tracking enabled the client awaits the broker
-        // confirm inside BasicPublishAsync, which runs while this channel's mutex is held - serializing all confirmed
-        // publishes on the bus to one in flight. EasyNetQ tracks confirms itself (PublishConfirmationListener) and
-        // awaits them outside the mutex. See When_a_channel_is_created_with_publisher_confirms.
-        createChannelOptions ??= new CreateChannelOptions(options.PublisherConfirms, publisherConfirmationTrackingEnabled: false);
+        // Confirmation tracking is delegated to the client: BasicPublishAsync completes when the broker confirms
+        // the message (or faults with PublishException/PublishReturnException). The publish actions return the
+        // in-flight task from inside the mutex so the confirm round-trip is awaited outside it - confirmed
+        // publishes stay concurrent, bounded per channel by the rate limiter (which the CreateChannelOptions
+        // ctor would otherwise silently default to null). See When_a_channel_is_created_with_publisher_confirms.
+        createChannelOptions ??= options.PublisherConfirms
+            ? new CreateChannelOptions(
+                publisherConfirmationsEnabled: true,
+                publisherConfirmationTrackingEnabled: true,
+                outstandingPublisherConfirmationsRateLimiter: new ThrottlingRateLimiter(128))
+            : new CreateChannelOptions(publisherConfirmationsEnabled: false, publisherConfirmationTrackingEnabled: false);
         var channel = await connection.CreateChannelAsync(createChannelOptions, cancellationToken).ConfigureAwait(false);
         AttachChannelEvents(channel);
         return channel;
@@ -183,42 +189,12 @@ public sealed class PersistentChannel : IPersistentChannel
 
     private void AttachChannelEvents(IChannel channel)
     {
-        if (options.PublisherConfirms)
-        {
-            channel.BasicAcksAsync += OnAck;
-            channel.BasicNacksAsync += OnNack;
-        }
-
         channel.BasicReturnAsync += OnReturn;
-        channel.ChannelShutdownAsync += OnChannelShutdown;
-
-        if (channel is IRecoverable recoverable)
-            recoverable.RecoveryAsync += OnChannelRecovered;
     }
 
     private void DetachChannelEvents(IChannel channel)
     {
-        if (channel is IRecoverable recoverable)
-            recoverable.RecoveryAsync -= OnChannelRecovered;
-
-        channel.ChannelShutdownAsync -= OnChannelShutdown;
         channel.BasicReturnAsync -= OnReturn;
-
-        if (!options.PublisherConfirms)
-            return;
-
-        channel.BasicNacksAsync -= OnNack;
-        channel.BasicAcksAsync -= OnAck;
-    }
-
-    private Task OnChannelRecovered(object sender, AsyncEventArgs e)
-    {
-        return eventBus.PublishAsync(new ChannelRecoveredEvent((IChannel)sender!));
-    }
-
-    private Task OnChannelShutdown(object sender, ShutdownEventArgs e)
-    {
-        return eventBus.PublishAsync(new ChannelShutdownEvent((IChannel)sender!));
     }
 
     private Task OnReturn(object sender, BasicReturnEventArgs args)
@@ -234,20 +210,13 @@ public sealed class PersistentChannel : IPersistentChannel
         return eventBus.PublishAsync(messageEvent);
     }
 
-    private async Task OnAck(object sender, BasicAckEventArgs args)
-    {
-        await eventBus.PublishAsync(MessageConfirmationEvent.Ack((IChannel)sender!, args.DeliveryTag, args.Multiple));
-    }
-
-    private Task OnNack(object sender, BasicNackEventArgs args)
-    {
-        return eventBus.PublishAsync(MessageConfirmationEvent.Nack((IChannel)sender!, args.DeliveryTag, args.Multiple));
-    }
-
     private static ExceptionVerdict GetExceptionVerdict(Exception exception)
     {
         switch (exception)
         {
+            case StaleChannelException:
+                // the channel was already dead before the action did anything - recreate it and retry
+                return ExceptionVerdict.SuppressAndCloseChannel;
             case OperationInterruptedException e:
                 return e.ShutdownReason?.ReplyCode switch
                 {

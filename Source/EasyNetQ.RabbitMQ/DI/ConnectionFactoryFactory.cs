@@ -24,6 +24,21 @@ internal static class ConnectionFactoryFactory
             RequestedChannelMax = configuration.RequestedChannelMax
         };
 
+        if (configuration.MaxInboundMessageBodySize.HasValue)
+            connectionFactory.MaxInboundMessageBodySize = configuration.MaxInboundMessageBodySize.Value;
+        if (configuration.SocketReadTimeout.HasValue)
+            connectionFactory.SocketReadTimeout = configuration.SocketReadTimeout.Value;
+        if (configuration.SocketWriteTimeout.HasValue)
+            connectionFactory.SocketWriteTimeout = configuration.SocketWriteTimeout.Value;
+        if (configuration.RequestedConnectionTimeout.HasValue)
+            connectionFactory.RequestedConnectionTimeout = configuration.RequestedConnectionTimeout.Value;
+        if (configuration.HandshakeContinuationTimeout.HasValue)
+            connectionFactory.HandshakeContinuationTimeout = configuration.HandshakeContinuationTimeout.Value;
+        if (configuration.EndpointResolverFactory != null)
+            connectionFactory.EndpointResolverFactory = configuration.EndpointResolverFactory;
+        if (configuration.CredentialsProvider != null)
+            connectionFactory.CredentialsProvider = configuration.CredentialsProvider;
+
         if (configuration.Hosts.Count > 0)
             connectionFactory.HostName = configuration.Hosts[0].Host;
 

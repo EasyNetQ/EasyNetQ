@@ -153,6 +153,46 @@ public class ConnectionConfiguration
     public ushort? ConsumerDispatcherConcurrency { get; set; } = null;
 
     public string ClientName { get; set; }
+
+    /// <summary>
+    ///     Maximum size in bytes of a message body the client accepts; larger deliveries fail the connection.
+    ///     Null uses the RabbitMQ.Client default (64 MiB).
+    /// </summary>
+    public uint? MaxInboundMessageBodySize { get; set; }
+
+    /// <summary>
+    ///     Socket read timeout. Null uses the RabbitMQ.Client default.
+    /// </summary>
+    public TimeSpan? SocketReadTimeout { get; set; }
+
+    /// <summary>
+    ///     Socket write timeout. Null uses the RabbitMQ.Client default.
+    /// </summary>
+    public TimeSpan? SocketWriteTimeout { get; set; }
+
+    /// <summary>
+    ///     Timeout for establishing the initial TCP connection. Null uses the RabbitMQ.Client default.
+    /// </summary>
+    public TimeSpan? RequestedConnectionTimeout { get; set; }
+
+    /// <summary>
+    ///     Timeout for the AMQP handshake continuation. Null uses the RabbitMQ.Client default (10 seconds);
+    ///     raise it when TLS or OAuth handshakes need longer.
+    /// </summary>
+    public TimeSpan? HandshakeContinuationTimeout { get; set; }
+
+    /// <summary>
+    ///     Factory for a custom endpoint resolver (custom DNS resolution, endpoint ordering or filtering).
+    ///     Null uses the RabbitMQ.Client default resolver over <see cref="Hosts" />.
+    /// </summary>
+    public Func<IEnumerable<AmqpTcpEndpoint>, IEndpointResolver> EndpointResolverFactory { get; set; }
+
+    /// <summary>
+    ///     Credentials provider for dynamic credentials such as OAuth2 tokens; the client refreshes credentials
+    ///     via the provider when they expire. When set, it takes precedence over
+    ///     <see cref="UserName" />/<see cref="Password" />.
+    /// </summary>
+    public ICredentialsProvider CredentialsProvider { get; set; }
 }
 
 /// <summary>
