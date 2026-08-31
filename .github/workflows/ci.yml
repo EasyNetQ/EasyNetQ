@@ -96,6 +96,8 @@ jobs:
         uses: NuGet/login@v1
         id: nuget-login
         with:
-          user: EasyNetQ
+          # nuget.org username of the org member who CREATED the trusted publishing
+          # policy (not the EasyNetQ org that owns it - orgs cannot create policies).
+          user: ${{ secrets.NUGET_USER }}
       - name: Publish
         run: dotnet nuget push '${{ github.workspace }}/Packages/*.*' --source https://api.nuget.org/v3/index.json --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
