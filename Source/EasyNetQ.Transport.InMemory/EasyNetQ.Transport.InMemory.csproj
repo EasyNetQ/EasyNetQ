@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>In-process EasyNetQ transport for tests and benchmarks</Description>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageId>EasyNetQ.Transport.InMemory</PackageId>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EasyNetQ.Core\EasyNetQ.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup Label="InternalsVisibleTo">
+    <InternalsVisibleTo Include="EasyNetQ.Core.Tests" />
+    <InternalsVisibleTo Include="EasyNetQ.Benchmarks" />
+  </ItemGroup>
+</Project>

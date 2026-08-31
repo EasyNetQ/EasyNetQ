@@ -20,10 +20,12 @@
   </Folder>
   <Folder Name="/Serialization/">
     <Project Path="EasyNetQ.Serialization.NewtonsoftJson/EasyNetQ.Serialization.NewtonsoftJson.csproj" />
+    <Project Path="EasyNetQ.Transport.InMemory/EasyNetQ.Transport.InMemory.csproj" />
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="EasyNetQ.AllocationTests/EasyNetQ.AllocationTests.csproj" />
     <Project Path="EasyNetQ.ApprovalTests/EasyNetQ.ApprovalTests.csproj" />
+    <Project Path="EasyNetQ.Core.Tests/EasyNetQ.Core.Tests.csproj" />
     <Project Path="EasyNetQ.Hosepipe.Tests/EasyNetQ.Hosepipe.Tests.csproj" />
     <Project Path="EasyNetQ.IntegrationTests/EasyNetQ.IntegrationTests.csproj" />
     <Project Path="EasyNetQ.Serialization.Tests/EasyNetQ.Serialization.Tests.csproj" />
