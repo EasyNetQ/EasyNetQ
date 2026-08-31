@@ -83,6 +83,7 @@ namespace EasyNetQ
     }
     public static class CoreServiceCollectionExtensions
     {
+        public static EasyNetQ.IEasyNetQBuilder AddEasyNetQCore(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
         public static Microsoft.Extensions.DependencyInjection.IServiceCollection AddEasyNetQCoreServices(this Microsoft.Extensions.DependencyInjection.IServiceCollection services) { }
     }
     public static class DeadLetterStrategy
@@ -587,6 +588,53 @@ namespace EasyNetQ
     public delegate System.Threading.Tasks.Task TEventHandler<TEvent>(TEvent messageEvent);
     public delegate string TopicNameConvention(System.Type messageType);
 }
+namespace EasyNetQ.Configuration
+{
+    public sealed class ConsumerBinding : System.IEquatable<EasyNetQ.Configuration.ConsumerBinding>
+    {
+        public ConsumerBinding(string Exchange, string RoutingKey, System.Collections.Generic.IDictionary<string, object>? Arguments = null) { }
+        public System.Collections.Generic.IDictionary<string, object>? Arguments { get; init; }
+        public string Exchange { get; init; }
+        public string RoutingKey { get; init; }
+    }
+    public abstract class ConsumerBuilder<TSelf>
+        where TSelf : EasyNetQ.Configuration.ConsumerBuilder<TSelf>
+    {
+        protected ConsumerBuilder(EasyNetQ.Configuration.ConsumerDefinition definition) { }
+        public EasyNetQ.Configuration.ConsumerDefinition Definition { get; }
+        public TSelf AutoAck() { }
+        public TSelf Bind(string exchange, string routingKey) { }
+        public TSelf ExistingQueue(string name) { }
+        public TSelf Handle<T>(EasyNetQ.MessageHandler<T> handler) { }
+        public TSelf Handle<T>(System.Func<T, System.Threading.CancellationToken, System.Threading.Tasks.Task> handler) { }
+        public TSelf Message(System.Action<EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext>> configure) { }
+        public TSelf PrefetchCount(ushort prefetchCount) { }
+        public TSelf Queue(string name) { }
+    }
+    public sealed class ConsumerDefinition
+    {
+        public ConsumerDefinition() { }
+        public bool AutoAck { get; set; }
+        public System.Collections.Generic.List<EasyNetQ.Configuration.ConsumerBinding> Bindings { get; }
+        public System.Action<EasyNetQ.Pipeline.ConsumerContext>? ConfigureContext { get; set; }
+        public System.Collections.Generic.List<EasyNetQ.Transport.ExchangeDefinition> ExchangesToDeclare { get; }
+        public System.Collections.Generic.List<System.Action<System.IServiceProvider, EasyNetQ.HandlerTable>> HandlerRegistrations { get; }
+        public System.Action<EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext>>? MessagePipeline { get; set; }
+        public ushort? PrefetchCount { get; set; }
+        public string Queue { get; set; }
+        public EasyNetQ.Transport.QueueDefinition? QueueToDeclare { get; set; }
+    }
+    public static class EasyNetQBuilderConsumeExtensions
+    {
+        public static EasyNetQ.IEasyNetQBuilder Consume(this EasyNetQ.IEasyNetQBuilder builder, System.Action<EasyNetQ.Configuration.GenericConsumerBuilder> configure) { }
+        public static EasyNetQ.IEasyNetQBuilder RegisterConsumer<TBuilder>(this EasyNetQ.IEasyNetQBuilder builder, TBuilder consumerBuilder, System.Action<TBuilder> configure)
+            where TBuilder : EasyNetQ.Configuration.ConsumerBuilder<TBuilder> { }
+    }
+    public sealed class GenericConsumerBuilder : EasyNetQ.Configuration.ConsumerBuilder<EasyNetQ.Configuration.GenericConsumerBuilder>
+    {
+        public GenericConsumerBuilder(EasyNetQ.Configuration.ConsumerDefinition definition) { }
+    }
+}
 namespace EasyNetQ.Consumer
 {
     public class HandlerCollection : EasyNetQ.Consumer.IHandlerCollection, EasyNetQ.Consumer.IHandlerRegistration
@@ -707,6 +755,15 @@ namespace EasyNetQ.Events
     {
         public ConnectionRestoredEvent(EasyNetQ.Persistent.PersistentConnectionType Type) { }
         public EasyNetQ.Persistent.PersistentConnectionType Type { get; init; }
+    }
+}
+namespace EasyNetQ.Hosting
+{
+    public sealed class ConsumerHostedService : Microsoft.Extensions.Hosting.IHostedService
+    {
+        public ConsumerHostedService(System.Collections.Generic.IEnumerable<EasyNetQ.Configuration.ConsumerDefinition> definitions, EasyNetQ.Transport.ITransport transport, System.IServiceProvider services, EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> consumePipelineBuilder, EasyNetQ.IMessageSerializer messageSerializer, EasyNetQ.IMessageTypeRegistry registry) { }
+        public System.Threading.Tasks.Task StartAsync(System.Threading.CancellationToken cancellationToken) { }
+        public System.Threading.Tasks.Task StopAsync(System.Threading.CancellationToken cancellationToken) { }
     }
 }
 namespace EasyNetQ.Interception

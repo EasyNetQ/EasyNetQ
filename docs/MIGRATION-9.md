@@ -62,6 +62,16 @@ signatures and internals do not.
 - Topology operations now receive the timeout-linked cancellation token; in 8.x only the channel-acquisition
   wait honored the configured timeout, the operation itself did not.
 
+## Fluent configuration (phase 5, additive)
+
+- Transport-agnostic: `services.AddEasyNetQCore().Consume(c => c.Queue("orders").Handle<T>(...))` with any
+  registered `ITransport` (e.g. `EasyNetQ.Transport.InMemory` for tests). Consumers start via `IHostedService`.
+- RabbitMQ-typed: `AddEasyNetQ("host=...").UseRabbitMq(r => r.Consume(c => c.Queue("q", q => q.Quorum()
+  .DeadLetterExchange("dlx")).Bind("orders", "order.*", e => e.Topic()).Handle<T>(...)))`. The transport owns
+  the typed queue/exchange/consumer settings; the generic layer stays for portable code.
+- Core-only hosts fall back to `SimpleConsumeErrorStrategy.NackWithRequeue`; the RabbitMQ registration keeps
+  the error-queue strategy.
+
 ## Serialization
 
 - `IMessageSerializer` (generic, descriptor-based) is the primary interface. `ISerializer` implementations

@@ -12,6 +12,16 @@ public static class CoreServiceCollectionExtensions
     /// <summary>
     ///     Registers the transport-agnostic core services (registry, serialization, pipelines, facades).
     /// </summary>
+    /// <summary>
+    ///     Registers the transport-agnostic services and returns the fluent builder. Register an
+    ///     <see cref="Transport.ITransport" /> implementation separately (a transport package does this).
+    /// </summary>
+    public static IEasyNetQBuilder AddEasyNetQCore(this IServiceCollection services)
+    {
+        services.AddEasyNetQCoreServices();
+        return new EasyNetQBuilder(services);
+    }
+
     public static IServiceCollection AddEasyNetQCoreServices(this IServiceCollection services)
     {
         services.TryAddSingleton<IMessageTypeRegistry, MessageTypeRegistry>();
@@ -30,6 +40,7 @@ public static class CoreServiceCollectionExtensions
                 : new Serialization.SystemTextJson.SystemTextJsonMessageSerializer(
                     System.Text.Json.Serialization.Metadata.JsonTypeInfoResolver.Combine(contexts), converters);
         });
+        services.TryAddSingleton<Consumer.IConsumeErrorStrategy>(Consumer.SimpleConsumeErrorStrategy.NackWithRequeue);
         services.TryAddSingleton<IConventions, Conventions>();
         services.TryAddSingleton<IEventBus, EventBus>();
         services.TryAddSingleton<ITypeNameSerializer, DefaultTypeNameSerializer>();

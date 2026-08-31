@@ -24,8 +24,10 @@ public static class ServiceCollectionExtensions
         Func<IServiceProvider, ConnectionConfiguration> connectionConfigurationFactory
     )
     {
-        CoreServiceCollectionExtensions.AddEasyNetQCoreServices(services);
+        // RabbitMQ registrations first: Core's fallbacks (e.g. SimpleConsumeErrorStrategy) are TryAdd and
+        // must not shadow the RabbitMQ defaults (e.g. the error-queue strategy)
         services.AddRabbitMqServices(connectionConfigurationFactory);
+        CoreServiceCollectionExtensions.AddEasyNetQCoreServices(services);
         return services;
     }
 
