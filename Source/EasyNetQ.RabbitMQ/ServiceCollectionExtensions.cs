@@ -77,6 +77,7 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<IConsumerConnection, ConsumerConnection>();
         services.TryAddSingleton<IPersistentChannelFactory, PersistentChannelFactory>();
         services.TryAddSingleton<IPullingConsumerFactory, PullingConsumerFactory>();
+        services.TryAddSingleton<Transport.ITransport, Transport.RabbitMqTransport>();
         services.TryAddSingleton<IAdvancedBus, RabbitAdvancedBus>();
         services.TryAddSingleton<IPubSub, DefaultPubSub>();
         services.TryAddSingleton<IRpc, DefaultRpc>();

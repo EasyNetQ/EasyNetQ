@@ -524,6 +524,12 @@ namespace EasyNetQ
         public const string Lazy = "lazy";
     }
     public delegate string QueueNameConvention(System.Type messageType, string subscriberId);
+    public readonly struct QueueStats
+    {
+        public QueueStats(ulong messagesCount, ulong consumersCount) { }
+        public ulong ConsumersCount { get; }
+        public ulong MessagesCount { get; }
+    }
     public static class QueueType
     {
         public const string Classic = "classic";
@@ -932,6 +938,7 @@ namespace EasyNetQ.Pipeline
     }
     public static class Keys
     {
+        public static readonly EasyNetQ.Pipeline.PropertyKey<EasyNetQ.Persistent.PersistentConnectionType> ConnectionType;
         public static readonly EasyNetQ.Pipeline.PropertyKey<EasyNetQ.Diagnostics.ConsumerTelemetry> ConsumerTelemetry;
         public static readonly EasyNetQ.Pipeline.PropertyKey<EasyNetQ.IMessageSerializer> Serializer;
     }
@@ -1148,5 +1155,65 @@ namespace EasyNetQ.Topology
         public bool IsDurable { get; }
         public bool IsExclusive { get; }
         public string Name { get; }
+    }
+}
+namespace EasyNetQ.Transport
+{
+    public sealed class BindingDefinition : System.IEquatable<EasyNetQ.Transport.BindingDefinition>
+    {
+        public BindingDefinition(string Source, string Destination, string RoutingKey, bool DestinationIsExchange = false) { }
+        public System.Collections.Generic.IDictionary<string, object>? Arguments { get; init; }
+        public string Destination { get; init; }
+        public bool DestinationIsExchange { get; init; }
+        public string RoutingKey { get; init; }
+        public string Source { get; init; }
+    }
+    public sealed class ExchangeDefinition : System.IEquatable<EasyNetQ.Transport.ExchangeDefinition>
+    {
+        public ExchangeDefinition(string Name, string Type = "topic", bool Durable = true, bool AutoDelete = false) { }
+        public System.Collections.Generic.IDictionary<string, object>? Arguments { get; init; }
+        public bool AutoDelete { get; init; }
+        public bool Durable { get; init; }
+        public string Name { get; init; }
+        public string Type { get; init; }
+    }
+    public interface ITopology
+    {
+        System.Threading.Tasks.ValueTask BindAsync(EasyNetQ.Transport.BindingDefinition binding, System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.ValueTask DeclareExchangeAsync(EasyNetQ.Transport.ExchangeDefinition exchange, System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.ValueTask DeclareExchangePassiveAsync(string exchange, System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.ValueTask<string> DeclareQueueAsync(EasyNetQ.Transport.QueueDefinition queue, System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.ValueTask DeclareQueuePassiveAsync(string queue, System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.ValueTask DeleteExchangeAsync(string exchange, bool ifUnused = false, System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.ValueTask DeleteQueueAsync(string queue, bool ifUnused = false, bool ifEmpty = false, System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.ValueTask<EasyNetQ.QueueStats> GetQueueStatsAsync(string queue, System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.ValueTask PurgeQueueAsync(string queue, System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.ValueTask UnbindAsync(EasyNetQ.Transport.BindingDefinition binding, System.Threading.CancellationToken cancellationToken = default);
+    }
+    public interface ITransport
+    {
+        System.Threading.Tasks.ValueTask<EasyNetQ.Transport.ITransportConnection> ConnectAsync(EasyNetQ.Pipeline.ConnectionContext context, System.Threading.CancellationToken cancellationToken = default);
+    }
+    public interface ITransportChannel : System.IAsyncDisposable
+    {
+        EasyNetQ.Transport.ITopology? Topology { get; }
+        System.Threading.Tasks.ValueTask PublishAsync(EasyNetQ.Pipeline.PublishContext context);
+        System.Threading.Tasks.ValueTask<EasyNetQ.Transport.ITransportConsumer> StartConsumerAsync(System.Collections.Generic.IReadOnlyCollection<EasyNetQ.Pipeline.ConsumerContext> consumers, System.Threading.CancellationToken cancellationToken = default);
+    }
+    public interface ITransportConnection : System.IAsyncDisposable
+    {
+        bool IsConnected { get; }
+        System.Threading.Tasks.Task EnsureConnectedAsync(System.Threading.CancellationToken cancellationToken = default);
+        System.Threading.Tasks.ValueTask<EasyNetQ.Transport.ITransportChannel> OpenChannelAsync(EasyNetQ.Pipeline.ChannelContext context, System.Threading.CancellationToken cancellationToken = default);
+    }
+    public interface ITransportConsumer : System.IAsyncDisposable { }
+    public sealed class QueueDefinition : System.IEquatable<EasyNetQ.Transport.QueueDefinition>
+    {
+        public QueueDefinition(string Name = "", bool Durable = true, bool Exclusive = false, bool AutoDelete = false) { }
+        public System.Collections.Generic.IDictionary<string, object>? Arguments { get; init; }
+        public bool AutoDelete { get; init; }
+        public bool Durable { get; init; }
+        public bool Exclusive { get; init; }
+        public string Name { get; init; }
     }
 }

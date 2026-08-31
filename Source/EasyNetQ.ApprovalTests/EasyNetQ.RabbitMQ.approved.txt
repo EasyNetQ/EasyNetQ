@@ -363,15 +363,9 @@ namespace EasyNetQ
         public static EasyNetQ.IQueueDeclareConfiguration WithQueueType(this EasyNetQ.IQueueDeclareConfiguration configuration, string queueType = "classic") { }
         public static EasyNetQ.IQueueDeclareConfiguration WithSingleActiveConsumer(this EasyNetQ.IQueueDeclareConfiguration configuration, bool singleActiveConsumer = true) { }
     }
-    public readonly struct QueueStats
-    {
-        public QueueStats(ulong messagesCount, ulong consumersCount) { }
-        public ulong ConsumersCount { get; }
-        public ulong MessagesCount { get; }
-    }
     public class RabbitAdvancedBus : EasyNetQ.IAdvancedBus, System.IDisposable
     {
-        public RabbitAdvancedBus(Microsoft.Extensions.Logging.ILogger<EasyNetQ.RabbitAdvancedBus> logger, EasyNetQ.Producer.IProducerConnection producerConnection, EasyNetQ.Consumer.IConsumerConnection consumerConnection, EasyNetQ.Consumer.IConsumerFactory consumerFactory, EasyNetQ.ChannelDispatcher.IPersistentChannelDispatcher persistentChannelDispatcher, EasyNetQ.IEventBus eventBus, EasyNetQ.Consumer.IHandlerCollectionFactory handlerCollectionFactory, EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.PublishContext> publishPipelineBuilder, EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> consumePipelineBuilder, System.IServiceProvider services, EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy, EasyNetQ.IMessageSerializer messageSerializer, EasyNetQ.IPullingConsumerFactory pullingConsumerFactory, EasyNetQ.AdvancedBusEventHandlers advancedBusEventHandlers) { }
+        public RabbitAdvancedBus(Microsoft.Extensions.Logging.ILogger<EasyNetQ.RabbitAdvancedBus> logger, EasyNetQ.Producer.IProducerConnection producerConnection, EasyNetQ.Consumer.IConsumerConnection consumerConnection, EasyNetQ.Transport.ITransport transport, EasyNetQ.IEventBus eventBus, EasyNetQ.Consumer.IHandlerCollectionFactory handlerCollectionFactory, EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.PublishContext> publishPipelineBuilder, EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> consumePipelineBuilder, System.IServiceProvider services, EasyNetQ.IMessageSerializationStrategy messageSerializationStrategy, EasyNetQ.IMessageSerializer messageSerializer, EasyNetQ.IPullingConsumerFactory pullingConsumerFactory, EasyNetQ.AdvancedBusEventHandlers advancedBusEventHandlers) { }
         public bool IsConnected { get; }
         public event System.EventHandler<EasyNetQ.BlockedEventArgs> Blocked;
         public event System.EventHandler<EasyNetQ.ConnectedEventArgs> Connected;
@@ -766,5 +760,20 @@ namespace EasyNetQ.SystemMessages
         public string Message { get; set; }
         public string Queue { get; set; }
         public string RoutingKey { get; set; }
+    }
+}
+namespace EasyNetQ.Transport
+{
+    public static class RabbitKeys
+    {
+        public static readonly EasyNetQ.Pipeline.PropertyKey<System.Collections.Generic.IDictionary<string, object>> ConsumerArguments;
+        public static readonly EasyNetQ.Pipeline.PropertyKey<string> ConsumerTag;
+        public static readonly EasyNetQ.Pipeline.PropertyKey<bool> ExclusiveConsumer;
+        public static readonly EasyNetQ.Pipeline.PropertyKey<EasyNetQ.Topology.Queue> Queue;
+    }
+    public sealed class RabbitMqTransport : EasyNetQ.Transport.ITransport
+    {
+        public RabbitMqTransport(EasyNetQ.ChannelDispatcher.IPersistentChannelDispatcher persistentChannelDispatcher, EasyNetQ.Producer.IProducerConnection producerConnection, EasyNetQ.Consumer.IConsumerConnection consumerConnection, EasyNetQ.Consumer.IConsumerFactory consumerFactory) { }
+        public System.Threading.Tasks.ValueTask<EasyNetQ.Transport.ITransportConnection> ConnectAsync(EasyNetQ.Pipeline.ConnectionContext context, System.Threading.CancellationToken cancellationToken = default) { }
     }
 }

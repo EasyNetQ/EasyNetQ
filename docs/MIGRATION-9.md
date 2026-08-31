@@ -52,6 +52,16 @@ signatures and internals do not.
 - `RabbitAdvancedBus`: confirmation listener parameter removed.
 - `DefaultConsumeErrorStrategy`: confirmation listener parameter removed.
 
+## Transport abstraction (phase 5)
+
+- New `EasyNetQ.Transport` namespace in Core: `ITransport`, `ITransportConnection`, `ITransportChannel`,
+  `ITransportConsumer`, `ITopology`, and `ExchangeDefinition`/`QueueDefinition`/`BindingDefinition`.
+  `EasyNetQ.RabbitMQ` implements them over the persistent connection/channel infrastructure.
+- `RabbitAdvancedBus` constructor takes `ITransport`; the dispatcher and consumer-factory parameters are gone.
+- `QueueStats` moved from the RabbitMQ assembly to `EasyNetQ.Core`.
+- Topology operations now receive the timeout-linked cancellation token; in 8.x only the channel-acquisition
+  wait honored the configured timeout, the operation itself did not.
+
 ## Serialization
 
 - `IMessageSerializer` (generic, descriptor-based) is the primary interface. `ISerializer` implementations

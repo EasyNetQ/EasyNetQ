@@ -16,4 +16,9 @@ public static class Keys
     ///     Per-consumer telemetry invariants, set on the consumer layer when the consumer is configured
     /// </summary>
     public static readonly PropertyKey<Diagnostics.ConsumerTelemetry> ConsumerTelemetry = new("EasyNetQ.ConsumerTelemetry");
+
+    /// <summary>
+    ///     The intent of a connection layer (producer or consumer side), read by transports on ConnectAsync
+    /// </summary>
+    public static readonly PropertyKey<Persistent.PersistentConnectionType> ConnectionType = new("EasyNetQ.ConnectionType");
 }

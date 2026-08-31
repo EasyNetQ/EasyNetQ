@@ -204,7 +204,7 @@ public class When_a_queue_is_deleted : IAsyncLifetime
     [Fact]
     public async Task Should_delete_the_queue()
     {
-        await mockBuilder.Channels[0].Received().QueueDeleteAsync("my_queue", false, false, cancellationToken: CancellationToken.None);
+        await mockBuilder.Channels[0].Received().QueueDeleteAsync("my_queue", false, false, cancellationToken: Arg.Any<CancellationToken>());
     }
 }
 
@@ -229,7 +229,7 @@ public class When_a_queue_is_deleted_with_name : IAsyncLifetime
     [Fact]
     public async Task Should_delete_the_queue()
     {
-        await mockBuilder.Channels[0].Received().QueueDeleteAsync("my_queue", false, false, cancellationToken: CancellationToken.None);
+        await mockBuilder.Channels[0].Received().QueueDeleteAsync("my_queue", false, false, cancellationToken: Arg.Any<CancellationToken>());
     }
 }
 
@@ -306,7 +306,7 @@ public class When_an_exchange_is_declared_passively : IAsyncLifetime
     public async Task Should_passively_declare_exchange()
     {
         mockBuilder.Channels.Count.Should().Be(1);
-        await mockBuilder.Channels[0].Received().ExchangeDeclarePassiveAsync(Arg.Is("my_exchange"), cancellationToken: CancellationToken.None);
+        await mockBuilder.Channels[0].Received().ExchangeDeclarePassiveAsync(Arg.Is("my_exchange"), cancellationToken: Arg.Any<CancellationToken>());
     }
 }
 
@@ -335,7 +335,7 @@ public class When_an_exchange_is_deleted : IAsyncLifetime
     [Fact]
     public async Task Should_delete_the_queue()
     {
-        await mockBuilder.Channels[0].Received().ExchangeDeleteAsync("my_exchange", false, cancellationToken: CancellationToken.None);
+        await mockBuilder.Channels[0].Received().ExchangeDeleteAsync("my_exchange", false, cancellationToken: Arg.Any<CancellationToken>());
     }
 }
 
@@ -469,6 +469,6 @@ public class When_a_queue_is_unbound_from_an_exchange : IAsyncLifetime
     [Fact]
     public async Task Should_unbind_the_exchange()
     {
-        await mockBuilder.Channels[0].Received().QueueUnbindAsync("my_queue", "my_exchange", "my_routing_key", null, cancellationToken: CancellationToken.None);
+        await mockBuilder.Channels[0].Received().QueueUnbindAsync("my_queue", "my_exchange", "my_routing_key", null, cancellationToken: Arg.Any<CancellationToken>());
     }
 }
