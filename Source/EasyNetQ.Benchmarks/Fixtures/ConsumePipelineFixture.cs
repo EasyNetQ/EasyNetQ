@@ -1,5 +1,6 @@
 using EasyNetQ.Consumer;
 using EasyNetQ.Pipeline;
+using EasyNetQ.Pipeline.Middleware;
 using EasyNetQ.Serialization.SystemTextJson;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -9,9 +10,10 @@ namespace EasyNetQ.Benchmarks.Fixtures;
 
 /// <summary>
 ///     Builds the consume pipeline exactly as <c>RabbitAdvancedBus.ConsumeAsync</c> does for typed handlers
-///     (error handling → interceptors → deserialize + handler lookup + dispatch) and drives it the way the transport
-///     does: rent a pooled <see cref="ConsumeContext" />, fill it, run the pipeline, return it.
-///     The handlers are no-ops, so the measured cost is framework overhead only (plus the deserialized message).
+///     (error handling → interceptors → resolve type → resolve handler → select serializer → deserialize → dispatch)
+///     and drives it the way the transport does: rent a pooled <see cref="ConsumeContext" />, fill it, run the
+///     pipeline, return it. Handlers are no-ops, so the measured cost is framework overhead plus the deserialized
+///     message object.
 /// </summary>
 public sealed class ConsumePipelineFixture
 {
@@ -19,10 +21,10 @@ public sealed class ConsumePipelineFixture
 
     public ConsumePipelineFixture()
     {
-        var serializer = new SystemTextJsonSerializerV2();
-        var typeNameSerializer = new DefaultTypeNameSerializer();
+        var serializer = new SystemTextJsonMessageSerializer();
+        var registry = new MessageTypeRegistry(new DefaultTypeNameSerializer());
         SerializationStrategy = new DefaultMessageSerializationStrategy(
-            typeNameSerializer, serializer, new DefaultCorrelationIdGenerationStrategy()
+            registry, serializer, new DefaultCorrelationIdGenerationStrategy()
         );
 
         var services = new ServiceCollection();
@@ -30,24 +32,26 @@ public sealed class ConsumePipelineFixture
         services.AddSingleton(typeof(ILogger<>), typeof(NullLogger<>));
         Services = services.BuildServiceProvider();
 
-        var handlerCollection = new HandlerCollection();
-        handlerCollection.Add<SmallMessage>((_, _, _) => AckTask);
-        handlerCollection.Add<MediumMessage>((_, _, _) => AckTask);
-        handlerCollection.Add<LargeMessage>((_, _, _) => AckTask);
+        var table = new HandlerTable(registry);
+        table.Add<SmallMessage>(static (_, _) => AckTask);
+        table.Add<MediumMessage>(static (_, _) => AckTask);
+        table.Add<LargeMessage>(static (_, _) => AckTask);
 
-        var strategy = SerializationStrategy;
         var pipeline = new PipelineBuilder<ConsumeContext>()
             .UseConsumeErrorStrategy()
             .UseConsumeInterceptors()
-            .Build(Services, async context =>
-            {
-                var message = strategy.DeserializeMessage(context.Properties, context.Body);
-                var handler = handlerCollection.GetHandler(message.MessageType);
-                context.Ack = await handler(message, context.ReceivedInfo, context.CancellationToken).ConfigureAwait(false);
-            });
+            .Use(new ResolveMessageTypeStep())
+            .Use(new ResolveHandlerStep())
+            .Use(new SelectSerializerStep(serializer))
+            .Use(new DeserializeStep())
+            .Build(Services, static async context => context.Ack = await context.Handler!.InvokeAsync(context).ConfigureAwait(false));
 
         var connection = new ConnectionContext("Consumer", Services);
-        Consumer = new ConsumerContext(new ChannelContext(connection), ReceivedInfo.Queue) { MessagePipeline = pipeline };
+        Consumer = new ConsumerContext(new ChannelContext(connection), ReceivedInfo.Queue)
+        {
+            Handlers = table,
+            MessagePipeline = pipeline,
+        };
     }
 
     public ConsumerContext Consumer { get; }
@@ -60,7 +64,7 @@ public sealed class ConsumePipelineFixture
     /// </summary>
     public (MessageProperties Properties, ReadOnlyMemory<byte> Body) Serialize<T>(T message)
     {
-        using var serialized = SerializationStrategy.SerializeMessage(new Message<T>(message));
+        using var serialized = SerializationStrategy.SerializeMessage(message, MessageProperties.Empty);
         return (serialized.Properties, serialized.Body.ToArray());
     }
 

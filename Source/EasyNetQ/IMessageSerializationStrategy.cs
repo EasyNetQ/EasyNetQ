@@ -3,23 +3,24 @@ using System.Buffers;
 namespace EasyNetQ;
 
 /// <summary>
-///     The message serialization strategy
+///     Represents a strategy of serialization/deserialization of messages
 /// </summary>
 public interface IMessageSerializationStrategy
 {
     /// <summary>
-    ///     Serializes the message
+    ///     Serializes an enveloped message (type-erased; used by <see cref="IAdvancedBus.PublishAsync(string,string,bool?,bool?,IMessage,System.Threading.CancellationToken)" />
+    ///     and by polymorphic publishes where the body's runtime type differs from the static type)
     /// </summary>
-    /// <param name="message">The message</param>
-    /// <returns></returns>
     SerializedMessage SerializeMessage(IMessage message);
 
     /// <summary>
-    ///     Deserializes the message
+    ///     Serializes a body whose runtime type is its static type — the common, reflection-free fast path
     /// </summary>
-    /// <param name="properties">The properties</param>
-    /// <param name="body">The body</param>
-    /// <returns></returns>
+    SerializedMessage SerializeMessage<T>(T body, in MessageProperties properties);
+
+    /// <summary>
+    ///     Deserializes a message into its typed <see cref="IMessage" /> envelope
+    /// </summary>
     IMessage DeserializeMessage(in MessageProperties properties, in ReadOnlyMemory<byte> body);
 }
 
@@ -32,7 +33,9 @@ public readonly struct SerializedMessage : IDisposable
 
     /// <summary>
     ///     Creates SerializedMessage
-    /// </summary>s
+    /// </summary>
+    /// <param name="properties">The properties</param>
+    /// <param name="body">The body</param>
     public SerializedMessage(in MessageProperties properties, IMemoryOwner<byte> body)
     {
         Properties = properties;
@@ -51,11 +54,5 @@ public readonly struct SerializedMessage : IDisposable
     public ReadOnlyMemory<byte> Body { get; }
 
     /// <inheritdoc />
-
-    public void Dispose()
-    {
-#pragma warning disable IDISP007 // the injected here is created in the calling method so it should be disposed
-        owner?.Dispose();
-#pragma warning restore IDISP007
-    }
+    public void Dispose() => owner?.Dispose();
 }

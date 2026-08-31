@@ -160,25 +160,23 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
     void RegisterResponseActions<TResponse>(string correlationId, TaskCompletionSource<TResponse> tcs, bool queueIsDurable)
     {
         var responseAction = new ResponseAction(
-            message =>
+            (properties, body) =>
             {
-                var messageOfTResponse = (IMessage<TResponse>)message;
-
                 var isFaulted = false;
                 var exceptionMessage = "The exception message has not been specified.";
 
-                if (messageOfTResponse.Properties is { HeadersPresent: true, Headers: not null })
+                if (properties is { HeadersPresent: true, Headers: not null })
                 {
-                    if (messageOfTResponse.Properties.Headers.TryGetValue(IsFaultedKey, out var isFaultedValue))
+                    if (properties.Headers.TryGetValue(IsFaultedKey, out var isFaultedValue))
                         isFaulted = Convert.ToBoolean(isFaultedValue);
-                    if (messageOfTResponse.Properties.Headers.TryGetValue(ExceptionMessageKey, out var exchangeMessageValue))
+                    if (properties.Headers.TryGetValue(ExceptionMessageKey, out var exchangeMessageValue))
                         exceptionMessage = Encoding.UTF8.GetString((byte[])exchangeMessageValue!);
                 }
 
                 if (isFaulted)
                     tcs.TrySetException(new EasyNetQResponderException(exceptionMessage));
                 else
-                    tcs.TrySetResult(messageOfTResponse.Body!);
+                    tcs.TrySetResult((TResponse)body!);
             },
             () => tcs.TrySetException(
                 new EasyNetQException(
@@ -226,10 +224,12 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
 
         var subscription = await advancedBus.ConsumeAsync<TResponse>(
             queue,
-            (message, _) =>
+            (body, context) =>
             {
-                if (message.Properties.CorrelationId != null && responseActions.TryRemove(message.Properties.CorrelationId, out var responseAction))
-                    responseAction.OnSuccess(message);
+                var properties = context.Properties;
+                if (properties.CorrelationId != null && responseActions.TryRemove(properties.CorrelationId, out var responseAction))
+                    responseAction.OnSuccess(properties, body);
+                return new ValueTask<AckDecision>(AckDecision.Ack);
             }
         );
         responseSubscriptions.TryAdd(rpcKey, new ResponseSubscription(queue.Name, subscription, queueIsQuorum));
@@ -269,8 +269,7 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
             Expiration = expiration == Timeout.InfiniteTimeSpan ? null : expiration
         };
 
-        var requestMessage = new Message<TRequest>(request, properties);
-        await advancedBus.PublishAsync(exchange.Name, routingKey, mandatory, publisherConfirms, requestMessage, cancellationToken)
+        await advancedBus.PublishAsync(exchange.Name, routingKey, mandatory, publisherConfirms, properties, request, cancellationToken)
             .ConfigureAwait(false);
     }
 
@@ -328,20 +327,18 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
         {
             var request = requestMessage.Body!;
             var response = await responder(request, cancellationToken).ConfigureAwait(false);
-            var responseMessage = new Message<TResponse>(
-                response,
-                new MessageProperties
-                {
-                    CorrelationId = requestMessage.Properties.CorrelationId,
-                    DeliveryMode = MessageDeliveryMode.NonPersistent
-                }
-            );
+            var responseProperties = new MessageProperties
+            {
+                CorrelationId = requestMessage.Properties.CorrelationId,
+                DeliveryMode = MessageDeliveryMode.NonPersistent
+            };
             await advancedBus.PublishAsync(
                 responseExchange.Name,
                 requestMessage.Properties.ReplyTo!,
                 false,
                 null,
-                responseMessage,
+                responseProperties,
+                response,
                 cancellationToken
             ).ConfigureAwait(false);
         }
@@ -351,25 +348,23 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
         }
         catch (Exception exception)
         {
-            var responseMessage = new Message<TResponse>(
-                default,
-                new MessageProperties
+            var faultProperties = new MessageProperties
+            {
+                CorrelationId = requestMessage.Properties.CorrelationId,
+                DeliveryMode = MessageDeliveryMode.NonPersistent,
+                Headers = new Dictionary<string, object>
                 {
-                    CorrelationId = requestMessage.Properties.CorrelationId,
-                    DeliveryMode = MessageDeliveryMode.NonPersistent,
-                    Headers = new Dictionary<string, object>
-                    {
-                        { IsFaultedKey, true },
-                        { ExceptionMessageKey, Encoding.UTF8.GetBytes(exception.Message) }
-                    }
+                    { IsFaultedKey, true },
+                    { ExceptionMessageKey, Encoding.UTF8.GetBytes(exception.Message) }
                 }
-            );
-            await advancedBus.PublishAsync(
+            };
+            await advancedBus.PublishAsync<TResponse>(
                 responseExchange.Name,
                 requestMessage.Properties.ReplyTo!,
                 false,
                 null,
-                responseMessage,
+                faultProperties,
+                default!,
                 cancellationToken
             ).ConfigureAwait(false);
 
@@ -381,7 +376,7 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
 
     readonly struct ResponseAction
     {
-        public ResponseAction(Action<object> onSuccess, Action onFailure, bool queueIsDurable)
+        public ResponseAction(Action<MessageProperties, object?> onSuccess, Action onFailure, bool queueIsDurable)
         {
             OnSuccess = onSuccess;
             OnFailure = onFailure;
@@ -389,7 +384,7 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
         }
 
         public bool QueueIsDurable { get; }
-        public Action<object> OnSuccess { get; }
+        public Action<MessageProperties, object?> OnSuccess { get; }
         public Action OnFailure { get; }
     }
 

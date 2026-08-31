@@ -38,6 +38,11 @@ public sealed class ConsumerContext : LayerContext, IConsumerView
     public bool AutoAck { get; set; }
 
     /// <summary>
+    ///     The typed handlers of this consumer; <see langword="null" /> for raw (untyped) consumers
+    /// </summary>
+    public HandlerTable? Handlers { get; set; }
+
+    /// <summary>
     ///     The message pipeline run for every delivery on this consumer
     /// </summary>
     public PipelineStep<ConsumeContext> MessagePipeline { get; set; } = static _ => default;

@@ -67,7 +67,7 @@ public class DefaultMessageSerializationStrategyTests
         const string correlationId = "CorrelationId";
 
         var serializationStrategy =
-            new DefaultMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
+            new DefaultMessageSerializationStrategy(new MessageTypeRegistry(typeNameSerializer), Adapt(serializer), new StaticCorrelationIdGenerationStrategy(correlationId));
 
         var messageBody = new MyMessage { Text = "Hello world!" };
         var message = new Message<MyMessage>(messageBody);
@@ -86,7 +86,7 @@ public class DefaultMessageSerializationStrategyTests
         const string correlationId = "CorrelationId";
 
         var serializationStrategy =
-            new DefaultMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
+            new DefaultMessageSerializationStrategy(new MessageTypeRegistry(typeNameSerializer), Adapt(serializer), new StaticCorrelationIdGenerationStrategy(correlationId));
 
         var message = new Message<MyMessage>();
         using var serializedMessage = serializationStrategy.SerializeMessage(message);
@@ -112,6 +112,8 @@ public class DefaultMessageSerializationStrategyTests
         Assert.Equal(message.Properties.ToString(), expectedMessageProperties); //, "Deserialized message properties do not match expected value");
     }
 
+    private static IMessageSerializer Adapt(ISerializer serializer) => new EasyNetQ.Serialization.LegacyMessageSerializerAdapter(serializer);
+
     private static DefaultMessageSerializationStrategy CreateSerializationStrategy(
         IMessage<MyMessage> message, string messageType, byte[] messageBody, string correlationId
     )
@@ -127,17 +129,18 @@ public class DefaultMessageSerializationStrategyTests
         serializer.MessageToBytes(message.MessageType, message.GetBody()).Returns(serializedMessage);
 #pragma warning restore IDISP004
 
-        return new DefaultMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
+        return new DefaultMessageSerializationStrategy(new MessageTypeRegistry(typeNameSerializer), Adapt(serializer), new StaticCorrelationIdGenerationStrategy(correlationId));
     }
 
     private static DefaultMessageSerializationStrategy CreateDeserializationStrategy(IMessage<MyMessage> message, byte[] messageBody, string correlationId)
     {
         var typeNameSerializer = Substitute.For<ITypeNameSerializer>();
         typeNameSerializer.Deserialize(message.Properties.Type).Returns(message.Body.GetType());
+        typeNameSerializer.Serialize(message.Body.GetType()).Returns(message.Properties.Type);
 
         var serializer = Substitute.For<ISerializer>();
         serializer.BytesToMessage(message.Body.GetType(), messageBody).Returns(message.Body);
 
-        return new DefaultMessageSerializationStrategy(typeNameSerializer, serializer, new StaticCorrelationIdGenerationStrategy(correlationId));
+        return new DefaultMessageSerializationStrategy(new MessageTypeRegistry(typeNameSerializer), Adapt(serializer), new StaticCorrelationIdGenerationStrategy(correlationId));
     }
 }

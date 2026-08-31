@@ -49,12 +49,11 @@ public class DefaultPubSub : IPubSub
             Headers = publishConfiguration.MessageHeaders,
             DeliveryMode = messageDeliveryModeStrategy.GetDeliveryMode(messageType),
         };
-        var advancedMessage = new Message<T>(message, advancedMessageProperties);
         var exchange = await exchangeDeclareStrategy.DeclareExchangeAsync(
             messageType, conventions.ExchangeTypeConvention(messageType), cts.Token
         ).ConfigureAwait(false);
         await advancedBus.PublishAsync(
-            exchange.Name, publishConfiguration.Topic, null, publishConfiguration.PublisherConfirms, advancedMessage, cts.Token
+            exchange.Name, publishConfiguration.Topic, null, publishConfiguration.PublisherConfirms, advancedMessageProperties, message, cts.Token
         ).ConfigureAwait(false);
     }
 
@@ -98,7 +97,7 @@ public class DefaultPubSub : IPubSub
 
         var consumerCancellation = await advancedBus.ConsumeAsync<T>(
             queue,
-            (message, _, cancellation) => onMessage(message.Body!, cancellation),
+            (body, context) => ToAckDecisionAsync(onMessage(body!, context.CancellationToken)),
             c =>
             {
                 c.WithPrefetchCount(subscriptionConfiguration.PrefetchCount)
@@ -111,5 +110,11 @@ public class DefaultPubSub : IPubSub
         );
 
         return new SubscriptionResult(exchange, queue, consumerCancellation);
+    }
+
+    private static async ValueTask<AckDecision> ToAckDecisionAsync(Task task)
+    {
+        await task.ConfigureAwait(false);
+        return AckDecision.Ack;
     }
 }

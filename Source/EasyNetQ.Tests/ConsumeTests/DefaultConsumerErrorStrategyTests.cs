@@ -1,88 +1,125 @@
-using EasyNetQ.Pipeline;
-using System.Text;
+using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
+using EasyNetQ.Persistent;
+using EasyNetQ.Pipeline;
+using EasyNetQ.Producer;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Exceptions;
+using System.Text;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 
 public class DefaultConsumerErrorStrategyTests
 {
     [Fact]
-    public async Task Should_enable_publisher_confirm_when_configured_and_return_ack_when_confirm_received()
+    public async Task Should_ack_failed_message_after_confirmed_error_publish_when_publisher_confirms_on()
     {
-        using var persistedConnectionMock = Substitute.For<IConsumerConnection>();
-        var channelMock = Substitute.For<IChannel>();
+        using var connection = Substitute.For<IConsumerConnection>();
+        var channel = Substitute.For<IChannel>();
 #pragma warning disable IDISP004
-        persistedConnectionMock.CreateChannelAsync(Arg.Is<CreateChannelOptions>(it => it.PublisherConfirmationTrackingEnabled && it.PublisherConfirmationsEnabled), cancellationToken: CancellationToken.None).Returns(channelMock);
+        connection.CreateChannelAsync(Arg.Any<CreateChannelOptions>(), Arg.Any<CancellationToken>()).Returns(channel);
 #pragma warning restore IDISP004
-        var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock, true);
+        var confirmationListener = Substitute.For<IPublishConfirmationListener>();
+        var strategy = CreateConsumerErrorStrategy(connection, confirmationListener, configurePublisherConfirm: true);
 
-        var ackStrategy = await consumerErrorStrategy.HandleErrorAsync(
-            CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!"), cancellationToken: CancellationToken.None
+        var ackDecision = await strategy.HandleErrorAsync(
+            CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!"), TestContext.Current.CancellationToken
         );
 
-        Assert.Equal(AckDecision.Ack, ackStrategy);
+        Assert.Equal(AckDecision.Ack, ackDecision);
+        await confirmationListener.Received().CreatePendingConfirmationAsync(channel, Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task
-        Should_enable_publisher_confirm_when_configured_and_return_nack_with_requeue_when_no_confirm_received()
+    public async Task Should_nack_with_requeue_when_error_publish_confirmation_fails()
     {
-        using var persistedConnectionMock = Substitute.For<IConsumerConnection>();
-        var channelMock = Substitute.For<IChannel>();
-        channelMock.BasicPublishAsync(
-                Arg.Any<string>(),
-                Arg.Any<string>(),
-                Arg.Any<bool>(),
-                Arg.Any<RabbitMQ.Client.BasicProperties>(),
-                Arg.Any<ReadOnlyMemory<byte>>(),
-                Arg.Any<CancellationToken>())
-                .Returns(ValueTask.FromException(new PublishException(42, default)));
-
+        using var connection = Substitute.For<IConsumerConnection>();
+        var channel = Substitute.For<IChannel>();
 #pragma warning disable IDISP004
-        persistedConnectionMock.CreateChannelAsync(Arg.Is<CreateChannelOptions>(it => it.PublisherConfirmationTrackingEnabled && it.PublisherConfirmationsEnabled), cancellationToken: CancellationToken.None).Returns(channelMock);
+        connection.CreateChannelAsync(Arg.Any<CreateChannelOptions>(), Arg.Any<CancellationToken>()).Returns(channel);
 #pragma warning restore IDISP004
-        var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock, true);
+        var pendingConfirmation = Substitute.For<IPublishPendingConfirmation>();
+        pendingConfirmation.WaitAsync(Arg.Any<CancellationToken>())
+            .Returns(Task.FromException(new PublishNackedException("nacked")));
+        var confirmationListener = Substitute.For<IPublishConfirmationListener>();
+        confirmationListener.CreatePendingConfirmationAsync(channel, Arg.Any<CancellationToken>())
+            .Returns(pendingConfirmation);
+        var strategy = CreateConsumerErrorStrategy(connection, confirmationListener, configurePublisherConfirm: true);
 
-        var ackStrategy = await consumerErrorStrategy.HandleErrorAsync(
-            CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!"), cancellationToken: CancellationToken.None);
+        var ackDecision = await strategy.HandleErrorAsync(
+            CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!"), TestContext.Current.CancellationToken
+        );
 
-        Assert.Equal(AckDecision.NackRequeue, ackStrategy);
+        Assert.Equal(AckDecision.NackRequeue, ackDecision);
     }
 
     [Fact]
-    public async Task Should_not_enable_publisher_confirm_when_not_configured_and_return_ack_when_no_confirm_received()
+    public async Task Should_ack_failed_message_and_skip_confirms_when_publisher_confirms_off()
     {
-        using var persistedConnectionMock = Substitute.For<IConsumerConnection>();
-        var modelMock = Substitute.For<IChannel>();
+        using var connection = Substitute.For<IConsumerConnection>();
+        var channel = Substitute.For<IChannel>();
 #pragma warning disable IDISP004
-        persistedConnectionMock.CreateChannelAsync(new CreateChannelOptions(false, false), cancellationToken: CancellationToken.None)
-            .Returns(modelMock);
+        connection.CreateChannelAsync(Arg.Any<CreateChannelOptions>(), Arg.Any<CancellationToken>()).Returns(channel);
 #pragma warning restore IDISP004
-        var consumerErrorStrategy = CreateConsumerErrorStrategy(persistedConnectionMock);
+        var confirmationListener = Substitute.For<IPublishConfirmationListener>();
+        var strategy = CreateConsumerErrorStrategy(connection, confirmationListener);
 
-        var ackStrategy = await consumerErrorStrategy.HandleErrorAsync(
-            CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!"), cancellationToken: CancellationToken.None);
+        var ackDecision = await strategy.HandleErrorAsync(
+            CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!"), TestContext.Current.CancellationToken
+        );
 
-        Assert.Equal(AckDecision.Ack, ackStrategy);
+        Assert.Equal(AckDecision.Ack, ackDecision);
+        await channel.Received().BasicPublishAsync(
+            Arg.Any<string>(), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<RabbitMQ.Client.BasicProperties>(),
+            Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>()
+        );
+        await confirmationListener.DidNotReceiveWithAnyArgs().CreatePendingConfirmationAsync(default!, TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
+    public async Task Should_create_the_error_channel_with_confirms_but_without_client_side_tracking()
+    {
+        using var connection = Substitute.For<IConsumerConnection>();
+        var channel = Substitute.For<IChannel>();
+        CreateChannelOptions? createChannelOptions = null;
+#pragma warning disable IDISP004
+        connection.CreateChannelAsync(Arg.Do<CreateChannelOptions>(x => createChannelOptions = x), Arg.Any<CancellationToken>())
+            .Returns(channel);
+#pragma warning restore IDISP004
+        var strategy = CreateConsumerErrorStrategy(connection, Substitute.For<IPublishConfirmationListener>(), configurePublisherConfirm: true);
+
+        await strategy.HandleErrorAsync(
+            CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!"), TestContext.Current.CancellationToken
+        );
+
+        createChannelOptions.Should().NotBeNull();
+        createChannelOptions!.PublisherConfirmationsEnabled.Should().BeTrue();
+        createChannelOptions.PublisherConfirmationTrackingEnabled.Should().BeFalse();
     }
 
     private static DefaultConsumeErrorStrategy CreateConsumerErrorStrategy(
-        IConsumerConnection connectionMock, bool configurePublisherConfirm = false
+        IConsumerConnection connectionMock,
+        IPublishConfirmationListener confirmationListener,
+        bool configurePublisherConfirm = false
     )
     {
-        var consumerErrorStrategy = new DefaultConsumeErrorStrategy(
-            Substitute.For<ILogger<DefaultConsumeErrorStrategy>>(),
+#pragma warning disable IDISP004
+        var channelDispatcher = new SinglePersistentChannelDispatcher(
+            Substitute.For<IProducerConnection>(),
             connectionMock,
-            Substitute.For<ISerializer>(),
+            new PersistentChannelFactory(Substitute.For<ILogger<PersistentChannel>>(), Substitute.For<IEventBus>())
+        );
+#pragma warning restore IDISP004
+        return new DefaultConsumeErrorStrategy(
+            Substitute.For<ILogger<DefaultConsumeErrorStrategy>>(),
+            channelDispatcher,
+            Substitute.For<IMessageSerializer>(),
+            new MessageTypeRegistry(new DefaultTypeNameSerializer()),
             Substitute.For<IConventions>(),
-            Substitute.For<ITypeNameSerializer>(),
             Substitute.For<IErrorMessageSerializer>(),
+            confirmationListener,
             new ConnectionConfiguration { PublisherConfirms = configurePublisherConfirm }
         );
-        return consumerErrorStrategy;
     }
 
     private static ConsumeContext CreateConsumerExecutionContext(byte[] originalMessageBody)
@@ -102,7 +139,6 @@ public class DefaultConsumerErrorStrategyTests
     private static byte[] CreateOriginalMessage()
     {
         const string originalMessage = "{ Text:\"Hello World\"}";
-        var originalMessageBody = Encoding.UTF8.GetBytes(originalMessage);
-        return originalMessageBody;
+        return Encoding.UTF8.GetBytes(originalMessage);
     }
 }
