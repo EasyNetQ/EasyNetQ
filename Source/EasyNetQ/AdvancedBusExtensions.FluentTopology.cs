@@ -12,6 +12,18 @@ public static partial class AdvancedBusExtensions
     /// </summary>
     /// <param name="advancedBus">The bus instance</param>
     /// <param name="queue">The name of the queue</param>
+    public static Task<Queue> QueueDeclareAsync(
+        this IAdvancedBus advancedBus,
+        string queue)
+    {
+        return advancedBus.QueueDeclareAsync(queue, options => { });
+    }
+
+    /// <summary>
+    /// Declare a queue. If the queue already exists this method does nothing
+    /// </summary>
+    /// <param name="advancedBus">The bus instance</param>
+    /// <param name="queue">The name of the queue</param>
     /// <param name="cancellationToken">The cancellation token</param>
     public static Task<Queue> QueueDeclareAsync(
         this IAdvancedBus advancedBus,
@@ -20,6 +32,7 @@ public static partial class AdvancedBusExtensions
     {
         return advancedBus.QueueDeclareAsync(queue, options => { }, cancellationToken);
     }
+
     /// <summary>
     /// Declare a queue. If the queue already exists this method does nothing
     /// </summary>
