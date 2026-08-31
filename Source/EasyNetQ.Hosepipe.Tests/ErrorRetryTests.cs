@@ -12,7 +12,7 @@ public class ErrorRetryTests
     public ErrorRetryTests()
     {
         var typeNameSerializer = new LegacyTypeNameSerializer();
-        conventions = new Conventions(typeNameSerializer);
+        conventions = new Conventions(typeNameSerializer, new MessageTypeRegistry(typeNameSerializer));
         errorRetry = new ErrorRetry(new Serialization.NewtonsoftJson.NewtonsoftJsonSerializer(), new DefaultErrorMessageSerializer());
     }
 

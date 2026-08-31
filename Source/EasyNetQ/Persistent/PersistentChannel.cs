@@ -98,7 +98,7 @@ public sealed class PersistentChannel : IPersistentChannel
                 if (exceptionVerdict.Rethrow)
                     throw;
 
-                logger.LogError(exception, "Failed to fast invoke channel action, invocation will be retried");
+                logger.FailedToFastInvokeChannelAction(exception);
             }
             finally
             {
@@ -108,7 +108,7 @@ public sealed class PersistentChannel : IPersistentChannel
                 }
                 catch (Exception exception)
                 {
-                    logger.LogWarning(exception, "Semaphore was already disposed during channel release!");
+                    logger.SemaphoreAlreadyDisposed(exception);
                 }
             }
         }
@@ -148,7 +148,7 @@ public sealed class PersistentChannel : IPersistentChannel
                 if (exceptionVerdict.Rethrow)
                     throw;
 
-                logger.LogError(exception, "Failed to invoke channel action, invocation will be retried");
+                logger.FailedToInvokeChannelAction(exception);
             }
 
             await Task.Delay(retryTimeoutMs, cts.Token).ConfigureAwait(false);

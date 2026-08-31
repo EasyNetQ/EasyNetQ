@@ -19,11 +19,12 @@ public sealed class PublishPipelineFixture
     {
         var serializer = new SystemTextJsonMessageSerializer();
         var typeNameSerializer = new DefaultTypeNameSerializer();
+        var registry = new MessageTypeRegistry(typeNameSerializer);
         SerializationStrategy = new DefaultMessageSerializationStrategy(
-            new MessageTypeRegistry(typeNameSerializer), serializer, new DefaultCorrelationIdGenerationStrategy()
+            registry, serializer, new DefaultCorrelationIdGenerationStrategy()
         );
-        Conventions = new Conventions(typeNameSerializer);
-        DeliveryModeStrategy = new MessageDeliveryModeStrategy(new ConnectionConfiguration());
+        Conventions = new Conventions(typeNameSerializer, registry);
+        DeliveryModeStrategy = new MessageDeliveryModeStrategy(new ConnectionConfiguration(), registry);
         Services = new ServiceCollection().BuildServiceProvider();
 
         pipeline = new PipelineBuilder<PublishContext>()

@@ -27,6 +27,7 @@
     <Project Path="EasyNetQ.Hosepipe.Tests/EasyNetQ.Hosepipe.Tests.csproj" />
     <Project Path="EasyNetQ.IntegrationTests/EasyNetQ.IntegrationTests.csproj" />
     <Project Path="EasyNetQ.Serialization.Tests/EasyNetQ.Serialization.Tests.csproj" />
+    <Project Path="EasyNetQ.Generators.Tests/EasyNetQ.Generators.Tests.csproj" />
     <Project Path="EasyNetQ.Tests/EasyNetQ.Tests.csproj" />
   </Folder>
   <Folder Name="/Benchmarks/">
@@ -34,4 +35,5 @@
   </Folder>
   <Project Path="EasyNetQ.Hosepipe/EasyNetQ.Hosepipe.csproj" />
   <Project Path="EasyNetQ/EasyNetQ.csproj" />
+  <Project Path="EasyNetQ.Generators/EasyNetQ.Generators.csproj" />
 </Solution>

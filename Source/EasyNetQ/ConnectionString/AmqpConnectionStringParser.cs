@@ -1,36 +1,15 @@
-using System.Linq.Expressions;
-using System.Reflection;
 using EasyNetQ.Internals;
 
 namespace EasyNetQ.ConnectionString;
 
-using UpdateConfiguration = Func<ConnectionConfiguration, Dictionary<string, string>, ConnectionConfiguration>;
-
 /// <inheritdoc />
 public class AmqpConnectionStringParser : IConnectionStringParser
 {
-    private static readonly IReadOnlyCollection<string> SupportedSchemes = new[] { "amqp", "amqps" };
-
-    private static readonly List<UpdateConfiguration> Parsers =
-    [
-        BuildKeyValueParser("requestedHeartbeat", c => TimeSpan.FromSeconds(int.Parse(c)), c => c.RequestedHeartbeat),
-        BuildKeyValueParser("prefetchCount", ushort.Parse, c => c.PrefetchCount),
-        BuildKeyValueParser("consumerDispatcherConcurrency", x => ushort.Parse(x), c => c.ConsumerDispatcherConcurrency),
-        BuildKeyValueParser("timeout", c => TimeSpan.FromSeconds(int.Parse(c)), c => c.Timeout),
-        BuildKeyValueParser("connectIntervalAttempt", c => TimeSpan.FromSeconds(int.Parse(c)), c => c.ConnectIntervalAttempt),
-        BuildKeyValueParser("publisherConfirms", bool.Parse, c => c.PublisherConfirms),
-        BuildKeyValueParser("persistentMessages", bool.Parse, c => c.PersistentMessages),
-        BuildKeyValueParser("product", c => c, c => c.Product),
-        BuildKeyValueParser("platform", c => c, c => c.Platform),
-        BuildKeyValueParser("name", c => c, c => c.Name),
-        BuildKeyValueParser("mandatoryPublish", bool.Parse, c => c.MandatoryPublish)
-    ];
-
     /// <inheritdoc />
     public ConnectionConfiguration Parse(string connectionString)
     {
         var uri = new Uri(connectionString, UriKind.Absolute);
-        if (!SupportedSchemes.Contains(uri.Scheme))
+        if (uri.Scheme is not ("amqp" or "amqps"))
             throw new ArgumentException($"Wrong scheme in AMQP URI: {uri.Scheme}");
 
         var secured = uri.Scheme == "amqps";
@@ -66,47 +45,22 @@ public class AmqpConnectionStringParser : IConnectionStringParser
         if (uri.Segments.Length == 2) configuration.VirtualHost = Uri.UnescapeDataString(uri.Segments[1]);
 
         var query = uri.ParseQuery();
-        return query == null ? configuration : Parsers.Aggregate(configuration, (current, parser) => parser(current, query));
-    }
+        if (query is null) return configuration;
 
-    private static UpdateConfiguration BuildKeyValueParser<T>(
-        string keyName,
-        Func<string, T> valueParser,
-        Expression<Func<ConnectionConfiguration, T>> getter
-    )
-    {
-        return (configuration, keyValues) =>
-        {
-            if (keyValues != null && keyValues.TryGetValue(keyName, out var keyValue))
-            {
-                var parsedValue = valueParser(keyValue);
-                CreateSetter(getter)(configuration, parsedValue);
-            }
+        // Query keys and value formats match the 8.x parser (note: no infinite mapping for 0/-1 here, unlike the
+        // key=value parser - preserved for compatibility)
+        if (query.TryGetValue("requestedHeartbeat", out var value)) configuration.RequestedHeartbeat = TimeSpan.FromSeconds(int.Parse(value));
+        if (query.TryGetValue("prefetchCount", out value)) configuration.PrefetchCount = ushort.Parse(value);
+        if (query.TryGetValue("consumerDispatcherConcurrency", out value)) configuration.ConsumerDispatcherConcurrency = ushort.Parse(value);
+        if (query.TryGetValue("timeout", out value)) configuration.Timeout = TimeSpan.FromSeconds(int.Parse(value));
+        if (query.TryGetValue("connectIntervalAttempt", out value)) configuration.ConnectIntervalAttempt = TimeSpan.FromSeconds(int.Parse(value));
+        if (query.TryGetValue("publisherConfirms", out value)) configuration.PublisherConfirms = bool.Parse(value);
+        if (query.TryGetValue("persistentMessages", out value)) configuration.PersistentMessages = bool.Parse(value);
+        if (query.TryGetValue("product", out value)) configuration.Product = value;
+        if (query.TryGetValue("platform", out value)) configuration.Platform = value;
+        if (query.TryGetValue("name", out value)) configuration.Name = value;
+        if (query.TryGetValue("mandatoryPublish", out value)) configuration.MandatoryPublish = bool.Parse(value);
 
-            return configuration;
-        };
-    }
-
-    private static Action<ConnectionConfiguration, T> CreateSetter<T>(Expression<Func<ConnectionConfiguration, T>> getter)
-    {
-        return CreateSetter<ConnectionConfiguration, T>(getter);
-    }
-
-    /// <summary>
-    /// Stolen from SO:
-    /// http://stackoverflow.com/questions/4596453/create-an-actiont-to-set-a-property-when-i-am-provided-with-the-linq-expres
-    /// </summary>
-    /// <typeparam name="TContaining"></typeparam>
-    /// <typeparam name="TProperty"></typeparam>
-    /// <param name="getter"></param>
-    /// <returns></returns>
-    private static Action<TContaining, TProperty> CreateSetter<TContaining, TProperty>(Expression<Func<TContaining, TProperty>> getter)
-    {
-        if (getter.Body is not MemberExpression memberEx) throw new ArgumentOutOfRangeException(nameof(getter), "Body is not a member-expression.");
-        if (memberEx.Member is not PropertyInfo propertyInfo) throw new ArgumentOutOfRangeException(nameof(getter), "Member is not a property.");
-        if (!propertyInfo.CanWrite) throw new ArgumentOutOfRangeException(nameof(getter), "Member is not a writeable property.");
-
-        var setMethodInfo = propertyInfo.GetSetMethod() ?? throw new ArgumentOutOfRangeException(nameof(getter), "No set method.");
-        return (Action<TContaining, TProperty>)setMethodInfo.CreateDelegate(typeof(Action<TContaining, TProperty>));
+        return configuration;
     }
 }

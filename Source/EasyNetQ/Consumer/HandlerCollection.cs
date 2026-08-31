@@ -6,6 +6,8 @@ namespace EasyNetQ.Consumer;
 public class HandlerCollection : IHandlerCollection
 {
     private readonly ConcurrentDictionary<Type, IMessageHandler> handlers = new();
+    // Resolution cache, kept separate from the registration map so polymorphic matches never poison exact lookups
+    private readonly ConcurrentDictionary<Type, IMessageHandler> resolvedHandlers = new();
 
     /// <summary>
     ///     Creates a handler collection backed by a <see cref="HandlerTable" />
@@ -36,24 +38,28 @@ public class HandlerCollection : IHandlerCollection
         Table.Add<T>((body, context) => handler(new Message<T>(body, context.Properties), context.ReceivedInfo, context.CancellationToken));
         if (!handlers.TryAdd(typeof(T), (m, i, c) => handler((IMessage<T>)m, i, c)))
             throw new EasyNetQException("There is already a handler for message type '{0}'", typeof(T).Name);
+        resolvedHandlers.Clear();
         return this;
     }
 
     /// <inheritdoc />
     public IMessageHandler GetHandler(Type messageType)
     {
-        if (handlers.TryGetValue(messageType, out var handler)) return handler;
+        if (resolvedHandlers.TryGetValue(messageType, out var resolved)) return resolved;
+
+        if (handlers.TryGetValue(messageType, out var handler))
+            return resolvedHandlers.GetOrAdd(messageType, handler);
 
         // no exact handler match found, so let's see if we can find a handler that
-        // handles a supertype of the consumed message.
+        // handles a supertype of the consumed message (memoized: 8.x re-ran this scan per message)
         foreach (var kvp in handlers)
             if (kvp.Key.IsAssignableFrom(messageType))
-                return kvp.Value;
+                return resolvedHandlers.GetOrAdd(messageType, kvp.Value);
 
         if (ThrowOnNoMatchingHandler)
             throw new EasyNetQException("No handler found for message type {0}", messageType.Name);
 
-        return static (_, _, _) => new ValueTask<AckDecision>(AckDecision.Ack);
+        return resolvedHandlers.GetOrAdd(messageType, static (_, _, _) => new ValueTask<AckDecision>(AckDecision.Ack));
     }
 
     /// <inheritdoc />

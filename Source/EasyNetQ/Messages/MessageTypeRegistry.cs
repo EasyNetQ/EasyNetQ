@@ -14,8 +14,20 @@ public sealed class MessageTypeRegistry : IMessageTypeRegistry
     ///     identical to the names 8.x peers produce and expect (including UseLegacyTypeNaming).
     /// </summary>
     public MessageTypeRegistry(ITypeNameSerializer typeNameSerializer)
+        : this(typeNameSerializer, null)
+    {
+    }
+
+    /// <summary>
+    ///     Creates the registry and applies generated initializers, closing every discoverable message type at
+    ///     construction so steady-state lookups never fall back to <see cref="RuntimeDescriptorFactory" />.
+    /// </summary>
+    public MessageTypeRegistry(ITypeNameSerializer typeNameSerializer, IEnumerable<IMessageTypeRegistryInitializer>? initializers)
     {
         this.typeNameSerializer = typeNameSerializer;
+        if (initializers is null) return;
+        foreach (var initializer in initializers)
+            initializer.Initialize(this);
     }
 
     /// <inheritdoc />
@@ -23,7 +35,7 @@ public sealed class MessageTypeRegistry : IMessageTypeRegistry
     {
         return byType.TryGetValue(typeof(T), out var existing)
             ? (MessageTypeDescriptor<T>)existing
-            : (MessageTypeDescriptor<T>)Register(new MessageTypeDescriptor<T>(typeNameSerializer.Serialize(typeof(T))));
+            : (MessageTypeDescriptor<T>)Register(Populate(new MessageTypeDescriptor<T>(typeNameSerializer.Serialize(typeof(T)))));
     }
 
     /// <inheritdoc />
@@ -31,7 +43,7 @@ public sealed class MessageTypeRegistry : IMessageTypeRegistry
     {
         return byType.TryGetValue(type, out var existing)
             ? existing
-            : Register(RuntimeDescriptorFactory.Create(type, typeNameSerializer.Serialize(type)));
+            : Register(Populate(RuntimeDescriptorFactory.Create(type, typeNameSerializer.Serialize(type))));
     }
 
     /// <inheritdoc />
@@ -49,6 +61,12 @@ public sealed class MessageTypeRegistry : IMessageTypeRegistry
         var descriptor = GetOrAdd(typeNameSerializer.Deserialize(wireName));
         // cache under the incoming name too, which may differ from descriptor.WireName for legacy formats
         byWireName.TryAdd(wireName, descriptor);
+        return descriptor;
+    }
+
+    private static TDescriptor Populate<TDescriptor>(TDescriptor descriptor) where TDescriptor : MessageTypeDescriptor
+    {
+        AttributeMetadataReader.Populate(descriptor);
         return descriptor;
     }
 

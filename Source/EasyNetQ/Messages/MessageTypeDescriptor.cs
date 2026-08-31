@@ -39,6 +39,34 @@ public abstract class MessageTypeDescriptor
     public object? SerializerState { get; set; }
 
     /// <summary>
+    ///     Exchange name override for this type ([Exchange] attribute or generated registration); null = use the
+    ///     naming convention
+    /// </summary>
+    public string? ExchangeName { get; set; }
+
+    /// <summary>
+    ///     Exchange type override for this type; null = topic
+    /// </summary>
+    public string? ExchangeType { get; set; }
+
+    /// <summary>
+    ///     Queue name override for this type ([Queue] attribute or generated registration); null = use the naming
+    ///     convention
+    /// </summary>
+    public string? QueueName { get; set; }
+
+    /// <summary>
+    ///     Queue type override for this type (e.g. quorum); null = broker default
+    /// </summary>
+    public string? QueueType { get; set; }
+
+    /// <summary>
+    ///     Delivery-mode override for this type ([DeliveryMode] attribute or generated registration); null = use
+    ///     ConnectionConfiguration.PersistentMessages
+    /// </summary>
+    public bool? IsPersistent { get; set; }
+
+    /// <summary>
     ///     Serializes <paramref name="body" /> (which must be an instance of <see cref="Type" />)
     /// </summary>
     public abstract IMemoryOwner<byte> SerializeBody(IMessageSerializer serializer, object body);
@@ -53,6 +81,13 @@ public abstract class MessageTypeDescriptor
     ///     expression-compiled MessageFactory)
     /// </summary>
     public abstract IMessage CreateMessage(object? body, in MessageProperties properties);
+
+    // Typed trampolines for the non-generic APIs: each closes the corresponding generic API over this descriptor's
+    // type, replacing the expression-compiled delegates the 8.x NonGeneric*Extensions built per type.
+    internal abstract Task PublishViaAsync(IPubSub pubSub, object message, Action<IPublishConfiguration> configure, CancellationToken cancellationToken);
+    internal abstract Task<SubscriptionResult> SubscribeViaAsync(IPubSub pubSub, string subscriptionId, Func<object, Type, CancellationToken, Task> onMessage, Action<ISubscriptionConfiguration> configure, CancellationToken cancellationToken);
+    internal abstract Task SendViaAsync(ISendReceive sendReceive, string queue, object message, Action<ISendConfiguration> configure, CancellationToken cancellationToken);
+    internal abstract Task FuturePublishViaAsync(IScheduler scheduler, object message, TimeSpan delay, Action<IFuturePublishConfiguration> configure, CancellationToken cancellationToken);
 }
 
 /// <summary>
@@ -82,4 +117,16 @@ public sealed class MessageTypeDescriptor<T> : MessageTypeDescriptor
     /// <inheritdoc />
     public override IMessage CreateMessage(object? body, in MessageProperties properties)
         => new Message<T>((T)body!, properties);
+
+    internal override Task PublishViaAsync(IPubSub pubSub, object message, Action<IPublishConfiguration> configure, CancellationToken cancellationToken)
+        => pubSub.PublishAsync((T)message, configure, cancellationToken);
+
+    internal override Task<SubscriptionResult> SubscribeViaAsync(IPubSub pubSub, string subscriptionId, Func<object, Type, CancellationToken, Task> onMessage, Action<ISubscriptionConfiguration> configure, CancellationToken cancellationToken)
+        => pubSub.SubscribeAsync<T>(subscriptionId, (message, ct) => onMessage(message!, message!.GetType(), ct), configure, cancellationToken);
+
+    internal override Task SendViaAsync(ISendReceive sendReceive, string queue, object message, Action<ISendConfiguration> configure, CancellationToken cancellationToken)
+        => sendReceive.SendAsync(queue, (T)message, configure, cancellationToken);
+
+    internal override Task FuturePublishViaAsync(IScheduler scheduler, object message, TimeSpan delay, Action<IFuturePublishConfiguration> configure, CancellationToken cancellationToken)
+        => scheduler.FuturePublishAsync((T)message, delay, configure, cancellationToken);
 }

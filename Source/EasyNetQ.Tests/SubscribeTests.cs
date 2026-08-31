@@ -20,7 +20,7 @@ public class When_subscribe_is_called : IAsyncLifetime
 
     public When_subscribe_is_called()
     {
-        var conventions = new Conventions(new DefaultTypeNameSerializer())
+        var conventions = new Conventions(new DefaultTypeNameSerializer(), new MessageTypeRegistry(new DefaultTypeNameSerializer()))
         {
             ConsumerTagConvention = () => consumerTag
         };
@@ -243,7 +243,7 @@ public class When_a_message_is_delivered : IAsyncLifetime
 
     public When_a_message_is_delivered()
     {
-        var conventions = new Conventions(new DefaultTypeNameSerializer())
+        var conventions = new Conventions(new DefaultTypeNameSerializer(), new MessageTypeRegistry(new DefaultTypeNameSerializer()))
         {
             ConsumerTagConvention = () => consumerTag
         };
@@ -322,7 +322,7 @@ public class When_the_handler_throws_an_exception : IAsyncLifetime
 
     public When_the_handler_throws_an_exception()
     {
-        var conventions = new Conventions(new DefaultTypeNameSerializer())
+        var conventions = new Conventions(new DefaultTypeNameSerializer(), new MessageTypeRegistry(new DefaultTypeNameSerializer()))
         {
             ConsumerTagConvention = () => consumerTag
         };
@@ -413,7 +413,7 @@ public class When_a_subscription_is_cancelled_by_the_user : IAsyncLifetime
 
     public When_a_subscription_is_cancelled_by_the_user()
     {
-        var conventions = new Conventions(new DefaultTypeNameSerializer())
+        var conventions = new Conventions(new DefaultTypeNameSerializer(), new MessageTypeRegistry(new DefaultTypeNameSerializer()))
         {
             ConsumerTagConvention = () => consumerTag
         };

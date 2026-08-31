@@ -131,7 +131,7 @@ public class InternalConsumer : IInternalConsumer
         {
             if (IsChannelClosedWithSoftError(channel))
             {
-                logger.LogInformation("Channel has shutdown with soft error and will be recreated");
+                logger.ChannelShutdownWithSoftError();
 
                 foreach (var consumer in consumers.Values)
                 {
@@ -157,7 +157,7 @@ public class InternalConsumer : IInternalConsumer
                         await channel.DisposeAsync();
                     channel = null;
 
-                    logger.LogError(exception, "Failed to create channel");
+                    logger.FailedToCreateChannel(exception);
                     return new InternalConsumerStatus(Array.Empty<Queue>(), Array.Empty<Queue>(), Array.Empty<Queue>());
                 }
             }
@@ -210,22 +210,14 @@ public class InternalConsumer : IInternalConsumer
                     );
                     consumers.Add(queue.Name, consumer);
 
-                    logger.LogInformation(
-                        "Declared consumer with consumerTag {ConsumerTag} on queue {Queue}",
-                        consumerTag,
-                        queue.Name
-                    );
+                    logger.ConsumerDeclared(consumerTag, queue.Name);
 
                     startedQueues.Add(queue);
                     activeQueues.Add(queue);
                 }
                 catch (Exception exception)
                 {
-                    logger.LogError(
-                        exception,
-                        "Failed to declare consumer on queue {Queue}",
-                        queue.Name
-                    );
+                    logger.FailedToDeclareConsumer(exception, queue.Name);
 
                     failedQueues.Add(queue);
                 }
@@ -254,11 +246,7 @@ public class InternalConsumer : IInternalConsumer
                     }
                     catch (Exception exception)
                     {
-                        logger.LogError(
-                            exception,
-                            "Failed to stop consuming on consumerTag {ConsumerTag}",
-                            consumerTag
-                        );
+                        logger.FailedToStopConsuming(exception, consumerTag);
                     }
                 }
 
@@ -292,11 +280,7 @@ public class InternalConsumer : IInternalConsumer
                     }
                     catch (Exception ex)
                     {
-                        logger.LogError(
-                            ex,
-                            "Failed to dispose on consumerTag {ConsumerTag}",
-                            consumerTag
-                        );
+                        logger.FailedToDisposeConsumer(ex, consumerTag);
                     }
                 }
 

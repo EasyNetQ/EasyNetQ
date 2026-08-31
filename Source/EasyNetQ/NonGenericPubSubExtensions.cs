@@ -1,19 +1,12 @@
-using System.Collections.Concurrent;
-using System.Linq.Expressions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EasyNetQ;
-
-using NonGenericPublishDelegate = Func<IPubSub, object, Type, Action<IPublishConfiguration>, CancellationToken, Task>;
-using NonGenericSubscribeDelegate = Func<IPubSub, string, Type, Func<object, Type, CancellationToken, Task>, Action<ISubscriptionConfiguration>, CancellationToken, Task<SubscriptionResult>>;
 
 /// <summary>
 ///     Various non-generic extensions for <see cref="IPubSub"/>
 /// </summary>
 public static class NonGenericPubSubExtensions
 {
-    private static readonly ConcurrentDictionary<Type, NonGenericPublishDelegate> PublishDelegates = new();
-    private static readonly ConcurrentDictionary<Type, NonGenericSubscribeDelegate> SubscribeDelegates = new();
-
     /// <summary>
     /// Publishes a message with a topic.
     /// When used with publisher confirms the task completes when the publish is confirmed.
@@ -23,7 +16,7 @@ public static class NonGenericPubSubExtensions
     /// <param name="message">The message to publish</param>
     /// <param name="messageType">The message type</param>
     /// <param name="cancellationToken">The cancellation token</param>
-    /// <returns></returns>
+    [RequiresDynamicCode(NonGenericBridge.RequiresDynamicCodeMessage)]
     public static Task PublishAsync(this IPubSub pubSub, object message, Type messageType, CancellationToken cancellationToken = default)
         => pubSub.PublishAsync(message, messageType, _ => { }, cancellationToken);
 
@@ -37,7 +30,7 @@ public static class NonGenericPubSubExtensions
     /// <param name="messageType">The message type</param>
     /// <param name="topic">The topic string</param>
     /// <param name="cancellationToken">The cancellation token</param>
-    /// <returns></returns>
+    [RequiresDynamicCode(NonGenericBridge.RequiresDynamicCodeMessage)]
     public static Task PublishAsync(
         this IPubSub pubSub,
         object message,
@@ -56,45 +49,14 @@ public static class NonGenericPubSubExtensions
     /// Fluent configuration e.g. x => x.WithTopic("*.brighton").WithPriority(2)
     /// </param>
     /// <param name="cancellationToken">The cancellation token</param>
+    [RequiresDynamicCode(NonGenericBridge.RequiresDynamicCodeMessage)]
     public static Task PublishAsync(
         this IPubSub pubSub,
         object message,
         Type messageType,
         Action<IPublishConfiguration> configure,
         CancellationToken cancellationToken = default
-    )
-    {
-        var publishDelegate = PublishDelegates.GetOrAdd(messageType, t =>
-        {
-            var publishMethodInfo = typeof(IPubSub).GetMethod("PublishAsync");
-            if (publishMethodInfo == null)
-                throw new MissingMethodException(nameof(IPubSub), "PublishAsync");
-
-            var genericPublishMethodInfo = publishMethodInfo.MakeGenericMethod(t);
-            var pubSubParameter = Expression.Parameter(typeof(IPubSub), "pubSub");
-            var messageParameter = Expression.Parameter(typeof(object), "message");
-            var messageTypeParameter = Expression.Parameter(typeof(Type), "messageType");
-            var configureParameter = Expression.Parameter(typeof(Action<IPublishConfiguration>), "configure");
-            var cancellationTokenParameter = Expression.Parameter(typeof(CancellationToken), "cancellationToken");
-            var genericPublishMethodCallExpression = Expression.Call(
-                pubSubParameter,
-                genericPublishMethodInfo,
-                Expression.Convert(messageParameter, t),
-                configureParameter,
-                cancellationTokenParameter
-            );
-            var lambda = Expression.Lambda<NonGenericPublishDelegate>(
-                genericPublishMethodCallExpression,
-                pubSubParameter,
-                messageParameter,
-                messageTypeParameter,
-                configureParameter,
-                cancellationTokenParameter
-            );
-            return lambda.Compile();
-        });
-        return publishDelegate(pubSub, message, messageType, configure, cancellationToken);
-    }
+    ) => NonGenericBridge.Get(messageType).PublishViaAsync(pubSub, message, configure, cancellationToken);
 
     /// <summary>
     /// Subscribes to a stream of messages that match a .NET type.
@@ -121,6 +83,7 @@ public static class NonGenericPubSubExtensions
     /// An <see cref="SubscriptionResult"/>
     /// Call Dispose on it or on its <see cref="SubscriptionResult.ConsumerCancellation"/> to cancel the subscription.
     /// </returns>
+    [RequiresDynamicCode(NonGenericBridge.RequiresDynamicCodeMessage)]
     public static Task<SubscriptionResult> SubscribeAsync(
         this IPubSub pubSub,
         string subscriptionId,
@@ -128,54 +91,5 @@ public static class NonGenericPubSubExtensions
         Func<object, Type, CancellationToken, Task> onMessage,
         Action<ISubscriptionConfiguration> configure,
         CancellationToken cancellationToken = default
-    )
-    {
-        var subscribeDelegate = SubscribeDelegates.GetOrAdd(messageType, t =>
-        {
-            var subscribeMethodInfo = typeof(IPubSub).GetMethod("SubscribeAsync");
-            if (subscribeMethodInfo == null)
-                throw new MissingMethodException(nameof(IPubSub), "SubscribeAsync");
-
-            var genericSubscribeMethodInfo = subscribeMethodInfo.MakeGenericMethod(t);
-            var pubSubParameter = Expression.Parameter(typeof(IPubSub), "pubSub");
-            var subscriptionIdParameter = Expression.Parameter(typeof(string), "subscriptionId");
-            var messageTypeParameter = Expression.Parameter(typeof(Type), "messageType");
-            var messageParameter = Expression.Parameter(t, "message");
-            var onMessageParameter = Expression.Parameter(typeof(Func<object, Type, CancellationToken, Task>), "onMessage");
-            var configureParameter = Expression.Parameter(typeof(Action<ISubscriptionConfiguration>), "configure");
-            var cancellationTokenParameter = Expression.Parameter(typeof(CancellationToken), "cancellationToken");
-            var onMessageInvocationExpression = Expression.Lambda(
-                Expression.GetFuncType(t, typeof(CancellationToken), typeof(Task)),
-                Expression.Invoke(
-                    onMessageParameter,
-                    Expression.Convert(messageParameter, typeof(object)),
-                    Expression.Call(
-                        Expression.Convert(messageParameter, typeof(object)),
-                        typeof(object).GetMethod("GetType", []) ?? throw new InvalidOperationException()
-                    ),
-                    cancellationTokenParameter
-                ),
-                messageParameter,
-                cancellationTokenParameter
-            );
-            var lambda = Expression.Lambda<NonGenericSubscribeDelegate>(
-                Expression.Call(
-                    pubSubParameter,
-                    genericSubscribeMethodInfo,
-                    subscriptionIdParameter,
-                    onMessageInvocationExpression,
-                    configureParameter,
-                    cancellationTokenParameter
-                ),
-                pubSubParameter,
-                subscriptionIdParameter,
-                messageTypeParameter,
-                onMessageParameter,
-                configureParameter,
-                cancellationTokenParameter
-            );
-            return lambda.Compile();
-        });
-        return subscribeDelegate(pubSub, subscriptionId, messageType, onMessage, configure, cancellationToken);
-    }
+    ) => NonGenericBridge.Get(messageType).SubscribeViaAsync(pubSub, subscriptionId, onMessage, configure, cancellationToken);
 }

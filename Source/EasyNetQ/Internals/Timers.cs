@@ -35,7 +35,7 @@ public static class Timers
             }
             catch (Exception exception)
             {
-                logger.LogError(exception, "Error from timer callback");
+                logger.TimerCallbackError(exception);
             }
         }
     }

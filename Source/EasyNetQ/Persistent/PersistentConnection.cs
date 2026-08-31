@@ -1,4 +1,5 @@
 using EasyNetQ.Events;
+using EasyNetQ.Internals;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -106,12 +107,7 @@ public class PersistentConnection : IPersistentConnection
         }
 
         status = status.ToConnected();
-        logger.LogInformation(
-            "Connection {Type} established to broker {Broker}, port {Port}",
-            type,
-            connection.Endpoint.HostName,
-            connection.Endpoint.Port
-        );
+        logger.ConnectionEstablished(type, connection.Endpoint.HostName, connection.Endpoint.Port);
         await eventBus.PublishAsync(new ConnectionCreatedEvent(type, connection.Endpoint));
         return connection;
     }
@@ -156,12 +152,7 @@ public class PersistentConnection : IPersistentConnection
     {
         status = status.ToConnected();
         var connection = (IConnection)sender!;
-        logger.LogInformation(
-            "Connection {Type} recovered to broker {Host}:{Port}",
-            type,
-            connection.Endpoint.HostName,
-            connection.Endpoint.Port
-        );
+        logger.ConnectionRecovered(type, connection.Endpoint.HostName, connection.Endpoint.Port);
         await eventBus.PublishAsync(new ConnectionRecoveredEvent(type, connection.Endpoint));
     }
 
@@ -169,26 +160,19 @@ public class PersistentConnection : IPersistentConnection
     {
         status = status.ToDisconnected(e.ToString());
         var connection = (IConnection)sender!;
-        logger.LogDebug(
-            e.Cause as Exception,
-            "Connection {Type} disconnected from broker {Host}:{Port} because of {Reason}",
-            type,
-            connection.Endpoint.HostName,
-            connection.Endpoint.Port,
-            e.ReplyText
-        );
+        logger.ConnectionDisconnected(e.Cause as Exception, type, connection.Endpoint.HostName, connection.Endpoint.Port, e.ReplyText);
         await eventBus.PublishAsync(new ConnectionDisconnectedEvent(type, connection.Endpoint, e.ReplyText));
     }
 
     private async Task OnConnectionBlocked(object sender, ConnectionBlockedEventArgs e)
     {
-        logger.LogInformation("Connection {Type} blocked with reason {Reason}", type, e.Reason);
+        logger.ConnectionBlocked(type, e.Reason);
         await eventBus.PublishAsync(new ConnectionBlockedEvent(type, e.Reason ?? "Unknown reason"));
     }
 
     private async Task OnConnectionUnblocked(object sender, AsyncEventArgs e)
     {
-        logger.LogInformation("Connection {Type} unblocked", type);
+        logger.ConnectionUnblocked(type);
         await eventBus.PublishAsync(new ConnectionUnblockedEvent(type));
     }
 
