@@ -89,3 +89,9 @@ dotnet format --verify-no-changes --severity warn Source/EasyNetQ.slnx
 - Steps: restore → format check → build → test (unit + serialization + hosepipe + integration + approval)
 - Publish: tag push triggers `dotnet pack` + `dotnet nuget push` to nuget.org
 - .NET SDK: 10.x in CI (pinned via `global.json`); test/example projects target net10.0
+
+## Commit & PR style
+
+- Terse. State what changed and why it matters; nothing else.
+- No adverbs. No filler.
+- v9 requirements and guidelines live in `docs/v9-requirements.md`; update that file when direction changes.
