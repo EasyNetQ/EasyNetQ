@@ -62,8 +62,8 @@ internal sealed class InMemoryChannel(InMemoryBroker broker) : ITransportChannel
         IReadOnlyCollection<ConsumerContext> consumers, CancellationToken cancellationToken = default
     )
     {
-        var consumer = new InMemoryConsumer(broker, consumers);
         var notifier = consumers.Count > 0 ? consumers.First().Services.GetService<LifecycleNotifier>() : null;
+        var consumer = new InMemoryConsumer(broker, consumers, notifier);
         if (notifier is not null)
             foreach (var consumerContext in consumers)
                 await notifier.NotifyAsync(consumerContext, LifecycleLayer.Consumer, LifecycleEvent.Started, cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -78,10 +78,13 @@ internal sealed class InMemoryConsumer : ITransportConsumer
     private readonly CancellationTokenSource cts = new();
     private readonly Task[] pumps;
     private readonly IReadOnlyCollection<ConsumerContext> consumers;
+    private readonly LifecycleNotifier? notifier;
+    private bool disposed;
 
-    public InMemoryConsumer(InMemoryBroker broker, IReadOnlyCollection<ConsumerContext> consumers)
+    public InMemoryConsumer(InMemoryBroker broker, IReadOnlyCollection<ConsumerContext> consumers, LifecycleNotifier? notifier)
     {
         this.consumers = consumers;
+        this.notifier = notifier;
         pumps = consumers.Select(consumerContext => Task.Run(() => PumpAsync(broker, consumerContext, cts.Token))).ToArray();
     }
 
@@ -131,6 +134,10 @@ internal sealed class InMemoryConsumer : ITransportConsumer
 
     public async ValueTask DisposeAsync()
     {
+        if (disposed)
+            return;
+        disposed = true;
+
         cts.Cancel();
         try
         {
@@ -141,7 +148,6 @@ internal sealed class InMemoryConsumer : ITransportConsumer
         }
         cts.Dispose();
 
-        var notifier = consumers.Count > 0 ? consumers.First().Services.GetService<LifecycleNotifier>() : null;
         if (notifier is not null)
             foreach (var consumerContext in consumers)
                 await notifier.NotifyAsync(consumerContext, LifecycleLayer.Consumer, LifecycleEvent.Stopped).ConfigureAwait(false);

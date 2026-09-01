@@ -599,6 +599,13 @@ namespace EasyNetQ
         public System.Threading.Tasks.ValueTask PublishAsync<T>(T message, System.Threading.CancellationToken cancellationToken = default) { }
         public System.Threading.Tasks.ValueTask PublishAsync<T>(T message, string routingKey, System.Threading.CancellationToken cancellationToken = default) { }
     }
+    public sealed class TransportRpc : EasyNetQ.IRpc, System.IAsyncDisposable
+    {
+        public TransportRpc(EasyNetQ.Transport.ITransport transport, System.IServiceProvider services, EasyNetQ.IMessageTypeRegistry registry, EasyNetQ.IMessageSerializer messageSerializer, EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.PublishContext> publishPipelineBuilder, EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> consumePipelineBuilder, EasyNetQ.IConventions conventions, EasyNetQ.ICorrelationIdGenerationStrategy correlationIdGenerationStrategy, EasyNetQ.IMessageDeliveryModeStrategy messageDeliveryModeStrategy) { }
+        public System.Threading.Tasks.ValueTask DisposeAsync() { }
+        public System.Threading.Tasks.Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, System.Action<EasyNetQ.IRequestConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
+        public System.Threading.Tasks.Task<System.IAsyncDisposable> RespondAsync<TRequest, TResponse>(System.Func<TRequest, System.Threading.CancellationToken, System.Threading.Tasks.Task<TResponse>> responder, System.Action<EasyNetQ.IResponderConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
+    }
 }
 namespace EasyNetQ.Configuration
 {
