@@ -92,6 +92,8 @@ public sealed class MockBuilder : IAsyncDisposable
 
     public IChannel NextModel => channelPool.Peek();
 
+    public IServiceProvider ServiceProvider => serviceProvider;
+
     public IPubSub PubSub => serviceProvider.GetRequiredService<IPubSub>();
 
     public IRpc Rpc => serviceProvider.GetRequiredService<IRpc>();

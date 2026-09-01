@@ -9,6 +9,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>See https://github.com/EasyNetQ/EasyNetQ/releases</PackageReleaseNotes>
     <LangVersion>latest</LangVersion>
+    <PolySharpIncludeRuntimeSupportedAttributes>true</PolySharpIncludeRuntimeSupportedAttributes>
     <InterceptorsNamespaces>$(InterceptorsNamespaces);EasyNetQ.Generated</InterceptorsNamespaces>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>

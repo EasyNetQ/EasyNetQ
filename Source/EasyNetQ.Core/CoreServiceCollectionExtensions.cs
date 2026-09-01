@@ -12,8 +12,19 @@ public static class CoreServiceCollectionExtensions
     /// <summary>
     ///     Registers the transport-agnostic core services (registry, serialization, pipelines, facades).
     /// </summary>
+    /// <summary>
+    ///     Registers the transport-agnostic services and returns the fluent builder. Register an
+    ///     <see cref="Transport.ITransport" /> implementation separately (a transport package does this).
+    /// </summary>
+    public static IEasyNetQBuilder AddEasyNetQCore(this IServiceCollection services)
+    {
+        services.AddEasyNetQCoreServices();
+        return new EasyNetQBuilder(services);
+    }
+
     public static IServiceCollection AddEasyNetQCoreServices(this IServiceCollection services)
     {
+        services.TryAddSingleton<BusOptions>(_ => new BusOptions());
         services.TryAddSingleton<IMessageTypeRegistry, MessageTypeRegistry>();
         services.TryAddSingleton<IMessageSerializer>(sp =>
         {
@@ -30,6 +41,7 @@ public static class CoreServiceCollectionExtensions
                 : new Serialization.SystemTextJson.SystemTextJsonMessageSerializer(
                     System.Text.Json.Serialization.Metadata.JsonTypeInfoResolver.Combine(contexts), converters);
         });
+        services.TryAddSingleton<Consumer.IConsumeErrorStrategy>(Consumer.SimpleConsumeErrorStrategy.NackWithRequeue);
         services.TryAddSingleton<IConventions, Conventions>();
         services.TryAddSingleton<IEventBus, EventBus>();
         services.TryAddSingleton<ITypeNameSerializer, DefaultTypeNameSerializer>();
@@ -43,6 +55,10 @@ public static class CoreServiceCollectionExtensions
         services.TryAddSingleton<PipelineBuilder<ConsumeContext>>(_ =>
             new PipelineBuilder<ConsumeContext>().UseConsumeMetrics().UseConsumeErrorStrategy().UseConsumeTracing().UseConsumeInterceptors());
         services.TryAddSingleton<ICorrelationIdGenerationStrategy, DefaultCorrelationIdGenerationStrategy>();
+        services.TryAddSingleton<IMessagePublisher, TransportMessagePublisher>();
+        services.TryAddSingleton<IRpc, TransportRpc>();
+        services.TryAddSingleton<PipelineBuilder<LifecycleContext>>(_ => new PipelineBuilder<LifecycleContext>());
+        services.TryAddSingleton<LifecycleNotifier>();
         services.TryAddSingleton<IMessageSerializationStrategy, DefaultMessageSerializationStrategy>();
         services.TryAddSingleton<IMessageDeliveryModeStrategy, MessageDeliveryModeStrategy>();
         services.TryAddSingleton<IHandlerCollectionFactory, HandlerCollectionFactory>();

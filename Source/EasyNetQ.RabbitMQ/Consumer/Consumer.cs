@@ -219,7 +219,7 @@ public sealed class Consumer : IConsumer
     {
         var last = Interlocked.Read(ref lastChannelFaultRestartTimestamp);
         var now = Stopwatch.GetTimestamp();
-        if (last != 0 && Stopwatch.GetElapsedTime(last, now) < MinChannelFaultRestartInterval) return;
+        if (last != 0 && Internals.StopwatchHelper.GetElapsedTime(last, now) < MinChannelFaultRestartInterval) return;
         if (Interlocked.CompareExchange(ref lastChannelFaultRestartTimestamp, now, last) != last) return;
 
         try

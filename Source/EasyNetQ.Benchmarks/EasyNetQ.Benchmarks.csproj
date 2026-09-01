@@ -17,6 +17,7 @@
     <ItemGroup>
         <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
         <ProjectReference Include="..\EasyNetQ.Serialization.NewtonsoftJson\EasyNetQ.Serialization.NewtonsoftJson.csproj" />
+        <ProjectReference Include="..\EasyNetQ.Transport.InMemory\EasyNetQ.Transport.InMemory.csproj" />
     </ItemGroup>
 
 </Project>

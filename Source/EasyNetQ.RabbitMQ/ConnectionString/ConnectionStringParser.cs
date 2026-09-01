@@ -3,13 +3,15 @@ namespace EasyNetQ.ConnectionString;
 /// <inheritdoc />
 public class ConnectionStringParser : IConnectionStringParser
 {
+    private static readonly char[] SegmentSeparators = [';'];
+
     /// <inheritdoc />
     public ConnectionConfiguration Parse(string connectionString)
     {
         var configuration = new ConnectionConfiguration();
         var parsedAny = false;
 
-        foreach (var segment in connectionString.Split(';', StringSplitOptions.RemoveEmptyEntries))
+        foreach (var segment in connectionString.Split(SegmentSeparators, StringSplitOptions.RemoveEmptyEntries))
         {
             var separatorIndex = segment.IndexOf('=');
             if (separatorIndex < 0)

@@ -15,15 +15,18 @@
   <Folder Name="/Examples/">
     <Project Path="EasyNetQ.Examples.Aot/EasyNetQ.Examples.Aot.csproj" />
     <Project Path="EasyNetQ.Examples.DlxRetry/EasyNetQ.Examples.DlxRetry.csproj" />
+    <Project Path="EasyNetQ.Examples.NetFramework/EasyNetQ.Examples.NetFramework.csproj" />
     <Project Path="EasyNetQ.Examples.PubSubWithAdvancedApi/EasyNetQ.Examples.PubSubWithAdvancedApi.csproj" />
     <Project Path="EasyNetQ.Examples.Rpc/EasyNetQ.Examples.Rpc.csproj" />
   </Folder>
   <Folder Name="/Serialization/">
     <Project Path="EasyNetQ.Serialization.NewtonsoftJson/EasyNetQ.Serialization.NewtonsoftJson.csproj" />
+    <Project Path="EasyNetQ.Transport.InMemory/EasyNetQ.Transport.InMemory.csproj" />
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="EasyNetQ.AllocationTests/EasyNetQ.AllocationTests.csproj" />
     <Project Path="EasyNetQ.ApprovalTests/EasyNetQ.ApprovalTests.csproj" />
+    <Project Path="EasyNetQ.Core.Tests/EasyNetQ.Core.Tests.csproj" />
     <Project Path="EasyNetQ.Hosepipe.Tests/EasyNetQ.Hosepipe.Tests.csproj" />
     <Project Path="EasyNetQ.IntegrationTests/EasyNetQ.IntegrationTests.csproj" />
     <Project Path="EasyNetQ.Serialization.Tests/EasyNetQ.Serialization.Tests.csproj" />

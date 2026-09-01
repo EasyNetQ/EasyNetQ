@@ -5,6 +5,7 @@ using EasyNetQ.Consumer;
 using EasyNetQ.Events;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
+using EasyNetQ.Transport;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 
@@ -40,12 +41,20 @@ public class AdvancedBusEventHandlersTests : IDisposable
 
         eventBus = new EventBus(Substitute.For<ILogger<EventBus>>());
 
+        var transport = Substitute.For<ITransport>();
+        var transportConnection = Substitute.For<ITransportConnection>();
+        var transportChannel = Substitute.For<ITransportChannel>();
+        transportChannel.Topology.Returns(Substitute.For<ITopology>());
+        transportConnection.OpenChannelAsync(Arg.Any<ChannelContext>(), Arg.Any<CancellationToken>())
+            .Returns(new ValueTask<ITransportChannel>(transportChannel));
+        transport.ConnectAsync(Arg.Any<ConnectionContext>(), Arg.Any<CancellationToken>())
+            .Returns(new ValueTask<ITransportConnection>(transportConnection));
+
         advancedBus = new RabbitAdvancedBus(
             Substitute.For<ILogger<RabbitAdvancedBus>>(),
             Substitute.For<IProducerConnection>(),
             Substitute.For<IConsumerConnection>(),
-            Substitute.For<IConsumerFactory>(),
-            Substitute.For<IPersistentChannelDispatcher>(),
+            transport,
             eventBus,
             Substitute.For<IHandlerCollectionFactory>(),
             Substitute.For<ConnectionConfiguration>(),

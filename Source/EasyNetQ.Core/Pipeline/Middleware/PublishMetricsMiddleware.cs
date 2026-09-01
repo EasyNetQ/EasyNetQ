@@ -40,7 +40,7 @@ public sealed class PublishMetricsMiddleware : IMiddleware<PublishContext>
         }
         finally
         {
-            var elapsed = Stopwatch.GetElapsedTime(startedAt);
+            var elapsed = Internals.StopwatchHelper.GetElapsedTime(startedAt);
             var tags = new TagList
             {
                 { MessagingTags.MessagingSystem, options.MessagingSystem },

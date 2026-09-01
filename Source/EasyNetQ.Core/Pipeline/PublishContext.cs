@@ -45,6 +45,22 @@ public class PublishContext : LayerContext
     public bool PublisherConfirms { get; set; }
 
     /// <summary>
+    ///     The message type being published, when publishing through a typed route
+    /// </summary>
+    public MessageTypeDescriptor? MessageType { get; set; }
+
+    /// <summary>
+    ///     The message being published, serialized by <see cref="Middleware.SerializeStep" />; null when the caller
+    ///     supplies a pre-serialized <see cref="Body" />
+    /// </summary>
+    public object? Message { get; set; }
+
+    /// <summary>
+    ///     The serializer for this message, set by <see cref="Middleware.SerializeStep" />
+    /// </summary>
+    public IMessageSerializer? Serializer { get; set; }
+
+    /// <summary>
     ///     Message properties; middleware may replace them
     /// </summary>
     public MessageProperties Properties { get; set; }
@@ -67,6 +83,9 @@ public class PublishContext : LayerContext
         RoutingKey = "";
         Mandatory = false;
         PublisherConfirms = false;
+        MessageType = null;
+        Message = null;
+        Serializer = null;
         Properties = default;
         Body = default;
         CancellationToken = default;
