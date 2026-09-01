@@ -112,6 +112,11 @@ public sealed class PipelineBuilder<TContext> where TContext : LayerContext
     }
 
     /// <summary>
+    ///     Number of registered steps
+    /// </summary>
+    public int Count => registrations.Count;
+
+    /// <summary>
     ///     Whether a middleware is registered as <typeparamref name="TMarker" />
     /// </summary>
     public bool Contains<TMarker>() where TMarker : IMiddleware<TContext>

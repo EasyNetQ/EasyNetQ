@@ -642,6 +642,10 @@ namespace EasyNetQ.Configuration
         public static EasyNetQ.IEasyNetQBuilder RegisterConsumer<TBuilder>(this EasyNetQ.IEasyNetQBuilder builder, TBuilder consumerBuilder, System.Action<TBuilder> configure)
             where TBuilder : EasyNetQ.Configuration.ConsumerBuilder<TBuilder> { }
     }
+    public static class EasyNetQBuilderLifecycleExtensions
+    {
+        public static EasyNetQ.IEasyNetQBuilder Lifecycle(this EasyNetQ.IEasyNetQBuilder builder, System.Action<EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.LifecycleContext>> configure) { }
+    }
     public static class EasyNetQBuilderPublishExtensions
     {
         public static EasyNetQ.IEasyNetQBuilder Publish(this EasyNetQ.IEasyNetQBuilder builder, System.Action<EasyNetQ.Configuration.GenericPublishBuilder> configure) { }
@@ -1078,6 +1082,47 @@ namespace EasyNetQ.Pipeline
         public bool TryGet<T>(EasyNetQ.Pipeline.PropertyKey<T> key, out T value) { }
         public bool TryGetLocal<T>(EasyNetQ.Pipeline.PropertyKey<T> key, out T value) { }
     }
+    public sealed class LifecycleConfiguration : System.IEquatable<EasyNetQ.Pipeline.LifecycleConfiguration>
+    {
+        public LifecycleConfiguration(System.Action<EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.LifecycleContext>> Configure) { }
+        public System.Action<EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.LifecycleContext>> Configure { get; init; }
+    }
+    public sealed class LifecycleContext : EasyNetQ.Pipeline.LayerContext
+    {
+        public LifecycleContext(EasyNetQ.Pipeline.LayerContext scope) { }
+        public System.Threading.CancellationToken CancellationToken { get; set; }
+        public System.Exception? Error { get; set; }
+        public EasyNetQ.Pipeline.LifecycleEvent Event { get; set; }
+        public EasyNetQ.Pipeline.LifecycleLayer Layer { get; set; }
+        public string? Reason { get; set; }
+    }
+    public readonly struct LifecycleEvent : System.IEquatable<EasyNetQ.Pipeline.LifecycleEvent>
+    {
+        public static readonly EasyNetQ.Pipeline.LifecycleEvent Blocked;
+        public static readonly EasyNetQ.Pipeline.LifecycleEvent CallbackError;
+        public static readonly EasyNetQ.Pipeline.LifecycleEvent Connected;
+        public static readonly EasyNetQ.Pipeline.LifecycleEvent Disconnected;
+        public static readonly EasyNetQ.Pipeline.LifecycleEvent Recovered;
+        public static readonly EasyNetQ.Pipeline.LifecycleEvent RecoveryError;
+        public static readonly EasyNetQ.Pipeline.LifecycleEvent Started;
+        public static readonly EasyNetQ.Pipeline.LifecycleEvent Stopped;
+        public static readonly EasyNetQ.Pipeline.LifecycleEvent Unblocked;
+        public LifecycleEvent(string Name) { }
+        public string Name { get; init; }
+        public override string ToString() { }
+    }
+    public enum LifecycleLayer : byte
+    {
+        Connection = 0,
+        Channel = 1,
+        Consumer = 2,
+    }
+    public sealed class LifecycleNotifier
+    {
+        public LifecycleNotifier(EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.LifecycleContext> builder, System.Collections.Generic.IEnumerable<EasyNetQ.Pipeline.LifecycleConfiguration> configurations, System.IServiceProvider services) { }
+        public bool IsEnabled { get; }
+        public System.Threading.Tasks.ValueTask NotifyAsync(EasyNetQ.Pipeline.LayerContext scope, EasyNetQ.Pipeline.LifecycleLayer layer, EasyNetQ.Pipeline.LifecycleEvent @event, string? reason = null, System.Exception? error = null, System.Threading.CancellationToken cancellationToken = default) { }
+    }
     public static class PipelineBuilderExtensions
     {
         public static EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> UseConsumeErrorStrategy(this EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> builder) { }
@@ -1095,6 +1140,7 @@ namespace EasyNetQ.Pipeline
         where TContext : EasyNetQ.Pipeline.LayerContext
     {
         public PipelineBuilder() { }
+        public int Count { get; }
         public System.Collections.Generic.IReadOnlyList<string> Steps { get; }
         public EasyNetQ.Pipeline.PipelineStep<TContext> Build(System.IServiceProvider services, EasyNetQ.Pipeline.PipelineStep<TContext>? terminal = null) { }
         public EasyNetQ.Pipeline.PipelineBuilder<TContext> Clone() { }

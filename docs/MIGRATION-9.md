@@ -85,6 +85,11 @@ signatures and internals do not.
   stamped on direct advanced publishes too (previously only the high-level APIs stamped it); types without the
   attribute are unchanged. Publishing a derived instance through a base type parameter, or registering a custom
   `IMessageSerializationStrategy` (e.g. message versioning), keeps the 8.x pre-serializing path.
+- Lifecycle pipeline: `builder.Lifecycle(l => l.Use(...))` runs for connection events
+  (Connected/Recovered/Disconnected/Blocked/Unblocked/RecoveryError/CallbackError) and consumer Started/Stopped
+  on any transport; `LifecycleContext` carries the layer, event, reason and error, parented to the layer's
+  context. This replaces subscribing to `IEventBus`, which becomes internal and is removed in phase 6; with no
+  steps registered the notifications cost nothing.
 
 ## Serialization
 

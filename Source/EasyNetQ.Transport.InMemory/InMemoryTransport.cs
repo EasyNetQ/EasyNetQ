@@ -1,4 +1,5 @@
 using EasyNetQ.Pipeline;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Transport.InMemory;
 
@@ -26,8 +27,13 @@ public sealed class InMemoryTransport : ITransport
     public InMemoryBroker Broker { get; }
 
     /// <inheritdoc />
-    public ValueTask<ITransportConnection> ConnectAsync(ConnectionContext context, CancellationToken cancellationToken = default)
-        => new(new InMemoryConnection(Broker));
+    public async ValueTask<ITransportConnection> ConnectAsync(ConnectionContext context, CancellationToken cancellationToken = default)
+    {
+        var notifier = context.Services.GetService<LifecycleNotifier>();
+        if (notifier is not null)
+            await notifier.NotifyAsync(context, LifecycleLayer.Connection, LifecycleEvent.Connected, cancellationToken: cancellationToken).ConfigureAwait(false);
+        return new InMemoryConnection(Broker);
+    }
 }
 
 internal sealed class InMemoryConnection(InMemoryBroker broker) : ITransportConnection
@@ -52,12 +58,16 @@ internal sealed class InMemoryChannel(InMemoryBroker broker) : ITransportChannel
         return default;
     }
 
-    public ValueTask<ITransportConsumer> StartConsumerAsync(
+    public async ValueTask<ITransportConsumer> StartConsumerAsync(
         IReadOnlyCollection<ConsumerContext> consumers, CancellationToken cancellationToken = default
     )
     {
         var consumer = new InMemoryConsumer(broker, consumers);
-        return new ValueTask<ITransportConsumer>(consumer);
+        var notifier = consumers.Count > 0 ? consumers.First().Services.GetService<LifecycleNotifier>() : null;
+        if (notifier is not null)
+            foreach (var consumerContext in consumers)
+                await notifier.NotifyAsync(consumerContext, LifecycleLayer.Consumer, LifecycleEvent.Started, cancellationToken: cancellationToken).ConfigureAwait(false);
+        return consumer;
     }
 
     public ValueTask DisposeAsync() => default;
@@ -67,9 +77,11 @@ internal sealed class InMemoryConsumer : ITransportConsumer
 {
     private readonly CancellationTokenSource cts = new();
     private readonly Task[] pumps;
+    private readonly IReadOnlyCollection<ConsumerContext> consumers;
 
     public InMemoryConsumer(InMemoryBroker broker, IReadOnlyCollection<ConsumerContext> consumers)
     {
+        this.consumers = consumers;
         pumps = consumers.Select(consumerContext => Task.Run(() => PumpAsync(broker, consumerContext, cts.Token))).ToArray();
     }
 
@@ -128,6 +140,11 @@ internal sealed class InMemoryConsumer : ITransportConsumer
         {
         }
         cts.Dispose();
+
+        var notifier = consumers.Count > 0 ? consumers.First().Services.GetService<LifecycleNotifier>() : null;
+        if (notifier is not null)
+            foreach (var consumerContext in consumers)
+                await notifier.NotifyAsync(consumerContext, LifecycleLayer.Consumer, LifecycleEvent.Stopped).ConfigureAwait(false);
     }
 }
 

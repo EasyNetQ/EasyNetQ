@@ -1,8 +1,10 @@
 using EasyNetQ.ChannelDispatcher;
+using EasyNetQ.Events;
 using EasyNetQ.Consumer;
 using EasyNetQ.Persistent;
 using EasyNetQ.Pipeline;
 using EasyNetQ.Producer;
+using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 
@@ -41,8 +43,10 @@ public sealed class RabbitMqTransport : ITransport
     {
         context.TryGet(Keys.ConnectionType, out var type);
         IPersistentConnection connection = type == PersistentConnectionType.Consumer ? consumerConnection : producerConnection;
+        var notifier = context.Services.GetService<LifecycleNotifier>();
+        var eventBus = context.Services.GetService<IEventBus>();
         return new ValueTask<ITransportConnection>(
-            new RabbitMqTransportConnection(connection, type, persistentChannelDispatcher, consumerFactory)
+            new RabbitMqTransportConnection(connection, type, persistentChannelDispatcher, consumerFactory, context, notifier, eventBus)
         );
     }
 }
@@ -53,19 +57,47 @@ internal sealed class RabbitMqTransportConnection : ITransportConnection
     private readonly PersistentConnectionType type;
     private readonly IPersistentChannelDispatcher persistentChannelDispatcher;
     private readonly IConsumerFactory consumerFactory;
+    private readonly LifecycleNotifier? notifier;
+    private readonly IDisposable[] lifecycleSubscriptions;
 
     public RabbitMqTransportConnection(
         IPersistentConnection connection,
         PersistentConnectionType type,
         IPersistentChannelDispatcher persistentChannelDispatcher,
-        IConsumerFactory consumerFactory
+        IConsumerFactory consumerFactory,
+        ConnectionContext context,
+        LifecycleNotifier? notifier,
+        IEventBus? eventBus
     )
     {
         this.connection = connection;
         this.type = type;
         this.persistentChannelDispatcher = persistentChannelDispatcher;
         this.consumerFactory = consumerFactory;
+        this.notifier = notifier;
+
+        // bridge the internal events onto the lifecycle pipeline; the internal bus goes away in phase 6
+        lifecycleSubscriptions = notifier is { IsEnabled: true } && eventBus is not null
+            ?
+            [
+                eventBus.Subscribe<ConnectionCreatedEvent>(e => NotifyAsync(e.Type, context, LifecycleEvent.Connected)),
+                eventBus.Subscribe<ConnectionRecoveredEvent>(e => NotifyAsync(e.Type, context, LifecycleEvent.Recovered)),
+                eventBus.Subscribe<ConnectionDisconnectedEvent>(e => NotifyAsync(e.Type, context, LifecycleEvent.Disconnected, e.Reason)),
+                eventBus.Subscribe<ConnectionBlockedEvent>(e => NotifyAsync(e.Type, context, LifecycleEvent.Blocked, e.Reason)),
+                eventBus.Subscribe<ConnectionUnblockedEvent>(e => NotifyAsync(e.Type, context, LifecycleEvent.Unblocked)),
+                eventBus.Subscribe<ConnectionRecoveryErrorEvent>(e => NotifyAsync(e.Type, context, LifecycleEvent.RecoveryError, error: e.Exception)),
+                eventBus.Subscribe<ConnectionCallbackErrorEvent>(e => NotifyAsync(e.Type, context, LifecycleEvent.CallbackError, error: e.Exception)),
+            ]
+            : [];
     }
+
+    private Task NotifyAsync(
+        PersistentConnectionType eventType, ConnectionContext context, LifecycleEvent @event,
+        string? reason = null, Exception? error = null
+    )
+        => eventType == type
+            ? notifier!.NotifyAsync(context, LifecycleLayer.Connection, @event, reason, error).AsTask()
+            : Task.CompletedTask;
 
     public bool IsConnected => connection.Status.State == PersistentConnectionState.Connected;
 
@@ -75,8 +107,13 @@ internal sealed class RabbitMqTransportConnection : ITransportConnection
     public ValueTask<ITransportChannel> OpenChannelAsync(ChannelContext context, CancellationToken cancellationToken = default)
         => new(new RabbitMqTransportChannel(type, persistentChannelDispatcher, consumerFactory));
 
-    // the persistent connections are owned by the container
-    public ValueTask DisposeAsync() => default;
+    // the persistent connections are owned by the container; only the lifecycle bridge is ours
+    public ValueTask DisposeAsync()
+    {
+        foreach (var subscription in lifecycleSubscriptions)
+            subscription.Dispose();
+        return default;
+    }
 }
 
 internal sealed class RabbitMqTransportChannel : ITransportChannel
@@ -168,7 +205,12 @@ internal sealed class RabbitMqTransportChannel : ITransportChannel
 
         var consumer = consumerFactory.CreateConsumer(new ConsumerConfiguration(prefetchCount, perQueueConfigurations));
         await consumer.StartConsumingAsync(cancellationToken).ConfigureAwait(false);
-        return new RabbitMqTransportConsumer(consumer);
+
+        var notifier = consumers.Count > 0 ? consumers.First().Services.GetService<LifecycleNotifier>() : null;
+        if (notifier is { IsEnabled: true })
+            foreach (var consumerContext in consumers)
+                await notifier.NotifyAsync(consumerContext, LifecycleLayer.Consumer, LifecycleEvent.Started, cancellationToken: cancellationToken).ConfigureAwait(false);
+        return new RabbitMqTransportConsumer(consumer, consumers, notifier);
     }
 
     public ValueTask DisposeAsync() => default;
@@ -240,8 +282,21 @@ internal sealed class RabbitMqTransportChannel : ITransportChannel
 internal sealed class RabbitMqTransportConsumer : ITransportConsumer
 {
     private readonly IConsumer consumer;
+    private readonly IReadOnlyCollection<ConsumerContext> consumers;
+    private readonly LifecycleNotifier? notifier;
 
-    public RabbitMqTransportConsumer(IConsumer consumer) => this.consumer = consumer;
+    public RabbitMqTransportConsumer(IConsumer consumer, IReadOnlyCollection<ConsumerContext> consumers, LifecycleNotifier? notifier)
+    {
+        this.consumer = consumer;
+        this.consumers = consumers;
+        this.notifier = notifier;
+    }
 
-    public ValueTask DisposeAsync() => consumer.DisposeAsync();
+    public async ValueTask DisposeAsync()
+    {
+        await consumer.DisposeAsync().ConfigureAwait(false);
+        if (notifier is { IsEnabled: true })
+            foreach (var consumerContext in consumers)
+                await notifier.NotifyAsync(consumerContext, LifecycleLayer.Consumer, LifecycleEvent.Stopped).ConfigureAwait(false);
+    }
 }
