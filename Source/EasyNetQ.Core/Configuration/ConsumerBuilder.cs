@@ -116,6 +116,16 @@ public abstract class ConsumerBuilder<TSelf> where TSelf : ConsumerBuilder<TSelf
     }
 
     /// <summary>
+    ///     Deserialize this consumer's messages with <paramref name="serializer" /> instead of the bus default
+    ///     (e.g. a peer with its own JSON conventions)
+    /// </summary>
+    public TSelf Serializer(IMessageSerializer serializer)
+    {
+        Definition.ConfigureContext += context => context.Set(Keys.Serializer, serializer);
+        return Self;
+    }
+
+    /// <summary>
     ///     Customize the message pipeline (runs after the typed dispatch steps are registered, so
     ///     InsertBefore/InsertAfter can target them)
     /// </summary>

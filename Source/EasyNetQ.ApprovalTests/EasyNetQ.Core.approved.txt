@@ -661,6 +661,7 @@ namespace EasyNetQ.Configuration
         public TSelf Message(System.Action<EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext>> configure) { }
         public TSelf PrefetchCount(ushort prefetchCount) { }
         public TSelf Queue(string name) { }
+        public TSelf Serializer(EasyNetQ.IMessageSerializer serializer) { }
     }
     public sealed class ConsumerDefinition
     {
@@ -1377,6 +1378,7 @@ namespace EasyNetQ.Serialization.SystemTextJson
         public SystemTextJsonMessageSerializer(System.Text.Json.Serialization.Metadata.IJsonTypeInfoResolver resolver, System.Collections.Generic.IEnumerable<System.Text.Json.Serialization.JsonConverter>? extraConverters) { }
         public T? Deserialize<T>(in System.ReadOnlyMemory<byte> body, EasyNetQ.MessageTypeDescriptor<T> descriptor) { }
         public System.Buffers.IMemoryOwner<byte> Serialize<T>(T body, EasyNetQ.MessageTypeDescriptor<T> descriptor) { }
+        public static System.Text.Json.JsonSerializerOptions CreateDefaultOptions() { }
     }
 }
 namespace EasyNetQ.Topology

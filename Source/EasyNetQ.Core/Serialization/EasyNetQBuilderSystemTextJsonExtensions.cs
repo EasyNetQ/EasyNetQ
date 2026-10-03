@@ -17,7 +17,7 @@ public static class EasyNetQBuilderSystemTextJsonExtensions
     public static IEasyNetQBuilder UseSystemTextJson(this IEasyNetQBuilder builder)
     {
         builder.Services.AddSingleton<IMessageSerializer>(sp => new SystemTextJsonMessageSerializer(
-            new JsonSerializerOptions(JsonSerializerDefaults.General), sp.GetServices<JsonConverter>()));
+            SystemTextJsonMessageSerializer.CreateDefaultOptions(), sp.GetServices<JsonConverter>()));
         return builder;
     }
 

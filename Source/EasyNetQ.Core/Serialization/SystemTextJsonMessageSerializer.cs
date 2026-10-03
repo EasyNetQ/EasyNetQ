@@ -16,10 +16,18 @@ public sealed class SystemTextJsonMessageSerializer : IMessageSerializer
     private readonly JsonSerializerOptions options;
 
     /// <summary>
-    ///     Creates the serializer with the default options (general defaults + MessageProperties converter)
+    ///     The default options: general defaults with case-insensitive property matching, so camelCase peers
+    ///     (ASP.NET Core, Wolverine, most non-.NET producers) deserialize instead of silently producing defaults.
+    ///     Writing keeps the property names as declared.
+    /// </summary>
+    public static JsonSerializerOptions CreateDefaultOptions()
+        => new(JsonSerializerDefaults.General) { PropertyNameCaseInsensitive = true };
+
+    /// <summary>
+    ///     Creates the serializer with the default options (<see cref="CreateDefaultOptions" />)
     /// </summary>
     public SystemTextJsonMessageSerializer()
-        : this(new JsonSerializerOptions(JsonSerializerDefaults.General))
+        : this(CreateDefaultOptions())
     {
     }
 
@@ -67,7 +75,8 @@ public sealed class SystemTextJsonMessageSerializer : IMessageSerializer
     /// </summary>
     public SystemTextJsonMessageSerializer(IJsonTypeInfoResolver resolver, IEnumerable<JsonConverter>? extraConverters)
     {
-        options = new JsonSerializerOptions(JsonSerializerDefaults.General) { TypeInfoResolver = resolver };
+        options = CreateDefaultOptions();
+        options.TypeInfoResolver = resolver;
         if (extraConverters is not null)
             foreach (var converter in extraConverters)
                 options.Converters.Add(converter);

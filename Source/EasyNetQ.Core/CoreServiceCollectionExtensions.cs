@@ -41,7 +41,7 @@ public static class CoreServiceCollectionExtensions
             var converters = sp.GetServices<System.Text.Json.Serialization.JsonConverter>();
             return contexts.Length == 0
                 ? new Serialization.SystemTextJson.SystemTextJsonMessageSerializer(
-                    new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.General), converters)
+                    Serialization.SystemTextJson.SystemTextJsonMessageSerializer.CreateDefaultOptions(), converters)
                 : new Serialization.SystemTextJson.SystemTextJsonMessageSerializer(
                     System.Text.Json.Serialization.Metadata.JsonTypeInfoResolver.Combine(contexts), converters);
         });

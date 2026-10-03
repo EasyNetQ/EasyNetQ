@@ -129,3 +129,8 @@ Gaps found running v9 in production consumers, fixed in the library rather than 
 - Messages without a `type` property (plain AMQP clients, shovels, non-.NET peers) dispatch to the consumer's only
   handler, or to `DefaultMessageType<T>()` when it has several; otherwise `HandleUnknown` or
   `UnknownMessageTypeException` as above.
+- **Behavior change:** the default System.Text.Json options read property names case-insensitively
+  (`SystemTextJsonMessageSerializer.CreateDefaultOptions()`), also with source-generated contexts. A camelCase body
+  from another stack used to deserialize silently into default values. Writing is unchanged. Options you pass
+  yourself are used as given.
+- Per-consumer serializer: `Consume(c => c.Serializer(serializer))`.
