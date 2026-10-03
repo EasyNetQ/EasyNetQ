@@ -1,0 +1,11 @@
+<Project>
+  <!-- Built as a source reference (EasyNetQ.SourceReference.props): no package on every build, and no MinVer, whose
+       git lookup fails in build contexts without history (e.g. a Docker build of the consuming app) -->
+  <PropertyGroup Condition="'$(EasyNetQSourceReference)' == 'true'">
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+  <!-- keyed on the checkout, not the global property, so transitively referenced projects agree -->
+  <PropertyGroup Condition="!Exists('$(MSBuildThisFileDirectory)../.git')">
+    <MinVerSkip>true</MinVerSkip>
+  </PropertyGroup>
+</Project>

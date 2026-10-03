@@ -149,3 +149,7 @@ Gaps found running v9 in production consumers, fixed in the library rather than 
   The error itself (event 600: queue, routing key, exchange, correlation id, exception) is still logged.
 - `UseRabbitMq(r => r.ErrorQueue(q => q.Quorum()))` declares the (bus-wide) error queue with typed arguments, e.g.
   quorum so failed messages survive a node loss. `ConsumeErrorOptions` carries both settings.
+- Consuming EasyNetQ from source (e.g. a git submodule): `<Import Project="…/EasyNetQ/Source/EasyNetQ.SourceReference.props" />`
+  adds the project references (`EasyNetQSourcePackages`, default `EasyNetQ`), the source generator as an analyzer and
+  the interceptors namespace. Source-referenced builds do not pack, and MinVer is skipped when the checkout has no
+  `.git` (Docker build contexts).

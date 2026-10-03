@@ -1,0 +1,24 @@
+<Project>
+  <!--
+    Consume EasyNetQ from source (e.g. a git submodule) instead of a package:
+      <Import Project="path/to/EasyNetQ/Source/EasyNetQ.SourceReference.props" />
+    Wires what the package does for you: project references to $(EasyNetQSourcePackages) (default EasyNetQ, which
+    carries AddEasyNetQ; add EasyNetQ.Transport.InMemory for tests), the source generator as an
+    analyzer, and the interceptors namespace. Set EasyNetQSourcePackages before the import.
+  -->
+  <PropertyGroup>
+    <EasyNetQSourcePackages Condition="'$(EasyNetQSourcePackages)' == ''">EasyNetQ</EasyNetQSourcePackages>
+    <InterceptorsNamespaces>$(InterceptorsNamespaces);EasyNetQ.Generated</InterceptorsNamespaces>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <_EasyNetQSourcePackage Include="$(EasyNetQSourcePackages)" />
+    <ProjectReference Include="@(_EasyNetQSourcePackage->'$(MSBuildThisFileDirectory)%(Identity)/%(Identity).csproj')"
+                      AdditionalProperties="EasyNetQSourceReference=true" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)EasyNetQ.Generators/EasyNetQ.Generators.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false"
+                      AdditionalProperties="EasyNetQSourceReference=true"
+                      UndefineProperties="PublishAot;RuntimeIdentifier;SelfContained;NativeLib" />
+  </ItemGroup>
+</Project>
