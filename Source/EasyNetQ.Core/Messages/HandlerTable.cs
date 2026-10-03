@@ -30,6 +30,18 @@ public abstract class HandlerEntry
     public abstract ValueTask<AckDecision> InvokeAsync(ConsumeContext context);
 }
 
+internal sealed class RawHandlerEntry : HandlerEntry
+{
+    private readonly MessageHandler<ReadOnlyMemory<byte>> handler;
+
+    public RawHandlerEntry(MessageHandler<ReadOnlyMemory<byte>> handler) : base(RawMessageTypeDescriptor.Instance)
+    {
+        this.handler = handler;
+    }
+
+    public override ValueTask<AckDecision> InvokeAsync(ConsumeContext context) => handler(context.Body, context);
+}
+
 internal sealed class HandlerEntry<T> : HandlerEntry
 {
     private readonly MessageHandler<T> handler;
@@ -67,10 +79,26 @@ public sealed class HandlerTable
         this.registry = registry;
     }
 
+    private HandlerEntry? unknownEntry;
+
     /// <summary>
     ///     Set to false to silently acknowledge messages no handler matches instead of failing them
     /// </summary>
     public bool ThrowOnNoMatchingHandler { get; set; } = true;
+
+    /// <summary>
+    ///     Handles every message no typed handler matches: an unknown wire name (a type this process cannot load,
+    ///     e.g. from another stack), a known type without a handler, or a message without a type and no default.
+    ///     The handler gets the raw body and the context (<see cref="ConsumeContext.Properties" /> carries the
+    ///     incoming type name); nothing is deserialized.
+    /// </summary>
+    public HandlerTable HandleUnknown(MessageHandler<ReadOnlyMemory<byte>> handler)
+    {
+        if (unknownEntry is not null)
+            throw new EasyNetQException("There is already a handler for unknown messages");
+        unknownEntry = new RawHandlerEntry(handler);
+        return this;
+    }
 
     /// <summary>
     ///     Registered handlers
@@ -97,11 +125,19 @@ public sealed class HandlerTable
     /// </summary>
     public MessageTypeDescriptor ResolveDescriptor(string? wireName)
     {
-        if (wireName is not null && registrationsByWireName.TryGetValue(wireName, out var entry))
+        if (string.IsNullOrEmpty(wireName))
+            return unknownEntry?.Descriptor
+                ?? throw new UnknownMessageTypeException(null, "Received message has no type property; add HandleUnknown(...) to dispatch it");
+
+        if (registrationsByWireName.TryGetValue(wireName!, out var entry))
             return entry.Descriptor;
-        if (wireName is null)
-            throw new EasyNetQException("Received message has no type property; a typed consumer cannot dispatch it");
-        return registry.GetByWireName(wireName);
+        if (registry.TryResolveWireName(wireName!, out var descriptor))
+            return descriptor;
+        return unknownEntry?.Descriptor
+            ?? throw new UnknownMessageTypeException(
+                wireName,
+                $"Could not resolve message type '{wireName}'; register it (MessageType<T>().Alias(...)) or add HandleUnknown(...)"
+            );
     }
 
     /// <summary>
@@ -110,6 +146,8 @@ public sealed class HandlerTable
     /// </summary>
     public HandlerEntry Resolve(MessageTypeDescriptor descriptor)
     {
+        if (ReferenceEquals(descriptor, RawMessageTypeDescriptor.Instance))
+            return unknownEntry!;
         if (resolvedByWireName.TryGetValue(descriptor.WireName, out var entry))
             return entry;
 
@@ -127,8 +165,14 @@ public sealed class HandlerTable
             return kvp.Value;
         }
 
+        if (unknownEntry is not null)
+        {
+            resolvedByWireName.TryAdd(descriptor.WireName, unknownEntry);
+            return unknownEntry;
+        }
+
         if (ThrowOnNoMatchingHandler)
-            throw new EasyNetQException("No handler found for message type {0}", descriptor.Type.Name);
+            throw new UnknownMessageTypeException(descriptor.WireName, $"No handler found for message type {descriptor.Type.Name}");
 
         return NoopEntry;
     }

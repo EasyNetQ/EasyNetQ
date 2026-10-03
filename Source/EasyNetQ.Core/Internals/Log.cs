@@ -158,6 +158,9 @@ internal static partial class Log
     [LoggerMessage(605, LogLevel.Error, "Consume error strategy has failed")]
     public static partial void ConsumeErrorStrategyFailed(this ILogger logger, Exception exception);
 
+    [LoggerMessage(606, LogLevel.Warning, "Cannot dispatch message type {WireName} on queue {Queue}: {Reason}. The error strategy handles it; logged once per type")]
+    public static partial void UnknownMessageType(this ILogger logger, string queue, string? wireName, string reason);
+
     #endregion
 
     #region Infrastructure (700-799)

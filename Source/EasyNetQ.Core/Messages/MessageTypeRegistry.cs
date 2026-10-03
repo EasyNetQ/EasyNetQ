@@ -108,6 +108,23 @@ public sealed class MessageTypeRegistry : IMessageTypeRegistry
         => byWireName.TryGetValue(wireName, out descriptor!);
 
     /// <inheritdoc />
+    public bool TryResolveWireName(string wireName, out MessageTypeDescriptor descriptor)
+    {
+        if (byWireName.TryGetValue(wireName, out descriptor!))
+            return true;
+        try
+        {
+            descriptor = GetByWireName(wireName);
+            return true;
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            // malformed or foreign names fail in many ways (EasyNetQException, FileLoadException, ...)
+            return false;
+        }
+    }
+
+    /// <inheritdoc />
     public MessageTypeDescriptor GetByWireName(string wireName)
     {
         if (byWireName.TryGetValue(wireName, out var existing))

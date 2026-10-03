@@ -33,6 +33,12 @@ public interface IMessageTypeRegistry
     bool TryGetByWireName(string wireName, out MessageTypeDescriptor descriptor);
 
     /// <summary>
+    ///     Looks up a descriptor by wire type name, falling back to the configured <see cref="ITypeNameSerializer" />
+    ///     for names not seen before; false when neither resolves the name (no exception)
+    /// </summary>
+    bool TryResolveWireName(string wireName, out MessageTypeDescriptor descriptor);
+
+    /// <summary>
     ///     Gets the descriptor for a wire type name, resolving unknown names through the configured
     ///     <see cref="ITypeNameSerializer" /> and caching the result
     /// </summary>

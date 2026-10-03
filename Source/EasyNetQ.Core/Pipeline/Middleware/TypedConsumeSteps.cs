@@ -60,7 +60,8 @@ public sealed class DeserializeStep : IMiddleware<ConsumeContext>
     /// <inheritdoc />
     public ValueTask InvokeAsync(ConsumeContext context, PipelineStep<ConsumeContext> next)
     {
-        context.Message = context.Body.IsEmpty
+        // the unknown-message handler reads the raw body; nothing to deserialize
+        context.Message = context.Body.IsEmpty || context.Handler is RawHandlerEntry
             ? null
             : context.MessageType!.DeserializeBody(context.Serializer!, context.Body);
         return next(context);

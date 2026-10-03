@@ -95,6 +95,17 @@ public abstract class ConsumerBuilder<TSelf> where TSelf : ConsumerBuilder<TSelf
     }
 
     /// <summary>
+    ///     Handle every message no typed handler matches (unknown or unloadable wire names, types without a handler,
+    ///     untyped messages without a default) as raw bytes; <see cref="ConsumeContext.Properties" /> carries the
+    ///     incoming type name
+    /// </summary>
+    public TSelf HandleUnknown(MessageHandler<ReadOnlyMemory<byte>> handler)
+    {
+        Definition.HandlerRegistrations.Add((_, table) => table.HandleUnknown(handler));
+        return Self;
+    }
+
+    /// <summary>
     ///     Customize the message pipeline (runs after the typed dispatch steps are registered, so
     ///     InsertBefore/InsertAfter can target them)
     /// </summary>

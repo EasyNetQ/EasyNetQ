@@ -196,6 +196,7 @@ namespace EasyNetQ
         public System.Collections.Generic.IReadOnlyCollection<EasyNetQ.HandlerEntry> Entries { get; }
         public bool ThrowOnNoMatchingHandler { get; set; }
         public EasyNetQ.HandlerTable Add<T>(EasyNetQ.MessageHandler<T> handler) { }
+        public EasyNetQ.HandlerTable HandleUnknown(EasyNetQ.MessageHandler<System.ReadOnlyMemory<byte>> handler) { }
         public EasyNetQ.HandlerEntry Resolve(EasyNetQ.MessageTypeDescriptor descriptor) { }
         public EasyNetQ.MessageTypeDescriptor ResolveDescriptor(string? wireName) { }
     }
@@ -276,6 +277,7 @@ namespace EasyNetQ
         EasyNetQ.MessageTypeDescriptor<T> GetOrAdd<T>();
         EasyNetQ.MessageTypeDescriptor<T> Register<T>(string? wireName, System.Collections.Generic.IEnumerable<string>? aliases = null);
         bool TryGetByWireName(string wireName, out EasyNetQ.MessageTypeDescriptor descriptor);
+        bool TryResolveWireName(string wireName, out EasyNetQ.MessageTypeDescriptor descriptor);
     }
     public interface IMessageTypeRegistryInitializer
     {
@@ -500,6 +502,7 @@ namespace EasyNetQ
         public EasyNetQ.MessageTypeDescriptor<T> GetOrAdd<T>() { }
         public EasyNetQ.MessageTypeDescriptor<T> Register<T>(string? wireName, System.Collections.Generic.IEnumerable<string>? aliases = null) { }
         public bool TryGetByWireName(string wireName, out EasyNetQ.MessageTypeDescriptor descriptor) { }
+        public bool TryResolveWireName(string wireName, out EasyNetQ.MessageTypeDescriptor descriptor) { }
     }
     public class Message<T> : EasyNetQ.IMessage, EasyNetQ.IMessage<T>
     {
@@ -627,6 +630,11 @@ namespace EasyNetQ
         public System.Threading.Tasks.Task<TResponse> RequestAsync<TRequest, TResponse>(TRequest request, System.Action<EasyNetQ.IRequestConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
         public System.Threading.Tasks.Task<System.IAsyncDisposable> RespondAsync<TRequest, TResponse>(System.Func<TRequest, System.Threading.CancellationToken, System.Threading.Tasks.Task<TResponse>> responder, System.Action<EasyNetQ.IResponderConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
     }
+    public sealed class UnknownMessageTypeException : EasyNetQ.EasyNetQException
+    {
+        public UnknownMessageTypeException(string? wireName, string message) { }
+        public string? WireName { get; }
+    }
 }
 namespace EasyNetQ.Configuration
 {
@@ -647,6 +655,7 @@ namespace EasyNetQ.Configuration
         public TSelf ExistingQueue(string name) { }
         public TSelf Handle<T>(EasyNetQ.MessageHandler<T> handler) { }
         public TSelf Handle<T>(System.Func<T, System.Threading.CancellationToken, System.Threading.Tasks.Task> handler) { }
+        public TSelf HandleUnknown(EasyNetQ.MessageHandler<System.ReadOnlyMemory<byte>> handler) { }
         public TSelf Message(System.Action<EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext>> configure) { }
         public TSelf PrefetchCount(ushort prefetchCount) { }
         public TSelf Queue(string name) { }

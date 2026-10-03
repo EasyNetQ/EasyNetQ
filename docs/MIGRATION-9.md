@@ -121,3 +121,8 @@ Gaps found running v9 in production consumers, fixed in the library rather than 
   aliases)` is the underlying call; a wire name that would resolve to two types throws at startup.
 - Per-route wire name: `Publish(p => p.Exchange("x").Message<T>("key", r => r.WireName("contract.v1")))` stamps
   that name on the route's messages without changing the type's own wire name.
+- Unknown messages: `Consume(c => c.Handle<T>(...).HandleUnknown((body, context) => ...))` receives every message no
+  typed handler matches (a wire name this process cannot load, a known type without a handler) as raw bytes, with
+  `context.Properties.Type` carrying the incoming name; the body is not deserialized. Without it such messages fail
+  with `UnknownMessageTypeException` (a subclass of `EasyNetQException`, previously a plain `EasyNetQException`
+  thrown before handler matching), logged once per queue and type name.
