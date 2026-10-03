@@ -66,6 +66,29 @@ public abstract class PublishBuilder<TSelf> where TSelf : PublishBuilder<TSelf>
     }
 
     /// <summary>
+    ///     Route <typeparamref name="T" /> with a fixed routing key and route options (e.g. a wire name for a
+    ///     contract shared with another stack)
+    /// </summary>
+    public TSelf Message<T>(string routingKey, Action<PublishRouteBuilder> configure)
+    {
+        var route = new PublishRouteBuilder();
+        configure(route);
+        Definition.MessageRegistrations.Add(table => table.Add<T>(Definition, routingKey, route.RouteWireName));
+        return Self;
+    }
+
+    /// <summary>
+    ///     Route <typeparamref name="T" /> with a per-message routing key and route options
+    /// </summary>
+    public TSelf Message<T>(Func<T, string> routingKey, Action<PublishRouteBuilder> configure)
+    {
+        var route = new PublishRouteBuilder();
+        configure(route);
+        Definition.MessageRegistrations.Add(table => table.Add(Definition, routingKey, route.RouteWireName));
+        return Self;
+    }
+
+    /// <summary>
     ///     Broker must route every message to at least one queue
     /// </summary>
     public TSelf Mandatory(bool mandatory = true)
@@ -104,5 +127,23 @@ public sealed class GenericPublishBuilder : PublishBuilder<GenericPublishBuilder
     /// </summary>
     public GenericPublishBuilder(PublishDefinition definition) : base(definition)
     {
+    }
+}
+
+/// <summary>
+///     Options for one publish route
+/// </summary>
+public sealed class PublishRouteBuilder
+{
+    internal string? RouteWireName { get; private set; }
+
+    /// <summary>
+    ///     Stamp <paramref name="wireName" /> as the AMQP "type" of this route's messages instead of the message
+    ///     type's own wire name
+    /// </summary>
+    public PublishRouteBuilder WireName(string wireName)
+    {
+        RouteWireName = wireName;
+        return this;
     }
 }

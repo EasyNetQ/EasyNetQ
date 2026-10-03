@@ -119,3 +119,5 @@ Gaps found running v9 in production consumers, fixed in the library rather than 
   generator, AOT-safe). The wire name is what publishes stamp and consumers match; aliases are extra incoming
   names, e.g. the `Type.FullName` a Wolverine or MassTransit peer sends. `IMessageTypeRegistry.Register<T>(wireName,
   aliases)` is the underlying call; a wire name that would resolve to two types throws at startup.
+- Per-route wire name: `Publish(p => p.Exchange("x").Message<T>("key", r => r.WireName("contract.v1")))` stamps
+  that name on the route's messages without changing the type's own wire name.

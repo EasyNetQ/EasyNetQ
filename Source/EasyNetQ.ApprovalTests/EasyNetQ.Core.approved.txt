@@ -709,6 +709,8 @@ namespace EasyNetQ.Configuration
         public TSelf Message<T>() { }
         public TSelf Message<T>(System.Func<T, string> routingKey) { }
         public TSelf Message<T>(string routingKey) { }
+        public TSelf Message<T>(System.Func<T, string> routingKey, System.Action<EasyNetQ.Configuration.PublishRouteBuilder> configure) { }
+        public TSelf Message<T>(string routingKey, System.Action<EasyNetQ.Configuration.PublishRouteBuilder> configure) { }
         public TSelf Pipeline(System.Action<EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.PublishContext>> configure) { }
         public TSelf PublisherConfirms(bool publisherConfirms = true) { }
     }
@@ -727,7 +729,13 @@ namespace EasyNetQ.Configuration
         public EasyNetQ.Configuration.PublishDefinition Definition { get; }
         public EasyNetQ.MessageTypeDescriptor Descriptor { get; }
         public EasyNetQ.Pipeline.PipelineStep<EasyNetQ.Pipeline.PublishContext>? Pipeline { get; set; }
+        public string? WireName { get; init; }
         public abstract string ResolveRoutingKey(object message);
+    }
+    public sealed class PublishRouteBuilder
+    {
+        public PublishRouteBuilder() { }
+        public EasyNetQ.Configuration.PublishRouteBuilder WireName(string wireName) { }
     }
     public sealed class PublishRouteTable
     {
@@ -735,6 +743,8 @@ namespace EasyNetQ.Configuration
         public System.Collections.Generic.IReadOnlyDictionary<System.Type, EasyNetQ.Configuration.PublishRoute> Routes { get; }
         public EasyNetQ.Configuration.PublishRouteTable Add<T>(EasyNetQ.Configuration.PublishDefinition definition, System.Func<T, string> routingKeyResolver) { }
         public EasyNetQ.Configuration.PublishRouteTable Add<T>(EasyNetQ.Configuration.PublishDefinition definition, string? routingKey) { }
+        public EasyNetQ.Configuration.PublishRouteTable Add<T>(EasyNetQ.Configuration.PublishDefinition definition, System.Func<T, string> routingKeyResolver, string? wireName) { }
+        public EasyNetQ.Configuration.PublishRouteTable Add<T>(EasyNetQ.Configuration.PublishDefinition definition, string? routingKey, string? wireName) { }
     }
     public sealed class PublishRoute<T> : EasyNetQ.Configuration.PublishRoute
     {

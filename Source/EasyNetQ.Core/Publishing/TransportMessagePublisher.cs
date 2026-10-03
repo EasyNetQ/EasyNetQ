@@ -84,6 +84,8 @@ public sealed class TransportMessagePublisher : IMessagePublisher, IAsyncDisposa
             context.PublisherConfirms = route.Definition.PublisherConfirms ?? busOptions.PublisherConfirms;
             context.MessageType = route.Descriptor;
             context.Message = message;
+            if (route.WireName is { } wireName)
+                context.Properties = context.Properties with { Type = wireName };
 
             using var cts = cancellationToken.WithTimeout(busOptions.Timeout);
             context.CancellationToken = cts.Token;

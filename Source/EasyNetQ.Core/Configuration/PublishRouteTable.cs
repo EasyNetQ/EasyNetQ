@@ -19,6 +19,12 @@ public abstract class PublishRoute
     /// <summary>The publish definition this route belongs to</summary>
     public PublishDefinition Definition { get; }
 
+    /// <summary>
+    ///     The wire type name stamped on this route's messages; null uses the descriptor's
+    ///     <see cref="MessageTypeDescriptor.WireName" />
+    /// </summary>
+    public string? WireName { get; init; }
+
     /// <summary>The pipeline for this route's definition, built by the publisher</summary>
     public PipelineStep<PublishContext>? Pipeline { get; set; }
 
@@ -69,13 +75,27 @@ public sealed class PublishRouteTable
     ///     Routes <typeparamref name="T" /> through <paramref name="definition" /> with a fixed routing key
     /// </summary>
     public PublishRouteTable Add<T>(PublishDefinition definition, string? routingKey)
-        => Add(typeof(T), new PublishRoute<T>(registry.GetOrAdd<T>(), definition, routingKey, null));
+        => Add<T>(definition, routingKey, (string?)null);
+
+    /// <summary>
+    ///     Routes <typeparamref name="T" /> through <paramref name="definition" /> with a fixed routing key and a
+    ///     route-specific wire name (null uses the type's)
+    /// </summary>
+    public PublishRouteTable Add<T>(PublishDefinition definition, string? routingKey, string? wireName)
+        => Add(typeof(T), new PublishRoute<T>(registry.GetOrAdd<T>(), definition, routingKey, null) { WireName = wireName });
 
     /// <summary>
     ///     Routes <typeparamref name="T" /> through <paramref name="definition" /> with a per-message routing key
     /// </summary>
     public PublishRouteTable Add<T>(PublishDefinition definition, Func<T, string> routingKeyResolver)
-        => Add(typeof(T), new PublishRoute<T>(registry.GetOrAdd<T>(), definition, null, routingKeyResolver));
+        => Add(definition, routingKeyResolver, null);
+
+    /// <summary>
+    ///     Routes <typeparamref name="T" /> through <paramref name="definition" /> with a per-message routing key and
+    ///     a route-specific wire name (null uses the type's)
+    /// </summary>
+    public PublishRouteTable Add<T>(PublishDefinition definition, Func<T, string> routingKeyResolver, string? wireName)
+        => Add(typeof(T), new PublishRoute<T>(registry.GetOrAdd<T>(), definition, null, routingKeyResolver) { WireName = wireName });
 
     private PublishRouteTable Add(Type type, PublishRoute route)
     {
