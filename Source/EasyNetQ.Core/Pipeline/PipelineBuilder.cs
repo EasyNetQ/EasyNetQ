@@ -92,6 +92,69 @@ public sealed class PipelineBuilder<TContext> where TContext : LayerContext
     }
 
     /// <summary>
+    ///     Replaces the middleware registered as <typeparamref name="TMarker" /> with a
+    ///     <typeparamref name="TMiddleware" /> resolved from the service provider at build time
+    /// </summary>
+    public PipelineBuilder<TContext> Replace<TMarker, TMiddleware>()
+        where TMarker : IMiddleware<TContext>
+        where TMiddleware : class, IMiddleware<TContext>
+        => Replace<TMarker, TMiddleware>(static services => services.GetRequiredService<TMiddleware>());
+
+    /// <summary>
+    ///     Replaces the middleware registered as <typeparamref name="TMarker" /> with one created by
+    ///     <paramref name="factory" /> at build time
+    /// </summary>
+    public PipelineBuilder<TContext> Replace<TMarker, TMiddleware>(Func<IServiceProvider, TMiddleware> factory)
+        where TMarker : IMiddleware<TContext>
+        where TMiddleware : class, IMiddleware<TContext>
+    {
+        registrations[IndexOf(typeof(TMarker))] = new Registration(typeof(TMiddleware), typeof(TMiddleware).Name, factory);
+        return this;
+    }
+
+    /// <summary>
+    ///     Inserts a <typeparamref name="TMiddleware" /> resolved from the service provider before the middleware
+    ///     registered as <typeparamref name="TMarker" />
+    /// </summary>
+    public PipelineBuilder<TContext> InsertBefore<TMarker, TMiddleware>()
+        where TMarker : IMiddleware<TContext>
+        where TMiddleware : class, IMiddleware<TContext>
+        => InsertBefore<TMarker, TMiddleware>(static services => services.GetRequiredService<TMiddleware>());
+
+    /// <summary>
+    ///     Inserts a middleware created by <paramref name="factory" /> before the one registered as
+    ///     <typeparamref name="TMarker" />
+    /// </summary>
+    public PipelineBuilder<TContext> InsertBefore<TMarker, TMiddleware>(Func<IServiceProvider, TMiddleware> factory)
+        where TMarker : IMiddleware<TContext>
+        where TMiddleware : class, IMiddleware<TContext>
+    {
+        registrations.Insert(IndexOf(typeof(TMarker)), new Registration(typeof(TMiddleware), typeof(TMiddleware).Name, factory));
+        return this;
+    }
+
+    /// <summary>
+    ///     Inserts a <typeparamref name="TMiddleware" /> resolved from the service provider after the middleware
+    ///     registered as <typeparamref name="TMarker" />
+    /// </summary>
+    public PipelineBuilder<TContext> InsertAfter<TMarker, TMiddleware>()
+        where TMarker : IMiddleware<TContext>
+        where TMiddleware : class, IMiddleware<TContext>
+        => InsertAfter<TMarker, TMiddleware>(static services => services.GetRequiredService<TMiddleware>());
+
+    /// <summary>
+    ///     Inserts a middleware created by <paramref name="factory" /> after the one registered as
+    ///     <typeparamref name="TMarker" />
+    /// </summary>
+    public PipelineBuilder<TContext> InsertAfter<TMarker, TMiddleware>(Func<IServiceProvider, TMiddleware> factory)
+        where TMarker : IMiddleware<TContext>
+        where TMiddleware : class, IMiddleware<TContext>
+    {
+        registrations.Insert(IndexOf(typeof(TMarker)) + 1, new Registration(typeof(TMiddleware), typeof(TMiddleware).Name, factory));
+        return this;
+    }
+
+    /// <summary>
     ///     Removes the middleware registered as <typeparamref name="TMarker" />
     /// </summary>
     public PipelineBuilder<TContext> Remove<TMarker>() where TMarker : IMiddleware<TContext>

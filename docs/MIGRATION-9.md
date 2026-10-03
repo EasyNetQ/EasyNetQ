@@ -106,3 +106,11 @@ signatures and internals do not.
 
 - `ActivitySource`/`Meter` named `EasyNetQ`; enable with `AddSource("EasyNetQ")` + `AddMeter("EasyNetQ")` and
   keep the client's `RabbitMQ.Client.*` sources on for wire spans.
+
+## Dogfooding fixes (additive unless noted)
+
+Gaps found running v9 in production consumers, fixed in the library rather than worked around in apps.
+
+- Pipeline steps resolvable from DI: `Replace<TMarker, TMiddleware>()`, `InsertBefore<TMarker, TMiddleware>()`
+  and `InsertAfter<TMarker, TMiddleware>()` resolve the step from the service provider at build time; the
+  `Func<IServiceProvider, TMiddleware>` overloads take a factory. The step is then addressable by its own type.

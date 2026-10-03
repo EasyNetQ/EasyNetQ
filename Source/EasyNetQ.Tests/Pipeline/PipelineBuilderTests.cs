@@ -92,6 +92,42 @@ public class PipelineBuilderTests
         context.Get(Trace).Should().Equal("a:before", "x:before", "y:before", "y:after", "x:after", "a:after");
     }
 
+    private sealed class Labelled : IMiddleware<ConsumeContext>
+    {
+        private readonly string label;
+        public Labelled(Label label) => this.label = label.Value;
+
+        public ValueTask InvokeAsync(ConsumeContext context, PipelineStep<ConsumeContext> next)
+        {
+            context.Get(Trace).Add(label);
+            return next(context);
+        }
+    }
+
+    private sealed record Label(string Value);
+
+    [Fact]
+    public async Task Should_resolve_replacements_and_insertions_from_the_service_provider()
+    {
+        var services = new ServiceCollection()
+            .AddSingleton(new Label("di"))
+            .AddSingleton<Labelled>()
+            .BuildServiceProvider();
+        var builder = new PipelineBuilder<ConsumeContext>().Use(new A()).Use(new B());
+
+        builder.Replace<A, Labelled>()
+            .InsertBefore<Labelled, Step>(_ => new Step("before"))
+            .InsertAfter<B, Step>(_ => new Step("after"));
+
+        builder.Steps.Should().Equal("Step", "Labelled", "B", "Step");
+        builder.Contains<Labelled>().Should().BeTrue();
+        builder.Contains<A>().Should().BeFalse();
+
+        var context = NewContext();
+        await builder.Build(services)(context);
+        context.Get(Trace).Should().Equal("before:before", "di", "B", "after:before", "after:after", "before:after");
+    }
+
     [Fact]
     public void Should_throw_for_unknown_markers()
     {

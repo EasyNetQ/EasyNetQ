@@ -1155,14 +1155,32 @@ namespace EasyNetQ.Pipeline
             where TMarker : EasyNetQ.Pipeline.IMiddleware<TContext> { }
         public EasyNetQ.Pipeline.PipelineBuilder<TContext> InsertAfter<TMarker>(EasyNetQ.Pipeline.IMiddleware<TContext> middleware)
             where TMarker : EasyNetQ.Pipeline.IMiddleware<TContext> { }
+        public EasyNetQ.Pipeline.PipelineBuilder<TContext> InsertAfter<TMarker, TMiddleware>()
+            where TMarker : EasyNetQ.Pipeline.IMiddleware<TContext>
+            where TMiddleware :  class, EasyNetQ.Pipeline.IMiddleware<TContext> { }
+        public EasyNetQ.Pipeline.PipelineBuilder<TContext> InsertAfter<TMarker, TMiddleware>(System.Func<System.IServiceProvider, TMiddleware> factory)
+            where TMarker : EasyNetQ.Pipeline.IMiddleware<TContext>
+            where TMiddleware :  class, EasyNetQ.Pipeline.IMiddleware<TContext> { }
         public EasyNetQ.Pipeline.PipelineBuilder<TContext> InsertBefore<TMarker>(EasyNetQ.Pipeline.IMiddleware<TContext> middleware)
             where TMarker : EasyNetQ.Pipeline.IMiddleware<TContext> { }
+        public EasyNetQ.Pipeline.PipelineBuilder<TContext> InsertBefore<TMarker, TMiddleware>()
+            where TMarker : EasyNetQ.Pipeline.IMiddleware<TContext>
+            where TMiddleware :  class, EasyNetQ.Pipeline.IMiddleware<TContext> { }
+        public EasyNetQ.Pipeline.PipelineBuilder<TContext> InsertBefore<TMarker, TMiddleware>(System.Func<System.IServiceProvider, TMiddleware> factory)
+            where TMarker : EasyNetQ.Pipeline.IMiddleware<TContext>
+            where TMiddleware :  class, EasyNetQ.Pipeline.IMiddleware<TContext> { }
         public EasyNetQ.Pipeline.PipelineBuilder<TContext> Prepend(EasyNetQ.Pipeline.IMiddleware<TContext> middleware, string? name = null) { }
         public EasyNetQ.Pipeline.PipelineBuilder<TContext> Remove(string name) { }
         public EasyNetQ.Pipeline.PipelineBuilder<TContext> Remove<TMarker>()
             where TMarker : EasyNetQ.Pipeline.IMiddleware<TContext> { }
         public EasyNetQ.Pipeline.PipelineBuilder<TContext> Replace<TMarker>(EasyNetQ.Pipeline.IMiddleware<TContext> replacement)
             where TMarker : EasyNetQ.Pipeline.IMiddleware<TContext> { }
+        public EasyNetQ.Pipeline.PipelineBuilder<TContext> Replace<TMarker, TMiddleware>()
+            where TMarker : EasyNetQ.Pipeline.IMiddleware<TContext>
+            where TMiddleware :  class, EasyNetQ.Pipeline.IMiddleware<TContext> { }
+        public EasyNetQ.Pipeline.PipelineBuilder<TContext> Replace<TMarker, TMiddleware>(System.Func<System.IServiceProvider, TMiddleware> factory)
+            where TMarker : EasyNetQ.Pipeline.IMiddleware<TContext>
+            where TMiddleware :  class, EasyNetQ.Pipeline.IMiddleware<TContext> { }
         public EasyNetQ.Pipeline.PipelineBuilder<TContext> Use(EasyNetQ.Pipeline.IMiddleware<TContext> middleware, string? name = null) { }
         public EasyNetQ.Pipeline.PipelineBuilder<TContext> Use(string name, System.Func<TContext, EasyNetQ.Pipeline.PipelineStep<TContext>, System.Threading.Tasks.ValueTask> step) { }
         public EasyNetQ.Pipeline.PipelineBuilder<TContext> Use<TMiddleware>()
