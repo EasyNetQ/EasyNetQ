@@ -1,3 +1,4 @@
+using EasyNetQ.Hosting;
 using EasyNetQ.Configuration;
 using EasyNetQ.Transport;
 using EasyNetQ.Transport.InMemory;
@@ -33,6 +34,7 @@ public class PublishRouteWireNameTests
         await using var provider = services.BuildServiceProvider();
         var host = provider.GetServices<IHostedService>().Single();
         await host.StartAsync(TestContext.Current.CancellationToken);
+        await provider.GetRequiredService<IConsumerHostStatus>().WaitForStartedAsync(TestContext.Current.CancellationToken);
 
         await provider.GetRequiredService<IMessagePublisher>().PublishAsync(new OrderShipped(3), TestContext.Current.CancellationToken);
 

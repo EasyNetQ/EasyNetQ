@@ -1,3 +1,4 @@
+using EasyNetQ.Hosting;
 using EasyNetQ.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -28,6 +29,7 @@ public class FluentBuilderTests
 
         var hostedService = mockBuilder.ServiceProvider.GetServices<IHostedService>().Single();
         await hostedService.StartAsync(TestContext.Current.CancellationToken);
+        await mockBuilder.ServiceProvider.GetRequiredService<IConsumerHostStatus>().WaitForStartedAsync(TestContext.Current.CancellationToken);
 
         var calls = mockBuilder.Channels.SelectMany(c => c.ReceivedCalls()).ToList();
 

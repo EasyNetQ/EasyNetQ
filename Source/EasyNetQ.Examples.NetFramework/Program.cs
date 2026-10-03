@@ -1,3 +1,4 @@
+using EasyNetQ.Hosting;
 using EasyNetQ;
 using EasyNetQ.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -42,6 +43,7 @@ public static class Program
         {
             foreach (var hostedService in provider.GetServices<IHostedService>())
                 await hostedService.StartAsync(CancellationToken.None);
+            await provider.GetRequiredService<IConsumerHostStatus>().WaitForStartedAsync();
 
             var publisher = provider.GetRequiredService<IMessagePublisher>();
             await publisher.PublishAsync(new Ping { Id = Guid.NewGuid() });

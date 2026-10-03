@@ -1,3 +1,4 @@
+using EasyNetQ.Hosting;
 using System.Collections.Concurrent;
 using EasyNetQ.Configuration;
 using EasyNetQ.Pipeline;
@@ -33,6 +34,7 @@ public class LifecycleTests
         await using var provider = services.BuildServiceProvider();
         var hostedService = provider.GetServices<IHostedService>().Single();
         await hostedService.StartAsync(TestContext.Current.CancellationToken);
+        await provider.GetRequiredService<IConsumerHostStatus>().WaitForStartedAsync(TestContext.Current.CancellationToken);
         await hostedService.StopAsync(TestContext.Current.CancellationToken);
 
         events.Should().ContainInOrder(
@@ -58,6 +60,7 @@ public class LifecycleTests
 
         var hostedService = provider.GetServices<IHostedService>().Single();
         await hostedService.StartAsync(TestContext.Current.CancellationToken);
+        await provider.GetRequiredService<IConsumerHostStatus>().WaitForStartedAsync(TestContext.Current.CancellationToken);
         await hostedService.StopAsync(TestContext.Current.CancellationToken);
     }
 }

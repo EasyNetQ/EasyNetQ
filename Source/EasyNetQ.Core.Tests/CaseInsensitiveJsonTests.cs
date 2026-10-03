@@ -1,3 +1,4 @@
+using EasyNetQ.Hosting;
 using System.Buffers;
 using System.Text;
 using System.Text.Json;
@@ -74,6 +75,7 @@ public class CaseInsensitiveJsonTests
         await using var provider = services.BuildServiceProvider();
         var host = provider.GetServices<IHostedService>().Single();
         await host.StartAsync(TestContext.Current.CancellationToken);
+        await provider.GetRequiredService<IConsumerHostStatus>().WaitForStartedAsync(TestContext.Current.CancellationToken);
 
         await WireNameTests.PublishRawAsync(transport, provider, "", "q", null, new LocalEvent(3, "x"));
 

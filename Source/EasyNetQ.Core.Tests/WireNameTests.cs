@@ -1,3 +1,4 @@
+using EasyNetQ.Hosting;
 using System.Text.Json;
 using EasyNetQ.Configuration;
 using EasyNetQ.Pipeline;
@@ -80,6 +81,7 @@ public class WireNameTests
         await using var provider = services.BuildServiceProvider();
         var host = provider.GetServices<IHostedService>().Single();
         await host.StartAsync(TestContext.Current.CancellationToken);
+        await provider.GetRequiredService<IConsumerHostStatus>().WaitForStartedAsync(TestContext.Current.CancellationToken);
 
         await provider.GetRequiredService<IMessagePublisher>().PublishAsync(new OrderPlaced(1, "socks"), TestContext.Current.CancellationToken);
         var published = await received.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);

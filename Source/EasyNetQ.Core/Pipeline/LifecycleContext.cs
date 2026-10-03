@@ -47,6 +47,9 @@ public readonly record struct LifecycleEvent(string Name)
     /// <summary>A consumer stopped consuming</summary>
     public static readonly LifecycleEvent Stopped = new("Stopped");
 
+    /// <summary>A consumer failed to start (broker unreachable, topology missing, ...); the host retries it</summary>
+    public static readonly LifecycleEvent StartFailed = new("StartFailed");
+
     /// <inheritdoc />
     public override string ToString() => Name;
 }

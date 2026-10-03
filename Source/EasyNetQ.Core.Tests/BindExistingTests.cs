@@ -1,3 +1,4 @@
+using EasyNetQ.Hosting;
 using EasyNetQ.Configuration;
 using EasyNetQ.Transport;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,6 +30,7 @@ public class BindExistingTests
         await using var provider = services.BuildServiceProvider();
         var host = provider.GetServices<IHostedService>().Single();
         await host.StartAsync(TestContext.Current.CancellationToken);
+        await provider.GetRequiredService<IConsumerHostStatus>().WaitForStartedAsync(TestContext.Current.CancellationToken);
 
         await WireNameTests.PublishRawAsync(transport.Inner, provider, "nextcloud.events", "file.deleted", null, new FileEvent(42));
 

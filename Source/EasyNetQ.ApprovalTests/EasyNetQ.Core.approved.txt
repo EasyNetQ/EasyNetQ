@@ -680,6 +680,7 @@ namespace EasyNetQ.Configuration
     public static class EasyNetQBuilderConsumeExtensions
     {
         public static EasyNetQ.IEasyNetQBuilder Consume(this EasyNetQ.IEasyNetQBuilder builder, System.Action<EasyNetQ.Configuration.GenericConsumerBuilder> configure) { }
+        public static EasyNetQ.IEasyNetQBuilder ConsumerHost(this EasyNetQ.IEasyNetQBuilder builder, System.Action<EasyNetQ.Hosting.ConsumerHostOptions> configure) { }
         public static EasyNetQ.IEasyNetQBuilder RegisterConsumer<TBuilder>(this EasyNetQ.IEasyNetQBuilder builder, TBuilder consumerBuilder, System.Action<TBuilder> configure)
             where TBuilder : EasyNetQ.Configuration.ConsumerBuilder<TBuilder> { }
     }
@@ -889,11 +890,33 @@ namespace EasyNetQ.Events
 }
 namespace EasyNetQ.Hosting
 {
+    public sealed class ConsumerHostOptions
+    {
+        public ConsumerHostOptions() { }
+        public System.TimeSpan MaxRetryDelay { get; set; }
+        public System.TimeSpan RetryDelay { get; set; }
+        public bool WaitForStartup { get; set; }
+    }
+    public sealed class ConsumerHostStatus : EasyNetQ.Hosting.IConsumerHostStatus
+    {
+        public ConsumerHostStatus() { }
+        public bool IsStarted { get; }
+        public System.Exception? LastError { get; }
+        public int PendingConsumers { get; }
+        public System.Threading.Tasks.Task WaitForStartedAsync(System.Threading.CancellationToken cancellationToken = default) { }
+    }
     public sealed class ConsumerHostedService : Microsoft.Extensions.Hosting.IHostedService
     {
-        public ConsumerHostedService(System.Collections.Generic.IEnumerable<EasyNetQ.Configuration.ConsumerDefinition> definitions, EasyNetQ.Transport.ITransport transport, System.IServiceProvider services, EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> consumePipelineBuilder, EasyNetQ.IMessageSerializer messageSerializer, EasyNetQ.IMessageTypeRegistry registry) { }
+        public ConsumerHostedService(System.Collections.Generic.IEnumerable<EasyNetQ.Configuration.ConsumerDefinition> definitions, EasyNetQ.Transport.ITransport transport, System.IServiceProvider services, EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.ConsumeContext> consumePipelineBuilder, EasyNetQ.IMessageSerializer messageSerializer, EasyNetQ.IMessageTypeRegistry registry, EasyNetQ.Hosting.ConsumerHostOptions options, EasyNetQ.Hosting.ConsumerHostStatus status, Microsoft.Extensions.Logging.ILogger<EasyNetQ.Hosting.ConsumerHostedService> logger) { }
         public System.Threading.Tasks.Task StartAsync(System.Threading.CancellationToken cancellationToken) { }
         public System.Threading.Tasks.Task StopAsync(System.Threading.CancellationToken cancellationToken) { }
+    }
+    public interface IConsumerHostStatus
+    {
+        bool IsStarted { get; }
+        System.Exception? LastError { get; }
+        int PendingConsumers { get; }
+        System.Threading.Tasks.Task WaitForStartedAsync(System.Threading.CancellationToken cancellationToken = default);
     }
 }
 namespace EasyNetQ.Interception
@@ -1165,6 +1188,7 @@ namespace EasyNetQ.Pipeline
         public static readonly EasyNetQ.Pipeline.LifecycleEvent Disconnected;
         public static readonly EasyNetQ.Pipeline.LifecycleEvent Recovered;
         public static readonly EasyNetQ.Pipeline.LifecycleEvent RecoveryError;
+        public static readonly EasyNetQ.Pipeline.LifecycleEvent StartFailed;
         public static readonly EasyNetQ.Pipeline.LifecycleEvent Started;
         public static readonly EasyNetQ.Pipeline.LifecycleEvent Stopped;
         public static readonly EasyNetQ.Pipeline.LifecycleEvent Unblocked;

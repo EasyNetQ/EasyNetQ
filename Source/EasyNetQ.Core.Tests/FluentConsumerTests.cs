@@ -1,3 +1,4 @@
+using EasyNetQ.Hosting;
 using System.Text;
 using System.Text.Json;
 using EasyNetQ.Configuration;
@@ -37,6 +38,7 @@ public class FluentConsumerTests
         var hostedServices = provider.GetServices<IHostedService>().ToList();
         hostedServices.Should().ContainSingle();
         await hostedServices[0].StartAsync(TestContext.Current.CancellationToken);
+        await provider.GetRequiredService<IConsumerHostStatus>().WaitForStartedAsync(TestContext.Current.CancellationToken);
 
         // publish straight through the transport, the way a remote producer would
         var registry = provider.GetRequiredService<IMessageTypeRegistry>();
@@ -87,6 +89,7 @@ public class FluentConsumerTests
         await using var provider = services.BuildServiceProvider();
         var hostedService = provider.GetServices<IHostedService>().Single();
         await hostedService.StartAsync(TestContext.Current.CancellationToken);
+        await provider.GetRequiredService<IConsumerHostStatus>().WaitForStartedAsync(TestContext.Current.CancellationToken);
 
         var registry = provider.GetRequiredService<IMessageTypeRegistry>();
         var connectionContext = new ConnectionContext("producer", provider);

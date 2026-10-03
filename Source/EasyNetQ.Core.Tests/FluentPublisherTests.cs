@@ -1,3 +1,4 @@
+using EasyNetQ.Hosting;
 using EasyNetQ.Configuration;
 using EasyNetQ.Pipeline;
 using EasyNetQ.Transport;
@@ -44,6 +45,7 @@ public class FluentPublisherTests
         await using var provider = services.BuildServiceProvider();
         var hostedService = provider.GetServices<IHostedService>().Single();
         await hostedService.StartAsync(TestContext.Current.CancellationToken);
+        await provider.GetRequiredService<IConsumerHostStatus>().WaitForStartedAsync(TestContext.Current.CancellationToken);
 
         var publisher = provider.GetRequiredService<IMessagePublisher>();
         await publisher.PublishAsync(new OrderPlaced(7, "socks"), TestContext.Current.CancellationToken);
@@ -79,6 +81,7 @@ public class FluentPublisherTests
         await using var provider = services.BuildServiceProvider();
         var hostedService = provider.GetServices<IHostedService>().Single();
         await hostedService.StartAsync(TestContext.Current.CancellationToken);
+        await provider.GetRequiredService<IConsumerHostStatus>().WaitForStartedAsync(TestContext.Current.CancellationToken);
 
         var publisher = provider.GetRequiredService<IMessagePublisher>();
         // routed away: no binding matches order.shoes
@@ -153,6 +156,7 @@ public class FluentPublisherTests
         await using var provider = services.BuildServiceProvider();
         var hostedService = provider.GetServices<IHostedService>().Single();
         await hostedService.StartAsync(TestContext.Current.CancellationToken);
+        await provider.GetRequiredService<IConsumerHostStatus>().WaitForStartedAsync(TestContext.Current.CancellationToken);
 
         var publisher = provider.GetRequiredService<IMessagePublisher>();
         await publisher.PublishAsync(new OrderPlaced(7, "socks"), TestContext.Current.CancellationToken);

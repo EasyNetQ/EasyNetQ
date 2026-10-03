@@ -1,3 +1,4 @@
+using EasyNetQ.Hosting;
 using System.Text;
 using EasyNetQ.Configuration;
 using EasyNetQ.Consumer;
@@ -43,6 +44,7 @@ public class UnknownMessageTests
         var provider = services.BuildServiceProvider();
         var host = provider.GetServices<IHostedService>().Single();
         await host.StartAsync(TestContext.Current.CancellationToken);
+        await provider.GetRequiredService<IConsumerHostStatus>().WaitForStartedAsync(TestContext.Current.CancellationToken);
         return (provider, transport, host);
     }
 

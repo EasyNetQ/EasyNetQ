@@ -1,3 +1,4 @@
+using EasyNetQ.Hosting;
 using EasyNetQ.Configuration;
 using EasyNetQ.IntegrationTests.Utils;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,6 +33,7 @@ public class When_consuming_via_fluent_builder(RabbitMQFixture rmqFixture)
         await using var provider = serviceCollection.BuildServiceProvider();
         var hostedService = provider.GetServices<IHostedService>().Single();
         await hostedService.StartAsync(TestContext.Current.CancellationToken);
+        await provider.GetRequiredService<IConsumerHostStatus>().WaitForStartedAsync(TestContext.Current.CancellationToken);
         try
         {
             var bus = provider.GetRequiredService<IBus>();
@@ -77,6 +79,7 @@ public class When_consuming_via_fluent_builder(RabbitMQFixture rmqFixture)
         await using var provider = serviceCollection.BuildServiceProvider();
         var hostedService = provider.GetServices<IHostedService>().Single();
         await hostedService.StartAsync(TestContext.Current.CancellationToken);
+        await provider.GetRequiredService<IConsumerHostStatus>().WaitForStartedAsync(TestContext.Current.CancellationToken);
         try
         {
             var publisher = provider.GetRequiredService<IMessagePublisher>();

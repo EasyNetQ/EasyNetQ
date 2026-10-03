@@ -25,7 +25,28 @@ public static class EasyNetQBuilderConsumeExtensions
     {
         configure(consumerBuilder);
         builder.Services.AddSingleton(consumerBuilder.Definition);
+        HostOptions(builder.Services);
+        builder.Services.TryAddSingleton<ConsumerHostStatus>();
+        builder.Services.TryAddSingleton<IConsumerHostStatus>(sp => sp.GetRequiredService<ConsumerHostStatus>());
         builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, ConsumerHostedService>());
         return builder;
+    }
+
+    /// <summary>
+    ///     Configures how the consumer host starts the consumers (background start with retries by default)
+    /// </summary>
+    public static IEasyNetQBuilder ConsumerHost(this IEasyNetQBuilder builder, Action<ConsumerHostOptions> configure)
+    {
+        configure(HostOptions(builder.Services));
+        return builder;
+    }
+
+    private static ConsumerHostOptions HostOptions(IServiceCollection services)
+    {
+        if (services.LastOrDefault(d => d.ServiceType == typeof(ConsumerHostOptions))?.ImplementationInstance is ConsumerHostOptions existing)
+            return existing;
+        var options = new ConsumerHostOptions();
+        services.AddSingleton(options);
+        return options;
     }
 }

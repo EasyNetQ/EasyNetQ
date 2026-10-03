@@ -136,3 +136,11 @@ Gaps found running v9 in production consumers, fixed in the library rather than 
 - Per-consumer serializer: `Consume(c => c.Serializer(serializer))`.
 - `BindExisting(exchange, routingKey)` binds to an exchange another application owns without declaring it
   (`Bind` declares, as before), like `ExistingQueue`/`ExistingExchange`.
+- **Behavior change:** fluent consumers start in the background. `ConsumerHostedService.StartAsync` returns at once
+  and each consumer retries with backoff until it runs, so a broker outage no longer keeps the host (and Kestrel)
+  from starting, and a missing exchange (404 on bind, e.g. one another app's operator declares later) no longer
+  crashes it. `IConsumerHostStatus` (`IsStarted`, `PendingConsumers`, `LastError`, `WaitForStartedAsync`) serves
+  readiness checks and tests; failures also raise `LifecycleEvent.StartFailed`. Restore blocking startup with
+  `ConsumerHost(o => o.WaitForStartup = true)`; `RetryDelay`/`MaxRetryDelay` tune the backoff. Code that publishes
+  right after `StartAsync` should await `WaitForStartedAsync` first.
+- `ConsumerHostedService` constructor takes `ConsumerHostOptions`, `ConsumerHostStatus` and a logger (DI-built).

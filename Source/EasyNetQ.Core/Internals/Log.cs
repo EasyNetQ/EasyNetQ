@@ -171,5 +171,14 @@ internal static partial class Log
     [LoggerMessage(701, LogLevel.Error, "Failed to handle {Event}")]
     public static partial void FailedToHandleEvent(this ILogger logger, Exception exception, string? @event);
 
+    [LoggerMessage(702, LogLevel.Warning, "Consumer of queue {Queue} failed to start, retrying in {RetryDelay}")]
+    public static partial void ConsumerStartFailed(this ILogger logger, Exception exception, string queue, TimeSpan retryDelay);
+
+    [LoggerMessage(703, LogLevel.Warning, "Consumer host could not open a channel, retrying in {RetryDelay}")]
+    public static partial void ConsumerHostConnectFailed(this ILogger logger, Exception exception, TimeSpan retryDelay);
+
+    [LoggerMessage(704, LogLevel.Information, "All {Count} consumers started")]
+    public static partial void ConsumersStarted(this ILogger logger, int count);
+
     #endregion
 }
