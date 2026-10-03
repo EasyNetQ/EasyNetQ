@@ -196,6 +196,7 @@ namespace EasyNetQ
         public System.Collections.Generic.IReadOnlyCollection<EasyNetQ.HandlerEntry> Entries { get; }
         public bool ThrowOnNoMatchingHandler { get; set; }
         public EasyNetQ.HandlerTable Add<T>(EasyNetQ.MessageHandler<T> handler) { }
+        public EasyNetQ.HandlerTable DefaultMessageType<T>() { }
         public EasyNetQ.HandlerTable HandleUnknown(EasyNetQ.MessageHandler<System.ReadOnlyMemory<byte>> handler) { }
         public EasyNetQ.HandlerEntry Resolve(EasyNetQ.MessageTypeDescriptor descriptor) { }
         public EasyNetQ.MessageTypeDescriptor ResolveDescriptor(string? wireName) { }
@@ -652,6 +653,7 @@ namespace EasyNetQ.Configuration
         public EasyNetQ.Configuration.ConsumerDefinition Definition { get; }
         public TSelf AutoAck() { }
         public TSelf Bind(string exchange, string routingKey) { }
+        public TSelf DefaultMessageType<T>() { }
         public TSelf ExistingQueue(string name) { }
         public TSelf Handle<T>(EasyNetQ.MessageHandler<T> handler) { }
         public TSelf Handle<T>(System.Func<T, System.Threading.CancellationToken, System.Threading.Tasks.Task> handler) { }

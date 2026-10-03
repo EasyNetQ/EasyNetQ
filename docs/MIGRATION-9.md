@@ -126,3 +126,6 @@ Gaps found running v9 in production consumers, fixed in the library rather than 
   `context.Properties.Type` carrying the incoming name; the body is not deserialized. Without it such messages fail
   with `UnknownMessageTypeException` (a subclass of `EasyNetQException`, previously a plain `EasyNetQException`
   thrown before handler matching), logged once per queue and type name.
+- Messages without a `type` property (plain AMQP clients, shovels, non-.NET peers) dispatch to the consumer's only
+  handler, or to `DefaultMessageType<T>()` when it has several; otherwise `HandleUnknown` or
+  `UnknownMessageTypeException` as above.

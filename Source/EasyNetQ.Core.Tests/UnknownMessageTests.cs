@@ -103,4 +103,61 @@ public class UnknownMessageTests
         await host.StopAsync(TestContext.Current.CancellationToken);
         await provider.DisposeAsync();
     }
+
+    [Fact]
+    public async Task Should_dispatch_an_untyped_message_to_the_only_handler()
+    {
+        var received = new TaskCompletionSource<OrderPlaced>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var (provider, transport, host) = await StartAsync(c => c
+            .Handle<OrderPlaced>((order, _) =>
+            {
+                received.TrySetResult(order);
+                return new ValueTask<AckDecision>(AckDecision.Ack);
+            }));
+
+        await WireNameTests.PublishRawAsync(transport, provider, "", "q", null, new OrderPlaced(5));
+
+        (await received.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken)).Should().Be(new OrderPlaced(5));
+        await host.StopAsync(TestContext.Current.CancellationToken);
+        await provider.DisposeAsync();
+    }
+
+    [Fact]
+    public async Task Should_dispatch_an_untyped_message_to_the_default_type()
+    {
+        var received = new TaskCompletionSource<OrderShipped>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var (provider, transport, host) = await StartAsync(c => c
+            .Handle<OrderPlaced>((_, _) => new ValueTask<AckDecision>(AckDecision.Ack))
+            .Handle<OrderShipped>((shipped, _) =>
+            {
+                received.TrySetResult(shipped);
+                return new ValueTask<AckDecision>(AckDecision.Ack);
+            })
+            .DefaultMessageType<OrderShipped>());
+
+        await WireNameTests.PublishRawAsync(transport, provider, "", "q", null, new OrderShipped(6));
+
+        (await received.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken)).Should().Be(new OrderShipped(6));
+        await host.StopAsync(TestContext.Current.CancellationToken);
+        await provider.DisposeAsync();
+    }
+
+    [Fact]
+    public async Task Should_fail_an_untyped_message_when_the_type_is_ambiguous()
+    {
+        var strategy = new CapturingErrorStrategy();
+        var (provider, transport, host) = await StartAsync(
+            c => c
+                .Handle<OrderPlaced>((_, _) => new ValueTask<AckDecision>(AckDecision.Ack))
+                .Handle<OrderShipped>((_, _) => new ValueTask<AckDecision>(AckDecision.Ack)),
+            strategy
+        );
+
+        await WireNameTests.PublishRawAsync(transport, provider, "", "q", null, new OrderShipped(6));
+
+        var error = await strategy.Error.Task.WaitAsync(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        error.Should().BeOfType<UnknownMessageTypeException>().Which.WireName.Should().BeNull();
+        await host.StopAsync(TestContext.Current.CancellationToken);
+        await provider.DisposeAsync();
+    }
 }

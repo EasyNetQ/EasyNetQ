@@ -106,6 +106,16 @@ public abstract class ConsumerBuilder<TSelf> where TSelf : ConsumerBuilder<TSelf
     }
 
     /// <summary>
+    ///     Dispatch messages without a type property as <typeparamref name="T" /> (needed only with more than one
+    ///     handler; a single handler is the default)
+    /// </summary>
+    public TSelf DefaultMessageType<T>()
+    {
+        Definition.HandlerRegistrations.Add((_, table) => table.DefaultMessageType<T>());
+        return Self;
+    }
+
+    /// <summary>
     ///     Customize the message pipeline (runs after the typed dispatch steps are registered, so
     ///     InsertBefore/InsertAfter can target them)
     /// </summary>

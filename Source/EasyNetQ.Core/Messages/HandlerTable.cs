@@ -80,6 +80,7 @@ public sealed class HandlerTable
     }
 
     private HandlerEntry? unknownEntry;
+    private MessageTypeDescriptor? defaultDescriptor;
 
     /// <summary>
     ///     Set to false to silently acknowledge messages no handler matches instead of failing them
@@ -97,6 +98,16 @@ public sealed class HandlerTable
         if (unknownEntry is not null)
             throw new EasyNetQException("There is already a handler for unknown messages");
         unknownEntry = new RawHandlerEntry(handler);
+        return this;
+    }
+
+    /// <summary>
+    ///     Dispatches messages without a type property as <typeparamref name="T" />. With exactly one handler that
+    ///     handler's type is the default already.
+    /// </summary>
+    public HandlerTable DefaultMessageType<T>()
+    {
+        defaultDescriptor = registry.GetOrAdd<T>();
         return this;
     }
 
@@ -126,8 +137,17 @@ public sealed class HandlerTable
     public MessageTypeDescriptor ResolveDescriptor(string? wireName)
     {
         if (string.IsNullOrEmpty(wireName))
+        {
+            if (defaultDescriptor is not null)
+                return defaultDescriptor;
+            if (byType.Count == 1)
+                return byType.Values.First().Descriptor;
             return unknownEntry?.Descriptor
-                ?? throw new UnknownMessageTypeException(null, "Received message has no type property; add HandleUnknown(...) to dispatch it");
+                ?? throw new UnknownMessageTypeException(
+                    null,
+                    "Received message has no type property; set DefaultMessageType<T>() or HandleUnknown(...) to dispatch it"
+                );
+        }
 
         if (registrationsByWireName.TryGetValue(wireName!, out var entry))
             return entry.Descriptor;
