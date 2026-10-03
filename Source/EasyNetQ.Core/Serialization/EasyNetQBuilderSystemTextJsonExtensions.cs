@@ -2,6 +2,7 @@ using EasyNetQ.Serialization.SystemTextJson;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 
 // ReSharper disable once CheckNamespace
 namespace EasyNetQ;
@@ -17,7 +18,7 @@ public static class EasyNetQBuilderSystemTextJsonExtensions
     public static IEasyNetQBuilder UseSystemTextJson(this IEasyNetQBuilder builder)
     {
         builder.Services.AddSingleton<IMessageSerializer>(sp => new SystemTextJsonMessageSerializer(
-            SystemTextJsonMessageSerializer.CreateDefaultOptions(), sp.GetServices<JsonConverter>()));
+            SystemTextJsonMessageSerializer.CreateDefaultResolver(sp.GetServices<JsonSerializerContext>()), sp.GetServices<JsonConverter>()));
         return builder;
     }
 
@@ -26,7 +27,17 @@ public static class EasyNetQBuilderSystemTextJsonExtensions
     /// </summary>
     public static IEasyNetQBuilder UseSystemTextJson(this IEasyNetQBuilder builder, JsonSerializerOptions options)
     {
-        builder.Services.AddSingleton<IMessageSerializer>(sp => new SystemTextJsonMessageSerializer(options, sp.GetServices<JsonConverter>()));
+        builder.Services.AddSingleton<IMessageSerializer>(sp =>
+        {
+            var contexts = sp.GetServices<JsonSerializerContext>();
+            var configured = new JsonSerializerOptions(options)
+            {
+                TypeInfoResolver = options.TypeInfoResolver is { } resolver
+                    ? JsonTypeInfoResolver.Combine([resolver, .. contexts])
+                    : SystemTextJsonMessageSerializer.CreateDefaultResolver(contexts),
+            };
+            return new SystemTextJsonMessageSerializer(configured, sp.GetServices<JsonConverter>());
+        });
         return builder;
     }
 
@@ -36,7 +47,8 @@ public static class EasyNetQBuilderSystemTextJsonExtensions
     /// </summary>
     public static IEasyNetQBuilder UseSystemTextJson(this IEasyNetQBuilder builder, JsonSerializerContext context)
     {
-        builder.Services.AddSingleton<IMessageSerializer>(sp => new SystemTextJsonMessageSerializer(context, sp.GetServices<JsonConverter>()));
+        builder.Services.AddSingleton<IMessageSerializer>(sp => new SystemTextJsonMessageSerializer(
+            JsonTypeInfoResolver.Combine([context, .. sp.GetServices<JsonSerializerContext>()]), sp.GetServices<JsonConverter>()));
         return builder;
     }
 

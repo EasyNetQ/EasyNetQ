@@ -1,4 +1,6 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
+using EasyNetQ.Internals;
 
 namespace EasyNetQ;
 
@@ -13,6 +15,19 @@ internal static class RuntimeDescriptorFactory
     private static readonly ConcurrentDictionary<Type, Func<string, MessageTypeDescriptor>> Factories = new();
 
     public static MessageTypeDescriptor Create(Type type, string wireName)
+    {
+#if NET
+        if (!System.Runtime.CompilerServices.RuntimeFeature.IsDynamicCodeSupported || !RuntimeReflection.IsSupported)
+#else
+        if (!RuntimeReflection.IsSupported)
+#endif
+            throw RuntimeReflection.Unavailable($"Describing unregistered message type {type.FullName}");
+        return CreateWithReflection(type, wireName);
+    }
+
+    [RequiresUnreferencedCode("Closes MessageTypeDescriptor<T> over a runtime type")]
+    [RequiresDynamicCode("Closes MessageTypeDescriptor<T> over a runtime type")]
+    private static MessageTypeDescriptor CreateWithReflection(Type type, string wireName)
     {
         var factory = Factories.GetOrAdd(type, static t =>
         {

@@ -153,3 +153,23 @@ Gaps found running v9 in production consumers, fixed in the library rather than 
   adds the project references (`EasyNetQSourcePackages`, default `EasyNetQ`), the source generator as an analyzer and
   the interceptors namespace. Source-referenced builds do not pack, and MinVer is skipped when the checkout has no
   `.git` (Docker build contexts).
+
+## Native AOT
+
+A default `AddEasyNetQ(...)` application publishes with **zero** trim/AOT warnings; CI fails on any
+(`EasyNetQ.Examples.Aot`, which also runs every fluent feature above against a broker). Core, RabbitMQ,
+InMemory and the bundle build with `IsAotCompatible` (net9.0+ assets).
+
+- The runtime-reflection fallbacks (loading a type from its wire name, describing an unregistered runtime type,
+  reflection-based JSON contracts) are guarded: unavailable under Native AOT (and with
+  `EasyNetQ.RuntimeReflection.IsSupported=false`), where they throw an `EasyNetQException` that names what to
+  register. Generated registrations, `MessageType<T>()` and source-generated JSON are the AOT path.
+- **AOT apps pass a `JsonSerializerContext`** (`UseSystemTextJson(context)`); the transport registers its own context
+  for the error-queue message, and the default resolver combines every registered context before falling back to
+  reflection where that works.
+- RabbitMQ's header and `MessageProperties` JSON no longer uses reflection (same wire format).
+- The 8.x-compatible reflection APIs in the `EasyNetQ` bundle are annotated `[RequiresUnreferencedCode]`
+  (and `[RequiresDynamicCode]` where they generate code): `AutoSubscriber.SubscribeAsync`, `UseLegacyTypeNaming`,
+  `UseLegacyConventions`, `UseAdvancedMessagePolymorphism`, `UseVersionedMessage`, `SystemTextJsonSerializer(V2)`,
+  `LegacyTypeNameSerializer`, the versioning/multiple-exchange strategies. Using them in an AOT app now warns at
+  the call site instead of failing at runtime.

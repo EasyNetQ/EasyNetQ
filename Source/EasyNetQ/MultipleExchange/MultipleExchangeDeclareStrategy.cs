@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using EasyNetQ.Internals;
 using EasyNetQ.Topology;
 
@@ -12,6 +13,7 @@ public class MultipleExchangeDeclareStrategy : IExchangeDeclareStrategy, IDispos
     private readonly AsyncCache<MessageTypeExchangeKey, Exchange> declaredMessageTypeExchanges;
     private bool disposed;
 
+    [RequiresUnreferencedCode(Compat.ReflectionApi)]
     public MultipleExchangeDeclareStrategy(IConventions conventions, IAdvancedBus advancedBus)
     {
         this.conventions = conventions;
@@ -27,6 +29,7 @@ public class MultipleExchangeDeclareStrategy : IExchangeDeclareStrategy, IDispos
     public Task<Exchange> DeclareExchangeAsync(Type messageType, string exchangeType, CancellationToken cancellationToken)
         => declaredMessageTypeExchanges.GetOrAddAsync(new MessageTypeExchangeKey(messageType, exchangeType), cancellationToken);
 
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = Compat.Annotated)]
     private async Task<Exchange> DeclareAndBindAsync(Type messageType, string exchangeType, CancellationToken cancellationToken)
     {
         var sourceExchangeName = conventions.ExchangeNamingConvention(messageType);

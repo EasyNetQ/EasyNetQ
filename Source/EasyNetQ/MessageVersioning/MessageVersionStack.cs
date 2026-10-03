@@ -1,3 +1,5 @@
+using EasyNetQ.Internals;
+using System.Diagnostics.CodeAnalysis;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Reflection;
@@ -12,6 +14,7 @@ public class MessageVersionStack : IEnumerable<Type>
 
     private readonly Stack<Type> messageVersions;
 
+    [RequiresUnreferencedCode(Compat.ReflectionApi)]
     public MessageVersionStack(Type messageType)
     {
         var chain = VersionChains.GetOrAdd(messageType, static t =>
@@ -74,6 +77,7 @@ public class MessageVersionStack : IEnumerable<Type>
         return types.Except(parentTypes).FirstOrDefault();
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = Compat.Annotated)]
     private static IEnumerable<Type> FindSupersedes(Type type)
     {
         return type

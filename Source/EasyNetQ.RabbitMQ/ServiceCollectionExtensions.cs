@@ -63,6 +63,7 @@ public static class ServiceCollectionExtensions
         // The transport's MessageProperties JSON converter (AMQP header values in the Error envelope); appended
         // to every SystemTextJsonMessageSerializer the DI container builds
         services.TryAddEnumerable(ServiceDescriptor.Singleton<System.Text.Json.Serialization.JsonConverter, Serialization.SystemTextJson.MessagePropertiesConverter>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<System.Text.Json.Serialization.JsonSerializerContext>(Serialization.SystemTextJson.RabbitMqJsonContext.Default));
         services.TryAddSingleton<AdvancedBusEventHandlers>(_ => new AdvancedBusEventHandlers());
         services.TryAddSingleton<IExchangeDeclareStrategy, DefaultExchangeDeclareStrategy>();
         services.TryAddSingleton<ConsumeErrorOptions>(_ => new ConsumeErrorOptions());

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using EasyNetQ.Internals;
 
 namespace EasyNetQ.MessageVersioning;
@@ -13,6 +14,7 @@ public class VersionedMessageSerializationStrategy : IMessageSerializationStrate
     /// <summary>
     ///     Creates VersionedMessageSerializationStrategy
     /// </summary>
+    [RequiresUnreferencedCode(Compat.ReflectionApi)]
     public VersionedMessageSerializationStrategy(
         ITypeNameSerializer typeNameSerializer,
         IMessageTypeRegistry registry,

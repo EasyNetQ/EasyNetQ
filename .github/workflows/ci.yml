@@ -76,7 +76,7 @@ jobs:
         dotnet test --configuration Release --no-build
 
   aot-smoke:
-    name: Native AOT smoke
+    name: Native AOT smoke (fails on any trim/AOT warning)
     if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -111,6 +111,11 @@ jobs:
           echo "| from EasyNetQ assemblies | $easynetq |"
         } >> "$GITHUB_STEP_SUMMARY"
         echo "IL warnings: total=$total easynetq=$easynetq"
+        # a default app (and every v9 feature the sample exercises) must publish clean under Native AOT
+        if [ "$total" -ne 0 ]; then
+          grep -E 'warning IL[23][0-9]{3}' aot-publish.log | sort -u
+          exit 1
+        fi
 
     - name: Upload publish log
       uses: actions/upload-artifact@v4

@@ -119,8 +119,8 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             .Build(services, PublishInternalAsync);
     }
     public bool IsConnected =>
-        (from PersistentConnectionType type in Enum.GetValues(typeof(PersistentConnectionType)) select GetConnection(type))
-        .All(connection => connection.Status.State == PersistentConnectionState.Connected);
+        GetConnection(PersistentConnectionType.Producer).Status.State == PersistentConnectionState.Connected
+        && GetConnection(PersistentConnectionType.Consumer).Status.State == PersistentConnectionState.Connected;
 
     /// <inheritdoc />
     public PersistentConnectionStatus GetConnectionStatus(PersistentConnectionType type)

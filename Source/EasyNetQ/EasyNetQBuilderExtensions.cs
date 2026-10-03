@@ -1,3 +1,5 @@
+using EasyNetQ.Internals;
+using System.Diagnostics.CodeAnalysis;
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
 using EasyNetQ.MessageVersioning;
@@ -25,6 +27,7 @@ public static class EasyNetQBuilderExtensions
         return builder;
     }
 
+    [RequiresUnreferencedCode(Compat.ReflectionApi)]
     public static IEasyNetQBuilder UseLegacyTypeNaming(this IEasyNetQBuilder builder)
     {
         builder.Services.AddSingleton<ITypeNameSerializer, LegacyTypeNameSerializer>();
@@ -37,6 +40,7 @@ public static class EasyNetQBuilderExtensions
         return builder;
     }
 
+    [RequiresUnreferencedCode(Compat.ReflectionApi)]
     public static IEasyNetQBuilder UseLegacyConventions(this IEasyNetQBuilder builder)
     {
         return builder
@@ -50,12 +54,15 @@ public static class EasyNetQBuilderExtensions
         return builder;
     }
 
+    [RequiresUnreferencedCode(Compat.ReflectionApi)]
     public static IEasyNetQBuilder UseAdvancedMessagePolymorphism(this IEasyNetQBuilder builder)
     {
         builder.Services.AddSingleton<IExchangeDeclareStrategy, MultipleExchangeDeclareStrategy>();
         return builder;
     }
 
+    [RequiresUnreferencedCode(Compat.ReflectionApi)]
+    [RequiresDynamicCode(Compat.ReflectionApi)]
     public static IEasyNetQBuilder UseVersionedMessage(this IEasyNetQBuilder builder)
     {
         builder.Services

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -20,7 +21,7 @@ public class MessagePropertiesConverter : JsonConverter<MessageProperties>
                 Priority = parsed.TryGetProperty(options.ConvertName("Priority"), out var priority) ? priority.GetByte() : default,
                 CorrelationId = parsed.TryGetProperty(options.ConvertName("CorrelationId"), out var correlationId) ? correlationId.GetString() : null,
                 ReplyTo = parsed.TryGetProperty(options.ConvertName("ReplyTo"), out var replyTo) ? replyTo.GetString() : null,
-                Expiration = parsed.TryGetProperty(options.ConvertName("Expiration"), out var expiration) ? expiration.Deserialize<TimeSpan>() : null,
+                Expiration = parsed.TryGetProperty(options.ConvertName("Expiration"), out var expiration) ? TimeSpan.Parse(expiration.GetString()!, CultureInfo.InvariantCulture) : null,
                 MessageId = parsed.TryGetProperty(options.ConvertName("MessageId"), out var messageId) ? messageId.GetString() : null,
                 Timestamp = parsed.TryGetProperty(options.ConvertName("Timestamp"), out var timestamp) ? timestamp.GetInt64() : default,
                 Type = parsed.TryGetProperty(options.ConvertName("Type"), out var type) ? type.GetString() : null,
@@ -51,7 +52,8 @@ public class MessagePropertiesConverter : JsonConverter<MessageProperties>
         if (value.ReplyToPresent)
             json.Add(options.ConvertName("ReplyTo"), value.ReplyTo);
         if (value.ExpirationPresent)
-            json.Add(options.ConvertName("Expiration"), JsonValue.Create(value.Expiration));
+            // System.Text.Json's TimeSpan format ("c"), written as a string so no reflection is needed
+            json.Add(options.ConvertName("Expiration"), value.Expiration?.ToString("c", CultureInfo.InvariantCulture));
         if (value.MessageIdPresent)
             json.Add(options.ConvertName("MessageId"), value.MessageId);
         if (value.TimestampPresent)

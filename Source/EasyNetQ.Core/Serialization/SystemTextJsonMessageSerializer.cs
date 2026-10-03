@@ -2,6 +2,7 @@ using System.Buffers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
+using System.Diagnostics.CodeAnalysis;
 using EasyNetQ.Internals;
 
 namespace EasyNetQ.Serialization.SystemTextJson;
@@ -49,7 +50,10 @@ public sealed class SystemTextJsonMessageSerializer : IMessageSerializer
         if (extraConverters is not null)
             foreach (var converter in extraConverters)
                 this.options.Converters.Add(converter);
-        this.options.MakeReadOnly(populateMissingResolver: true);
+        // reflection-based contracts only where they work; under Native AOT an unknown type fails at use with
+        // "no metadata provided" - pass a JsonSerializerContext (UseSystemTextJson(context)) there
+        this.options.TypeInfoResolver ??= DefaultResolver();
+        this.options.MakeReadOnly();
     }
 
     /// <summary>
@@ -80,8 +84,31 @@ public sealed class SystemTextJsonMessageSerializer : IMessageSerializer
         if (extraConverters is not null)
             foreach (var converter in extraConverters)
                 options.Converters.Add(converter);
-        options.MakeReadOnly(populateMissingResolver: false);
+        options.MakeReadOnly();
     }
+
+    /// <summary>
+    ///     The default contract resolver: the registered source-generated <paramref name="contexts" /> (the
+    ///     application's and the transport's), then reflection-based contracts where runtime reflection is available.
+    ///     Under Native AOT a type no context covers fails at use with "no metadata provided".
+    /// </summary>
+    public static IJsonTypeInfoResolver CreateDefaultResolver(IEnumerable<IJsonTypeInfoResolver> contexts)
+        => JsonTypeInfoResolver.Combine([.. contexts, DefaultResolver()]);
+
+    private static IJsonTypeInfoResolver DefaultResolver()
+    {
+#if NET
+        if (!System.Runtime.CompilerServices.RuntimeFeature.IsDynamicCodeSupported || !RuntimeReflection.IsSupported)
+#else
+        if (!RuntimeReflection.IsSupported)
+#endif
+            return JsonTypeInfoResolver.Combine();
+        return ReflectionResolver();
+    }
+
+    [RequiresUnreferencedCode("Reflection-based JSON contracts")]
+    [RequiresDynamicCode("Reflection-based JSON contracts")]
+    private static IJsonTypeInfoResolver ReflectionResolver() => new DefaultJsonTypeInfoResolver();
 
     /// <inheritdoc />
     public IMemoryOwner<byte> Serialize<T>(T body, MessageTypeDescriptor<T> descriptor)

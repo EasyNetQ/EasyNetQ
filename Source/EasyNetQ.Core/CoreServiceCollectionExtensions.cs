@@ -35,15 +35,12 @@ public static class CoreServiceCollectionExtensions
             if (sp.GetService<ISerializer>() is { } legacySerializer)
                 return new Serialization.LegacyMessageSerializerAdapter(legacySerializer);
 
-            // Source-generated modules register JsonSerializerContexts; combining them keeps serialization
-            // reflection-free (and AOT-safe) for every discovered message type
-            var contexts = sp.GetServices<System.Text.Json.Serialization.JsonSerializerContext>().ToArray();
-            var converters = sp.GetServices<System.Text.Json.Serialization.JsonConverter>();
-            return contexts.Length == 0
-                ? new Serialization.SystemTextJson.SystemTextJsonMessageSerializer(
-                    Serialization.SystemTextJson.SystemTextJsonMessageSerializer.CreateDefaultOptions(), converters)
-                : new Serialization.SystemTextJson.SystemTextJsonMessageSerializer(
-                    System.Text.Json.Serialization.Metadata.JsonTypeInfoResolver.Combine(contexts), converters);
+            // the transport's and the application's source-generated contexts first; reflection only where it works
+            var contexts = sp.GetServices<System.Text.Json.Serialization.JsonSerializerContext>();
+            return new Serialization.SystemTextJson.SystemTextJsonMessageSerializer(
+                Serialization.SystemTextJson.SystemTextJsonMessageSerializer.CreateDefaultResolver(contexts),
+                sp.GetServices<System.Text.Json.Serialization.JsonConverter>()
+            );
         });
         services.TryAddSingleton<Consumer.IConsumeErrorStrategy>(Consumer.SimpleConsumeErrorStrategy.NackWithRequeue);
         services.TryAddSingleton<IConventions, Conventions>();

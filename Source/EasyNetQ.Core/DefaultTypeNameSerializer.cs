@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
 using EasyNetQ.Internals;
@@ -28,14 +29,27 @@ public class DefaultTypeNameSerializer : ITypeNameSerializer
     }
 
     /// <inheritdoc />
+    /// <remarks>
+    ///     Loads the type by name at runtime, which Native AOT cannot do: there the name must be registered (source
+    ///     generator, <c>MessageType&lt;T&gt;()</c>) and this throws for anything else.
+    /// </remarks>
     public Type Deserialize(string typeName)
     {
-        return deSerializedTypes.GetOrAdd(typeName, t =>
-        {
-            var typeNameKey = SplitFullyQualifiedTypeName(t);
-            return GetTypeFromTypeNameKey(typeNameKey);
-        });
+        if (deSerializedTypes.TryGetValue(typeName, out var cached))
+            return cached;
+#if NET
+        if (!System.Runtime.CompilerServices.RuntimeFeature.IsDynamicCodeSupported || !RuntimeReflection.IsSupported)
+#else
+        if (!RuntimeReflection.IsSupported)
+#endif
+            throw RuntimeReflection.Unavailable($"Loading message type '{typeName}' by name");
+        return LoadType(typeName);
     }
+
+    [RequiresUnreferencedCode("Loads a type by name")]
+    [RequiresDynamicCode("May close a generic type over runtime arguments")]
+    private Type LoadType(string typeName)
+        => deSerializedTypes.GetOrAdd(typeName, static t => GetTypeFromTypeNameKey(SplitFullyQualifiedTypeName(t)));
 
     private static string RemoveAssemblyDetails(string fullyQualifiedTypeName)
     {
@@ -102,6 +116,8 @@ public class DefaultTypeNameSerializer : ITypeNameSerializer
         return new TypeNameKey(assemblyName, typeName);
     }
 
+    [RequiresUnreferencedCode("Loads a type by name")]
+    [RequiresDynamicCode("May close a generic type over runtime arguments")]
     private static Type GetTypeFromTypeNameKey(TypeNameKey typeNameKey)
     {
         var assemblyName = typeNameKey.AssemblyName;
@@ -144,6 +160,8 @@ public class DefaultTypeNameSerializer : ITypeNameSerializer
         return Type.GetType(typeName) ?? throw new EasyNetQException($"Could not find type '{typeName}'");
     }
 
+    [RequiresUnreferencedCode("Loads a type by name")]
+    [RequiresDynamicCode("Closes a generic type over runtime arguments")]
     private static Type GetGenericTypeFromTypeName(string typeName, Assembly assembly)
     {
         Type type = null;

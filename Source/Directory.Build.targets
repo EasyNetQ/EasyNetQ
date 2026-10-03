@@ -1,4 +1,9 @@
 <Project>
+  <!-- Native AOT/trim analyzers on the library assemblies (net9.0+: FeatureGuard, which the reflection fallbacks rely on, is net9+) -->
+  <PropertyGroup Condition="'$(EasyNetQAotCompatible)' == 'true' and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))">
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
   <!-- Built as a source reference (EasyNetQ.SourceReference.props): no package on every build, and no MinVer, whose
        git lookup fails in build contexts without history (e.g. a Docker build of the consuming app) -->
   <PropertyGroup Condition="'$(EasyNetQSourceReference)' == 'true'">

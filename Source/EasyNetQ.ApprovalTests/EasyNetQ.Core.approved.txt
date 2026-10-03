@@ -1404,6 +1404,7 @@ namespace EasyNetQ.Serialization.SystemTextJson
         public T? Deserialize<T>(in System.ReadOnlyMemory<byte> body, EasyNetQ.MessageTypeDescriptor<T> descriptor) { }
         public System.Buffers.IMemoryOwner<byte> Serialize<T>(T body, EasyNetQ.MessageTypeDescriptor<T> descriptor) { }
         public static System.Text.Json.JsonSerializerOptions CreateDefaultOptions() { }
+        public static System.Text.Json.Serialization.Metadata.IJsonTypeInfoResolver CreateDefaultResolver(System.Collections.Generic.IEnumerable<System.Text.Json.Serialization.Metadata.IJsonTypeInfoResolver> contexts) { }
     }
 }
 namespace EasyNetQ.Topology

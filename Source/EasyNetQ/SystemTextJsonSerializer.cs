@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Buffers;
 using EasyNetQ.Internals;
 
@@ -8,12 +9,16 @@ public sealed class SystemTextJsonSerializer : ISerializer
     private readonly System.Text.Json.JsonSerializerOptions serialiseOptions;
     private readonly System.Text.Json.JsonSerializerOptions deserializeOptions;
 
+    [RequiresUnreferencedCode(Compat.ReflectionApi)]
+    [RequiresDynamicCode(Compat.ReflectionApi)]
     public SystemTextJsonSerializer()
         : this(new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.General))
     {
     }
 
     // ReSharper disable once MemberCanBePrivate.Global
+    [RequiresUnreferencedCode(Compat.ReflectionApi)]
+    [RequiresDynamicCode(Compat.ReflectionApi)]
     public SystemTextJsonSerializer(System.Text.Json.JsonSerializerOptions options)
     {
         serialiseOptions = new System.Text.Json.JsonSerializerOptions(options);
@@ -21,6 +26,8 @@ public sealed class SystemTextJsonSerializer : ISerializer
         deserializeOptions.Converters.Add(new SystemObjectNewtonsoftCompatibleConverter());
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = Compat.Annotated)]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = Compat.Annotated)]
     public IMemoryOwner<byte> MessageToBytes(Type messageType, object message)
     {
         var stream = new ArrayPooledMemoryStream();
@@ -28,6 +35,8 @@ public sealed class SystemTextJsonSerializer : ISerializer
         return stream;
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = Compat.Annotated)]
+    [UnconditionalSuppressMessage("AOT", "IL3050", Justification = Compat.Annotated)]
     public object BytesToMessage(Type messageType, in ReadOnlyMemory<byte> bytes)
     {
         return System.Text.Json.JsonSerializer.Deserialize(bytes.Span, messageType, deserializeOptions)!;

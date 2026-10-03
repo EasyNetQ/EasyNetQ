@@ -1,3 +1,5 @@
+using EasyNetQ.Internals;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace EasyNetQ.MessageVersioning;
@@ -11,6 +13,7 @@ public class MessageTypeProperty
 
     private readonly ITypeNameSerializer typeNameSerializer;
 
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = Compat.Annotated)]
     private MessageTypeProperty(ITypeNameSerializer typeNameSerializer, Type messageType)
     {
         this.typeNameSerializer = typeNameSerializer;

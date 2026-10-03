@@ -10,8 +10,14 @@ namespace EasyNetQ.AutoSubscribe
         public string SubscriptionIdPrefix { get; }
         public static string DefaultTopicName { get; set; }
         protected virtual string DefaultSubscriptionIdGenerator(EasyNetQ.AutoSubscribe.AutoSubscriberConsumerInfo c) { }
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
+            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
         protected virtual System.Collections.Generic.IEnumerable<EasyNetQ.AutoSubscribe.AutoSubscriberConsumerInfo> GetSubscriberConsumerInfos(System.Collections.Generic.IEnumerable<System.Type> types, System.Type interfaceType) { }
         protected virtual EasyNetQ.AutoSubscribe.AutoSubscriberConsumerAttribute GetSubscriptionAttribute(EasyNetQ.AutoSubscribe.AutoSubscriberConsumerInfo consumerInfo) { }
+        [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
+            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
+            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
         public virtual System.Threading.Tasks.Task<System.IAsyncDisposable> SubscribeAsync(System.Type[] consumerTypes, System.Threading.CancellationToken cancellationToken = default) { }
     }
     [System.AttributeUsage(System.AttributeTargets.Method)]
@@ -30,6 +36,10 @@ namespace EasyNetQ.AutoSubscribe
     }
     public static class AutoSubscriberExtensions
     {
+        [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
+            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
+            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
         public static System.Threading.Tasks.Task<System.IAsyncDisposable> SubscribeAsync(this EasyNetQ.AutoSubscribe.AutoSubscriber autoSubscriber, System.Reflection.Assembly[] assemblies, System.Threading.CancellationToken cancellationToken = default) { }
     }
     public class DefaultAutoSubscriberMessageDispatcher : EasyNetQ.AutoSubscribe.IAutoSubscriberMessageDispatcher
@@ -81,15 +91,25 @@ namespace EasyNetQ
 {
     public static class EasyNetQBuilderExtensions
     {
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
+            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
         public static EasyNetQ.IEasyNetQBuilder UseAdvancedMessagePolymorphism(this EasyNetQ.IEasyNetQBuilder builder) { }
         public static EasyNetQ.IEasyNetQBuilder UseAlwaysAckConsumerErrorStrategy(this EasyNetQ.IEasyNetQBuilder builder) { }
         public static EasyNetQ.IEasyNetQBuilder UseAlwaysNackWithRequeueConsumerErrorStrategy(this EasyNetQ.IEasyNetQBuilder builder) { }
         public static EasyNetQ.IEasyNetQBuilder UseAlwaysNackWithoutRequeueConsumerErrorStrategy(this EasyNetQ.IEasyNetQBuilder builder) { }
         public static EasyNetQ.IEasyNetQBuilder UseDelayedExchangeScheduler(this EasyNetQ.IEasyNetQBuilder builder) { }
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
+            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
         public static EasyNetQ.IEasyNetQBuilder UseLegacyConventions(this EasyNetQ.IEasyNetQBuilder builder) { }
         public static EasyNetQ.IEasyNetQBuilder UseLegacyRpcConventions(this EasyNetQ.IEasyNetQBuilder builder) { }
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
+            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
         public static EasyNetQ.IEasyNetQBuilder UseLegacyTypeNaming(this EasyNetQ.IEasyNetQBuilder builder) { }
         public static EasyNetQ.IEasyNetQBuilder UseMultiChannelClientCommandDispatcher(this EasyNetQ.IEasyNetQBuilder builder, int channelsCount) { }
+        [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
+            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
+            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
         public static EasyNetQ.IEasyNetQBuilder UseVersionedMessage(this EasyNetQ.IEasyNetQBuilder builder) { }
     }
     public class LegacyRpcConventions : EasyNetQ.Conventions
@@ -98,7 +118,10 @@ namespace EasyNetQ
     }
     public class LegacyTypeNameSerializer : EasyNetQ.ITypeNameSerializer
     {
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
+            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
         public LegacyTypeNameSerializer() { }
+        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2057", Justification="The public entry point carries RequiresUnreferencedCode/RequiresDynamicCode.")]
         public System.Type Deserialize(string typeName) { }
         public string Serialize(System.Type type) { }
     }
@@ -165,6 +188,8 @@ namespace EasyNetQ.MessageVersioning
     }
     public class MessageVersionStack : System.Collections.Generic.IEnumerable<System.Type>, System.Collections.IEnumerable
     {
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
+            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
         public MessageVersionStack(System.Type messageType) { }
         public System.Collections.Generic.IEnumerator<System.Type> GetEnumerator() { }
         public bool IsEmpty() { }
@@ -172,13 +197,18 @@ namespace EasyNetQ.MessageVersioning
     }
     public class VersionedExchangeDeclareStrategy : EasyNetQ.IExchangeDeclareStrategy, System.IDisposable
     {
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
+            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
         public VersionedExchangeDeclareStrategy(EasyNetQ.IConventions conventions, EasyNetQ.IAdvancedBus advancedBus) { }
+        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2026", Justification="The public entry point carries RequiresUnreferencedCode/RequiresDynamicCode.")]
         public System.Threading.Tasks.Task<EasyNetQ.Topology.Exchange> DeclareExchangeAsync(System.Type messageType, string exchangeType, System.Threading.CancellationToken cancellationToken) { }
         public System.Threading.Tasks.Task<EasyNetQ.Topology.Exchange> DeclareExchangeAsync(string exchangeName, string exchangeType, System.Threading.CancellationToken cancellationToken) { }
         public virtual void Dispose() { }
     }
     public class VersionedMessageSerializationStrategy : EasyNetQ.IMessageSerializationStrategy
     {
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
+            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
         public VersionedMessageSerializationStrategy(EasyNetQ.ITypeNameSerializer typeNameSerializer, EasyNetQ.IMessageTypeRegistry registry, EasyNetQ.IMessageSerializer serializer, EasyNetQ.ICorrelationIdGenerationStrategy correlationIdGenerator) { }
         public EasyNetQ.IMessage DeserializeMessage(in EasyNetQ.MessageProperties properties, in System.ReadOnlyMemory<byte> body) { }
         public EasyNetQ.SerializedMessage SerializeMessage(EasyNetQ.IMessage message) { }
@@ -189,6 +219,8 @@ namespace EasyNetQ.MultipleExchange
 {
     public class MultipleExchangeDeclareStrategy : EasyNetQ.IExchangeDeclareStrategy, System.IDisposable
     {
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
+            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
         public MultipleExchangeDeclareStrategy(EasyNetQ.IConventions conventions, EasyNetQ.IAdvancedBus advancedBus) { }
         public System.Threading.Tasks.Task<EasyNetQ.Topology.Exchange> DeclareExchangeAsync(System.Type messageType, string exchangeType, System.Threading.CancellationToken cancellationToken) { }
         public System.Threading.Tasks.Task<EasyNetQ.Topology.Exchange> DeclareExchangeAsync(string exchangeName, string exchangeType, System.Threading.CancellationToken cancellationToken) { }
@@ -205,16 +237,40 @@ namespace EasyNetQ.Serialization.SystemTextJson
     }
     public sealed class SystemTextJsonSerializer : EasyNetQ.ISerializer
     {
+        [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
+            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
+            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
         public SystemTextJsonSerializer() { }
+        [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
+            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
+            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
         public SystemTextJsonSerializer(System.Text.Json.JsonSerializerOptions options) { }
+        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification="The public entry point carries RequiresUnreferencedCode/RequiresDynamicCode.")]
+        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2026", Justification="The public entry point carries RequiresUnreferencedCode/RequiresDynamicCode.")]
         public object BytesToMessage(System.Type messageType, in System.ReadOnlyMemory<byte> bytes) { }
+        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification="The public entry point carries RequiresUnreferencedCode/RequiresDynamicCode.")]
+        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2026", Justification="The public entry point carries RequiresUnreferencedCode/RequiresDynamicCode.")]
         public System.Buffers.IMemoryOwner<byte> MessageToBytes(System.Type messageType, object message) { }
     }
     public sealed class SystemTextJsonSerializerV2 : EasyNetQ.ISerializer
     {
+        [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
+            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
+            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
         public SystemTextJsonSerializerV2() { }
+        [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
+            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
+            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
         public SystemTextJsonSerializerV2(System.Text.Json.JsonSerializerOptions options) { }
+        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification="The public entry point carries RequiresUnreferencedCode/RequiresDynamicCode.")]
+        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2026", Justification="The public entry point carries RequiresUnreferencedCode/RequiresDynamicCode.")]
         public object BytesToMessage(System.Type messageType, in System.ReadOnlyMemory<byte> bytes) { }
+        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification="The public entry point carries RequiresUnreferencedCode/RequiresDynamicCode.")]
+        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2026", Justification="The public entry point carries RequiresUnreferencedCode/RequiresDynamicCode.")]
         public System.Buffers.IMemoryOwner<byte> MessageToBytes(System.Type messageType, object message) { }
     }
 }

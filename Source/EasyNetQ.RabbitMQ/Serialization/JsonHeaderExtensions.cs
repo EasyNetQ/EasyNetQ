@@ -64,7 +64,8 @@ internal static class JsonHeaderExtensions
             case string stringValue:
                 return (JsonHeaderType.String, JsonValue.Create(stringValue));
             case byte[] bytesValue:
-                return (JsonHeaderType.Bytes, JsonValue.Create(bytesValue));
+                // base64, as System.Text.Json writes byte[]; the string form needs no reflection
+                return (JsonHeaderType.Bytes, JsonValue.Create(Convert.ToBase64String(bytesValue)));
             case IList listValue:
                 var list = new List<JsonNode>();
                 foreach (var listItem in listValue)
@@ -93,7 +94,7 @@ internal static class JsonHeaderExtensions
                 }
                 return (JsonHeaderType.Dictionary, dictionaryJson);
             case BinaryTableValue binaryTableValue:
-                return (JsonHeaderType.BinaryTable, JsonValue.Create(binaryTableValue.Bytes));
+                return (JsonHeaderType.BinaryTable, JsonValue.Create(Convert.ToBase64String(binaryTableValue.Bytes)));
         }
 
         throw new InternalBufferOverflowException();
