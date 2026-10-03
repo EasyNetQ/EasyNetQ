@@ -29,6 +29,10 @@ public abstract class MessageTypeMapping
 /// </summary>
 public sealed class MessageTypeMapping<T> : MessageTypeMapping
 {
+    internal MessageTypeMapping()
+    {
+    }
+
     /// <inheritdoc />
     public override Type MessageType => typeof(T);
 

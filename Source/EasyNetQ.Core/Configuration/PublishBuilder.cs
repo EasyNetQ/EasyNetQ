@@ -135,6 +135,10 @@ public sealed class GenericPublishBuilder : PublishBuilder<GenericPublishBuilder
 /// </summary>
 public sealed class PublishRouteBuilder
 {
+    internal PublishRouteBuilder()
+    {
+    }
+
     internal string? RouteWireName { get; private set; }
 
     /// <summary>

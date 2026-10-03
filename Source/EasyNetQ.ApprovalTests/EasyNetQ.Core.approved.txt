@@ -490,7 +490,6 @@ namespace EasyNetQ
     }
     public sealed class MessageTypeMapping<T> : EasyNetQ.MessageTypeMapping
     {
-        public MessageTypeMapping() { }
         public override System.Type MessageType { get; }
     }
     public sealed class MessageTypeRegistry : EasyNetQ.IMessageTypeRegistry
@@ -748,7 +747,6 @@ namespace EasyNetQ.Configuration
     }
     public sealed class PublishRouteBuilder
     {
-        public PublishRouteBuilder() { }
         public EasyNetQ.Configuration.PublishRouteBuilder WireName(string wireName) { }
     }
     public sealed class PublishRouteTable
