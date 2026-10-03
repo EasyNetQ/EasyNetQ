@@ -65,6 +65,7 @@ public static class ServiceCollectionExtensions
         services.TryAddEnumerable(ServiceDescriptor.Singleton<System.Text.Json.Serialization.JsonConverter, Serialization.SystemTextJson.MessagePropertiesConverter>());
         services.TryAddSingleton<AdvancedBusEventHandlers>(_ => new AdvancedBusEventHandlers());
         services.TryAddSingleton<IExchangeDeclareStrategy, DefaultExchangeDeclareStrategy>();
+        services.TryAddSingleton<ConsumeErrorOptions>(_ => new ConsumeErrorOptions());
         services.TryAddSingleton<IConsumeErrorStrategy, DefaultConsumeErrorStrategy>();
         services.TryAddSingleton<IErrorMessageSerializer, DefaultErrorMessageSerializer>();
         services.TryAddSingleton<IInternalConsumerFactory, InternalConsumerFactory>();

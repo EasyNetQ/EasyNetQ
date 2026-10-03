@@ -35,6 +35,22 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
     private readonly IMessageSerializer serializer;
     private readonly MessageTypeDescriptor<Error> errorMessageDescriptor;
     private readonly ConnectionConfiguration configuration;
+    private readonly ConsumeErrorOptions options;
+
+    /// <summary>
+    ///     Creates DefaultConsumerErrorStrategy with the default <see cref="ConsumeErrorOptions" />
+    /// </summary>
+    public DefaultConsumeErrorStrategy(
+        ILogger<DefaultConsumeErrorStrategy> logger,
+        IPersistentChannelDispatcher channelDispatcher,
+        IMessageSerializer serializer,
+        IMessageTypeRegistry registry,
+        IConventions conventions,
+        IErrorMessageSerializer errorMessageSerializer,
+        ConnectionConfiguration configuration
+    ) : this(logger, channelDispatcher, serializer, registry, conventions, errorMessageSerializer, configuration, new ConsumeErrorOptions())
+    {
+    }
 
     /// <summary>
     ///     Creates DefaultConsumerErrorStrategy
@@ -46,9 +62,11 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
         IMessageTypeRegistry registry,
         IConventions conventions,
         IErrorMessageSerializer errorMessageSerializer,
-        ConnectionConfiguration configuration
+        ConnectionConfiguration configuration,
+        ConsumeErrorOptions options
     )
     {
+        this.options = options;
         this.logger = logger;
         this.channelDispatcher = channelDispatcher;
         errorDispatchOptions = new PersistentChannelDispatchOptions("Error", PersistentConnectionType.Consumer, configuration.PublisherConfirms);
@@ -70,9 +88,9 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
         var body = context.Body.ToArray();
 
         logger.ConsumeCallbackFailed(exception, receivedInfo.Queue, receivedInfo.RoutingKey, receivedInfo.Exchange, properties.CorrelationId);
-        if (logger.IsEnabled(LogLevel.Error))
+        if (options.LogMessageBody && logger.IsEnabled(LogLevel.Error))
         {
-            // Materialize the base64 body string only when the log will actually be emitted
+            // opt-in: bodies may carry personal data, and the error queue keeps them anyway
             logger.FailedMessageBody(receivedInfo.Queue, Convert.ToBase64String(body));
         }
 
@@ -142,19 +160,25 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
         return new(AckDecision.NackRequeue);
     }
 
-    private static async Task DeclareAndBindErrorExchangeWithErrorQueueAsync(
+    private async Task DeclareAndBindErrorExchangeWithErrorQueueAsync(
         IChannel channel,
         string exchangeName,
         string exchangeType,
         string queueName,
-        string queueType,
+        string? queueType,
         string routingKey,
         CancellationToken cancellationToken
     )
     {
-        var queueArgs = queueType != null
-            ? new Dictionary<string, object> { { Argument.QueueType, queueType } }
-            : null;
+        Dictionary<string, object>? queueArgs = null;
+        if (queueType != null)
+            queueArgs = new Dictionary<string, object> { { Argument.QueueType, queueType } };
+        if (options.ErrorQueueArguments is { Count: > 0 } configured)
+        {
+            queueArgs ??= new Dictionary<string, object>();
+            foreach (var argument in configured)
+                queueArgs[argument.Key] = argument.Value;
+        }
 
         await channel.QueueDeclareAsync(queueName, true, false, false, queueArgs, cancellationToken: cancellationToken);
         await channel.ExchangeDeclareAsync(exchangeName, exchangeType, true, cancellationToken: cancellationToken);

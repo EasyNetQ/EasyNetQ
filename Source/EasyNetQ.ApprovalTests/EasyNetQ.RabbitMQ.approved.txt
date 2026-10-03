@@ -456,6 +456,8 @@ namespace EasyNetQ.Configuration
     public sealed class RabbitMqBuilder
     {
         public EasyNetQ.Configuration.RabbitMqBuilder Consume(System.Action<EasyNetQ.Configuration.RabbitMqConsumerBuilder> configure) { }
+        public EasyNetQ.Configuration.RabbitMqBuilder ErrorQueue(System.Action<EasyNetQ.Configuration.RabbitMqQueueBuilder> configure) { }
+        public EasyNetQ.Configuration.RabbitMqBuilder LogFailedMessageBodies(bool enabled = true) { }
         public EasyNetQ.Configuration.RabbitMqBuilder Publish(System.Action<EasyNetQ.Configuration.RabbitMqPublishBuilder> configure) { }
     }
     public sealed class RabbitMqConsumerBuilder : EasyNetQ.Configuration.ConsumerBuilder<EasyNetQ.Configuration.RabbitMqConsumerBuilder>
@@ -529,6 +531,12 @@ namespace EasyNetQ.Consumer
         public byte[] Deserialize(string messageBody) { }
         public string Serialize(byte[] messageBody) { }
     }
+    public sealed class ConsumeErrorOptions
+    {
+        public ConsumeErrorOptions() { }
+        public System.Collections.Generic.IDictionary<string, object>? ErrorQueueArguments { get; set; }
+        public bool LogMessageBody { get; set; }
+    }
     public sealed class Consumer : EasyNetQ.Consumer.IConsumer, System.IAsyncDisposable
     {
         public Consumer(Microsoft.Extensions.Logging.ILogger<EasyNetQ.Consumer.Consumer> logger, EasyNetQ.Consumer.ConsumerConfiguration configuration, EasyNetQ.Consumer.IInternalConsumerFactory internalConsumerFactory, EasyNetQ.IEventBus eventBus) { }
@@ -555,6 +563,7 @@ namespace EasyNetQ.Consumer
     public class DefaultConsumeErrorStrategy : EasyNetQ.Consumer.IConsumeErrorStrategy
     {
         public DefaultConsumeErrorStrategy(Microsoft.Extensions.Logging.ILogger<EasyNetQ.Consumer.DefaultConsumeErrorStrategy> logger, EasyNetQ.ChannelDispatcher.IPersistentChannelDispatcher channelDispatcher, EasyNetQ.IMessageSerializer serializer, EasyNetQ.IMessageTypeRegistry registry, EasyNetQ.IConventions conventions, EasyNetQ.Consumer.IErrorMessageSerializer errorMessageSerializer, EasyNetQ.ConnectionConfiguration configuration) { }
+        public DefaultConsumeErrorStrategy(Microsoft.Extensions.Logging.ILogger<EasyNetQ.Consumer.DefaultConsumeErrorStrategy> logger, EasyNetQ.ChannelDispatcher.IPersistentChannelDispatcher channelDispatcher, EasyNetQ.IMessageSerializer serializer, EasyNetQ.IMessageTypeRegistry registry, EasyNetQ.IConventions conventions, EasyNetQ.Consumer.IErrorMessageSerializer errorMessageSerializer, EasyNetQ.ConnectionConfiguration configuration, EasyNetQ.Consumer.ConsumeErrorOptions options) { }
         public virtual System.Threading.Tasks.ValueTask<EasyNetQ.AckDecision> HandleCancelledAsync(EasyNetQ.Pipeline.ConsumeContext context, System.Threading.CancellationToken cancellationToken = default) { }
         public virtual System.Threading.Tasks.ValueTask<EasyNetQ.AckDecision> HandleErrorAsync(EasyNetQ.Pipeline.ConsumeContext context, System.Exception exception, System.Threading.CancellationToken cancellationToken = default) { }
     }

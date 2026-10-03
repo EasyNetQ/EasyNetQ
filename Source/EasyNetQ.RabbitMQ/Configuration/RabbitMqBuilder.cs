@@ -1,3 +1,6 @@
+using EasyNetQ.Consumer;
+using Microsoft.Extensions.DependencyInjection;
+
 namespace EasyNetQ.Configuration;
 
 /// <summary>
@@ -17,6 +20,36 @@ public sealed class RabbitMqBuilder
     {
         builder.RegisterConsumer(new RabbitMqConsumerBuilder(new ConsumerDefinition()), configure);
         return this;
+    }
+
+    /// <summary>
+    ///     Declare the error queue with typed settings, e.g. <c>ErrorQueue(q =&gt; q.Quorum())</c> so failed messages
+    ///     are replicated on a cluster. One error queue serves every consumer, so this is bus-wide.
+    /// </summary>
+    public RabbitMqBuilder ErrorQueue(Action<RabbitMqQueueBuilder> configure)
+    {
+        var queueBuilder = new RabbitMqQueueBuilder();
+        configure(queueBuilder);
+        ErrorOptions().ErrorQueueArguments = queueBuilder.Build("").Arguments;
+        return this;
+    }
+
+    /// <summary>
+    ///     Log failed message bodies next to the error (off by default; the error queue keeps them)
+    /// </summary>
+    public RabbitMqBuilder LogFailedMessageBodies(bool enabled = true)
+    {
+        ErrorOptions().LogMessageBody = enabled;
+        return this;
+    }
+
+    private ConsumeErrorOptions ErrorOptions()
+    {
+        if (builder.Services.LastOrDefault(d => d.ServiceType == typeof(ConsumeErrorOptions))?.ImplementationInstance is ConsumeErrorOptions existing)
+            return existing;
+        var options = new ConsumeErrorOptions();
+        builder.Services.AddSingleton(options);
+        return options;
     }
 
     /// <summary>

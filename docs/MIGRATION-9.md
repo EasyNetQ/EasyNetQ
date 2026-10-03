@@ -144,3 +144,8 @@ Gaps found running v9 in production consumers, fixed in the library rather than 
   `ConsumerHost(o => o.WaitForStartup = true)`; `RetryDelay`/`MaxRetryDelay` tune the backoff. Code that publishes
   right after `StartAsync` should await `WaitForStartedAsync` first.
 - `ConsumerHostedService` constructor takes `ConsumerHostOptions`, `ConsumerHostStatus` and a logger (DI-built).
+- **Behavior change:** `DefaultConsumeErrorStrategy` no longer logs failed message bodies (event 601) by default; the
+  error queue keeps them and they often carry personal data. Opt in with `UseRabbitMq(r => r.LogFailedMessageBodies())`.
+  The error itself (event 600: queue, routing key, exchange, correlation id, exception) is still logged.
+- `UseRabbitMq(r => r.ErrorQueue(q => q.Quorum()))` declares the (bus-wide) error queue with typed arguments, e.g.
+  quorum so failed messages survive a node loss. `ConsumeErrorOptions` carries both settings.
