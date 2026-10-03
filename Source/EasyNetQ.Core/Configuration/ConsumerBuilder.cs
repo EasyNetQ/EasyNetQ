@@ -54,6 +54,17 @@ public abstract class ConsumerBuilder<TSelf> where TSelf : ConsumerBuilder<TSelf
     }
 
     /// <summary>
+    ///     Bind the queue to <paramref name="exchange" /> without declaring it: for exchanges another application
+    ///     (or an operator) owns, where declaring would need configure permission on it or fail on differing
+    ///     arguments
+    /// </summary>
+    public TSelf BindExisting(string exchange, string routingKey)
+    {
+        Definition.Bindings.Add(new ConsumerBinding(exchange, routingKey));
+        return Self;
+    }
+
+    /// <summary>
     ///     Prefetch for this consumer
     /// </summary>
     public TSelf PrefetchCount(ushort prefetchCount)

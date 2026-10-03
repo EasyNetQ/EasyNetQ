@@ -134,3 +134,5 @@ Gaps found running v9 in production consumers, fixed in the library rather than 
   from another stack used to deserialize silently into default values. Writing is unchanged. Options you pass
   yourself are used as given.
 - Per-consumer serializer: `Consume(c => c.Serializer(serializer))`.
+- `BindExisting(exchange, routingKey)` binds to an exchange another application owns without declaring it
+  (`Bind` declares, as before), like `ExistingQueue`/`ExistingExchange`.

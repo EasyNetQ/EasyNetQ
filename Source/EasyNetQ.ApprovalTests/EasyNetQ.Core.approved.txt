@@ -653,6 +653,7 @@ namespace EasyNetQ.Configuration
         public EasyNetQ.Configuration.ConsumerDefinition Definition { get; }
         public TSelf AutoAck() { }
         public TSelf Bind(string exchange, string routingKey) { }
+        public TSelf BindExisting(string exchange, string routingKey) { }
         public TSelf DefaultMessageType<T>() { }
         public TSelf ExistingQueue(string name) { }
         public TSelf Handle<T>(EasyNetQ.MessageHandler<T> handler) { }
