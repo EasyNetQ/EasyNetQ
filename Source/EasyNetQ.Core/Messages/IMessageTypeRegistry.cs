@@ -14,6 +14,14 @@ public interface IMessageTypeRegistry
     MessageTypeDescriptor<T> GetOrAdd<T>();
 
     /// <summary>
+    ///     Registers <typeparamref name="T" /> under an explicit wire name (null keeps the
+    ///     <see cref="ITypeNameSerializer" /> name) and extra incoming <paramref name="aliases" />. Registering a
+    ///     type again with a different wire name, or an alias another type already owns, throws: a wire name must
+    ///     resolve to exactly one type.
+    /// </summary>
+    MessageTypeDescriptor<T> Register<T>(string? wireName, IEnumerable<string>? aliases = null);
+
+    /// <summary>
     ///     Gets the descriptor for a runtime <see cref="Type" />, creating it via the runtime fallback when no
     ///     generic registration has happened for it yet
     /// </summary>

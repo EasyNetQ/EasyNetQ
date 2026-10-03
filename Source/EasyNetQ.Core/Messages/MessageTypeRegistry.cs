@@ -23,8 +23,25 @@ public sealed class MessageTypeRegistry : IMessageTypeRegistry
     ///     construction so steady-state lookups never fall back to <see cref="RuntimeDescriptorFactory" />.
     /// </summary>
     public MessageTypeRegistry(ITypeNameSerializer typeNameSerializer, IEnumerable<IMessageTypeRegistryInitializer>? initializers)
+        : this(typeNameSerializer, initializers, null)
+    {
+    }
+
+    /// <summary>
+    ///     Creates the registry, applies the configured <paramref name="mappings" /> (wire names and aliases set
+    ///     through <c>MessageType&lt;T&gt;(...)</c>) and then the generated initializers. Mappings go first so a
+    ///     configured wire name is in place before anything registers the type under its default name.
+    /// </summary>
+    public MessageTypeRegistry(
+        ITypeNameSerializer typeNameSerializer,
+        IEnumerable<IMessageTypeRegistryInitializer>? initializers,
+        IEnumerable<MessageTypeMapping>? mappings
+    )
     {
         this.typeNameSerializer = typeNameSerializer;
+        if (mappings is not null)
+            foreach (var mapping in mappings)
+                mapping.Apply(this);
         if (initializers is null) return;
         foreach (var initializer in initializers)
             initializer.Initialize(this);
@@ -36,6 +53,46 @@ public sealed class MessageTypeRegistry : IMessageTypeRegistry
         return byType.TryGetValue(typeof(T), out var existing)
             ? (MessageTypeDescriptor<T>)existing
             : (MessageTypeDescriptor<T>)Register(Populate(new MessageTypeDescriptor<T>(typeNameSerializer.Serialize(typeof(T)))));
+    }
+
+    /// <inheritdoc />
+    public MessageTypeDescriptor<T> Register<T>(string? wireName, IEnumerable<string>? aliases = null)
+    {
+        MessageTypeDescriptor<T> descriptor;
+        if (byType.TryGetValue(typeof(T), out var existing))
+        {
+            descriptor = (MessageTypeDescriptor<T>)existing;
+            if (wireName is not null && descriptor.WireName != wireName)
+                throw new EasyNetQException(
+                    "Message type {0} is already registered with wire name '{1}'; it cannot also be '{2}'",
+                    typeof(T).FullName ?? typeof(T).Name, descriptor.WireName, wireName
+                );
+        }
+        else
+        {
+            descriptor = (MessageTypeDescriptor<T>)Register(Populate(new MessageTypeDescriptor<T>(wireName ?? typeNameSerializer.Serialize(typeof(T)))));
+            if (wireName is not null && descriptor.WireName != wireName)
+                throw new EasyNetQException("Message type {0} was registered concurrently under another wire name", typeof(T).Name);
+        }
+
+        if (wireName is not null && byWireName.TryGetValue(wireName, out var wireOwner) && !ReferenceEquals(wireOwner, descriptor))
+            throw new EasyNetQException(
+                "Wire name '{0}' already resolves to {1}; it cannot also name {2}",
+                wireName, wireOwner.DisplayName, descriptor.DisplayName
+            );
+
+        if (aliases is null) return descriptor;
+        foreach (var alias in aliases)
+        {
+            var owner = byWireName.GetOrAdd(alias, descriptor);
+            if (!ReferenceEquals(owner, descriptor))
+                throw new EasyNetQException(
+                    "Wire name '{0}' already resolves to {1}; it cannot alias {2}",
+                    alias, owner.DisplayName, descriptor.DisplayName
+                );
+        }
+
+        return descriptor;
     }
 
     /// <inheritdoc />

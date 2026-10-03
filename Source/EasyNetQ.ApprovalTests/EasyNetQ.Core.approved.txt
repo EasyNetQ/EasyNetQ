@@ -274,6 +274,7 @@ namespace EasyNetQ
         EasyNetQ.MessageTypeDescriptor GetByWireName(string wireName);
         EasyNetQ.MessageTypeDescriptor GetOrAdd(System.Type type);
         EasyNetQ.MessageTypeDescriptor<T> GetOrAdd<T>();
+        EasyNetQ.MessageTypeDescriptor<T> Register<T>(string? wireName, System.Collections.Generic.IEnumerable<string>? aliases = null);
         bool TryGetByWireName(string wireName, out EasyNetQ.MessageTypeDescriptor descriptor);
     }
     public interface IMessageTypeRegistryInitializer
@@ -449,6 +450,13 @@ namespace EasyNetQ
         public bool Redelivered { get; init; }
         public string RoutingKey { get; init; }
     }
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Struct | System.AttributeTargets.Interface, Inherited=false)]
+    public sealed class MessageTypeAttribute : System.Attribute
+    {
+        public MessageTypeAttribute(string wireName) { }
+        public string[]? Aliases { get; init; }
+        public string WireName { get; }
+    }
     public abstract class MessageTypeDescriptor
     {
         public string DisplayName { get; }
@@ -471,13 +479,26 @@ namespace EasyNetQ
         public override object? DeserializeBody(EasyNetQ.IMessageSerializer serializer, in System.ReadOnlyMemory<byte> body) { }
         public override System.Buffers.IMemoryOwner<byte> SerializeBody(EasyNetQ.IMessageSerializer serializer, object body) { }
     }
+    public abstract class MessageTypeMapping
+    {
+        public System.Collections.Generic.IReadOnlyList<string> Aliases { get; }
+        public abstract System.Type MessageType { get; }
+        public string? WireName { get; }
+    }
+    public sealed class MessageTypeMapping<T> : EasyNetQ.MessageTypeMapping
+    {
+        public MessageTypeMapping() { }
+        public override System.Type MessageType { get; }
+    }
     public sealed class MessageTypeRegistry : EasyNetQ.IMessageTypeRegistry
     {
         public MessageTypeRegistry(EasyNetQ.ITypeNameSerializer typeNameSerializer) { }
         public MessageTypeRegistry(EasyNetQ.ITypeNameSerializer typeNameSerializer, System.Collections.Generic.IEnumerable<EasyNetQ.IMessageTypeRegistryInitializer>? initializers) { }
+        public MessageTypeRegistry(EasyNetQ.ITypeNameSerializer typeNameSerializer, System.Collections.Generic.IEnumerable<EasyNetQ.IMessageTypeRegistryInitializer>? initializers, System.Collections.Generic.IEnumerable<EasyNetQ.MessageTypeMapping>? mappings) { }
         public EasyNetQ.MessageTypeDescriptor GetByWireName(string wireName) { }
         public EasyNetQ.MessageTypeDescriptor GetOrAdd(System.Type type) { }
         public EasyNetQ.MessageTypeDescriptor<T> GetOrAdd<T>() { }
+        public EasyNetQ.MessageTypeDescriptor<T> Register<T>(string? wireName, System.Collections.Generic.IEnumerable<string>? aliases = null) { }
         public bool TryGetByWireName(string wireName, out EasyNetQ.MessageTypeDescriptor descriptor) { }
     }
     public class Message<T> : EasyNetQ.IMessage, EasyNetQ.IMessage<T>
@@ -653,6 +674,10 @@ namespace EasyNetQ.Configuration
     {
         public static EasyNetQ.IEasyNetQBuilder Lifecycle(this EasyNetQ.IEasyNetQBuilder builder, System.Action<EasyNetQ.Pipeline.PipelineBuilder<EasyNetQ.Pipeline.LifecycleContext>> configure) { }
     }
+    public static class EasyNetQBuilderMessageTypeExtensions
+    {
+        public static EasyNetQ.IEasyNetQBuilder MessageType<T>(this EasyNetQ.IEasyNetQBuilder builder, System.Action<EasyNetQ.Configuration.MessageTypeBuilder<T>> configure) { }
+    }
     public static class EasyNetQBuilderPublishExtensions
     {
         public static EasyNetQ.IEasyNetQBuilder Publish(this EasyNetQ.IEasyNetQBuilder builder, System.Action<EasyNetQ.Configuration.GenericPublishBuilder> configure) { }
@@ -666,6 +691,12 @@ namespace EasyNetQ.Configuration
     public sealed class GenericPublishBuilder : EasyNetQ.Configuration.PublishBuilder<EasyNetQ.Configuration.GenericPublishBuilder>
     {
         public GenericPublishBuilder(EasyNetQ.Configuration.PublishDefinition definition) { }
+    }
+    public sealed class MessageTypeBuilder<T>
+    {
+        public EasyNetQ.MessageTypeMapping<T> Mapping { get; }
+        public EasyNetQ.Configuration.MessageTypeBuilder<T> Alias(params string[] wireNames) { }
+        public EasyNetQ.Configuration.MessageTypeBuilder<T> WireName(string wireName) { }
     }
     public abstract class PublishBuilder<TSelf>
         where TSelf : EasyNetQ.Configuration.PublishBuilder<TSelf>

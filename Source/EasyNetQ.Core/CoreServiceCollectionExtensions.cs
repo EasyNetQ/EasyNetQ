@@ -25,7 +25,11 @@ public static class CoreServiceCollectionExtensions
     public static IServiceCollection AddEasyNetQCoreServices(this IServiceCollection services)
     {
         services.TryAddSingleton<BusOptions>(_ => new BusOptions());
-        services.TryAddSingleton<IMessageTypeRegistry, MessageTypeRegistry>();
+        services.TryAddSingleton<IMessageTypeRegistry>(sp => new MessageTypeRegistry(
+            sp.GetRequiredService<ITypeNameSerializer>(),
+            sp.GetServices<IMessageTypeRegistryInitializer>(),
+            sp.GetServices<MessageTypeMapping>()
+        ));
         services.TryAddSingleton<IMessageSerializer>(sp =>
         {
             if (sp.GetService<ISerializer>() is { } legacySerializer)

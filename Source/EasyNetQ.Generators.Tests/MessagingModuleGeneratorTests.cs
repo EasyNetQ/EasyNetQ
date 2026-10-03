@@ -57,6 +57,36 @@ public class MessagingModuleGeneratorTests
     }
 
     [Fact]
+    public void Should_emit_wire_names_and_aliases_from_MessageType_attributes()
+    {
+        var result = GeneratorTestHarness.Run("""
+            using System.Threading;
+            using System.Threading.Tasks;
+            using EasyNetQ;
+
+            namespace App;
+
+            [MessageType("nextcloud.file-event.v1", Aliases = new[] { "Legacy.FileEvent", "Other\"Name" })]
+            public sealed record FileEvent(long FileId);
+
+            [MessageType("orders.placed.v1")]
+            public sealed record OrderPlaced(int Id);
+
+            public class Publisher(IBus bus)
+            {
+                public Task PublishAsync(OrderPlaced message) => bus.PubSub.PublishAsync(message, CancellationToken.None);
+            }
+            """);
+
+        result.GeneratorDiagnostics.Should().BeEmpty();
+        result.CompilationErrors.Should().BeEmpty();
+        result.AllGenerated.Should().Contain("registry.Register<global::App.FileEvent>(\"nextcloud.file-event.v1\", new string[] { \"Legacy.FileEvent\", \"Other\\\"Name\" });");
+        result.AllGenerated.Should().Contain("registry.Register<global::App.OrderPlaced>(\"orders.placed.v1\", null);");
+        // a mapped type is registered once, through its mapping
+        result.AllGenerated.Should().NotContain("registry.GetOrAdd<global::App.OrderPlaced>();");
+    }
+
+    [Fact]
     public void Should_harvest_assembly_level_opt_in()
     {
         var result = GeneratorTestHarness.Run("""

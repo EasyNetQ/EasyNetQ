@@ -12,7 +12,7 @@ namespace EasyNetQ.Generators;
 
 /// <summary>
 ///     Harvests message types from EasyNetQ call sites, IConsume/IConsumeAsync implementations, [Queue]/[Exchange]/
-///     [DeliveryMode]-annotated types and [assembly: EasyNetQMessages], then emits an
+///     [DeliveryMode]-annotated types, [MessageType] wire names and [assembly: EasyNetQMessages], then emits an
 ///     <c>{Assembly}.EasyNetQ.Generated.MessagingModule</c> that pre-registers every discovered type in the message
 ///     type registry (closed generics - AOT-safe, no runtime reflection), plus interceptors for AddEasyNetQ(...) call
 ///     sites that register the module automatically, composing modules from referenced assemblies via their
@@ -60,6 +60,15 @@ public sealed class MessagingModuleGenerator : IIncrementalGenerator
         var exchangeAnnotated = AttributeTargets(context, "EasyNetQ.ExchangeAttribute").Collect();
         var deliveryModeAnnotated = AttributeTargets(context, "EasyNetQ.DeliveryModeAttribute").Collect();
 
+        // (c2) [MessageType("wire", Aliases = ...)]: explicit wire names, emitted as Register<T>(...) calls
+        var wireNameMappings = context.SyntaxProvider.ForAttributeWithMetadataName(
+                "EasyNetQ.MessageTypeAttribute",
+                static (node, _) => node is ClassDeclarationSyntax or InterfaceDeclarationSyntax or RecordDeclarationSyntax or StructDeclarationSyntax,
+                static (ctx, _) => HarvestWireNameMapping(ctx))
+            .Where(static mapping => mapping is not null)
+            .Select(static (mapping, _) => mapping!)
+            .Collect();
+
         // (d) [assembly: EasyNetQMessages(typeof(...))] opt-ins + (e) referenced modules + assembly identity
         var compilationFacts = context.CompilationProvider.Select(static (compilation, ct) => GetCompilationFacts(compilation, ct));
 
@@ -83,10 +92,32 @@ public sealed class MessagingModuleGenerator : IIncrementalGenerator
                 .Concat(t.Right)
                 .ToImmutableArray());
 
-        var everything = allTypes.Combine(compilationFacts).Combine(interceptions);
+        var everything = allTypes.Combine(compilationFacts).Combine(interceptions).Combine(wireNameMappings);
 
         context.RegisterSourceOutput(everything, static (spc, source) =>
-            Emit(spc, source.Left.Left, source.Left.Right, source.Right));
+            Emit(spc, source.Left.Left.Left, source.Left.Left.Right, source.Left.Right, source.Right));
+    }
+
+    /// <summary>A [MessageType] registration; aliases are joined with '\n' to keep the record value-equatable.</summary>
+    private sealed record WireNameMapping(string Type, string WireName, string Aliases);
+
+    private static WireNameMapping? HarvestWireNameMapping(GeneratorAttributeSyntaxContext ctx)
+    {
+        if (ctx.TargetSymbol is not INamedTypeSymbol named || !IsEmittable(named)) return null;
+        var attribute = ctx.Attributes[0];
+        if (attribute.ConstructorArguments.Length != 1 || attribute.ConstructorArguments[0].Value is not string wireName) return null;
+
+        var aliases = new List<string>();
+        foreach (var argument in attribute.NamedArguments)
+        {
+            if (argument.Key != "Aliases" || argument.Value.Kind != TypedConstantKind.Array) continue;
+            foreach (var value in argument.Value.Values)
+            {
+                if (value.Value is string alias) aliases.Add(alias);
+            }
+        }
+
+        return new WireNameMapping(named.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), wireName, string.Join("\n", aliases));
     }
 
     private static IncrementalValuesProvider<string> AttributeTargets(IncrementalGeneratorInitializationContext context, string attributeMetadataName)
@@ -246,12 +277,24 @@ public sealed class MessagingModuleGenerator : IIncrementalGenerator
         return builder.ToString();
     }
 
-    private static void Emit(SourceProductionContext spc, ImmutableArray<string> types, CompilationFacts facts, ImmutableArray<InterceptionSite> interceptSites)
+    private static void Emit(
+        SourceProductionContext spc,
+        ImmutableArray<string> types,
+        CompilationFacts facts,
+        ImmutableArray<InterceptionSite> interceptSites,
+        ImmutableArray<WireNameMapping> wireNameMappings
+    )
     {
         if (!facts.ReferencesEasyNetQ || EasyNetQAssemblyNames.Contains(facts.AssemblyName)) return;
 
-        var messageTypes = types.Concat(facts.OptInTypes).Distinct(StringComparer.Ordinal).OrderBy(t => t, StringComparer.Ordinal).ToList();
-        var hasModule = messageTypes.Count > 0;
+        var mappings = wireNameMappings.OrderBy(m => m.Type, StringComparer.Ordinal).ToList();
+        var mappedTypes = new HashSet<string>(mappings.Select(m => m.Type), StringComparer.Ordinal);
+        var messageTypes = types.Concat(facts.OptInTypes)
+            .Where(t => !mappedTypes.Contains(t))
+            .Distinct(StringComparer.Ordinal)
+            .OrderBy(t => t, StringComparer.Ordinal)
+            .ToList();
+        var hasModule = messageTypes.Count > 0 || mappings.Count > 0;
         if (!hasModule && interceptSites.IsEmpty && facts.ReferencedModules.IsEmpty) return;
 
         var ns = $"EasyNetQ.Generated.{SanitizeIdentifier(facts.AssemblyName)}";
@@ -288,6 +331,13 @@ public sealed class MessagingModuleGenerator : IIncrementalGenerator
             source.AppendLine();
             source.AppendLine("            public void Initialize(global::EasyNetQ.IMessageTypeRegistry registry)");
             source.AppendLine("            {");
+            foreach (var mapping in mappings)
+            {
+                var aliases = mapping.Aliases.Length == 0
+                    ? "null"
+                    : "new string[] { " + string.Join(", ", mapping.Aliases.Split('\n').Select(a => SymbolDisplay.FormatLiteral(a, true))) + " }";
+                source.AppendLine($"                registry.Register<{mapping.Type}>({SymbolDisplay.FormatLiteral(mapping.WireName, true)}, {aliases});");
+            }
             foreach (var messageType in messageTypes)
                 source.AppendLine($"                registry.GetOrAdd<{messageType}>();");
             source.AppendLine("            }");
