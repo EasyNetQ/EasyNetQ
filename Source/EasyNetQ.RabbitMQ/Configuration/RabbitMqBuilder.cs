@@ -49,7 +49,7 @@ public sealed class RabbitMqBuilder
     /// </summary>
     public RabbitMqBuilder ErrorQueue(string name, Action<RabbitMqQueueBuilder>? configure = null)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("An error queue name is required", nameof(name));
         var options = ErrorOptions();
         options.QueueName = name;
         options.ExchangeName = name;
