@@ -50,6 +50,12 @@ public readonly record struct LifecycleEvent(string Name)
     /// <summary>A consumer failed to start (broker unreachable, topology missing, ...); the host retries it</summary>
     public static readonly LifecycleEvent StartFailed = new("StartFailed");
 
+    /// <summary>
+    ///     The broker cancelled a consumer (its queue was deleted, the queue's node was lost, a policy changed); unlike
+    ///     a connection interruption it does not restart on its own. Whoever owns the queue decides what happens next.
+    /// </summary>
+    public static readonly LifecycleEvent Cancelled = new("Cancelled");
+
     /// <inheritdoc />
     public override string ToString() => Name;
 }

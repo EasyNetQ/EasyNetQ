@@ -193,6 +193,7 @@ public sealed class Consumer : IConsumer
 
     private async Task InternalConsumerOnCancelledAsync(object sender, InternalConsumerCancelledEventArgs e)
     {
+        await eventBus.PublishAsync(new ConsumerCancelledEvent(this, e.Cancelled));
         if (e.Active.Count == 0)
             await DisposeAsync();
         await Task.CompletedTask;

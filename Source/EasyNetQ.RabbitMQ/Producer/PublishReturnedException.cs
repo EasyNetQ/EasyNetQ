@@ -6,7 +6,7 @@ namespace EasyNetQ.Producer;
 ///     This exception indicates that a message was returned
 /// </summary>
 
-public class PublishReturnedException : Exception
+public class PublishReturnedException : UnroutableMessageException
 {
     //
     // For guidelines regarding the creation of new exception types, see

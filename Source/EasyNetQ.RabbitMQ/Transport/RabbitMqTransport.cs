@@ -204,13 +204,26 @@ internal sealed class RabbitMqTransportChannel : ITransportChannel
         }
 
         var consumer = consumerFactory.CreateConsumer(new ConsumerConfiguration(prefetchCount, perQueueConfigurations));
+        var notifier = consumers.Count > 0 ? consumers.First().Services.GetService<LifecycleNotifier>() : null;
+
+        // a broker-side cancel ends that queue's consumption for good; tell the lifecycle so the queue's owner can act
+        IDisposable? cancelSubscription = null;
+        if (notifier is { IsEnabled: true } && consumers.First().Services.GetService<IEventBus>() is { } eventBus)
+        {
+            var contextsByQueue = consumers.ToDictionary(c => c.Queue, StringComparer.Ordinal);
+            cancelSubscription = eventBus.Subscribe<ConsumerCancelledEvent>(e =>
+                e.Consumer.Id == consumer.Id && contextsByQueue.TryGetValue(e.Queue.Name, out var cancelledContext)
+                    ? notifier.NotifyAsync(cancelledContext, LifecycleLayer.Consumer, LifecycleEvent.Cancelled, "Cancelled by the broker").AsTask()
+                    : Task.CompletedTask
+            );
+        }
+
         await consumer.StartConsumingAsync(cancellationToken).ConfigureAwait(false);
 
-        var notifier = consumers.Count > 0 ? consumers.First().Services.GetService<LifecycleNotifier>() : null;
         if (notifier is { IsEnabled: true })
             foreach (var consumerContext in consumers)
                 await notifier.NotifyAsync(consumerContext, LifecycleLayer.Consumer, LifecycleEvent.Started, cancellationToken: cancellationToken).ConfigureAwait(false);
-        return new RabbitMqTransportConsumer(consumer, consumers, notifier);
+        return new RabbitMqTransportConsumer(consumer, consumers, notifier, cancelSubscription);
     }
 
     public ValueTask DisposeAsync() => default;
@@ -284,16 +297,21 @@ internal sealed class RabbitMqTransportConsumer : ITransportConsumer
     private readonly IConsumer consumer;
     private readonly IReadOnlyCollection<ConsumerContext> consumers;
     private readonly LifecycleNotifier? notifier;
+    private readonly IDisposable? cancelSubscription;
 
-    public RabbitMqTransportConsumer(IConsumer consumer, IReadOnlyCollection<ConsumerContext> consumers, LifecycleNotifier? notifier)
+    public RabbitMqTransportConsumer(
+        IConsumer consumer, IReadOnlyCollection<ConsumerContext> consumers, LifecycleNotifier? notifier, IDisposable? cancelSubscription
+    )
     {
         this.consumer = consumer;
         this.consumers = consumers;
         this.notifier = notifier;
+        this.cancelSubscription = cancelSubscription;
     }
 
     public async ValueTask DisposeAsync()
     {
+        cancelSubscription?.Dispose();
         await consumer.DisposeAsync().ConfigureAwait(false);
         if (notifier is { IsEnabled: true })
             foreach (var consumerContext in consumers)

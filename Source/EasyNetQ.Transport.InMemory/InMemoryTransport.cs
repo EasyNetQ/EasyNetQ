@@ -54,7 +54,11 @@ internal sealed class InMemoryChannel(InMemoryBroker broker) : ITransportChannel
 
     public ValueTask PublishAsync(PublishContext context)
     {
-        broker.Publish(context.Exchange, context.RoutingKey, context.Properties, context.Body);
+        var routed = broker.Publish(context.Exchange, context.RoutingKey, context.Properties, context.Body);
+        if (!routed && context.Mandatory)
+            throw new UnroutableMessageException(
+                $"No queue is bound to the message (exchange={context.Exchange}, routingKey={context.RoutingKey})"
+            );
         return default;
     }
 
@@ -85,10 +89,12 @@ internal sealed class InMemoryConsumer : ITransportConsumer
     {
         this.consumers = consumers;
         this.notifier = notifier;
-        pumps = consumers.Select(consumerContext => Task.Run(() => PumpAsync(broker, consumerContext, cts.Token))).ToArray();
+        pumps = consumers.Select(consumerContext => Task.Run(() => PumpAsync(broker, consumerContext, notifier, cts.Token))).ToArray();
     }
 
-    private static async Task PumpAsync(InMemoryBroker broker, ConsumerContext consumerContext, CancellationToken cancellationToken)
+    private static async Task PumpAsync(
+        InMemoryBroker broker, ConsumerContext consumerContext, LifecycleNotifier? notifier, CancellationToken cancellationToken
+    )
     {
         var queue = broker.GetQueue(consumerContext.Queue);
         if (queue is null) return;
@@ -125,11 +131,16 @@ internal sealed class InMemoryConsumer : ITransportConsumer
         }
         catch (OperationCanceledException)
         {
+            return;
         }
         finally
         {
             Interlocked.Decrement(ref queue.ConsumerCount);
         }
+
+        // the queue was deleted under the consumer: the broker-side cancel
+        if (notifier is not null && !cancellationToken.IsCancellationRequested)
+            await notifier.NotifyAsync(consumerContext, LifecycleLayer.Consumer, LifecycleEvent.Cancelled, "Queue deleted").ConfigureAwait(false);
     }
 
     public async ValueTask DisposeAsync()

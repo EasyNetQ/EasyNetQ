@@ -145,3 +145,107 @@ public class InMemoryTransportTests
         name.Should().StartWith("inmemory.gen-");
     }
 }
+
+public class When_the_in_memory_broker_behaves_like_amqp
+{
+    private static async Task<(ITransportChannel Channel, ITopology Topology, ConnectionContext Connection, ServiceProvider Services, List<LifecycleContext> Events)> OpenAsync()
+    {
+        var events = new List<LifecycleContext>();
+        var services = new ServiceCollection()
+            .AddSingleton(new PipelineBuilder<LifecycleContext>())
+            .AddSingleton(new LifecycleConfiguration(b => b.Use("record", (context, next) =>
+            {
+                lock (events) events.Add(context);
+                return next(context);
+            })))
+            .AddSingleton<LifecycleNotifier>()
+            .BuildServiceProvider();
+        var connectionContext = new ConnectionContext("test", services);
+        var connection = await new InMemoryTransport().ConnectAsync(connectionContext, TestContext.Current.CancellationToken);
+        var channel = await connection.OpenChannelAsync(new ChannelContext(connectionContext), TestContext.Current.CancellationToken);
+        return (channel, channel.Topology!, connectionContext, services, events);
+    }
+
+    private static PublishContext Publish(ConnectionContext connection, string exchange, string key, bool mandatory = false) => new(new ChannelContext(connection))
+    {
+        Exchange = exchange,
+        RoutingKey = key,
+        Mandatory = mandatory,
+        Body = Encoding.UTF8.GetBytes(key),
+        CancellationToken = TestContext.Current.CancellationToken,
+    };
+
+    [Fact]
+    public async Task Should_return_an_unroutable_mandatory_publish()
+    {
+        var (channel, topology, connection, services, _) = await OpenAsync();
+        await using var _ = services;
+        await topology.DeclareExchangeAsync(new ExchangeDefinition("x", ExchangeType.Direct), TestContext.Current.CancellationToken);
+
+        var mandatory = async () => await channel.PublishAsync(Publish(connection, "x", "nobody", mandatory: true));
+        var fireAndForget = async () => await channel.PublishAsync(Publish(connection, "x", "nobody"));
+
+        await mandatory.Should().ThrowAsync<UnroutableMessageException>();
+        await fireAndForget.Should().NotThrowAsync();
+    }
+
+    [Fact]
+    public async Task Should_treat_a_repeated_binding_as_one()
+    {
+        var (channel, topology, connection, services, _) = await OpenAsync();
+        await using var _ = services;
+        await topology.DeclareExchangeAsync(new ExchangeDefinition("x", ExchangeType.Direct), TestContext.Current.CancellationToken);
+        var queue = await topology.DeclareQueueAsync(new QueueDefinition("q"), TestContext.Current.CancellationToken);
+        await topology.BindAsync(new BindingDefinition("x", queue, "k"), TestContext.Current.CancellationToken);
+        await topology.BindAsync(new BindingDefinition("x", queue, "k"), TestContext.Current.CancellationToken);
+
+        await channel.PublishAsync(Publish(connection, "x", "k"));
+
+        (await topology.GetQueueStatsAsync(queue, TestContext.Current.CancellationToken)).MessagesCount.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task Should_keep_routing_other_keys_while_unbinding()
+    {
+        var (channel, topology, connection, services, _) = await OpenAsync();
+        await using var _ = services;
+        await topology.DeclareExchangeAsync(new ExchangeDefinition("x", ExchangeType.Direct), TestContext.Current.CancellationToken);
+        var queue = await topology.DeclareQueueAsync(new QueueDefinition("q"), TestContext.Current.CancellationToken);
+        await topology.BindAsync(new BindingDefinition("x", queue, "stays"), TestContext.Current.CancellationToken);
+
+        var churn = Task.Run(async () =>
+        {
+            for (var i = 0; i < 2_000; i++)
+            {
+                await topology.BindAsync(new BindingDefinition("x", queue, $"churn.{i}"));
+                await topology.UnbindAsync(new BindingDefinition("x", queue, $"churn.{i}"));
+            }
+        }, TestContext.Current.CancellationToken);
+        for (var i = 0; i < 2_000; i++)
+            await channel.PublishAsync(Publish(connection, "x", "stays", mandatory: true));
+        await churn;
+
+        (await topology.GetQueueStatsAsync(queue, TestContext.Current.CancellationToken)).MessagesCount.Should().Be(2_000);
+    }
+
+    [Fact]
+    public async Task Should_report_a_deleted_queue_as_a_cancelled_consumer()
+    {
+        var (channel, topology, connection, services, events) = await OpenAsync();
+        await using var _ = services;
+        var queue = await topology.DeclareQueueAsync(new QueueDefinition("q"), TestContext.Current.CancellationToken);
+        var consumerContext = new ConsumerContext(new ChannelContext(connection), queue) { MessagePipeline = static _ => default };
+        await using var consumer = await channel.StartConsumerAsync([consumerContext], TestContext.Current.CancellationToken);
+
+        await topology.DeleteQueueAsync(queue, cancellationToken: TestContext.Current.CancellationToken);
+
+        for (var i = 0; i < 100 && !Cancelled(); i++)
+            await Task.Delay(20, TestContext.Current.CancellationToken);
+        Cancelled().Should().BeTrue();
+
+        bool Cancelled()
+        {
+            lock (events) return events.Any(e => e.Layer == LifecycleLayer.Consumer && e.Event == LifecycleEvent.Cancelled);
+        }
+    }
+}

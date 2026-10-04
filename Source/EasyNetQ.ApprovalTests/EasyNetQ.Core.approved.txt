@@ -635,6 +635,12 @@ namespace EasyNetQ
         public UnknownMessageTypeException(string? wireName, string message) { }
         public string? WireName { get; }
     }
+    public class UnroutableMessageException : System.Exception
+    {
+        public UnroutableMessageException() { }
+        public UnroutableMessageException(string message) { }
+        public UnroutableMessageException(string message, System.Exception inner) { }
+    }
 }
 namespace EasyNetQ.Configuration
 {
@@ -1183,6 +1189,7 @@ namespace EasyNetQ.Pipeline
     {
         public static readonly EasyNetQ.Pipeline.LifecycleEvent Blocked;
         public static readonly EasyNetQ.Pipeline.LifecycleEvent CallbackError;
+        public static readonly EasyNetQ.Pipeline.LifecycleEvent Cancelled;
         public static readonly EasyNetQ.Pipeline.LifecycleEvent Connected;
         public static readonly EasyNetQ.Pipeline.LifecycleEvent Disconnected;
         public static readonly EasyNetQ.Pipeline.LifecycleEvent Recovered;

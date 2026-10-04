@@ -685,6 +685,12 @@ namespace EasyNetQ.Events
         public ConnectionUnblockedEvent(EasyNetQ.Persistent.PersistentConnectionType Type) { }
         public EasyNetQ.Persistent.PersistentConnectionType Type { get; init; }
     }
+    public readonly struct ConsumerCancelledEvent : System.IEquatable<EasyNetQ.Events.ConsumerCancelledEvent>
+    {
+        public ConsumerCancelledEvent(EasyNetQ.Consumer.IConsumer Consumer, in EasyNetQ.Topology.Queue Queue) { }
+        public EasyNetQ.Consumer.IConsumer Consumer { get; init; }
+        public EasyNetQ.Topology.Queue Queue { get; init; }
+    }
     public readonly struct ConsumerChannelDisposedEvent : System.IEquatable<EasyNetQ.Events.ConsumerChannelDisposedEvent>
     {
         public ConsumerChannelDisposedEvent(System.Collections.Generic.IReadOnlyCollection<string> ConsumerTags) { }
@@ -802,7 +808,7 @@ namespace EasyNetQ.Producer
         public PublishNackedException(string message) { }
         public PublishNackedException(string message, System.Exception inner) { }
     }
-    public class PublishReturnedException : System.Exception
+    public class PublishReturnedException : EasyNetQ.UnroutableMessageException
     {
         public PublishReturnedException() { }
         public PublishReturnedException(string message) { }

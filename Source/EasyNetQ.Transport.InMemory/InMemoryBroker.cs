@@ -17,7 +17,8 @@ public sealed class InMemoryBroker
     internal sealed class InMemoryExchange(string type)
     {
         public string Type { get; } = type;
-        public ConcurrentBag<BindingDefinition> Bindings { get; } = new();
+        // copy-on-write: routing reads a stable snapshot while bindings change concurrently
+        public volatile BindingDefinition[] Bindings = [];
     }
 
     internal sealed class InMemoryQueue
@@ -51,7 +52,12 @@ public sealed class InMemoryBroker
 
     internal bool QueueExists(string queue) => queues.ContainsKey(queue);
 
-    internal void DeleteQueue(string queue) => queues.TryRemove(queue, out _);
+    internal void DeleteQueue(string queue)
+    {
+        // like a broker cancelling the queue's consumers
+        if (queues.TryRemove(queue, out var removed))
+            removed.Deliveries.Writer.TryComplete();
+    }
 
     internal void Purge(string queue)
     {
@@ -62,43 +68,45 @@ public sealed class InMemoryBroker
     internal void Bind(BindingDefinition binding)
     {
         var exchange = exchanges.GetOrAdd(binding.Source, static _ => new InMemoryExchange("topic"));
-        exchange.Bindings.Add(binding);
+        // AMQP bindings are idempotent: binding the same key twice must not deliver twice
+        lock (exchange)
+        {
+            if (!exchange.Bindings.Contains(binding))
+                exchange.Bindings = [.. exchange.Bindings, binding];
+        }
     }
 
     internal void Unbind(BindingDefinition binding)
     {
         if (!exchanges.TryGetValue(binding.Source, out var exchange)) return;
-        // ConcurrentBag has no remove; rebuild without the binding
-        var remaining = exchange.Bindings.Where(b => b != binding).ToList();
-        while (exchange.Bindings.TryTake(out _))
-        {
-        }
-        foreach (var b in remaining) exchange.Bindings.Add(b);
+        lock (exchange)
+            exchange.Bindings = exchange.Bindings.Where(b => b != binding).ToArray();
     }
 
     internal InMemoryQueue? GetQueue(string queue) => queues.TryGetValue(queue, out var q) ? q : null;
 
     /// <summary>Routes one message; the body is copied because publishers reuse their buffers</summary>
-    internal void Publish(string exchangeName, string routingKey, in MessageProperties properties, ReadOnlyMemory<byte> body)
+    /// <returns>Whether at least one queue received the message (an AMQP mandatory publish is returned otherwise)</returns>
+    internal bool Publish(string exchangeName, string routingKey, in MessageProperties properties, ReadOnlyMemory<byte> body)
     {
         var delivery = new InMemoryDelivery(exchangeName, routingKey, properties, body.ToArray());
 
         if (exchangeName.Length == 0)
         {
             // default exchange: routing key = queue name
-            GetQueue(routingKey)?.Deliveries.Writer.TryWrite(delivery);
-            return;
+            return GetQueue(routingKey)?.Deliveries.Writer.TryWrite(delivery) ?? false;
         }
 
-        Route(exchangeName, routingKey, delivery, depth: 0);
+        return Route(exchangeName, routingKey, delivery, depth: 0);
     }
 
     internal void Redeliver(string queue, InMemoryDelivery delivery)
         => GetQueue(queue)?.Deliveries.Writer.TryWrite(delivery with { Redelivered = true });
 
-    private void Route(string exchangeName, string routingKey, InMemoryDelivery delivery, int depth)
+    private bool Route(string exchangeName, string routingKey, InMemoryDelivery delivery, int depth)
     {
-        if (depth > 8 || !exchanges.TryGetValue(exchangeName, out var exchange)) return;
+        if (depth > 8 || !exchanges.TryGetValue(exchangeName, out var exchange)) return false;
+        var routed = false;
 
         foreach (var binding in exchange.Bindings)
         {
@@ -111,10 +119,12 @@ public sealed class InMemoryBroker
             if (!matches) continue;
 
             if (binding.DestinationIsExchange)
-                Route(binding.Destination, routingKey, delivery, depth + 1);
+                routed |= Route(binding.Destination, routingKey, delivery, depth + 1);
             else
-                GetQueue(binding.Destination)?.Deliveries.Writer.TryWrite(delivery);
+                routed |= GetQueue(binding.Destination)?.Deliveries.Writer.TryWrite(delivery) ?? false;
         }
+
+        return routed;
     }
 }
 
