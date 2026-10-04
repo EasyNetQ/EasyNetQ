@@ -4,15 +4,16 @@
     <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
 
-  <!-- Built as a source reference (EasyNetQ.SourceReference.props): no package on every build, and no MinVer, whose
-       git lookup fails in build contexts without history (e.g. a Docker build of the consuming app) -->
-  <!-- ...and the consumer's configuration all the way down: a solution build would otherwise unset it for these projects'
-       own references (none are in the consumer's solution), and two instances of one project collide on bin/obj -->
-  <PropertyGroup Condition="'$(EasyNetQSourceReference)' == 'true'">
+  <!-- Built anywhere but EasyNetQ's own solution, i.e. as a source reference (EasyNetQ.SourceReference.props): no
+       package on every build, and the consumer's configuration all the way down (a solution build would otherwise unset
+       it for these projects' own references, none of which are in the consumer's solution). Keyed on the solution, not
+       on a global property: one set by the props is missing where a project reaches EasyNetQ only transitively (a test
+       project referencing the app), and two sets of global properties are two instances colliding on bin/obj. -->
+  <PropertyGroup Condition="'$(SolutionDir)' != '$(MSBuildThisFileDirectory)'">
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <ShouldUnsetParentConfigurationAndPlatform>false</ShouldUnsetParentConfigurationAndPlatform>
   </PropertyGroup>
-  <!-- keyed on the checkout, not the global property, so transitively referenced projects agree -->
+  <!-- No MinVer when its git lookup cannot work (e.g. a Docker build of the consuming app) -->
   <PropertyGroup Condition="!Exists('$(MSBuildThisFileDirectory)../.git')">
     <MinVerSkip>true</MinVerSkip>
   </PropertyGroup>

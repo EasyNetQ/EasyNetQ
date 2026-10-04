@@ -162,10 +162,13 @@ Gaps found running v9 in production consumers, fixed in the library rather than 
 - Consuming EasyNetQ from source (e.g. a git submodule): `<Import Project="…/EasyNetQ/Source/EasyNetQ.SourceReference.props" />`
   adds the project references (`EasyNetQSourcePackages`, default `EasyNetQ`), the source generator as an analyzer and
   the interceptors namespace. Source-referenced builds do not pack, and MinVer is skipped when the checkout has no
-  `.git` (Docker build contexts). Every EasyNetQ project is built once, in the consumer's configuration: the SDK's transitive
-  references get the same global properties as the direct ones, and a solution build no longer unsets Configuration for
-  them (before, EasyNetQ.Core and EasyNetQ.RabbitMQ were built twice, partly as Debug, into the same `bin/obj`, which
-  broke parallel builds intermittently). `tests/source-reference/check.sh` guards this in CI.
+  `.git` (Docker build contexts). Every EasyNetQ project is built once, in the consumer's configuration: the references
+  carry no global properties, so a project reaching EasyNetQ only transitively (a test project referencing the app, built
+  on its own) shares the same instances, and outside EasyNetQ's own solution a build neither packs nor unsets
+  Configuration for EasyNetQ's references (before, EasyNetQ.Core and EasyNetQ.RabbitMQ were built twice, partly as Debug,
+  into the same `bin/obj`, which broke parallel builds intermittently). In a consumer *solution*, every project that
+  references EasyNetQ, also only transitively, imports the props: the referencing side decides whether Configuration
+  is unset. `tests/source-reference/check.sh` guards both the solution and the standalone build in CI.
 
 ## Native AOT
 
