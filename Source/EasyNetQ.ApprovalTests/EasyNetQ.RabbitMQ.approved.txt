@@ -457,6 +457,7 @@ namespace EasyNetQ.Configuration
     {
         public EasyNetQ.Configuration.RabbitMqBuilder Consume(System.Action<EasyNetQ.Configuration.RabbitMqConsumerBuilder> configure) { }
         public EasyNetQ.Configuration.RabbitMqBuilder ErrorQueue(System.Action<EasyNetQ.Configuration.RabbitMqQueueBuilder> configure) { }
+        public EasyNetQ.Configuration.RabbitMqBuilder ErrorQueue(string name, System.Action<EasyNetQ.Configuration.RabbitMqQueueBuilder>? configure = null) { }
         public EasyNetQ.Configuration.RabbitMqBuilder LogFailedMessageBodies(bool enabled = true) { }
         public EasyNetQ.Configuration.RabbitMqBuilder Publish(System.Action<EasyNetQ.Configuration.RabbitMqPublishBuilder> configure) { }
     }
@@ -535,7 +536,9 @@ namespace EasyNetQ.Consumer
     {
         public ConsumeErrorOptions() { }
         public System.Collections.Generic.IDictionary<string, object>? ErrorQueueArguments { get; set; }
+        public string? ExchangeName { get; set; }
         public bool LogMessageBody { get; set; }
+        public string? QueueName { get; set; }
     }
     public sealed class Consumer : EasyNetQ.Consumer.IConsumer, System.IAsyncDisposable
     {

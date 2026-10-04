@@ -17,4 +17,15 @@ public sealed class ConsumeErrorOptions
     ///     cluster). Merged over <see cref="IConventions.ErrorQueueTypeConvention" />; null declares a classic queue.
     /// </summary>
     public IDictionary<string, object>? ErrorQueueArguments { get; set; }
+
+    /// <summary>
+    ///     Name of the error queue; null uses <see cref="IConventions.ErrorQueueNamingConvention" />. A broker that
+    ///     scopes permissions by name (e.g. <c>^app\.</c>) needs the error queue under the app's prefix.
+    /// </summary>
+    public string? QueueName { get; set; }
+
+    /// <summary>
+    ///     Name of the error exchange; null uses <see cref="IConventions.ErrorExchangeNamingConvention" />
+    /// </summary>
+    public string? ExchangeName { get; set; }
 }

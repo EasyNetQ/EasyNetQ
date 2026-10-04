@@ -150,6 +150,30 @@ public class DefaultConsumerErrorStrategyTests
         declaredArguments![Argument.QueueType].Should().Be(QueueType.Quorum);
     }
 
+    [Fact]
+    public async Task Should_declare_and_publish_to_the_configured_error_queue_and_exchange_names()
+    {
+        using var connection = Substitute.For<IConsumerConnection>();
+        var channel = Substitute.For<IChannel>();
+        string? declaredQueue = null, declaredExchange = null, boundQueue = null, boundExchange = null;
+        channel.QueueDeclareAsync(Arg.Do<string>(q => declaredQueue = q), Arg.Any<bool>(), Arg.Any<bool>(), Arg.Any<bool>(), Arg.Any<IDictionary<string, object?>>(), Arg.Any<bool>(), Arg.Any<bool>(), Arg.Any<CancellationToken>());
+        channel.ExchangeDeclareAsync(Arg.Do<string>(e => declaredExchange = e), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<bool>(), Arg.Any<IDictionary<string, object?>>(), Arg.Any<bool>(), Arg.Any<bool>(), Arg.Any<CancellationToken>());
+        channel.QueueBindAsync(Arg.Do<string>(q => boundQueue = q), Arg.Do<string>(e => boundExchange = e), Arg.Any<string>(), Arg.Any<IDictionary<string, object?>>(), Arg.Any<bool>(), Arg.Any<CancellationToken>());
+#pragma warning disable IDISP004
+        connection.CreateChannelAsync(Arg.Any<CreateChannelOptions>(), Arg.Any<CancellationToken>()).Returns(channel);
+#pragma warning restore IDISP004
+        var options = new ConsumeErrorOptions { QueueName = "app.errors", ExchangeName = "app.errors" };
+
+        await CreateConsumerErrorStrategy(connection, options: options).HandleErrorAsync(
+            CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("boom"), TestContext.Current.CancellationToken
+        );
+
+        declaredQueue.Should().Be("app.errors");
+        declaredExchange.Should().Be("app.errors");
+        boundQueue.Should().Be("app.errors");
+        boundExchange.Should().Be("app.errors");
+    }
+
     private static DefaultConsumeErrorStrategy CreateConsumerErrorStrategy(
         IConsumerConnection connectionMock,
         bool configurePublisherConfirm = false,

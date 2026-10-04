@@ -148,7 +148,9 @@ Gaps found running v9 in production consumers, fixed in the library rather than 
   error queue keeps them and they often carry personal data. Opt in with `UseRabbitMq(r => r.LogFailedMessageBodies())`.
   The error itself (event 600: queue, routing key, exchange, correlation id, exception) is still logged.
 - `UseRabbitMq(r => r.ErrorQueue(q => q.Quorum()))` declares the (bus-wide) error queue with typed arguments, e.g.
-  quorum so failed messages survive a node loss. `ConsumeErrorOptions` carries both settings.
+  quorum so failed messages survive a node loss. `ErrorQueue("app.errors", q => q.Quorum())` also names the queue and
+  its exchange instead of `EasyNetQ_Default_Error_Queue`, for brokers that scope permissions by name (`^app\.`).
+  `ConsumeErrorOptions` carries these settings.
 - Consuming EasyNetQ from source (e.g. a git submodule): `<Import Project="…/EasyNetQ/Source/EasyNetQ.SourceReference.props" />`
   adds the project references (`EasyNetQSourcePackages`, default `EasyNetQ`), the source generator as an analyzer and
   the interceptors namespace. Source-referenced builds do not pack, and MinVer is skipped when the checkout has no

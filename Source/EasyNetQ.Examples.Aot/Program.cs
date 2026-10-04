@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 // Native AOT smoke test: publish with PublishAot, run against a broker, exit 0 when every check passes.
 // Covers the fluent v9 API end to end: background consumer start that retries until a missing exchange exists,
 // type-level and per-route wire names, aliases, [MessageType], HandleUnknown for foreign types, untyped messages,
-// case-insensitive JSON through a source-generated context, and a quorum error queue.
+// case-insensitive JSON through a source-generated context, and a named quorum error queue.
 // Usage: EasyNetQ.Examples.Aot [connectionString]   (default: host=localhost)
 static ReadOnlyMemory<byte> Raw(string json) => Encoding.UTF8.GetBytes(json);
 var connectionString = args.Length > 0 ? args[0] : Environment.GetEnvironmentVariable("EASYNETQ_CONNECTION") ?? "host=localhost";
@@ -18,6 +18,7 @@ var run = Guid.NewGuid().ToString("N")[..8];
 var exchange = $"aot.smoke.{run}";
 var typedQueue = $"aot.smoke.{run}.typed";
 var untypedQueue = $"aot.smoke.{run}.untyped";
+const string errorQueueName = "aot.smoke.errors";
 
 var ping = new TaskCompletionSource<string?>(TaskCreationOptions.RunContinuationsAsynchronously);
 var pong = new TaskCompletionSource<string?>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -36,7 +37,7 @@ services.AddEasyNetQ(connectionString)
     .MessageType<Pong>(m => m.Alias("aot.pong.v1"))
     .ConsumerHost(o => o.RetryDelay = TimeSpan.FromMilliseconds(200))
     .UseRabbitMq(r => r
-        .ErrorQueue(q => q.Quorum())
+        .ErrorQueue(errorQueueName, q => q.Quorum())
         .Publish(p => p
             .Exchange(exchange, e => e.Topic())
             .Message<Ping>("ping")
@@ -120,8 +121,8 @@ Check("HandleUnknown for a foreign type", await foreign.Task.WaitAsync(timeout.T
 Check("untyped message to the only handler", (await untyped.Task.WaitAsync(timeout.Token)).Text == "untyped");
 await failed.Task.WaitAsync(timeout.Token);
 await Task.Delay(1000, timeout.Token);
-var errorQueue = await advanced.GetQueueStatsAsync("EasyNetQ_Default_Error_Queue", timeout.Token);
-Check("failed message reached the (quorum) error queue", errorQueue.MessagesCount > 0, $"({errorQueue.MessagesCount} messages)");
+var errorQueue = await advanced.GetQueueStatsAsync(errorQueueName, timeout.Token);
+Check("failed message reached the named (quorum) error queue", errorQueue.MessagesCount > 0, $"({errorQueue.MessagesCount} messages)");
 
 await host.StopAsync(CancellationToken.None);
 await advanced.ExchangeDeleteAsync(exchange, cancellationToken: CancellationToken.None);

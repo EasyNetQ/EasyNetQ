@@ -96,12 +96,12 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
 
         // the republish to the error queue gets its own PRODUCER span so failed messages are visible in traces
         using var errorPublishActivity = EasyNetQDiagnostics.Source.HasListeners()
-            ? EasyNetQDiagnostics.Source.StartActivity($"send {conventions.ErrorExchangeNamingConvention(receivedInfo)}", System.Diagnostics.ActivityKind.Producer)
+            ? EasyNetQDiagnostics.Source.StartActivity($"send {ErrorExchangeName(receivedInfo)}", System.Diagnostics.ActivityKind.Producer)
             : null;
         if (errorPublishActivity is not null)
         {
             errorPublishActivity.SetTag(MessagingTags.ErrorQueue, true);
-            errorPublishActivity.SetTag(MessagingTags.DestinationName, conventions.ErrorExchangeNamingConvention(receivedInfo));
+            errorPublishActivity.SetTag(MessagingTags.DestinationName, ErrorExchangeName(receivedInfo));
             errorPublishActivity.SetTag(MessagingTags.ErrorType, exception.GetType().FullName);
             if (properties.CorrelationIdPresent)
                 errorPublishActivity.SetTag(MessagingTags.ConversationId, properties.CorrelationId);
@@ -185,11 +185,14 @@ public class DefaultConsumeErrorStrategy : IConsumeErrorStrategy
         await channel.QueueBindAsync(queueName, exchangeName, routingKey, cancellationToken: cancellationToken);
     }
 
+    private string ErrorExchangeName(MessageReceivedInfo receivedInfo)
+        => options.ExchangeName ?? conventions.ErrorExchangeNamingConvention(receivedInfo);
+
     private async Task<string> DeclareErrorExchangeWithQueueAsync(IChannel channel, MessageReceivedInfo receivedInfo, CancellationToken cancellationToken = default)
     {
-        var errorExchangeName = conventions.ErrorExchangeNamingConvention(receivedInfo);
+        var errorExchangeName = ErrorExchangeName(receivedInfo);
         var errorExchangeType = conventions.ErrorExchangeTypeConvention();
-        var errorQueueName = conventions.ErrorQueueNamingConvention(receivedInfo);
+        var errorQueueName = options.QueueName ?? conventions.ErrorQueueNamingConvention(receivedInfo);
         var errorQueueType = conventions.ErrorQueueTypeConvention();
         var routingKey = conventions.ErrorExchangeRoutingKeyConvention(receivedInfo);
 

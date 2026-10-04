@@ -43,6 +43,19 @@ public sealed class RabbitMqBuilder
         return this;
     }
 
+    /// <summary>
+    ///     Name the error queue and its exchange, e.g. <c>ErrorQueue("app.errors", q =&gt; q.Quorum())</c>, instead of
+    ///     the conventions' <c>EasyNetQ_Default_Error_Queue</c>; needed when broker permissions are scoped by name.
+    /// </summary>
+    public RabbitMqBuilder ErrorQueue(string name, Action<RabbitMqQueueBuilder>? configure = null)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        var options = ErrorOptions();
+        options.QueueName = name;
+        options.ExchangeName = name;
+        return configure is null ? this : ErrorQueue(configure);
+    }
+
     private ConsumeErrorOptions ErrorOptions()
     {
         if (builder.Services.LastOrDefault(d => d.ServiceType == typeof(ConsumeErrorOptions))?.ImplementationInstance is ConsumeErrorOptions existing)
