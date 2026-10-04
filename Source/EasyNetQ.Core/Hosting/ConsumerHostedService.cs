@@ -16,7 +16,7 @@ namespace EasyNetQ.Hosting;
 ///     them on the transport for the lifetime of the host. Startup runs in the background and retries each consumer
 ///     until it runs (see <see cref="ConsumerHostOptions" />); <see cref="IConsumerHostStatus" /> reports progress.
 /// </summary>
-public sealed class ConsumerHostedService : IHostedService
+public sealed class ConsumerHostedService : IHostedService, IAsyncDisposable
 {
     private readonly IEnumerable<ConsumerDefinition> definitions;
     private readonly ITransport transport;
@@ -31,6 +31,7 @@ public sealed class ConsumerHostedService : IHostedService
     private readonly List<ITransportConsumer> consumers = new();
     private readonly CancellationTokenSource stopping = new();
     private ChannelContext? channelContext;
+    private ITransportConnection? connection;
     private ITransportChannel? channel;
     private Task? startup;
 
@@ -87,12 +88,31 @@ public sealed class ConsumerHostedService : IHostedService
             }
         }
 
+        await ReleaseAsync().ConfigureAwait(false);
+    }
+
+    /// <summary>
+    ///     Releases what <see cref="StopAsync" /> releases, for a container disposed without stopping the host.
+    ///     The transport connection carries the lifecycle bridge, so it must go before the container's services do.
+    /// </summary>
+    public async ValueTask DisposeAsync()
+    {
+        stopping.Cancel();
+        await ReleaseAsync().ConfigureAwait(false);
+        stopping.Dispose();
+    }
+
+    private async ValueTask ReleaseAsync()
+    {
         foreach (var consumer in consumers)
             await consumer.DisposeAsync().ConfigureAwait(false);
         consumers.Clear();
         if (channel is not null)
             await channel.DisposeAsync().ConfigureAwait(false);
         channel = null;
+        if (connection is not null)
+            await connection.DisposeAsync().ConfigureAwait(false);
+        connection = null;
     }
 
     private async Task StartConsumersAsync(List<ConsumerDefinition> pending, CancellationToken cancellationToken)
@@ -147,11 +167,15 @@ public sealed class ConsumerHostedService : IHostedService
 
     private async Task<ITransportChannel> OpenChannelAsync(CancellationToken cancellationToken)
     {
-        var connectionContext = new ConnectionContext("Consumers", services);
-        connectionContext.Set(Keys.ConnectionType, PersistentConnectionType.Consumer);
-        var connection = await transport.ConnectAsync(connectionContext, cancellationToken).ConfigureAwait(false);
-        channelContext = new ChannelContext(connectionContext);
-        return await connection.OpenChannelAsync(channelContext, cancellationToken).ConfigureAwait(false);
+        // one connection for the host's lifetime: a retry after a failed channel open reuses it
+        if (connection is null)
+        {
+            var connectionContext = new ConnectionContext("Consumers", services);
+            connectionContext.Set(Keys.ConnectionType, PersistentConnectionType.Consumer);
+            connection = await transport.ConnectAsync(connectionContext, cancellationToken).ConfigureAwait(false);
+            channelContext = new ChannelContext(connectionContext);
+        }
+        return await connection.OpenChannelAsync(channelContext!, cancellationToken).ConfigureAwait(false);
     }
 
     private async Task<ITransportConsumer> StartConsumerAsync(ITransportChannel transportChannel, ConsumerDefinition definition, CancellationToken cancellationToken)

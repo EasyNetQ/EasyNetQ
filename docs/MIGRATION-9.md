@@ -144,6 +144,10 @@ Gaps found running v9 in production consumers, fixed in the library rather than 
   `ConsumerHost(o => o.WaitForStartup = true)`; `RetryDelay`/`MaxRetryDelay` tune the backoff. Code that publishes
   right after `StartAsync` should await `WaitForStartedAsync` first.
 - `ConsumerHostedService` constructor takes `ConsumerHostOptions`, `ConsumerHostStatus` and a logger (DI-built).
+- `ConsumerHostedService` owns its transport connection and releases it on `StopAsync` and on `DisposeAsync`
+  (`IAsyncDisposable`, for a container disposed without stopping the host). `LifecycleNotifier` is `IDisposable` and
+  stops dispatching once disposed. **Behavior change:** lifecycle steps no longer see the connection's `Disconnected`
+  while the container shuts down; before, a step resolving a service there threw `ObjectDisposedException` (event 701).
 - **Behavior change:** `DefaultConsumeErrorStrategy` no longer logs failed message bodies (event 601) by default; the
   error queue keeps them and they often carry personal data. Opt in with `UseRabbitMq(r => r.LogFailedMessageBodies())`.
   The error itself (event 600: queue, routing key, exchange, correlation id, exception) is still logged.

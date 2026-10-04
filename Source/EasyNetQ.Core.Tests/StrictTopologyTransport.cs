@@ -7,7 +7,7 @@ namespace EasyNetQ.Core.Tests;
 /// <summary>
 ///     InMemory transport with RabbitMQ's topology rules: binding to an exchange nobody declared fails (the broker's
 ///     404), and every exchange declaration is recorded. <see cref="FailConnects" /> makes connecting fail, like an
-///     unreachable broker.
+///     unreachable broker. <see cref="OpenConnections" /> counts connections not disposed yet.
 /// </summary>
 public sealed class StrictTopologyTransport : ITransport
 {
@@ -16,6 +16,8 @@ public sealed class StrictTopologyTransport : ITransport
     public InMemoryTransport Inner => inner;
     public List<string> DeclaredExchanges { get; } = new();
     public int FailConnects { get; set; }
+    public int OpenConnections => openConnections;
+    private int openConnections;
 
     public void DeclareExternally(string exchange) => inner.Broker.DeclareExchange(new ExchangeDefinition(exchange));
 
@@ -26,7 +28,9 @@ public sealed class StrictTopologyTransport : ITransport
             FailConnects--;
             throw new EasyNetQException("broker unreachable");
         }
-        return new Connection(await inner.ConnectAsync(context, cancellationToken), this);
+        var connection = new Connection(await inner.ConnectAsync(context, cancellationToken), this);
+        Interlocked.Increment(ref openConnections);
+        return connection;
     }
 
     private sealed class Connection(ITransportConnection connection, StrictTopologyTransport transport) : ITransportConnection
@@ -37,7 +41,11 @@ public sealed class StrictTopologyTransport : ITransport
         public async ValueTask<ITransportChannel> OpenChannelAsync(ChannelContext context, CancellationToken cancellationToken = default)
             => new Channel(await connection.OpenChannelAsync(context, cancellationToken), transport);
 
-        public ValueTask DisposeAsync() => connection.DisposeAsync();
+        public ValueTask DisposeAsync()
+        {
+            Interlocked.Decrement(ref transport.openConnections);
+            return connection.DisposeAsync();
+        }
     }
 
     private sealed class Channel(ITransportChannel channel, StrictTopologyTransport transport) : ITransportChannel

@@ -10,11 +10,12 @@ public sealed record LifecycleConfiguration(Action<PipelineBuilder<LifecycleCont
 ///     Runs the lifecycle pipeline for connection, channel and consumer events. When no step is registered,
 ///     notifications are free: no context is allocated and no pipeline runs.
 /// </summary>
-public sealed class LifecycleNotifier
+public sealed class LifecycleNotifier : IDisposable
 {
     private readonly PipelineBuilder<LifecycleContext> builder;
     private readonly IServiceProvider services;
     private PipelineStep<LifecycleContext>? pipeline;
+    private volatile bool disposed;
 
     /// <summary>
     ///     Creates the notifier, applying the fluent contributions to the pipeline builder
@@ -48,7 +49,7 @@ public sealed class LifecycleNotifier
         CancellationToken cancellationToken = default
     )
     {
-        if (!IsEnabled) return default;
+        if (!IsEnabled || disposed) return default;
 
         pipeline ??= builder.Build(services);
         var context = new LifecycleContext(scope)
@@ -61,4 +62,10 @@ public sealed class LifecycleNotifier
         };
         return pipeline(context);
     }
+
+    /// <summary>
+    ///     Stops dispatching: once the container starts disposing, steps would resolve services that are gone.
+    ///     Connections owned by the hosts release their lifecycle bridge themselves; this covers any other path.
+    /// </summary>
+    public void Dispose() => disposed = true;
 }
