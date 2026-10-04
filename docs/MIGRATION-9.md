@@ -1,214 +1,396 @@
-# Migrating from EasyNetQ 8.x to 9.0
+# EasyNetQ 9.0: release notes, design direction and migration guide
 
-Living document; updated as v9 phases land. Best-effort compatibility: the high-level API shape survives,
-signatures and internals do not.
+9.0 is in pre-release (`9.0.0-alpha.1` on nuget.org). This document tracks the v9 branches and changes until 9.0
+ships. Sections: [Highlights](#highlights), [Design direction](#design-direction), [Performance](#performance),
+[Upgrading from 8.x](#upgrade-in-five-steps), [What v9 adds](#what-v9-adds-in-detail),
+[Known gaps before 9.0](#known-gaps-before-90).
 
-## Platform and packaging
+## Highlights
 
-- Target frameworks: `netstandard2.0`, `net8.0`, `net9.0`, `net10.0`. .NET Framework 4.7.2+ works through
-  the `netstandard2.0` assets, but only from SDK-style projects: the required source generator runs in the
-  compiler, so packages.config-era projects cannot use v9 — stay on 8.x there. The `netstandard2.0` binaries
-  trade some publish/consume-path efficiency (no pooled async builders) for reach; `net8.0`+ binaries are
-  unaffected.
-- The `EasyNetQ` package is now a bundle over two new packages: `EasyNetQ.Core` (transport-agnostic) and
-  `EasyNetQ.RabbitMQ` (client-coupled). Keep referencing `EasyNetQ` for a drop-in experience. Types moved
-  between assemblies, so binary compatibility is gone even where source compatibility remains: recompile.
-- The source generator (`EasyNetQ.Generators`) is required. It registers message types found at call sites and
-  intercepts `AddEasyNetQ(...)`; without it, unregistered types fail at runtime. It ships inside the
-  `EasyNetQ.Core` package (`analyzers/dotnet/cs`), together with `buildTransitive/EasyNetQ.Core.props`, which opts
-  the consuming project into the generated interceptors (`InterceptorsNamespaces`), so referencing `EasyNetQ` is
-  all a project needs. `tests/package-consumer` proves it in CI: the Native AOT sample built against the packed
-  packages, which `publish-to-nuget` waits for.
+- **Drop-in for `IBus` users.** `PubSub`, `Rpc`, `SendReceive` and `Scheduler` keep their shape; most apps
+  recompile with few or no changes and stay wire-compatible with 8.x services, so rolling upgrades work.
+- **One middleware pipeline** for publishing, consuming and connection lifecycle (`IMiddleware<TContext>`),
+  replacing 8.x's pipeline builders, ack strategies and per-message events.
+- **Fluent configuration**: declare consumers, queues, exchanges and publish routes at startup, with typed
+  RabbitMQ settings (quorum queues, dead-lettering, error queues) and background consumer startup.
+- **Transport abstraction**: `EasyNetQ.Core` has no RabbitMQ dependency; `EasyNetQ.RabbitMQ` implements it, and
+  `EasyNetQ.Transport.InMemory` runs the same code in tests without a broker.
+- **Native AOT**: a source generator replaces runtime reflection; a default app publishes with zero trim/AOT
+  warnings, enforced in CI.
+- **Interop**: stable wire names, aliases for foreign type names (Wolverine, MassTransit), raw handling of unknown
+  and untyped messages.
+- **Observability**: OpenTelemetry `ActivitySource` and `Meter` named `EasyNetQ`.
+- **New package `EasyNetQ.AspNetCore.SignalR`**: a SignalR scale-out backplane over EasyNetQ instead of Redis.
+- **Packages**: `EasyNetQ` becomes a bundle over `EasyNetQ.Core` and `EasyNetQ.RabbitMQ`; targets
+  `netstandard2.0`, `net8.0`, `net9.0`, `net10.0`.
 
-## Behavioral changes
+## Design direction
 
-- `ConsumerDispatchConcurrency` defaults to **1** (ordered processing). 8.x defaulted to `PrefetchCount`
-  (concurrent, unordered). Set `ConnectionConfiguration.ConsumerDispatcherConcurrency` to restore concurrency.
-- Publisher confirms are tracked by RabbitMQ.Client, not EasyNetQ:
-  - `BasicPublishAsync` completes when the broker confirms. Outstanding confirms are bounded per channel by a
-    rate limiter (128).
-  - A publish interrupted by reconnect **fails to the caller**; 8.x silently republished
-    (`PublishInterruptedException` and the retry loop are gone).
-  - The `EasyNetQ.Confirmation.Id` header is no longer added to messages.
-  - `PublishNackedException`/`PublishReturnedException` remain, now wrapping the client's
-    `PublishException`/`PublishReturnException` as inner exceptions.
-- Per-request `PublisherConfirms` on `IPublishConfiguration`/`ISendConfiguration`/`IRequestConfiguration`/
-  `IFuturePublishConfiguration` is `bool?`. Unset falls back to the connection-level setting (in 8.x the
-  non-nullable default silently disabled confirms for every high-level publish; fixed in 8.1.7 as well).
-- Consumer restart on channel-level errors is event-driven (immediate) with a 60 s safety-net timer; 8.x
-  polled every 5 s.
-- Connection-string parsing: unknown keys throw `EasyNetQException`; keys are case-insensitive.
+v9 is a rewrite of the internals around a few rules, each enforced by tests rather than review:
 
-## Removed APIs
+- **Everything is a pipeline step.** Connection, channel, consumer and handler are layers; each feature
+  (serialization, error handling, interceptors, confirms) is a step you can insert before, after, replace or
+  remove. Lower layers cannot modify higher ones.
+- **No reflection in Core.** A Roslyn source generator discovers message types and wires `AddEasyNetQ(...)`
+  at compile time. The 8.x reflection APIs survive in the `EasyNetQ` bundle for compatibility, annotated so AOT
+  apps get a warning at the call site. Native AOT is a result, not an add-on.
+- **The transport is a library.** Core never references RabbitMQ.Client. Typed broker settings live under
+  `UseRabbitMq(...)`; the generic, top-level configuration exists for portable code and back-compat.
+- **Do not rebuild what RabbitMQ.Client 7 does.** Publisher-confirm tracking, recovery and callbacks are the
+  client's; EasyNetQ adds the semantic layer on top. The same goes for tracing: the client emits wire spans,
+  EasyNetQ adds message-level spans and metrics.
+- **Lifecycle pipelines replace the event bus** as the user-facing surface for connection and consumer events.
+- **Allocation budgets only go down.** Every hot path has an allocation ceiling in
+  `Source/EasyNetQ.AllocationTests`; every phase commits its benchmark deltas
+  (`Source/EasyNetQ.Benchmarks/results/`).
+- **Compatibility is best effort.** The API shape is kept, signatures may break, and this guide covers the
+  difference, rather than keeping an 8.x snapshot frozen.
+- **Reach stays.** `netstandard2.0` is still a target, multi-targeted in the same assemblies (no separate compat
+  assembly), so .NET Framework 4.7.2+ SDK-style projects keep working.
+- **Dogfooded.** v9 runs in production consumers; gaps found there are fixed in the library, not worked around in
+  the apps (the [dogfooding fixes](#wire-names-aliases-and-foreign-messages) below came from that).
+
+## Performance
+
+Allocations per message on the hot paths, 8.x pipeline versus v9 (BenchmarkDotNet on .NET 10; allocations are
+deterministic, timings were taken on a busy machine and are left out):
+
+| Path | 8.x | 9.0 |
+|---|---:|---:|
+| Consume, small message | 208 B | 64 B |
+| Consume, medium message | 1,776 B | 1,632 B |
+| Publish (advanced or `PubSub`), small message | 408 B | 264 B |
+| Publish, medium message | 720 B | 576 B |
+| Publish + consume end to end (in-memory) | n/a | 480 B |
+
+The fixed per-message overhead of the pipeline dropped by 144 B on each side; what remains is mostly the JSON
+payload itself. Moving serialization into the publish pipeline and adding the fluent and lifecycle machinery
+cost zero bytes on the hot paths.
+
+# Upgrading from 8.x
+
+**The short version:** most applications that use `IBus` (`PubSub`, `Rpc`, `SendReceive`, `Scheduler`) recompile with
+few or no source changes, and keep talking to 8.x services on the wire. Code that touches the internals (custom
+pipelines, ack strategies, the event bus, publisher-confirmation types) needs editing, and a handful of defaults
+changed behavior. Everything new in v9 is opt-in.
+
+## Upgrade in five steps
+
+1. **Check the toolchain.** An SDK-style project and **.NET SDK 9.0.300 or later** (the source generator targets
+   Roslyn 4.14). `packages.config` projects cannot run the generator: stay on 8.x there.
+2. **Update the packages.** Every EasyNetQ package moves to the same 9.x version:
+
+   ```xml
+   <PackageReference Include="EasyNetQ" Version="9.0.0-alpha.1" />
+   <!-- only if you used it in 8.x -->
+   <PackageReference Include="EasyNetQ.Serialization.NewtonsoftJson" Version="9.0.0-alpha.1" />
+   ```
+
+   `EasyNetQ` now bundles `EasyNetQ.Core` (transport-agnostic) and `EasyNetQ.RabbitMQ`; keep referencing `EasyNetQ`.
+   The source generator ships inside `EasyNetQ.Core`, so nothing else is needed.
+3. **Rebuild everything that references EasyNetQ.** Types moved between assemblies: binary compatibility is gone even
+   where source compatibility stays. A library compiled against 8.x will not load under 9.x.
+4. **Fix the compile errors** with [Source changes](#source-changes).
+5. **Go through [Behavior changes](#behavior-changes)** before deploying. Two of them change semantics silently:
+   consumer concurrency and publishes interrupted by a reconnect.
+
+## Wire compatibility: running 8.x and 9.x side by side
+
+A rolling upgrade works: by default, 9.x names, routes and serializes messages the way 8.x does.
+
+| | 8.x and 9.x |
+|---|---|
+| `type` property (wire name) | `Namespace.Type, Assembly`: the same `DefaultTypeNameSerializer` output |
+| Exchange and queue names | same conventions (`Conventions` falls back to the type name, as in 8.x) |
+| JSON written | System.Text.Json, `JsonSerializerDefaults.General` (PascalCase): same as 8.x's default `SystemTextJsonSerializerV2` |
+| `UseNewtonsoftJson()`, `UseLegacyConventions()` | still available, same output |
+
+Differences a peer can notice:
+
+- 9.x no longer adds the `EasyNetQ.Confirmation.Id` header.
+- 9.x **reads** JSON property names case-insensitively, so a camelCase body from another stack now populates the
+  message instead of silently yielding default values. Writing is unchanged.
+- A `byte[]` (or `ReadOnlyMemory<byte>`, `Memory<byte>`, `ArraySegment<byte>`) passed to `IAdvancedBus.PublishAsync`
+  is sent as-is. In 8.x a `byte[]` bound to the typed overload and was published as a base64 JSON string.
+- A wire name or alias you set with `MessageType<T>(m => m.WireName(...))` or `[MessageType("...")]` replaces the
+  default `type`. Only use one once every consumer of that type runs 9.x, or give the 9.x consumers the old name as
+  an alias.
+
+## Source changes
+
+### Removed types
 
 | 8.x | 9.0 replacement |
 |---|---|
-| `ConsumePipelineBuilder`, `ProducePipelineBuilder` | `PipelineBuilder<ConsumeContext>` / `PipelineBuilder<PublishContext>` |
 | `AckStrategyAsync`, `AckStrategies`, `AckResult` | `AckDecision` (`Ack`, `NackRequeue`, `NackDiscard`, `Handled`) |
-| `IConsumeErrorStrategy` returning `AckStrategyAsync` | returns `AckDecision`; receives the consumer token |
-| Per-message events (`DeliveredMessageEvent`, `AckEvent`, `PublishedMessageEvent`) | pipeline middleware |
-| `MessageConfirmationEvent`, `ChannelRecoveredEvent`, `ChannelShutdownEvent` | removed with the confirmation listener |
-| `IPublishConfirmationListener`, `IPublishPendingConfirmation`, `PublishInterruptedException` | client-side confirmation tracking |
+| `ConsumePipelineBuilder`, `ProducePipelineBuilder`, `ProduceContext` | `PipelineBuilder<ConsumeContext>` / `PipelineBuilder<PublishContext>`, steps are `IMiddleware<TContext>` |
+| `DeliveredMessageEvent`, `AckEvent`, `PublishedMessageEvent` | a pipeline step (see [Pipelines](#pipelines-and-per-message-events)) |
+| `MessageConfirmationEvent`, `ChannelRecoveredEvent`, `ChannelShutdownEvent` | removed with the confirmation listener; connection events via `Lifecycle(...)` |
+| `IPublishConfirmationListener`, `IPublishPendingConfirmation`, `PublishConfirmationListener`, `PublishInterruptedException` | RabbitMQ.Client tracks confirms (see [Behavior changes](#behavior-changes)) |
 | `MessageFactory` | `MessageTypeDescriptor<T>.CreateMessage` (legacy `IMessage` paths only) |
 | `new MessageProperties(IReadOnlyBasicProperties)` | `BasicPropertiesMapper.FromBasicProperties` |
-| `ReflectionHelpers`, vendored `Sprache/` | deleted |
+| `ReflectionHelpers`, the vendored `Sprache` parser | none (internal) |
 
-## Changed constructors (DI-built types; affects manual construction and test fakes)
+No namespace was removed. One type moved: `ConsumeContext` is now in `EasyNetQ.Pipeline` (was `EasyNetQ.Consumer`).
+New code needs `using EasyNetQ.Pipeline;` for `IMiddleware<T>`, the contexts and `LifecycleEvent`, and
+`using EasyNetQ.Configuration;` for the fluent builder extensions (`Consume`, `Publish`, `UseRabbitMq`, `Lifecycle`).
 
-- `Conventions`, `MessageDeliveryModeStrategy`: take `IMessageTypeRegistry`.
-- `RabbitAdvancedBus`: confirmation listener parameter removed.
-- `DefaultConsumeErrorStrategy`: confirmation listener parameter removed.
+### Ack strategies → `AckDecision`
 
-## Transport abstraction (phase 5)
+Advanced-bus handlers and error strategies return a `ValueTask<AckDecision>` instead of a `Task<AckStrategyAsync>`.
 
-- New `EasyNetQ.Transport` namespace in Core: `ITransport`, `ITransportConnection`, `ITransportChannel`,
-  `ITransportConsumer`, `ITopology`, and `ExchangeDefinition`/`QueueDefinition`/`BindingDefinition`.
-  `EasyNetQ.RabbitMQ` implements them over the persistent connection/channel infrastructure.
-- `RabbitAdvancedBus` constructor takes `ITransport`; the dispatcher and consumer-factory parameters are gone.
-- `QueueStats` moved from the RabbitMQ assembly to `EasyNetQ.Core`.
-- Topology operations now receive the timeout-linked cancellation token; in 8.x only the channel-acquisition
-  wait honored the configured timeout, the operation itself did not.
+```csharp
+// 8.x
+await bus.Advanced.ConsumeAsync(queue, async (body, properties, info) =>
+{
+    await HandleAsync(body);
+    return AckStrategies.Ack;
+});
 
-## Fluent configuration (phase 5, additive)
+// 9.0
+await bus.Advanced.ConsumeAsync(queue, async (body, properties, info) =>
+{
+    await HandleAsync(body);
+    return AckDecision.Ack;
+});
+```
 
-- Transport-agnostic: `services.AddEasyNetQCore().Consume(c => c.Queue("orders").Handle<T>(...))` with any
-  registered `ITransport` (e.g. `EasyNetQ.Transport.InMemory` for tests). Consumers start via `IHostedService`.
-- RabbitMQ-typed: `AddEasyNetQ("host=...").UseRabbitMq(r => r.Consume(c => c.Queue("q", q => q.Quorum()
-  .DeadLetterExchange("dlx")).Bind("orders", "order.*", e => e.Topic()).Handle<T>(...)))`. The transport owns
-  the typed queue/exchange/consumer settings; the generic layer stays for portable code.
-- Core-only hosts fall back to `SimpleConsumeErrorStrategy.NackWithRequeue`; the RabbitMQ registration keeps
-  the error-queue strategy.
-- Publish routes: `Publish(p => p.Exchange("orders", e => e.Topic()).Message<OrderPlaced>("order.placed"))`
-  or a per-message routing key `Message<OrderPlaced>(o => $"order.{o.Region}")`. Publish through
-  `IMessagePublisher.PublishAsync(message)`; the route decides exchange and routing key, the exchange is
-  declared on first publish. A message type publishes through exactly one route; an unrouted type throws.
-- The publish pipeline serializes inside the pipeline (`SerializeStep`); steps added via
-  `Pipeline(...)`/`InsertAfter<SerializeStep>` see the serialized body (compress/encrypt goes there).
-- `IAdvancedBus.PublishAsync<T>` also runs through `SerializeStep`: pipeline steps see the typed message and
-  its descriptor before serialization. New: a message type declaring `[DeliveryMode]` gets its delivery mode
-  stamped on direct advanced publishes too (previously only the high-level APIs stamped it); types without the
-  attribute are unchanged. Publishing a derived instance through a base type parameter, or registering a custom
-  `IMessageSerializationStrategy` (e.g. message versioning), keeps the 8.x pre-serializing path.
-- Request-response works on any transport: `TransportRpc` implements `IRpc` over the transport abstraction
-  (request publish pipeline + reply consumer + correlation), so Core-only hosts (e.g. InMemory tests) get RPC.
-  RabbitMQ hosts keep `DefaultRpc` until phase 6. Deviations in `TransportRpc`: a faulted responder acks the
-  request after publishing the fault reply (no error-queue copy), and non-durable reply subscriptions are not
-  yet reset on reconnect.
-- Lifecycle pipeline: `builder.Lifecycle(l => l.Use(...))` runs for connection events
-  (Connected/Recovered/Disconnected/Blocked/Unblocked/RecoveryError/CallbackError) and consumer Started/Stopped
-  on any transport; `LifecycleContext` carries the layer, event, reason and error, parented to the layer's
-  context. This replaces subscribing to `IEventBus`, which becomes internal and is removed in phase 6; with no
-  steps registered the notifications cost nothing.
+`AckStrategies.NackWithRequeue` becomes `AckDecision.NackRequeue`; `NackWithoutRequeue` becomes `NackDiscard`.
+`Handled` means the step already settled the delivery itself.
 
-## Serialization
+### Custom `IConsumeErrorStrategy`
 
-- `IMessageSerializer` (generic, descriptor-based) is the primary interface. `ISerializer` implementations
-  (including Newtonsoft) keep working through `LegacyMessageSerializerAdapter`.
-- System.Text.Json is the default; pass a `JsonSerializerContext` for AOT/trimmed apps.
+Both methods return `ValueTask<AckDecision>`, take `EasyNetQ.Pipeline.ConsumeContext`, and receive the consumer's
+cancellation token.
 
-## Observability (new, not breaking)
+```csharp
+public sealed class MyErrorStrategy : IConsumeErrorStrategy
+{
+    public ValueTask<AckDecision> HandleErrorAsync(ConsumeContext context, Exception exception, CancellationToken ct = default)
+        => new(AckDecision.NackDiscard);
 
-- `ActivitySource`/`Meter` named `EasyNetQ`; enable with `AddSource("EasyNetQ")` + `AddMeter("EasyNetQ")` and
-  keep the client's `RabbitMQ.Client.*` sources on for wire spans.
+    public ValueTask<AckDecision> HandleCancelledAsync(ConsumeContext context, CancellationToken ct = default)
+        => new(AckDecision.NackRequeue);
+}
+```
 
-## Dogfooding fixes (additive unless noted)
+`DefaultConsumeErrorStrategy` lost its confirmation-listener constructor parameter.
 
-Gaps found running v9 in production consumers, fixed in the library rather than worked around in apps.
+### Pipelines and per-message events
 
-- Pipeline steps resolvable from DI: `Replace<TMarker, TMiddleware>()`, `InsertBefore<TMarker, TMiddleware>()`
-  and `InsertAfter<TMarker, TMiddleware>()` resolve the step from the service provider at build time; the
-  `Func<IServiceProvider, TMiddleware>` overloads take a factory. The step is then addressable by its own type.
-- Wire names and aliases per message type: `MessageType<T>(m => m.WireName("orders.placed.v1").Alias("Legacy.Name"))`
-  on the builder, or `[MessageType("orders.placed.v1", Aliases = new[] { ... })]` on the type (read by the source
-  generator, AOT-safe). The wire name is what publishes stamp and consumers match; aliases are extra incoming
-  names, e.g. the `Type.FullName` a Wolverine or MassTransit peer sends. `IMessageTypeRegistry.Register<T>(wireName,
-  aliases)` is the underlying call; a wire name that would resolve to two types throws at startup.
-- Per-route wire name: `Publish(p => p.Exchange("x").Message<T>("key", r => r.WireName("contract.v1")))` stamps
-  that name on the route's messages without changing the type's own wire name.
-- Unknown messages: `Consume(c => c.Handle<T>(...).HandleUnknown((body, context) => ...))` receives every message no
-  typed handler matches (a wire name this process cannot load, a known type without a handler) as raw bytes, with
-  `context.Properties.Type` carrying the incoming name; the body is not deserialized. Without it such messages fail
-  with `UnknownMessageTypeException` (a subclass of `EasyNetQException`, previously a plain `EasyNetQException`
-  thrown before handler matching), logged once per queue and type name.
-- Messages without a `type` property (plain AMQP clients, shovels, non-.NET peers) dispatch to the consumer's only
-  handler, or to `DefaultMessageType<T>()` when it has several; otherwise `HandleUnknown` or
-  `UnknownMessageTypeException` as above.
-- **Behavior change:** the default System.Text.Json options read property names case-insensitively
-  (`SystemTextJsonMessageSerializer.CreateDefaultOptions()`), also with source-generated contexts. A camelCase body
-  from another stack used to deserialize silently into default values. Writing is unchanged. Options you pass
-  yourself are used as given.
-- Per-consumer serializer: `Consume(c => c.Serializer(serializer))`.
-- `BindExisting(exchange, routingKey)` binds to an exchange another application owns without declaring it
-  (`Bind` declares, as before), like `ExistingQueue`/`ExistingExchange`.
-- **Behavior change:** fluent consumers start in the background. `ConsumerHostedService.StartAsync` returns at once
-  and each consumer retries with backoff until it runs, so a broker outage no longer keeps the host (and Kestrel)
-  from starting, and a missing exchange (404 on bind, e.g. one another app's operator declares later) no longer
-  crashes it. `IConsumerHostStatus` (`IsStarted`, `PendingConsumers`, `LastError`, `WaitForStartedAsync`) serves
-  readiness checks and tests; failures also raise `LifecycleEvent.StartFailed`. Restore blocking startup with
-  `ConsumerHost(o => o.WaitForStartup = true)`; `RetryDelay`/`MaxRetryDelay` tune the backoff. Code that publishes
-  right after `StartAsync` should await `WaitForStartedAsync` first.
-- `ConsumerHostedService` constructor takes `ConsumerHostOptions`, `ConsumerHostStatus` and a logger (DI-built).
-- `IAdvancedBus.PublishAsync(..., MessageProperties, byte[] body)` publishes the bytes as is. Before, a `byte[]` bound
-  to the typed `PublishAsync<T>` (exact generic match beats the conversion to `ReadOnlyMemory<byte>`), was serialized
-  as a JSON base64 string, and failed under Native AOT. `PublishAsync<T>` also sends `byte[]`, `ReadOnlyMemory<byte>`,
-  `Memory<byte>` and `ArraySegment<byte>` bodies as is. **Behavior change** for code that relied on the base64 JSON.
-- `ConsumerHostedService` owns its transport connection and releases it on `StopAsync` and on `DisposeAsync`
-  (`IAsyncDisposable`, for a container disposed without stopping the host). `LifecycleNotifier` is `IDisposable` and
-  stops dispatching once disposed. **Behavior change:** lifecycle steps no longer see the connection's `Disconnected`
-  while the container shuts down; before, a step resolving a service there threw `ObjectDisposedException` (event 701).
-- **Behavior change:** `DefaultConsumeErrorStrategy` no longer logs failed message bodies (event 601) by default; the
-  error queue keeps them and they often carry personal data. Opt in with `UseRabbitMq(r => r.LogFailedMessageBodies())`.
-  The error itself (event 600: queue, routing key, exchange, correlation id, exception) is still logged.
-- `UseRabbitMq(r => r.ErrorQueue(q => q.Quorum()))` declares the (bus-wide) error queue with typed arguments, e.g.
-  quorum so failed messages survive a node loss. `ErrorQueue("app.errors", q => q.Quorum())` also names the queue and
-  its exchange instead of `EasyNetQ_Default_Error_Queue`, for brokers that scope permissions by name (`^app\.`).
-  `ConsumeErrorOptions` carries these settings.
-- Consuming EasyNetQ from source (e.g. a git submodule): `<Import Project="…/EasyNetQ/Source/EasyNetQ.SourceReference.props" />`
-  adds the project references (`EasyNetQSourcePackages`, default `EasyNetQ`), the source generator as an analyzer and
-  the interceptors namespace. Source-referenced builds do not pack, and MinVer is skipped when the checkout has no
-  `.git` (Docker build contexts). Every EasyNetQ project is built once, in the consumer's configuration: the references
-  carry no global properties, so a project reaching EasyNetQ only transitively (a test project referencing the app, built
-  on its own) shares the same instances, and outside EasyNetQ's own solution a build neither packs nor unsets
-  Configuration for EasyNetQ's references (before, EasyNetQ.Core and EasyNetQ.RabbitMQ were built twice, partly as Debug,
-  into the same `bin/obj`, which broke parallel builds intermittently). In a consumer *solution*, every project that
-  references EasyNetQ, also only transitively, imports the props: the referencing side decides whether Configuration
-  is unset. `tests/source-reference/check.sh` guards both the solution and the standalone build in CI.
+8.x's `Func<ConsumeDelegate, ConsumeDelegate>` pipelines and its per-message events are replaced by one middleware
+model for publishing, consuming and connection lifecycle:
 
-## SignalR backplane (new package)
+```csharp
+public sealed class TimingStep : IMiddleware<ConsumeContext>
+{
+    public async ValueTask InvokeAsync(ConsumeContext context, PipelineStep<ConsumeContext> next)
+    {
+        var started = Stopwatch.GetTimestamp();
+        await next(context);
+        Log(context.ReceivedInfo.Queue, context.Ack, Stopwatch.GetElapsedTime(started));
+    }
+}
+```
 
-`EasyNetQ.AspNetCore.SignalR`: `services.AddSignalR().AddEasyNetQ(b => b.Prefix("chat"))` scales SignalR out over
-any EasyNetQ transport with the semantics of the Redis backplane (all/except, connections, groups incl. acknowledged
-cross-server membership, users, client results). Direct exchange per hub, one durable `x-expires` queue per server,
-redeclared on `Recovered`/`Cancelled`. Native AOT safe; see the package README.
+- Consume side: `Consume(c => c.Message(p => p.Use<TimingStep>()))` per consumer. `context.Ack` holds the decision
+  (what `AckEvent` reported); `context.Message` holds the deserialized message (what `DeliveredMessageEvent` reported).
+- Publish side: `Publish(p => p.Pipeline(b => b.InsertAfter<SerializeStep, MyStep>()))`. Steps after `SerializeStep`
+  see the serialized body, which is where compression or encryption belong (what `PublishedMessageEvent` reported).
+- Inline: `Use("name", async (context, next) => { ...; await next(context); })`.
+- `Use<T>()`, `InsertBefore<TMarker, T>()`, `InsertAfter<TMarker, T>()` and `Replace<TMarker, T>()` resolve the
+  step from DI; the overloads taking `Func<IServiceProvider, T>` use a factory.
+- `IProduceConsumeInterceptor` (`GZipInterceptor`, `TripleDESInterceptor`) still works:
+  `UseConsumeInterceptors()` / `UseProduceInterceptors()` are now extensions on `PipelineBuilder<T>`.
 
-Transport additions it relies on, available to everyone:
+### Connection events → lifecycle pipeline
 
-- `LifecycleEvent.Cancelled`: the broker cancelled a consumer (queue deleted, queue node lost, policy change). Unlike a
-  connection interruption it does not restart on its own. RabbitMQ raises it per queue (new internal
-  `ConsumerCancelledEvent`); the in-memory transport raises it when a consumed queue is deleted.
-- `UnroutableMessageException` (Core): a mandatory publish no queue received. `PublishReturnedException` (RabbitMQ)
-  now derives from it, so code above the transport can catch "nobody is listening" without referencing RabbitMQ.
-  Existing `catch (PublishReturnedException)` blocks are unaffected.
-- In-memory transport, closer to AMQP: binding the same key twice binds once; unbinding no longer drops messages
-  routed concurrently through other bindings; a mandatory publish that reaches no queue throws
-  `UnroutableMessageException`; deleting a queue cancels its consumers.
+Subscribing to `IEventBus` for connection events still compiles, but `IEventBus` becomes internal before 9.0 ships.
+Move to the lifecycle pipeline, which works on every transport:
 
-## Native AOT
+```csharp
+services.AddEasyNetQ("host=rabbitmq")
+    .Lifecycle(l => l.Use("log", (context, next) =>
+    {
+        if (context.Event == LifecycleEvent.Disconnected)
+            logger.LogWarning("broker connection lost: {Reason}", context.Reason);
+        return next(context);
+    }));
+```
 
-A default `AddEasyNetQ(...)` application publishes with **zero** trim/AOT warnings; CI fails on any
-(`EasyNetQ.Examples.Aot`, which also runs every fluent feature above against a broker). Core, RabbitMQ,
-InMemory and the bundle build with `IsAotCompatible` (net9.0+ assets).
+Events: `Connected`, `Recovered`, `Disconnected`, `Blocked`, `Unblocked`, `RecoveryError`, `CallbackError`, and for
+consumers `Started`, `Stopped`, `StartFailed`, `Cancelled`. `LifecycleContext` carries `Layer`, `Event`, `Reason`
+and `Error`. With no steps registered, notifications cost nothing.
 
-- The runtime-reflection fallbacks (loading a type from its wire name, describing an unregistered runtime type,
-  reflection-based JSON contracts) are guarded: unavailable under Native AOT (and with
-  `EasyNetQ.RuntimeReflection.IsSupported=false`), where they throw an `EasyNetQException` that names what to
-  register. Generated registrations, `MessageType<T>()` and source-generated JSON are the AOT path.
-- **AOT apps pass a `JsonSerializerContext`** (`UseSystemTextJson(context)`); the transport registers its own context
-  for the error-queue message, and the default resolver combines every registered context before falling back to
-  reflection where that works.
-- RabbitMQ's header and `MessageProperties` JSON no longer uses reflection (same wire format).
-- The 8.x-compatible reflection APIs in the `EasyNetQ` bundle are annotated `[RequiresUnreferencedCode]`
-  (and `[RequiresDynamicCode]` where they generate code): `AutoSubscriber.SubscribeAsync`, `UseLegacyTypeNaming`,
-  `UseLegacyConventions`, `UseAdvancedMessagePolymorphism`, `UseVersionedMessage`, `SystemTextJsonSerializer(V2)`,
-  `LegacyTypeNameSerializer`, the versioning/multiple-exchange strategies. Using them in an AOT app now warns at
-  the call site instead of failing at runtime.
+### Constructors of DI-built types
+
+These only matter if you construct them yourself (tests, fakes, custom registrations):
+
+- `Conventions` and `MessageDeliveryModeStrategy` take an `IMessageTypeRegistry`.
+- `RabbitAdvancedBus` takes an `ITransport`; the confirmation-listener, dispatcher and consumer-factory parameters are gone.
+- `ConsumerHostedService` takes `ConsumerHostOptions`, `ConsumerHostStatus` and a logger.
+
+### Serializers
+
+- `IMessageSerializer` (generic, descriptor-based) is the primary interface. Existing `ISerializer` implementations,
+  Newtonsoft included, keep working: they are wrapped in `LegacyMessageSerializerAdapter`.
+- `QueueStats` moved from the RabbitMQ assembly to `EasyNetQ.Core` (same namespace).
+
+## Behavior changes
+
+Review each one; the right-hand column restores 8.x behavior where that is possible.
+
+| Change | 8.x | 9.0 | Restore 8.x behavior |
+|---|---|---|---|
+| Consumer dispatch concurrency | `PrefetchCount` (concurrent, unordered) | **1** (ordered) | `consumerDispatcherConcurrency=<n>` in the connection string, or `ConnectionConfiguration.ConsumerDispatcherConcurrency` |
+| Publish interrupted by a reconnect | silently republished | **fails to the caller** | retry in your code (`PublishInterruptedException` and the retry loop are gone) |
+| Publisher confirms | EasyNetQ's listener | RabbitMQ.Client: `PublishAsync` completes on confirm, at most 128 outstanding confirms per channel | none needed |
+| Per-request `PublisherConfirms` | `bool` (default silently disabled confirms on every high-level publish) | `bool?`; unset uses the connection setting | set it explicitly per request |
+| Consumer restart after a channel error | polled every 5 s | immediate, event-driven; 60 s safety-net timer | none needed |
+| Connection string | unknown keys ignored | **unknown keys throw** `EasyNetQException`; keys are case-insensitive | remove typos and obsolete keys |
+| Fluent consumers' startup | n/a | in the background, retrying with backoff; host startup never blocks or crashes on a broker outage or a missing exchange | `ConsumerHost(o => o.WaitForStartup = true)` |
+| JSON property names when reading | case-sensitive | case-insensitive | pass your own `JsonSerializerOptions` |
+| `byte[]` body on `IAdvancedBus.PublishAsync` | serialized as a base64 JSON string | sent as-is | serialize it yourself |
+| Failed message bodies in logs (event 601) | logged | not logged (error queues often hold personal data); event 600 still logs the failure | `UseRabbitMq(r => r.LogFailedMessageBodies())` |
+| Unknown message type on a consumer | plain `EasyNetQException` before handler matching | `UnknownMessageTypeException` (subclass), logged once per queue and type; or handled by `HandleUnknown` | catch the base type |
+| `[DeliveryMode]` on direct advanced publishes | ignored | stamped | remove the attribute |
+| Topology operations | only channel acquisition honored the timeout | the whole operation honors it | none needed |
+| Lifecycle steps during container shutdown | could see `Disconnected` and hit `ObjectDisposedException` | the host releases its connection first | none needed |
+
+Code that publishes right after starting the host should `await IConsumerHostStatus.WaitForStartedAsync()` first,
+because fluent consumers now start in the background.
+
+# What v9 adds in detail
+
+None of this is needed to upgrade; adopt it when it helps.
+
+### Fluent configuration
+
+Declare consumers and publish routes at startup, with typed RabbitMQ settings:
+
+```csharp
+using EasyNetQ;
+using EasyNetQ.Configuration;
+
+services.AddEasyNetQ("host=rabbitmq")
+    .UseRabbitMq(r => r
+        .ErrorQueue("orders.errors", q => q.Quorum())
+        .Publish(p => p
+            .Exchange("orders", e => e.Topic())
+            .Message<OrderPlaced>(o => $"order.{o.Region}"))
+        .Consume(c => c
+            .Queue("billing.orders", q => q.Quorum().DeadLetterExchange("orders.dlx"))
+            .Bind("orders", "order.*", e => e.Topic())
+            .Handle<OrderPlaced>(async (order, context) =>
+            {
+                await billing.ChargeAsync(order);
+                return AckDecision.Ack;
+            })));
+
+// publish anywhere: the route picks exchange and routing key, the exchange is declared on first publish
+await provider.GetRequiredService<IMessagePublisher>().PublishAsync(new OrderPlaced(...));
+```
+
+- `AddEasyNetQCore()` plus `Consume(...)`/`Publish(...)` is the transport-agnostic version, for code that must not
+  depend on RabbitMQ.
+- `Bind` declares the exchange; `BindExisting`, `ExistingQueue` and `ExistingExchange` use topology another app owns.
+- A message type publishes through exactly one route; publishing an unrouted type throws.
+- Consumers start from an `IHostedService`. `IConsumerHostStatus` (`IsStarted`, `PendingConsumers`, `LastError`,
+  `WaitForStartedAsync`) serves readiness checks. `ConsumerHost(o => ...)` tunes `RetryDelay`, `MaxRetryDelay` and
+  `WaitForStartup`.
+- `ErrorQueue(...)` declares the bus-wide error queue with typed arguments (e.g. quorum), and can rename it from
+  `EasyNetQ_Default_Error_Queue` for brokers that scope permissions by name.
+- `Consume(c => c.Serializer(...))` sets a serializer per consumer.
+
+### Wire names, aliases and foreign messages
+
+- `MessageType<T>(m => m.WireName("orders.placed.v1").Alias("Legacy.Name"))`, or
+  `[MessageType("orders.placed.v1", Aliases = new[] { ... })]` on the type: a stable contract name instead of the
+  CLR name. Aliases are additional incoming names, e.g. the `Type.FullName` a Wolverine or MassTransit peer sends.
+  A wire name that resolves to two types fails at startup.
+- `Message<T>("key", r => r.WireName("contract.v1"))` overrides the name for one publish route only.
+- `HandleUnknown((body, context) => ...)` receives the raw bytes of messages no typed handler matches;
+  `context.Properties.Type` holds the incoming name.
+- Messages without a `type` property (plain AMQP clients, shovels) go to the consumer's only handler, or to
+  `DefaultMessageType<T>()`.
+
+### Transports and testing
+
+- The `EasyNetQ.Transport` namespace (`ITransport`, `ITopology`, exchange/queue/binding definitions) abstracts the
+  broker. `EasyNetQ.RabbitMQ` implements it.
+- `EasyNetQ.Transport.InMemory` runs the same code in tests without a broker. It follows AMQP closely: mandatory
+  publishes without a route throw `UnroutableMessageException`, and deleting a queue cancels its consumers.
+- `UnroutableMessageException` (Core) is the base of `PublishReturnedException`, so transport-agnostic code can
+  catch "nobody is listening".
+- Request/response works on any transport (`TransportRpc`). RabbitMQ hosts keep `DefaultRpc` for now. Differences in
+  `TransportRpc`: a faulted responder acks the request after replying (no error-queue copy), and non-durable reply
+  subscriptions are not yet reset on reconnect.
+
+### Native AOT
+
+A default `AddEasyNetQ(...)` app publishes with **zero** trim/AOT warnings; CI enforces this with
+`EasyNetQ.Examples.Aot` and with `tests/package-consumer`, which builds that sample against the packed packages.
+
+- Pass a source-generated context: `UseSystemTextJson(MyJsonContext.Default)`. Contexts registered by transports and
+  by you are combined.
+- The source generator registers the message types it sees at call sites and intercepts `AddEasyNetQ(...)`.
+  Types it cannot see need `MessageType<T>()`, or `[MessageType]` on the type.
+- Reflection fallbacks (loading a type from its wire name, describing an unregistered type, reflection-based JSON)
+  throw an `EasyNetQException` naming what to register under AOT, or when `EasyNetQ.RuntimeReflection.IsSupported`
+  is false.
+- The 8.x reflection APIs carry `[RequiresUnreferencedCode]` (and `[RequiresDynamicCode]` where they emit code), so
+  AOT apps get a warning at the call site: `AutoSubscriber`, `UseLegacyTypeNaming`, `UseLegacyConventions`,
+  `UseAdvancedMessagePolymorphism`, `UseVersionedMessage`, `SystemTextJsonSerializer(V2)`,
+  `LegacyTypeNameSerializer`, the versioning and multiple-exchange strategies.
+- A custom `IMessageSerializationStrategy` (message versioning, for example), or publishing a derived instance
+  through a base type parameter, keeps the 8.x pre-serializing publish path.
+
+### Observability
+
+`ActivitySource` and `Meter`, both named `EasyNetQ`: `AddSource("EasyNetQ")` and `AddMeter("EasyNetQ")`. Keep
+RabbitMQ.Client's own `RabbitMQ.Client.*` sources enabled for wire-level spans.
+
+### SignalR backplane
+
+The new `EasyNetQ.AspNetCore.SignalR` package scales SignalR out over EasyNetQ, with the semantics of the Redis
+backplane:
+
+```csharp
+builder.Services.AddEasyNetQ("host=rabbitmq");
+builder.Services.AddSignalR().AddEasyNetQ(b => b.Prefix("chat"));
+```
+
+It supports all/except, connections, groups (including acknowledged membership changes across servers), users and
+client results, and is Native AOT safe. See the package README.
+
+### Consuming EasyNetQ from source
+
+For a git submodule instead of packages, import
+`<Import Project="…/EasyNetQ/Source/EasyNetQ.SourceReference.props" />`. It adds the project references
+(`EasyNetQSourcePackages`, default `EasyNetQ`), the generator as an analyzer, and the interceptors namespace.
+
+- Every EasyNetQ project builds once, in the consumer's configuration.
+- MinVer is skipped when the checkout has no `.git`, as in Docker build contexts.
+- In a consumer solution, every project that references EasyNetQ, even transitively, imports the props.
+- `tests/source-reference/check.sh` guards this in CI.
+
+# Known gaps before 9.0
+
+- `IEventBus` becomes internal; move connection-event subscribers to `Lifecycle(...)` now.
+- RabbitMQ hosts still use `DefaultRpc`; `TransportRpc` replaces it once it copies faulted requests to the error
+  queue and resets non-durable reply subscriptions on reconnect.
+- `PubSub`, `SendReceive` and the scheduler are not yet expressed as fluent definitions, and `RabbitAdvancedBus`
+  still carries more than the transport needs.
+- The `netstandard2.0` build emits nullable-reference warnings; no functional impact.
+- Timings will be re-baselined on a quiet machine; only allocation numbers are authoritative so far.
+
+# Platform notes
+
+- Target frameworks: `netstandard2.0`, `net8.0`, `net9.0`, `net10.0`.
+- .NET Framework 4.7.2+ works through `netstandard2.0` from SDK-style projects. Those binaries skip pooled async
+  builders on the publish/consume path; `net8.0`+ is unaffected.
+- `IsAotCompatible` is set for Core, RabbitMQ, InMemory and the bundle (net9.0+ assets).
+- The generator package layout: `analyzers/dotnet/cs/EasyNetQ.Generators.dll` plus
+  `buildTransitive/EasyNetQ.Core.props`, which adds `EasyNetQ.Generated` to `InterceptorsNamespaces`. If a build
+  reports CS9137, that props file was not imported (e.g. an `ExcludeAssets`/`IncludeAssets` setting that drops
+  `buildTransitive`).
