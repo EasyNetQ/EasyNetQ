@@ -63,8 +63,30 @@ public interface IAdvancedBus
     );
 
     /// <summary>
+    ///     Publishes an already serialized body. The exact <c>byte[]</c> match keeps a byte array off the typed
+    ///     <see cref="PublishAsync{T}" /> overload, which would otherwise win overload resolution and serialize it.
+    /// </summary>
+    /// <param name="exchange">The exchange to publish to</param>
+    /// <param name="routingKey">The routing key</param>
+    /// <param name="mandatory">The mandatory flag; null means the configured default</param>
+    /// <param name="publisherConfirms">The publisher confirms flag; null means the configured default</param>
+    /// <param name="properties">The message properties</param>
+    /// <param name="body">The message body, sent as is</param>
+    /// <param name="cancellationToken">The cancellation token</param>
+    Task PublishAsync(
+        string exchange,
+        string routingKey,
+        bool? mandatory,
+        bool? publisherConfirms,
+        MessageProperties properties,
+        byte[] body,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     ///     Publishes a body whose runtime type is its static type - the reflection-free fast path (no IMessage
-    ///     envelope is allocated)
+    ///     envelope is allocated). A byte buffer (<c>byte[]</c>, <c>ReadOnlyMemory&lt;byte&gt;</c>,
+    ///     <c>Memory&lt;byte&gt;</c>, <c>ArraySegment&lt;byte&gt;</c>) is the wire body and is sent as is, not serialized.
     /// </summary>
     /// <typeparam name="T">The message type</typeparam>
     /// <param name="exchange">The exchange to publish to</param>

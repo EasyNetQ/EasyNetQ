@@ -91,4 +91,36 @@ public class TypedPublishPipelineTests
             Arg.Any<CancellationToken>()
         );
     }
+
+    public static TheoryData<string> ByteBufferBodies => ["byte[]", "Memory<byte>", "ArraySegment<byte>", "ReadOnlyMemory<byte>"];
+
+    [Theory]
+    [MemberData(nameof(ByteBufferBodies))]
+    public async Task Should_publish_a_byte_buffer_body_as_is(string bufferType)
+    {
+        await using var mockBuilder = new MockBuilder();
+        var bytes = "{\"raw\":true}"u8.ToArray();
+        var advanced = mockBuilder.Bus.Advanced;
+        var properties = new MessageProperties { Type = "foreign.type.v1" };
+
+        var publish = bufferType switch
+        {
+            // overload resolution: the exact byte[] overload, not PublishAsync<byte[]>
+            "byte[]" => advanced.PublishAsync("x", "rk", null, null, properties, bytes, CancellationToken.None),
+            // the typed overload with a buffer type is the raw body too
+            "Memory<byte>" => advanced.PublishAsync<Memory<byte>>("x", "rk", null, null, properties, bytes.AsMemory(), CancellationToken.None),
+            "ArraySegment<byte>" => advanced.PublishAsync<ArraySegment<byte>>("x", "rk", null, null, properties, new ArraySegment<byte>(bytes), CancellationToken.None),
+            _ => advanced.PublishAsync<ReadOnlyMemory<byte>>("x", "rk", null, null, properties, bytes, CancellationToken.None),
+        };
+        await publish;
+
+        await mockBuilder.PublishChannel.Received().BasicPublishAsync(
+            Arg.Is("x"),
+            Arg.Is("rk"),
+            Arg.Is(false),
+            Arg.Is<RabbitMQ.Client.BasicProperties>(x => x.Type == "foreign.type.v1"),
+            Arg.Is<ReadOnlyMemory<byte>>(x => x.ToArray().SequenceEqual(bytes)),
+            Arg.Any<CancellationToken>()
+        );
+    }
 }

@@ -144,6 +144,10 @@ Gaps found running v9 in production consumers, fixed in the library rather than 
   `ConsumerHost(o => o.WaitForStartup = true)`; `RetryDelay`/`MaxRetryDelay` tune the backoff. Code that publishes
   right after `StartAsync` should await `WaitForStartedAsync` first.
 - `ConsumerHostedService` constructor takes `ConsumerHostOptions`, `ConsumerHostStatus` and a logger (DI-built).
+- `IAdvancedBus.PublishAsync(..., MessageProperties, byte[] body)` publishes the bytes as is. Before, a `byte[]` bound
+  to the typed `PublishAsync<T>` (exact generic match beats the conversion to `ReadOnlyMemory<byte>`), was serialized
+  as a JSON base64 string, and failed under Native AOT. `PublishAsync<T>` also sends `byte[]`, `ReadOnlyMemory<byte>`,
+  `Memory<byte>` and `ArraySegment<byte>` bodies as is. **Behavior change** for code that relied on the base64 JSON.
 - `ConsumerHostedService` owns its transport connection and releases it on `StopAsync` and on `DisposeAsync`
   (`IAsyncDisposable`, for a container disposed without stopping the host). `LifecycleNotifier` is `IDisposable` and
   stops dispatching once disposed. **Behavior change:** lifecycle steps no longer see the connection's `Disconnected`

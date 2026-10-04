@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
+using System.Runtime.CompilerServices;
 
 namespace EasyNetQ;
 
@@ -304,6 +305,17 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     }
 
     /// <inheritdoc />
+    public virtual Task PublishAsync(
+        string exchange,
+        string routingKey,
+        bool? mandatory,
+        bool? publisherConfirms,
+        MessageProperties properties,
+        byte[] body,
+        CancellationToken cancellationToken
+    ) => PublishAsync(exchange, routingKey, mandatory, publisherConfirms, properties, (ReadOnlyMemory<byte>)body, cancellationToken);
+
+    /// <inheritdoc />
     public virtual async Task PublishAsync<T>(
         string exchange,
         string routingKey,
@@ -314,6 +326,29 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         CancellationToken cancellationToken
     )
     {
+        // a byte buffer is already the wire body: never JSON (base64) and never a serializer lookup, which AOT has
+        // no metadata for. The typeof tests fold away per instantiation, and Unsafe.As neither boxes nor reflects.
+        if (typeof(T) == typeof(byte[]))
+        {
+            await PublishAsync(exchange, routingKey, mandatory, publisherConfirms, properties, Unsafe.As<T, byte[]>(ref body), cancellationToken).ConfigureAwait(false);
+            return;
+        }
+        if (typeof(T) == typeof(ReadOnlyMemory<byte>))
+        {
+            await PublishAsync(exchange, routingKey, mandatory, publisherConfirms, properties, Unsafe.As<T, ReadOnlyMemory<byte>>(ref body), cancellationToken).ConfigureAwait(false);
+            return;
+        }
+        if (typeof(T) == typeof(Memory<byte>))
+        {
+            await PublishAsync(exchange, routingKey, mandatory, publisherConfirms, properties, (ReadOnlyMemory<byte>)Unsafe.As<T, Memory<byte>>(ref body), cancellationToken).ConfigureAwait(false);
+            return;
+        }
+        if (typeof(T) == typeof(ArraySegment<byte>))
+        {
+            await PublishAsync(exchange, routingKey, mandatory, publisherConfirms, properties, (ReadOnlyMemory<byte>)Unsafe.As<T, ArraySegment<byte>>(ref body), cancellationToken).ConfigureAwait(false);
+            return;
+        }
+
         // the typed pipeline serializes inside SerializeStep; a custom serialization strategy or a body of a
         // derived type (serialized with its runtime type in 8.x) keeps the legacy pre-serializing path
         if (registry is null

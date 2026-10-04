@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 // type-level and per-route wire names, aliases, [MessageType], HandleUnknown for foreign types, untyped messages,
 // case-insensitive JSON through a source-generated context, and a named quorum error queue.
 // Usage: EasyNetQ.Examples.Aot [connectionString]   (default: host=localhost)
-static ReadOnlyMemory<byte> Raw(string json) => Encoding.UTF8.GetBytes(json);
+static byte[] Raw(string json) => Encoding.UTF8.GetBytes(json);
 var connectionString = args.Length > 0 ? args[0] : Environment.GetEnvironmentVariable("EASYNETQ_CONNECTION") ?? "host=localhost";
 var run = Guid.NewGuid().ToString("N")[..8];
 var exchange = $"aot.smoke.{run}";
