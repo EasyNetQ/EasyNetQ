@@ -14,7 +14,11 @@ signatures and internals do not.
   `EasyNetQ.RabbitMQ` (client-coupled). Keep referencing `EasyNetQ` for a drop-in experience. Types moved
   between assemblies, so binary compatibility is gone even where source compatibility remains: recompile.
 - The source generator (`EasyNetQ.Generators`) is required. It registers message types found at call sites and
-  intercepts `AddEasyNetQ(...)`; without it, unregistered types fail at runtime.
+  intercepts `AddEasyNetQ(...)`; without it, unregistered types fail at runtime. It ships inside the
+  `EasyNetQ.Core` package (`analyzers/dotnet/cs`), together with `buildTransitive/EasyNetQ.Core.props`, which opts
+  the consuming project into the generated interceptors (`InterceptorsNamespaces`), so referencing `EasyNetQ` is
+  all a project needs. `tests/package-consumer` proves it in CI: the Native AOT sample built against the packed
+  packages, which `publish-to-nuget` waits for.
 
 ## Behavioral changes
 

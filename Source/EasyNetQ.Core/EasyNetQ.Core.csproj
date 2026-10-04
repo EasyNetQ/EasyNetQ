@@ -19,6 +19,24 @@
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
     <PackageReference Include="System.Text.Json" />
   </ItemGroup>
+  <!-- The source generator ships inside this package as an analyzer (with buildTransitive/EasyNetQ.Core.props for its
+       InterceptorsNamespaces opt-in), so every consumer of EasyNetQ gets [MessageType] and the generated registrations.
+       No ProjectReference: one with other global properties than EasyNetQ.SourceReference.props builds the generator
+       twice (tests/source-reference). The solution builds it; pack only picks up its output. -->
+  <ItemGroup>
+    <None Include="buildTransitive/EasyNetQ.Core.props" Pack="true" PackagePath="build/;buildTransitive/" />
+  </ItemGroup>
+  <Target Name="_EasyNetQPackGenerator" BeforeTargets="_GetPackageFiles">
+    <MSBuild Projects="..\EasyNetQ.Generators\EasyNetQ.Generators.csproj" Targets="GetTargetPath"
+             Properties="Configuration=$(Configuration)">
+      <Output TaskParameter="TargetOutputs" ItemName="_EasyNetQGeneratorAssembly" />
+    </MSBuild>
+    <Error Condition="!Exists('@(_EasyNetQGeneratorAssembly)')"
+           Text="EasyNetQ.Generators is not built ($(Configuration)); pack the solution, not EasyNetQ.Core alone." />
+    <ItemGroup>
+      <None Include="@(_EasyNetQGeneratorAssembly)" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    </ItemGroup>
+  </Target>
   <ItemGroup Label="InternalsVisibleTo">
     <InternalsVisibleTo Include="EasyNetQ.RabbitMQ" />
     <InternalsVisibleTo Include="EasyNetQ" />
