@@ -9,6 +9,10 @@
   <PropertyGroup>
     <EasyNetQSourcePackages Condition="'$(EasyNetQSourcePackages)' == ''">EasyNetQ</EasyNetQSourcePackages>
     <InterceptorsNamespaces>$(InterceptorsNamespaces);EasyNetQ.Generated</InterceptorsNamespaces>
+    <!-- a solution build unsets Configuration for references outside the solution, which every EasyNetQ project is;
+         keep the consumer's, so a project is not built as Debug and Release side by side (Directory.Build.targets
+         does the same for EasyNetQ's own references) -->
+    <ShouldUnsetParentConfigurationAndPlatform>false</ShouldUnsetParentConfigurationAndPlatform>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,4 +25,14 @@
                       AdditionalProperties="EasyNetQSourceReference=true"
                       UndefineProperties="PublishAot;RuntimeIdentifier;SelfContained;NativeLib" />
   </ItemGroup>
+
+  <!-- The SDK adds EasyNetQ's own references (EasyNetQ.Core, EasyNetQ.RabbitMQ, ...) to this project as transitive
+       references, without the metadata above. A project reached both ways would get two sets of global properties,
+       i.e. two instances building into the same bin/obj side by side. -->
+  <Target Name="_EasyNetQSourceTransitiveReferences" AfterTargets="IncludeTransitiveProjectReferences">
+    <ItemGroup>
+      <ProjectReference Condition="$([System.String]::Copy('%(FullPath)').StartsWith('$(MSBuildThisFileDirectory)'))"
+                        AdditionalProperties="EasyNetQSourceReference=true" />
+    </ItemGroup>
+  </Target>
 </Project>

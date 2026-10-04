@@ -123,6 +123,25 @@ jobs:
         name: aot-publish-log
         path: aot-publish.log
 
+  source-reference:
+    name: Source-reference consumer (each EasyNetQ project built once)
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v7
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET (global.json)
+      uses: actions/setup-dotnet@v6
+      with:
+        global-json-file: global.json
+
+    - name: Build the consumer fixture
+      run: tests/source-reference/check.sh
+
   benchmarks:
     name: Benchmarks
     if: >-

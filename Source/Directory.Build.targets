@@ -6,8 +6,11 @@
 
   <!-- Built as a source reference (EasyNetQ.SourceReference.props): no package on every build, and no MinVer, whose
        git lookup fails in build contexts without history (e.g. a Docker build of the consuming app) -->
+  <!-- ...and the consumer's configuration all the way down: a solution build would otherwise unset it for these projects'
+       own references (none are in the consumer's solution), and two instances of one project collide on bin/obj -->
   <PropertyGroup Condition="'$(EasyNetQSourceReference)' == 'true'">
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <ShouldUnsetParentConfigurationAndPlatform>false</ShouldUnsetParentConfigurationAndPlatform>
   </PropertyGroup>
   <!-- keyed on the checkout, not the global property, so transitively referenced projects agree -->
   <PropertyGroup Condition="!Exists('$(MSBuildThisFileDirectory)../.git')">
