@@ -41,17 +41,14 @@ public class RabbitAdvancedBusTests
     [InlineData(true, true, 1)]
     public async Task Should_use_confirms_per_request_if_not_null_else_from_settings(bool confirmsFromSettings, bool? confirmsPerRequest, int expected)
     {
-        var xxx = Substitute.For<IPublishConfirmationListener>();
         await using var mockBuilder = new MockBuilder(
-            x =>
-            {
-                x.AddSingleton(new ConnectionConfiguration { PublisherConfirms = confirmsFromSettings });
-                x.AddSingleton(xxx);
-            });
+            x => x.AddSingleton(new ConnectionConfiguration { PublisherConfirms = confirmsFromSettings }));
 
         await mockBuilder.Bus.Advanced.PublishAsync("", "", null, confirmsPerRequest, new Message<object>(null), cancellationToken: CancellationToken.None);
 
-        await xxx.Received(expected).CreatePendingConfirmationAsync(Arg.Any<IChannel>(), Arg.Any<CancellationToken>());
+        // confirms are delegated to the client, so the publish channel's CreateChannelOptions reveal the choice
+        await mockBuilder.Connection.Received(expected).CreateChannelAsync(
+            Arg.Is<RabbitMQ.Client.CreateChannelOptions>(o => o.PublisherConfirmationTrackingEnabled), Arg.Any<CancellationToken>());
         await mockBuilder.Channels[0].Received().BasicPublishAsync(
             Arg.Any<string>(),
             Arg.Any<string>(),

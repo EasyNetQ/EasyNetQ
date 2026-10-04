@@ -95,7 +95,7 @@ public class NonGenericPubSubExtensionsTests
             Arg.Any<Action<ISubscriptionConfiguration>>(),
             Arg.Any<CancellationToken>()
         ).ReturnsForAnyArgs(subscribeResult);
-        await using var _ = await pubSub.SubscribeAsync("Id", messageType, (_, _, _) => Task.FromResult(AckStrategies.AckAsync), subscribeConfigure, cancellationToken: CancellationToken.None);
+        await using var _ = await pubSub.SubscribeAsync("Id", messageType, (_, _, _) => Task.CompletedTask, subscribeConfigure, cancellationToken: CancellationToken.None);
         await pubSub.Received()
             .SubscribeAsync(Arg.Is("Id"), Arg.Any<Func<Dog, CancellationToken, Task>>(), Arg.Is(subscribeConfigure), Arg.Any<CancellationToken>());
     }
@@ -113,7 +113,7 @@ public class NonGenericPubSubExtensionsTests
             Arg.Any<CancellationToken>()
         ).ReturnsForAnyArgs(subscribeResult);
 
-        await using var _ = await pubSub.SubscribeAsync("Id", messageType, (_, _, _) => Task.FromResult(AckStrategies.AckAsync), subscribeConfigure, cancellationToken: CancellationToken.None);
+        await using var _ = await pubSub.SubscribeAsync("Id", messageType, (_, _, _) => Task.CompletedTask, subscribeConfigure, cancellationToken: CancellationToken.None);
         await pubSub.Received()
             .SubscribeAsync(Arg.Is("Id"), Arg.Any<Func<IAnimal, CancellationToken, Task>>(), Arg.Is(subscribeConfigure), Arg.Any<CancellationToken>());
     }
@@ -132,7 +132,7 @@ public class NonGenericPubSubExtensionsTests
             Arg.Any<CancellationToken>()
         ).ReturnsForAnyArgs(subscribeResult);
 
-        await using var _ = await pubSub.SubscribeAsync("Id", messageType, (_, _, _) => Task.FromResult(AckStrategies.AckAsync), subscribeConfigure, cancellationToken: CancellationToken.None);
+        await using var _ = await pubSub.SubscribeAsync("Id", messageType, (_, _, _) => Task.CompletedTask, subscribeConfigure, cancellationToken: CancellationToken.None);
         await pubSub.Received()
             .SubscribeAsync(Arg.Is("Id"), Arg.Any<Func<DateTime, CancellationToken, Task>>(), Arg.Is(subscribeConfigure), Arg.Any<CancellationToken>());
     }

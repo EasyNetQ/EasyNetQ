@@ -54,7 +54,7 @@ public class QueueRetrieval : IQueueRetrieval
                 yield break;
             }
 
-            var properties = new MessageProperties(basicGetResult.BasicProperties);
+            var properties = BasicPropertiesMapper.FromBasicProperties(basicGetResult.BasicProperties);
             var info = new MessageReceivedInfo(
                 "hosepipe",
                 basicGetResult.DeliveryTag,

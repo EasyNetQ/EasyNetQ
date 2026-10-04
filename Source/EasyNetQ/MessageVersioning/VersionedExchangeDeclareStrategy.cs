@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using EasyNetQ.Internals;
 using EasyNetQ.Topology;
 
@@ -11,6 +12,7 @@ public class VersionedExchangeDeclareStrategy : IExchangeDeclareStrategy, IDispo
     private readonly AsyncCache<ExchangeKey, Exchange> declaredExchanges;
     private bool disposed;
 
+    [RequiresUnreferencedCode(Compat.ReflectionApi)]
     public VersionedExchangeDeclareStrategy(IConventions conventions, IAdvancedBus advancedBus)
     {
         this.conventions = conventions;
@@ -26,6 +28,7 @@ public class VersionedExchangeDeclareStrategy : IExchangeDeclareStrategy, IDispo
     }
 
     /// <inheritdoc />
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = Compat.Annotated)]
     public Task<Exchange> DeclareExchangeAsync(Type messageType, string exchangeType, CancellationToken cancellationToken)
     {
         var messageVersions = new MessageVersionStack(messageType);

@@ -13,10 +13,6 @@ public class When_an_action_is_performed_and_channel_reopens
         {
             new object[]
             {
-                new NotSupportedException("Pipelining of requests forbidden")
-            },
-            new object[]
-            {
                 new AlreadyClosedException(
                     new ShutdownEventArgs(
                         ShutdownInitiator.Library, AmqpErrorCodes.InternalErrors, "Unexpected Exception"

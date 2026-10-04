@@ -7,7 +7,7 @@ public class When_consume_is_called_with_auto_ack : ConsumerTestBase
     protected override async Task InitializeAsyncCore()
     {
 #pragma warning disable IDISP004
-        await StartConsumerAsync((_, _, _, _) => AckStrategies.AckAsync, true);
+        await StartConsumerAsync((_, _, _, _) => AckDecision.Ack, true);
 #pragma warning restore IDISP004
     }
 

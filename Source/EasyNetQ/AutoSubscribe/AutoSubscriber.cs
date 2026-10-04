@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using EasyNetQ.Internals;
 using System.Reflection;
 using System.Security.Cryptography;
@@ -67,6 +68,8 @@ public class AutoSubscriber
     /// </summary>
     /// <param name="consumerTypes">The types to register as consumers.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
+    [RequiresUnreferencedCode(Compat.ReflectionApi)]
+    [RequiresDynamicCode(Compat.ReflectionApi)]
     public virtual async Task<IAsyncDisposable> SubscribeAsync(Type[] consumerTypes, CancellationToken cancellationToken = default)
     {
         var subscriptions = new List<IAsyncDisposable>();
@@ -213,7 +216,7 @@ public class AutoSubscriber
         };
     }
 
-    private static SubscriptionConfigurationAttribute GetSubscriptionConfigurationAttributeValue(AutoSubscriberConsumerInfo subscriptionInfo)
+    private static SubscriptionConfigurationAttribute? GetSubscriptionConfigurationAttributeValue(AutoSubscriberConsumerInfo subscriptionInfo)
     {
         var customAttributes = subscriptionInfo.ConsumeMethod.GetCustomAttributes(typeof(SubscriptionConfigurationAttribute), true);
         return customAttributes
@@ -221,13 +224,14 @@ public class AutoSubscriber
             .FirstOrDefault();
     }
 
-    protected virtual AutoSubscriberConsumerAttribute GetSubscriptionAttribute(AutoSubscriberConsumerInfo consumerInfo)
+    protected virtual AutoSubscriberConsumerAttribute? GetSubscriptionAttribute(AutoSubscriberConsumerInfo consumerInfo)
     {
         return consumerInfo.ConsumeMethod
             .GetCustomAttributes(typeof(AutoSubscriberConsumerAttribute), true)
             .SingleOrDefault() as AutoSubscriberConsumerAttribute;
     }
 
+    [RequiresUnreferencedCode(Compat.ReflectionApi)]
     protected virtual IEnumerable<AutoSubscriberConsumerInfo> GetSubscriberConsumerInfos(IEnumerable<Type> types, Type interfaceType)
     {
         return types.Where(t => t.GetTypeInfo().IsClass && !t.GetTypeInfo().IsAbstract)

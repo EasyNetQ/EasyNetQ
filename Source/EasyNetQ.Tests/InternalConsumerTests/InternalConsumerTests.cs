@@ -31,7 +31,7 @@ public sealed class InternalConsumerTests : IAsyncLifetime
                             "exclusiveConsumerTag",
                             false,
                             new Dictionary<string, object>(),
-                            _ => new ValueTask<AckStrategyAsync>(AckStrategies.AckAsync)
+                            TestContexts.Consumer(exclusiveQueue.Name)
                         )
                     },
                     {
@@ -41,7 +41,7 @@ public sealed class InternalConsumerTests : IAsyncLifetime
                             "nonExclusiveConsumerTag",
                             false,
                             new Dictionary<string, object>(),
-                            _ => new ValueTask<AckStrategyAsync>(AckStrategies.AckAsync)
+                            TestContexts.Consumer(nonExclusiveQueue.Name)
                         )
                     }
                 }

@@ -1,0 +1,145 @@
+using System.Diagnostics.CodeAnalysis;
+
+namespace EasyNetQ.Internals;
+
+/// <summary>
+///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
+///     the same compatibility as public APIs. It may be changed or removed without notice in
+///     any release. You should only use it directly in your code with extreme caution and knowing that
+///     doing so can result in application failures when updating to a new EasyNetQ release.
+/// </summary>
+public sealed class AsyncQueue<T> : IDisposable
+{
+    private readonly Queue<T> elements = new();
+    private readonly object mutex = new();
+    private readonly Queue<TaskCompletionSource<T>> waiters = new();
+
+    /// <summary>
+    ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
+    ///     the same compatibility as public APIs. It may be changed or removed without notice in
+    ///     any release. You should only use it directly in your code with extreme caution and knowing that
+    ///     doing so can result in application failures when updating to a new EasyNetQ release.
+    /// </summary>
+    public AsyncQueue()
+    {
+    }
+
+    /// <summary>
+    ///     This is an internal API that supports the EasyNetQ infrastructure and not subject to
+    ///     the same compatibility as public APIs. It may be changed or removed without notice in
+    ///     any release. You should only use it directly in your code with extreme caution and knowing that
+    ///     doing so can result in application failures when updating to a new EasyNetQ release.
+    /// </summary>
+    public AsyncQueue(IEnumerable<T> collection)
+    {
+        foreach (var element in collection)
+            elements.Enqueue(element);
+    }
+
+    /// <summary>
+    ///     Returns count of elements in queue
+    /// </summary>
+    public int Count
+    {
+        get
+        {
+            lock (mutex)
+            {
+                return elements.Count;
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Tries to take the element from queue
+    /// </summary>
+    /// <param name="element">Dequeued element</param>
+    /// <returns><see langword="true"/> if an element was dequeued</returns>
+    public bool TryDequeue([MaybeNullWhen(false)] out T element)
+    {
+        lock (mutex)
+        {
+            var hasElements = elements.Count > 0;
+            if (hasElements)
+            {
+                element = elements.Dequeue();
+                return true;
+            }
+
+            element = default;
+            return false;
+        }
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        lock (mutex)
+        {
+            while (waiters.Count > 0)
+            {
+                var waiter = waiters.Dequeue();
+                waiter.TrySetCanceled();
+            }
+            elements.Clear();
+        }
+    }
+
+    /// <summary>
+    ///     Takes the element from queue
+    /// </summary>
+    /// <param name="cancellationToken">The cancellation token</param>
+    /// <returns>The dequeued element</returns>
+    public ValueTask<T> DequeueAsync(CancellationToken cancellationToken = default)
+    {
+        if (cancellationToken.IsCancellationRequested)
+            return new ValueTask<T>(Task.FromCanceled<T>(cancellationToken));
+
+        lock (mutex)
+        {
+            if (elements.Count > 0)
+                return new ValueTask<T>(elements.Dequeue());
+
+            CleanUpCancelledWaiters();
+
+            var waiter = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
+            waiter.AttachCancellation(cancellationToken);
+            waiters.Enqueue(waiter);
+            return new ValueTask<T>(waiter.Task);
+        }
+    }
+
+    /// <summary>
+    ///     Adds the element to queue
+    /// </summary>
+    /// <param name="element">The element to enqueue</param>
+    public void Enqueue(T element)
+    {
+        lock (mutex)
+        {
+            while (waiters.Count > 0)
+            {
+                var waiter = waiters.Dequeue();
+                if (waiter.TrySetResult(element))
+                {
+                    CleanUpCancelledWaiters();
+                    return;
+                }
+            }
+
+            elements.Enqueue(element);
+        }
+    }
+
+    private void CleanUpCancelledWaiters()
+    {
+        while (waiters.Count > 0)
+        {
+            var waiter = waiters.Peek();
+            if (waiter.Task.IsCompleted)
+                waiters.Dequeue();
+            else
+                break;
+        }
+    }
+}

@@ -1,9 +1,0 @@
-using EasyNetQ.Topology;
-
-namespace EasyNetQ.Consumer;
-
-public class HandlerCollectionFactory : IHandlerCollectionFactory
-{
-    /// <inheritdoc />
-    public IHandlerCollection CreateHandlerCollection(in Queue queue) => new HandlerCollection();
-}

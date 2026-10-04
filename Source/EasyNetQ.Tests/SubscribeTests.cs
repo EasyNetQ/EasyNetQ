@@ -1,3 +1,4 @@
+using EasyNetQ.Pipeline;
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
 using EasyNetQ.Tests.Mocking;
@@ -19,7 +20,7 @@ public class When_subscribe_is_called : IAsyncLifetime
 
     public When_subscribe_is_called()
     {
-        var conventions = new Conventions(new DefaultTypeNameSerializer())
+        var conventions = new Conventions(new DefaultTypeNameSerializer(), new MessageTypeRegistry(new DefaultTypeNameSerializer()))
         {
             ConsumerTagConvention = () => consumerTag
         };
@@ -132,7 +133,7 @@ public class When_subscribe_with_configuration_is_called
     [InlineData(null, false, 0, 0, null, false, null, true, "qqq", null, null)]
     [Theory]
     public async Task Queue_should_be_declared_with_correct_options(
-        string topic,
+        string? topic,
         bool autoDelete,
         int priority,
         ushort prefetchCount,
@@ -242,7 +243,7 @@ public class When_a_message_is_delivered : IAsyncLifetime
 
     public When_a_message_is_delivered()
     {
-        var conventions = new Conventions(new DefaultTypeNameSerializer())
+        var conventions = new Conventions(new DefaultTypeNameSerializer(), new MessageTypeRegistry(new DefaultTypeNameSerializer()))
         {
             ConsumerTagConvention = () => consumerTag
         };
@@ -321,7 +322,7 @@ public class When_the_handler_throws_an_exception : IAsyncLifetime
 
     public When_the_handler_throws_an_exception()
     {
-        var conventions = new Conventions(new DefaultTypeNameSerializer())
+        var conventions = new Conventions(new DefaultTypeNameSerializer(), new MessageTypeRegistry(new DefaultTypeNameSerializer()))
         {
             ConsumerTagConvention = () => consumerTag
         };
@@ -332,8 +333,9 @@ public class When_the_handler_throws_an_exception : IAsyncLifetime
                 i =>
                 {
                     basicDeliverEventArgs = (ConsumeContext)i[0];
+                    basicDeliverEventArgs.Detach(); // pooled: keep it alive for the assertions
                     raisedException = (Exception)i[1];
-                    return new ValueTask<AckStrategyAsync>(AckStrategies.AckAsync);
+                    return new ValueTask<AckDecision>(AckDecision.Ack);
                 }
             );
 
@@ -384,7 +386,7 @@ public class When_the_handler_throws_an_exception : IAsyncLifetime
     public void Should_invoke_the_consumer_error_strategy()
     {
         consumeErrorStrategy.Received()
-            .HandleErrorAsync(Arg.Any<ConsumeContext>(), Arg.Any<Exception>(), cancellationToken: CancellationToken.None);
+            .HandleErrorAsync(Arg.Any<ConsumeContext>(), Arg.Any<Exception>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -411,7 +413,7 @@ public class When_a_subscription_is_cancelled_by_the_user : IAsyncLifetime
 
     public When_a_subscription_is_cancelled_by_the_user()
     {
-        var conventions = new Conventions(new DefaultTypeNameSerializer())
+        var conventions = new Conventions(new DefaultTypeNameSerializer(), new MessageTypeRegistry(new DefaultTypeNameSerializer()))
         {
             ConsumerTagConvention = () => consumerTag
         };

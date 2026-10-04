@@ -329,3 +329,4 @@ __pycache__/
 
 # API approval files
 *.received.txt
+BenchmarkDotNet.Artifacts/

@@ -37,7 +37,7 @@ public abstract class ConsumerTestBase : IAsyncLifetime
     }
 
     protected async Task<IAsyncDisposable> StartConsumerAsync(
-        Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, CancellationToken, AckStrategyAsync> handler,
+        Func<ReadOnlyMemory<byte>, MessageProperties, MessageReceivedInfo, CancellationToken, AckDecision> handler,
         bool autoAck = false
     )
     {
@@ -45,17 +45,17 @@ public abstract class ConsumerTestBase : IAsyncLifetime
         var queue = new Queue("my_queue", false);
         return await MockBuilder.Bus.Advanced.ConsumeAsync(
             queue,
-            (body, properties, messageInfo, ct) =>
+            async (body, properties, messageInfo, ct) =>
             {
-                return Task.Run(() =>
+                return await Task.Run(() =>
                 {
                     DeliveredMessageBody = body;
                     DeliveredMessageProperties = properties;
                     DeliveredMessageInfo = messageInfo;
 
-                    var ackStrategy = handler(body, properties, messageInfo, ct);
+                    var ackDecision = handler(body, properties, messageInfo, ct);
                     ConsumerWasInvoked = true;
-                    return ackStrategy;
+                    return ackDecision;
                 }, CancellationToken.None);
             },
             c =>
