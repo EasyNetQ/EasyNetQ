@@ -5,11 +5,10 @@ using RabbitMQ.Client;
 namespace EasyNetQ.Tests.PersistentChannelTests;
 
 /// <summary>
-///     Regression test: PersistentChannel must NOT enable the client's publisher-confirmation tracking.
-///     With tracking enabled, RabbitMQ.Client 7.x awaits the broker confirm inside BasicPublishAsync, which
-///     EasyNetQ invokes while holding the persistent channel mutex - serializing every confirmed publish on the
-///     bus to one in flight (and duplicating EasyNetQ's own PublishConfirmationListener tracking and headers).
-///     EasyNetQ enables confirms on the channel but tracks and awaits them itself, outside the mutex.
+///     Confirmation tracking is delegated to RabbitMQ.Client: BasicPublishAsync completes when the broker
+///     confirms. EasyNetQ starts the publish inside the channel mutex but awaits the in-flight task outside it
+///     (StartConfirmedPublishAction), so confirmed publishes stay concurrent - bounded by the rate limiter,
+///     which must be passed explicitly because the CreateChannelOptions ctor defaults it to null.
 /// </summary>
 public class When_a_channel_is_created_with_publisher_confirms : IAsyncLifetime
 {
@@ -53,11 +52,13 @@ public class When_a_channel_is_created_with_publisher_confirms : IAsyncLifetime
     }
 
     [Fact]
-    public void Should_not_enable_the_clients_confirmation_tracking()
+    public void Should_enable_the_clients_confirmation_tracking_with_a_rate_limiter()
     {
         createChannelOptions.Should().NotBeNull();
         createChannelOptions.PublisherConfirmationTrackingEnabled.Should()
-            .BeFalse("the client would await the confirm inside BasicPublishAsync while the persistent channel mutex is held, serializing confirmed publishes");
+            .BeTrue("confirmation tracking is delegated to the client; the publish task is awaited outside the channel mutex");
+        createChannelOptions.OutstandingPublisherConfirmationsRateLimiter.Should()
+            .NotBeNull("the CreateChannelOptions ctor silently defaults the rate limiter to null");
     }
 }
 

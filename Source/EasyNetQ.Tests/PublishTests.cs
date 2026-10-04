@@ -34,9 +34,7 @@ public class When_publish_is_called : IAsyncLifetime
     private void WaitForMessageToPublish()
     {
         using var autoResetEvent = new AutoResetEvent(false);
-#pragma warning disable IDISP004
-        mockBuilder.EventBus.Subscribe((PublishedMessageEvent _) => Task.FromResult(autoResetEvent.Set()));
-#pragma warning restore IDISP004
+        mockBuilder.Published += () => autoResetEvent.Set();
         autoResetEvent.WaitOne(1000);
     }
 
@@ -104,9 +102,7 @@ public class When_publish_with_topic_is_called : IAsyncLifetime
     private void WaitForMessageToPublish()
     {
         using var autoResetEvent = new AutoResetEvent(false);
-#pragma warning disable IDISP004
-        mockBuilder.EventBus.Subscribe((PublishedMessageEvent _) => Task.FromResult(autoResetEvent.Set()));
-#pragma warning restore IDISP004
+        mockBuilder.Published += () => autoResetEvent.Set();
         autoResetEvent.WaitOne(1000);
     }
 

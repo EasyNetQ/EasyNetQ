@@ -68,7 +68,7 @@ public class Program
             new MessageReader(),
             new QueueInsertion(errorMessageSerializer),
             new ErrorRetry(new Serialization.SystemTextJson.SystemTextJsonSerializerV2(), errorMessageSerializer),
-            new Conventions(typeNameSerializer)
+            new Conventions(typeNameSerializer, new MessageTypeRegistry(typeNameSerializer))
         );
 
         using var cts = new CancellationTokenSource();

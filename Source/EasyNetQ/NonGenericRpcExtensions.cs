@@ -1,17 +1,17 @@
 using System.Collections.Concurrent;
-using System.Linq.Expressions;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace EasyNetQ;
 
-using NonGenericRequestDelegate = Func<IRpc, object, Type, Type, Action<IRequestConfiguration>, CancellationToken, Task<object>>;
+using NonGenericRequestDelegate = Func<IRpc, object, Action<IRequestConfiguration>, CancellationToken, Task<object>>;
 
 /// <summary>
 ///     Various non-generic extensions for <see cref="IRpc"/>
 /// </summary>
 public static class NonGenericRpcExtensions
 {
-    private static readonly ConcurrentDictionary<Tuple<Type, Type>, NonGenericRequestDelegate> RequestDelegates = new();
+    private static readonly ConcurrentDictionary<(Type RequestType, Type ResponseType), NonGenericRequestDelegate> RequestDelegates = new();
 
     /// <summary>
     ///     Makes an RPC style request
@@ -22,6 +22,7 @@ public static class NonGenericRpcExtensions
     /// <param name="responseType">The response type</param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>The response</returns>
+    [RequiresDynamicCode(NonGenericBridge.RequiresDynamicCodeMessage)]
     public static Task<object> RequestAsync(
         this IRpc rpc,
         object request,
@@ -42,6 +43,7 @@ public static class NonGenericRpcExtensions
     /// </param>
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>The response</returns>
+    [RequiresDynamicCode(NonGenericBridge.RequiresDynamicCodeMessage)]
     public static Task<object> RequestAsync(
         this IRpc rpc,
         object request,
@@ -51,44 +53,19 @@ public static class NonGenericRpcExtensions
         CancellationToken cancellationToken = default
     )
     {
-        var requestDelegate = RequestDelegates.GetOrAdd(Tuple.Create(requestType, responseType), t =>
+        // The request/response pair needs a generic method closed over two runtime types; a static bridge method
+        // plus CreateDelegate (cached per pair) replaces the 8.x expression-tree compilation
+        var requestDelegate = RequestDelegates.GetOrAdd((requestType, responseType), static key =>
         {
-            var requestMethodInfo = typeof(IRpc).GetMethod("RequestAsync");
-            if (requestMethodInfo == null)
-                throw new MissingMethodException(nameof(IRpc), "RequestAsync");
-
-            var toTaskOfObjectMethodInfo = typeof(NonGenericRpcExtensions).GetMethod(nameof(ToTaskOfObject), BindingFlags.NonPublic | BindingFlags.Static);
-            if (toTaskOfObjectMethodInfo == null)
-                throw new MissingMethodException(nameof(NonGenericRpcExtensions), nameof(ToTaskOfObject));
-
-            var genericRequestPublishMethodInfo = requestMethodInfo.MakeGenericMethod(t.Item1, t.Item2);
-            var genericToTaskOfObjectMethodInfo = toTaskOfObjectMethodInfo.MakeGenericMethod(t.Item2);
-            var rpcParameter = Expression.Parameter(typeof(IRpc), "rpc");
-            var requestParameter = Expression.Parameter(typeof(object), "request");
-            var requestTypeParameter = Expression.Parameter(typeof(Type), "requestType");
-            var responseTypeParameter = Expression.Parameter(typeof(Type), "responseType");
-            var configureParameter = Expression.Parameter(typeof(Action<IRequestConfiguration>), "configure");
-            var cancellationTokenParameter = Expression.Parameter(typeof(CancellationToken), "cancellationToken");
-            var genericRequestMethodCallExpression = Expression.Call(
-                rpcParameter,
-                genericRequestPublishMethodInfo,
-                Expression.Convert(requestParameter, t.Item1),
-                configureParameter,
-                cancellationTokenParameter
-            );
-            var lambda = Expression.Lambda<NonGenericRequestDelegate>(
-                Expression.Call(null, genericToTaskOfObjectMethodInfo, genericRequestMethodCallExpression),
-                rpcParameter,
-                requestParameter,
-                requestTypeParameter,
-                responseTypeParameter,
-                configureParameter,
-                cancellationTokenParameter
-            );
-            return lambda.Compile();
+            var bridgeMethod = typeof(NonGenericRpcExtensions).GetMethod(nameof(RequestBridgeAsync), BindingFlags.NonPublic | BindingFlags.Static)
+                ?? throw new MissingMethodException(nameof(NonGenericRpcExtensions), nameof(RequestBridgeAsync));
+            var closedBridgeMethod = bridgeMethod.MakeGenericMethod(key.RequestType, key.ResponseType);
+            return (NonGenericRequestDelegate)closedBridgeMethod.CreateDelegate(typeof(NonGenericRequestDelegate));
         });
-        return requestDelegate(rpc, request, requestType, responseType, configure, cancellationToken);
+        return requestDelegate(rpc, request, configure, cancellationToken);
     }
 
-    private static async Task<object> ToTaskOfObject<T>(Task<T> task) => (await task.ConfigureAwait(false))!;
+    private static async Task<object> RequestBridgeAsync<TRequest, TResponse>(
+        IRpc rpc, object request, Action<IRequestConfiguration> configure, CancellationToken cancellationToken
+    ) => (await rpc.RequestAsync<TRequest, TResponse>((TRequest)request, configure, cancellationToken).ConfigureAwait(false))!;
 }

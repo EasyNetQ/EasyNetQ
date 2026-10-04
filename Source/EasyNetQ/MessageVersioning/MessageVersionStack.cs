@@ -1,15 +1,30 @@
+using EasyNetQ.Internals;
+using System.Diagnostics.CodeAnalysis;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Reflection;
 
 namespace EasyNetQ.MessageVersioning;
 
 public class MessageVersionStack : IEnumerable<Type>
 {
+    // The ISupersede<> interface walk is pure type metadata, so compute it once per message type - 8.x re-ran the
+    // GetInterfaces/GetGenericTypeDefinition scan on every serialized message and every publish
+    private static readonly ConcurrentDictionary<Type, Type[]> VersionChains = new();
+
     private readonly Stack<Type> messageVersions;
 
+    [RequiresUnreferencedCode(Compat.ReflectionApi)]
     public MessageVersionStack(Type messageType)
     {
-        messageVersions = ExtractMessageVersions(messageType);
+        var chain = VersionChains.GetOrAdd(messageType, static t =>
+        {
+            var stack = ExtractMessageVersions(t);
+            var bottomUp = stack.ToArray();
+            Array.Reverse(bottomUp); // Stack<T>(IEnumerable) pushes in order, so store bottom-up to reproduce the stack
+            return bottomUp;
+        });
+        messageVersions = new Stack<Type>(chain);
     }
 
     public Type Pop()
@@ -51,7 +66,7 @@ public class MessageVersionStack : IEnumerable<Type>
         return messageVersions;
     }
 
-    private static Type GetSupersededType(Type type)
+    private static Type? GetSupersededType(Type type)
     {
         if (type.BaseType == null)
             return null;
@@ -62,6 +77,7 @@ public class MessageVersionStack : IEnumerable<Type>
         return types.Except(parentTypes).FirstOrDefault();
     }
 
+    [UnconditionalSuppressMessage("Trimming", "IL2070", Justification = Compat.Annotated)]
     private static IEnumerable<Type> FindSupersedes(Type type)
     {
         return type

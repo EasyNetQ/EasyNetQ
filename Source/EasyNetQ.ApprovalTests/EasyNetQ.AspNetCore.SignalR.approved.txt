@@ -1,0 +1,52 @@
+namespace EasyNetQ.AspNetCore.SignalR
+{
+    public sealed class EasyNetQBackplaneConfigurator
+    {
+        public EasyNetQBackplaneConfigurator() { }
+        public EasyNetQ.AspNetCore.SignalR.EasyNetQBackplaneConfigurator AckTimeout(System.TimeSpan timeout) { }
+        public EasyNetQ.AspNetCore.SignalR.EasyNetQBackplaneConfigurator PrefetchCount(ushort prefetchCount) { }
+        public EasyNetQ.AspNetCore.SignalR.EasyNetQBackplaneConfigurator Prefix(string prefix) { }
+        public EasyNetQ.AspNetCore.SignalR.EasyNetQBackplaneConfigurator QueueExpiry(System.TimeSpan expiry) { }
+        public EasyNetQ.AspNetCore.SignalR.EasyNetQBackplaneConfigurator ServerName(string serverName) { }
+    }
+    public sealed class EasyNetQBackplaneOptions : System.IEquatable<EasyNetQ.AspNetCore.SignalR.EasyNetQBackplaneOptions>
+    {
+        public EasyNetQBackplaneOptions() { }
+        public System.TimeSpan AckTimeout { get; init; }
+        public ushort PrefetchCount { get; init; }
+        public string Prefix { get; init; }
+        public System.TimeSpan QueueExpiry { get; init; }
+        public string ServerName { get; init; }
+    }
+    public sealed class EasyNetQHubLifetimeManager<THub> : Microsoft.AspNetCore.SignalR.HubLifetimeManager<THub>, System.IAsyncDisposable, System.IDisposable
+        where THub : Microsoft.AspNetCore.SignalR.Hub
+    {
+        public EasyNetQHubLifetimeManager(EasyNetQ.Transport.ITransport transport, System.IServiceProvider services, EasyNetQ.AspNetCore.SignalR.EasyNetQBackplaneOptions options, Microsoft.AspNetCore.SignalR.IHubProtocolResolver protocolResolver, Microsoft.Extensions.Options.IOptions<Microsoft.AspNetCore.SignalR.HubOptions> globalHubOptions, Microsoft.Extensions.Options.IOptions<Microsoft.AspNetCore.SignalR.HubOptions<THub>> hubOptions, Microsoft.Extensions.Logging.ILogger<EasyNetQ.AspNetCore.SignalR.EasyNetQHubLifetimeManager<THub>> logger) { }
+        public string ServerName { get; }
+        public override System.Threading.Tasks.Task AddToGroupAsync(string connectionId, string groupName, System.Threading.CancellationToken cancellationToken = default) { }
+        public void Dispose() { }
+        public System.Threading.Tasks.ValueTask DisposeAsync() { }
+        public override System.Threading.Tasks.Task<T> InvokeConnectionAsync<T>(string connectionId, string methodName, object?[] args, System.Threading.CancellationToken cancellationToken) { }
+        public override System.Threading.Tasks.Task OnConnectedAsync(Microsoft.AspNetCore.SignalR.HubConnectionContext connection) { }
+        public override System.Threading.Tasks.Task OnDisconnectedAsync(Microsoft.AspNetCore.SignalR.HubConnectionContext connection) { }
+        public override System.Threading.Tasks.Task RemoveFromGroupAsync(string connectionId, string groupName, System.Threading.CancellationToken cancellationToken = default) { }
+        public override System.Threading.Tasks.Task SendAllAsync(string methodName, object?[] args, System.Threading.CancellationToken cancellationToken = default) { }
+        public override System.Threading.Tasks.Task SendAllExceptAsync(string methodName, object?[] args, System.Collections.Generic.IReadOnlyList<string> excludedConnectionIds, System.Threading.CancellationToken cancellationToken = default) { }
+        public override System.Threading.Tasks.Task SendConnectionAsync(string connectionId, string methodName, object?[] args, System.Threading.CancellationToken cancellationToken = default) { }
+        public override System.Threading.Tasks.Task SendConnectionsAsync(System.Collections.Generic.IReadOnlyList<string> connectionIds, string methodName, object?[] args, System.Threading.CancellationToken cancellationToken = default) { }
+        public override System.Threading.Tasks.Task SendGroupAsync(string groupName, string methodName, object?[] args, System.Threading.CancellationToken cancellationToken = default) { }
+        public override System.Threading.Tasks.Task SendGroupExceptAsync(string groupName, string methodName, object?[] args, System.Collections.Generic.IReadOnlyList<string> excludedConnectionIds, System.Threading.CancellationToken cancellationToken = default) { }
+        public override System.Threading.Tasks.Task SendGroupsAsync(System.Collections.Generic.IReadOnlyList<string> groupNames, string methodName, object?[] args, System.Threading.CancellationToken cancellationToken = default) { }
+        public override System.Threading.Tasks.Task SendUserAsync(string userId, string methodName, object?[] args, System.Threading.CancellationToken cancellationToken = default) { }
+        public override System.Threading.Tasks.Task SendUsersAsync(System.Collections.Generic.IReadOnlyList<string> userIds, string methodName, object?[] args, System.Threading.CancellationToken cancellationToken = default) { }
+        public override System.Threading.Tasks.Task SetConnectionResultAsync(string connectionId, Microsoft.AspNetCore.SignalR.Protocol.CompletionMessage result) { }
+        public override bool TryGetReturnType(string invocationId, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out System.Type? type) { }
+    }
+}
+namespace Microsoft.Extensions.DependencyInjection
+{
+    public static class EasyNetQSignalRServerBuilderExtensions
+    {
+        public static Microsoft.AspNetCore.SignalR.ISignalRServerBuilder AddEasyNetQ(this Microsoft.AspNetCore.SignalR.ISignalRServerBuilder signalr, System.Action<EasyNetQ.AspNetCore.SignalR.EasyNetQBackplaneConfigurator>? configure = null) { }
+    }
+}

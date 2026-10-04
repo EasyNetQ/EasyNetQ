@@ -9,7 +9,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
         private readonly ServiceProvider serviceProvider;
         private readonly IBus bus;
         private readonly RabbitMQFixture fixture;
-        readonly Conventions conventions = new Conventions(new DefaultTypeNameSerializer());
+        readonly Conventions conventions = new Conventions(new DefaultTypeNameSerializer(), new MessageTypeRegistry(new DefaultTypeNameSerializer()));
 
         public When_request_and_respond_with_configured_queues(RabbitMQFixture fixture)
         {

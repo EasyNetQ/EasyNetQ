@@ -13,7 +13,7 @@ public class LegacyTypeNameSerializerTests
         var typeName = typeNameSerializer.Serialize(typeof(HashSet<string>));
         typeName.Should()
             .Be(
-                "System.Collections.Generic.HashSet`1[[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]:System.Private.CoreLib");
+                $"System.Collections.Generic.HashSet`1[[{typeof(string).AssemblyQualifiedName}]]:System.Private.CoreLib");
     }
 
     [Fact]

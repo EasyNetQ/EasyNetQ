@@ -38,7 +38,7 @@ public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : IA
             using var waiter = new CountdownEvent(2);
 
 #pragma warning disable IDISP004
-            mockBuilder.EventBus.Subscribe((PublishedMessageEvent _) => Task.FromResult(waiter.Signal()));
+            mockBuilder.Published += () => waiter.Signal();
             mockBuilder.EventBus.Subscribe((StartConsumingSucceededEvent _) => Task.FromResult(waiter.Signal()));
 #pragma warning restore IDISP004
 
@@ -59,7 +59,7 @@ public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : IA
             using var waiter = new CountdownEvent(2);
 
 #pragma warning disable IDISP004
-            mockBuilder.EventBus.Subscribe((PublishedMessageEvent _) => Task.FromResult(waiter.Signal()));
+            mockBuilder.Published += () => waiter.Signal();
             mockBuilder.EventBus.Subscribe((StartConsumingSucceededEvent _) => Task.FromResult(waiter.Signal()));
 #pragma warning restore IDISP004
 

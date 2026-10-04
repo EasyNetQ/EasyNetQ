@@ -15,6 +15,11 @@ public class RabbitMQFixture : IAsyncLifetime, IDisposable
     private const string User = "guest";
     private const string Password = "guest";
 
+    // Host ports deliberately off the RabbitMQ defaults so the suite can run
+    // alongside a developer's own broker on 5672/15672.
+    private const string AmqpHostPort = "5674";
+    private const string ManagementHostPort = "15674";
+
     private readonly DockerProxy dockerProxy = new();
     private OSPlatform dockerEngineOsPlatform;
     private string dockerNetworkName;
@@ -41,8 +46,16 @@ public class RabbitMQFixture : IAsyncLifetime, IDisposable
         await PullImageAsync(cts.Token);
         var containerId = await RunNewContainerAsync(cts.Token);
         if (dockerEngineOsPlatform == OSPlatform.Windows)
+        {
+            // Windows containers are reached directly on the container IP with the default ports
             Host = await dockerProxy.GetContainerIpAsync(containerId, cts.Token);
-        ManagementClient = new ManagementClient(new Uri($"http://{Host}:15672"), User, Password);
+            ManagementClient = new ManagementClient(new Uri($"http://{Host}:15672"), User, Password);
+        }
+        else
+        {
+            Host = $"localhost:{AmqpHostPort}";
+            ManagementClient = new ManagementClient(new Uri($"http://localhost:{ManagementHostPort}"), User, Password);
+        }
         await WaitForRabbitMqReadyAsync(cts.Token);
     }
 
@@ -81,8 +94,8 @@ public class RabbitMQFixture : IAsyncLifetime, IDisposable
     {
         var portMappings = new Dictionary<string, ISet<string>>
         {
-            { "5672", new HashSet<string> { "5672" } },
-            { "15672", new HashSet<string> { "15672" } }
+            { "5672", new HashSet<string> { AmqpHostPort } },
+            { "15672", new HashSet<string> { ManagementHostPort } }
         };
         var envVars = new List<string> { "RABBITMQ_DEFAULT_VHOST=/" };
         var containerId = await dockerProxy.CreateContainerAsync(
