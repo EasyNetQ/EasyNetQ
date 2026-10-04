@@ -17,7 +17,8 @@
     <InternalsVisibleTo Include="EasyNetQ.AspNetCore.SignalR.Tests" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove="README.md" />
+    <!-- this package's own README, not the repository one Directory.Build.props packs for every project -->
+    <None Remove="README.md;..\..\README.md" />
     <None Include="README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 </Project>
