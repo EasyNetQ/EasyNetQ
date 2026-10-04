@@ -14,6 +14,7 @@
   </Folder>
   <Folder Name="/Examples/">
     <Project Path="EasyNetQ.Examples.Aot/EasyNetQ.Examples.Aot.csproj" />
+    <Project Path="EasyNetQ.Examples.SignalRAot/EasyNetQ.Examples.SignalRAot.csproj" />
     <Project Path="EasyNetQ.Examples.DlxRetry/EasyNetQ.Examples.DlxRetry.csproj" />
     <Project Path="EasyNetQ.Examples.NetFramework/EasyNetQ.Examples.NetFramework.csproj" />
     <Project Path="EasyNetQ.Examples.PubSubWithAdvancedApi/EasyNetQ.Examples.PubSubWithAdvancedApi.csproj" />
@@ -22,6 +23,8 @@
   <Folder Name="/Serialization/">
     <Project Path="EasyNetQ.Serialization.NewtonsoftJson/EasyNetQ.Serialization.NewtonsoftJson.csproj" />
     <Project Path="EasyNetQ.Transport.InMemory/EasyNetQ.Transport.InMemory.csproj" />
+    <Project Path="EasyNetQ.AspNetCore.SignalR/EasyNetQ.AspNetCore.SignalR.csproj" />
+    <Project Path="EasyNetQ.AspNetCore.SignalR.Tests/EasyNetQ.AspNetCore.SignalR.Tests.csproj" />
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="EasyNetQ.AllocationTests/EasyNetQ.AllocationTests.csproj" />

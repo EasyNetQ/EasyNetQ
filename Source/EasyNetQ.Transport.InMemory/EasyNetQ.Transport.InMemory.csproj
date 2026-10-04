@@ -18,5 +18,6 @@
   <ItemGroup Label="InternalsVisibleTo">
     <InternalsVisibleTo Include="EasyNetQ.Core.Tests" />
     <InternalsVisibleTo Include="EasyNetQ.Benchmarks" />
+    <InternalsVisibleTo Include="EasyNetQ.AspNetCore.SignalR.Tests" />
   </ItemGroup>
 </Project>

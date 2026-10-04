@@ -9,6 +9,7 @@ public class ApprovalTests
     [InlineData(typeof(RabbitBus))] // EasyNetQ.RabbitMQ
     [InlineData(typeof(AutoSubscribe.AutoSubscriber))] // EasyNetQ (bundle)
     [InlineData(typeof(Serialization.NewtonsoftJson.NewtonsoftJsonSerializer))]
+    [InlineData(typeof(AspNetCore.SignalR.EasyNetQBackplaneOptions))]
     public void Public_api_should_not_be_changed_unintentionally(Type type)
     {
         var publicApi = type?.Assembly.GeneratePublicApi(new ApiGeneratorOptions

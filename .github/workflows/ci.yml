@@ -75,6 +75,41 @@ jobs:
         cd ${{ github.workspace }}/Source/EasyNetQ.ApprovalTests
         dotnet test --configuration Release --no-build
 
+  signalr:
+    name: SignalR backplane (in-memory + RabbitMQ)
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      rabbitmq:
+        image: rabbitmq:4-management
+        ports:
+          - 5673:5672
+          - 15673:15672
+        options: >-
+          --health-cmd "rabbitmq-diagnostics -q ping"
+          --health-interval 5s
+          --health-timeout 10s
+          --health-retries 20
+    env:
+      EASYNETQ_SIGNALR_RABBITMQ: host=localhost;port=5673;username=guest;password=guest;timeout=10;requestedHeartbeat=10
+      EASYNETQ_SIGNALR_RABBITMQ_MANAGEMENT: http://guest:guest@localhost:15673
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v7
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET (global.json)
+      uses: actions/setup-dotnet@v6
+      with:
+        global-json-file: global.json
+
+    - name: Backplane tests
+      run: |
+        cd ${{ github.workspace }}/Source/EasyNetQ.AspNetCore.SignalR.Tests
+        dotnet test --configuration Release
+
   aot-smoke:
     name: Native AOT smoke (fails on any trim/AOT warning)
     if: github.event_name != 'schedule'
@@ -96,6 +131,8 @@ jobs:
       run: |
         set -o pipefail
         dotnet publish ${{ github.workspace }}/Source/EasyNetQ.Examples.Aot --configuration Release --runtime linux-x64 --output ${{ github.workspace }}/aot-out 2>&1 | tee aot-publish.log
+        # the SignalR backplane sample: ASP.NET Core + SignalR (server and client) over EasyNetQ, JSON hub protocol
+        dotnet publish ${{ github.workspace }}/Source/EasyNetQ.Examples.SignalRAot --configuration Release --runtime linux-x64 --output ${{ github.workspace }}/aot-out-signalr 2>&1 | tee -a aot-publish.log
 
     - name: Summarize trim/AOT warnings
       shell: bash

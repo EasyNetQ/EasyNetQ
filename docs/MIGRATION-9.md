@@ -174,6 +174,25 @@ Gaps found running v9 in production consumers, fixed in the library rather than 
   references EasyNetQ, also only transitively, imports the props: the referencing side decides whether Configuration
   is unset. `tests/source-reference/check.sh` guards both the solution and the standalone build in CI.
 
+## SignalR backplane (new package)
+
+`EasyNetQ.AspNetCore.SignalR`: `services.AddSignalR().AddEasyNetQ(b => b.Prefix("chat"))` scales SignalR out over
+any EasyNetQ transport with the semantics of the Redis backplane (all/except, connections, groups incl. acknowledged
+cross-server membership, users, client results). Direct exchange per hub, one durable `x-expires` queue per server,
+redeclared on `Recovered`/`Cancelled`. Native AOT safe; see the package README.
+
+Transport additions it relies on, available to everyone:
+
+- `LifecycleEvent.Cancelled`: the broker cancelled a consumer (queue deleted, queue node lost, policy change). Unlike a
+  connection interruption it does not restart on its own. RabbitMQ raises it per queue (new internal
+  `ConsumerCancelledEvent`); the in-memory transport raises it when a consumed queue is deleted.
+- `UnroutableMessageException` (Core): a mandatory publish no queue received. `PublishReturnedException` (RabbitMQ)
+  now derives from it, so code above the transport can catch "nobody is listening" without referencing RabbitMQ.
+  Existing `catch (PublishReturnedException)` blocks are unaffected.
+- In-memory transport, closer to AMQP: binding the same key twice binds once; unbinding no longer drops messages
+  routed concurrently through other bindings; a mandatory publish that reaches no queue throws
+  `UnroutableMessageException`; deleting a queue cancels its consumers.
+
 ## Native AOT
 
 A default `AddEasyNetQ(...)` application publishes with **zero** trim/AOT warnings; CI fails on any
