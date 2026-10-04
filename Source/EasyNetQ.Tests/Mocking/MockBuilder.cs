@@ -41,8 +41,13 @@ public sealed class MockBuilder : IAsyncDisposable
         connection.Endpoint.Returns(new AmqpTcpEndpoint("localhost"));
         connection.CreateChannelAsync(default, default).ReturnsForAnyArgs(async _ =>
         {
-            var channel = channelPool.Pop();
-            channels.Add(channel);
+            // channels can be created concurrently (publish, topology, consume); keep pool and list consistent
+            IChannel channel;
+            lock (channels)
+            {
+                channel = channelPool.Pop();
+                channels.Add(channel);
+            }
             channel.IsOpen.Returns(true);
             channel.When(x => x.BasicPublishAsync(
                     Arg.Any<string>(), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<RabbitMQ.Client.BasicProperties>(), Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>()
@@ -87,6 +92,18 @@ public sealed class MockBuilder : IAsyncDisposable
     public IConnection Connection => connection;
 
     public List<IChannel> Channels => channels;
+
+    /// <summary>
+    ///     The one channel that published, whatever order channels were created in
+    /// </summary>
+    public IChannel PublishChannel
+    {
+        get
+        {
+            lock (channels)
+                return channels.Single(c => c.ReceivedCalls().Any(call => call.GetMethodInfo().Name == nameof(IChannel.BasicPublishAsync)));
+        }
+    }
 
     public List<AsyncDefaultBasicConsumer> Consumers => consumers;
 

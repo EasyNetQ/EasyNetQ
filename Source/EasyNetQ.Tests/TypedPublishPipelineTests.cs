@@ -44,7 +44,7 @@ public class TypedPublishPipelineTests
         descriptorSeen!.Type.Should().Be<MyMessage>();
         bodyLengthSeen.Should().Be(0, "the probe runs before SerializeStep");
 
-        await mockBuilder.Channels[0].Received().BasicPublishAsync(
+        await mockBuilder.PublishChannel.Received().BasicPublishAsync(
             Arg.Is("the.exchange"),
             Arg.Is("the.routing.key"),
             Arg.Is(false),
@@ -63,7 +63,7 @@ public class TypedPublishPipelineTests
             "the.exchange", "rk", null, null, MessageProperties.Empty, new TransientMessage { Text = "t" }, CancellationToken.None
         );
 
-        await mockBuilder.Channels[0].Received().BasicPublishAsync(
+        await mockBuilder.PublishChannel.Received().BasicPublishAsync(
             Arg.Is("the.exchange"),
             Arg.Is("rk"),
             Arg.Is(false),
@@ -82,7 +82,7 @@ public class TypedPublishPipelineTests
             "the.exchange", "rk", null, null, MessageProperties.Empty, new MyMessage { Text = "t" }, CancellationToken.None
         );
 
-        await mockBuilder.Channels[0].Received().BasicPublishAsync(
+        await mockBuilder.PublishChannel.Received().BasicPublishAsync(
             Arg.Any<string>(),
             Arg.Any<string>(),
             Arg.Any<bool>(),
