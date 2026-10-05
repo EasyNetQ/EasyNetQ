@@ -850,6 +850,7 @@ namespace EasyNetQ.Diagnostics
         public static readonly System.Diagnostics.Metrics.Counter<long> ConsumedMessages;
         public static readonly System.Diagnostics.Metrics.UpDownCounter<long> ConsumerInFlight;
         public static readonly System.Diagnostics.Metrics.Counter<long> ConsumerMessages;
+        public static readonly System.Diagnostics.Metrics.Counter<long> LifecycleEvents;
         public static readonly System.Diagnostics.Metrics.Meter Meter;
         public static readonly System.Diagnostics.Metrics.Histogram<double> OperationDuration;
         public static readonly System.Diagnostics.Metrics.Histogram<double> ProcessDuration;
@@ -865,6 +866,8 @@ namespace EasyNetQ.Diagnostics
         public const string DestinationSubscriptionName = "messaging.destination.subscription.name";
         public const string ErrorQueue = "easynetq.error.queue";
         public const string ErrorType = "error.type";
+        public const string LifecycleEvent = "easynetq.lifecycle.event";
+        public const string LifecycleLayer = "easynetq.lifecycle.layer";
         public const string MessageId = "messaging.message.id";
         public const string MessageType = "easynetq.message.type";
         public const string MessagingSystem = "messaging.system";

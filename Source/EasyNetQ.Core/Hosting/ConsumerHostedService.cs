@@ -221,7 +221,7 @@ public sealed class ConsumerHostedService : IHostedService, IAsyncDisposable
 
     private async ValueTask NotifyStartFailedAsync(Exception exception, CancellationToken cancellationToken)
     {
-        if (channelContext is null || services.GetService<LifecycleNotifier>() is not { IsEnabled: true } notifier) return;
+        if (channelContext is null || services.GetService<LifecycleNotifier>() is not { } notifier) return;
         try
         {
             await notifier.NotifyAsync(channelContext, LifecycleLayer.Consumer, LifecycleEvent.StartFailed, exception.Message, exception, cancellationToken).ConfigureAwait(false);

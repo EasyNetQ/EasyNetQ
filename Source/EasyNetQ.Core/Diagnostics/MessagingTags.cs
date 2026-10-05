@@ -51,6 +51,12 @@ public static class MessagingTags
     /// <summary>easynetq.ack.decision - ack, nack_requeue, nack_discard, reject or handled</summary>
     public const string AckDecision = "easynetq.ack.decision";
 
+    /// <summary>easynetq.lifecycle.layer - connection, channel or consumer</summary>
+    public const string LifecycleLayer = "easynetq.lifecycle.layer";
+
+    /// <summary>easynetq.lifecycle.event - the lifecycle event name (Disconnected, RecoveryError, StartFailed, ...)</summary>
+    public const string LifecycleEvent = "easynetq.lifecycle.event";
+
     /// <summary>easynetq.error.queue - true on the error-queue republish span</summary>
     public const string ErrorQueue = "easynetq.error.queue";
 }

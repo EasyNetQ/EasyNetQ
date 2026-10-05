@@ -171,4 +171,40 @@ public class TelemetryMiddlewareTests
             measurements.Where(m => m.Instrument == "easynetq.consumer.in_flight").Sum(m => m.Value).Should().Be(0);
         }
     }
+
+    [Fact]
+    public async Task Should_count_lifecycle_events_without_a_lifecycle_step()
+    {
+        var measurements = new List<(string? Layer, string? Event, string? ErrorType)>();
+        using var meterListener = new MeterListener();
+        meterListener.InstrumentPublished = (instrument, l) =>
+        {
+            if (instrument.Meter.Name == EasyNetQDiagnostics.SourceName && instrument.Name == "easynetq.lifecycle.events")
+                l.EnableMeasurementEvents(instrument);
+        };
+        meterListener.SetMeasurementEventCallback<long>((_, _, tags, _) =>
+        {
+            string? layer = null, @event = null, errorType = null;
+            foreach (var tag in tags)
+            {
+                if (tag.Key == MessagingTags.LifecycleLayer) layer = tag.Value as string;
+                if (tag.Key == MessagingTags.LifecycleEvent) @event = tag.Value as string;
+                if (tag.Key == MessagingTags.ErrorType) errorType = tag.Value as string;
+            }
+            lock (measurements) measurements.Add((layer, @event, errorType));
+        });
+        meterListener.Start();
+
+        await using var mockBuilder = new MockBuilder();
+        _ = mockBuilder.Bus; // create the bus so the transport connections subscribe
+
+        await mockBuilder.EventBus.PublishAsync(new ConnectionDisconnectedEvent(Persistent.PersistentConnectionType.Consumer, new RabbitMQ.Client.AmqpTcpEndpoint(), "bye"));
+        await mockBuilder.EventBus.PublishAsync(new ConnectionRecoveryErrorEvent(Persistent.PersistentConnectionType.Consumer, new TimeoutException()));
+
+        lock (measurements)
+        {
+            measurements.Should().ContainSingle(m => m.Layer == "connection" && m.Event == "Disconnected" && m.ErrorType == null);
+            measurements.Should().ContainSingle(m => m.Layer == "connection" && m.Event == "RecoveryError" && m.ErrorType == "System.TimeoutException");
+        }
+    }
 }

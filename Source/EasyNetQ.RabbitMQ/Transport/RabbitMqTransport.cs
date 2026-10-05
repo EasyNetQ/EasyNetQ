@@ -77,7 +77,7 @@ internal sealed class RabbitMqTransportConnection : ITransportConnection
         this.notifier = notifier;
 
         // bridge the internal events onto the lifecycle pipeline; the internal bus goes away in phase 6
-        lifecycleSubscriptions = notifier is { IsEnabled: true } && eventBus is not null
+        lifecycleSubscriptions = notifier is not null && eventBus is not null
             ?
             [
                 eventBus.Subscribe<ConnectionCreatedEvent>(e => NotifyAsync(e.Type, context, LifecycleEvent.Connected)),
@@ -208,7 +208,7 @@ internal sealed class RabbitMqTransportChannel : ITransportChannel
 
         // a broker-side cancel ends that queue's consumption for good; tell the lifecycle so the queue's owner can act
         IDisposable? cancelSubscription = null;
-        if (notifier is { IsEnabled: true } && consumers.First().Services.GetService<IEventBus>() is { } eventBus)
+        if (notifier is not null && consumers.First().Services.GetService<IEventBus>() is { } eventBus)
         {
             var contextsByQueue = consumers.ToDictionary(c => c.Queue, StringComparer.Ordinal);
             cancelSubscription = eventBus.Subscribe<ConsumerCancelledEvent>(e =>
@@ -220,7 +220,7 @@ internal sealed class RabbitMqTransportChannel : ITransportChannel
 
         await consumer.StartConsumingAsync(cancellationToken).ConfigureAwait(false);
 
-        if (notifier is { IsEnabled: true })
+        if (notifier is not null)
             foreach (var consumerContext in consumers)
                 await notifier.NotifyAsync(consumerContext, LifecycleLayer.Consumer, LifecycleEvent.Started, cancellationToken: cancellationToken).ConfigureAwait(false);
         return new RabbitMqTransportConsumer(consumer, consumers, notifier, cancelSubscription);
@@ -313,7 +313,7 @@ internal sealed class RabbitMqTransportConsumer : ITransportConsumer
     {
         cancelSubscription?.Dispose();
         await consumer.DisposeAsync().ConfigureAwait(false);
-        if (notifier is { IsEnabled: true })
+        if (notifier is not null)
             foreach (var consumerContext in consumers)
                 await notifier.NotifyAsync(consumerContext, LifecycleLayer.Consumer, LifecycleEvent.Stopped).ConfigureAwait(false);
     }
