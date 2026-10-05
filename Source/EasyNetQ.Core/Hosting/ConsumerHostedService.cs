@@ -59,13 +59,14 @@ public sealed class ConsumerHostedService : IHostedService, IAsyncDisposable
         this.options = options;
         this.status = status;
         this.logger = logger;
+        status.Join(this);
     }
 
     /// <inheritdoc />
     public Task StartAsync(CancellationToken cancellationToken)
     {
         var pending = definitions.ToList();
-        status.Pending(pending.Count);
+        status.Pending(this, pending.Count);
         if (options.WaitForStartup)
             return StartConsumersAsync(pending, cancellationToken);
 
@@ -141,7 +142,7 @@ public sealed class ConsumerHostedService : IHostedService, IAsyncDisposable
                     {
                         consumers.Add(await StartConsumerAsync(channel, pending[i], cancellationToken).ConfigureAwait(false));
                         pending.RemoveAt(i);
-                        status.Pending(pending.Count);
+                        status.Pending(this, pending.Count);
                     }
                     catch (Exception exception) when (!cancellationToken.IsCancellationRequested)
                     {
@@ -155,7 +156,7 @@ public sealed class ConsumerHostedService : IHostedService, IAsyncDisposable
 
             if (pending.Count == 0)
             {
-                status.Started();
+                status.Started(this);
                 logger.ConsumersStarted(consumers.Count);
                 return;
             }

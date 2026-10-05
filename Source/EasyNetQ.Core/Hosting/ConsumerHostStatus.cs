@@ -19,11 +19,14 @@ public interface IConsumerHostStatus
 }
 
 /// <summary>
-///     The <see cref="IConsumerHostStatus" /> the consumer host updates
+///     The <see cref="IConsumerHostStatus" /> the consumer hosts update: the fluent consumer host and, when
+///     registered, the auto-subscriber host. It reports started once every host that joined has started.
 /// </summary>
 public sealed class ConsumerHostStatus : IConsumerHostStatus
 {
     private readonly TaskCompletionSource<bool> started = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private readonly Dictionary<object, int> pendingByHost = new();
+    private readonly HashSet<object> startedHosts = new();
     private volatile int pending;
     private volatile Exception? lastError;
 
@@ -49,13 +52,37 @@ public sealed class ConsumerHostStatus : IConsumerHostStatus
         await (await Task.WhenAny(started.Task, cancelled.Task).ConfigureAwait(false)).ConfigureAwait(false);
     }
 
-    internal void Pending(int count) => pending = count;
+    // hosts join from their constructors: the generic host resolves every IHostedService before starting any
+    internal void Join(object host)
+    {
+        lock (pendingByHost)
+        {
+            if (!pendingByHost.ContainsKey(host))
+                pendingByHost[host] = 0;
+        }
+    }
+
+    internal void Pending(object host, int count)
+    {
+        lock (pendingByHost)
+        {
+            pendingByHost[host] = count;
+            pending = pendingByHost.Values.Sum();
+        }
+    }
 
     internal void Failed(Exception exception) => lastError = exception;
 
-    internal void Started()
+    internal void Started(object host)
     {
-        pending = 0;
+        lock (pendingByHost)
+        {
+            pendingByHost[host] = 0;
+            startedHosts.Add(host);
+            pending = pendingByHost.Values.Sum();
+            if (startedHosts.Count < pendingByHost.Count)
+                return;
+        }
         lastError = null;
         started.TrySetResult(true);
     }
