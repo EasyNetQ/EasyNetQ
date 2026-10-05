@@ -117,6 +117,13 @@ internal sealed class InMemoryConsumer : ITransportConsumer
             while (await reader.WaitToReadAsync(cancellationToken).ConfigureAwait(false))
                 while (reader.TryRead(out var delivery))
                 {
+                    if (!delivery.TryTake())
+                    {
+                        // expired (and dead-lettered) while waiting
+                        Interlocked.Decrement(ref queue.Expired);
+                        continue;
+                    }
+
                     var context = consumerContext.RentMessageContext();
                     try
                     {
@@ -225,7 +232,7 @@ internal sealed class InMemoryTopology(InMemoryBroker broker) : ITopology
     {
         var q = broker.GetQueue(queue);
         return new ValueTask<QueueStats>(new QueueStats(
-            (ulong)(q?.Deliveries.Reader.Count ?? 0),
+            (ulong)(q?.Count ?? 0),
             (ulong)(q?.ConsumerCount ?? 0)
         ));
     }

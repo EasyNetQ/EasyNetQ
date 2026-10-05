@@ -9,6 +9,14 @@ namespace EasyNetQ;
 /// </summary>
 internal static class AttributeMetadataReader
 {
+    /// <summary>The type's own [MessageType] (not inherited: a subclass is another contract)</summary>
+    public static MessageTypeAttribute? MessageType(Type type)
+    {
+        foreach (var attribute in type.GetCustomAttributes(typeof(MessageTypeAttribute), false))
+            return (MessageTypeAttribute)attribute;
+        return null;
+    }
+
     public static void Populate(MessageTypeDescriptor descriptor)
     {
         foreach (var attribute in descriptor.Type.GetCustomAttributes(true))
