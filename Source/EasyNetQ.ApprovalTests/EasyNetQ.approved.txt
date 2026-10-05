@@ -10,15 +10,29 @@ namespace EasyNetQ.AutoSubscribe
         public string SubscriptionIdPrefix { get; }
         public static string DefaultTopicName { get; set; }
         protected virtual string DefaultSubscriptionIdGenerator(EasyNetQ.AutoSubscribe.AutoSubscriberConsumerInfo c) { }
-        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
-            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("8.x reflection AutoSubscriber: not trim- or Native-AOT-safe. Use AddEasyNetQ(...)" +
+            ".AutoSubscribe(...), or SubscribeAsync with the generated AutoSubscriberConsumer" +
+            "s.All.")]
         protected virtual System.Collections.Generic.IEnumerable<EasyNetQ.AutoSubscribe.AutoSubscriberConsumerInfo> GetSubscriberConsumerInfos(System.Collections.Generic.IEnumerable<System.Type> types, System.Type interfaceType) { }
         protected virtual EasyNetQ.AutoSubscribe.AutoSubscriberConsumerAttribute? GetSubscriptionAttribute(EasyNetQ.AutoSubscribe.AutoSubscriberConsumerInfo consumerInfo) { }
-        [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
-            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
-        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
-            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
+        public virtual System.Threading.Tasks.Task<System.IAsyncDisposable> SubscribeAsync(System.Collections.Generic.IEnumerable<EasyNetQ.AutoSubscribe.AutoSubscriberConsumer> consumers, System.Threading.CancellationToken cancellationToken = default) { }
+        [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("8.x reflection AutoSubscriber: not trim- or Native-AOT-safe. Use AddEasyNetQ(...)" +
+            ".AutoSubscribe(...), or SubscribeAsync with the generated AutoSubscriberConsumer" +
+            "s.All.")]
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("8.x reflection AutoSubscriber: not trim- or Native-AOT-safe. Use AddEasyNetQ(...)" +
+            ".AutoSubscribe(...), or SubscribeAsync with the generated AutoSubscriberConsumer" +
+            "s.All.")]
         public virtual System.Threading.Tasks.Task<System.IAsyncDisposable> SubscribeAsync(System.Type[] consumerTypes, System.Threading.CancellationToken cancellationToken = default) { }
+    }
+    public sealed class AutoSubscriberConsumer
+    {
+        public EasyNetQ.AutoSubscribe.AutoSubscriberConsumerInfo Info { get; }
+        public static EasyNetQ.AutoSubscribe.AutoSubscriberConsumer Async<TMessage, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]  TConsumer>(EasyNetQ.AutoSubscribe.AutoSubscriberConsumerAttribute? subscriptionAttribute = null, System.Collections.Generic.IReadOnlyList<string>? topics = null, EasyNetQ.AutoSubscribe.SubscriptionConfigurationAttribute? subscriptionConfiguration = null)
+            where TMessage :  class
+            where TConsumer :  class, EasyNetQ.AutoSubscribe.IConsumeAsync<TMessage> { }
+        public static EasyNetQ.AutoSubscribe.AutoSubscriberConsumer Sync<TMessage, [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]  TConsumer>(EasyNetQ.AutoSubscribe.AutoSubscriberConsumerAttribute? subscriptionAttribute = null, System.Collections.Generic.IReadOnlyList<string>? topics = null, EasyNetQ.AutoSubscribe.SubscriptionConfigurationAttribute? subscriptionConfiguration = null)
+            where TMessage :  class
+            where TConsumer :  class, EasyNetQ.AutoSubscribe.IConsume<TMessage> { }
     }
     [System.AttributeUsage(System.AttributeTargets.Method)]
     public class AutoSubscriberConsumerAttribute : System.Attribute
@@ -29,17 +43,30 @@ namespace EasyNetQ.AutoSubscribe
     }
     public class AutoSubscriberConsumerInfo
     {
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("8.x reflection AutoSubscriber: not trim- or Native-AOT-safe. Use AddEasyNetQ(...)" +
+            ".AutoSubscribe(...), or SubscribeAsync with the generated AutoSubscriberConsumer" +
+            "s.All.")]
         public AutoSubscriberConsumerInfo(System.Type concreteType, System.Type interfaceType, System.Type messageType) { }
+        public AutoSubscriberConsumerInfo(System.Type concreteType, System.Type interfaceType, System.Type messageType, EasyNetQ.AutoSubscribe.AutoSubscriberConsumerAttribute? subscriptionAttribute, System.Collections.Generic.IReadOnlyList<string> topics, EasyNetQ.AutoSubscribe.SubscriptionConfigurationAttribute? subscriptionConfiguration) { }
         public System.Type ConcreteType { get; }
+        [get: System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("8.x reflection AutoSubscriber: not trim- or Native-AOT-safe. Use AddEasyNetQ(...)" +
+            ".AutoSubscribe(...), or SubscribeAsync with the generated AutoSubscriberConsumer" +
+            "s.All.")]
         public System.Reflection.MethodInfo ConsumeMethod { get; }
+        public System.Type InterfaceType { get; }
         public System.Type MessageType { get; }
+        public EasyNetQ.AutoSubscribe.AutoSubscriberConsumerAttribute? SubscriptionAttribute { get; }
+        public EasyNetQ.AutoSubscribe.SubscriptionConfigurationAttribute? SubscriptionConfiguration { get; }
+        public System.Collections.Generic.IReadOnlyList<string> Topics { get; }
     }
     public static class AutoSubscriberExtensions
     {
-        [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
-            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
-        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +
-            "I (Consume/Publish, MessageType<T>) with generated registrations.")]
+        [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("8.x reflection AutoSubscriber: not trim- or Native-AOT-safe. Use AddEasyNetQ(...)" +
+            ".AutoSubscribe(...), or SubscribeAsync with the generated AutoSubscriberConsumer" +
+            "s.All.")]
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("8.x reflection AutoSubscriber: not trim- or Native-AOT-safe. Use AddEasyNetQ(...)" +
+            ".AutoSubscribe(...), or SubscribeAsync with the generated AutoSubscriberConsumer" +
+            "s.All.")]
         public static System.Threading.Tasks.Task<System.IAsyncDisposable> SubscribeAsync(this EasyNetQ.AutoSubscribe.AutoSubscriber autoSubscriber, System.Reflection.Assembly[] assemblies, System.Threading.CancellationToken cancellationToken = default) { }
     }
     public class DefaultAutoSubscriberMessageDispatcher : EasyNetQ.AutoSubscribe.IAutoSubscriberMessageDispatcher
@@ -57,6 +84,10 @@ namespace EasyNetQ.AutoSubscribe
     {
         public ForTopicAttribute(string topic) { }
         public string Topic { get; init; }
+    }
+    public interface IAutoSubscriberConsumerSource
+    {
+        System.Collections.Generic.IReadOnlyList<EasyNetQ.AutoSubscribe.AutoSubscriberConsumer> Consumers { get; }
     }
     public interface IAutoSubscriberMessageDispatcher
     {
@@ -89,6 +120,16 @@ namespace EasyNetQ.AutoSubscribe
 }
 namespace EasyNetQ
 {
+    public static class AutoSubscribeBuilderExtensions
+    {
+        public static EasyNetQ.IEasyNetQBuilder AutoSubscribe(this EasyNetQ.IEasyNetQBuilder builder, string subscriptionIdPrefix, System.Action<EasyNetQ.AutoSubscribeOptions>? configure = null) { }
+    }
+    public sealed class AutoSubscribeOptions
+    {
+        public System.Action<EasyNetQ.AutoSubscribe.AutoSubscriber>? Configure { get; set; }
+        public System.Func<EasyNetQ.AutoSubscribe.AutoSubscriberConsumerInfo, bool>? Filter { get; set; }
+        public string SubscriptionIdPrefix { get; }
+    }
     public static class EasyNetQBuilderExtensions
     {
         [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode("8.x-compatible reflection API: not trim- or Native-AOT-safe. Use the fluent v9 AP" +

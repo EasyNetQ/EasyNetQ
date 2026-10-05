@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json.Serialization;
 using EasyNetQ;
+using EasyNetQ.AutoSubscribe;
 using EasyNetQ.Configuration;
 using EasyNetQ.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +11,10 @@ using Microsoft.Extensions.Logging;
 // Native AOT smoke test: publish with PublishAot, run against a broker, exit 0 when every check passes.
 // Covers the fluent v9 API end to end: background consumer start that retries until a missing exchange exists,
 // type-level and per-route wire names, aliases, [MessageType], HandleUnknown for foreign types, untyped messages,
-// case-insensitive JSON through a source-generated context, and a named quorum error queue.
+// case-insensitive JSON through a source-generated context, and a named quorum error queue. Then the 8.x-compatible
+// IBus API: PubSub with [Exchange]/[Queue], Rpc, SendReceive, the DLX+TTL scheduler, and the AutoSubscriber on
+// generated registrations (DI-resolved IConsume/IConsumeAsync consumers with [ForTopic], [AutoSubscriberConsumer]
+// and [SubscriptionConfiguration]).
 // Usage: EasyNetQ.Examples.Aot [connectionString]   (default: host=localhost)
 static byte[] Raw(string json) => Encoding.UTF8.GetBytes(json);
 var connectionString = args.Length > 0 ? args[0] : Environment.GetEnvironmentVariable("EASYNETQ_CONNECTION") ?? "host=localhost";
@@ -28,7 +32,9 @@ var foreign = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuati
 var untyped = new TaskCompletionSource<Ping>(TaskCreationOptions.RunContinuationsAsynchronously);
 var failed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
+var shipments = new Shipments();
 var services = new ServiceCollection();
+services.AddSingleton(shipments);
 services.AddLogging(builder => builder.AddConsole().SetMinimumLevel(LogLevel.Warning));
 services.AddEasyNetQ(connectionString)
     .UseSystemTextJson(AotJsonContext.Default)
@@ -78,11 +84,13 @@ services.AddEasyNetQ(connectionString)
             {
                 untyped.TrySetResult(message);
                 return new ValueTask<AckDecision>(AckDecision.Ack);
-            })));
+            })))
+    .AutoSubscribe(run, o => o.Configure = autoSubscriber =>
+        autoSubscriber.ConfigureSubscriptionConfiguration = c => c.WithAutoDelete());
 
 await using var provider = services.BuildServiceProvider();
 using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-var host = provider.GetServices<IHostedService>().Single();
+var hosts = provider.GetServices<IHostedService>().ToList();
 var status = provider.GetRequiredService<IConsumerHostStatus>();
 var advanced = provider.GetRequiredService<IBus>().Advanced;
 var publisher = provider.GetRequiredService<IMessagePublisher>();
@@ -95,12 +103,14 @@ void Check(string name, bool ok, string detail = "")
 }
 
 // the consumer binds to an exchange nobody declared yet: startup must neither block nor crash
-await host.StartAsync(timeout.Token);
+foreach (var host in hosts) await host.StartAsync(timeout.Token);
 await Task.Delay(500, timeout.Token);
 Check("non-blocking start while the exchange is missing", !status.IsStarted, $"(pending {status.PendingConsumers})");
 await advanced.ExchangeDeclareAsync(exchange, ExchangeType.Topic, cancellationToken: timeout.Token);
 await status.WaitForStartedAsync(timeout.Token);
 Check("consumers started once the exchange exists", status.IsStarted);
+var generatedConsumers = provider.GetServices<IAutoSubscriberConsumerSource>().Sum(s => s.Consumers.Count);
+Check("generated auto-subscriber consumers", generatedConsumers == 2, $"({generatedConsumers})");
 
 await publisher.PublishAsync(new Ping(Guid.NewGuid(), "hello"), timeout.Token);
 await publisher.PublishAsync(new Pong(1), timeout.Token);
@@ -124,7 +134,43 @@ await Task.Delay(1000, timeout.Token);
 var errorQueue = await advanced.GetQueueStatsAsync(errorQueueName, timeout.Token);
 Check("failed message reached the named (quorum) error queue", errorQueue.MessagesCount > 0, $"({errorQueue.MessagesCount} messages)");
 
-await host.StopAsync(CancellationToken.None);
+// 8.x-compatible IBus API: PubSub with [Exchange]/[Queue] naming, Rpc, SendReceive and the DLX+TTL scheduler
+var bus = provider.GetRequiredService<IBus>();
+var published = new TaskCompletionSource<OrderPlaced>(TaskCreationOptions.RunContinuationsAsynchronously);
+var scheduled = new TaskCompletionSource<Reminder>(TaskCreationOptions.RunContinuationsAsynchronously);
+var sent = new TaskCompletionSource<Command>(TaskCreationOptions.RunContinuationsAsynchronously);
+await using (await bus.PubSub.SubscribeAsync<OrderPlaced>(run, (m, _) => { published.TrySetResult(m); return Task.CompletedTask; },
+    c => c.WithTopic("order.#").WithAutoDelete(), timeout.Token))
+await using (await bus.PubSub.SubscribeAsync<Reminder>(run, (m, _) => { scheduled.TrySetResult(m); return Task.CompletedTask; },
+    c => c.WithAutoDelete(), timeout.Token))
+await using (await bus.Rpc.RespondAsync<Question, Answer>((q, _) => Task.FromResult(new Answer(q.Value * 2)),
+    c => c.WithQueueName($"aot.compat.rpc.{run}").WithExpires(60_000), timeout.Token))
+await using (await bus.SendReceive.ReceiveAsync($"aot.compat.commands.{run}", r => r.Add<Command>((m, _) => { sent.TrySetResult(m); return Task.CompletedTask; }),
+    c => c.WithAutoDelete(), timeout.Token))
+{
+    await bus.PubSub.PublishAsync(new OrderPlaced(42), "order.eu", timeout.Token);
+    Check("PubSub publish/subscribe via [Exchange]/[Queue]", (await published.Task.WaitAsync(timeout.Token)).Id == 42);
+    var answer = await bus.Rpc.RequestAsync<Question, Answer>(new Question(21), c => c.WithQueueName($"aot.compat.rpc.{run}"), timeout.Token);
+    Check("Rpc request/respond", answer.Value == 42);
+    await bus.SendReceive.SendAsync($"aot.compat.commands.{run}", new Command("go"), timeout.Token);
+    Check("SendReceive send/receive", (await sent.Task.WaitAsync(timeout.Token)).Name == "go");
+    var futureAt = DateTime.UtcNow;
+    await bus.Scheduler.FuturePublishAsync(new Reminder(run), TimeSpan.FromSeconds(1), timeout.Token);
+    var reminder = await scheduled.Task.WaitAsync(timeout.Token);
+    Check("Scheduler future publish (DLX + TTL)", reminder.Run == run && DateTime.UtcNow - futureAt >= TimeSpan.FromMilliseconds(900));
+}
+
+var shipmentsBus = provider.GetRequiredService<IBus>();
+await shipmentsBus.PubSub.PublishAsync(new ShipmentDispatched(1, "eu"), "shipment.eu", timeout.Token);
+await shipmentsBus.PubSub.PublishAsync(new ShipmentDispatched(2, "us"), "shipment.us", timeout.Token);
+await shipments.Audited.Task.WaitAsync(timeout.Token);
+var eu = await shipments.Europe.Task.WaitAsync(timeout.Token);
+await Task.Delay(500, timeout.Token);
+Check("AutoSubscriber IConsumeAsync with [ForTopic] and a DI dependency", eu.Id == 1 && shipments.EuropeCount == 1, $"({shipments.EuropeCount} eu)");
+Check("AutoSubscriber IConsume on the default topic", shipments.AuditCount == 2, $"({shipments.AuditCount} audited)");
+Check("[AutoSubscriberConsumer] subscription id names the queue", shipments.EuropeQueue == "aot.compat.shipments_eu", shipments.EuropeQueue ?? "");
+
+foreach (var host in hosts) await host.StopAsync(CancellationToken.None);
 await advanced.ExchangeDeleteAsync(exchange, cancellationToken: CancellationToken.None);
 Console.WriteLine(failures == 0 ? "ALL OK" : $"{failures} FAILED");
 return failures == 0 ? 0 : 1;
@@ -136,6 +182,63 @@ public sealed record Pong(int Id);
 [MessageType("aot.contract.v1", Aliases = ["Old.Contract"])]
 public sealed record Contract(int Id);
 
+[Exchange("aot.compat.orders")]
+[Queue("aot.compat.orders")]
+public sealed record OrderPlaced(int Id);
+
+[Exchange("aot.compat.reminders")]
+[Queue("aot.compat.reminders")]
+public sealed record Reminder(string Run);
+
+[Exchange("aot.compat.shipments")]
+[Queue("aot.compat.shipments")]
+public sealed record ShipmentDispatched(int Id, string Region);
+
+public sealed class Shipments
+{
+    public readonly TaskCompletionSource<ShipmentDispatched> Europe = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    public readonly TaskCompletionSource Audited = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    public int EuropeCount;
+    public int AuditCount;
+    public string? EuropeQueue;
+}
+
+// resolved from DI per message; the generator reads the attributes at compile time
+public sealed class EuropeanShipments(Shipments shipments, IBus bus) : IConsumeAsync<ShipmentDispatched>
+{
+    [AutoSubscriberConsumer(SubscriptionId = "eu")]
+    [ForTopic("shipment.eu")]
+    [SubscriptionConfiguration(PrefetchCount = 2, AutoDelete = true)]
+    public async Task ConsumeAsync(ShipmentDispatched message, CancellationToken cancellationToken = default)
+    {
+        Interlocked.Increment(ref shipments.EuropeCount);
+        // throws when the subscription id did not name the queue
+        await bus.Advanced.QueueDeclarePassiveAsync("aot.compat.shipments_eu", cancellationToken);
+        shipments.EuropeQueue = "aot.compat.shipments_eu";
+        shipments.Europe.TrySetResult(message);
+    }
+}
+
+public sealed class ShipmentAudit(Shipments shipments) : IConsume<ShipmentDispatched>
+{
+    public void Consume(ShipmentDispatched message, CancellationToken cancellationToken = default)
+    {
+        if (Interlocked.Increment(ref shipments.AuditCount) == 2) shipments.Audited.TrySetResult();
+    }
+}
+
+public sealed record Question(int Value);
+
+public sealed record Answer(int Value);
+
+public sealed record Command(string Name);
+
+[JsonSerializable(typeof(ShipmentDispatched))]
+[JsonSerializable(typeof(OrderPlaced))]
+[JsonSerializable(typeof(Reminder))]
+[JsonSerializable(typeof(Question))]
+[JsonSerializable(typeof(Answer))]
+[JsonSerializable(typeof(Command))]
 [JsonSerializable(typeof(Ping))]
 [JsonSerializable(typeof(Pong))]
 [JsonSerializable(typeof(Contract))]

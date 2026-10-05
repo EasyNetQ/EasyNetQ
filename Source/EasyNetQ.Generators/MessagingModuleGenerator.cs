@@ -16,7 +16,9 @@ namespace EasyNetQ.Generators;
 ///     <c>{Assembly}.EasyNetQ.Generated.MessagingModule</c> that pre-registers every discovered type in the message
 ///     type registry (closed generics - AOT-safe, no runtime reflection), plus interceptors for AddEasyNetQ(...) call
 ///     sites that register the module automatically, composing modules from referenced assemblies via their
-///     [assembly: EasyNetQModule] attributes.
+///     [assembly: EasyNetQModule] attributes. IConsume/IConsumeAsync implementations also become AutoSubscriber
+///     registrations (closed generics plus their [AutoSubscriberConsumer]/[ForTopic]/[SubscriptionConfiguration]
+///     values), so AutoSubscribe(...) needs no reflection.
 ///
 ///     Note: a JsonSerializerContext is deliberately NOT emitted. Roslyn generators cannot see each other's output,
 ///     so the System.Text.Json generator would never fill such a context. AOT users pass their own context to
@@ -55,6 +57,13 @@ public sealed class MessagingModuleGenerator : IIncrementalGenerator
                 static (ctx, ct) => HarvestConsumerImplementations(ctx, ct))
             .SelectMany(static (types, _) => types);
 
+        // (b2) the same implementations as AutoSubscriber registrations
+        var autoSubscriberConsumers = context.SyntaxProvider.CreateSyntaxProvider(
+                static (node, _) => node is ClassDeclarationSyntax { BaseList: not null },
+                static (ctx, ct) => HarvestAutoSubscriberConsumers(ctx, ct))
+            .SelectMany(static (consumers, _) => consumers)
+            .Collect();
+
         // (c) [Queue]/[Exchange]/[DeliveryMode]-annotated types
         var queueAnnotated = AttributeTargets(context, "EasyNetQ.QueueAttribute").Collect();
         var exchangeAnnotated = AttributeTargets(context, "EasyNetQ.ExchangeAttribute").Collect();
@@ -92,10 +101,19 @@ public sealed class MessagingModuleGenerator : IIncrementalGenerator
                 .Concat(t.Right)
                 .ToImmutableArray());
 
-        var everything = allTypes.Combine(compilationFacts).Combine(interceptions).Combine(wireNameMappings);
+        // (g) AutoSubscribe(...) call sites: only then is a consumer the generated code cannot reach worth a warning
+        var usesAutoSubscribe = context.SyntaxProvider.CreateSyntaxProvider(
+                static (node, _) => node is InvocationExpressionSyntax { Expression: MemberAccessExpressionSyntax { Name.Identifier.ValueText: "AutoSubscribe" } },
+                static (ctx, ct) => ctx.SemanticModel.GetSymbolInfo(ctx.Node, ct).Symbol is IMethodSymbol { ContainingType.Name: "AutoSubscribeBuilderExtensions" } method
+                    && EasyNetQAssemblyNames.Contains(method.ContainingType.ContainingAssembly?.Name ?? ""))
+            .Where(static used => used)
+            .Collect()
+            .Select(static (calls, _) => !calls.IsEmpty);
+
+        var everything = allTypes.Combine(compilationFacts).Combine(interceptions).Combine(wireNameMappings).Combine(autoSubscriberConsumers.Combine(usesAutoSubscribe));
 
         context.RegisterSourceOutput(everything, static (spc, source) =>
-            Emit(spc, source.Left.Left.Left, source.Left.Left.Right, source.Left.Right, source.Right));
+            Emit(spc, source.Left.Left.Left.Left, source.Left.Left.Left.Right, source.Left.Left.Right, source.Left.Right, source.Right.Left, source.Right.Right));
     }
 
     /// <summary>A [MessageType] registration; aliases are joined with '\n' to keep the record value-equatable.</summary>
@@ -169,6 +187,124 @@ public sealed class MessagingModuleGenerator : IIncrementalGenerator
             }
         }
         return builder.ToImmutable();
+    }
+
+    /// <summary>
+    ///     An AutoSubscriber registration: Factory is AutoSubscriberConsumer.Async or .Sync, the rest are C# expressions
+    ///     for the attribute values ("null" when absent). Location is set only for consumers generated code cannot
+    ///     reach, which get a warning instead of a registration.
+    /// </summary>
+    private sealed record AutoSubscriberRegistration(
+        string ConsumerType,
+        string MessageType,
+        string Factory,
+        string SubscriptionAttribute,
+        string Topics,
+        string SubscriptionConfiguration,
+        Location? Inaccessible
+    );
+
+    private static readonly DiagnosticDescriptor InaccessibleConsumer = new(
+        "ENQGEN001",
+        "Consumer is not reachable from generated code",
+        "'{0}' implements {1} but is not accessible from generated code, so AutoSubscribe(...) skips it; make it internal or public (and non-generic)",
+        "EasyNetQ.Generators",
+        DiagnosticSeverity.Warning,
+        isEnabledByDefault: true);
+
+    private static ImmutableArray<AutoSubscriberRegistration> HarvestAutoSubscriberConsumers(GeneratorSyntaxContext ctx, System.Threading.CancellationToken ct)
+    {
+        if (ctx.SemanticModel.GetDeclaredSymbol(ctx.Node, ct) is not INamedTypeSymbol { TypeKind: TypeKind.Class, IsAbstract: false, IsGenericType: false } classSymbol)
+            return ImmutableArray<AutoSubscriberRegistration>.Empty;
+        // a partial class is harvested once, from its first declaration
+        if (classSymbol.DeclaringSyntaxReferences.Length > 1 && classSymbol.DeclaringSyntaxReferences[0].GetSyntax(ct) != ctx.Node)
+            return ImmutableArray<AutoSubscriberRegistration>.Empty;
+
+        var builder = ImmutableArray.CreateBuilder<AutoSubscriberRegistration>();
+        foreach (var iface in classSymbol.AllInterfaces)
+        {
+            if (iface is not { IsGenericType: true, Name: "IConsume" or "IConsumeAsync", TypeArguments.Length: 1 }
+                || iface.ContainingNamespace?.ToDisplayString() != "EasyNetQ.AutoSubscribe"
+                || !EasyNetQAssemblyNames.Contains(iface.ContainingAssembly?.Name ?? "")
+                || iface.TypeArguments[0] is not INamedTypeSymbol messageType)
+                continue;
+
+            var consumerName = classSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            if (!IsEmittable(classSymbol) || !IsEmittable(messageType) || messageType.TypeKind is not (TypeKind.Class or TypeKind.Interface))
+            {
+                builder.Add(new AutoSubscriberRegistration(consumerName, iface.ToDisplayString(), "", "", "", "", ctx.Node.GetLocation()));
+                continue;
+            }
+
+            var interfaceMethod = iface.GetMembers().OfType<IMethodSymbol>().FirstOrDefault();
+            var method = MostDerivedOverride(classSymbol, interfaceMethod is null ? null : classSymbol.FindImplementationForInterfaceMember(interfaceMethod) as IMethodSymbol);
+
+            var methodAttributes = new List<AttributeData>();
+            for (var current = method; current is not null; current = current.OverriddenMethod)
+                methodAttributes.AddRange(current.GetAttributes());
+            var classAttributes = new List<AttributeData>();
+            for (var current = (INamedTypeSymbol?)classSymbol; current is not null; current = current.BaseType)
+                classAttributes.AddRange(current.GetAttributes());
+
+            var subscription = methodAttributes.FirstOrDefault(a => IsAttribute(a, "AutoSubscriberConsumerAttribute"));
+            var topics = methodAttributes.Where(a => IsAttribute(a, "ForTopicAttribute")).Select(a => AttributeExpression(a)).ToList();
+            var configuration = methodAttributes.FirstOrDefault(a => IsAttribute(a, "SubscriptionConfigurationAttribute"))
+                ?? classAttributes.FirstOrDefault(a => IsAttribute(a, "SubscriptionConfigurationAttribute"));
+
+            builder.Add(new AutoSubscriberRegistration(
+                consumerName,
+                messageType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                iface.Name == "IConsumeAsync" ? "Async" : "Sync",
+                subscription is null ? "null" : AttributeExpression(subscription),
+                topics.Count == 0 ? "null" : "new string[] { " + string.Join(", ", topics.Select(t => t + ".Topic")) + " }",
+                configuration is null ? "null" : AttributeExpression(configuration),
+                null));
+        }
+        return builder.ToImmutable();
+    }
+
+    /// <summary>
+    ///     Roslyn maps an interface member to the virtual method that implements it; the runtime (and so reflection's
+    ///     GetInterfaceMap) dispatches to the most derived override of it.
+    /// </summary>
+    private static IMethodSymbol? MostDerivedOverride(INamedTypeSymbol classSymbol, IMethodSymbol? implementation)
+    {
+        if (implementation is null || !(implementation.IsVirtual || implementation.IsOverride || implementation.IsAbstract)) return implementation;
+        for (var current = (INamedTypeSymbol?)classSymbol; current is not null; current = current.BaseType)
+        {
+            foreach (var candidate in current.GetMembers(implementation.Name).OfType<IMethodSymbol>())
+            {
+                for (var overridden = candidate; overridden is not null; overridden = overridden.OverriddenMethod)
+                {
+                    if (SymbolEqualityComparer.Default.Equals(overridden, implementation)) return candidate;
+                }
+            }
+        }
+        return implementation;
+    }
+
+    /// <summary>The attribute or a subclass of it, from EasyNetQ.AutoSubscribe</summary>
+    private static bool IsAttribute(AttributeData attribute, string name)
+    {
+        for (var current = attribute.AttributeClass; current is not null; current = current.BaseType)
+        {
+            if (current.Name == name && current.ContainingNamespace?.ToDisplayString() == "EasyNetQ.AutoSubscribe")
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>Recreates an attribute instance: <c>new T(args) { Named = value }</c></summary>
+    private static string AttributeExpression(AttributeData attribute)
+    {
+        var expression = new StringBuilder("new ")
+            .Append(attribute.AttributeClass!.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat))
+            .Append('(')
+            .Append(string.Join(", ", attribute.ConstructorArguments.Select(a => a.ToCSharpString())))
+            .Append(')');
+        if (attribute.NamedArguments.Length > 0)
+            expression.Append(" { ").Append(string.Join(", ", attribute.NamedArguments.Select(a => a.Key + " = " + a.Value.ToCSharpString()))).Append(" }");
+        return expression.ToString();
     }
 
     private sealed record CompilationFacts(
@@ -282,10 +418,22 @@ public sealed class MessagingModuleGenerator : IIncrementalGenerator
         ImmutableArray<string> types,
         CompilationFacts facts,
         ImmutableArray<InterceptionSite> interceptSites,
-        ImmutableArray<WireNameMapping> wireNameMappings
+        ImmutableArray<WireNameMapping> wireNameMappings,
+        ImmutableArray<AutoSubscriberRegistration> autoSubscriberRegistrations,
+        bool usesAutoSubscribe
     )
     {
         if (!facts.ReferencesEasyNetQ || EasyNetQAssemblyNames.Contains(facts.AssemblyName)) return;
+
+        // the reflection AutoSubscriber still reaches private consumers, so they only matter to AutoSubscribe(...)
+        foreach (var inaccessible in autoSubscriberRegistrations.Where(r => usesAutoSubscribe && r.Inaccessible is not null))
+            spc.ReportDiagnostic(Diagnostic.Create(InaccessibleConsumer, inaccessible.Inaccessible, inaccessible.ConsumerType.Replace("global::", ""), inaccessible.MessageType));
+        var consumers = autoSubscriberRegistrations
+            .Where(r => r.Inaccessible is null)
+            .Distinct()
+            .OrderBy(r => r.ConsumerType, StringComparer.Ordinal)
+            .ThenBy(r => r.MessageType, StringComparer.Ordinal)
+            .ToList();
 
         var mappings = wireNameMappings.OrderBy(m => m.Type, StringComparer.Ordinal).ToList();
         var mappedTypes = new HashSet<string>(mappings.Select(m => m.Type), StringComparer.Ordinal);
@@ -294,7 +442,7 @@ public sealed class MessagingModuleGenerator : IIncrementalGenerator
             .Distinct(StringComparer.Ordinal)
             .OrderBy(t => t, StringComparer.Ordinal)
             .ToList();
-        var hasModule = messageTypes.Count > 0 || mappings.Count > 0;
+        var hasModule = messageTypes.Count > 0 || mappings.Count > 0 || consumers.Count > 0;
         if (!hasModule && interceptSites.IsEmpty && facts.ReferencedModules.IsEmpty) return;
 
         var ns = $"EasyNetQ.Generated.{SanitizeIdentifier(facts.AssemblyName)}";
@@ -323,6 +471,12 @@ public sealed class MessagingModuleGenerator : IIncrementalGenerator
             source.AppendLine("            global::Microsoft.Extensions.DependencyInjection.Extensions.ServiceCollectionDescriptorExtensions.TryAddEnumerable(");
             source.AppendLine("                services,");
             source.AppendLine("                global::Microsoft.Extensions.DependencyInjection.ServiceDescriptor.Singleton<global::EasyNetQ.IMessageTypeRegistryInitializer>(RegistryInitializer.Instance));");
+            if (consumers.Count > 0)
+            {
+                source.AppendLine("            global::Microsoft.Extensions.DependencyInjection.Extensions.ServiceCollectionDescriptorExtensions.TryAddEnumerable(");
+                source.AppendLine("                services,");
+                source.AppendLine("                global::Microsoft.Extensions.DependencyInjection.ServiceDescriptor.Singleton<global::EasyNetQ.AutoSubscribe.IAutoSubscriberConsumerSource>(AutoSubscriberConsumerSource.Instance));");
+            }
             source.AppendLine("        }");
             source.AppendLine();
             source.AppendLine("        private sealed class RegistryInitializer : global::EasyNetQ.IMessageTypeRegistryInitializer");
@@ -342,6 +496,31 @@ public sealed class MessagingModuleGenerator : IIncrementalGenerator
                 source.AppendLine($"                registry.GetOrAdd<{messageType}>();");
             source.AppendLine("            }");
             source.AppendLine("        }");
+            if (consumers.Count > 0)
+            {
+                source.AppendLine();
+                source.AppendLine("        private sealed class AutoSubscriberConsumerSource : global::EasyNetQ.AutoSubscribe.IAutoSubscriberConsumerSource");
+                source.AppendLine("        {");
+                source.AppendLine("            public static readonly AutoSubscriberConsumerSource Instance = new();");
+                source.AppendLine();
+                source.AppendLine("            public global::System.Collections.Generic.IReadOnlyList<global::EasyNetQ.AutoSubscribe.AutoSubscriberConsumer> Consumers => AutoSubscriberConsumers.All;");
+                source.AppendLine("        }");
+            }
+            source.AppendLine("    }");
+            source.AppendLine();
+        }
+
+        if (consumers.Count > 0)
+        {
+            source.AppendLine("    /// <summary>This assembly's IConsume/IConsumeAsync implementations, for AutoSubscriber.SubscribeAsync(...)</summary>");
+            source.AppendLine("    public static class AutoSubscriberConsumers");
+            source.AppendLine("    {");
+            source.AppendLine("        /// <summary>Every consumer, with the values of its subscription attributes</summary>");
+            source.AppendLine("        public static global::System.Collections.Generic.IReadOnlyList<global::EasyNetQ.AutoSubscribe.AutoSubscriberConsumer> All { get; } = new global::EasyNetQ.AutoSubscribe.AutoSubscriberConsumer[]");
+            source.AppendLine("        {");
+            foreach (var consumer in consumers)
+                source.AppendLine($"            global::EasyNetQ.AutoSubscribe.AutoSubscriberConsumer.{consumer.Factory}<{consumer.MessageType}, {consumer.ConsumerType}>({consumer.SubscriptionAttribute}, {consumer.Topics}, {consumer.SubscriptionConfiguration}),");
+            source.AppendLine("        };");
             source.AppendLine("    }");
             source.AppendLine();
         }

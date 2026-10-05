@@ -356,12 +356,48 @@ A default `AddEasyNetQ(...)` app publishes with **zero** trim/AOT warnings; CI e
 - Reflection fallbacks (loading a type from its wire name, describing an unregistered type, reflection-based JSON)
   throw an `EasyNetQException` naming what to register under AOT, or when `EasyNetQ.RuntimeReflection.IsSupported`
   is false.
+- The generic `IBus` API is AOT-safe: `PubSub`, `Rpc`, `SendReceive`, `Scheduler` (both schedulers) and `IAdvancedBus`.
+  `EasyNetQ.Examples.Aot` runs each of them against a broker in CI, on top of the fluent API.
+- The `AutoSubscriber` is AOT-safe through the generator: `AddEasyNetQ(...).AutoSubscribe(...)`, see
+  [AutoSubscriber](#autosubscriber-on-generated-registrations).
 - The 8.x reflection APIs carry `[RequiresUnreferencedCode]` (and `[RequiresDynamicCode]` where they emit code), so
-  AOT apps get a warning at the call site: `AutoSubscriber`, `UseLegacyTypeNaming`, `UseLegacyConventions`,
-  `UseAdvancedMessagePolymorphism`, `UseVersionedMessage`, `SystemTextJsonSerializer(V2)`,
-  `LegacyTypeNameSerializer`, the versioning and multiple-exchange strategies.
+  AOT apps get a warning at the call site: `AutoSubscriber.SubscribeAsync(Type[])` and `(Assembly[])`, the
+  `AutoSubscriberConsumerInfo(Type, Type, Type)` constructor and its `ConsumeMethod`, the non-generic (`Type`-based)
+  `PubSub`/`Rpc`/`SendReceive`/`Scheduler` extensions, `UseLegacyTypeNaming`, `UseLegacyConventions`,
+  `UseAdvancedMessagePolymorphism`, `UseVersionedMessage`, `SystemTextJsonSerializer(V2)`, `LegacyTypeNameSerializer`,
+  the versioning and multiple-exchange strategies.
 - A custom `IMessageSerializationStrategy` (message versioning, for example), or publishing a derived instance
   through a base type parameter, keeps the 8.x pre-serializing publish path.
+
+### AutoSubscriber on generated registrations
+
+The source generator turns every `IConsume<T>`/`IConsumeAsync<T>` implementation into an `AutoSubscriberConsumer`,
+closed over its message and consumer types, with the values of `[AutoSubscriberConsumer]`, `[ForTopic]` and
+`[SubscriptionConfiguration]` read at compile time. Subscribing needs no reflection:
+
+```csharp
+services.AddEasyNetQ("host=rabbitmq")
+    .UseSystemTextJson(AppJson.Default)
+    .AutoSubscribe("billing", o => o.Configure = a => a.ConfigureSubscriptionConfiguration = c => c.WithQueueType(QueueType.Quorum));
+
+public sealed class InvoiceConsumer(IInvoices invoices) : IConsumeAsync<OrderPlaced>
+{
+    [ForTopic("order.eu")]
+    [SubscriptionConfiguration(PrefetchCount = 4)]
+    public Task ConsumeAsync(OrderPlaced message, CancellationToken cancellationToken) => invoices.CreateAsync(message, cancellationToken);
+}
+```
+
+- Subscriptions go through `IPubSub.SubscribeAsync` with the 8.x rules: subscription id from `GenerateSubscriptionId`
+  or `[AutoSubscriberConsumer]`, `[ForTopic]` topics (default `#`), `[SubscriptionConfiguration]` over
+  `ConfigureSubscriptionConfiguration`. Queues and exchanges keep their 8.x names.
+- Consumers are resolved from DI in a scope per message and registered as transient unless you registered them.
+- `AutoSubscribe(...)` starts in the background and retries like the fluent consumers (`ConsumerHost(...)`);
+  `IConsumerHostStatus` covers both. `o.Filter` selects consumers, `o.Configure` customizes the `AutoSubscriber`.
+- Without the host: `await autoSubscriber.SubscribeAsync(EasyNetQ.Generated.<Assembly>.AutoSubscriberConsumers.All)`.
+- Consumers must be reachable from generated code (internal or public, non-generic). When `AutoSubscribe(...)` is used,
+  warning `ENQGEN001` names the ones that are not.
+- `[SubscriptionConfiguration]` on the consumer class now applies when the method has none, on the reflection path too.
 
 ### Observability
 

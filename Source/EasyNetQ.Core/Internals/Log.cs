@@ -183,5 +183,11 @@ internal static partial class Log
     [LoggerMessage(704, LogLevel.Information, "All {Count} consumers started")]
     public static partial void ConsumersStarted(this ILogger logger, int count);
 
+    [LoggerMessage(705, LogLevel.Warning, "Auto-subscriber consumer {Consumer} of {MessageType} failed to subscribe, retrying in {RetryDelay}")]
+    public static partial void AutoSubscribeFailed(this ILogger logger, Exception exception, string consumer, string messageType, TimeSpan retryDelay);
+
+    [LoggerMessage(706, LogLevel.Information, "All {Count} auto-subscriber consumers subscribed")]
+    public static partial void AutoSubscribed(this ILogger logger, int count);
+
     #endregion
 }

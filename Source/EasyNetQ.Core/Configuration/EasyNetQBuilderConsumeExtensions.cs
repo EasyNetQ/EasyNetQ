@@ -25,9 +25,7 @@ public static class EasyNetQBuilderConsumeExtensions
     {
         configure(consumerBuilder);
         builder.Services.AddSingleton(consumerBuilder.Definition);
-        HostOptions(builder.Services);
-        builder.Services.TryAddSingleton<ConsumerHostStatus>();
-        builder.Services.TryAddSingleton<IConsumerHostStatus>(sp => sp.GetRequiredService<ConsumerHostStatus>());
+        AddConsumerHostStatus(builder.Services);
         builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IHostedService, ConsumerHostedService>());
         return builder;
     }
@@ -39,6 +37,14 @@ public static class EasyNetQBuilderConsumeExtensions
     {
         configure(HostOptions(builder.Services));
         return builder;
+    }
+
+    /// <summary>Options and status shared by every consumer host (fluent consumers, auto-subscriber)</summary>
+    internal static void AddConsumerHostStatus(IServiceCollection services)
+    {
+        HostOptions(services);
+        services.TryAddSingleton<ConsumerHostStatus>();
+        services.TryAddSingleton<IConsumerHostStatus>(sp => sp.GetRequiredService<ConsumerHostStatus>());
     }
 
     private static ConsumerHostOptions HostOptions(IServiceCollection services)
