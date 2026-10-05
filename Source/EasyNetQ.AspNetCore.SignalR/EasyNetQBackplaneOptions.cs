@@ -15,6 +15,12 @@ public sealed record EasyNetQBackplaneOptions
     public TimeSpan AckTimeout { get; init; } = TimeSpan.FromSeconds(30);
 
     /// <summary>
+    ///     Upper bound on one backplane publish. During a broker outage a publish waits in the channel retry loop;
+    ///     this turns that wait into a <see cref="TimeoutException" /> instead of holding the caller indefinitely.
+    /// </summary>
+    public TimeSpan SendTimeout { get; init; } = TimeSpan.FromSeconds(5);
+
+    /// <summary>
     ///     Idle time after which the broker deletes a server's (durable) queue (<c>x-expires</c>). Long enough to
     ///     survive a reconnect, short enough that a crashed server's queue does not collect messages for long.
     /// </summary>
@@ -52,6 +58,14 @@ public sealed class EasyNetQBackplaneConfigurator
     {
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(timeout, TimeSpan.Zero);
         options = options with { AckTimeout = timeout };
+        return this;
+    }
+
+    /// <summary>Upper bound on one backplane publish (hub sends, group commands) while the broker is unreachable</summary>
+    public EasyNetQBackplaneConfigurator SendTimeout(TimeSpan timeout)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(timeout, TimeSpan.Zero);
+        options = options with { SendTimeout = timeout };
         return this;
     }
 
