@@ -49,6 +49,40 @@ public class ErrorHandlingMiddlewareTests
     }
 
     [Fact]
+    public async Task Should_hand_the_strategy_the_delivery_as_received_when_an_inner_step_replaced_it()
+    {
+        ReadOnlyMemory<byte> seenBody = default;
+        MessageProperties seenProperties = default;
+        strategy.HandleErrorAsync(default!, default!, TestContext.Current.CancellationToken).ReturnsForAnyArgs(call =>
+        {
+            var failed = call.Arg<ConsumeContext>();
+            seenBody = failed.Body;
+            seenProperties = failed.Properties;
+            return new ValueTask<AckDecision>(AckDecision.Ack);
+        });
+        var pipeline = new PipelineBuilder<ConsumeContext>()
+            .Use(new ErrorHandlingMiddleware(strategy, NullLogger<ErrorHandlingMiddleware>.Instance))
+            .Use("decrypt", (ctx, next) =>
+            {
+                ctx.Body = "plaintext"u8.ToArray();
+                ctx.Properties = ctx.Properties with { Type = "decrypted" };
+                return next(ctx);
+            })
+            .Build(services, _ => throw new InvalidOperationException("handler failed"));
+        var received = "ciphertext"u8.ToArray();
+        var context = new ConsumeContext(TestContexts.Consumer())
+        {
+            Body = received,
+            Properties = new MessageProperties { Type = "wire" }
+        };
+
+        await pipeline(context);
+
+        seenBody.ToArray().Should().Equal(received);
+        seenProperties.Type.Should().Be("wire");
+    }
+
+    [Fact]
     public async Task Should_ask_the_strategy_on_cancellation_when_the_consumer_is_stopping()
     {
         using var cts = new CancellationTokenSource();
