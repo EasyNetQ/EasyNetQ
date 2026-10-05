@@ -86,6 +86,42 @@ public class TelemetryMiddlewareTests
     }
 
     [Fact]
+    public async Task Should_not_mark_the_process_span_as_error_when_the_consumer_stops_mid_message()
+    {
+        var activities = new List<Activity>();
+        using var listener = CreateListener(activities);
+        await using var mockBuilder = new MockBuilder();
+        using var started = new SemaphoreSlim(0);
+
+        var consumer = await mockBuilder.Bus.Advanced.ConsumeAsync(
+            new Topology.Queue("telemetry_queue", false),
+            async (_, _, _, ct) =>
+            {
+                started.Release();
+                await Task.Delay(-1, ct);
+                return AckDecision.Ack;
+            },
+            c => c.WithConsumerTag("telemetry_consumer")
+        );
+
+        Task deliver;
+        await using (consumer)
+        {
+            deliver = mockBuilder.Consumers[0].HandleBasicDeliverAsync(
+                "telemetry_consumer", 1, false, "telemetry_exchange", "telemetry_key",
+                new RabbitMQ.Client.BasicProperties(), "{}"u8.ToArray(), TestContext.Current.CancellationToken
+            );
+            await started.WaitAsync(TestContext.Current.CancellationToken);
+        }
+
+        await deliver;
+
+        var activity = activities.Should().ContainSingle(a => a.OperationName == "process telemetry_queue").Subject;
+        activity.Status.Should().NotBe(ActivityStatusCode.Error);
+        activity.GetTagItem(MessagingTags.ErrorType).Should().BeNull();
+    }
+
+    [Fact]
     public async Task Should_emit_rpc_client_span_around_request_response()
     {
         var activities = new List<Activity>();

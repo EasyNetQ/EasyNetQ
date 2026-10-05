@@ -131,6 +131,11 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
         {
             logger.FailedToAckOrNack(ioException, receivedInfo.ConsumerTag, receivedInfo.DeliveryTag, receivedInfo.Queue);
         }
+        catch (OperationCanceledException cancelled) when (cancellationToken.IsCancellationRequested || cts.IsCancellationRequested)
+        {
+            // consumer shutting down mid-ack: an unacked delivery is redelivered when the channel closes
+            logger.FailedToAckOrNack(cancelled, receivedInfo.ConsumerTag, receivedInfo.DeliveryTag, receivedInfo.Queue);
+        }
         catch (Exception exception)
         {
             logger.UnexpectedExceptionOnAckOrNack(exception, receivedInfo.ConsumerTag, receivedInfo.DeliveryTag, receivedInfo.Queue);
