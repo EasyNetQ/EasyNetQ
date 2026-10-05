@@ -10,12 +10,9 @@
     <ItemGroup>
         <PackageReference Include="BenchmarkDotNet" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
-        <PackageReference Include="RabbitMQ.Client" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
         <ProjectReference Include="..\EasyNetQ.Serialization.NewtonsoftJson\EasyNetQ.Serialization.NewtonsoftJson.csproj" />
         <ProjectReference Include="..\EasyNetQ.Transport.InMemory\EasyNetQ.Transport.InMemory.csproj" />
     </ItemGroup>

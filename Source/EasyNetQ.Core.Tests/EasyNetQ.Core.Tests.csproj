@@ -4,7 +4,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EasyNetQ.Core\EasyNetQ.Core.csproj" />
     <ProjectReference Include="..\EasyNetQ.Transport.InMemory\EasyNetQ.Transport.InMemory.csproj" />
   </ItemGroup>
   <ItemGroup>

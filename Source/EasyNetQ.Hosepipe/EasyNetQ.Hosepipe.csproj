@@ -7,7 +7,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="RabbitMQ.Client" />
     <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
   <ItemGroup>

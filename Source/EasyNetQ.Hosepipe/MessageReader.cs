@@ -10,7 +10,7 @@ public class MessageReader : IMessageReader
         return ReadMessagesAsync(parameters, null, cancellationToken);
     }
 
-    public async IAsyncEnumerable<HosepipeMessage> ReadMessagesAsync(QueueParameters parameters, string messageName, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<HosepipeMessage> ReadMessagesAsync(QueueParameters parameters, string? messageName, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         if (!Directory.Exists(parameters.MessagesOutputDirectory))
         {

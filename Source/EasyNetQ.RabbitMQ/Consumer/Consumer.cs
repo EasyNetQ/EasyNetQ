@@ -38,7 +38,7 @@ public class PerQueueConsumerConfiguration
         bool autoAck,
         string consumerTag,
         bool isExclusive,
-        IDictionary<string, object> arguments,
+        IDictionary<string, object>? arguments,
         ConsumerContext context
     )
     {
@@ -67,7 +67,7 @@ public class PerQueueConsumerConfiguration
     /// <summary>
     ///     Custom arguments
     /// </summary>
-    public IDictionary<string, object> Arguments { get; }
+    public IDictionary<string, object>? Arguments { get; }
 
     /// <summary>
     ///     Consumer-layer context: owns the message pipeline and the pooled message contexts
