@@ -37,7 +37,7 @@ public class QueueRetrieval : IQueueRetrieval
         var count = 0;
         while (count++ < parameters.NumberOfMessagesToRetrieve)
         {
-            BasicGetResult basicGetResult;
+            BasicGetResult? basicGetResult;
             try
             {
                 basicGetResult = await channel.BasicGetAsync(parameters.QueueName, false, cancellationToken);
