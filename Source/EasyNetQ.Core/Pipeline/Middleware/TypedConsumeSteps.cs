@@ -6,11 +6,32 @@ namespace EasyNetQ.Pipeline.Middleware;
 /// </summary>
 public sealed class ResolveMessageTypeStep : IMiddleware<ConsumeContext>
 {
+    // written by UseVersionedMessage publishers: the older versions (ISupersede<T>) the message also satisfies
+    private const string AlternativeMessageTypesHeader = "Alternative-Message-Types";
+
     /// <inheritdoc />
     public ValueTask InvokeAsync(ConsumeContext context, PipelineStep<ConsumeContext> next)
     {
-        context.MessageType = context.Consumer.Handlers!.ResolveDescriptor(context.Properties.Type);
+        var handlers = context.Consumer.Handlers!;
+        var properties = context.Properties;
+        context.MessageType = properties.HeadersPresent && TryResolveVersioned(handlers, properties, out var versioned)
+            ? versioned
+            : handlers.ResolveDescriptor(properties.Type);
         return next(context);
+    }
+
+    // a newer version this consumer cannot load falls back to the first alternative it can, as 8.x did
+    private static bool TryResolveVersioned(HandlerTable handlers, in MessageProperties properties, out MessageTypeDescriptor descriptor)
+    {
+        descriptor = null!;
+        if (properties.Headers?.TryGetValue(AlternativeMessageTypesHeader, out var header) != true || header is not byte[] alternatives)
+            return false;
+        if (!string.IsNullOrEmpty(properties.Type) && handlers.TryResolveDescriptor(properties.Type!, out descriptor))
+            return true;
+        foreach (var alternative in System.Text.Encoding.UTF8.GetString(alternatives).Split([';'], StringSplitOptions.RemoveEmptyEntries))
+            if (handlers.TryResolveDescriptor(alternative, out descriptor))
+                return true;
+        return false;
     }
 }
 

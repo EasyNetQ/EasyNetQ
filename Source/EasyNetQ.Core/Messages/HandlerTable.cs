@@ -160,6 +160,16 @@ public sealed class HandlerTable
             );
     }
 
+    internal bool TryResolveDescriptor(string wireName, out MessageTypeDescriptor descriptor)
+    {
+        if (registrationsByWireName.TryGetValue(wireName, out var entry))
+        {
+            descriptor = entry.Descriptor;
+            return true;
+        }
+        return registry.TryResolveWireName(wireName, out descriptor);
+    }
+
     /// <summary>
     ///     Resolves the handler for a message type: exact match first, then a handler of an assignable type
     ///     (cached after the first scan)
