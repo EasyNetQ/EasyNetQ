@@ -80,6 +80,11 @@ public sealed class ConsumeTracingMiddleware : IMiddleware<ConsumeContext>
         {
             await next(context).ConfigureAwait(false);
         }
+        catch (OperationCanceledException) when (context.CancellationToken.IsCancellationRequested)
+        {
+            // consumer stopping: the error strategy requeues the delivery, so it is not a processing failure
+            throw;
+        }
         catch (Exception exception)
         {
             activity.SetTag(MessagingTags.ErrorType, exception.GetType().FullName);
