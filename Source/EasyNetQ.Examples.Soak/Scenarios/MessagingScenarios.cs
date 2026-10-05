@@ -246,15 +246,11 @@ public static class MessagingScenarios
         else
             ctx.Skip("[SubscriptionConfiguration] on the method: auto-delete queue", "no management API");
 
-        // 8.x and v9.0.0-alpha.1 read the attribute from the method only, although it is allowed on the class; the
-        // AOT AutoSubscriber work (AutoSubscriberConsumerInfo.SubscriptionConfiguration) adds the class fallback
-        const string classLevel = "[SubscriptionConfiguration] on the class: auto-delete queue";
-        if (typeof(AutoSubscriberConsumerInfo).GetProperty("SubscriptionConfiguration") is null)
-            ctx.Skip(classLevel, "known gap: class-level attribute ignored until the AOT AutoSubscriber lands");
-        else if (await ctx.Admin.GetQueueAsync(topicQueue, ctx.Token) is { } topicJson)
-            ctx.Check(classLevel, topicJson.GetProperty("auto_delete").GetBoolean());
+        // 8.x read the attribute from the consume method only, although it is allowed on the class
+        if (await ctx.Admin.GetQueueAsync(topicQueue, ctx.Token) is { } topicJson)
+            ctx.Check("[SubscriptionConfiguration] on the class: auto-delete queue", topicJson.GetProperty("auto_delete").GetBoolean());
         else
-            ctx.Skip(classLevel, "no management API");
+            ctx.Skip("[SubscriptionConfiguration] on the class: auto-delete queue", "no management API");
 
         await subscriptions.DisposeAsync();
 
