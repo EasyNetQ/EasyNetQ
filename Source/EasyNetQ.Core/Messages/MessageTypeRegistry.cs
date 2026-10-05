@@ -50,8 +50,12 @@ public sealed class MessageTypeRegistry : IMessageTypeRegistry
     /// <inheritdoc />
     public MessageTypeDescriptor<T> GetOrAdd<T>()
     {
-        return byType.TryGetValue(typeof(T), out var existing)
-            ? (MessageTypeDescriptor<T>)existing
+        if (byType.TryGetValue(typeof(T), out var existing))
+            return (MessageTypeDescriptor<T>)existing;
+        // [MessageType] wins over the default name whoever registers the type first, e.g. another assembly's
+        // generated module that only saw the type at a call site
+        return AttributeMetadataReader.MessageType(typeof(T)) is { } messageType
+            ? Register<T>(messageType.WireName, messageType.Aliases)
             : (MessageTypeDescriptor<T>)Register(Populate(new MessageTypeDescriptor<T>(typeNameSerializer.Serialize(typeof(T)))));
     }
 
@@ -98,9 +102,14 @@ public sealed class MessageTypeRegistry : IMessageTypeRegistry
     /// <inheritdoc />
     public MessageTypeDescriptor GetOrAdd(Type type)
     {
-        return byType.TryGetValue(type, out var existing)
-            ? existing
-            : Register(Populate(RuntimeDescriptorFactory.Create(type, typeNameSerializer.Serialize(type))));
+        if (byType.TryGetValue(type, out var existing))
+            return existing;
+        var messageType = AttributeMetadataReader.MessageType(type);
+        var descriptor = Register(Populate(RuntimeDescriptorFactory.Create(type, messageType?.WireName ?? typeNameSerializer.Serialize(type))));
+        if (messageType?.Aliases is { } aliases)
+            foreach (var alias in aliases)
+                byWireName.TryAdd(alias, descriptor);
+        return descriptor;
     }
 
     /// <inheritdoc />

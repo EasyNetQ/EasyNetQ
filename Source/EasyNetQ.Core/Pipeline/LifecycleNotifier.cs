@@ -55,7 +55,7 @@ public sealed class LifecycleNotifier : IDisposable
         if (disposed) return default;
 
         RecordMetric(layer, @event, error);
-        if (!IsEnabled) return default;
+        if (!IsEnabled || ContainerDisposed()) return default;
 
         pipeline ??= builder.Build(services);
         var context = new LifecycleContext(scope)
@@ -67,6 +67,22 @@ public sealed class LifecycleNotifier : IDisposable
             CancellationToken = cancellationToken,
         };
         return pipeline(context);
+    }
+
+    // the container disposes its services in reverse creation order, so a singleton created after this one (DefaultRpc,
+    // say) stops its consumers before Dispose() below runs, while the container already refuses to resolve
+    private bool ContainerDisposed()
+    {
+        try
+        {
+            services.GetService(typeof(LifecycleNotifier));
+            return false;
+        }
+        catch (ObjectDisposedException)
+        {
+            disposed = true;
+            return true;
+        }
     }
 
     private static void RecordMetric(LifecycleLayer layer, LifecycleEvent @event, Exception? error)

@@ -267,7 +267,7 @@ Review each one; the right-hand column restores 8.x behavior where that is possi
 | Unknown message type on a consumer | plain `EasyNetQException` before handler matching | `UnknownMessageTypeException` (subclass), logged once per queue and type; or handled by `HandleUnknown` | catch the base type |
 | `[DeliveryMode]` on direct advanced publishes | ignored | stamped | remove the attribute |
 | Topology operations | only channel acquisition honored the timeout | the whole operation honors it | none needed |
-| Lifecycle steps during container shutdown | could see `Disconnected` and hit `ObjectDisposedException` | the host releases its connection first | none needed |
+| Lifecycle steps during container shutdown | could see `Disconnected` and hit `ObjectDisposedException` | the host releases its connection first; events raised while the container disposes (`IBus` subscriptions, the RPC reply consumer) skip the steps | none needed |
 | Broker-initiated disconnect log (event 102) | Debug | **Warning**; a close by the application itself logs at Debug (event 107) | filter event 102 |
 | Retried channel actions (200, 202), failed recovery attempts (105) | Error, with a stack trace per attempt | Warning: they are retried, and a publish that still fails reaches the caller | none needed |
 
@@ -324,7 +324,8 @@ await provider.GetRequiredService<IMessagePublisher>().PublishAsync(new OrderPla
 
 - `MessageType<T>(m => m.WireName("orders.placed.v1").Alias("Legacy.Name"))`, or
   `[MessageType("orders.placed.v1", Aliases = new[] { ... })]` on the type: a stable contract name instead of the
-  CLR name. Aliases are additional incoming names, e.g. the `Type.FullName` a Wolverine or MassTransit peer sends.
+  CLR name. `[MessageType]` applies whichever assembly registers the type first (a test project's generated module
+  included). Aliases are additional incoming names, e.g. the `Type.FullName` a Wolverine or MassTransit peer sends.
   A wire name that resolves to two types fails at startup.
 - `Message<T>("key", r => r.WireName("contract.v1"))` overrides the name for one publish route only.
 - `HandleUnknown((body, context) => ...)` receives the raw bytes of messages no typed handler matches;
@@ -336,8 +337,10 @@ await provider.GetRequiredService<IMessagePublisher>().PublishAsync(new OrderPla
 
 - The `EasyNetQ.Transport` namespace (`ITransport`, `ITopology`, exchange/queue/binding definitions) abstracts the
   broker. `EasyNetQ.RabbitMQ` implements it.
-- `EasyNetQ.Transport.InMemory` runs the same code in tests without a broker. It follows AMQP closely: mandatory
-  publishes without a route throw `UnroutableMessageException`, and deleting a queue cancels its consumers.
+- `EasyNetQ.Transport.InMemory` runs the same code in tests without a broker, the `IBus` API included (register the
+  transport as `ITransport` after `AddEasyNetQ(...)`). It follows AMQP closely: mandatory publishes without a route
+  throw `UnroutableMessageException`, deleting a queue cancels its consumers, and message TTL (`x-message-ttl`, the
+  per-message expiration) dead-letters to `x-dead-letter-exchange`, so the DLX + TTL scheduler and RPC expiry work.
 - `UnroutableMessageException` (Core) is the base of `PublishReturnedException`, so transport-agnostic code can
   catch "nobody is listening".
 - Request/response works on any transport (`TransportRpc`). RabbitMQ hosts keep `DefaultRpc` for now. Differences in
