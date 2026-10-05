@@ -19,6 +19,7 @@
     <Project Path="EasyNetQ.Examples.NetFramework/EasyNetQ.Examples.NetFramework.csproj" />
     <Project Path="EasyNetQ.Examples.PubSubWithAdvancedApi/EasyNetQ.Examples.PubSubWithAdvancedApi.csproj" />
     <Project Path="EasyNetQ.Examples.Rpc/EasyNetQ.Examples.Rpc.csproj" />
+    <Project Path="EasyNetQ.Examples.Soak/EasyNetQ.Examples.Soak.csproj" />
   </Folder>
   <Folder Name="/Serialization/">
     <Project Path="EasyNetQ.Serialization.NewtonsoftJson/EasyNetQ.Serialization.NewtonsoftJson.csproj" />

@@ -49,6 +49,9 @@ v9 is a rewrite of the internals around a few rules, each enforced by tests rath
   assembly), so .NET Framework 4.7.2+ SDK-style projects keep working.
 - **Dogfooded.** v9 runs in production consumers; gaps found there are fixed in the library, not worked around in
   the apps (the [dogfooding fixes](#wire-names-aliases-and-foreign-messages) below came from that).
+- **Soaked.** What production apps do not exercise (Newtonsoft, interceptors, versioning, polymorphism, priority,
+  multi-channel, confirms, scheduler, Rpc, AutoSubscriber, cancellation, error queues, typed queues) runs as
+  assertion-based scenarios against RabbitMQ 4 in CI: `Source/EasyNetQ.Examples.Soak`, `--minutes N` for a long run.
 
 ## Performance
 

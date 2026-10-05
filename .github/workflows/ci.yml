@@ -218,6 +218,58 @@ jobs:
     - name: Pack, publish AOT against the packages, run
       run: tests/package-consumer/check.sh "host=localhost;port=5674;username=guest;password=guest"
 
+  soak:
+    name: Feature soak (RabbitMQ 4, short mode)
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      rabbitmq:
+        image: rabbitmq:4-management
+        ports:
+          - 5675:5672
+          - 15675:15672
+        options: >-
+          --health-cmd "rabbitmq-diagnostics -q ping"
+          --health-interval 5s
+          --health-timeout 10s
+          --health-retries 20
+      # rabbitmq_delayed_message_exchange is a community plugin, not in the official image, and its latest release
+      # (4.2.0) supports 4.2.x only: the delayed-exchange scheduler runs against this second broker
+      rabbitmq_delayed:
+        image: rabbitmq:4.2-management
+        ports:
+          - 5676:5672
+        options: >-
+          --health-cmd "rabbitmq-diagnostics -q ping"
+          --health-interval 5s
+          --health-timeout 10s
+          --health-retries 20
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v7
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET (global.json)
+      uses: actions/setup-dotnet@v6
+      with:
+        global-json-file: global.json
+
+    - name: Enable rabbitmq_delayed_message_exchange
+      run: |
+        curl -fsSL -o delayed.ez https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases/download/v4.2.0/rabbitmq_delayed_message_exchange-4.2.0.ez
+        docker cp delayed.ez ${{ job.services.rabbitmq_delayed.id }}:/opt/rabbitmq/plugins/rabbitmq_delayed_message_exchange-4.2.0.ez
+        docker exec -u rabbitmq ${{ job.services.rabbitmq_delayed.id }} rabbitmq-plugins enable rabbitmq_delayed_message_exchange
+
+    - name: Soak (every scenario twice)
+      run: >-
+        dotnet run --project ${{ github.workspace }}/Source/EasyNetQ.Examples.Soak --configuration Release --
+        --connection "host=localhost;port=5675;username=guest;password=guest;timeout=10"
+        --delayed-connection "host=localhost;port=5676;username=guest;password=guest;timeout=10"
+        --management http://guest:guest@localhost:15675
+        --iterations 2
+
   benchmarks:
     name: Benchmarks
     if: >-
@@ -261,7 +313,7 @@ jobs:
   publish-to-nuget:
     name: Publish to NuGet
     runs-on: ubuntu-latest
-    needs: [test, aot-smoke, package-consumer]
+    needs: [test, aot-smoke, package-consumer, soak]
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     environment: release
     permissions:
