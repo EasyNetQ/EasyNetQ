@@ -633,8 +633,8 @@ namespace EasyNetQ.Consumer
     }
     public class PerQueueConsumerConfiguration
     {
-        public PerQueueConsumerConfiguration(bool autoAck, string consumerTag, bool isExclusive, System.Collections.Generic.IDictionary<string, object> arguments, EasyNetQ.Pipeline.ConsumerContext context) { }
-        public System.Collections.Generic.IDictionary<string, object> Arguments { get; }
+        public PerQueueConsumerConfiguration(bool autoAck, string consumerTag, bool isExclusive, System.Collections.Generic.IDictionary<string, object>? arguments, EasyNetQ.Pipeline.ConsumerContext context) { }
+        public System.Collections.Generic.IDictionary<string, object>? Arguments { get; }
         public bool AutoAck { get; }
         public string ConsumerTag { get; }
         public EasyNetQ.Pipeline.ConsumerContext Context { get; }
