@@ -1,3 +1,6 @@
+using System.Diagnostics;
+using EasyNetQ.Diagnostics;
+
 namespace EasyNetQ.Pipeline;
 
 /// <summary>
@@ -33,7 +36,7 @@ public sealed class LifecycleNotifier : IDisposable
     }
 
     /// <summary>
-    ///     Whether any lifecycle step is registered; sources may skip event wiring entirely when false
+    ///     Whether any lifecycle step is registered. Sources wire events regardless, since every event is counted.
     /// </summary>
     public bool IsEnabled => builder.Count > 0;
 
@@ -49,7 +52,10 @@ public sealed class LifecycleNotifier : IDisposable
         CancellationToken cancellationToken = default
     )
     {
-        if (!IsEnabled || disposed) return default;
+        if (disposed) return default;
+
+        RecordMetric(layer, @event, error);
+        if (!IsEnabled) return default;
 
         pipeline ??= builder.Build(services);
         var context = new LifecycleContext(scope)
@@ -61,6 +67,27 @@ public sealed class LifecycleNotifier : IDisposable
             CancellationToken = cancellationToken,
         };
         return pipeline(context);
+    }
+
+    private static void RecordMetric(LifecycleLayer layer, LifecycleEvent @event, Exception? error)
+    {
+        if (!EasyNetQDiagnostics.LifecycleEvents.Enabled) return;
+
+        var tags = new TagList
+        {
+            { MessagingTags.LifecycleLayer, layer switch
+                {
+                    LifecycleLayer.Connection => "connection",
+                    LifecycleLayer.Channel => "channel",
+                    LifecycleLayer.Consumer => "consumer",
+                    _ => layer.ToString().ToLowerInvariant(),
+                }
+            },
+            { MessagingTags.LifecycleEvent, @event.Name },
+        };
+        if (error is not null)
+            tags.Add(MessagingTags.ErrorType, error.GetType().FullName);
+        EasyNetQDiagnostics.LifecycleEvents.Add(1, in tags);
     }
 
     /// <summary>
