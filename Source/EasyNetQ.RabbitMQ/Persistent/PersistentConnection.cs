@@ -175,7 +175,10 @@ public class PersistentConnection : IPersistentConnection
     {
         status = status.ToDisconnected(e.ToString());
         var connection = (IConnection)sender!;
-        logger.ConnectionDisconnected(e.Cause as Exception, type, connection.Endpoint.HostName, connection.Endpoint.Port, e.ReplyText);
+        if (e.Initiator == ShutdownInitiator.Application)
+            logger.ConnectionClosed(type, connection.Endpoint.HostName, connection.Endpoint.Port);
+        else
+            logger.ConnectionDisconnected(e.Cause as Exception, type, connection.Endpoint.HostName, connection.Endpoint.Port, e.ReplyText);
         await eventBus.PublishAsync(new ConnectionDisconnectedEvent(type, connection.Endpoint, e.ReplyText));
     }
 

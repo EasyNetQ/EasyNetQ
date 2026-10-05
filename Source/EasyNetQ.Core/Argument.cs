@@ -17,6 +17,7 @@ public static class Argument
     public const string QueueMasterLocator = "x-queue-master-locator";
     public const string DeadLetterStrategy = "x-dead-letter-strategy";
     public const string Overflow = "x-overflow";
+    public const string DeliveryLimit = "x-delivery-limit";
 
     # endregion Queue
 

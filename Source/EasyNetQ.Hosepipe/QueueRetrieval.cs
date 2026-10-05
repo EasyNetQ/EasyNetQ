@@ -35,6 +35,7 @@ public class QueueRetrieval : IQueueRetrieval
         }
 
         var count = 0;
+        long maxDeliveryCount = -1;
         while (count++ < parameters.NumberOfMessagesToRetrieve)
         {
             BasicGetResult? basicGetResult;
@@ -55,6 +56,8 @@ public class QueueRetrieval : IQueueRetrieval
             }
 
             var properties = BasicPropertiesMapper.FromBasicProperties(basicGetResult.BasicProperties);
+            if (!parameters.Purge)
+                maxDeliveryCount = Math.Max(maxDeliveryCount, DeliveryCount(properties));
             var info = new MessageReceivedInfo(
                 "hosepipe",
                 basicGetResult.DeliveryTag,
@@ -65,6 +68,27 @@ public class QueueRetrieval : IQueueRetrieval
             );
 
             yield return new HosepipeMessage(errorMessageSerializer.Serialize(basicGetResult.Body.ToArray()), properties, info);
+        }
+
+        if (maxDeliveryCount >= 0)
+            Console.WriteLine(
+                "Warning: the messages were returned to '{0}', and a quorum queue counts every return as a delivery attempt " +
+                "(x-delivery-count is now up to {1}). At the queue's delivery limit (RabbitMQ 4 default: 20) they are dropped. " +
+                "Use x:true to take them off the queue, or give error queues an unlimited delivery limit.",
+                parameters.QueueName, maxDeliveryCount + 1);
+    }
+
+    private static long DeliveryCount(in MessageProperties properties)
+    {
+        // quorum queues only: absent on a first delivery and on classic queues
+        if (properties.Headers?.TryGetValue("x-delivery-count", out var value) != true || value is null) return -1;
+        try
+        {
+            return Convert.ToInt64(value);
+        }
+        catch (Exception exception) when (exception is FormatException or InvalidCastException or OverflowException)
+        {
+            return -1;
         }
     }
 }

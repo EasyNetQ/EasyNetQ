@@ -268,6 +268,8 @@ Review each one; the right-hand column restores 8.x behavior where that is possi
 | `[DeliveryMode]` on direct advanced publishes | ignored | stamped | remove the attribute |
 | Topology operations | only channel acquisition honored the timeout | the whole operation honors it | none needed |
 | Lifecycle steps during container shutdown | could see `Disconnected` and hit `ObjectDisposedException` | the host releases its connection first | none needed |
+| Broker-initiated disconnect log (event 102) | Debug | **Warning**; a close by the application itself logs at Debug (event 107) | filter event 102 |
+| Retried channel actions (200, 202), failed recovery attempts (105) | Error, with a stack trace per attempt | Warning: they are retried, and a publish that still fails reaches the caller | none needed |
 
 Code that publishes right after starting the host should `await IConsumerHostStatus.WaitForStartedAsync()` first,
 because fluent consumers now start in the background.
@@ -312,6 +314,10 @@ await provider.GetRequiredService<IMessagePublisher>().PublishAsync(new OrderPla
   `WaitForStartup`.
 - `ErrorQueue(...)` declares the bus-wide error queue with typed arguments (e.g. quorum), and can rename it from
   `EasyNetQ_Default_Error_Queue` for brokers that scope permissions by name.
+- `DeliveryLimit(n)` sets a quorum queue's `x-delivery-limit` (`-1` is unlimited). RabbitMQ 4 defaults it to 20 and
+  counts every requeue, including messages returned by a closing channel (a non-destructive Hosepipe dump, for
+  example), so an error queue that is inspected often wants `DeliveryLimit(-1)`. Adding it to an existing queue fails
+  the redeclare (`PRECONDITION_FAILED`); use a broker policy (`delivery-limit: -1`) there.
 - `Consume(c => c.Serializer(...))` sets a serializer per consumer.
 
 ### Wire names, aliases and foreign messages
