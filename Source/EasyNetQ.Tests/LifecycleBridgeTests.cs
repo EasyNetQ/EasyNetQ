@@ -69,4 +69,60 @@ public class LifecycleBridgeTests
         events.Should().Contain((LifecycleLayer.Consumer, "Started"));
         events.Should().Contain((LifecycleLayer.Consumer, "Stopped"));
     }
+
+    [Fact]
+    public async Task Should_notify_stopped_on_connection_loss_and_started_again_after_recovery()
+    {
+        var events = new ConcurrentQueue<(string Event, string? Reason)>();
+
+        await using var mockBuilder = new MockBuilder(x =>
+            new TestBuilder(x).Lifecycle(lifecycle => lifecycle.Use("record", (context, next) =>
+            {
+                if (context.Layer == LifecycleLayer.Consumer)
+                    events.Enqueue((context.Event.Name, context.Reason));
+                return next(context);
+            }))
+        );
+
+        var disposable = await mockBuilder.Bus.Advanced.ConsumeAsync(
+            new Topology.Queue("lifecycle.q"),
+            (_, _, _) => Task.FromResult(AckDecision.Ack)
+        );
+
+        var disconnected = new ConnectionDisconnectedEvent(PersistentConnectionType.Consumer, new AmqpTcpEndpoint(), "node maintenance");
+        await mockBuilder.EventBus.PublishAsync(disconnected);
+        await mockBuilder.EventBus.PublishAsync(disconnected);
+        await mockBuilder.EventBus.PublishAsync(new ConnectionRecoveredEvent(PersistentConnectionType.Consumer, new AmqpTcpEndpoint()));
+        await disposable.DisposeAsync();
+
+        events.Should().Equal(
+            ("Started", null),
+            ("Stopped", "node maintenance"),
+            ("Started", null),
+            ("Stopped", "Consumer disposed")
+        );
+    }
+
+    [Fact]
+    public async Task Should_ignore_a_producer_connection_loss()
+    {
+        var events = new ConcurrentQueue<string>();
+
+        await using var mockBuilder = new MockBuilder(x =>
+            new TestBuilder(x).Lifecycle(lifecycle => lifecycle.Use("record", (context, next) =>
+            {
+                if (context.Layer == LifecycleLayer.Consumer)
+                    events.Enqueue(context.Event.Name);
+                return next(context);
+            }))
+        );
+
+        await using var disposable = await mockBuilder.Bus.Advanced.ConsumeAsync(
+            new Topology.Queue("lifecycle.q"),
+            (_, _, _) => Task.FromResult(AckDecision.Ack)
+        );
+        await mockBuilder.EventBus.PublishAsync(new ConnectionDisconnectedEvent(PersistentConnectionType.Producer, new AmqpTcpEndpoint(), "bye"));
+
+        events.Should().Equal("Started");
+    }
 }
