@@ -204,26 +204,23 @@ internal sealed class RabbitMqTransportChannel : ITransportChannel
         }
 
         var consumer = consumerFactory.CreateConsumer(new ConsumerConfiguration(prefetchCount, perQueueConfigurations));
-        var notifier = consumers.Count > 0 ? consumers.First().Services.GetService<LifecycleNotifier>() : null;
+        var services = consumers.Count > 0 ? consumers.First().Services : null;
+        var lifecycle = services?.GetService<LifecycleNotifier>() is { } notifier
+            && services.GetService<IEventBus>() is { } eventBus
+            ? new ConsumerLifecycleBridge(consumer.Id, consumers, notifier, eventBus)
+            : null;
 
-        // a broker-side cancel ends that queue's consumption for good; tell the lifecycle so the queue's owner can act
-        IDisposable? cancelSubscription = null;
-        if (notifier is not null && consumers.First().Services.GetService<IEventBus>() is { } eventBus)
+        try
         {
-            var contextsByQueue = consumers.ToDictionary(c => c.Queue, StringComparer.Ordinal);
-            cancelSubscription = eventBus.Subscribe<ConsumerCancelledEvent>(e =>
-                e.Consumer.Id == consumer.Id && contextsByQueue.TryGetValue(e.Queue.Name, out var cancelledContext)
-                    ? notifier.NotifyAsync(cancelledContext, LifecycleLayer.Consumer, LifecycleEvent.Cancelled, "Cancelled by the broker").AsTask()
-                    : Task.CompletedTask
-            );
+            await consumer.StartConsumingAsync(cancellationToken).ConfigureAwait(false);
+        }
+        catch
+        {
+            lifecycle?.Dispose();
+            throw;
         }
 
-        await consumer.StartConsumingAsync(cancellationToken).ConfigureAwait(false);
-
-        if (notifier is not null)
-            foreach (var consumerContext in consumers)
-                await notifier.NotifyAsync(consumerContext, LifecycleLayer.Consumer, LifecycleEvent.Started, cancellationToken: cancellationToken).ConfigureAwait(false);
-        return new RabbitMqTransportConsumer(consumer, consumers, notifier, cancelSubscription);
+        return new RabbitMqTransportConsumer(consumer, lifecycle);
     }
 
     public ValueTask DisposeAsync() => default;
@@ -295,26 +292,93 @@ internal sealed class RabbitMqTransportChannel : ITransportChannel
 internal sealed class RabbitMqTransportConsumer : ITransportConsumer
 {
     private readonly IConsumer consumer;
-    private readonly IReadOnlyCollection<ConsumerContext> consumers;
-    private readonly LifecycleNotifier? notifier;
-    private readonly IDisposable? cancelSubscription;
+    private readonly ConsumerLifecycleBridge? lifecycle;
 
-    public RabbitMqTransportConsumer(
-        IConsumer consumer, IReadOnlyCollection<ConsumerContext> consumers, LifecycleNotifier? notifier, IDisposable? cancelSubscription
-    )
+    public RabbitMqTransportConsumer(IConsumer consumer, ConsumerLifecycleBridge? lifecycle)
     {
         this.consumer = consumer;
-        this.consumers = consumers;
-        this.notifier = notifier;
-        this.cancelSubscription = cancelSubscription;
+        this.lifecycle = lifecycle;
     }
 
     public async ValueTask DisposeAsync()
     {
-        cancelSubscription?.Dispose();
+        lifecycle?.Dispose();
         await consumer.DisposeAsync().ConfigureAwait(false);
-        if (notifier is not null)
-            foreach (var consumerContext in consumers)
-                await notifier.NotifyAsync(consumerContext, LifecycleLayer.Consumer, LifecycleEvent.Stopped).ConfigureAwait(false);
+        if (lifecycle is not null)
+            await lifecycle.NotifyStoppedAsync("Consumer disposed").ConfigureAwait(false);
+    }
+}
+
+/// <summary>
+///     Maps the consumer's internal events onto the consumer lifecycle per queue: Started/StartFailed on every
+///     (re)start, Stopped when the consumer connection drops and on dispose, Cancelled on a broker-side cancel.
+/// </summary>
+internal sealed class ConsumerLifecycleBridge : IDisposable
+{
+    private readonly Guid consumerId;
+    private readonly LifecycleNotifier notifier;
+    private readonly Dictionary<string, ConsumerContext> contextsByQueue;
+    private readonly HashSet<string> running = new(StringComparer.Ordinal);
+    private readonly IDisposable[] subscriptions;
+
+    public ConsumerLifecycleBridge(Guid consumerId, IReadOnlyCollection<ConsumerContext> consumers, LifecycleNotifier notifier, IEventBus eventBus)
+    {
+        this.consumerId = consumerId;
+        this.notifier = notifier;
+        contextsByQueue = consumers.ToDictionary(c => c.Queue, StringComparer.Ordinal);
+        subscriptions =
+        [
+            eventBus.Subscribe<StartConsumingSucceededEvent>(e => OnStartedAsync(e.Consumer.Id, e.Queue.Name)),
+            eventBus.Subscribe<StartConsumingFailedEvent>(e => OnStartFailedAsync(e.Consumer.Id, e.Queue.Name)),
+            eventBus.Subscribe<ConsumerCancelledEvent>(e => OnCancelledAsync(e.Consumer.Id, e.Queue.Name)),
+            eventBus.Subscribe<ConnectionDisconnectedEvent>(e =>
+                e.Type == PersistentConnectionType.Consumer ? NotifyStoppedAsync(e.Reason ?? "Connection lost") : Task.CompletedTask),
+        ];
+    }
+
+    public void Dispose()
+    {
+        foreach (var subscription in subscriptions)
+            subscription.Dispose();
+    }
+
+    public async Task NotifyStoppedAsync(string reason)
+    {
+        foreach (var context in Transition(contextsByQueue.Keys, isRunning: false))
+            await notifier.NotifyAsync(context, LifecycleLayer.Consumer, LifecycleEvent.Stopped, reason).ConfigureAwait(false);
+    }
+
+    private async Task OnStartedAsync(Guid id, string queue)
+    {
+        if (id != consumerId) return;
+        foreach (var context in Transition([queue], isRunning: true))
+            await notifier.NotifyAsync(context, LifecycleLayer.Consumer, LifecycleEvent.Started).ConfigureAwait(false);
+    }
+
+    private async Task OnStartFailedAsync(Guid id, string queue)
+    {
+        if (id != consumerId || !contextsByQueue.TryGetValue(queue, out var context)) return;
+        Transition([queue], isRunning: false);
+        await notifier.NotifyAsync(context, LifecycleLayer.Consumer, LifecycleEvent.StartFailed, "Failed to start consuming").ConfigureAwait(false);
+    }
+
+    private async Task OnCancelledAsync(Guid id, string queue)
+    {
+        if (id != consumerId || !contextsByQueue.TryGetValue(queue, out var context)) return;
+        Transition([queue], isRunning: false);
+        await notifier.NotifyAsync(context, LifecycleLayer.Consumer, LifecycleEvent.Cancelled, "Cancelled by the broker").ConfigureAwait(false);
+    }
+
+    // only edges are reported: a repeated disconnect or an idempotent restart does not repeat the event
+    private List<ConsumerContext> Transition(IEnumerable<string> queues, bool isRunning)
+    {
+        var changed = new List<ConsumerContext>();
+        lock (running)
+        {
+            foreach (var queue in queues)
+                if (contextsByQueue.TryGetValue(queue, out var context) && (isRunning ? running.Add(queue) : running.Remove(queue)))
+                    changed.Add(context);
+        }
+        return changed;
     }
 }
