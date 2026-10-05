@@ -34,6 +34,11 @@ public sealed class ErrorHandlingMiddleware : IMiddleware<ConsumeContext>
 #endif
     public async ValueTask InvokeAsync(ConsumeContext context, PipelineStep<ConsumeContext> next)
     {
+        // inner steps (interceptors, decompression) replace the body and properties; the strategy gets the delivery
+        // as received, so an error queue never keeps a decrypted copy and a replay goes through the steps again
+        var receivedInfo = context.ReceivedInfo;
+        var properties = context.Properties;
+        var body = context.Body;
         try
         {
             try
@@ -42,12 +47,14 @@ public sealed class ErrorHandlingMiddleware : IMiddleware<ConsumeContext>
             }
             catch (OperationCanceledException) when (context.CancellationToken.IsCancellationRequested)
             {
+                Restore(context, receivedInfo, properties, body);
                 context.Ack = await errorStrategy.HandleCancelledAsync(context, context.CancellationToken).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
                 if (exception is UnknownMessageTypeException unknown)
                     ReportUnknownType(context, unknown);
+                Restore(context, receivedInfo, properties, body);
                 context.Error = exception;
                 context.Ack = await errorStrategy.HandleErrorAsync(context, exception, context.CancellationToken).ConfigureAwait(false);
             }
@@ -57,6 +64,13 @@ public sealed class ErrorHandlingMiddleware : IMiddleware<ConsumeContext>
             logger.ConsumeErrorStrategyFailed(exception);
             context.Ack = AckDecision.NackRequeue;
         }
+    }
+
+    private static void Restore(ConsumeContext context, in MessageReceivedInfo receivedInfo, in MessageProperties properties, in ReadOnlyMemory<byte> body)
+    {
+        context.ReceivedInfo = receivedInfo;
+        context.Properties = properties;
+        context.Body = body;
     }
 
     private void ReportUnknownType(ConsumeContext context, UnknownMessageTypeException exception)
