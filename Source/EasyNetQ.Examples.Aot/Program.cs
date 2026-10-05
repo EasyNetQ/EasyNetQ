@@ -4,6 +4,9 @@ using EasyNetQ;
 using EasyNetQ.AutoSubscribe;
 using EasyNetQ.Configuration;
 using EasyNetQ.Hosting;
+using EasyNetQ.Interception;
+using EasyNetQ.Pipeline;
+using EasyNetQ.Pipeline.Middleware;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -14,7 +17,9 @@ using Microsoft.Extensions.Logging;
 // case-insensitive JSON through a source-generated context, and a named quorum error queue. Then the 8.x-compatible
 // IBus API: PubSub with [Exchange]/[Queue], Rpc, SendReceive, the DLX+TTL scheduler, and the AutoSubscriber on
 // generated registrations (DI-resolved IConsume/IConsumeAsync consumers with [ForTopic], [AutoSubscriberConsumer]
-// and [SubscriptionConfiguration]).
+// and [SubscriptionConfiguration]). Last, the AOT-safe part of the feature soak (EasyNetQ.Examples.Soak): GZip
+// interceptor with a custom step after SerializeStep, mandatory + confirms on an unroutable route, and rejection
+// dead-lettered through typed queue settings.
 // Usage: EasyNetQ.Examples.Aot [connectionString]   (default: host=localhost)
 static byte[] Raw(string json) => Encoding.UTF8.GetBytes(json);
 var connectionString = args.Length > 0 ? args[0] : Environment.GetEnvironmentVariable("EASYNETQ_CONNECTION") ?? "host=localhost";
@@ -172,6 +177,88 @@ Check("[AutoSubscriberConsumer] subscription id names the queue", shipments.Euro
 
 foreach (var host in hosts) await host.StopAsync(CancellationToken.None);
 await advanced.ExchangeDeleteAsync(exchange, cancellationToken: CancellationToken.None);
+
+var soakExchange = $"aot.soak.{run}";
+var soakQueue = $"{soakExchange}.squeezed";
+var rejectQueue = $"{soakExchange}.reject";
+var deadLetterExchange = $"{soakExchange}.dlx";
+var deadLetterQueue = $"{soakExchange}.dlq";
+var tapQueue = $"{soakExchange}.tap";
+var squeezed = new TaskCompletionSource<string?>(TaskCreationOptions.RunContinuationsAsynchronously);
+var deadLettered = new TaskCompletionSource<Doomed>(TaskCreationOptions.RunContinuationsAsynchronously);
+var tapped = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
+var soakServices = new ServiceCollection();
+soakServices.AddLogging(builder => builder.AddConsole().SetMinimumLevel(LogLevel.Warning));
+soakServices.AddSingleton<IProduceConsumeInterceptor>(new GZipInterceptor());
+soakServices.AddEasyNetQ(connectionString)
+    .UseSystemTextJson(AotJsonContext.Default)
+    .ConsumerHost(o => o.RetryDelay = TimeSpan.FromMilliseconds(200))
+    .UseRabbitMq(r => r
+        .ErrorQueue(errorQueueName, q => q.Quorum())
+        .Publish(p => p
+            .Exchange(soakExchange, e => e.Topic())
+            .PublisherConfirms()
+            .Message<Squeezed>("squeezed")
+            .Message<Doomed>("doomed")
+            .Pipeline(b => b.InsertAfter<SerializeStep, MarkStep>(_ => new MarkStep())))
+        .Publish(p => p
+            .Exchange($"{soakExchange}.void", e => e.Direct())
+            .Mandatory()
+            .PublisherConfirms()
+            .Message<Lost>("nowhere"))
+        .Consume(c => c
+            .Queue(soakQueue, q => q.AutoDelete())
+            .Bind(soakExchange, "squeezed", e => e.Topic())
+            .Handle<Squeezed>((_, context) =>
+            {
+                squeezed.TrySetResult(context.Properties.Headers?.TryGetValue(MarkStep.Header, out var mark) == true && mark is byte[] raw ? Encoding.UTF8.GetString(raw) : null);
+                return new ValueTask<AckDecision>(AckDecision.Ack);
+            }))
+        .Consume(c => c
+            .Queue(rejectQueue, q => q.AutoDelete().DeadLetterExchange(deadLetterExchange))
+            .Bind(soakExchange, "doomed", e => e.Topic())
+            .Handle<Doomed>((_, _) => new ValueTask<AckDecision>(AckDecision.NackDiscard)))
+        .Consume(c => c
+            .Queue(deadLetterQueue, q => q.AutoDelete())
+            .Bind(deadLetterExchange, "#", e => e.Fanout())
+            .Handle<Doomed>((message, _) =>
+            {
+                deadLettered.TrySetResult(message);
+                return new ValueTask<AckDecision>(AckDecision.Ack);
+            })));
+
+await using (var soakProvider = soakServices.BuildServiceProvider())
+{
+    var soakHost = soakProvider.GetServices<IHostedService>().Single();
+    await soakHost.StartAsync(timeout.Token);
+    await soakProvider.GetRequiredService<IConsumerHostStatus>().WaitForStartedAsync(timeout.Token);
+    // the tap lives on the first container, which has no interceptor: it sees the wire bytes
+    var tap = await advanced.QueueDeclareAsync(tapQueue, durable: true, exclusive: false, autoDelete: true, cancellationToken: timeout.Token);
+    await advanced.QueueBindAsync(tap.Name, soakExchange, "squeezed", null, timeout.Token);
+    await using var tapConsumer = await advanced.ConsumeAsync(tap, (body, _, _) => tapped.TrySetResult(body.ToArray()));
+
+    var soakPublisher = soakProvider.GetRequiredService<IMessagePublisher>();
+    await soakPublisher.PublishAsync(new Squeezed(string.Concat(Enumerable.Repeat("squeeze me ", 50))), timeout.Token);
+    await soakPublisher.PublishAsync(new Doomed(42), timeout.Token);
+    Check("custom step after SerializeStep ran on the publish route", await squeezed.Task.WaitAsync(timeout.Token) == "1");
+    var wire = await tapped.Task.WaitAsync(timeout.Token);
+    Check("GZip interceptor compressed the wire body", wire.Length > 2 && wire[0] == 0x1f && wire[1] == 0x8b, $"({wire.Length} bytes)");
+    Check("rejected message dead-lettered through typed queue settings", (await deadLettered.Task.WaitAsync(timeout.Token)).Id == 42);
+    Exception? unroutable = null;
+    try
+    {
+        await soakPublisher.PublishAsync(new Lost(1), timeout.Token);
+    }
+    catch (Exception exception)
+    {
+        unroutable = exception;
+    }
+    Check("mandatory + confirms route without a binding throws UnroutableMessageException", unroutable is UnroutableMessageException, unroutable?.GetType().Name ?? "no exception");
+    await soakHost.StopAsync(CancellationToken.None);
+}
+await advanced.ExchangeDeleteAsync(soakExchange, cancellationToken: CancellationToken.None);
+await advanced.ExchangeDeleteAsync($"{soakExchange}.void", cancellationToken: CancellationToken.None);
+await advanced.ExchangeDeleteAsync(deadLetterExchange, cancellationToken: CancellationToken.None);
 Console.WriteLine(failures == 0 ? "ALL OK" : $"{failures} FAILED");
 return failures == 0 ? 0 : 1;
 
@@ -181,6 +268,23 @@ public sealed record Pong(int Id);
 
 [MessageType("aot.contract.v1", Aliases = ["Old.Contract"])]
 public sealed record Contract(int Id);
+
+public sealed record Squeezed(string Text);
+
+public sealed record Doomed(int Id);
+
+public sealed record Lost(int Id);
+
+internal sealed class MarkStep : IMiddleware<PublishContext>
+{
+    public const string Header = "x-aot-step";
+
+    public ValueTask InvokeAsync(PublishContext context, PipelineStep<PublishContext> next)
+    {
+        context.Properties = context.Properties.SetHeader(Header, "1");
+        return next(context);
+    }
+}
 
 [Exchange("aot.compat.orders")]
 [Queue("aot.compat.orders")]
@@ -242,4 +346,7 @@ public sealed record Command(string Name);
 [JsonSerializable(typeof(Ping))]
 [JsonSerializable(typeof(Pong))]
 [JsonSerializable(typeof(Contract))]
+[JsonSerializable(typeof(Squeezed))]
+[JsonSerializable(typeof(Doomed))]
+[JsonSerializable(typeof(Lost))]
 internal sealed partial class AotJsonContext : JsonSerializerContext;
