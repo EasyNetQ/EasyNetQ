@@ -270,6 +270,7 @@ Review each one; the right-hand column restores 8.x behavior where that is possi
 | Lifecycle steps during container shutdown | could see `Disconnected` and hit `ObjectDisposedException` | the host releases its connection first; events raised while the container disposes (`IBus` subscriptions, the RPC reply consumer) skip the steps | none needed |
 | Broker-initiated disconnect log (event 102) | Debug | **Warning**; a close by the application itself logs at Debug (event 107) | filter event 102 |
 | Retried channel actions (200, 202), failed recovery attempts (105) | Error, with a stack trace per attempt | Warning: they are retried, and a publish that still fails reaches the caller | none needed |
+| Broker denies a deprecated feature (RabbitMQ 4.3: a non-durable, non-exclusive queue) | retried until the timeout, closing the connection on each attempt | thrown with the broker's reason | declare the queue durable or exclusive |
 
 Code that publishes right after starting the host should `await IConsumerHostStatus.WaitForStartedAsync()` first,
 because fluent consumers now start in the background.

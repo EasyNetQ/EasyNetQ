@@ -241,6 +241,10 @@ public sealed class PersistentChannel : IPersistentChannel
                     AmqpErrorCodes.NotFound => ExceptionVerdict.ThrowAndCloseChannel,
                     AmqpErrorCodes.ResourceLocked => ExceptionVerdict.ThrowAndCloseChannel,
                     AmqpErrorCodes.PreconditionFailed => ExceptionVerdict.ThrowAndCloseChannel,
+                    // RabbitMQ 4 refuses deprecated features (e.g. transient non-exclusive queues) with a connection-level
+                    // internal_error: retrying cannot succeed and would close the shared connection again on every attempt
+                    AmqpErrorCodes.InternalErrors when e is not AlreadyClosedException && IsDeniedDeprecatedFeature(e.ShutdownReason)
+                        => ExceptionVerdict.ThrowAndCloseChannel,
                     AmqpErrorCodes.InternalErrors => ExceptionVerdict.SuppressAndCloseChannel,
                     _ => ExceptionVerdict.Throw
                 };
@@ -255,6 +259,10 @@ public sealed class PersistentChannel : IPersistentChannel
                 return ExceptionVerdict.Throw;
         }
     }
+
+    private static bool IsDeniedDeprecatedFeature(ShutdownEventArgs? reason)
+        => reason is { Initiator: ShutdownInitiator.Peer, ReplyText: { } text }
+           && text.IndexOf("is deprecated", StringComparison.Ordinal) >= 0;
 
     private readonly struct ExceptionVerdict
     {
