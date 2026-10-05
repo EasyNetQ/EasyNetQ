@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using EasyNetQ.AutoSubscribe;
 using EasyNetQ.Configuration;
+using EasyNetQ.Persistent;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EasyNetQ.Examples.Soak.Scenarios;
@@ -106,11 +107,18 @@ public static class MessagingScenarios
         if (transient is null)
             ctx.Skip("a transient responder queue the broker denies fails fast", "this broker permits transient non-exclusive queues");
         else
+        {
             ctx.Check(
                 "a transient responder queue the broker denies fails fast",
                 transientWatch.Elapsed < TimeSpan.FromSeconds(5) && transient.Message.Contains("deprecated", StringComparison.OrdinalIgnoreCase),
                 $"({transientWatch.Elapsed.TotalMilliseconds:F0} ms) {Soak.Describe(transient)}"
             );
+            // the broker answers with a connection-level error: the whole connection goes down and recovers
+            transientWatch.Restart();
+            await Soak.WaitUntilAsync(() => !Connected(bus), TimeSpan.FromSeconds(2), ctx.Token);
+            var recovered = await Soak.WaitUntilAsync(() => Connected(bus), TimeSpan.FromSeconds(60), ctx.Token);
+            ctx.Check("the bus reconnects after the broker closed its connection", recovered, $"({transientWatch.Elapsed.TotalSeconds:F1} s)");
+        }
 
         var handled = 0;
         await using var responder = await bus.Bus.Rpc.RespondAsync<RpcRequest, RpcResponse>(
@@ -160,6 +168,10 @@ public static class MessagingScenarios
         ctx.Check("a faulted responder surfaces as EasyNetQResponderException with its message", faulted is EasyNetQResponderException && faulted.Message.Contains("rpc failure 7", StringComparison.Ordinal), Soak.Describe(faulted));
         ctx.Check("the faulted request is copied to the error queue", await Soak.WaitUntilAsync(async () => await ctx.Admin.MessageCountAsync(errorQueue, ctx.Token) >= 1, TimeSpan.FromSeconds(10), ctx.Token));
     }
+
+    private static bool Connected(SoakBus bus)
+        => bus.Advanced.GetConnectionStatus(PersistentConnectionType.Producer).State == PersistentConnectionState.Connected
+           && bus.Advanced.GetConnectionStatus(PersistentConnectionType.Consumer).State == PersistentConnectionState.Connected;
 
     /// <summary>
     ///     SendReceive with two message types on one queue
