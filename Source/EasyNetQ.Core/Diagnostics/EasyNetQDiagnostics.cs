@@ -68,4 +68,8 @@ public static class EasyNetQDiagnostics
     /// <summary>Messages currently being processed by consumers</summary>
     public static readonly UpDownCounter<long> ConsumerInFlight =
         Meter.CreateUpDownCounter<long>("easynetq.consumer.in_flight", "{message}", "Messages currently being processed by consumers");
+
+    /// <summary>Number of lifecycle events by layer (easynetq.lifecycle.layer) and event (easynetq.lifecycle.event)</summary>
+    public static readonly Counter<long> LifecycleEvents =
+        Meter.CreateCounter<long>("easynetq.lifecycle.events", "{event}", "Number of connection, channel and consumer lifecycle events");
 }
