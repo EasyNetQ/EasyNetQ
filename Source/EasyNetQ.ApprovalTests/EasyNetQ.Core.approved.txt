@@ -14,6 +14,7 @@ namespace EasyNetQ
         public const string DeadLetterRoutingKey = "x-dead-letter-routing-key";
         public const string DeadLetterStrategy = "x-dead-letter-strategy";
         public const string DelayedType = "x-delayed-type";
+        public const string DeliveryLimit = "x-delivery-limit";
         public const string Expires = "x-expires";
         public const string MaxLength = "x-max-length";
         public const string MaxLengthBytes = "x-max-length-bytes";

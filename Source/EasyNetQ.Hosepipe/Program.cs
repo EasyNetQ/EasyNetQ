@@ -96,26 +96,30 @@ public class Program
 
         try
         {
-            if (arguments.At(0, "dump", () =>
-                {
-                    arguments.WithKey("q", a =>
-                    {
-                        parameters.QueueName = a.Value;
-                    }).FailWith(Message("No Queue Name given"));
-                }) != null)
+            string? command = null;
+            arguments.At(0, a => command = a.HasKey ? null : a.Value);
+
+            switch (command)
             {
-                await DumpAsync(parameters, cancellationToken);
+                case "dump":
+                    if (string.IsNullOrEmpty(parameters.QueueName))
+                        Message("No Queue Name given")();
+                    else
+                        await DumpAsync(parameters, cancellationToken);
+                    break;
+                case "insert":
+                    await InsertAsync(parameters, cancellationToken);
+                    break;
+                case "err":
+                    await ErrorDumpAsync(parameters, cancellationToken);
+                    break;
+                case "retry":
+                    await RetryAsync(parameters, cancellationToken);
+                    break;
+                default:
+                    PrintUsage();
+                    break;
             }
-
-            arguments.At(0, "insert", async () => await InsertAsync(parameters, cancellationToken));
-
-            arguments.At(0, "err", async () => await ErrorDumpAsync(parameters, cancellationToken));
-
-            arguments.At(0, "retry", async () => await RetryAsync(parameters, cancellationToken));
-
-            arguments.At(0, "?", PrintUsage);
-
-            arguments.At(0, _ => { }).FailWith(PrintUsage);
         }
         catch (EasyNetQHosepipeException easyNetQHosepipeException)
         {
@@ -153,7 +157,7 @@ public class Program
 
     private async Task ErrorDumpAsync(QueueParameters parameters, CancellationToken cancellationToken)
     {
-        if (parameters.QueueName == null)
+        if (string.IsNullOrEmpty(parameters.QueueName))
             parameters.QueueName = conventions.ErrorQueueNamingConvention(default);
         await DumpAsync(parameters, cancellationToken);
     }
@@ -161,7 +165,9 @@ public class Program
     private async Task RetryAsync(QueueParameters parameters, CancellationToken cancellationToken)
     {
         var count = 0;
-        var queueName = parameters.QueueName ?? conventions.ErrorQueueNamingConvention(default);
+        var queueName = string.IsNullOrEmpty(parameters.QueueName)
+            ? conventions.ErrorQueueNamingConvention(default)
+            : parameters.QueueName;
 
         await errorRetry.RetryErrorsAsync(
             WithEachAsync(messageReader.ReadMessagesAsync(parameters, queueName, cancellationToken), () => count++), parameters, cancellationToken

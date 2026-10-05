@@ -19,7 +19,7 @@ public class FluentBuilderTests
         await using var mockBuilder = new MockBuilder(x =>
             new TestBuilder(x).UseRabbitMq(rabbit => rabbit
                 .Consume(consumer => consumer
-                    .Queue("typed.q", queue => queue.Quorum().DeadLetterExchange("typed.dlx").MessageTtl(TimeSpan.FromMinutes(5)))
+                    .Queue("typed.q", queue => queue.Quorum().DeadLetterExchange("typed.dlx").MessageTtl(TimeSpan.FromMinutes(5)).DeliveryLimit(5))
                     .Bind("orders", "order.*", exchange => exchange.Topic().Durable())
                     .ConsumerTag("billing-1")
                     .Handle<MyMessage>((_, _) => new ValueTask<AckDecision>(AckDecision.Ack))
@@ -38,6 +38,7 @@ public class FluentBuilderTests
         arguments["x-queue-type"].Should().Be("quorum");
         arguments["x-dead-letter-exchange"].Should().Be("typed.dlx");
         arguments["x-message-ttl"].Should().Be(300000);
+        arguments["x-delivery-limit"].Should().Be(5);
 
         calls.Should().Contain(c => c.GetMethodInfo().Name == "ExchangeDeclareAsync" && Equals(c.GetArguments()[0], "orders"));
         calls.Should().Contain(c => c.GetMethodInfo().Name == "QueueBindAsync" && Equals(c.GetArguments()[0], "typed.q") && Equals(c.GetArguments()[1], "orders"));

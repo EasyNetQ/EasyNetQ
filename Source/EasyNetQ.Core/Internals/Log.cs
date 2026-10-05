@@ -18,13 +18,16 @@ internal static partial class Log
     [LoggerMessage(101, LogLevel.Information, "Connection {Type} recovered to broker {Host}:{Port}")]
     public static partial void ConnectionRecovered(this ILogger logger, PersistentConnectionType type, string host, int port);
 
-    [LoggerMessage(102, LogLevel.Debug, "Connection {Type} disconnected from broker {Host}:{Port} because of {Reason}")]
+    [LoggerMessage(102, LogLevel.Warning, "Connection {Type} disconnected from broker {Host}:{Port} because of {Reason}")]
     public static partial void ConnectionDisconnected(this ILogger logger, Exception? exception, PersistentConnectionType type, string host, int port, string? reason);
+
+    [LoggerMessage(107, LogLevel.Debug, "Connection {Type} closed by the application from broker {Host}:{Port}")]
+    public static partial void ConnectionClosed(this ILogger logger, PersistentConnectionType type, string host, int port);
 
     [LoggerMessage(103, LogLevel.Information, "Connection {Type} blocked with reason {Reason}")]
     public static partial void ConnectionBlocked(this ILogger logger, PersistentConnectionType type, string? reason);
 
-    [LoggerMessage(105, LogLevel.Error, "Connection {Type} recovery attempt failed; the client will retry on its recovery interval")]
+    [LoggerMessage(105, LogLevel.Warning, "Connection {Type} recovery attempt failed; the client will retry on its recovery interval")]
     public static partial void ConnectionRecoveryError(this ILogger logger, Exception exception, PersistentConnectionType type);
 
     [LoggerMessage(106, LogLevel.Error, "Exception escaped a connection {Type} event callback")]
@@ -37,13 +40,13 @@ internal static partial class Log
 
     #region Channel (200-299)
 
-    [LoggerMessage(200, LogLevel.Error, "Failed to fast invoke channel action, invocation will be retried")]
+    [LoggerMessage(200, LogLevel.Warning, "Failed to fast invoke channel action, invocation will be retried")]
     public static partial void FailedToFastInvokeChannelAction(this ILogger logger, Exception exception);
 
     [LoggerMessage(201, LogLevel.Warning, "Semaphore was already disposed during channel release!")]
     public static partial void SemaphoreAlreadyDisposed(this ILogger logger, Exception exception);
 
-    [LoggerMessage(202, LogLevel.Error, "Failed to invoke channel action, invocation will be retried")]
+    [LoggerMessage(202, LogLevel.Warning, "Failed to invoke channel action, invocation will be retried")]
     public static partial void FailedToInvokeChannelAction(this ILogger logger, Exception exception);
 
     [LoggerMessage(203, LogLevel.Error, "Exception escaped a channel event callback")]

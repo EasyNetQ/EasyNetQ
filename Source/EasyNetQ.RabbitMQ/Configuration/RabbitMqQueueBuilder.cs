@@ -63,6 +63,12 @@ public sealed class RabbitMqQueueBuilder
     /// <summary>Maximum total body size of ready messages</summary>
     public RabbitMqQueueBuilder MaxLengthBytes(int maxLengthBytes) => Argument(EasyNetQ.Argument.MaxLengthBytes, maxLengthBytes);
 
+    /// <summary>
+    ///     Quorum queues: deliveries per message before it is dead-lettered or dropped; -1 is unlimited. RabbitMQ 4
+    ///     defaults to 20 and counts every requeue, including messages returned when a channel closes.
+    /// </summary>
+    public RabbitMqQueueBuilder DeliveryLimit(int limit) => Argument(EasyNetQ.Argument.DeliveryLimit, limit);
+
     /// <summary>Only one consumer at a time receives messages</summary>
     public RabbitMqQueueBuilder SingleActiveConsumer() => Argument(EasyNetQ.Argument.SingleActiveConsumer, true);
 
