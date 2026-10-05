@@ -19,6 +19,10 @@ internal static class BackplaneMetrics
         "easynetq.signalr.ack_timeouts", "{ack}", "Cross-server group changes no server acknowledged in time"
     );
 
+    private static readonly Counter<long> SendTimeouts = EasyNetQDiagnostics.Meter.CreateCounter<long>(
+        "easynetq.signalr.send_timeouts", "{message}", "Backplane publishes that did not complete within the send timeout"
+    );
+
     private static readonly Counter<long> Resyncs = EasyNetQDiagnostics.Meter.CreateCounter<long>(
         "easynetq.signalr.resyncs", "{resync}", "Queue and binding redeclarations after a connection recovery"
     );
@@ -32,6 +36,10 @@ internal static class BackplaneMetrics
     public static void ConnectionRemoved(string hub) => Connections.Add(-1, new KeyValuePair<string, object?>("signalr.hub", hub));
 
     public static void AckTimedOut(string hub) => AckTimeouts.Add(1, new KeyValuePair<string, object?>("signalr.hub", hub));
+
+    public static void SendTimedOut(string hub, BackplaneMessageKind kind) => SendTimeouts.Add(
+        1, new KeyValuePair<string, object?>("signalr.hub", hub), new KeyValuePair<string, object?>("easynetq.signalr.kind", KindName(kind))
+    );
 
     public static void Resynced(string hub) => Resyncs.Add(1, new KeyValuePair<string, object?>("signalr.hub", hub));
 

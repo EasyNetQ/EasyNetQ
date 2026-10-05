@@ -46,6 +46,9 @@ lost, policy change), the backplane redeclares its queue and every binding and r
 EasyNetQ lifecycle pipeline (`LifecycleEvent.Recovered`, `LifecycleEvent.Cancelled`); nothing to configure.
 
 Messages are best effort, as with any SignalR backplane: a send while a server's queue is gone is lost for that server.
+While the broker is unreachable a send waits for the channel to recover for at most `SendTimeout` (5 s), then throws
+`TimeoutException`; a request that sends after its own work (a write, then a notification) should treat that as
+"not delivered", not as a failed write.
 
 ## Options
 
@@ -54,6 +57,7 @@ Messages are best effort, as with any SignalR backplane: a send while a server's
 | `Prefix(string)` | `signalr` | prefix of every exchange and queue; servers of one app must share it |
 | `ServerName(string)` | machine name + random suffix | unique per server process |
 | `AckTimeout(TimeSpan)` | 30 s | wait for a remote group change |
+| `SendTimeout(TimeSpan)` | 5 s | bound on one backplane publish while the broker is unreachable |
 | `QueueExpiry(TimeSpan)` | 1 min | `x-expires` of the server queue |
 | `PrefetchCount(ushort)` | 100 | unacknowledged messages per server |
 
@@ -73,7 +77,7 @@ builder.Services.AddSignalR()
 ## Observability
 
 Instruments on the `EasyNetQ` meter: `easynetq.signalr.messages` (by kind and direction), `easynetq.signalr.connections`,
-`easynetq.signalr.ack_timeouts`, `easynetq.signalr.resyncs`. Backplane traffic does not run through the application's
+`easynetq.signalr.ack_timeouts`, `easynetq.signalr.send_timeouts` (by kind), `easynetq.signalr.resyncs`. Backplane traffic does not run through the application's
 publish/consume pipelines: it is SignalR's payload, not application messages.
 
 ## Not supported

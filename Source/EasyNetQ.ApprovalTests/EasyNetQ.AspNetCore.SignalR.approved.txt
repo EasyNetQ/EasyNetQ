@@ -7,6 +7,7 @@ namespace EasyNetQ.AspNetCore.SignalR
         public EasyNetQ.AspNetCore.SignalR.EasyNetQBackplaneConfigurator PrefetchCount(ushort prefetchCount) { }
         public EasyNetQ.AspNetCore.SignalR.EasyNetQBackplaneConfigurator Prefix(string prefix) { }
         public EasyNetQ.AspNetCore.SignalR.EasyNetQBackplaneConfigurator QueueExpiry(System.TimeSpan expiry) { }
+        public EasyNetQ.AspNetCore.SignalR.EasyNetQBackplaneConfigurator SendTimeout(System.TimeSpan timeout) { }
         public EasyNetQ.AspNetCore.SignalR.EasyNetQBackplaneConfigurator ServerName(string serverName) { }
     }
     public sealed class EasyNetQBackplaneOptions : System.IEquatable<EasyNetQ.AspNetCore.SignalR.EasyNetQBackplaneOptions>
@@ -16,6 +17,7 @@ namespace EasyNetQ.AspNetCore.SignalR
         public ushort PrefetchCount { get; init; }
         public string Prefix { get; init; }
         public System.TimeSpan QueueExpiry { get; init; }
+        public System.TimeSpan SendTimeout { get; init; }
         public string ServerName { get; init; }
     }
     public sealed class EasyNetQHubLifetimeManager<THub> : Microsoft.AspNetCore.SignalR.HubLifetimeManager<THub>, System.IAsyncDisposable, System.IDisposable

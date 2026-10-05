@@ -496,19 +496,29 @@ public sealed class EasyNetQHubLifetimeManager<THub> : HubLifetimeManager<THub>,
         string routingKey, BackplaneMessageKind kind, ReadOnlyMemory<byte> body, bool mandatory, CancellationToken cancellationToken
     )
     {
-        var current = runtime ?? await EnsureRuntimeAsync(cancellationToken).ConfigureAwait(false);
-        var context = new PublishContext(current.ProducerChannelContext)
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        timeout.CancelAfter(options.SendTimeout);
+        try
         {
-            Exchange = names.Exchange,
-            RoutingKey = routingKey,
-            Mandatory = mandatory,
-            // the broker only reports a returned mandatory message through a publisher confirm
-            PublisherConfirms = mandatory,
-            Properties = new MessageProperties { DeliveryMode = MessageDeliveryMode.NonPersistent },
-            Body = body,
-            CancellationToken = cancellationToken,
-        };
-        await current.ProducerChannel.PublishAsync(context).ConfigureAwait(false);
+            var current = runtime ?? await EnsureRuntimeAsync(timeout.Token).ConfigureAwait(false);
+            var context = new PublishContext(current.ProducerChannelContext)
+            {
+                Exchange = names.Exchange,
+                RoutingKey = routingKey,
+                Mandatory = mandatory,
+                // the broker only reports a returned mandatory message through a publisher confirm
+                PublisherConfirms = mandatory,
+                Properties = new MessageProperties { DeliveryMode = MessageDeliveryMode.NonPersistent },
+                Body = body,
+                CancellationToken = timeout.Token,
+            };
+            await current.ProducerChannel.PublishAsync(context).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException) when (timeout.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+        {
+            BackplaneMetrics.SendTimedOut(hubName, kind);
+            throw new TimeoutException($"Backplane publish ({kind}) to '{routingKey}' did not complete within {options.SendTimeout}.");
+        }
         BackplaneMetrics.Published(hubName, kind);
     }
 

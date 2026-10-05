@@ -51,7 +51,9 @@ public sealed class TestServer : IAsyncDisposable
             services.AddEasyNetQCore();
         }, ackTimeout);
 
-    public static async Task<TestServer> StartAsync(string name, Action<IServiceCollection> addTransport, TimeSpan? ackTimeout = null)
+    public static async Task<TestServer> StartAsync(
+        string name, Action<IServiceCollection> addTransport, TimeSpan? ackTimeout = null, TimeSpan? sendTimeout = null
+    )
     {
         var builder = WebApplication.CreateSlimBuilder();
         builder.WebHost.UseKestrel().UseUrls("http://127.0.0.1:0");
@@ -60,7 +62,12 @@ public sealed class TestServer : IAsyncDisposable
             builder.Logging.AddSimpleConsole().SetMinimumLevel(LogLevel.Debug);
         addTransport(builder.Services);
         builder.Services.AddSingleton<IUserIdProvider, QueryUserIdProvider>();
-        builder.Services.AddSignalR().AddEasyNetQ(b => b.ServerName(name).AckTimeout(ackTimeout ?? TimeSpan.FromSeconds(5)));
+        builder.Services.AddSignalR().AddEasyNetQ(b =>
+        {
+            b.ServerName(name).AckTimeout(ackTimeout ?? TimeSpan.FromSeconds(5));
+            if (sendTimeout is { } timeout)
+                b.SendTimeout(timeout);
+        });
         var app = builder.Build();
         app.MapHub<ChatHub>("/chat");
         await app.StartAsync();
