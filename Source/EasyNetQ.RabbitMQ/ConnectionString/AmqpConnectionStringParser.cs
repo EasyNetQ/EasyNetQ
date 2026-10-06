@@ -45,7 +45,6 @@ public class AmqpConnectionStringParser : IConnectionStringParser
         if (uri.Segments.Length == 2) configuration.VirtualHost = Uri.UnescapeDataString(uri.Segments[1]);
 
         var query = uri.ParseQuery();
-        if (query is null) return configuration;
 
         // Query keys and value formats match the 8.x parser (note: no infinite mapping for 0/-1 here, unlike the
         // key=value parser - preserved for compatibility)

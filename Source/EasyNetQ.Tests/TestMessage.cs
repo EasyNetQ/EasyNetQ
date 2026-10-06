@@ -48,10 +48,10 @@ public interface IEmptyQueueNameAnnotatedTestMessage
 
 public class MyMessage
 {
-    public string? Text { get; set; }
+    public string Text { get; set; } = "";
 }
 
 public class MyOtherMessage
 {
-    public string? Text { get; set; }
+    public string Text { get; set; } = "";
 }

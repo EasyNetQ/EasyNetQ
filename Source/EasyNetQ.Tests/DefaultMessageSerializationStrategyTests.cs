@@ -112,6 +112,18 @@ public class DefaultMessageSerializationStrategyTests
         Assert.Equal(message.Properties.ToString(), expectedMessageProperties); //, "Deserialized message properties do not match expected value");
     }
 
+    [Fact]
+    public void When_deserializing_a_message_without_a_type_property_it_fails_with_an_EasyNetQException()
+    {
+        var serializationStrategy = new DefaultMessageSerializationStrategy(
+            new MessageTypeRegistry(new DefaultTypeNameSerializer()),
+            Adapt(new Serialization.SystemTextJson.SystemTextJsonSerializerV2()),
+            new StaticCorrelationIdGenerationStrategy("CorrelationId")
+        );
+
+        Assert.Throws<EasyNetQException>(() => serializationStrategy.DeserializeMessage(MessageProperties.Empty, ReadOnlyMemory<byte>.Empty));
+    }
+
     private static IMessageSerializer Adapt(ISerializer serializer) => new EasyNetQ.Serialization.LegacyMessageSerializerAdapter(serializer);
 
     private static DefaultMessageSerializationStrategy CreateSerializationStrategy(

@@ -2,7 +2,7 @@ namespace EasyNetQ.IntegrationTests.Utils;
 
 public class MessagesSink
 {
-    private readonly TaskCompletionSource<object> allMessagedReceived = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private readonly TaskCompletionSource allMessagedReceived = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly object locker = new();
     private readonly int maxCount;
     private readonly List<Message> receivedMessages = new();
@@ -11,7 +11,7 @@ public class MessagesSink
     {
         this.maxCount = maxCount;
         if (maxCount == 0)
-            allMessagedReceived.TrySetResult(null);
+            allMessagedReceived.TrySetResult();
     }
 
     public IReadOnlyList<Message> ReceivedMessages
@@ -27,13 +27,7 @@ public class MessagesSink
 
     public async Task WaitAllReceivedAsync(CancellationToken cancellationToken = default)
     {
-        await using (
-            cancellationToken.Register(
-                x => ((TaskCompletionSource<object>?)x)?.TrySetCanceled(),
-                allMessagedReceived,
-                false
-            )
-        )
+        await using (cancellationToken.Register(() => allMessagedReceived.TrySetCanceled()))
         {
             await allMessagedReceived.Task;
         }
@@ -48,7 +42,7 @@ public class MessagesSink
 
             receivedMessages.Add(message);
             if (receivedMessages.Count == maxCount)
-                allMessagedReceived.TrySetResult(null);
+                allMessagedReceived.TrySetResult();
         }
     }
 }

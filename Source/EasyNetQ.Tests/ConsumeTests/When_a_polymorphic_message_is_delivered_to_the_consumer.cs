@@ -55,10 +55,10 @@ public class When_a_polymorphic_message_is_delivered_to_the_consumer : IAsyncLif
 
 public interface ITestMessageInterface
 {
-    string? Text { get; set; }
+    string Text { get; set; }
 }
 
 public class Implementation : ITestMessageInterface
 {
-    public string? Text { get; set; }
+    public string Text { get; set; } = "";
 }

@@ -189,7 +189,7 @@ public class When_subscribe_with_configuration_is_called
 
         // Assert that queue got declared correctly
         await mockBuilder.Channels[1].Received().QueueDeclareAsync(
-            Arg.Is(queueName ?? "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests_x"),
+            Arg.Is(queueName),
             Arg.Is(durable),
             Arg.Is(false),
             Arg.Is(autoDelete),
@@ -205,7 +205,7 @@ public class When_subscribe_with_configuration_is_called
 
         // Assert that consumer was created correctly
         await mockBuilder.Channels[2].Received().BasicConsumeAsync(
-            Arg.Is(queueName ?? "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests_x"),
+            Arg.Is(queueName),
             Arg.Is(false),
             Arg.Any<string>(),
             Arg.Is(true),
@@ -220,7 +220,7 @@ public class When_subscribe_with_configuration_is_called
 
         // Assert that binding got configured correctly
         await mockBuilder.Channels[1].Received().QueueBindAsync(
-            Arg.Is(queueName!),
+            Arg.Is(queueName),
             Arg.Is("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
             Arg.Is(topic ?? "#"),
             Arg.Is((IDictionary<string, object?>?)null),

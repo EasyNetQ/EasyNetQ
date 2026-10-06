@@ -403,6 +403,7 @@ public sealed class TransportRpc : IRpc, IAsyncDisposable
         CancellationToken cancellationToken
     )
     {
+        var replyTo = requestProperties.ReplyTo ?? throw new EasyNetQException("RPC request has no reply_to property, so there is nowhere to send the response");
         var responseExchangeName = conventions.RpcResponseExchangeNamingConvention(typeof(TResponse));
         if (responseExchangeName.Length > 0 && currentRuntime.ProducerChannel.Topology is { } topology)
             await DeclareExchangeOnceAsync(topology, responseExchangeName, cancellationToken).ConfigureAwait(false);
@@ -439,7 +440,7 @@ public sealed class TransportRpc : IRpc, IAsyncDisposable
         try
         {
             context.Exchange = responseExchangeName;
-            context.RoutingKey = requestProperties.ReplyTo!;
+            context.RoutingKey = replyTo;
             context.Properties = properties;
             context.MessageType = registry.GetOrAdd<TResponse>();
             context.Message = failure is null ? response : null;

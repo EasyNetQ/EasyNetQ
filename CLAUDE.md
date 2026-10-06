@@ -54,6 +54,11 @@ dotnet format --verify-no-changes --severity warn Source/EasyNetQ.slnx
 - **Readonly**: Enforce `readonly` on fields where possible
 - **Naming**: PascalCase for public members, camelCase for private fields (no underscore prefix), `I` prefix for interfaces
 - **Nullable**: `<Nullable>enable</Nullable>` is on solution-wide (warnings, not errors); no Fody/NullGuard
+- **Nullability is a contract, not a warning fix**: a member is `?` only when `null` is a valid state (optional value
+  absent, field not yet set, "no result"). Decide per instance; if it is never null, keep it non-nullable and fix the
+  cause instead: assign in the constructor, default to an empty value, `[MemberNotNullWhen]`/`[NotNullWhen]`, or throw on
+  invalid input (e.g. a wire message missing a required property). No `!`, `#pragma` or `<NoWarn>` to silence nullable
+  warnings, unless the compiler cannot see an invariant that does hold. Tests included.
 - **XML docs**: Generated for all public APIs (`GenerateDocumentationFile=true`)
 
 ## Architecture

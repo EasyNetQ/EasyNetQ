@@ -7,18 +7,21 @@ namespace EasyNetQ.Tests.ProducerTests;
 
 public class When_a_request_is_sent : IAsyncLifetime
 {
-    private MockBuilder? mockBuilder;
+    private readonly string correlationId = Guid.NewGuid().ToString();
+    private readonly MockBuilder mockBuilder;
     private TestResponseMessage? responseMessage;
 
-    public async ValueTask InitializeAsync()
+    public When_a_request_is_sent()
     {
-        var correlationId = Guid.NewGuid().ToString();
         mockBuilder = new MockBuilder(
             c => c.AddSingleton<ICorrelationIdGenerationStrategy>(
                 _ => new StaticCorrelationIdGenerationStrategy(correlationId)
             )
         );
+    }
 
+    public async ValueTask InitializeAsync()
+    {
         using var waiter = new CountdownEvent(2);
 
 #pragma warning disable IDISP004
@@ -37,7 +40,7 @@ public class When_a_request_is_sent : IAsyncLifetime
 
     public async ValueTask DisposeAsync()
     {
-        await mockBuilder!.DisposeAsync();
+        await mockBuilder.DisposeAsync();
     }
 
     private async Task DeliverMessageAsync(string correlationId)
@@ -49,7 +52,7 @@ public class When_a_request_is_sent : IAsyncLifetime
         };
         var body = "{ Id:12, Text:\"Hello World\"}"u8.ToArray();
 
-        await mockBuilder!.Consumers[0].HandleBasicDeliverAsync(
+        await mockBuilder.Consumers[0].HandleBasicDeliverAsync(
             "consumer_tag",
             0,
             false,
@@ -63,7 +66,7 @@ public class When_a_request_is_sent : IAsyncLifetime
     [Fact]
     public async Task Should_declare_the_publish_exchange()
     {
-        await mockBuilder!.Channels[1].Received().ExchangeDeclareAsync(
+        await mockBuilder.Channels[1].Received().ExchangeDeclareAsync(
             Arg.Is("easy_net_q_rpc"),
             Arg.Is(ExchangeType.Direct),
             Arg.Is(true),
@@ -76,7 +79,7 @@ public class When_a_request_is_sent : IAsyncLifetime
     [Fact]
     public async Task Should_declare_the_response_queue()
     {
-        await mockBuilder!.Channels[0].Received().QueueDeclareAsync(
+        await mockBuilder.Channels[0].Received().QueueDeclareAsync(
             Arg.Is<string>(arg => arg.StartsWith("easynetq.response.")),
             Arg.Is(false),
             Arg.Is(true),
@@ -90,7 +93,7 @@ public class When_a_request_is_sent : IAsyncLifetime
     [Fact]
     public async Task Should_publish_request_message()
     {
-        await mockBuilder!.Channels[3].Received().BasicPublishAsync(
+        await mockBuilder.Channels[3].Received().BasicPublishAsync(
             Arg.Is("easy_net_q_rpc"),
             Arg.Is("EasyNetQ.Tests.TestRequestMessage, EasyNetQ.Tests"),
             Arg.Is(false),

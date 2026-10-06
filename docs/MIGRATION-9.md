@@ -240,9 +240,11 @@ with `<Nullable>enable</Nullable>` see new warnings where they dereference these
 
 - `MessageProperties`: the string properties and `Headers`.
 - Topology `arguments` (`Queue`, `Exchange`, `Binding` and the `IAdvancedBus` declare methods) and `.Arguments`.
-- Optional parameters defaulting to `null` (`ExchangeAttribute`, `QueueAttribute`, `AdvancedBusEventHandlers`,
-  `CreateChannelAsync(options)`), unset `ConnectionConfiguration` properties and events, and members that can return
-  `null` (`IMessage.GetBody()`, `QueueTypeConvention`, `ErrorQueueTypeConvention`).
+- Optional parameters defaulting to `null` (the `exchangeType`/`type` of `ExchangeAttribute`/`QueueAttribute`,
+  `AdvancedBusEventHandlers`, `CreateChannelAsync(options)`), unset `ConnectionConfiguration` properties and events,
+  and members that can return `null` (`IMessage.GetBody()`, `QueueTypeConvention`, `ErrorQueueTypeConvention`).
+- `ExchangeAttribute.Name`/`QueueAttribute.Name` are `null` only when set through the parameterless constructor (the
+  convention picks the name); the `name` constructor parameter itself is non-nullable.
 - `AsyncQueue<T>.TryDequeue` carries `[MaybeNullWhen(false)]`.
 
 ### Serializers

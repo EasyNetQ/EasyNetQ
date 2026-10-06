@@ -145,12 +145,12 @@ public class SerializerTests
 
     private sealed class PolyMessage
     {
-        public A? AorB { get; set; }
+        public required A AorB { get; set; }
     }
 
     private sealed class Message
     {
-        public string? Text { get; set; }
+        public string Text { get; set; } = "";
     }
 }
 

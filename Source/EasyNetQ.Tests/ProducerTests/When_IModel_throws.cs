@@ -12,7 +12,7 @@ public class When_IModel_throws_because_of_closed_connection : IAsyncLifetime
         mockBuilder = new MockBuilder("host=localhost;timeout=1");
 
         mockBuilder.NextModel
-            .WhenForAnyArgs(x => x.ExchangeDeclareAsync(null, null, false, false, null))
+            .WhenForAnyArgs(x => x.ExchangeDeclareAsync(Arg.Any<string>(), Arg.Any<string>(), false, false, null))
             .Do(_ =>
             {
                 var args = new ShutdownEventArgs(ShutdownInitiator.Peer, 320,

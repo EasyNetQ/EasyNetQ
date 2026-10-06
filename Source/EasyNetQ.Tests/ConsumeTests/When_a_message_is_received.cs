@@ -5,7 +5,7 @@ namespace EasyNetQ.Tests.ConsumeTests;
 
 public class When_a_message_is_received : IAsyncLifetime
 {
-    private readonly MockBuilder? mockBuilder;
+    private readonly MockBuilder mockBuilder;
     private MyMessage? deliveredMyMessage;
     private MyOtherMessage? deliveredMyOtherMessage;
 
@@ -17,7 +17,7 @@ public class When_a_message_is_received : IAsyncLifetime
     public async ValueTask InitializeAsync()
     {
 #pragma warning disable IDISP004
-        await mockBuilder!.SendReceive.ReceiveAsync("the_queue", x => x
+        await mockBuilder.SendReceive.ReceiveAsync("the_queue", x => x
 #pragma warning restore IDISP004
             .Add<MyMessage>(message => deliveredMyMessage = message)
             .Add<MyOtherMessage>(message => deliveredMyOtherMessage = message));
@@ -29,7 +29,7 @@ public class When_a_message_is_received : IAsyncLifetime
 
     public async ValueTask DisposeAsync()
     {
-        await mockBuilder!.DisposeAsync();
+        await mockBuilder.DisposeAsync();
     }
 
     [Fact]
@@ -55,7 +55,7 @@ public class When_a_message_is_received : IAsyncLifetime
         };
         var body = Encoding.UTF8.GetBytes(message);
 
-        await mockBuilder!.Consumers[0].HandleBasicDeliverAsync(
+        await mockBuilder.Consumers[0].HandleBasicDeliverAsync(
             "consumer tag",
             0,
             false,

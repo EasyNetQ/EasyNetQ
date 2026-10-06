@@ -65,7 +65,7 @@ public sealed class MockBuilder : IAsyncDisposable
                     consumers.Add(consumer);
                     return string.Empty;
                 });
-            channel.QueueDeclareAsync(null, true, false, false, null, default)
+            channel.QueueDeclareAsync(Arg.Any<string>(), true, false, false, null, default)
                 .ReturnsForAnyArgs(async queueDeclareInvocation =>
                {
                    var queueName = (string)queueDeclareInvocation[0];

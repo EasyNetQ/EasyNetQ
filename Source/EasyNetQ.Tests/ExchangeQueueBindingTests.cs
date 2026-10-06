@@ -427,13 +427,13 @@ public class When_a_queue_is_bound_to_an_exchange_with_headers : IAsyncLifetime
     [Fact]
     public async Task Should_declare_a_binding()
     {
-        var expectedHeaders = new Dictionary<string, object> { ["header1"] = "value1" };
+        var expectedHeaders = new Dictionary<string, object?> { ["header1"] = "value1" };
 
         await mockBuilder.Channels[0].Received().QueueBindAsync(
             Arg.Is("my_queue"),
             Arg.Is("my_exchange"),
             Arg.Is("my_routing_key"),
-            Arg.Is<Dictionary<string, object?>>(x => x!.SequenceEqual(expectedHeaders)),
+            Arg.Is<Dictionary<string, object?>>(x => x.SequenceEqual(expectedHeaders)),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()
         );
