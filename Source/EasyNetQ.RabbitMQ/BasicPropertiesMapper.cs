@@ -31,7 +31,7 @@ public static class BasicPropertiesMapper
         UserId = basicProperties.UserId,
         AppId = basicProperties.AppId,
         ClusterId = basicProperties.ClusterId,
-        Headers = basicProperties.Headers.FromAmqpTable()
+        Headers = basicProperties.Headers
     };
 
     /// <summary>
@@ -57,7 +57,7 @@ public static class BasicPropertiesMapper
         if (source.ClusterIdPresent) basicProperties.ClusterId = source.ClusterId;
 
         if (source is { HeadersPresent: true, Headers: not null })
-            basicProperties.Headers = source.Headers.ToAmqpTable();
+            basicProperties.Headers = source.Headers;
     }
 
 }

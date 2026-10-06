@@ -109,8 +109,8 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         var publishChannelContext = new ChannelContext(producerConnectionContext);
         producerChannel = producerTransportConnection.OpenChannelAsync(publishChannelContext).AsTask().GetAwaiter().GetResult();
         consumerChannel = consumerTransportConnection.OpenChannelAsync(new ChannelContext(consumerConnectionContext)).AsTask().GetAwaiter().GetResult();
-        producerTopology = producerChannel.Topology!;
-        consumerTopology = consumerChannel.Topology!;
+        producerTopology = producerChannel.Topology ?? throw new InvalidOperationException("The producer channel has no topology");
+        consumerTopology = consumerChannel.Topology ?? throw new InvalidOperationException("The consumer channel has no topology");
 
         publishContextPool = new ContextPool<PublishContext>(() => new PublishContext(publishChannelContext));
         publishPipeline = publishPipelineBuilder.Build(services, PublishInternalAsync);
@@ -227,7 +227,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
     }
 
     private static async ValueTask DispatchTerminal(ConsumeContext context)
-        => context.Ack = await context.Handler!.InvokeAsync(context).ConfigureAwait(false);
+        => context.Ack = await context.RequireHandler().InvokeAsync(context).ConfigureAwait(false);
 
     private PipelineStep<ConsumeContext> LegacyTypedHandlerTerminal(IHandlerCollection handlers)
         => async context =>

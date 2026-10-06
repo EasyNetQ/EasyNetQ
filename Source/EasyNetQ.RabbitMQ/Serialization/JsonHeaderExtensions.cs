@@ -22,7 +22,7 @@ internal static class JsonHeaderExtensions
         return headers;
     }
 
-    public static void AddHeaderToJson(this JsonObject json, string name, object value, JsonSerializerOptions options)
+    public static void AddHeaderToJson(this JsonObject json, string name, object? value, JsonSerializerOptions options)
     {
         var (valueType, valueJson) = value.ConvertToTypeAndJson(options);
         var valueContainer = new JsonObject

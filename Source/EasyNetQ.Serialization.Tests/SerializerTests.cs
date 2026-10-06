@@ -18,7 +18,7 @@ public class SerializerTests
         var message = new Message { Text = "Hello World" };
 
         using var serializedMessage = serializer.MessageToBytes(typeof(Message), message);
-        var deserializedMessage = (Message)serializer.BytesToMessage(typeof(Message), serializedMessage.Memory);
+        var deserializedMessage = Assert.IsType<Message>(serializer.BytesToMessage(typeof(Message), serializedMessage.Memory));
 
         message.Text.Should().Be(deserializedMessage.Text);
     }
@@ -51,9 +51,9 @@ public class SerializerTests
 
         var messageBasicProperties = BasicPropertiesMapper.FromBasicProperties(originalProperties);
         using var serializedMessage = serializer.MessageToBytes(typeof(MessageProperties), messageBasicProperties);
-        var deserializedMessageBasicProperties = (MessageProperties)serializer.BytesToMessage(
+        var deserializedMessageBasicProperties = Assert.IsType<MessageProperties>(serializer.BytesToMessage(
             typeof(MessageProperties), serializedMessage.Memory
-        );
+        ));
 
         var newProperties = new BasicProperties();
         deserializedMessageBasicProperties.CopyTo(newProperties);
@@ -107,9 +107,9 @@ public class SerializerTests
         var messageBasicProperties = BasicPropertiesMapper.FromBasicProperties(originalProperties);
         using var serializedMessage = serializer.MessageToBytes(typeof(MessageProperties), messageBasicProperties);
 
-        var deserializedMessageBasicProperties = (MessageProperties)serializer.BytesToMessage(
+        var deserializedMessageBasicProperties = Assert.IsType<MessageProperties>(serializer.BytesToMessage(
             typeof(MessageProperties), serializedMessage.Memory
-        );
+        ));
 
         var newProperties = new BasicProperties();
         deserializedMessageBasicProperties.CopyTo(newProperties);
@@ -123,7 +123,7 @@ public class SerializerTests
     public void Should_be_able_to_serialize_and_deserialize_polymorphic_properties(string name, ISerializer serializer)
     {
         using var serializedMessage = serializer.MessageToBytes(typeof(PolyMessage), new PolyMessage { AorB = new B() });
-        var result = (PolyMessage)serializer.BytesToMessage(typeof(PolyMessage), serializedMessage.Memory);
+        var result = Assert.IsType<PolyMessage>(serializer.BytesToMessage(typeof(PolyMessage), serializedMessage.Memory));
         Assert.IsType<B>(result.AorB);
     }
 

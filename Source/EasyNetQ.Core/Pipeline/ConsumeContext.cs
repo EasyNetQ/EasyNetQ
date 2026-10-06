@@ -65,6 +65,18 @@ public class ConsumeContext : LayerContext
     /// </summary>
     public object? Message { get; set; }
 
+    internal HandlerTable RequireHandlers()
+        => Consumer.Handlers ?? throw new InvalidOperationException("The consumer has no handler table");
+
+    internal MessageTypeDescriptor RequireMessageType()
+        => MessageType ?? throw new InvalidOperationException($"MessageType is not set; {nameof(Middleware.ResolveMessageTypeStep)} must run first");
+
+    internal HandlerEntry RequireHandler()
+        => Handler ?? throw new InvalidOperationException($"Handler is not set; {nameof(Middleware.ResolveHandlerStep)} must run first");
+
+    internal IMessageSerializer RequireSerializer()
+        => Serializer ?? throw new InvalidOperationException($"Serializer is not set; {nameof(Middleware.SelectSerializerStep)} must run first");
+
     /// <summary>
     ///     The acknowledgement the transport applies once the pipeline completes. Defaults to <see cref="AckDecision.Ack" />;
     ///     handlers and error handling set it to something else.

@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace EasyNetQ;
 
 /// <summary>
@@ -30,13 +32,13 @@ public interface IMessageTypeRegistry
     /// <summary>
     ///     Looks up a descriptor by wire type name; only names seen before (registered or resolved) match
     /// </summary>
-    bool TryGetByWireName(string wireName, out MessageTypeDescriptor descriptor);
+    bool TryGetByWireName(string wireName, [MaybeNullWhen(false)] out MessageTypeDescriptor descriptor);
 
     /// <summary>
     ///     Looks up a descriptor by wire type name, falling back to the configured <see cref="ITypeNameSerializer" />
     ///     for names not seen before; false when neither resolves the name (no exception)
     /// </summary>
-    bool TryResolveWireName(string wireName, out MessageTypeDescriptor descriptor);
+    bool TryResolveWireName(string wireName, [MaybeNullWhen(false)] out MessageTypeDescriptor descriptor);
 
     /// <summary>
     ///     Gets the descriptor for a wire type name, resolving unknown names through the configured

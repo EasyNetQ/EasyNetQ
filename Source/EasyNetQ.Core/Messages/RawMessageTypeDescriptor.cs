@@ -25,7 +25,7 @@ internal sealed class RawMessageTypeDescriptor : MessageTypeDescriptor
     internal override Task PublishViaAsync(IPubSub pubSub, object message, Action<IPublishConfiguration> configure, CancellationToken cancellationToken)
         => throw new NotSupportedException("Unknown messages are consume-only");
 
-    internal override Task<SubscriptionResult> SubscribeViaAsync(IPubSub pubSub, string subscriptionId, Func<object, Type, CancellationToken, Task> onMessage, Action<ISubscriptionConfiguration> configure, CancellationToken cancellationToken)
+    internal override Task<SubscriptionResult> SubscribeViaAsync(IPubSub pubSub, string subscriptionId, Func<object?, Type, CancellationToken, Task> onMessage, Action<ISubscriptionConfiguration> configure, CancellationToken cancellationToken)
         => throw new NotSupportedException("Unknown messages are consume-only");
 
     internal override Task SendViaAsync(ISendReceive sendReceive, string queue, object message, Action<ISendConfiguration> configure, CancellationToken cancellationToken)

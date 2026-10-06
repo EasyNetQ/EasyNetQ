@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using EasyNetQ.Interception;
 using EasyNetQ.Internals;
 using EasyNetQ.Persistent;
@@ -180,6 +181,7 @@ public readonly struct PullResult<T> : IPullResult
     /// <summary>
     ///     <see langword="true"/> if a message is available
     /// </summary>
+    [MemberNotNullWhen(true, nameof(message))]
     public bool IsAvailable { get; }
 
     /// <summary>
@@ -223,7 +225,7 @@ public readonly struct PullResult<T> : IPullResult
             if (!IsAvailable)
                 throw new InvalidOperationException("No message is available");
 
-            return message!;
+            return message;
         }
     }
 }

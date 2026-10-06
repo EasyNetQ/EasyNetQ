@@ -12,7 +12,7 @@ namespace EasyNetQ.Serialization.NewtonsoftJson
     {
         public NewtonsoftJsonSerializer() { }
         public NewtonsoftJsonSerializer(Newtonsoft.Json.JsonSerializerSettings settings) { }
-        public object BytesToMessage(System.Type messageType, in System.ReadOnlyMemory<byte> bytes) { }
+        public object? BytesToMessage(System.Type messageType, in System.ReadOnlyMemory<byte> bytes) { }
         public System.Buffers.IMemoryOwner<byte> MessageToBytes(System.Type messageType, object message) { }
     }
 }

@@ -16,7 +16,7 @@ public class MessageTypeAttributeRegistryTests
         // then the declaring assembly's module registers the attribute values: no conflict
         var act = () => registry.Register<Recheck>("tests.recheck.v1", ["Old.Recheck"]);
         act.Should().NotThrow();
-        registry.TryGetByWireName("Old.Recheck", out var byAlias).Should().BeTrue();
+        Assert.True(registry.TryGetByWireName("Old.Recheck", out var byAlias));
         byAlias.Type.Should().Be(typeof(Recheck));
     }
 

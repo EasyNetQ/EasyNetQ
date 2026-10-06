@@ -153,7 +153,7 @@ public class PersistentConnection : IPersistentConnection
     private async Task OnConnectionRecovered(object sender, AsyncEventArgs e)
     {
         status = status.ToConnected();
-        var connection = (IConnection)sender!;
+        var connection = (IConnection)sender;
         logger.ConnectionRecovered(type, connection.Endpoint.HostName, connection.Endpoint.Port);
         await eventBus.PublishAsync(new ConnectionRecoveredEvent(type, connection.Endpoint));
         await eventBus.PublishAsync(new ConnectionRestoredEvent(type));
@@ -174,7 +174,7 @@ public class PersistentConnection : IPersistentConnection
     private async Task OnConnectionShutdown(object sender, ShutdownEventArgs e)
     {
         status = status.ToDisconnected(e.ToString());
-        var connection = (IConnection)sender!;
+        var connection = (IConnection)sender;
         if (e.Initiator == ShutdownInitiator.Application)
             logger.ConnectionClosed(type, connection.Endpoint.HostName, connection.Endpoint.Port);
         else

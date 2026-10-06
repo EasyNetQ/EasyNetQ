@@ -37,8 +37,8 @@ public sealed class SystemTextJsonSerializer : ISerializer
 
     [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = Compat.Annotated)]
     [UnconditionalSuppressMessage("AOT", "IL3050", Justification = Compat.Annotated)]
-    public object BytesToMessage(Type messageType, in ReadOnlyMemory<byte> bytes)
+    public object? BytesToMessage(Type messageType, in ReadOnlyMemory<byte> bytes)
     {
-        return System.Text.Json.JsonSerializer.Deserialize(bytes.Span, messageType, deserializeOptions)!;
+        return System.Text.Json.JsonSerializer.Deserialize(bytes.Span, messageType, deserializeOptions);
     }
 }

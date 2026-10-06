@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Collections.Concurrent;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Protocol;
@@ -40,11 +41,11 @@ internal sealed class ClientResults : IInvocationBinder
     /// <summary>Completes an invocation this server awaits; only the connection it was sent to may answer</summary>
     public bool TryComplete(string? connectionId, CompletionMessage completion)
     {
-        if (!pending.TryGetValue(completion.InvocationId!, out var result))
+        if (completion.InvocationId is not { } invocationId || !pending.TryGetValue(invocationId, out var result))
             return false;
         if (connectionId is not null && result.ConnectionId != connectionId)
             return false;
-        if (!pending.TryRemove(completion.InvocationId!, out result))
+        if (!pending.TryRemove(invocationId, out result))
             return false;
         result.Complete(completion);
         return true;
@@ -52,11 +53,11 @@ internal sealed class ClientResults : IInvocationBinder
 
     public void AddForwarded(string invocationId, ForwardedInvocation invocation) => forwarded[invocationId] = invocation;
 
-    public bool TryTakeForwarded(string connectionId, string invocationId, out ForwardedInvocation invocation)
+    public bool TryTakeForwarded(string connectionId, string invocationId, [MaybeNullWhen(false)] out ForwardedInvocation invocation)
     {
-        if (forwarded.TryGetValue(invocationId, out invocation!) && invocation.ConnectionId == connectionId)
-            return forwarded.TryRemove(invocationId, out invocation!);
-        invocation = default!;
+        if (forwarded.TryGetValue(invocationId, out invocation) && invocation.ConnectionId == connectionId)
+            return forwarded.TryRemove(invocationId, out invocation);
+        invocation = default;
         return false;
     }
 

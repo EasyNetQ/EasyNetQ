@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace EasyNetQ.Pipeline;
 
 /// <summary>
@@ -43,7 +45,7 @@ public abstract class LayerContext : IProperties
     /// </summary>
     public IServiceProvider Services
     {
-        get => services ?? parent!.Services;
+        get => services ?? parent?.Services ?? throw new InvalidOperationException("No service provider is set on this context or its parents");
         set => services = value;
     }
 
@@ -53,18 +55,18 @@ public abstract class LayerContext : IProperties
     public bool IsDetached => detached;
 
     /// <inheritdoc />
-    public bool TryGet<T>(PropertyKey<T> key, out T value)
+    public bool TryGet<T>(PropertyKey<T> key, [MaybeNullWhen(false)] out T value)
     {
         if (bag.TryGet(key, out value)) return true;
         if (parent is not null) return parent.TryGet(key, out value);
-        value = default!;
+        value = default;
         return false;
     }
 
     /// <summary>
     ///     Gets a value stored on this layer only, ignoring parents
     /// </summary>
-    public bool TryGetLocal<T>(PropertyKey<T> key, out T value) => bag.TryGet(key, out value);
+    public bool TryGetLocal<T>(PropertyKey<T> key, [MaybeNullWhen(false)] out T value) => bag.TryGet(key, out value);
 
     /// <inheritdoc />
     public void Set<T>(PropertyKey<T> key, T value) => bag.Set(key, value);

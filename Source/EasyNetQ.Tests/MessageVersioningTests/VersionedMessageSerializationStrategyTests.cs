@@ -168,7 +168,7 @@ public class VersionedMessageSerializationStrategyTests
                 Type = messageType,
                 CorrelationId = correlationId,
                 UserId = "Bob",
-                Headers = new Dictionary<string, object>
+                Headers = new Dictionary<string, object?>
                 {
                     { "Alternative-Message-Types", Encoding.UTF8.GetBytes(supersededMessageType) }
                 }
@@ -224,7 +224,7 @@ public class VersionedMessageSerializationStrategyTests
         // Mess with the properties to mimic a message serialized as MyMessageV3
         var messageType = serializedMessage.Properties.Type;
         var properties = serializedMessage.Properties with { Type = messageType?.Replace("MyMessageV2", "SomeCompletelyRandomType") };
-        var alternativeMessageHeader = Encoding.UTF8.GetString((byte[])serializedMessage.Properties.Headers![AlternativeMessageTypesHeaderKey]);
+        var alternativeMessageHeader = Encoding.UTF8.GetString(Assert.IsType<byte[]>(serializedMessage.Properties.Headers?[AlternativeMessageTypesHeaderKey]));
         alternativeMessageHeader = string.Concat(messageType, ";", alternativeMessageHeader);
         properties = properties.SetHeader(AlternativeMessageTypesHeaderKey, Encoding.UTF8.GetBytes(alternativeMessageHeader));
 
@@ -264,7 +264,7 @@ public class VersionedMessageSerializationStrategyTests
     )
     {
         AssertDefaultMessagePropertiesCorrect(properties, expectedType, expectedCorrelationId);
-        Assert.Equal(Encoding.UTF8.GetString((byte[])properties.Headers![AlternativeMessageTypesHeaderKey]), alternativeTypes);
+        Assert.Equal(Encoding.UTF8.GetString(Assert.IsType<byte[]>(properties.Headers?[AlternativeMessageTypesHeaderKey])), alternativeTypes);
     }
 
     private static IMessageSerializer Adapt(ISerializer serializer) => new EasyNetQ.Serialization.LegacyMessageSerializerAdapter(serializer);

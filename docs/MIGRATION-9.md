@@ -238,14 +238,18 @@ These only matter if you construct them yourself (tests, fakes, custom registrat
 The public API now says where `null` is possible; nothing was renamed or removed, so code compiles, but projects
 with `<Nullable>enable</Nullable>` see new warnings where they dereference these without a check:
 
-- `MessageProperties`: the string properties and `Headers`.
+- `MessageProperties`: the string properties and `Headers`, whose values are `object?` (AMQP allows void field
+  values); `HeadersPresent` guarantees `Headers` is non-null.
+- `ISerializer.BytesToMessage` returns `object?` (a JSON `null` body, which 8.x publishers send for a null message), and
+  the non-generic `RequestAsync`/`SubscribeAsync` pass `object?` (a responder or publisher may send null).
 - Topology `arguments` (`Queue`, `Exchange`, `Binding` and the `IAdvancedBus` declare methods) and `.Arguments`.
 - Optional parameters defaulting to `null` (the `exchangeType`/`type` of `ExchangeAttribute`/`QueueAttribute`,
   `AdvancedBusEventHandlers`, `CreateChannelAsync(options)`), unset `ConnectionConfiguration` properties and events,
   and members that can return `null` (`IMessage.GetBody()`, `QueueTypeConvention`, `ErrorQueueTypeConvention`).
 - `ExchangeAttribute.Name`/`QueueAttribute.Name` are `null` only when set through the parameterless constructor (the
   convention picks the name); the `name` constructor parameter itself is non-nullable.
-- `AsyncQueue<T>.TryDequeue` carries `[MaybeNullWhen(false)]`.
+- `Try*` methods (`AsyncQueue<T>.TryDequeue`, `IMessageTypeRegistry.TryGetByWireName`/`TryResolveWireName`, property bag
+  `TryGet`) carry `[MaybeNullWhen(false)]`.
 
 ### Serializers
 

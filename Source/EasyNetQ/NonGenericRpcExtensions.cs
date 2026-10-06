@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace EasyNetQ;
 
-using NonGenericRequestDelegate = Func<IRpc, object, Action<IRequestConfiguration>, CancellationToken, Task<object>>;
+using NonGenericRequestDelegate = Func<IRpc, object, Action<IRequestConfiguration>, CancellationToken, Task<object?>>;
 
 /// <summary>
 ///     Various non-generic extensions for <see cref="IRpc"/>
@@ -23,7 +23,7 @@ public static class NonGenericRpcExtensions
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>The response</returns>
     [RequiresDynamicCode(NonGenericBridge.RequiresDynamicCodeMessage)]
-    public static Task<object> RequestAsync(
+    public static Task<object?> RequestAsync(
         this IRpc rpc,
         object request,
         Type requestType,
@@ -44,7 +44,7 @@ public static class NonGenericRpcExtensions
     /// <param name="cancellationToken">The cancellation token</param>
     /// <returns>The response</returns>
     [RequiresDynamicCode(NonGenericBridge.RequiresDynamicCodeMessage)]
-    public static Task<object> RequestAsync(
+    public static Task<object?> RequestAsync(
         this IRpc rpc,
         object request,
         Type requestType,
@@ -65,7 +65,7 @@ public static class NonGenericRpcExtensions
         return requestDelegate(rpc, request, configure, cancellationToken);
     }
 
-    private static async Task<object> RequestBridgeAsync<TRequest, TResponse>(
+    private static async Task<object?> RequestBridgeAsync<TRequest, TResponse>(
         IRpc rpc, object request, Action<IRequestConfiguration> configure, CancellationToken cancellationToken
-    ) => (await rpc.RequestAsync<TRequest, TResponse>((TRequest)request, configure, cancellationToken).ConfigureAwait(false))!;
+    ) => (await rpc.RequestAsync<TRequest, TResponse>((TRequest)request, configure, cancellationToken).ConfigureAwait(false));
 }

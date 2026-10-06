@@ -169,14 +169,14 @@ public sealed class ConsumerHostedService : IHostedService, IAsyncDisposable
     private async Task<ITransportChannel> OpenChannelAsync(CancellationToken cancellationToken)
     {
         // one connection for the host's lifetime: a retry after a failed channel open reuses it
-        if (connection is null)
+        if (connection is null || channelContext is null)
         {
             var connectionContext = new ConnectionContext("Consumers", services);
             connectionContext.Set(Keys.ConnectionType, PersistentConnectionType.Consumer);
             connection = await transport.ConnectAsync(connectionContext, cancellationToken).ConfigureAwait(false);
             channelContext = new ChannelContext(connectionContext);
         }
-        return await connection.OpenChannelAsync(channelContext!, cancellationToken).ConfigureAwait(false);
+        return await connection.OpenChannelAsync(channelContext, cancellationToken).ConfigureAwait(false);
     }
 
     private async Task<ITransportConsumer> StartConsumerAsync(ITransportChannel transportChannel, ConsumerDefinition definition, CancellationToken cancellationToken)
@@ -203,7 +203,7 @@ public sealed class ConsumerHostedService : IHostedService, IAsyncDisposable
         foreach (var registration in definition.HandlerRegistrations)
             registration(services, handlers);
 
-        var consumerContext = new ConsumerContext(channelContext!, queueName)
+        var consumerContext = new ConsumerContext(channelContext ?? throw new InvalidOperationException("The consumer channel is not open"), queueName)
         {
             PrefetchCount = definition.PrefetchCount ?? busOptions.PrefetchCount,
             AutoAck = definition.AutoAck,
@@ -234,5 +234,5 @@ public sealed class ConsumerHostedService : IHostedService, IAsyncDisposable
     }
 
     private static async ValueTask DispatchTerminal(ConsumeContext context)
-        => context.Ack = await context.Handler!.InvokeAsync(context).ConfigureAwait(false);
+        => context.Ack = await context.RequireHandler().InvokeAsync(context).ConfigureAwait(false);
 }

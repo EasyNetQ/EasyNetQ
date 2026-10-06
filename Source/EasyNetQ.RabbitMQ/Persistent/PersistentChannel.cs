@@ -218,7 +218,7 @@ public sealed class PersistentChannel : IPersistentChannel
         var messageProperties = BasicPropertiesMapper.FromBasicProperties(args.BasicProperties);
         var messageReturnedInfo = new MessageReturnedInfo(args.Exchange, args.RoutingKey, args.ReplyText);
         var messageEvent = new ReturnedMessageEvent(
-            (IChannel)sender!,
+            (IChannel)sender,
             args.Body,
             messageProperties,
             messageReturnedInfo

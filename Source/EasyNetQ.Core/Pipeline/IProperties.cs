@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace EasyNetQ.Pipeline;
 
 /// <summary>
@@ -9,7 +11,7 @@ public interface IReadOnlyProperties
     /// <summary>
     ///     Gets the value stored for <paramref name="key" />, searching this layer first and then its parents
     /// </summary>
-    bool TryGet<T>(PropertyKey<T> key, out T value);
+    bool TryGet<T>(PropertyKey<T> key, [MaybeNullWhen(false)] out T value);
 }
 
 /// <summary>
@@ -42,7 +44,8 @@ public static class PropertiesExtensions
     /// <summary>
     ///     Gets the value for <paramref name="key" /> or <paramref name="fallback" /> when it is not set
     /// </summary>
-    public static T GetOrDefault<T>(this IReadOnlyProperties properties, PropertyKey<T> key, T fallback = default!)
+    [return: NotNullIfNotNull(nameof(fallback))]
+    public static T? GetOrDefault<T>(this IReadOnlyProperties properties, PropertyKey<T> key, T? fallback = default)
         => properties.TryGet(key, out var value) ? value : fallback;
 
     /// <summary>

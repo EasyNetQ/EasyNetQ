@@ -666,10 +666,10 @@ public sealed class EasyNetQHubLifetimeManager<THub> : HubLifetimeManager<THub>,
             case InvocationTarget.All:
                 await WriteAsync(connections, message, invocation.ExcludedConnectionIds).ConfigureAwait(false);
                 break;
-            case InvocationTarget.Group when groups.TryGetValue(invocation.TargetName!, out var group):
+            case InvocationTarget.Group when invocation.TargetName is { } groupName && groups.TryGetValue(groupName, out var group):
                 await WriteAsync(group, message, invocation.ExcludedConnectionIds).ConfigureAwait(false);
                 break;
-            case InvocationTarget.User when users.TryGetValue(invocation.TargetName!, out var user):
+            case InvocationTarget.User when invocation.TargetName is { } userName && users.TryGetValue(userName, out var user):
                 await WriteAsync(user, message, invocation.ExcludedConnectionIds).ConfigureAwait(false);
                 break;
             case InvocationTarget.Connection when connections[invocation.TargetName!] is { } connection:
