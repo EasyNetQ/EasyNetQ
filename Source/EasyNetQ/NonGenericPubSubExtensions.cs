@@ -88,7 +88,7 @@ public static class NonGenericPubSubExtensions
         this IPubSub pubSub,
         string subscriptionId,
         Type messageType,
-        Func<object, Type, CancellationToken, Task> onMessage,
+        Func<object?, Type, CancellationToken, Task> onMessage,
         Action<ISubscriptionConfiguration> configure,
         CancellationToken cancellationToken = default
     ) => NonGenericBridge.Get(messageType).SubscribeViaAsync(pubSub, subscriptionId, onMessage, configure, cancellationToken);

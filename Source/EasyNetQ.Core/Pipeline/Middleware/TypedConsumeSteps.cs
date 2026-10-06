@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace EasyNetQ.Pipeline.Middleware;
 
 /// <summary>
@@ -12,7 +14,7 @@ public sealed class ResolveMessageTypeStep : IMiddleware<ConsumeContext>
     /// <inheritdoc />
     public ValueTask InvokeAsync(ConsumeContext context, PipelineStep<ConsumeContext> next)
     {
-        var handlers = context.Consumer.Handlers!;
+        var handlers = context.RequireHandlers();
         var properties = context.Properties;
         context.MessageType = properties.HeadersPresent && TryResolveVersioned(handlers, properties, out var versioned)
             ? versioned
@@ -21,12 +23,12 @@ public sealed class ResolveMessageTypeStep : IMiddleware<ConsumeContext>
     }
 
     // a newer version this consumer cannot load falls back to the first alternative it can, as 8.x did
-    private static bool TryResolveVersioned(HandlerTable handlers, in MessageProperties properties, out MessageTypeDescriptor descriptor)
+    private static bool TryResolveVersioned(HandlerTable handlers, in MessageProperties properties, [MaybeNullWhen(false)] out MessageTypeDescriptor descriptor)
     {
-        descriptor = null!;
+        descriptor = null;
         if (properties.Headers?.TryGetValue(AlternativeMessageTypesHeader, out var header) != true || header is not byte[] alternatives)
             return false;
-        if (!string.IsNullOrEmpty(properties.Type) && handlers.TryResolveDescriptor(properties.Type!, out descriptor))
+        if (properties.Type is { Length: > 0 } type && handlers.TryResolveDescriptor(type, out descriptor))
             return true;
         foreach (var alternative in System.Text.Encoding.UTF8.GetString(alternatives).Split([';'], StringSplitOptions.RemoveEmptyEntries))
             if (handlers.TryResolveDescriptor(alternative, out descriptor))
@@ -43,7 +45,7 @@ public sealed class ResolveHandlerStep : IMiddleware<ConsumeContext>
     /// <inheritdoc />
     public ValueTask InvokeAsync(ConsumeContext context, PipelineStep<ConsumeContext> next)
     {
-        context.Handler = context.Consumer.Handlers!.Resolve(context.MessageType!);
+        context.Handler = context.RequireHandlers().Resolve(context.RequireMessageType());
         return next(context);
     }
 }
@@ -84,7 +86,7 @@ public sealed class DeserializeStep : IMiddleware<ConsumeContext>
         // the unknown-message handler reads the raw body; nothing to deserialize
         context.Message = context.Body.IsEmpty || context.Handler is RawHandlerEntry
             ? null
-            : context.MessageType!.DeserializeBody(context.Serializer!, context.Body);
+            : context.RequireMessageType().DeserializeBody(context.RequireSerializer(), context.Body);
         return next(context);
     }
 }

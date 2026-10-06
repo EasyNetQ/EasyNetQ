@@ -201,8 +201,8 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
                 {
                     if (properties.Headers.TryGetValue(IsFaultedKey, out var isFaultedValue))
                         isFaulted = Convert.ToBoolean(isFaultedValue);
-                    if (properties.Headers.TryGetValue(ExceptionMessageKey, out var exchangeMessageValue))
-                        exceptionMessage = Encoding.UTF8.GetString((byte[])exchangeMessageValue!);
+                    if (properties.Headers.TryGetValue(ExceptionMessageKey, out var exceptionMessageValue) && exceptionMessageValue is byte[] exceptionMessageBytes)
+                        exceptionMessage = Encoding.UTF8.GetString(exceptionMessageBytes);
                 }
 
                 if (isFaulted)
@@ -286,7 +286,7 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
         byte? priority,
         bool? mandatory,
         bool? publisherConfirms,
-        IDictionary<string, object>? headers,
+        IDictionary<string, object?>? headers,
         CancellationToken cancellationToken
     )
     {
@@ -391,7 +391,7 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
             {
                 CorrelationId = requestMessage.Properties.CorrelationId,
                 DeliveryMode = MessageDeliveryMode.NonPersistent,
-                Headers = new Dictionary<string, object>
+                Headers = new Dictionary<string, object?>
                 {
                     { IsFaultedKey, true },
                     { ExceptionMessageKey, Encoding.UTF8.GetBytes(exception.Message) }

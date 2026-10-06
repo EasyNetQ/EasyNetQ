@@ -269,8 +269,8 @@ public sealed class TransportRpc : IRpc, IAsyncDisposable
                 {
                     if (properties.Headers.TryGetValue(IsFaultedKey, out var isFaultedValue))
                         isFaulted = Convert.ToBoolean(isFaultedValue);
-                    if (properties.Headers.TryGetValue(ExceptionMessageKey, out var exceptionMessageValue))
-                        exceptionMessage = Encoding.UTF8.GetString((byte[])exceptionMessageValue!);
+                    if (properties.Headers.TryGetValue(ExceptionMessageKey, out var exceptionMessageValue) && exceptionMessageValue is byte[] exceptionMessageBytes)
+                        exceptionMessage = Encoding.UTF8.GetString(exceptionMessageBytes);
                 }
 
                 if (isFaulted)
@@ -429,7 +429,7 @@ public sealed class TransportRpc : IRpc, IAsyncDisposable
             DeliveryMode = MessageDeliveryMode.NonPersistent,
             Headers = failure is null
                 ? null
-                : new Dictionary<string, object>
+                : new Dictionary<string, object?>
                 {
                     { IsFaultedKey, true },
                     { ExceptionMessageKey, Encoding.UTF8.GetBytes(failure.Message) },
@@ -512,7 +512,7 @@ public sealed class TransportRpc : IRpc, IAsyncDisposable
     }
 
     private static async ValueTask DispatchTerminal(ConsumeContext context)
-        => context.Ack = await context.Handler!.InvokeAsync(context).ConfigureAwait(false);
+        => context.Ack = await context.RequireHandler().InvokeAsync(context).ConfigureAwait(false);
 
     private readonly record struct RpcKey(Type RequestType, Type ResponseType);
 

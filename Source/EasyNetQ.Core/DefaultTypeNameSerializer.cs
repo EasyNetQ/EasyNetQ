@@ -19,7 +19,7 @@ public class DefaultTypeNameSerializer : ITypeNameSerializer
         {
             if (t.AssemblyQualifiedName == null) throw new ArgumentOutOfRangeException(nameof(t), t, null);
 
-            var typeName = RemoveAssemblyDetails(t.AssemblyQualifiedName!);
+            var typeName = RemoveAssemblyDetails(t.AssemblyQualifiedName);
             if (typeName.Length > 255)
             {
                 throw new EasyNetQException($"The serialized name of type '{t.Name}' exceeds the AMQP maximum short string length of 255 characters");

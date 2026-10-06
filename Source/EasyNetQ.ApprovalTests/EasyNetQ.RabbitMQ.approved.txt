@@ -300,6 +300,8 @@ namespace EasyNetQ
     }
     public readonly struct PullResult<T> : EasyNetQ.IPullResult
     {
+        [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, "message")]
+        [get: System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, "message")]
         public bool IsAvailable { get; }
         public EasyNetQ.IMessage<T> Message { get; }
         public ulong MessagesCount { get; }

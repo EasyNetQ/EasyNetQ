@@ -53,11 +53,11 @@ public class MessageTypeProperty
     public Type GetMessageType()
     {
         if (TryDeserializeType(firstAlternativeMessageType, out var messageType))
-            return messageType!;
+            return messageType;
 
         foreach (var alternativeType in alternativeTypes)
             if (TryDeserializeType(alternativeType, out messageType))
-                return messageType!;
+                return messageType;
 
         throw new EasyNetQException(
             "Cannot find declared message type {0} or any of the specified alternative types {1}", firstAlternativeMessageType,
@@ -73,7 +73,7 @@ public class MessageTypeProperty
         if (messageType == null)
             throw new EasyNetQException("Type is empty");
 
-        if (!messageProperties.HeadersPresent || !messageProperties.Headers!.ContainsKey(AlternativeMessageTypesHeaderKey))
+        if (!messageProperties.HeadersPresent || !messageProperties.Headers.ContainsKey(AlternativeMessageTypesHeaderKey))
             return new MessageTypeProperty(typeNameSerializer, messageType, null);
 
         if (messageProperties.Headers[AlternativeMessageTypesHeaderKey] is not byte[] rawHeader)

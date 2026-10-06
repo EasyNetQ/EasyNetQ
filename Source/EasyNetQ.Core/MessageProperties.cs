@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace EasyNetQ;
 
 /// <summary>
@@ -20,7 +22,7 @@ public readonly record struct MessageProperties
     /// <summary>
     ///     Various headers
     /// </summary>
-    public IDictionary<string, object>? Headers { get; init; }
+    public IDictionary<string, object?>? Headers { get; init; }
 
     /// <summary>
     ///     non-persistent (1) or persistent (2)
@@ -90,6 +92,7 @@ public readonly record struct MessageProperties
     /// <summary>
     ///     True if <see cref="Headers"/> is present
     /// </summary>
+    [MemberNotNullWhen(true, nameof(Headers))]
     public bool HeadersPresent => Headers?.Count > 0;
 
     /// <summary>

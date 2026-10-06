@@ -85,7 +85,7 @@ public abstract class MessageTypeDescriptor
     // Typed trampolines for the non-generic APIs: each closes the corresponding generic API over this descriptor's
     // type, replacing the expression-compiled delegates the 8.x NonGeneric*Extensions built per type.
     internal abstract Task PublishViaAsync(IPubSub pubSub, object message, Action<IPublishConfiguration> configure, CancellationToken cancellationToken);
-    internal abstract Task<SubscriptionResult> SubscribeViaAsync(IPubSub pubSub, string subscriptionId, Func<object, Type, CancellationToken, Task> onMessage, Action<ISubscriptionConfiguration> configure, CancellationToken cancellationToken);
+    internal abstract Task<SubscriptionResult> SubscribeViaAsync(IPubSub pubSub, string subscriptionId, Func<object?, Type, CancellationToken, Task> onMessage, Action<ISubscriptionConfiguration> configure, CancellationToken cancellationToken);
     internal abstract Task SendViaAsync(ISendReceive sendReceive, string queue, object message, Action<ISendConfiguration> configure, CancellationToken cancellationToken);
     internal abstract Task FuturePublishViaAsync(IScheduler scheduler, object message, TimeSpan delay, Action<IFuturePublishConfiguration> configure, CancellationToken cancellationToken);
 }
@@ -121,8 +121,8 @@ public sealed class MessageTypeDescriptor<T> : MessageTypeDescriptor
     internal override Task PublishViaAsync(IPubSub pubSub, object message, Action<IPublishConfiguration> configure, CancellationToken cancellationToken)
         => pubSub.PublishAsync((T)message, configure, cancellationToken);
 
-    internal override Task<SubscriptionResult> SubscribeViaAsync(IPubSub pubSub, string subscriptionId, Func<object, Type, CancellationToken, Task> onMessage, Action<ISubscriptionConfiguration> configure, CancellationToken cancellationToken)
-        => pubSub.SubscribeAsync<T>(subscriptionId, (message, ct) => onMessage(message!, message!.GetType(), ct), configure, cancellationToken);
+    internal override Task<SubscriptionResult> SubscribeViaAsync(IPubSub pubSub, string subscriptionId, Func<object?, Type, CancellationToken, Task> onMessage, Action<ISubscriptionConfiguration> configure, CancellationToken cancellationToken)
+        => pubSub.SubscribeAsync<T>(subscriptionId, (message, ct) => onMessage(message, message?.GetType() ?? typeof(T), ct), configure, cancellationToken);
 
     internal override Task SendViaAsync(ISendReceive sendReceive, string queue, object message, Action<ISendConfiguration> configure, CancellationToken cancellationToken)
         => sendReceive.SendAsync(queue, (T)message, configure, cancellationToken);

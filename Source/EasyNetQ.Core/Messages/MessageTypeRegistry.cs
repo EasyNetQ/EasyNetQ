@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Collections.Concurrent;
 
 namespace EasyNetQ;
@@ -113,13 +114,13 @@ public sealed class MessageTypeRegistry : IMessageTypeRegistry
     }
 
     /// <inheritdoc />
-    public bool TryGetByWireName(string wireName, out MessageTypeDescriptor descriptor)
-        => byWireName.TryGetValue(wireName, out descriptor!);
+    public bool TryGetByWireName(string wireName, [MaybeNullWhen(false)] out MessageTypeDescriptor descriptor)
+        => byWireName.TryGetValue(wireName, out descriptor);
 
     /// <inheritdoc />
-    public bool TryResolveWireName(string wireName, out MessageTypeDescriptor descriptor)
+    public bool TryResolveWireName(string wireName, [MaybeNullWhen(false)] out MessageTypeDescriptor descriptor)
     {
-        if (byWireName.TryGetValue(wireName, out descriptor!))
+        if (byWireName.TryGetValue(wireName, out descriptor))
             return true;
         try
         {

@@ -77,26 +77,26 @@ internal sealed class RabbitMqTransportConnection : ITransportConnection
         this.notifier = notifier;
 
         // bridge the internal events onto the lifecycle pipeline; the internal bus goes away in phase 6
-        lifecycleSubscriptions = notifier is not null && eventBus is not null
+        lifecycleSubscriptions = notifier is { } lifecycle && eventBus is not null
             ?
             [
-                eventBus.Subscribe<ConnectionCreatedEvent>(e => NotifyAsync(e.Type, context, LifecycleEvent.Connected)),
-                eventBus.Subscribe<ConnectionRecoveredEvent>(e => NotifyAsync(e.Type, context, LifecycleEvent.Recovered)),
-                eventBus.Subscribe<ConnectionDisconnectedEvent>(e => NotifyAsync(e.Type, context, LifecycleEvent.Disconnected, e.Reason)),
-                eventBus.Subscribe<ConnectionBlockedEvent>(e => NotifyAsync(e.Type, context, LifecycleEvent.Blocked, e.Reason)),
-                eventBus.Subscribe<ConnectionUnblockedEvent>(e => NotifyAsync(e.Type, context, LifecycleEvent.Unblocked)),
-                eventBus.Subscribe<ConnectionRecoveryErrorEvent>(e => NotifyAsync(e.Type, context, LifecycleEvent.RecoveryError, error: e.Exception)),
-                eventBus.Subscribe<ConnectionCallbackErrorEvent>(e => NotifyAsync(e.Type, context, LifecycleEvent.CallbackError, error: e.Exception)),
+                eventBus.Subscribe<ConnectionCreatedEvent>(e => NotifyAsync(lifecycle, e.Type, context, LifecycleEvent.Connected)),
+                eventBus.Subscribe<ConnectionRecoveredEvent>(e => NotifyAsync(lifecycle, e.Type, context, LifecycleEvent.Recovered)),
+                eventBus.Subscribe<ConnectionDisconnectedEvent>(e => NotifyAsync(lifecycle, e.Type, context, LifecycleEvent.Disconnected, e.Reason)),
+                eventBus.Subscribe<ConnectionBlockedEvent>(e => NotifyAsync(lifecycle, e.Type, context, LifecycleEvent.Blocked, e.Reason)),
+                eventBus.Subscribe<ConnectionUnblockedEvent>(e => NotifyAsync(lifecycle, e.Type, context, LifecycleEvent.Unblocked)),
+                eventBus.Subscribe<ConnectionRecoveryErrorEvent>(e => NotifyAsync(lifecycle, e.Type, context, LifecycleEvent.RecoveryError, error: e.Exception)),
+                eventBus.Subscribe<ConnectionCallbackErrorEvent>(e => NotifyAsync(lifecycle, e.Type, context, LifecycleEvent.CallbackError, error: e.Exception)),
             ]
             : [];
     }
 
     private Task NotifyAsync(
-        PersistentConnectionType eventType, ConnectionContext context, LifecycleEvent @event,
+        LifecycleNotifier lifecycle, PersistentConnectionType eventType, ConnectionContext context, LifecycleEvent @event,
         string? reason = null, Exception? error = null
     )
         => eventType == type
-            ? notifier!.NotifyAsync(context, LifecycleLayer.Connection, @event, reason, error).AsTask()
+            ? lifecycle.NotifyAsync(context, LifecycleLayer.Connection, @event, reason, error).AsTask()
             : Task.CompletedTask;
 
     public bool IsConnected => connection.Status.State == PersistentConnectionState.Connected;

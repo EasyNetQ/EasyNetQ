@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Collections.Concurrent;
 using EasyNetQ.Pipeline;
 
@@ -136,7 +137,7 @@ public sealed class HandlerTable
     /// </summary>
     public MessageTypeDescriptor ResolveDescriptor(string? wireName)
     {
-        if (string.IsNullOrEmpty(wireName))
+        if (wireName is null || wireName.Length == 0)
         {
             if (defaultDescriptor is not null)
                 return defaultDescriptor;
@@ -149,9 +150,9 @@ public sealed class HandlerTable
                 );
         }
 
-        if (registrationsByWireName.TryGetValue(wireName!, out var entry))
+        if (registrationsByWireName.TryGetValue(wireName, out var entry))
             return entry.Descriptor;
-        if (registry.TryResolveWireName(wireName!, out var descriptor))
+        if (registry.TryResolveWireName(wireName, out var descriptor))
             return descriptor;
         return unknownEntry?.Descriptor
             ?? throw new UnknownMessageTypeException(
@@ -160,7 +161,7 @@ public sealed class HandlerTable
             );
     }
 
-    internal bool TryResolveDescriptor(string wireName, out MessageTypeDescriptor descriptor)
+    internal bool TryResolveDescriptor(string wireName, [MaybeNullWhen(false)] out MessageTypeDescriptor descriptor)
     {
         if (registrationsByWireName.TryGetValue(wireName, out var entry))
         {
@@ -177,7 +178,7 @@ public sealed class HandlerTable
     public HandlerEntry Resolve(MessageTypeDescriptor descriptor)
     {
         if (ReferenceEquals(descriptor, RawMessageTypeDescriptor.Instance))
-            return unknownEntry!;
+            return unknownEntry ?? throw new InvalidOperationException("A raw message type was resolved without a HandleUnknown handler");
         if (resolvedByWireName.TryGetValue(descriptor.WireName, out var entry))
             return entry;
 

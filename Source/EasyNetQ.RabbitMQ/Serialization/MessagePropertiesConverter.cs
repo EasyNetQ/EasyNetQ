@@ -21,7 +21,7 @@ public class MessagePropertiesConverter : JsonConverter<MessageProperties>
                 Priority = parsed.TryGetProperty(options.ConvertName("Priority"), out var priority) ? priority.GetByte() : default,
                 CorrelationId = parsed.TryGetProperty(options.ConvertName("CorrelationId"), out var correlationId) ? correlationId.GetString() : null,
                 ReplyTo = parsed.TryGetProperty(options.ConvertName("ReplyTo"), out var replyTo) ? replyTo.GetString() : null,
-                Expiration = parsed.TryGetProperty(options.ConvertName("Expiration"), out var expiration) ? TimeSpan.Parse(expiration.GetString()!, CultureInfo.InvariantCulture) : null,
+                Expiration = parsed.TryGetProperty(options.ConvertName("Expiration"), out var expiration) && expiration.GetString() is { } expirationText ? TimeSpan.Parse(expirationText, CultureInfo.InvariantCulture) : null,
                 MessageId = parsed.TryGetProperty(options.ConvertName("MessageId"), out var messageId) ? messageId.GetString() : null,
                 Timestamp = parsed.TryGetProperty(options.ConvertName("Timestamp"), out var timestamp) ? timestamp.GetInt64() : default,
                 Type = parsed.TryGetProperty(options.ConvertName("Type"), out var type) ? type.GetString() : null,
@@ -29,7 +29,7 @@ public class MessagePropertiesConverter : JsonConverter<MessageProperties>
                 AppId = parsed.TryGetProperty(options.ConvertName("AppId"), out var appId) ? appId.GetString() : null,
                 ClusterId = parsed.TryGetProperty(options.ConvertName("ClusterId"), out var clusterId) ? clusterId.GetString() : null,
                 Headers = parsed.TryGetProperty(options.ConvertName("Headers"), out var headers)
-                    ? headers.ConvertJsonToHeaders(options).FromAmqpTable()
+                    ? headers.ConvertJsonToHeaders(options)
                     : null
             },
             _ => throw new ArgumentOutOfRangeException(nameof(parsed.ValueKind), parsed.ValueKind, null)
@@ -69,7 +69,7 @@ public class MessagePropertiesConverter : JsonConverter<MessageProperties>
         if (value.HeadersPresent)
         {
             var headersJson = new JsonObject();
-            foreach (var kvp in value.Headers!)
+            foreach (var kvp in value.Headers)
                 headersJson.AddHeaderToJson(kvp.Key, kvp.Value, options);
             json.Add(options.ConvertName("Headers"), headersJson);
         }

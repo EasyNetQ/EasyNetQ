@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace EasyNetQ.Pipeline;
 
 /// <summary>
@@ -23,7 +25,7 @@ public struct PropertyBag
     /// <summary>
     ///     Gets the value stored for <paramref name="key" />
     /// </summary>
-    public readonly bool TryGet<T>(PropertyKey<T> key, out T value)
+    public readonly bool TryGet<T>(PropertyKey<T> key, [MaybeNullWhen(false)] out T value)
     {
         var items = entries;
         if (items is not null)
@@ -39,7 +41,7 @@ public struct PropertyBag
             }
         }
 
-        value = default!;
+        value = default;
         return false;
     }
 

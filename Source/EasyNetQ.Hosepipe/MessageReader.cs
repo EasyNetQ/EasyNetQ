@@ -23,10 +23,9 @@ public class MessageReader : IMessageReader
         foreach (var file in Directory.GetFiles(parameters.MessagesOutputDirectory, bodyPattern))
         {
             const string messageTag = ".message.";
-            var directoryName = Path.GetDirectoryName(file);
             var fileName = Path.GetFileName(file);
-            var propertiesFileName = Path.Combine(directoryName!, fileName.Replace(messageTag, ".properties."));
-            var infoFileName = Path.Combine(directoryName!, fileName.Replace(messageTag, ".info."));
+            var propertiesFileName = Path.Combine(parameters.MessagesOutputDirectory, fileName.Replace(messageTag, ".properties."));
+            var infoFileName = Path.Combine(parameters.MessagesOutputDirectory, fileName.Replace(messageTag, ".info."));
 
             var body = await File.ReadAllTextAsync(file, cancellationToken);
 

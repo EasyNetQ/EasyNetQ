@@ -278,8 +278,8 @@ namespace EasyNetQ
         EasyNetQ.MessageTypeDescriptor GetOrAdd(System.Type type);
         EasyNetQ.MessageTypeDescriptor<T> GetOrAdd<T>();
         EasyNetQ.MessageTypeDescriptor<T> Register<T>(string? wireName, System.Collections.Generic.IEnumerable<string>? aliases = null);
-        bool TryGetByWireName(string wireName, out EasyNetQ.MessageTypeDescriptor descriptor);
-        bool TryResolveWireName(string wireName, out EasyNetQ.MessageTypeDescriptor descriptor);
+        bool TryGetByWireName(string wireName, [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)] out EasyNetQ.MessageTypeDescriptor descriptor);
+        bool TryResolveWireName(string wireName, [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)] out EasyNetQ.MessageTypeDescriptor descriptor);
     }
     public interface IMessageTypeRegistryInitializer
     {
@@ -361,7 +361,7 @@ namespace EasyNetQ
     }
     public interface ISerializer
     {
-        object BytesToMessage(System.Type messageType, in System.ReadOnlyMemory<byte> bytes);
+        object? BytesToMessage(System.Type messageType, in System.ReadOnlyMemory<byte> bytes);
         System.Buffers.IMemoryOwner<byte> MessageToBytes(System.Type messageType, object message);
     }
     public interface ISimpleConsumeConfiguration
@@ -424,7 +424,9 @@ namespace EasyNetQ
         public bool DeliveryModePresent { get; }
         public System.TimeSpan? Expiration { get; init; }
         public bool ExpirationPresent { get; }
-        public System.Collections.Generic.IDictionary<string, object>? Headers { get; init; }
+        public System.Collections.Generic.IDictionary<string, object?>? Headers { get; init; }
+        [System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, "Headers")]
+        [get: System.Diagnostics.CodeAnalysis.MemberNotNullWhen(true, "Headers")]
         public bool HeadersPresent { get; }
         public string? MessageId { get; init; }
         public bool MessageIdPresent { get; }
@@ -502,8 +504,8 @@ namespace EasyNetQ
         public EasyNetQ.MessageTypeDescriptor GetOrAdd(System.Type type) { }
         public EasyNetQ.MessageTypeDescriptor<T> GetOrAdd<T>() { }
         public EasyNetQ.MessageTypeDescriptor<T> Register<T>(string? wireName, System.Collections.Generic.IEnumerable<string>? aliases = null) { }
-        public bool TryGetByWireName(string wireName, out EasyNetQ.MessageTypeDescriptor descriptor) { }
-        public bool TryResolveWireName(string wireName, out EasyNetQ.MessageTypeDescriptor descriptor) { }
+        public bool TryGetByWireName(string wireName, [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)] out EasyNetQ.MessageTypeDescriptor descriptor) { }
+        public bool TryResolveWireName(string wireName, [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)] out EasyNetQ.MessageTypeDescriptor descriptor) { }
     }
     public class Message<T> : EasyNetQ.IMessage, EasyNetQ.IMessage<T>
     {
@@ -1153,7 +1155,7 @@ namespace EasyNetQ.Pipeline
     }
     public interface IReadOnlyProperties
     {
-        bool TryGet<T>(EasyNetQ.Pipeline.PropertyKey<T> key, out T value);
+        bool TryGet<T>(EasyNetQ.Pipeline.PropertyKey<T> key, [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)] out T value);
     }
     public static class Keys
     {
@@ -1172,8 +1174,8 @@ namespace EasyNetQ.Pipeline
         public bool Remove<T>(EasyNetQ.Pipeline.PropertyKey<T> key) { }
         protected virtual void Reset() { }
         public void Set<T>(EasyNetQ.Pipeline.PropertyKey<T> key, T value) { }
-        public bool TryGet<T>(EasyNetQ.Pipeline.PropertyKey<T> key, out T value) { }
-        public bool TryGetLocal<T>(EasyNetQ.Pipeline.PropertyKey<T> key, out T value) { }
+        public bool TryGet<T>(EasyNetQ.Pipeline.PropertyKey<T> key, [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)] out T value) { }
+        public bool TryGetLocal<T>(EasyNetQ.Pipeline.PropertyKey<T> key, [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)] out T value) { }
     }
     public sealed class LifecycleConfiguration : System.IEquatable<EasyNetQ.Pipeline.LifecycleConfiguration>
     {
@@ -1282,7 +1284,8 @@ namespace EasyNetQ.Pipeline
     {
         public static bool Contains<T>(this EasyNetQ.Pipeline.IReadOnlyProperties properties, EasyNetQ.Pipeline.PropertyKey<T> key) { }
         public static T Get<T>(this EasyNetQ.Pipeline.IReadOnlyProperties properties, EasyNetQ.Pipeline.PropertyKey<T> key) { }
-        public static T GetOrDefault<T>(this EasyNetQ.Pipeline.IReadOnlyProperties properties, EasyNetQ.Pipeline.PropertyKey<T> key, T fallback = default) { }
+        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNull("fallback")]
+        public static T? GetOrDefault<T>(this EasyNetQ.Pipeline.IReadOnlyProperties properties, EasyNetQ.Pipeline.PropertyKey<T> key, T? fallback = default) { }
     }
     public struct PropertyBag
     {
@@ -1290,7 +1293,7 @@ namespace EasyNetQ.Pipeline
         public void Clear() { }
         public bool Remove<T>(EasyNetQ.Pipeline.PropertyKey<T> key) { }
         public void Set<T>(EasyNetQ.Pipeline.PropertyKey<T> key, T value) { }
-        public bool TryGet<T>(EasyNetQ.Pipeline.PropertyKey<T> key, out T value) { }
+        public bool TryGet<T>(EasyNetQ.Pipeline.PropertyKey<T> key, [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)] out T value) { }
     }
     public readonly struct PropertyKey<T> : System.IEquatable<EasyNetQ.Pipeline.PropertyKey<T>>
     {

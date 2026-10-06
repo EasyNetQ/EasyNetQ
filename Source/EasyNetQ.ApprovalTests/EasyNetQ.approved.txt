@@ -179,16 +179,16 @@ namespace EasyNetQ
         public static System.Threading.Tasks.Task PublishAsync(this EasyNetQ.IPubSub pubSub, object message, System.Type messageType, string topic, System.Threading.CancellationToken cancellationToken = default) { }
         [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Non-generic messaging APIs close generic methods over runtime types. Use the gene" +
             "ric APIs for AOT-compatible applications.")]
-        public static System.Threading.Tasks.Task<EasyNetQ.SubscriptionResult> SubscribeAsync(this EasyNetQ.IPubSub pubSub, string subscriptionId, System.Type messageType, System.Func<object, System.Type, System.Threading.CancellationToken, System.Threading.Tasks.Task> onMessage, System.Action<EasyNetQ.ISubscriptionConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
+        public static System.Threading.Tasks.Task<EasyNetQ.SubscriptionResult> SubscribeAsync(this EasyNetQ.IPubSub pubSub, string subscriptionId, System.Type messageType, System.Func<object?, System.Type, System.Threading.CancellationToken, System.Threading.Tasks.Task> onMessage, System.Action<EasyNetQ.ISubscriptionConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
     }
     public static class NonGenericRpcExtensions
     {
         [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Non-generic messaging APIs close generic methods over runtime types. Use the gene" +
             "ric APIs for AOT-compatible applications.")]
-        public static System.Threading.Tasks.Task<object> RequestAsync(this EasyNetQ.IRpc rpc, object request, System.Type requestType, System.Type responseType, System.Threading.CancellationToken cancellationToken = default) { }
+        public static System.Threading.Tasks.Task<object?> RequestAsync(this EasyNetQ.IRpc rpc, object request, System.Type requestType, System.Type responseType, System.Threading.CancellationToken cancellationToken = default) { }
         [System.Diagnostics.CodeAnalysis.RequiresDynamicCode("Non-generic messaging APIs close generic methods over runtime types. Use the gene" +
             "ric APIs for AOT-compatible applications.")]
-        public static System.Threading.Tasks.Task<object> RequestAsync(this EasyNetQ.IRpc rpc, object request, System.Type requestType, System.Type responseType, System.Action<EasyNetQ.IRequestConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
+        public static System.Threading.Tasks.Task<object?> RequestAsync(this EasyNetQ.IRpc rpc, object request, System.Type requestType, System.Type responseType, System.Action<EasyNetQ.IRequestConfiguration> configure, System.Threading.CancellationToken cancellationToken = default) { }
     }
     public static class NonGenericSchedulerExtensions
     {
@@ -290,7 +290,7 @@ namespace EasyNetQ.Serialization.SystemTextJson
         public SystemTextJsonSerializer(System.Text.Json.JsonSerializerOptions options) { }
         [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification="The public entry point carries RequiresUnreferencedCode/RequiresDynamicCode.")]
         [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2026", Justification="The public entry point carries RequiresUnreferencedCode/RequiresDynamicCode.")]
-        public object BytesToMessage(System.Type messageType, in System.ReadOnlyMemory<byte> bytes) { }
+        public object? BytesToMessage(System.Type messageType, in System.ReadOnlyMemory<byte> bytes) { }
         [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification="The public entry point carries RequiresUnreferencedCode/RequiresDynamicCode.")]
         [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2026", Justification="The public entry point carries RequiresUnreferencedCode/RequiresDynamicCode.")]
         public System.Buffers.IMemoryOwner<byte> MessageToBytes(System.Type messageType, object message) { }
@@ -309,7 +309,7 @@ namespace EasyNetQ.Serialization.SystemTextJson
         public SystemTextJsonSerializerV2(System.Text.Json.JsonSerializerOptions options) { }
         [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification="The public entry point carries RequiresUnreferencedCode/RequiresDynamicCode.")]
         [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2026", Justification="The public entry point carries RequiresUnreferencedCode/RequiresDynamicCode.")]
-        public object BytesToMessage(System.Type messageType, in System.ReadOnlyMemory<byte> bytes) { }
+        public object? BytesToMessage(System.Type messageType, in System.ReadOnlyMemory<byte> bytes) { }
         [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050", Justification="The public entry point carries RequiresUnreferencedCode/RequiresDynamicCode.")]
         [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2026", Justification="The public entry point carries RequiresUnreferencedCode/RequiresDynamicCode.")]
         public System.Buffers.IMemoryOwner<byte> MessageToBytes(System.Type messageType, object message) { }

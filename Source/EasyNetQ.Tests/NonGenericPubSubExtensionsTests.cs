@@ -136,4 +136,28 @@ public class NonGenericPubSubExtensionsTests
         await pubSub.Received()
             .SubscribeAsync(Arg.Is("Id"), Arg.Any<Func<DateTime, CancellationToken, Task>>(), Arg.Is(subscribeConfigure), Arg.Any<CancellationToken>());
     }
+
+    [Fact]
+    public async Task Should_pass_a_null_message_with_the_subscribed_type()
+    {
+        Func<Dog, CancellationToken, Task>? typedHandler = null;
+        pubSub.SubscribeAsync(Arg.Any<string>(), Arg.Do<Func<Dog, CancellationToken, Task>>(h => typedHandler = h), Arg.Any<Action<ISubscriptionConfiguration>>(), Arg.Any<CancellationToken>())
+            .Returns(subscribeResult);
+        object? received = new();
+        Type? receivedType = null;
+
+        await using var _ = await pubSub.SubscribeAsync(
+            "Id", typeof(Dog), (message, type, _) =>
+            {
+                received = message;
+                receivedType = type;
+                return Task.CompletedTask;
+            }, subscribeConfigure, cancellationToken: CancellationToken.None
+        );
+        Assert.NotNull(typedHandler);
+        await typedHandler(null!, CancellationToken.None);
+
+        received.Should().BeNull();
+        receivedType.Should().Be<Dog>();
+    }
 }
