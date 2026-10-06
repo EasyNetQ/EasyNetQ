@@ -36,7 +36,7 @@ public class When_a_connection_becomes_unblocked
         var blocked = true;
         mockBuilder.Bus.Advanced.Unblocked += (_, _) => blocked = false;
         if (unblockedHandlers != null)
-        await unblockedHandlers.Invoke(this, new());
+            await unblockedHandlers.Invoke(this, new());
         Assert.False(blocked);
     }
 }

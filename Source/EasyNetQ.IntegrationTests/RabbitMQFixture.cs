@@ -25,7 +25,7 @@ public class RabbitMQFixture : IAsyncLifetime, IDisposable
     private string? dockerNetworkName;
 
     public string Host { get; private set; } = "localhost";
-    private  IManagementClient? _managementClient;
+    private IManagementClient? _managementClient;
     public IManagementClient ManagementClient
     {
         get => _managementClient!;
