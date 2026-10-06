@@ -192,7 +192,7 @@ public class When_publishing_a_message : IAsyncLifetime
             Arg.Is(ExchangeType.Topic),
             Arg.Is(true),
             Arg.Is(false),
-            Arg.Is((IDictionary<string, object>)null),
+            Arg.Is((IDictionary<string, object?>?)null),
             Arg.Any<bool>(),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()
@@ -242,7 +242,7 @@ public class When_registering_response_handler : IAsyncLifetime
             Arg.Is("CustomRpcRoutingKeyName"),
             Arg.Is("CustomRpcExchangeName"),
             Arg.Is("CustomRpcRoutingKeyName"),
-            Arg.Is((IDictionary<string, object>)null),
+            Arg.Is((IDictionary<string, object?>?)null),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()
         );
@@ -256,7 +256,7 @@ public class When_registering_response_handler : IAsyncLifetime
             Arg.Is(ExchangeType.Direct),
             Arg.Is(true),
             Arg.Is(false),
-            Arg.Is((IDictionary<string, object>)null),
+            Arg.Is((IDictionary<string, object?>?)null),
             Arg.Any<bool>(),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()

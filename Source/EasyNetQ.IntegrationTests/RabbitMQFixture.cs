@@ -22,13 +22,13 @@ public class RabbitMQFixture : IAsyncLifetime, IDisposable
 
     private readonly DockerProxy dockerProxy = new();
     private OSPlatform dockerEngineOsPlatform;
-    private string dockerNetworkName;
+    private string? dockerNetworkName;
 
     public string Host { get; private set; } = "localhost";
-    private IManagementClient _managementClient;
+    private  IManagementClient? _managementClient;
     public IManagementClient ManagementClient
     {
-        get => _managementClient;
+        get => _managementClient!;
         private set
         {
             _managementClient?.Dispose();
@@ -76,13 +76,13 @@ public class RabbitMQFixture : IAsyncLifetime, IDisposable
         await dockerProxy.StopContainerAsync(ContainerName, cancellationToken);
         await dockerProxy.RemoveContainerAsync(ContainerName, cancellationToken);
         if (dockerEngineOsPlatform == OSPlatform.Linux || dockerEngineOsPlatform == OSPlatform.OSX)
-            await dockerProxy.DeleteNetworkAsync(dockerNetworkName, cancellationToken);
+            await dockerProxy.DeleteNetworkAsync(dockerNetworkName!, cancellationToken);
     }
 
     private async Task CreateNetworkAsync(CancellationToken cancellationToken)
     {
         if (dockerEngineOsPlatform == OSPlatform.Linux || dockerEngineOsPlatform == OSPlatform.OSX)
-            await dockerProxy.CreateNetworkAsync(dockerNetworkName, cancellationToken);
+            await dockerProxy.CreateNetworkAsync(dockerNetworkName!, cancellationToken);
     }
 
     private async Task PullImageAsync(CancellationToken cancellationToken)

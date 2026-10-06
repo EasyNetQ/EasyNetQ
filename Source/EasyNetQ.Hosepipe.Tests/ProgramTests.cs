@@ -54,7 +54,7 @@ public class ProgramTests
         var actualInsertOutput = writer.GetStringBuilder().ToString();
         actualInsertOutput.ShouldEqual(expectedInsertOutput);
 
-        messageReader.Parameters.HostName.ShouldEqual("localhost");
+        messageReader.Parameters!.HostName.ShouldEqual("localhost");
     }
 
     private readonly string expectedInsertOutputWithQueue =
@@ -78,7 +78,7 @@ public class ProgramTests
         var actualInsertOutput = writer.GetStringBuilder().ToString();
         actualInsertOutput.ShouldEqual(expectedInsertOutputWithQueue);
 
-        messageReader.Parameters.HostName.ShouldEqual("localhost");
+        messageReader.Parameters!.HostName.ShouldEqual("localhost");
     }
 
     private readonly string expectedRetryOutput =
@@ -100,7 +100,7 @@ public class ProgramTests
 
         writer.GetStringBuilder().ToString().ShouldEqual(expectedRetryOutput);
 
-        messageReader.Parameters.HostName.ShouldEqual("localhost");
+        messageReader.Parameters!.HostName.ShouldEqual("localhost");
     }
 
     [Fact]
@@ -143,13 +143,13 @@ public class ProgramTests
 
         await program.StartAsync(new[] { "err", "s:localhost" }, CancellationToken.None);
 
-        messageWriter.Parameters.QueueName.ShouldEqual(conventions.ErrorQueueNamingConvention(default));
+        messageWriter.Parameters!.QueueName.ShouldEqual(conventions.ErrorQueueNamingConvention(default));
     }
 }
 
 public class MockMessageWriter : IMessageWriter
 {
-    public QueueParameters Parameters { get; set; }
+    public QueueParameters? Parameters { get; set; }
 
     public async Task WriteAsync(
         IAsyncEnumerable<HosepipeMessage> messages,
@@ -177,7 +177,7 @@ public class MockQueueRetrieval : IQueueRetrieval
 
 public class MockMessageReader : IMessageReader
 {
-    public QueueParameters Parameters { get; set; }
+    public QueueParameters? Parameters { get; set; }
 
     public async IAsyncEnumerable<HosepipeMessage> ReadMessagesAsync(QueueParameters parameters, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {

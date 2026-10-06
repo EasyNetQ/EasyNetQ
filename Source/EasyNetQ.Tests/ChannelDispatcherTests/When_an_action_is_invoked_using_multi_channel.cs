@@ -9,7 +9,7 @@ namespace EasyNetQ.Tests.ChannelDispatcherTests;
 
 public class When_an_action_is_invoked_using_multi_channel : IAsyncLifetime
 {
-    private MultiPersistentChannelDispatcher dispatcher;
+    private MultiPersistentChannelDispatcher? dispatcher;
     private readonly IPersistentChannelFactory channelFactory;
     private int actionResult;
     private readonly IProducerConnection producerConnection;
@@ -38,7 +38,7 @@ public class When_an_action_is_invoked_using_multi_channel : IAsyncLifetime
 
     public async ValueTask DisposeAsync()
     {
-        await dispatcher.DisposeAsync();
+        await dispatcher!.DisposeAsync();
     }
 
     [Fact]

@@ -20,7 +20,7 @@ public class RabbitAdvancedBusTests
             x => x.AddSingleton(new ConnectionConfiguration { MandatoryPublish = mandatoryFromSettings })
         );
 
-        await mockBuilder.Bus.Advanced.PublishAsync("", "", mandatoryPerRequest, null, new Message<object>(null), cancellationToken: CancellationToken.None);
+        await mockBuilder.Bus.Advanced.PublishAsync("", "", mandatoryPerRequest, null, new Message<object?>(null), cancellationToken: CancellationToken.None);
 
         await mockBuilder.Channels[0].Received().BasicPublishAsync(
             Arg.Any<string>(),
@@ -44,7 +44,7 @@ public class RabbitAdvancedBusTests
         await using var mockBuilder = new MockBuilder(
             x => x.AddSingleton(new ConnectionConfiguration { PublisherConfirms = confirmsFromSettings }));
 
-        await mockBuilder.Bus.Advanced.PublishAsync("", "", null, confirmsPerRequest, new Message<object>(null), cancellationToken: CancellationToken.None);
+        await mockBuilder.Bus.Advanced.PublishAsync("", "", null, confirmsPerRequest, new Message<object?>(null), cancellationToken: CancellationToken.None);
 
         // confirms are delegated to the client, so the publish channel's CreateChannelOptions reveal the choice
         await mockBuilder.Connection.Received(expected).CreateChannelAsync(

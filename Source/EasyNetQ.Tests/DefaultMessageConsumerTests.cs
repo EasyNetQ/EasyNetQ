@@ -15,7 +15,7 @@ public class DefaultMessageConsumerTests
 
         var consumer = new DefaultAutoSubscriberMessageDispatcher(serviceProvider);
         var message = new MyMessage();
-        var consumedMessage = (MyMessage)null;
+        var consumedMessage = (MyMessage?)null;
 
         MyMessageConsumer.ConsumedMessageFunc = m => consumedMessage = m;
         consumer.Dispatch<MyMessage, MyMessageConsumer>(message, cancellationToken: CancellationToken.None);
@@ -26,11 +26,11 @@ public class DefaultMessageConsumerTests
     // Discovered by reflection over test assembly, do not remove.
     private sealed class MyMessageConsumer : IConsume<MyMessage>
     {
-        public static Action<MyMessage> ConsumedMessageFunc { get; set; }
+        public static Action<MyMessage>? ConsumedMessageFunc { get; set; }
 
         public void Consume(MyMessage message, CancellationToken cancellationToken)
         {
-            ConsumedMessageFunc(message);
+            ConsumedMessageFunc!(message);
         }
     }
 }

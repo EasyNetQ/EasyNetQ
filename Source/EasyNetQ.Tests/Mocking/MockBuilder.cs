@@ -53,7 +53,7 @@ public sealed class MockBuilder : IAsyncDisposable
                     Arg.Any<string>(), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<RabbitMQ.Client.BasicProperties>(), Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>()
                 ))
                 .Do(_ => Published?.Invoke());
-            channel.BasicConsumeAsync(Arg.Any<string>(), false, Arg.Any<string>(), true, false, Arg.Any<IDictionary<string, object>>(), Arg.Any<IAsyncBasicConsumer>(), default)
+            channel.BasicConsumeAsync(Arg.Any<string>(), false, Arg.Any<string>(), true, false, Arg.Any<IDictionary<string, object?>>(), Arg.Any<IAsyncBasicConsumer>(), default)
                 .ReturnsForAnyArgs(async consumeInvocation =>
                 {
                     var queueName = (string)consumeInvocation[0];

@@ -42,7 +42,7 @@ public class SerializerTests
             Timestamp = new AmqpTimestamp(123344044),
             Type = "Type",
             UserId = "user id",
-            Headers = new Dictionary<string, object>
+            Headers = new Dictionary<string, object?>
             {
                 { "one", "header one" },
                 { "two", "header two" }
@@ -83,7 +83,7 @@ public class SerializerTests
             Timestamp = new AmqpTimestamp(123344044),
             Type = "Type",
             UserId = "user id",
-            Headers = new Dictionary<string, object>
+            Headers = new Dictionary<string, object?>
             {
                 { "Bool", false },
                 { "Byte", (byte)1 },
@@ -145,12 +145,12 @@ public class SerializerTests
 
     private sealed class PolyMessage
     {
-        public A AorB { get; set; }
+        public A? AorB { get; set; }
     }
 
     private sealed class Message
     {
-        public string Text { get; set; }
+        public string? Text { get; set; }
     }
 }
 

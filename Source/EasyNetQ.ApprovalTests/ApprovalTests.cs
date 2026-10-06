@@ -20,6 +20,6 @@ public class ApprovalTests
         });
         Assert.NotNull(publicApi);
 
-        publicApi.ShouldMatchApproved(options => options.WithFilenameGenerator((_, _, fileType, fileExtension) => $"{type.Assembly.GetName().Name}.{fileType}.{fileExtension}"));
+        publicApi.ShouldMatchApproved(options => options.WithFilenameGenerator((_, _, fileType, fileExtension) => $"{type!.Assembly.GetName().Name}.{fileType}.{fileExtension}"));
     }
 }

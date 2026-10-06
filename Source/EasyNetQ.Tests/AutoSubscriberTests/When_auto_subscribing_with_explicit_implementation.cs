@@ -50,7 +50,7 @@ public class When_auto_subscribing_with_explicit_implementation : IAsyncLifetime
                 Arg.Is(true),
                 Arg.Is(false),
                 Arg.Is(false),
-                Arg.Is((IDictionary<string, object>)null),
+                Arg.Is((IDictionary<string, object?>?)null),
                 default,
                 default,
                 Arg.Any<CancellationToken>()
@@ -70,7 +70,7 @@ public class When_auto_subscribing_with_explicit_implementation : IAsyncLifetime
                 Arg.Is(queueName),
                 Arg.Any<string>(),
                 Arg.Is(topicName),
-                Arg.Is((IDictionary<string, object>)null),
+                Arg.Is((IDictionary<string, object?>?)null),
                 default,
                 Arg.Any<CancellationToken>()
             );
@@ -118,16 +118,16 @@ public class When_auto_subscribing_with_explicit_implementation : IAsyncLifetime
 
     private sealed class MessageA
     {
-        public string Text { get; set; }
+        public string? Text { get; set; }
     }
 
     private sealed class MessageB
     {
-        public string Text { get; set; }
+        public string? Text { get; set; }
     }
 
     private sealed class MessageC
     {
-        public string Text { get; set; }
+        public string? Text { get; set; }
     }
 }

@@ -79,7 +79,7 @@ public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : IA
         {
             Type = "EasyNetQ.Tests.TestResponseMessage, EasyNetQ.Tests",
             CorrelationId = correlationId,
-            Headers = new Dictionary<string, object>
+            Headers = new Dictionary<string, object?>
             {
                 { "IsFaulted", true }
             }

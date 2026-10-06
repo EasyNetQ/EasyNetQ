@@ -14,7 +14,7 @@ public class When_a_channel_is_created_with_publisher_confirms : IAsyncLifetime
 {
     private readonly IPersistentConnection persistentConnection;
     private readonly IPersistentChannel persistentChannel;
-    private CreateChannelOptions createChannelOptions;
+    private CreateChannelOptions? createChannelOptions;
 
     public When_a_channel_is_created_with_publisher_confirms()
     {
@@ -66,7 +66,7 @@ public class When_a_channel_is_created_without_publisher_confirms : IAsyncLifeti
 {
     private readonly IPersistentConnection persistentConnection;
     private readonly IPersistentChannel persistentChannel;
-    private CreateChannelOptions createChannelOptions;
+    private CreateChannelOptions? createChannelOptions;
 
     public When_a_channel_is_created_without_publisher_confirms()
     {

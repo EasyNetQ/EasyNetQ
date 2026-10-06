@@ -27,7 +27,7 @@ public class When_a_message_is_delivered_to_the_consumer : ConsumerTestBase
     [Fact]
     public void Should_deliver_the_message_properties()
     {
-        DeliveredMessageProperties.Type.Should().BeSameAs(OriginalProperties.Type);
+        DeliveredMessageProperties.Type.Should().BeSameAs(OriginalProperties!.Type);
     }
 
     [Fact]
