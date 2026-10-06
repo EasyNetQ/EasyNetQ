@@ -47,7 +47,8 @@ public class DefaultMessageSerializationStrategy : IMessageSerializationStrategy
     /// <inheritdoc />
     public IMessage DeserializeMessage(in MessageProperties properties, in ReadOnlyMemory<byte> body)
     {
-        var descriptor = registry.GetByWireName(properties.Type!);
+        var wireName = properties.Type ?? throw new EasyNetQException("Cannot deserialize a message without a type property");
+        var descriptor = registry.GetByWireName(wireName);
         var messageBody = body.IsEmpty ? null : descriptor.DeserializeBody(serializer, body);
         return descriptor.CreateMessage(messageBody, properties);
     }

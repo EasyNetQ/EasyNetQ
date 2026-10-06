@@ -7,7 +7,7 @@ public class When_cancellation_of_message_handler_occurs : ConsumerTestBase
 {
     protected override async Task InitializeAsyncCore()
     {
-        ConsumeErrorStrategy.HandleCancelledAsync(default)
+        ConsumeErrorStrategy.HandleCancelledAsync(Arg.Any<ConsumeContext>())
             .ReturnsForAnyArgs(i =>
             {
                 // the context is pooled; keep this instance alive so Received() can inspect it after the delivery

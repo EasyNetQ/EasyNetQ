@@ -357,6 +357,7 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
         CancellationToken cancellationToken
     )
     {
+        var replyTo = requestMessage.Properties.ReplyTo ?? throw new EasyNetQException("RPC request has no reply_to property, so there is nowhere to send the response");
         var responseExchangeName = conventions.RpcResponseExchangeNamingConvention(typeof(TResponse));
         var responseExchange = responseExchangeName == Exchange.Default.Name
             ? Exchange.Default
@@ -377,7 +378,7 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
             };
             await advancedBus.PublishAsync(
                 responseExchange.Name,
-                requestMessage.Properties.ReplyTo!,
+                replyTo,
                 false,
                 null,
                 responseProperties,
@@ -403,7 +404,7 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
             };
             await advancedBus.PublishAsync<TResponse>(
                 responseExchange.Name,
-                requestMessage.Properties.ReplyTo!,
+                replyTo,
                 false,
                 null,
                 faultProperties,

@@ -10,7 +10,7 @@ public class When_a_cancellation_error_occurs_in_the_message_handler : ConsumerT
     {
         exception = new OperationCanceledException("I've had a bad day :(");
 
-        ConsumeErrorStrategy.HandleErrorAsync(default, exception)
+        ConsumeErrorStrategy.HandleErrorAsync(Arg.Any<ConsumeContext>(), exception)
             .ReturnsForAnyArgs(i =>
             {
                 // the context is pooled; keep this instance alive so Received() can inspect it after the delivery

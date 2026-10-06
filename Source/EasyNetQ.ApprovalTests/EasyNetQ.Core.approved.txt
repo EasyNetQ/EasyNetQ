@@ -172,7 +172,7 @@ namespace EasyNetQ
     public sealed class ExchangeAttribute : System.Attribute
     {
         public ExchangeAttribute() { }
-        public ExchangeAttribute(string? name, string? exchangeType = null) { }
+        public ExchangeAttribute(string name, string? exchangeType = null) { }
         public string? ExchangeType { get; init; }
         public string? Name { get; init; }
     }
@@ -539,7 +539,7 @@ namespace EasyNetQ
     public sealed class QueueAttribute : System.Attribute
     {
         public QueueAttribute() { }
-        public QueueAttribute(string? name, string? type = null) { }
+        public QueueAttribute(string name, string? type = null) { }
         public string? Name { get; init; }
         public string? Type { get; init; }
     }
@@ -1065,7 +1065,7 @@ namespace EasyNetQ.Internals
     }
     public static class UriExtensions
     {
-        public static System.Collections.Generic.Dictionary<string, string>? ParseQuery(this System.Uri uri) { }
+        public static System.Collections.Generic.Dictionary<string, string> ParseQuery(this System.Uri uri) { }
     }
 }
 namespace EasyNetQ.Persistent

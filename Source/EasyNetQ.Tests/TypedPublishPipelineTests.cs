@@ -14,7 +14,7 @@ public class TypedPublishPipelineTests
     [DeliveryMode(isPersistent: false)]
     private sealed class TransientMessage
     {
-        public string? Text { get; set; }
+        public string Text { get; set; } = "";
     }
 
     [Fact]

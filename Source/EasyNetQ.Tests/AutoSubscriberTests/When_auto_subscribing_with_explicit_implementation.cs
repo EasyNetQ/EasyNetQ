@@ -118,16 +118,16 @@ public class When_auto_subscribing_with_explicit_implementation : IAsyncLifetime
 
     private sealed class MessageA
     {
-        public string? Text { get; set; }
+        public string Text { get; set; } = "";
     }
 
     private sealed class MessageB
     {
-        public string? Text { get; set; }
+        public string Text { get; set; } = "";
     }
 
     private sealed class MessageC
     {
-        public string? Text { get; set; }
+        public string Text { get; set; } = "";
     }
 }

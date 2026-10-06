@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
 namespace EasyNetQ.Hosepipe;
@@ -37,7 +38,7 @@ public class Arguments
         arguments.Add(argument);
         if (argument.HasKey)
         {
-            keys.Add(argument.Key!, argument);
+            keys.Add(argument.Key, argument);
         }
     }
 
@@ -102,6 +103,7 @@ public class Argument
 
     public string Value { get; private set; }
     public string? Key { get; private set; }
+    [MemberNotNullWhen(true, nameof(Key))]
     public bool HasKey { get; private set; }
 }
 

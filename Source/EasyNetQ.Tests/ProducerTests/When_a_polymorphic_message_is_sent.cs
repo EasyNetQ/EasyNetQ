@@ -65,11 +65,11 @@ public class When_a_polymorphic_message_is_sent : IAsyncLifetime
 
 public interface IMyMessageInterface
 {
-    string? Text { get; set; }
+    string Text { get; set; }
 }
 
 public class MyImplementation : IMyMessageInterface
 {
-    public string? Text { get; set; }
-    public string? NotInInterface { get; set; }
+    public string Text { get; set; } = "";
+    public string NotInInterface { get; set; } = "";
 }

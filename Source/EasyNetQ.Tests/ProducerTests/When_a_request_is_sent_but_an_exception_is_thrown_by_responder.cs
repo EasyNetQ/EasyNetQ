@@ -73,7 +73,7 @@ public class When_a_request_is_sent_but_an_exception_is_thrown_by_responder : IA
         }); // ,"Why you are so bad with me?"
     }
 
-    private async Task DeliverMessageAsync(string exceptionMessage)
+    private async Task DeliverMessageAsync(string? exceptionMessage)
     {
         var properties = new BasicProperties
         {

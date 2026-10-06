@@ -28,7 +28,7 @@ public class RabbitMQFixture : IAsyncLifetime, IDisposable
     private IManagementClient? _managementClient;
     public IManagementClient ManagementClient
     {
-        get => _managementClient!;
+        get => _managementClient ?? throw new InvalidOperationException("RabbitMQFixture is not initialized");
         private set
         {
             _managementClient?.Dispose();
@@ -66,23 +66,23 @@ public class RabbitMQFixture : IAsyncLifetime, IDisposable
 
     public virtual void Dispose()
     {
-        ManagementClient?.Dispose();
+        _managementClient?.Dispose();
         dockerProxy.Dispose();
     }
 
     private async Task DisposeAsync(CancellationToken cancellationToken)
     {
-        ManagementClient?.Dispose();
+        _managementClient?.Dispose();
         await dockerProxy.StopContainerAsync(ContainerName, cancellationToken);
         await dockerProxy.RemoveContainerAsync(ContainerName, cancellationToken);
-        if (dockerEngineOsPlatform == OSPlatform.Linux || dockerEngineOsPlatform == OSPlatform.OSX)
-            await dockerProxy.DeleteNetworkAsync(dockerNetworkName!, cancellationToken);
+        if (dockerNetworkName != null)
+            await dockerProxy.DeleteNetworkAsync(dockerNetworkName, cancellationToken);
     }
 
     private async Task CreateNetworkAsync(CancellationToken cancellationToken)
     {
-        if (dockerEngineOsPlatform == OSPlatform.Linux || dockerEngineOsPlatform == OSPlatform.OSX)
-            await dockerProxy.CreateNetworkAsync(dockerNetworkName!, cancellationToken);
+        if (dockerNetworkName != null)
+            await dockerProxy.CreateNetworkAsync(dockerNetworkName, cancellationToken);
     }
 
     private async Task PullImageAsync(CancellationToken cancellationToken)

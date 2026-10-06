@@ -12,17 +12,17 @@ public static class UriExtensions
     /// Parse a query string
     /// There could be multiple values per key, but it doesn't matter for configuration purposes
     /// </summary>
-    /// <returns>A collection of parsed keys and values, null if there are no entries.</returns>
-    public static Dictionary<string, string>? ParseQuery(this Uri uri)
+    /// <returns>A collection of parsed keys and values, empty if there are no entries.</returns>
+    public static Dictionary<string, string> ParseQuery(this Uri uri)
     {
+        var query = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
         var queryString = uri.Query;
         if (string.IsNullOrEmpty(queryString) || queryString == "?")
-            return null;
+            return query;
 
         if (queryString[0] == '?')
             queryString = queryString.Substring(1);
 
-        var query = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
         var keyValues = queryString.Split(['&'], StringSplitOptions.RemoveEmptyEntries);
         foreach (var keyValue in keyValues)
         {
