@@ -77,13 +77,13 @@ public class AdvancedBusEventHandlersTests : IDisposable
     private bool connectedCalled;
     private bool disconnectedCalled;
     private bool blockedCalled;
-    private BlockedEventArgs blockedEventArgs;
+    private BlockedEventArgs? blockedEventArgs;
     private bool unBlockedCalled;
     private bool messageReturnedCalled;
-    private MessageReturnedEventArgs messageReturnedEventArgs;
+    private MessageReturnedEventArgs? messageReturnedEventArgs;
     private readonly RabbitAdvancedBus advancedBus;
-    private ConnectedEventArgs connectedEventArgs;
-    private DisconnectedEventArgs disconnectedEventArgs;
+    private ConnectedEventArgs? connectedEventArgs;
+    private DisconnectedEventArgs? disconnectedEventArgs;
 
     [Fact]
     public async Task AdvancedBusEventHandlers_Blocked_handler_is_called()
@@ -101,7 +101,7 @@ public class AdvancedBusEventHandlersTests : IDisposable
     {
         await eventBus.PublishAsync(new ConnectionRecoveredEvent(PersistentConnectionType.Producer, new AmqpTcpEndpoint()));
         connectedCalled.Should().BeTrue();
-        connectedEventArgs.Hostname.Should().Be("localhost");
+        connectedEventArgs!.Hostname.Should().Be("localhost");
         connectedEventArgs.Port.Should().Be(5672);
     }
 
@@ -110,7 +110,7 @@ public class AdvancedBusEventHandlersTests : IDisposable
     {
         await eventBus.PublishAsync(new ConnectionCreatedEvent(PersistentConnectionType.Producer, new AmqpTcpEndpoint()));
         connectedCalled.Should().BeTrue();
-        connectedEventArgs.Hostname.Should().Be("localhost");
+        connectedEventArgs!.Hostname.Should().Be("localhost");
         connectedEventArgs.Port.Should().Be(5672);
     }
 

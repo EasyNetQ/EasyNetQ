@@ -4,20 +4,20 @@ namespace EasyNetQ.Tests;
 
 public sealed class BasicProperties : IReadOnlyBasicProperties
 {
-    private string contentType;
-    private string contentEncoding;
-    private IDictionary<string, object> headers;
+    private string? contentType;
+    private string? contentEncoding;
+    private IDictionary<string, object?>? headers;
     private DeliveryModes deliveryMode;
     private byte priority;
-    private string correlationId;
-    private string replyTo;
-    private string expiration;
-    private string messageId;
+    private string? correlationId;
+    private string? replyTo;
+    private string? expiration;
+    private string? messageId;
     private AmqpTimestamp timestamp;
-    private string type;
-    private string userId;
-    private string appId;
-    private string clusterId;
+    private string? type;
+    private string? userId;
+    private string? appId;
+    private string? clusterId;
 
     private bool contentTypePresent;
     private bool contentEncodingPresent;
@@ -33,7 +33,7 @@ public sealed class BasicProperties : IReadOnlyBasicProperties
     private bool userIdPresent;
     private bool appIdPresent;
     private bool clusterIdPresent;
-
+#pragma warning disable CS8603
     public string ContentType
     {
         get => contentType;
@@ -54,7 +54,7 @@ public sealed class BasicProperties : IReadOnlyBasicProperties
         }
     }
 
-    public IDictionary<string, object> Headers
+    public IDictionary<string, object?> Headers
     {
         get => headers;
         set
@@ -179,7 +179,7 @@ public sealed class BasicProperties : IReadOnlyBasicProperties
             clusterId = value;
         }
     }
-
+#pragma warning restore CS8603
     public void ClearContentType() => contentTypePresent = false;
 
     public void ClearContentEncoding() => contentEncodingPresent = false;
@@ -238,7 +238,7 @@ public sealed class BasicProperties : IReadOnlyBasicProperties
 
     public PublicationAddress ReplyToAddress
     {
-        get => PublicationAddress.Parse(ReplyTo);
+        get => PublicationAddress.Parse(ReplyTo)!;
         set => ReplyTo = value.ToString();
     }
 

@@ -1,11 +1,10 @@
 using EasyNetQ.Pipeline;
-using EasyNetQ.Consumer;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 
 public class When_a_cancellation_error_occurs_in_the_message_handler : ConsumerTestBase
 {
-    private Exception exception;
+    private Exception? exception;
 
     protected override async Task InitializeAsyncCore()
     {

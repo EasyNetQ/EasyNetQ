@@ -6,11 +6,11 @@ namespace EasyNetQ.Tests.ConsumeTests;
 
 public class When_a_consumer_has_multiple_handlers : IAsyncLifetime
 {
-    private readonly MockBuilder mockBuilder;
-    private IAnimal animalResult;
+    private readonly MockBuilder? mockBuilder;
+    private IAnimal? animalResult;
 
-    private MyMessage myMessageResult;
-    private MyOtherMessage myOtherMessageResult;
+    private MyMessage? myMessageResult;
+    private MyOtherMessage? myOtherMessageResult;
 
     public When_a_consumer_has_multiple_handlers()
     {
@@ -24,7 +24,7 @@ public class When_a_consumer_has_multiple_handlers : IAsyncLifetime
         using var countdownEvent = new CountdownEvent(3);
 
 #pragma warning disable IDISP004
-        await mockBuilder.Bus.Advanced.ConsumeAsync(
+        await mockBuilder!.Bus.Advanced.ConsumeAsync(
 #pragma warning restore IDISP004
             queue,
             x => x.Add<MyMessage>((message, _) =>
@@ -52,7 +52,7 @@ public class When_a_consumer_has_multiple_handlers : IAsyncLifetime
 
     public async ValueTask DisposeAsync()
     {
-        await mockBuilder.DisposeAsync();
+        await mockBuilder!.DisposeAsync();
     }
 
     private async Task DeliverAsync<T>(T message) where T : class
@@ -63,7 +63,7 @@ public class When_a_consumer_has_multiple_handlers : IAsyncLifetime
             Type = new DefaultTypeNameSerializer().Serialize(typeof(T))
         };
 
-        await mockBuilder.Consumers[0].HandleBasicDeliverAsync(
+        await mockBuilder!.Consumers[0].HandleBasicDeliverAsync(
             "consumer_tag",
             0,
             false,

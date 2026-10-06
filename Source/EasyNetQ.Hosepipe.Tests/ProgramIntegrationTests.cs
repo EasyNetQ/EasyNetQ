@@ -80,6 +80,6 @@ public class ProgramIntegrationTests
 
     private sealed class TestMessage
     {
-        public string Text { get; set; }
+        public string? Text { get; set; }
     }
 }

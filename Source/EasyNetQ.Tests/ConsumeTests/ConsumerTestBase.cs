@@ -16,10 +16,10 @@ public abstract class ConsumerTestBase : IAsyncLifetime
     protected ReadOnlyMemory<byte> DeliveredMessageBody;
     protected MessageReceivedInfo DeliveredMessageInfo;
     protected MessageProperties DeliveredMessageProperties;
-    protected byte[] OriginalBody;
+    protected byte[]? OriginalBody;
 
     // populated when a message is delivered
-    protected IBasicProperties OriginalProperties;
+    protected IBasicProperties? OriginalProperties;
 
     protected ConsumerTestBase()
     {

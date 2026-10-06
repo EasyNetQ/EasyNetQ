@@ -51,7 +51,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
 
             string destinationQueueName = conventions.RpcRoutingKeyNamingConvention.Invoke(typeof(RabbitRequest));
 
-            Exception e =
+            Exception? e =
                 await Record.ExceptionAsync(() => bus.Advanced.QueueDeclareAsync(destinationQueueName, c => c.WithQueueType("quorum"), TestContext.Current.CancellationToken));
 
             e.Should().BeOfType<OperationInterruptedException>();
@@ -78,7 +78,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
 
             string destinationQueueName = conventions.RpcRoutingKeyNamingConvention.Invoke(typeof(BunnyRequest));
 
-            Exception e =
+            Exception? e =
                 await Record.ExceptionAsync(() => bus.Advanced.QueueDeclareAsync(destinationQueueName, c => c.WithQueueType("classic"), TestContext.Current.CancellationToken));
 
             e.Should().BeOfType<OperationInterruptedException>();

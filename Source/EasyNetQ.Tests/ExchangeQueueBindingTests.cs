@@ -42,10 +42,10 @@ public class When_a_queue_is_declared : IAsyncLifetime
             Arg.Is(false),
             Arg.Is(true),
             Arg.Is(true),
-            Arg.Is<IDictionary<string, object>>(
-                args => (int)args[Argument.MessageTtl] == 1000 &&
-                        (int)args[Argument.Expires] == 2000 &&
-                        (byte)args[Argument.MaxPriority] == 10
+            Arg.Is<IDictionary<string, object?>>(
+                args => (int)args[Argument.MessageTtl]! == 1000 &&
+                        (int)args[Argument.Expires]! == 2000 &&
+                        (byte)args[Argument.MaxPriority]! == 10
             ),
             Arg.Any<bool>(),
             Arg.Any<bool>(),
@@ -102,12 +102,12 @@ public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange : IAsyncLi
             Arg.Is(false),
             Arg.Is(true),
             Arg.Is(true),
-            Arg.Is<IDictionary<string, object>>(
-                args => (int)args[Argument.MessageTtl] == 1000 &&
-                        (int)args[Argument.Expires] == 2000 &&
-                        (byte)args[Argument.MaxPriority] == 10 &&
-                        (string)args[Argument.DeadLetterExchange] == "my_exchange" &&
-                        (string)args[Argument.DeadLetterRoutingKey] == "my_routing_key"
+            Arg.Is<IDictionary<string, object?>>(
+                args => (int)args[Argument.MessageTtl]! == 1000 &&
+                        (int)args[Argument.Expires]! == 2000 &&
+                        (byte)args[Argument.MaxPriority]! == 10 &&
+                        (string)args[Argument.DeadLetterExchange]! == "my_exchange" &&
+                        (string)args[Argument.DeadLetterRoutingKey]! == "my_routing_key"
             ),
             Arg.Any<bool>(),
             Arg.Any<bool>(),
@@ -163,12 +163,12 @@ public class When_a_queue_is_declared_With_EmptyDeadLetterExchange : IAsyncLifet
             Arg.Is(false),
             Arg.Is(true),
             Arg.Is(true),
-            Arg.Is<IDictionary<string, object>>(
-                args => (int)args[Argument.MessageTtl] == 1000 &&
-                        (int)args[Argument.Expires] == 2000 &&
-                        (byte)args[Argument.MaxPriority] == 10 &&
-                        (string)args[Argument.DeadLetterExchange] == "" &&
-                        (string)args[Argument.DeadLetterRoutingKey] == "my_queue2"
+            Arg.Is<IDictionary<string, object?>>(
+                args => (int)args[Argument.MessageTtl]! == 1000 &&
+                        (int)args[Argument.Expires]! == 2000 &&
+                        (byte)args[Argument.MaxPriority]! == 10 &&
+                        (string)args[Argument.DeadLetterExchange]! == "" &&
+                        (string)args[Argument.DeadLetterRoutingKey]! == "my_queue2"
             ),
             Arg.Any<bool>(),
             Arg.Any<bool>(),
@@ -269,7 +269,7 @@ public class When_an_exchange_is_declared : IAsyncLifetime
             Arg.Is(ExchangeType.Direct),
             Arg.Is(false),
             Arg.Is(true),
-            Arg.Is<IDictionary<string, object>>(c => (string)c["alternate-exchange"] == "my.alternate.exchange"),
+            Arg.Is<IDictionary<string, object?>>(c => (string)c["alternate-exchange"]! == "my.alternate.exchange"),
             Arg.Any<bool>(),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()
@@ -380,7 +380,7 @@ public class When_a_queue_is_bound_to_an_exchange : IAsyncLifetime
             Arg.Is("my_queue"),
             Arg.Is("my_exchange"),
             Arg.Is("my_routing_key"),
-            Arg.Is((IDictionary<string, object>)null),
+            Arg.Is((IDictionary<string, object?>?)null),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()
         );
@@ -433,7 +433,7 @@ public class When_a_queue_is_bound_to_an_exchange_with_headers : IAsyncLifetime
             Arg.Is("my_queue"),
             Arg.Is("my_exchange"),
             Arg.Is("my_routing_key"),
-            Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(expectedHeaders)),
+            Arg.Is<Dictionary<string, object?>>(x => x!.SequenceEqual(expectedHeaders)),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()
         );

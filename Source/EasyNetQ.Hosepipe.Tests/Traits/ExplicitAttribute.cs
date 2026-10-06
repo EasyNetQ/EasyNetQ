@@ -16,5 +16,5 @@ public class ExplicitAttribute : CategoryAttribute
         SkipReason = skipReason;
     }
 
-    public string SkipReason { get; set; }
+    public string? SkipReason { get; set; }
 }

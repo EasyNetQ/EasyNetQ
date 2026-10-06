@@ -58,7 +58,7 @@ public class When_subscribe_is_called : IAsyncLifetime
             Arg.Is(true), // durable
             Arg.Is(false), // exclusive
             Arg.Is(false), // autoDelete
-            Arg.Any<IDictionary<string, object>>(),
+            Arg.Any<IDictionary<string, object?>>(),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()
         );
@@ -72,7 +72,7 @@ public class When_subscribe_is_called : IAsyncLifetime
             Arg.Is(ExchangeType.Topic),
             Arg.Is(true),
             Arg.Is(false),
-            Arg.Is((IDictionary<string, object>)null),
+            Arg.Is((IDictionary<string, object?>?)null),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()
         );
@@ -85,7 +85,7 @@ public class When_subscribe_is_called : IAsyncLifetime
             Arg.Is(queueName),
             Arg.Is(typeName),
             Arg.Is("#"),
-            Arg.Is((IDictionary<string, object>)null),
+            Arg.Is((IDictionary<string, object?>?)null),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()
         );
@@ -107,7 +107,7 @@ public class When_subscribe_is_called : IAsyncLifetime
             Arg.Any<string>(),
             Arg.Is(true),
             Arg.Is(false),
-            Arg.Any<IDictionary<string, object>>(),
+            Arg.Any<IDictionary<string, object?>>(),
             Arg.Any<IAsyncBasicConsumer>(),
             Arg.Any<CancellationToken>()
         );
@@ -193,11 +193,11 @@ public class When_subscribe_with_configuration_is_called
             Arg.Is(durable),
             Arg.Is(false),
             Arg.Is(autoDelete),
-            Arg.Is<IDictionary<string, object>>(
-                x => (!expires.HasValue || expires.Value == (int)x[Argument.Expires]) &&
-                     (!maxPriority.HasValue || maxPriority.Value == (byte)x[Argument.MaxPriority]) &&
-                     (!maxLength.HasValue || maxLength.Value == (int)x[Argument.MaxLength]) &&
-                     (!maxLengthBytes.HasValue || maxLengthBytes.Value == (int)x[Argument.MaxLengthBytes])
+            Arg.Is<IDictionary<string, object?>>(
+                x => (!expires.HasValue || expires.Value == (int)x[Argument.Expires]!) &&
+                     (!maxPriority.HasValue || maxPriority.Value == (byte)x[Argument.MaxPriority]!) &&
+                     (!maxLength.HasValue || maxLength.Value == (int)x[Argument.MaxLength]!) &&
+                     (!maxLengthBytes.HasValue || maxLengthBytes.Value == (int)x[Argument.MaxLengthBytes]!)
             ),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()
@@ -210,7 +210,7 @@ public class When_subscribe_with_configuration_is_called
             Arg.Any<string>(),
             Arg.Is(true),
             Arg.Is(isExclusive),
-            Arg.Is<IDictionary<string, object>>(x => priority == (int)x["x-priority"]),
+            Arg.Is<IDictionary<string, object?>>(x => priority == (int)x["x-priority"]!),
             Arg.Any<IAsyncBasicConsumer>(),
             Arg.Any<CancellationToken>()
         );
@@ -220,10 +220,10 @@ public class When_subscribe_with_configuration_is_called
 
         // Assert that binding got configured correctly
         await mockBuilder.Channels[1].Received().QueueBindAsync(
-            Arg.Is(queueName),
+            Arg.Is(queueName!),
             Arg.Is("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
             Arg.Is(topic ?? "#"),
-            Arg.Is((IDictionary<string, object>)null),
+            Arg.Is((IDictionary<string, object?>?)null),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()
         );
@@ -237,9 +237,9 @@ public class When_a_message_is_delivered : IAsyncLifetime
     private const string correlationId = "the_correlation_id";
     private const string consumerTag = "the_consumer_tag";
     private const ulong deliveryTag = 123;
-    private MyMessage deliveredMessage;
+    private MyMessage? deliveredMessage;
     private readonly MockBuilder mockBuilder;
-    private MyMessage originalMessage;
+    private MyMessage? originalMessage;
 
     public When_a_message_is_delivered()
     {
@@ -295,7 +295,7 @@ public class When_a_message_is_delivered : IAsyncLifetime
     public void Should_deliver_message()
     {
         deliveredMessage.Should().NotBeNull();
-        deliveredMessage.Text.Should().Be(originalMessage.Text);
+        deliveredMessage.Text.Should().Be(originalMessage!.Text);
     }
 
     [Fact]
@@ -314,11 +314,11 @@ public class When_the_handler_throws_an_exception : IAsyncLifetime
     private const ulong deliveryTag = 123;
     private readonly Exception originalException = new("Some exception message");
 
-    private MyMessage originalMessage;
-    private ConsumeContext basicDeliverEventArgs;
+    private MyMessage? originalMessage;
+    private ConsumeContext? basicDeliverEventArgs;
     private readonly IConsumeErrorStrategy consumeErrorStrategy;
     private readonly MockBuilder mockBuilder;
-    private Exception raisedException;
+    private Exception? raisedException;
 
     public When_the_handler_throws_an_exception()
     {

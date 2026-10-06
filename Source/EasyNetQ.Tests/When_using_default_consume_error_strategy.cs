@@ -63,7 +63,7 @@ public class When_using_default_consume_error_strategy
             true,
             false,
             false,
-            Arg.Is<IDictionary<string, object>>(x => x.ContainsKey(Argument.QueueType) && x[Argument.QueueType].Equals(QueueType.Quorum)),
+            Arg.Is<IDictionary<string, object?>>(x => x.ContainsKey(Argument.QueueType) && x[Argument.QueueType]!.Equals(QueueType.Quorum)),
             cancellationToken: CancellationToken.None
         );
         await mockBuilder.Channels[0].Received().QueueBindAsync(
@@ -101,7 +101,7 @@ public class When_using_default_consume_error_strategy
             true,
             Arg.Is(false),
             Arg.Is(false),
-            Arg.Is<IDictionary<string, object>>(x => x.ContainsKey(Argument.QueueType) && x[Argument.QueueType].Equals(QueueType.Quorum)),
+            Arg.Is<IDictionary<string, object?>>(x => x.ContainsKey(Argument.QueueType) && x[Argument.QueueType]!.Equals(QueueType.Quorum)),
             Arg.Any<bool>(),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()

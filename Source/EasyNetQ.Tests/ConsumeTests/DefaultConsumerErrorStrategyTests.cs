@@ -136,7 +136,7 @@ public class DefaultConsumerErrorStrategyTests
         using var connection = Substitute.For<IConsumerConnection>();
         var channel = Substitute.For<IChannel>();
         IDictionary<string, object?>? declaredArguments = null;
-        channel.QueueDeclareAsync(Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<bool>(), Arg.Any<bool>(), Arg.Do<IDictionary<string, object?>>(a => declaredArguments = a), Arg.Any<bool>(), Arg.Any<bool>(), Arg.Any<CancellationToken>());
+        await channel.QueueDeclareAsync(Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<bool>(), Arg.Any<bool>(), Arg.Do<IDictionary<string, object?>>(a => declaredArguments = a), Arg.Any<bool>(), Arg.Any<bool>(), Arg.Any<CancellationToken>());
 #pragma warning disable IDISP004
         connection.CreateChannelAsync(Arg.Any<CreateChannelOptions>(), Arg.Any<CancellationToken>()).Returns(channel);
 #pragma warning restore IDISP004
@@ -156,9 +156,11 @@ public class DefaultConsumerErrorStrategyTests
         using var connection = Substitute.For<IConsumerConnection>();
         var channel = Substitute.For<IChannel>();
         string? declaredQueue = null, declaredExchange = null, boundQueue = null, boundExchange = null;
+#pragma warning disable CS4014
         channel.QueueDeclareAsync(Arg.Do<string>(q => declaredQueue = q), Arg.Any<bool>(), Arg.Any<bool>(), Arg.Any<bool>(), Arg.Any<IDictionary<string, object?>>(), Arg.Any<bool>(), Arg.Any<bool>(), Arg.Any<CancellationToken>());
         channel.ExchangeDeclareAsync(Arg.Do<string>(e => declaredExchange = e), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<bool>(), Arg.Any<IDictionary<string, object?>>(), Arg.Any<bool>(), Arg.Any<bool>(), Arg.Any<CancellationToken>());
         channel.QueueBindAsync(Arg.Do<string>(q => boundQueue = q), Arg.Do<string>(e => boundExchange = e), Arg.Any<string>(), Arg.Any<IDictionary<string, object?>>(), Arg.Any<bool>(), Arg.Any<CancellationToken>());
+#pragma warning restore CS4014
 #pragma warning disable IDISP004
         connection.CreateChannelAsync(Arg.Any<CreateChannelOptions>(), Arg.Any<CancellationToken>()).Returns(channel);
 #pragma warning restore IDISP004
