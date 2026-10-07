@@ -101,11 +101,12 @@ public interface IReceiveConfiguration
     IReceiveConfiguration WithSingleActiveConsumer(bool singleActiveConsumer = true);
 }
 
-internal class ReceiveConfiguration : IReceiveConfiguration
+internal class ReceiveConfiguration : IReceiveConfiguration, IConsumerDispatcherConcurrencyConfiguration
 {
     public bool AutoDelete { get; private set; }
     public int Priority { get; private set; }
     public ushort PrefetchCount { get; private set; }
+    public ushort? ConsumerDispatcherConcurrency { get; set; }
     public bool IsExclusive { get; private set; }
     public bool Durable { get; private set; }
 

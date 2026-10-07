@@ -39,7 +39,7 @@ internal class PerQueueConsumeConfiguration : IPerQueueConsumeConfiguration
     }
 }
 
-internal class ConsumeConfiguration : IConsumeConfiguration
+internal class ConsumeConfiguration : IConsumeConfiguration, IConsumerDispatcherConcurrencyConfiguration
 {
     private readonly IHandlerCollectionFactory handlerCollectionFactory;
 
@@ -54,6 +54,7 @@ internal class ConsumeConfiguration : IConsumeConfiguration
     }
 
     public ushort PrefetchCount { get; private set; }
+    public ushort? ConsumerDispatcherConcurrency { get; set; }
     public List<Tuple<Queue, MessageHandler, PerQueueConsumeConfiguration>> PerQueueConsumeConfigurations { get; }
 
     public List<Tuple<Queue, IHandlerCollection, PerQueueConsumeConfiguration>> PerQueueTypedConsumeConfigurations { get; }

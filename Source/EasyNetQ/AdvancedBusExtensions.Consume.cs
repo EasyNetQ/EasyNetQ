@@ -405,12 +405,13 @@ public static partial class AdvancedBusExtensions
         });
     }
 
-    private class SimpleConsumeConfiguration : ISimpleConsumeConfiguration
+    private class SimpleConsumeConfiguration : ISimpleConsumeConfiguration, IConsumerDispatcherConcurrencyConfiguration
     {
         public bool AutoAck { get; private set; }
         public string ConsumerTag { get; private set; }
         public bool? IsExclusive { get; private set; }
         public ushort? PrefetchCount { get; private set; }
+        public ushort? ConsumerDispatcherConcurrency { get; set; }
         public IDictionary<string, object> Arguments { get; private set; }
 
         public ISimpleConsumeConfiguration WithAutoAck()

@@ -56,7 +56,7 @@ public interface IResponderConfiguration
     IResponderConfiguration WithQueueType(string queueType = QueueType.Classic);
 }
 
-internal class ResponderConfiguration : IResponderConfiguration
+internal class ResponderConfiguration : IResponderConfiguration, IConsumerDispatcherConcurrencyConfiguration
 {
     public ResponderConfiguration(ushort defaultPrefetchCount, string queueType = null)
     {
@@ -70,6 +70,7 @@ internal class ResponderConfiguration : IResponderConfiguration
     }
 
     public ushort PrefetchCount { get; private set; }
+    public ushort? ConsumerDispatcherConcurrency { get; set; }
     public string QueueName { get; private set; }
     public string QueueType { get; private set; }
     public bool Durable { get; private set; } = true;

@@ -134,7 +134,7 @@ public interface ISubscriptionConfiguration
     ISubscriptionConfiguration WithAutoAck();
 }
 
-internal class SubscriptionConfiguration : ISubscriptionConfiguration
+internal class SubscriptionConfiguration : ISubscriptionConfiguration, IConsumerDispatcherConcurrencyConfiguration
 {
     public IList<string> Topics { get; }
     public bool AutoDelete { get; private set; }
@@ -147,6 +147,7 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration
     public IDictionary<string, object> QueueArguments { get; private set; }
     public IDictionary<string, object> ExchangeArguments { get; private set; }
     public bool AutoAck { get; private set; }
+    public ushort? ConsumerDispatcherConcurrency { get; set; }
 
     public SubscriptionConfiguration(ushort defaultPrefetchCount, string queueType = null, string exchangeType = null)
     {
