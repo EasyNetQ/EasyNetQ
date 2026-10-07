@@ -360,6 +360,7 @@ namespace EasyNetQ
     {
         EasyNetQ.IConsumeConfiguration ForQueue(in EasyNetQ.Topology.Queue queue, EasyNetQ.Consumer.MessageHandler handler, System.Action<EasyNetQ.IPerQueueConsumeConfiguration> configure);
         EasyNetQ.IConsumeConfiguration ForQueue(in EasyNetQ.Topology.Queue queue, System.Action<EasyNetQ.Consumer.IHandlerRegistration> register, System.Action<EasyNetQ.IPerQueueConsumeConfiguration> configure);
+        EasyNetQ.IConsumeConfiguration WithConsumerDispatcherConcurrency(ushort consumerDispatcherConcurrency);
         EasyNetQ.IConsumeConfiguration WithPrefetchCount(ushort prefetchCount);
     }
     public interface IConventions
@@ -483,6 +484,7 @@ namespace EasyNetQ
     {
         EasyNetQ.IReceiveConfiguration AsExclusive(bool isExclusive = true);
         EasyNetQ.IReceiveConfiguration WithAutoDelete(bool autoDelete = true);
+        EasyNetQ.IReceiveConfiguration WithConsumerDispatcherConcurrency(ushort consumerDispatcherConcurrency);
         EasyNetQ.IReceiveConfiguration WithDurable(bool durable = true);
         EasyNetQ.IReceiveConfiguration WithExpires(int expires);
         EasyNetQ.IReceiveConfiguration WithMaxLength(int maxLength);
@@ -509,6 +511,7 @@ namespace EasyNetQ
     }
     public interface IResponderConfiguration
     {
+        EasyNetQ.IResponderConfiguration WithConsumerDispatcherConcurrency(ushort consumerDispatcherConcurrency);
         EasyNetQ.IResponderConfiguration WithDurable(bool durable = true);
         EasyNetQ.IResponderConfiguration WithExpires(int expires);
         EasyNetQ.IResponderConfiguration WithMaxPriority(byte priority);
@@ -545,6 +548,7 @@ namespace EasyNetQ
     {
         EasyNetQ.ISimpleConsumeConfiguration WithArgument(string name, object value);
         EasyNetQ.ISimpleConsumeConfiguration WithAutoAck();
+        EasyNetQ.ISimpleConsumeConfiguration WithConsumerDispatcherConcurrency(ushort consumerDispatcherConcurrency);
         EasyNetQ.ISimpleConsumeConfiguration WithConsumerTag(string consumerTag);
         EasyNetQ.ISimpleConsumeConfiguration WithExclusive(bool isExclusive = true);
         EasyNetQ.ISimpleConsumeConfiguration WithPrefetchCount(ushort prefetchCount);
@@ -555,6 +559,7 @@ namespace EasyNetQ
         EasyNetQ.ISubscriptionConfiguration WithAlternateExchange(string alternateExchange);
         EasyNetQ.ISubscriptionConfiguration WithAutoAck();
         EasyNetQ.ISubscriptionConfiguration WithAutoDelete(bool autoDelete = true);
+        EasyNetQ.ISubscriptionConfiguration WithConsumerDispatcherConcurrency(ushort consumerDispatcherConcurrency);
         EasyNetQ.ISubscriptionConfiguration WithDurable(bool durable = true);
         EasyNetQ.ISubscriptionConfiguration WithExchangeType(string exchangeType);
         EasyNetQ.ISubscriptionConfiguration WithExpires(int expires);
@@ -1011,6 +1016,7 @@ namespace EasyNetQ.AutoSubscribe
     {
         public SubscriptionConfigurationAttribute() { }
         public bool AutoDelete { get; set; }
+        public ushort ConsumerDispatcherConcurrency { get; set; }
         public int Expires { get; set; }
         public ushort PrefetchCount { get; set; }
         public int Priority { get; set; }
@@ -1110,6 +1116,8 @@ namespace EasyNetQ.Consumer
     public class ConsumerConfiguration
     {
         public ConsumerConfiguration(ushort prefetchCount, System.Collections.Generic.IReadOnlyDictionary<EasyNetQ.Topology.Queue, EasyNetQ.Consumer.PerQueueConsumerConfiguration> perQueueConfigurations) { }
+        public ConsumerConfiguration(ushort prefetchCount, System.Collections.Generic.IReadOnlyDictionary<EasyNetQ.Topology.Queue, EasyNetQ.Consumer.PerQueueConsumerConfiguration> perQueueConfigurations, ushort? consumerDispatcherConcurrency) { }
+        public ushort? ConsumerDispatcherConcurrency { get; }
         public System.Collections.Generic.IReadOnlyDictionary<EasyNetQ.Topology.Queue, EasyNetQ.Consumer.PerQueueConsumerConfiguration> PerQueueConfigurations { get; }
         public ushort PrefetchCount { get; }
     }

@@ -16,6 +16,14 @@ public interface IResponderConfiguration
     IResponderConfiguration WithPrefetchCount(ushort prefetchCount);
 
     /// <summary>
+    /// Configures the consumer's dispatcher concurrency, overriding <see cref="ConnectionConfiguration.ConsumerDispatcherConcurrency"/> for this consumer
+    /// </summary>
+    /// <remarks>For concurrency greater than one, the consumer could process messages in any order, not in the order it receives them</remarks>
+    /// <param name="consumerDispatcherConcurrency">Consumer's dispatcher concurrency value, greater than zero</param>
+    /// <returns>Reference to the same <see cref="IResponderConfiguration"/> to allow methods chaining</returns>
+    IResponderConfiguration WithConsumerDispatcherConcurrency(ushort consumerDispatcherConcurrency);
+
+    /// <summary>
     /// Sets the queue name
     /// </summary>
     /// <param name="queueName"></param>
@@ -70,6 +78,7 @@ internal class ResponderConfiguration : IResponderConfiguration
     }
 
     public ushort PrefetchCount { get; private set; }
+    public ushort? ConsumerDispatcherConcurrency { get; private set; }
     public string QueueName { get; private set; }
     public string QueueType { get; private set; }
     public bool Durable { get; private set; } = true;
@@ -79,6 +88,12 @@ internal class ResponderConfiguration : IResponderConfiguration
     public IResponderConfiguration WithPrefetchCount(ushort prefetchCount)
     {
         PrefetchCount = prefetchCount;
+        return this;
+    }
+
+    public IResponderConfiguration WithConsumerDispatcherConcurrency(ushort consumerDispatcherConcurrency)
+    {
+        ConsumerDispatcherConcurrency = consumerDispatcherConcurrency;
         return this;
     }
 

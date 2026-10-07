@@ -37,6 +37,14 @@ public interface IReceiveConfiguration
     IReceiveConfiguration WithPrefetchCount(ushort prefetchCount);
 
     /// <summary>
+    /// Configures the consumer's dispatcher concurrency, overriding <see cref="ConnectionConfiguration.ConsumerDispatcherConcurrency"/> for this consumer
+    /// </summary>
+    /// <remarks>For concurrency greater than one, the consumer could process messages in any order, not in the order it receives them</remarks>
+    /// <param name="consumerDispatcherConcurrency">Consumer's dispatcher concurrency value, greater than zero</param>
+    /// <returns>Returns a reference to itself</returns>
+    IReceiveConfiguration WithConsumerDispatcherConcurrency(ushort consumerDispatcherConcurrency);
+
+    /// <summary>
     /// Expiry time can be set for a given queue by setting the x-expires argument to queue.declare, or by setting the expires policy.
     /// This controls for how long a queue can be unused before it is automatically deleted.
     /// Unused means the queue has no consumers, the queue has not been redeclared, and basic.get has not been invoked for a duration of at least the expiration period.
@@ -106,6 +114,7 @@ internal class ReceiveConfiguration : IReceiveConfiguration
     public bool AutoDelete { get; private set; }
     public int Priority { get; private set; }
     public ushort PrefetchCount { get; private set; }
+    public ushort? ConsumerDispatcherConcurrency { get; private set; }
     public bool IsExclusive { get; private set; }
     public bool Durable { get; private set; }
 
@@ -142,6 +151,12 @@ internal class ReceiveConfiguration : IReceiveConfiguration
     public IReceiveConfiguration WithPrefetchCount(ushort prefetchCount)
     {
         PrefetchCount = prefetchCount;
+        return this;
+    }
+
+    public IReceiveConfiguration WithConsumerDispatcherConcurrency(ushort consumerDispatcherConcurrency)
+    {
+        ConsumerDispatcherConcurrency = consumerDispatcherConcurrency;
         return this;
     }
 

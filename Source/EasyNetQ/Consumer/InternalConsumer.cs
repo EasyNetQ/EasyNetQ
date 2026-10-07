@@ -148,7 +148,7 @@ public class InternalConsumer : IInternalConsumer
             {
                 try
                 {
-                    channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
+                    channel = await connection.CreateChannelAsync(CreateConsumerChannelOptions(), cancellationToken);
                     await channel.BasicQosAsync(0, configuration.PrefetchCount, false, cancellationToken);
                 }
                 catch (Exception exception)
@@ -351,6 +351,19 @@ public class InternalConsumer : IInternalConsumer
         {
             await CancelledAsync.Invoke(this, new InternalConsumerCancelledEventArgs(cancelled, active));
         }
+    }
+
+    private CreateChannelOptions CreateConsumerChannelOptions()
+    {
+        // Passing no options keeps the connection-wide concurrency: the CreateChannelOptions constructor defaults it to 1, not null.
+        // A consumer channel never publishes, so publisher confirmations stay disabled as they are without options.
+        if (configuration.ConsumerDispatcherConcurrency == null) return null;
+
+        return new CreateChannelOptions(
+            publisherConfirmationsEnabled: false,
+            publisherConfirmationTrackingEnabled: false,
+            consumerDispatchConcurrency: configuration.ConsumerDispatcherConcurrency
+        );
     }
 
     private static bool IsChannelClosedWithSoftError(IChannel channel)
