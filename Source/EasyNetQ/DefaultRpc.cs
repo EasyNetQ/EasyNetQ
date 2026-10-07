@@ -308,7 +308,7 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
             c =>
             {
                 c.WithPrefetchCount(responderConfiguration.PrefetchCount);
-                if (responderConfiguration.ConsumerDispatcherConcurrency.HasValue)
+                if (responderConfiguration.ConsumerDispatcherConcurrency > 0)
                     c.WithConsumerDispatcherConcurrency(responderConfiguration.ConsumerDispatcherConcurrency.Value);
             }
         );

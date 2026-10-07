@@ -46,6 +46,7 @@ public class When_publish_and_subscribe_with_consumer_dispatcher_concurrency : I
         var sequential = new InFlightTracker(MessagesCount, 1);
         var parallel = new InFlightTracker(MessagesCount, ParallelDispatcherConcurrency);
         var inherited = new InFlightTracker(MessagesCount, ConnectionDispatcherConcurrency);
+        var zero = new InFlightTracker(MessagesCount, ConnectionDispatcherConcurrency);
 
         await using (await bus.PubSub.SubscribeAsync<Message>(
             Guid.NewGuid().ToString(), sequential.HandleAsync, c => c.WithConsumerDispatcherConcurrency(1), cts.Token
@@ -56,12 +57,16 @@ public class When_publish_and_subscribe_with_consumer_dispatcher_concurrency : I
         await using (await bus.PubSub.SubscribeAsync<Message>(
             Guid.NewGuid().ToString(), inherited.HandleAsync, _ => { }, cts.Token
         ))
+        await using (await bus.PubSub.SubscribeAsync<Message>(
+            Guid.NewGuid().ToString(), zero.HandleAsync, c => c.WithConsumerDispatcherConcurrency(0), cts.Token
+        ))
         {
             await bus.PubSub.PublishBatchAsync(messages, cts.Token);
 
             await sequential.WaitAllReceivedAsync(cts.Token);
             await parallel.WaitAllReceivedAsync(cts.Token);
             await inherited.WaitAllReceivedAsync(cts.Token);
+            await zero.WaitAllReceivedAsync(cts.Token);
         }
 
         sequential.MaxInFlight.Should().Be(1);
@@ -72,6 +77,9 @@ public class When_publish_and_subscribe_with_consumer_dispatcher_concurrency : I
 
         inherited.MaxInFlight.Should().Be(ConnectionDispatcherConcurrency, "a subscription without its own value keeps the connection-wide concurrency");
         inherited.ReceivedMessages.Should().BeEquivalentTo(messages);
+
+        zero.MaxInFlight.Should().Be(ConnectionDispatcherConcurrency, "0 is not forwarded, as in the AutoSubscriber attribute, so the connection-wide concurrency applies");
+        zero.ReceivedMessages.Should().BeEquivalentTo(messages);
     }
 
     private sealed class InFlightTracker

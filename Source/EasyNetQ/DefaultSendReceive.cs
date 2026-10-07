@@ -92,7 +92,7 @@ public class DefaultSendReceive : ISendReceive
                     .WithPriority(receiveConfiguration.Priority)
                     .WithExclusive(receiveConfiguration.IsExclusive)
                     .WithConsumerTag(conventions.ConsumerTagConvention());
-                if (receiveConfiguration.ConsumerDispatcherConcurrency.HasValue)
+                if (receiveConfiguration.ConsumerDispatcherConcurrency > 0)
                     c.WithConsumerDispatcherConcurrency(receiveConfiguration.ConsumerDispatcherConcurrency.Value);
             }
         );
