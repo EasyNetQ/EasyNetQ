@@ -107,6 +107,8 @@ public class DefaultPubSub : IPubSub
                 .WithConsumerTag(conventions.ConsumerTagConvention());
                 if (subscriptionConfiguration.AutoAck)
                     c.WithAutoAck();
+                if (subscriptionConfiguration.ConsumerDispatcherConcurrency.HasValue)
+                    c.WithConsumerDispatcherConcurrency(subscriptionConfiguration.ConsumerDispatcherConcurrency.Value);
             }
         );
 

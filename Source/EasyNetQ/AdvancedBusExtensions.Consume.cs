@@ -122,6 +122,8 @@ public static partial class AdvancedBusExtensions
         {
             if (consumeConfiguration.PrefetchCount.HasValue)
                 c.WithPrefetchCount(consumeConfiguration.PrefetchCount.Value);
+            if (consumeConfiguration.ConsumerDispatcherConcurrency.HasValue)
+                c.WithConsumerDispatcherConcurrency(consumeConfiguration.ConsumerDispatcherConcurrency.Value);
             c.ForQueue(
                 queue,
                 handler,
@@ -174,6 +176,8 @@ public static partial class AdvancedBusExtensions
         {
             if (consumeConfiguration.PrefetchCount.HasValue)
                 c.WithPrefetchCount(consumeConfiguration.PrefetchCount.Value);
+            if (consumeConfiguration.ConsumerDispatcherConcurrency.HasValue)
+                c.WithConsumerDispatcherConcurrency(consumeConfiguration.ConsumerDispatcherConcurrency.Value);
             c.ForQueue(
                 queue,
                 addHandlers,
@@ -387,6 +391,8 @@ public static partial class AdvancedBusExtensions
         {
             if (consumeConfiguration.PrefetchCount.HasValue)
                 c.WithPrefetchCount(consumeConfiguration.PrefetchCount.Value);
+            if (consumeConfiguration.ConsumerDispatcherConcurrency.HasValue)
+                c.WithConsumerDispatcherConcurrency(consumeConfiguration.ConsumerDispatcherConcurrency.Value);
             c.ForQueue(
                 queue,
                 handler,

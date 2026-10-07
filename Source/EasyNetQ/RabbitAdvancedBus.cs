@@ -143,7 +143,8 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
                         ).Build()
                     )
                 )
-            ).ToDictionary(x => x.Key, x => x.Value)
+            ).ToDictionary(x => x.Key, x => x.Value),
+            consumeConfiguration.ConsumerDispatcherConcurrency
         );
         var consumer = consumerFactory.CreateConsumer(consumerConfiguration);
         await consumer.StartConsumingAsync();

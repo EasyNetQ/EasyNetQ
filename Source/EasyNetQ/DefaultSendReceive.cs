@@ -86,10 +86,15 @@ public class DefaultSendReceive : ISendReceive
         return await advancedBus.ConsumeAsync(
             queue,
             c => addHandlers(new HandlerAdder(c)),
-            c => c.WithPrefetchCount(receiveConfiguration.PrefetchCount)
-                .WithPriority(receiveConfiguration.Priority)
-                .WithExclusive(receiveConfiguration.IsExclusive)
-                .WithConsumerTag(conventions.ConsumerTagConvention())
+            c =>
+            {
+                c.WithPrefetchCount(receiveConfiguration.PrefetchCount)
+                    .WithPriority(receiveConfiguration.Priority)
+                    .WithExclusive(receiveConfiguration.IsExclusive)
+                    .WithConsumerTag(conventions.ConsumerTagConvention());
+                if (receiveConfiguration.ConsumerDispatcherConcurrency.HasValue)
+                    c.WithConsumerDispatcherConcurrency(receiveConfiguration.ConsumerDispatcherConcurrency.Value);
+            }
         );
     }
 
