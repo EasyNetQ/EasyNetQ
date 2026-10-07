@@ -44,6 +44,14 @@ public interface ISubscriptionConfiguration
     ISubscriptionConfiguration WithPrefetchCount(ushort prefetchCount);
 
     /// <summary>
+    /// Configures the consumer's dispatcher concurrency, overriding <see cref="ConnectionConfiguration.ConsumerDispatcherConcurrency"/> for this consumer
+    /// </summary>
+    /// <remarks>For concurrency greater than one, the consumer could process messages in any order, not in the order it receives them</remarks>
+    /// <param name="consumerDispatcherConcurrency">Consumer's dispatcher concurrency value, greater than zero</param>
+    /// <returns>Returns a reference to itself</returns>
+    ISubscriptionConfiguration WithConsumerDispatcherConcurrency(ushort consumerDispatcherConcurrency);
+
+    /// <summary>
     /// Expiry time can be set for a given queue by setting the x-expires argument to queue.declare, or by setting the expires policy.
     /// This controls for how long a queue can be unused before it is automatically deleted.
     /// Unused means the queue has no consumers, the queue has not been redeclared, and basic.get has not been invoked for a duration of at least the expiration period.
@@ -134,7 +142,7 @@ public interface ISubscriptionConfiguration
     ISubscriptionConfiguration WithAutoAck();
 }
 
-internal class SubscriptionConfiguration : ISubscriptionConfiguration, IConsumerDispatcherConcurrencyConfiguration
+internal class SubscriptionConfiguration : ISubscriptionConfiguration
 {
     public IList<string> Topics { get; }
     public bool AutoDelete { get; private set; }
@@ -147,7 +155,7 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration, IConsumer
     public IDictionary<string, object> QueueArguments { get; private set; }
     public IDictionary<string, object> ExchangeArguments { get; private set; }
     public bool AutoAck { get; private set; }
-    public ushort? ConsumerDispatcherConcurrency { get; set; }
+    public ushort? ConsumerDispatcherConcurrency { get; private set; }
 
     public SubscriptionConfiguration(ushort defaultPrefetchCount, string queueType = null, string exchangeType = null)
     {
@@ -196,6 +204,12 @@ internal class SubscriptionConfiguration : ISubscriptionConfiguration, IConsumer
     public ISubscriptionConfiguration WithPrefetchCount(ushort prefetchCount)
     {
         PrefetchCount = prefetchCount;
+        return this;
+    }
+
+    public ISubscriptionConfiguration WithConsumerDispatcherConcurrency(ushort consumerDispatcherConcurrency)
+    {
+        ConsumerDispatcherConcurrency = consumerDispatcherConcurrency;
         return this;
     }
 

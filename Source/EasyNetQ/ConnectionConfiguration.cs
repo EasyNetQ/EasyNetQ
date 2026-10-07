@@ -147,7 +147,7 @@ public class ConnectionConfiguration
     /// <summary>
     ///     Value greater than one enables concurrent processing for consumers.
     /// If it is not set, a value of <seealso cref="PrefetchCount"/> is used due to backward compatibility.
-    /// A consumer can override it with <c>WithConsumerDispatcherConcurrency</c>, see <seealso cref="ConsumerDispatcherConcurrencyExtensions"/>
+    /// A consumer can override it with <seealso cref="IConsumeConfiguration.WithConsumerDispatcherConcurrency"/> and its equivalents
     /// </summary>
     /// <remarks>For concurrency greater than one, the consumers could process messages in any order, not in the order they receive them</remarks>
     public ushort? ConsumerDispatcherConcurrency { get; set; } = null;

@@ -39,7 +39,7 @@ internal class PerQueueConsumeConfiguration : IPerQueueConsumeConfiguration
     }
 }
 
-internal class ConsumeConfiguration : IConsumeConfiguration, IConsumerDispatcherConcurrencyConfiguration
+internal class ConsumeConfiguration : IConsumeConfiguration
 {
     private readonly IHandlerCollectionFactory handlerCollectionFactory;
 
@@ -54,7 +54,7 @@ internal class ConsumeConfiguration : IConsumeConfiguration, IConsumerDispatcher
     }
 
     public ushort PrefetchCount { get; private set; }
-    public ushort? ConsumerDispatcherConcurrency { get; set; }
+    public ushort? ConsumerDispatcherConcurrency { get; private set; }
     public List<Tuple<Queue, MessageHandler, PerQueueConsumeConfiguration>> PerQueueConsumeConfigurations { get; }
 
     public List<Tuple<Queue, IHandlerCollection, PerQueueConsumeConfiguration>> PerQueueTypedConsumeConfigurations { get; }
@@ -62,6 +62,12 @@ internal class ConsumeConfiguration : IConsumeConfiguration, IConsumerDispatcher
     public IConsumeConfiguration WithPrefetchCount(ushort prefetchCount)
     {
         PrefetchCount = prefetchCount;
+        return this;
+    }
+
+    public IConsumeConfiguration WithConsumerDispatcherConcurrency(ushort consumerDispatcherConcurrency)
+    {
+        ConsumerDispatcherConcurrency = consumerDispatcherConcurrency;
         return this;
     }
 
@@ -140,6 +146,19 @@ public interface IConsumeConfiguration
     IConsumeConfiguration WithPrefetchCount(ushort prefetchCount);
 
     /// <summary>
+    ///     Sets consumer dispatcher concurrency, overriding <see cref="ConnectionConfiguration.ConsumerDispatcherConcurrency"/>
+    ///     for this consumer. It is shared by all the queues of the consumer, because they are consumed on one channel
+    /// </summary>
+    /// <remarks>
+    ///     The messages handled at the same time are also limited by the prefetch count of each queue, unless it is zero
+    ///     (unlimited) or messages are auto acknowledged.
+    ///     For concurrency greater than one, the consumer could process messages in any order, not in the order it receives them
+    /// </remarks>
+    /// <param name="consumerDispatcherConcurrency">The consumerDispatcherConcurrency to set, greater than zero</param>
+    /// <returns>IConsumeConfiguration</returns>
+    IConsumeConfiguration WithConsumerDispatcherConcurrency(ushort consumerDispatcherConcurrency);
+
+    /// <summary>
     ///     Add consume configuration for a given queue
     /// </summary>
     /// <returns>IConsumeConfiguration</returns>
@@ -197,4 +216,12 @@ public interface ISimpleConsumeConfiguration
     /// <param name="prefetchCount">The prefetchCount to set</param>
     /// <returns>ISimpleConsumeConfiguration</returns>
     ISimpleConsumeConfiguration WithPrefetchCount(ushort prefetchCount);
+
+    /// <summary>
+    ///     Sets consumer dispatcher concurrency, overriding <see cref="ConnectionConfiguration.ConsumerDispatcherConcurrency"/> for this consumer
+    /// </summary>
+    /// <remarks>For concurrency greater than one, the consumer could process messages in any order, not in the order it receives them</remarks>
+    /// <param name="consumerDispatcherConcurrency">The consumerDispatcherConcurrency to set, greater than zero</param>
+    /// <returns>ISimpleConsumeConfiguration</returns>
+    ISimpleConsumeConfiguration WithConsumerDispatcherConcurrency(ushort consumerDispatcherConcurrency);
 }
