@@ -144,6 +144,14 @@ namespace EasyNetQ
         public EasyNetQ.MessageProperties Properties { get; init; }
         public EasyNetQ.MessageReceivedInfo ReceivedInfo { get; init; }
     }
+    public static class ConsumerDispatcherConcurrencyExtensions
+    {
+        public static EasyNetQ.IConsumeConfiguration WithConsumerDispatcherConcurrency(this EasyNetQ.IConsumeConfiguration configuration, ushort consumerDispatcherConcurrency) { }
+        public static EasyNetQ.IReceiveConfiguration WithConsumerDispatcherConcurrency(this EasyNetQ.IReceiveConfiguration configuration, ushort consumerDispatcherConcurrency) { }
+        public static EasyNetQ.IResponderConfiguration WithConsumerDispatcherConcurrency(this EasyNetQ.IResponderConfiguration configuration, ushort consumerDispatcherConcurrency) { }
+        public static EasyNetQ.ISimpleConsumeConfiguration WithConsumerDispatcherConcurrency(this EasyNetQ.ISimpleConsumeConfiguration configuration, ushort consumerDispatcherConcurrency) { }
+        public static EasyNetQ.ISubscriptionConfiguration WithConsumerDispatcherConcurrency(this EasyNetQ.ISubscriptionConfiguration configuration, ushort consumerDispatcherConcurrency) { }
+    }
     public delegate string ConsumerTagConvention();
     public class Conventions : EasyNetQ.IConventions
     {
@@ -1110,6 +1118,8 @@ namespace EasyNetQ.Consumer
     public class ConsumerConfiguration
     {
         public ConsumerConfiguration(ushort prefetchCount, System.Collections.Generic.IReadOnlyDictionary<EasyNetQ.Topology.Queue, EasyNetQ.Consumer.PerQueueConsumerConfiguration> perQueueConfigurations) { }
+        public ConsumerConfiguration(ushort prefetchCount, System.Collections.Generic.IReadOnlyDictionary<EasyNetQ.Topology.Queue, EasyNetQ.Consumer.PerQueueConsumerConfiguration> perQueueConfigurations, ushort? consumerDispatcherConcurrency) { }
+        public ushort? ConsumerDispatcherConcurrency { get; }
         public System.Collections.Generic.IReadOnlyDictionary<EasyNetQ.Topology.Queue, EasyNetQ.Consumer.PerQueueConsumerConfiguration> PerQueueConfigurations { get; }
         public ushort PrefetchCount { get; }
     }
