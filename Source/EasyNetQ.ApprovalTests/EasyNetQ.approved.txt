@@ -113,6 +113,7 @@ namespace EasyNetQ.AutoSubscribe
     {
         public SubscriptionConfigurationAttribute() { }
         public bool AutoDelete { get; set; }
+        public ushort ConsumerDispatcherConcurrency { get; set; }
         public int Expires { get; set; }
         public ushort PrefetchCount { get; set; }
         public int Priority { get; set; }

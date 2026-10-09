@@ -215,6 +215,7 @@ namespace EasyNetQ
     {
         EasyNetQ.IConsumeConfiguration ForQueue(in EasyNetQ.Topology.Queue queue, EasyNetQ.Consumer.MessageHandler handler, System.Action<EasyNetQ.IPerQueueConsumeConfiguration> configure);
         EasyNetQ.IConsumeConfiguration ForQueue(in EasyNetQ.Topology.Queue queue, System.Action<EasyNetQ.Consumer.IHandlerRegistration> register, System.Action<EasyNetQ.IPerQueueConsumeConfiguration> configure);
+        EasyNetQ.IConsumeConfiguration WithConsumerDispatcherConcurrency(ushort consumerDispatcherConcurrency);
         EasyNetQ.IConsumeConfiguration WithPrefetchCount(ushort prefetchCount);
     }
     public interface IExchangeDeclareConfiguration
@@ -555,6 +556,8 @@ namespace EasyNetQ.Consumer
     public class ConsumerConfiguration
     {
         public ConsumerConfiguration(ushort prefetchCount, System.Collections.Generic.IReadOnlyDictionary<EasyNetQ.Topology.Queue, EasyNetQ.Consumer.PerQueueConsumerConfiguration> perQueueConfigurations) { }
+        public ConsumerConfiguration(ushort prefetchCount, System.Collections.Generic.IReadOnlyDictionary<EasyNetQ.Topology.Queue, EasyNetQ.Consumer.PerQueueConsumerConfiguration> perQueueConfigurations, ushort? consumerDispatcherConcurrency) { }
+        public ushort? ConsumerDispatcherConcurrency { get; }
         public System.Collections.Generic.IReadOnlyDictionary<EasyNetQ.Topology.Queue, EasyNetQ.Consumer.PerQueueConsumerConfiguration> PerQueueConfigurations { get; }
         public ushort PrefetchCount { get; }
     }

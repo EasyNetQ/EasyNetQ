@@ -342,7 +342,12 @@ public sealed class DefaultRpc : IRpc, IAsyncDisposable
         return await advancedBus.ConsumeAsync<TRequest>(
             queue,
             (message, _, cancellation) => RespondToMessageAsync(responder, message, cancellation),
-            c => c.WithPrefetchCount(responderConfiguration.PrefetchCount)
+            c =>
+            {
+                c.WithPrefetchCount(responderConfiguration.PrefetchCount);
+                if (responderConfiguration.ConsumerDispatcherConcurrency > 0)
+                    c.WithConsumerDispatcherConcurrency(responderConfiguration.ConsumerDispatcherConcurrency.Value);
+            }
         );
     }
 

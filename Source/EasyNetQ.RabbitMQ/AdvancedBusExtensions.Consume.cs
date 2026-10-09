@@ -1,4 +1,4 @@
-using EasyNetQ.Consumer;
+﻿using EasyNetQ.Consumer;
 using EasyNetQ.Internals;
 using EasyNetQ.Topology;
 
@@ -122,6 +122,8 @@ public static partial class AdvancedBusExtensions
         {
             if (consumeConfiguration.PrefetchCount.HasValue)
                 c.WithPrefetchCount(consumeConfiguration.PrefetchCount.Value);
+            if (consumeConfiguration.ConsumerDispatcherConcurrency > 0)
+                c.WithConsumerDispatcherConcurrency(consumeConfiguration.ConsumerDispatcherConcurrency.Value);
             c.ForQueue(
                 queue,
                 handler,
@@ -219,6 +221,8 @@ public static partial class AdvancedBusExtensions
         {
             if (consumeConfiguration.PrefetchCount.HasValue)
                 c.WithPrefetchCount(consumeConfiguration.PrefetchCount.Value);
+            if (consumeConfiguration.ConsumerDispatcherConcurrency > 0)
+                c.WithConsumerDispatcherConcurrency(consumeConfiguration.ConsumerDispatcherConcurrency.Value);
             c.ForQueue(
                 queue,
                 addHandlers,
@@ -432,6 +436,8 @@ public static partial class AdvancedBusExtensions
         {
             if (consumeConfiguration.PrefetchCount.HasValue)
                 c.WithPrefetchCount(consumeConfiguration.PrefetchCount.Value);
+            if (consumeConfiguration.ConsumerDispatcherConcurrency > 0)
+                c.WithConsumerDispatcherConcurrency(consumeConfiguration.ConsumerDispatcherConcurrency.Value);
             c.ForQueue(
                 queue,
                 handler,
@@ -457,6 +463,7 @@ public static partial class AdvancedBusExtensions
         public bool? IsExclusive { get; private set; }
         public ushort? PrefetchCount { get; private set; }
         public IDictionary<string, object>? Arguments { get; private set; }
+        public ushort? ConsumerDispatcherConcurrency { get; private set; }
 
         public ISimpleConsumeConfiguration WithAutoAck()
         {
@@ -485,6 +492,12 @@ public static partial class AdvancedBusExtensions
         public ISimpleConsumeConfiguration WithPrefetchCount(ushort prefetchCount)
         {
             PrefetchCount = prefetchCount;
+            return this;
+        }
+
+        public ISimpleConsumeConfiguration WithConsumerDispatcherConcurrency(ushort consumerDispatcherConcurrency)
+        {
+            ConsumerDispatcherConcurrency = consumerDispatcherConcurrency;
             return this;
         }
     }

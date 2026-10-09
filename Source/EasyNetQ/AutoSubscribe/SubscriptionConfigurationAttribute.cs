@@ -7,4 +7,5 @@ public class SubscriptionConfigurationAttribute : Attribute
     public int Priority { get; set; }
     public ushort PrefetchCount { get; set; }
     public int Expires { get; set; }
+    public ushort ConsumerDispatcherConcurrency { get; set; }
 }

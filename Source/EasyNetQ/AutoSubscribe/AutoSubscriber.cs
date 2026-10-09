@@ -225,6 +225,9 @@ public class AutoSubscriber
             if (configSettings.PrefetchCount > 0)
                 configuration.WithPrefetchCount(configSettings.PrefetchCount);
 
+            if (configSettings.ConsumerDispatcherConcurrency > 0)
+                configuration.WithConsumerDispatcherConcurrency(configSettings.ConsumerDispatcherConcurrency);
+
             if (configSettings.Expires > 0)
                 configuration.WithExpires(configSettings.Expires);
 

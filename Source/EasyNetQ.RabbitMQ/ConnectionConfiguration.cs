@@ -1,4 +1,4 @@
-using RabbitMQ.Client;
+﻿using RabbitMQ.Client;
 
 namespace EasyNetQ;
 
@@ -146,6 +146,8 @@ public class ConnectionConfiguration
 
     /// <summary>
     ///     Value greater than one enables concurrent processing for consumers.
+    /// If it is not set, a value of <seealso cref="PrefetchCount"/> is used due to backward compatibility.
+    /// A consumer can override it with <seealso cref="IConsumeConfiguration.WithConsumerDispatcherConcurrency"/> and its equivalents
     ///     Defaults to 1 so messages are processed in the order they are received; set it explicitly for
     ///     concurrent processing (before 9.0 the default was <seealso cref="PrefetchCount"/>).
     /// </summary>

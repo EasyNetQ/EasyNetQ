@@ -86,16 +86,34 @@ public class ConsumerConfiguration
     public ConsumerConfiguration(
         ushort prefetchCount,
         IReadOnlyDictionary<Queue, PerQueueConsumerConfiguration> perQueueConfigurations
+    ) : this(prefetchCount, perQueueConfigurations, null)
+    {
+    }
+
+    /// <summary>
+    ///     Creates ConsumerConfiguration
+    /// </summary>
+    public ConsumerConfiguration(
+        ushort prefetchCount,
+        IReadOnlyDictionary<Queue, PerQueueConsumerConfiguration> perQueueConfigurations,
+        ushort? consumerDispatcherConcurrency
     )
     {
         PrefetchCount = prefetchCount;
         PerQueueConfigurations = perQueueConfigurations;
+        ConsumerDispatcherConcurrency = consumerDispatcherConcurrency;
     }
 
     /// <summary>
     ///     PrefetchCount for the consumer
     /// </summary>
     public ushort PrefetchCount { get; }
+
+    /// <summary>
+    ///     Dispatch concurrency of the consumer's channel.
+    ///     If it is not set, the connection-wide dispatch concurrency is used, see <see cref="ConnectionConfiguration.ConsumerDispatcherConcurrency"/>
+    /// </summary>
+    public ushort? ConsumerDispatcherConcurrency { get; }
 
     /// <summary>
     ///     Configurations of the consumer for queues
