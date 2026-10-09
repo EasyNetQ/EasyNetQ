@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using EasyNetQ.Internals;
 using EasyNetQ.Persistent;
 using EasyNetQ.Topology;

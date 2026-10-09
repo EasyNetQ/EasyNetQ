@@ -1,4 +1,4 @@
-﻿namespace EasyNetQ;
+namespace EasyNetQ;
 
 /// <summary>
 /// Allows responder configuration to be fluently extended without adding overloads
