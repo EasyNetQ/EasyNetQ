@@ -60,19 +60,19 @@ public class SerializerBenchmarks
     }
 
     [Benchmark]
-    public object SystemTextJson_Deserialize()
+    public object? SystemTextJson_Deserialize()
     {
         return systemTextJson.BytesToMessage(messageType, systemTextJsonBytes);
     }
 
     [Benchmark]
-    public object SystemTextJsonV2_Deserialize()
+    public object? SystemTextJsonV2_Deserialize()
     {
         return systemTextJsonV2.BytesToMessage(messageType, systemTextJsonV2Bytes);
     }
 
     [Benchmark]
-    public object Newtonsoft_Deserialize()
+    public object? Newtonsoft_Deserialize()
     {
         return newtonsoft.BytesToMessage(messageType, newtonsoftBytes);
     }

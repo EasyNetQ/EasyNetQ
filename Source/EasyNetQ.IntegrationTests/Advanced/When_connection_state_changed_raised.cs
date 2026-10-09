@@ -14,7 +14,7 @@ public class When_connection_state_changed_raised : IDisposable, IAsyncLifetime
     public When_connection_state_changed_raised(RabbitMQFixture rmqFixture)
     {
         var serviceCollection = new ServiceCollection();
-        serviceCollection.AddEasyNetQ($"host={rmqFixture.Host}");
+        serviceCollection.AddEasyNetQ($"host={rmqFixture.Host};name=connstate-test");
         managementClient = rmqFixture.ManagementClient;
 
         serviceProvider = serviceCollection.BuildServiceProvider();
@@ -113,12 +113,31 @@ public class When_connection_state_changed_raised : IDisposable, IAsyncLifetime
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
-            await managementClient.KillAllConnectionsAsync(cts.Token);
+            // The management plugin only kills connections it has already seen, and its stats DB lags connection
+            // creation by several seconds. Wait until BOTH of this bus's (named) connections are visible - other
+            // tests' lingering connections must not satisfy the wait - then close exactly those two.
+            while (true)
+            {
+                var connections = (await managementClient.GetConnectionsAsync(cts.Token))
+                    .Where(c => c.ClientProperties != null && c.ClientProperties.TryGetValue("connection_name", out var name) && name?.ToString() == "connstate-test")
+                    .ToList();
+                if (connections.Count >= 2)
+                {
+                    foreach (var connection in connections)
+                        await managementClient.CloseConnectionAsync(connection, cts.Token);
+                    break;
+                }
+
+                await Task.Delay(250, cts.Token);
+            }
 
             // The broker closes the sockets asynchronously and the client recovers automatically a few seconds later,
-            // so capture each connection's status the moment it reports the disconnect
-            var producerStatus = await WaitForStateAsync(advanced, PersistentConnectionType.Producer, PersistentConnectionState.Disconnected, cts.Token);
-            var consumerStatus = await WaitForStateAsync(advanced, PersistentConnectionType.Consumer, PersistentConnectionState.Disconnected, cts.Token);
+            // so poll both connections concurrently and capture each status the moment it reports the disconnect
+            // (waiting sequentially would let the second connection recover before its poll starts)
+            var producerStatusTask = WaitForStateAsync(advanced, PersistentConnectionType.Producer, PersistentConnectionState.Disconnected, cts.Token);
+            var consumerStatusTask = WaitForStateAsync(advanced, PersistentConnectionType.Consumer, PersistentConnectionState.Disconnected, cts.Token);
+            var producerStatus = await producerStatusTask;
+            var consumerStatus = await consumerStatusTask;
 
             producerStatus.Should().BeEquivalentTo(
                 new PersistentConnectionStatus(

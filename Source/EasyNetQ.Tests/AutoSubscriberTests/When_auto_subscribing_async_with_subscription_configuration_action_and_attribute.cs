@@ -7,7 +7,7 @@ public class When_auto_subscribing_async_with_subscription_configuration_action_
 {
     private readonly IBus bus;
     private readonly ServiceProvider serviceProvider;
-    private Action<ISubscriptionConfiguration> capturedAction;
+    private Action<ISubscriptionConfiguration>? capturedAction;
     private readonly IPubSub pubSub;
     private bool disposed;
     readonly AutoSubscriber autoSubscriber;

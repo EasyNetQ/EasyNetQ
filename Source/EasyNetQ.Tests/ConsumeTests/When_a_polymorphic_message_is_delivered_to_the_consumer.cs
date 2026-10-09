@@ -6,7 +6,7 @@ namespace EasyNetQ.Tests.ConsumeTests;
 public class When_a_polymorphic_message_is_delivered_to_the_consumer : IAsyncLifetime
 {
     private readonly MockBuilder mockBuilder;
-    private ITestMessageInterface receivedMessage;
+    private ITestMessageInterface? receivedMessage;
 
     public When_a_polymorphic_message_is_delivered_to_the_consumer()
     {
@@ -60,5 +60,5 @@ public interface ITestMessageInterface
 
 public class Implementation : ITestMessageInterface
 {
-    public string Text { get; set; }
+    public string Text { get; set; } = "";
 }

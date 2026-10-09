@@ -11,5 +11,5 @@ public class AutoSubscriberConsumerAttribute : Attribute
     {
         SubscriptionId = subscriptionId;
     }
-    public string SubscriptionId { get; init; }
+    public string? SubscriptionId { get; init; }
 }

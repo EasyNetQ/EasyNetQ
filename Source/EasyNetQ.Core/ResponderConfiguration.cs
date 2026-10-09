@@ -1,0 +1,132 @@
+namespace EasyNetQ;
+
+/// <summary>
+/// Allows responder configuration to be fluently extended without adding overloads
+///
+/// e.g.
+/// x => x.WithPrefetchCount(50)
+/// </summary>
+public interface IResponderConfiguration
+{
+    /// <summary>
+    /// Configures the consumer's prefetch count
+    /// </summary>
+    /// <param name="prefetchCount">Consumer's prefetch count value</param>
+    /// <returns>Reference to the same <see cref="IResponderConfiguration"/> to allow methods chaining</returns>
+    IResponderConfiguration WithPrefetchCount(ushort prefetchCount);
+
+    /// <summary>
+    /// Configures the consumer's dispatcher concurrency, overriding <see cref="ConnectionConfiguration.ConsumerDispatcherConcurrency"/> for this consumer
+    /// </summary>
+    /// <remarks>For concurrency greater than one, the consumer could process messages in any order, not in the order it receives them</remarks>
+    /// <param name="consumerDispatcherConcurrency">Consumer's dispatcher concurrency value, greater than zero</param>
+    /// <returns>Reference to the same <see cref="IResponderConfiguration"/> to allow methods chaining</returns>
+    IResponderConfiguration WithConsumerDispatcherConcurrency(ushort consumerDispatcherConcurrency);
+
+    /// <summary>
+    /// Sets the queue name
+    /// </summary>
+    /// <param name="queueName"></param>
+    /// <returns>Reference to the same <see cref="IResponderConfiguration"/> to allow methods chaining</returns>
+    IResponderConfiguration WithQueueName(string queueName);
+
+    /// <summary>
+    /// Configures the queue's durability
+    /// </summary>
+    /// <returns>Reference to the same <see cref="IResponderConfiguration"/> to allow methods chaining</returns>
+    IResponderConfiguration WithDurable(bool durable = true);
+
+    /// <summary>
+    /// Expiry time can be set for a given queue by setting the x-expires argument to queue.declare, or by setting the expires policy.
+    /// This controls for how long a queue can be unused before it is automatically deleted.
+    /// Unused means the queue has no consumers, the queue has not been redeclared, and basic.get has not been invoked for a duration of at least the expiration period.
+    /// This can be used, for example, for RPC-style reply queues, where many queues can be created which may never be drained.
+    /// The server guarantees that the queue will be deleted, if unused for at least the expiration period.
+    /// No guarantee is given as to how promptly the queue will be removed after the expiration period has elapsed.
+    /// Leases of durable queues restart when the server restarts.
+    /// </summary>
+    /// <param name="expires">The value of the x-expires argument or expires policy describes the expiration period and is subject to the same constraints as x-message-ttl and cannot be zero. Thus a value of 1 means a queue which is unused for 1 second will be deleted.</param>
+    /// <returns>Reference to the same <see cref="IResponderConfiguration"/> to allow methods chaining</returns>
+    IResponderConfiguration WithExpires(int expires);
+
+    /// <summary>
+    /// Configures the queue's maxPriority
+    /// </summary>
+    /// <param name="priority">Queue's maxPriority value</param>
+    /// <returns>Reference to the same <see cref="IResponderConfiguration"/> to allow methods chaining</returns>
+    IResponderConfiguration WithMaxPriority(byte priority);
+
+    /// <summary>
+    /// Sets the queue type. Valid types are "classic" and "quorum". Works with RabbitMQ version 3.8+.
+    /// </summary>
+    /// <param name="queueType">Desired queue type.</param>
+    /// <returns>Returns a reference to itself</returns>
+    IResponderConfiguration WithQueueType(string queueType = QueueType.Classic);
+}
+
+internal class ResponderConfiguration : IResponderConfiguration
+{
+    public ResponderConfiguration(ushort defaultPrefetchCount, string? queueType = null)
+    {
+        PrefetchCount = defaultPrefetchCount;
+
+        if (queueType != null)
+        {
+            QueueArguments = new Dictionary<string, object> { { Argument.QueueType, queueType } };
+            QueueType = queueType;
+        }
+    }
+
+    public ushort PrefetchCount { get; private set; }
+    public string? QueueName { get; private set; }
+    public ushort? ConsumerDispatcherConcurrency { get; private set; }
+    public string? QueueType { get; private set; }
+    public bool Durable { get; private set; } = true;
+
+    public IDictionary<string, object>? QueueArguments { get; private set; }
+
+    public IResponderConfiguration WithPrefetchCount(ushort prefetchCount)
+    {
+        PrefetchCount = prefetchCount;
+        return this;
+    }
+
+    public IResponderConfiguration WithConsumerDispatcherConcurrency(ushort consumerDispatcherConcurrency)
+    {
+        ConsumerDispatcherConcurrency = consumerDispatcherConcurrency;
+        return this;
+    }
+
+    public IResponderConfiguration WithQueueName(string queueName)
+    {
+        QueueName = queueName;
+        return this;
+    }
+
+    public IResponderConfiguration WithDurable(bool durable = true)
+    {
+        Durable = durable;
+        return this;
+    }
+
+    public IResponderConfiguration WithExpires(int expires)
+    {
+        InitializedQueueArguments.WithExpires(expires);
+        return this;
+    }
+
+    public IResponderConfiguration WithMaxPriority(byte priority)
+    {
+        InitializedQueueArguments.WithMaxPriority(priority);
+        return this;
+    }
+
+    public IResponderConfiguration WithQueueType(string queueType = EasyNetQ.QueueType.Classic)
+    {
+        QueueType = queueType;
+        InitializedQueueArguments.WithQueueType(queueType);
+        return this;
+    }
+
+    private IDictionary<string, object> InitializedQueueArguments => QueueArguments ??= new Dictionary<string, object>();
+}

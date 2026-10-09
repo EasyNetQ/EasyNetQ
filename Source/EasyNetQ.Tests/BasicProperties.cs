@@ -4,20 +4,20 @@ namespace EasyNetQ.Tests;
 
 public sealed class BasicProperties : IReadOnlyBasicProperties
 {
-    private string contentType;
-    private string contentEncoding;
-    private IDictionary<string, object> headers;
+    private string? contentType;
+    private string? contentEncoding;
+    private IDictionary<string, object?>? headers;
     private DeliveryModes deliveryMode;
     private byte priority;
-    private string correlationId;
-    private string replyTo;
-    private string expiration;
-    private string messageId;
+    private string? correlationId;
+    private string? replyTo;
+    private string? expiration;
+    private string? messageId;
     private AmqpTimestamp timestamp;
-    private string type;
-    private string userId;
-    private string appId;
-    private string clusterId;
+    private string? type;
+    private string? userId;
+    private string? appId;
+    private string? clusterId;
 
     private bool contentTypePresent;
     private bool contentEncodingPresent;
@@ -34,7 +34,7 @@ public sealed class BasicProperties : IReadOnlyBasicProperties
     private bool appIdPresent;
     private bool clusterIdPresent;
 
-    public string ContentType
+    public string? ContentType
     {
         get => contentType;
         set
@@ -44,7 +44,7 @@ public sealed class BasicProperties : IReadOnlyBasicProperties
         }
     }
 
-    public string ContentEncoding
+    public string? ContentEncoding
     {
         get => contentEncoding;
         set
@@ -54,7 +54,7 @@ public sealed class BasicProperties : IReadOnlyBasicProperties
         }
     }
 
-    public IDictionary<string, object> Headers
+    public IDictionary<string, object?>? Headers
     {
         get => headers;
         set
@@ -90,7 +90,7 @@ public sealed class BasicProperties : IReadOnlyBasicProperties
         }
     }
 
-    public string CorrelationId
+    public string? CorrelationId
     {
         get => correlationId;
         set
@@ -100,7 +100,7 @@ public sealed class BasicProperties : IReadOnlyBasicProperties
         }
     }
 
-    public string ReplyTo
+    public string? ReplyTo
     {
         get => replyTo;
         set
@@ -110,7 +110,7 @@ public sealed class BasicProperties : IReadOnlyBasicProperties
         }
     }
 
-    public string Expiration
+    public string? Expiration
     {
         get => expiration;
         set
@@ -120,7 +120,7 @@ public sealed class BasicProperties : IReadOnlyBasicProperties
         }
     }
 
-    public string MessageId
+    public string? MessageId
     {
         get => messageId;
         set
@@ -140,7 +140,7 @@ public sealed class BasicProperties : IReadOnlyBasicProperties
         }
     }
 
-    public string Type
+    public string? Type
     {
         get => type;
         set
@@ -150,7 +150,7 @@ public sealed class BasicProperties : IReadOnlyBasicProperties
         }
     }
 
-    public string UserId
+    public string? UserId
     {
         get => userId;
         set
@@ -160,7 +160,7 @@ public sealed class BasicProperties : IReadOnlyBasicProperties
         }
     }
 
-    public string AppId
+    public string? AppId
     {
         get => appId;
         set
@@ -170,7 +170,7 @@ public sealed class BasicProperties : IReadOnlyBasicProperties
         }
     }
 
-    public string ClusterId
+    public string? ClusterId
     {
         get => clusterId;
         set
@@ -236,10 +236,10 @@ public sealed class BasicProperties : IReadOnlyBasicProperties
 
     public bool IsClusterIdPresent() => clusterIdPresent;
 
-    public PublicationAddress ReplyToAddress
+    public PublicationAddress? ReplyToAddress
     {
-        get => PublicationAddress.Parse(ReplyTo);
-        set => ReplyTo = value.ToString();
+        get => ReplyTo is null ? null : PublicationAddress.Parse(ReplyTo);
+        set => ReplyTo = value?.ToString();
     }
 
     public ushort ProtocolClassId => 60;

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
 namespace EasyNetQ.Hosepipe;
@@ -101,7 +102,8 @@ public class Argument
     }
 
     public string Value { get; private set; }
-    public string Key { get; private set; }
+    public string? Key { get; private set; }
+    [MemberNotNullWhen(true, nameof(Key))]
     public bool HasKey { get; private set; }
 }
 

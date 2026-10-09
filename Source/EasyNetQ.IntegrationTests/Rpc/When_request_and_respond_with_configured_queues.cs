@@ -9,7 +9,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
         private readonly ServiceProvider serviceProvider;
         private readonly IBus bus;
         private readonly RabbitMQFixture fixture;
-        readonly Conventions conventions = new Conventions(new DefaultTypeNameSerializer());
+        readonly Conventions conventions = new Conventions(new DefaultTypeNameSerializer(), new MessageTypeRegistry(new DefaultTypeNameSerializer()));
 
         public When_request_and_respond_with_configured_queues(RabbitMQFixture fixture)
         {
@@ -51,7 +51,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
 
             string destinationQueueName = conventions.RpcRoutingKeyNamingConvention.Invoke(typeof(RabbitRequest));
 
-            Exception e =
+            Exception? e =
                 await Record.ExceptionAsync(() => bus.Advanced.QueueDeclareAsync(destinationQueueName, c => c.WithQueueType("quorum"), TestContext.Current.CancellationToken));
 
             e.Should().BeOfType<OperationInterruptedException>();
@@ -78,7 +78,7 @@ namespace EasyNetQ.IntegrationTests.Rpc
 
             string destinationQueueName = conventions.RpcRoutingKeyNamingConvention.Invoke(typeof(BunnyRequest));
 
-            Exception e =
+            Exception? e =
                 await Record.ExceptionAsync(() => bus.Advanced.QueueDeclareAsync(destinationQueueName, c => c.WithQueueType("classic"), TestContext.Current.CancellationToken));
 
             e.Should().BeOfType<OperationInterruptedException>();

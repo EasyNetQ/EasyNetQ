@@ -48,7 +48,7 @@ public class DockerProxy : IDisposable
     }
 
     public async Task<string> CreateContainerAsync(string image, string name,
-        IDictionary<string, ISet<string>> portMappings, string networkName = null, IList<string> envVars = null,
+        IDictionary<string, ISet<string>> portMappings, string? networkName = null, IList<string>? envVars = null,
         CancellationToken cancellationToken = default)
     {
         var createParameters = new CreateContainerParameters

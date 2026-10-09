@@ -87,15 +87,15 @@ public class MyOtherMessage : MyMessage, ISupersede<MyMessageV2>
 
 public class SimpleMessage
 {
-    public string Message { get; set; }
+    public string Message { get; set; } = "";
 }
 
 public class AdvancedMessage : SimpleMessage, ISupersede<SimpleMessage>
 {
-    public string VeryAdvanced { get; set; }
+    public string VeryAdvanced { get; set; } = "";
 }
 
 public class ComplexMessage : AdvancedMessage, ISupersede<AdvancedMessage>
 {
-    public string SoComplex { get; set; }
+    public string SoComplex { get; set; } = "";
 }

@@ -20,7 +20,7 @@ public class ErrorMessageRepublishSpike
     [Fact]
     public void Should_deserialize_error_message_correctly()
     {
-        var error = (Error)serializer.BytesToMessage(typeof(Error), Encoding.UTF8.GetBytes(errorMessage));
+        var error = Assert.IsType<Error>(serializer.BytesToMessage(typeof(Error), Encoding.UTF8.GetBytes(errorMessage)));
 
         error.RoutingKey.ShouldEqual("originalRoutingKey");
         error.Message.ShouldEqual("{ Text:\"Hello World\"}");
@@ -30,7 +30,7 @@ public class ErrorMessageRepublishSpike
     [Traits.Explicit("Requires a localhost instance of RabbitMQ to run")]
     public async Task Should_be_able_to_republish_message()
     {
-        var error = (Error)serializer.BytesToMessage(typeof(Error), Encoding.UTF8.GetBytes(errorMessage));
+        var error = Assert.IsType<Error>(serializer.BytesToMessage(typeof(Error), Encoding.UTF8.GetBytes(errorMessage)));
 
         var connectionFactory = new ConnectionFactory
         {

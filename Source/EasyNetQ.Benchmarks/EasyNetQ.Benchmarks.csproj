@@ -2,19 +2,19 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
         <IsPackable>false</IsPackable>
+        <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="BenchmarkDotNet" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\EasyNetQ\EasyNetQ.csproj" />
         <ProjectReference Include="..\EasyNetQ.Serialization.NewtonsoftJson\EasyNetQ.Serialization.NewtonsoftJson.csproj" />
+        <ProjectReference Include="..\EasyNetQ.Transport.InMemory\EasyNetQ.Transport.InMemory.csproj" />
     </ItemGroup>
 
 </Project>
