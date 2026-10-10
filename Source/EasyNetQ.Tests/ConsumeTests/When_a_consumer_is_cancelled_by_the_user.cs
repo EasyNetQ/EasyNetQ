@@ -43,4 +43,10 @@ public class When_a_consumer_is_cancelled_by_the_user : IAsyncLifetime
     {
         mockBuilder.Consumers[0].Channel.Received().DisposeAsync();
     }
+
+    [Fact]
+    public void Should_not_cancel_the_consumer_before_disposing_the_model()
+    {
+        mockBuilder.Consumers[0].Channel.DidNotReceive().BasicCancelAsync(Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<CancellationToken>());
+    }
 }
