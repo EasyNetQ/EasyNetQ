@@ -29,7 +29,7 @@ public static class EasyNetQDiagnostics
     /// </summary>
     public static readonly Meter Meter = new(SourceName, Version);
 
-#if NET9_0_OR_GREATER
+#if NET10_0_OR_GREATER
     private static readonly InstrumentAdvice<double> DurationAdvice = new()
     {
         // semconv advised buckets for messaging durations
@@ -47,7 +47,7 @@ public static class EasyNetQDiagnostics
 
     /// <summary>Duration of publish operations, in seconds</summary>
     public static readonly Histogram<double> OperationDuration =
-#if NET9_0_OR_GREATER
+#if NET10_0_OR_GREATER
         Meter.CreateHistogram<double>("messaging.client.operation.duration", "s", "Duration of messaging operations initiated by a producer or consumer client", advice: DurationAdvice);
 #else
         Meter.CreateHistogram<double>("messaging.client.operation.duration", "s", "Duration of messaging operations initiated by a producer or consumer client");
@@ -55,7 +55,7 @@ public static class EasyNetQDiagnostics
 
     /// <summary>Duration of processing one delivered message, in seconds</summary>
     public static readonly Histogram<double> ProcessDuration =
-#if NET9_0_OR_GREATER
+#if NET10_0_OR_GREATER
         Meter.CreateHistogram<double>("messaging.process.duration", "s", "Duration of processing operation", advice: DurationAdvice);
 #else
         Meter.CreateHistogram<double>("messaging.process.duration", "s", "Duration of processing operation");

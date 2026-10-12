@@ -18,7 +18,7 @@ which are deterministic.
   definition. `SerializeStep` moves serialization into the publish pipeline, before interceptors.
 - **netstandard2.0 restored** across the packages (maintainer decision: reach is a selling point):
   multi-targeted in the same assemblies with PolySharp + per-TFM refs + `#if`; no separate compat assembly.
-  net472 SDK-style compile proof in `EasyNetQ.Examples.NetFramework`. The net8+ binaries are unchanged.
+  net472 SDK-style compile proof in `EasyNetQ.Examples.NetFramework`. The net10+ binaries are unchanged.
 - **5f — typed publishes through the pipeline**: `IAdvancedBus.PublishAsync<T>` sets `Message`/`MessageType`
   on the context and lets `SerializeStep` serialize in-pipeline; custom serialization strategies and
   derived-type bodies keep the legacy pre-serializing path. `[DeliveryMode]` now stamps direct publishes.

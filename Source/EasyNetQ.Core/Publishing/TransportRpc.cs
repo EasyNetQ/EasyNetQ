@@ -321,7 +321,7 @@ public sealed class TransportRpc : IRpc, IAsyncDisposable
             var properties = context.Properties;
             if (properties.CorrelationId is not null && responseActions.TryRemove(properties.CorrelationId, out var responseAction))
             {
-#if NET9_0_OR_GREATER
+#if NET10_0_OR_GREATER
                 if (responseAction.RequestActivityContext != default)
                     Activity.Current?.AddLink(new ActivityLink(responseAction.RequestActivityContext));
 #endif

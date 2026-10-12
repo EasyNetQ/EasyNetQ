@@ -13,7 +13,7 @@ internal static class RuntimeReflection
 {
     public const string SwitchName = "EasyNetQ.RuntimeReflection.IsSupported";
 
-#if NET9_0_OR_GREATER
+#if NET10_0_OR_GREATER
     [FeatureSwitchDefinition(SwitchName)]
     [FeatureGuard(typeof(RequiresUnreferencedCodeAttribute))]
     [FeatureGuard(typeof(RequiresDynamicCodeAttribute))]

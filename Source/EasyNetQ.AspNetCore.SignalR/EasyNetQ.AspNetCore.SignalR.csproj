@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>SignalR scale-out over EasyNetQ: a HubLifetimeManager backplane on any EasyNetQ transport (RabbitMQ, in-memory)</Description>
-    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>net10.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <EasyNetQAotCompatible>true</EasyNetQAotCompatible>

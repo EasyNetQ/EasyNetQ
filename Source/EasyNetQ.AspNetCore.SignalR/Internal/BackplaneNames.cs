@@ -45,7 +45,7 @@ internal sealed class BackplaneNames
 
     private static string Hash(string value)
     {
-#if NET9_0_OR_GREATER
+#if NET10_0_OR_GREATER
         return Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(value)));
 #else
         return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(value))).ToLowerInvariant();
