@@ -281,26 +281,11 @@ public class InternalConsumer : IInternalConsumer
 
         using (await mutex.AcquireAsync())
         {
+            // No basic.cancel here: closing the channel cancels its consumers and requeues their unacked messages at once,
+            // while cancelling first lets a waiting single active consumer take over before those messages are back
             foreach (var consumer in consumers.Values)
             {
                 consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
-                foreach (var consumerTag in consumer.ConsumerTags)
-                {
-                    try
-                    {
-                        if (channel != null)
-                            await channel.BasicCancelAsync(consumerTag);
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogError(
-                            ex,
-                            "Failed to dispose on consumerTag {ConsumerTag}",
-                            consumerTag
-                        );
-                    }
-                }
-
                 await consumer.DisposeAsync();
             }
 
