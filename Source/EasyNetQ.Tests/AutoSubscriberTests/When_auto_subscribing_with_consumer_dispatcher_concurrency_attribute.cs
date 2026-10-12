@@ -8,7 +8,7 @@ public class When_auto_subscribing_with_consumer_dispatcher_concurrency_attribut
     private readonly ServiceProvider serviceProvider;
     private readonly IPubSub pubSub;
     private readonly AutoSubscriber autoSubscriber;
-    private Action<ISubscriptionConfiguration> capturedAction;
+    private Action<ISubscriptionConfiguration>? capturedAction;
     private bool disposed;
 
     public When_auto_subscribing_with_consumer_dispatcher_concurrency_attribute()
@@ -37,7 +37,7 @@ public class When_auto_subscribing_with_consumer_dispatcher_concurrency_attribut
     {
         var subscriptionConfiguration = new SubscriptionConfiguration(1);
 
-        capturedAction(subscriptionConfiguration);
+        capturedAction!(subscriptionConfiguration);
 
         subscriptionConfiguration.ConsumerDispatcherConcurrency.Should().Be(4);
         subscriptionConfiguration.PrefetchCount.Should().Be(10);

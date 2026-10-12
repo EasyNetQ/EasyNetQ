@@ -44,7 +44,7 @@ public interface ISubscriptionConfiguration
     ISubscriptionConfiguration WithPrefetchCount(ushort prefetchCount);
 
     /// <summary>
-    /// Configures the consumer's dispatcher concurrency, overriding <see cref="ConnectionConfiguration.ConsumerDispatcherConcurrency"/> for this consumer
+    /// Configures the consumer's dispatcher concurrency for this consumer
     /// </summary>
     /// <remarks>For concurrency greater than one, the consumer could process messages in any order, not in the order it receives them</remarks>
     /// <param name="consumerDispatcherConcurrency">Consumer's dispatcher concurrency value, greater than zero</param>
