@@ -4,6 +4,8 @@
     <File Path="../.github/workflows/ci.yml" />
     <File Path="../.github/workflows/depsreview.yaml" />
     <File Path="../.gitignore" />
+    <File Path="../docs/MIGRATION-9.md" />
+    <File Path="../docs/v9-requirements.md" />
     <File Path="../global.json" />
     <File Path="../hall_of_fame.md" />
     <File Path="../licence.txt" />

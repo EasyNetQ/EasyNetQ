@@ -17,7 +17,7 @@ Working document for the v9 rewrite. Edit as decisions change; the phase plan de
 
 ## Confirmed decisions
 
-- TFMs: netstandard2.0;net8.0;net9.0;net10.0. netstandard2.0 restored 2026-08-31 (maintainer: key selling
+- TFMs: netstandard2.0;net10.0. netstandard2.0 restored 2026-08-31 (maintainer: key selling
   point). Mechanism: multi-target the existing csprojs with per-TFM package refs, PolySharp and `#if` — never a
   separate compat or "latest" assembly (NuGet TFM asset selection is the isolation mechanism; assembly splits
   break type identity and polyfills cannot cross assemblies). Known limits: .NET Framework consumers need

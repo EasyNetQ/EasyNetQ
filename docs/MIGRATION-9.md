@@ -22,7 +22,7 @@ ships. Sections: [Highlights](#highlights), [Design direction](#design-direction
 - **Observability**: OpenTelemetry `ActivitySource` and `Meter` named `EasyNetQ`.
 - **New package `EasyNetQ.AspNetCore.SignalR`**: a SignalR scale-out backplane over EasyNetQ instead of Redis.
 - **Packages**: `EasyNetQ` becomes a bundle over `EasyNetQ.Core` and `EasyNetQ.RabbitMQ`; targets
-  `netstandard2.0`, `net8.0`, `net9.0`, `net10.0`.
+  `netstandard2.0`, `net10.0`.
 
 ## Design direction
 
@@ -452,10 +452,10 @@ For a git submodule instead of packages, import
 
 # Platform notes
 
-- Target frameworks: `netstandard2.0`, `net8.0`, `net9.0`, `net10.0`.
+- Target frameworks: `netstandard2.0`, `net10.0`.
 - .NET Framework 4.7.2+ works through `netstandard2.0` from SDK-style projects. Those binaries skip pooled async
-  builders on the publish/consume path; `net8.0`+ is unaffected.
-- `IsAotCompatible` is set for Core, RabbitMQ, InMemory and the bundle (net9.0+ assets).
+  builders on the publish/consume path; `net10.0`+ is unaffected.
+- `IsAotCompatible` is set for Core, RabbitMQ, InMemory and the bundle (net10.0+ assets).
 - The generator package layout: `analyzers/dotnet/cs/EasyNetQ.Generators.dll` plus
   `buildTransitive/EasyNetQ.Core.props`, which adds `EasyNetQ.Generated` to `InterceptorsNamespaces`. If a build
   reports CS9137, that props file was not imported (e.g. an `ExcludeAssets`/`IncludeAssets` setting that drops
