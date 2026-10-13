@@ -1113,6 +1113,7 @@ namespace EasyNetQ.Pipeline
         public ConsumerContext(EasyNetQ.Pipeline.ChannelContext channel, string queue, System.Func<EasyNetQ.Pipeline.ConsumerContext, EasyNetQ.Pipeline.ConsumeContext>? messageContextFactory = null) { }
         public bool AutoAck { get; set; }
         public EasyNetQ.Pipeline.IChannelView Channel { get; }
+        public ushort? ConsumerDispatcherConcurrency { get; set; }
         public EasyNetQ.HandlerTable? Handlers { get; set; }
         public EasyNetQ.Pipeline.PipelineStep<EasyNetQ.Pipeline.ConsumeContext> MessagePipeline { get; set; }
         public ushort PrefetchCount { get; set; }
