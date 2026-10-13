@@ -176,6 +176,8 @@ public static partial class AdvancedBusExtensions
         {
             if (consumeConfiguration.PrefetchCount.HasValue)
                 c.WithPrefetchCount(consumeConfiguration.PrefetchCount.Value);
+            if (consumeConfiguration.ConsumerDispatcherConcurrency >0 )
+                c.WithConsumerDispatcherConcurrency(consumeConfiguration.ConsumerDispatcherConcurrency.Value);
             c.ForQueue(
                 queue,
                 handler,

@@ -189,6 +189,7 @@ internal sealed class RabbitMqTransportChannel : ITransportChannel
     {
         var perQueueConfigurations = new Dictionary<Topology.Queue, PerQueueConsumerConfiguration>();
         ushort prefetchCount = 0;
+        ushort consumerDispatcherConcurrency = 0;
         foreach (var consumerContext in consumers)
         {
             if (!consumerContext.TryGet(RabbitKeys.Queue, out var queue))
@@ -197,13 +198,14 @@ internal sealed class RabbitMqTransportChannel : ITransportChannel
             consumerContext.TryGet(RabbitKeys.ExclusiveConsumer, out var exclusive);
             consumerContext.TryGet(RabbitKeys.ConsumerArguments, out var arguments);
             prefetchCount = Math.Max(prefetchCount, consumerContext.PrefetchCount);
+            consumerDispatcherConcurrency = Math.Max(consumerDispatcherConcurrency, consumerContext.ConsumerDispatcherConcurrency ?? 0);
             perQueueConfigurations.Add(
                 queue,
                 new PerQueueConsumerConfiguration(consumerContext.AutoAck, consumerTag ?? "", exclusive, arguments, consumerContext)
             );
         }
 
-        var consumer = consumerFactory.CreateConsumer(new ConsumerConfiguration(prefetchCount, perQueueConfigurations));
+        var consumer = consumerFactory.CreateConsumer(new ConsumerConfiguration(prefetchCount, perQueueConfigurations, consumerDispatcherConcurrency > 0 ? consumerDispatcherConcurrency : null));
         var services = consumers.Count > 0 ? consumers.First().Services : null;
         var lifecycle = services?.GetService<LifecycleNotifier>() is { } notifier
             && services.GetService<IEventBus>() is { } eventBus

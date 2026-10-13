@@ -150,14 +150,14 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
 
         foreach (var (queue, handler, perQueueConfiguration) in consumeConfiguration.PerQueueConsumeConfigurations)
             consumerContexts.Add(
-                CreatePerQueueContext(channelContext, queue, perQueueConfiguration, consumeConfiguration.PrefetchCount, RawHandlerTerminal(handler))
+                CreatePerQueueContext(channelContext, queue, perQueueConfiguration, consumeConfiguration.PrefetchCount, consumeConfiguration.ConsumerDispatcherConcurrency, RawHandlerTerminal(handler))
             );
 
         foreach (var (queue, handlers, perQueueConfiguration) in consumeConfiguration.PerQueueTypedConsumeConfigurations)
             consumerContexts.Add(
                 handlers is HandlerCollection { Table: var table }
-                    ? CreateTypedPerQueueContext(channelContext, queue, perQueueConfiguration, consumeConfiguration.PrefetchCount, table)
-                    : CreatePerQueueContext(channelContext, queue, perQueueConfiguration, consumeConfiguration.PrefetchCount, LegacyTypedHandlerTerminal(handlers))
+                    ? CreateTypedPerQueueContext(channelContext, queue, perQueueConfiguration, consumeConfiguration.PrefetchCount, consumeConfiguration.ConsumerDispatcherConcurrency, table)
+                    : CreatePerQueueContext(channelContext, queue, perQueueConfiguration, consumeConfiguration.PrefetchCount, consumeConfiguration.ConsumerDispatcherConcurrency, LegacyTypedHandlerTerminal(handlers))
             );
 
         return await consumerChannel.StartConsumerAsync(consumerContexts);
@@ -168,6 +168,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         in Queue queue,
         PerQueueConsumeConfiguration perQueueConfiguration,
         ushort prefetchCount,
+        ushort? consumerDispatcherConcurrency,
         PipelineStep<ConsumeContext> terminal
     )
     {
@@ -175,6 +176,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         {
             PrefetchCount = prefetchCount,
             AutoAck = perQueueConfiguration.AutoAck,
+            ConsumerDispatcherConcurrency = consumerDispatcherConcurrency
         };
         SetConsumerConfiguration(consumerContext, queue, perQueueConfiguration);
         consumerContext.MessagePipeline = consumePipelineBuilder.Build(services, terminal);
@@ -210,6 +212,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
         in Queue queue,
         PerQueueConsumeConfiguration perQueueConfiguration,
         ushort prefetchCount,
+        ushort? consumerDispatcherConcurrency,
         HandlerTable table
     )
     {
@@ -218,6 +221,7 @@ public class RabbitAdvancedBus : IAdvancedBus, IDisposable
             PrefetchCount = prefetchCount,
             AutoAck = perQueueConfiguration.AutoAck,
             Handlers = table,
+            ConsumerDispatcherConcurrency = consumerDispatcherConcurrency
         };
         SetConsumerConfiguration(consumerContext, queue, perQueueConfiguration);
         consumerContext.MessagePipeline = consumePipelineBuilder.Clone()

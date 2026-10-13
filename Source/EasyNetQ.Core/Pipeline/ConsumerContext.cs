@@ -34,6 +34,8 @@ public sealed class ConsumerContext : LayerContext, IConsumerView
     /// <inheritdoc />
     public ushort PrefetchCount { get; set; }
 
+    public ushort? ConsumerDispatcherConcurrency { get; set; }
+
     /// <inheritdoc />
     public bool AutoAck { get; set; }
 
