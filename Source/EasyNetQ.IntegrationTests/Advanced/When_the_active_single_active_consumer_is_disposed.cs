@@ -22,26 +22,35 @@ public class When_the_active_single_active_consumer_is_disposed : IAsyncLifetime
         bus = serviceProvider.GetRequiredService<IBus>();
     }
 
-    [Fact]
-    public async Task Should_redeliver_its_unacked_message_before_the_next_ones()
+    [Theory]
+    [InlineData(QueueType.Classic, 1)]
+    // A quorum queue gives a requeued message a new position, so a requeue sent while the active consumer is still
+    // subscribed would bring it back after the other messages it holds
+    [InlineData(QueueType.Quorum, 5)]
+    public async Task Should_redeliver_its_unacked_message_before_the_next_ones(string queueType, ushort prefetchCount)
     {
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
         var queueName = Guid.NewGuid().ToString();
         var queue = await bus.Advanced.QueueDeclareAsync(
-            queueName, arguments: new Dictionary<string, object>().WithSingleActiveConsumer(), cancellationToken: cts.Token
+            queueName, arguments: new Dictionary<string, object>().WithQueueType(queueType).WithSingleActiveConsumer(),
+            cancellationToken: cts.Token
         );
 
         var firstMessageReceived = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var receivedMessages = new ConcurrentQueue<int>();
         using var allMessagesReceived = new AsyncCountdownEvent();
 
-        var activeConsumer = await bus.Advanced.ConsumeAsync(queue, (_, _, _, ct) =>
-        {
-            firstMessageReceived.TrySetResult();
-            // Holds the first message unacked until the consumer is disposed
-            return Task.Delay(-1, ct);
-        });
+        var activeConsumer = await bus.Advanced.ConsumeAsync(
+            queue,
+            (_, _, _, ct) =>
+            {
+                firstMessageReceived.TrySetResult();
+                // Holds the first message unacked until the consumer is disposed
+                return Task.Delay(-1, ct);
+            },
+            c => c.WithPrefetchCount(prefetchCount)
+        );
 
         await using (
             await bus.Advanced.ConsumeAsync(queue, (body, _, _, _) =>

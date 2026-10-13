@@ -289,6 +289,15 @@ public class InternalConsumer : IInternalConsumer
                 await consumer.DisposeAsync();
             }
 
+            // Closing the channel requeues the messages of the handlers that are still running: another consumer could
+            // get them while they are being handled, and their acks would fail. RabbitMQ.Client waits for these handlers
+            // only after closing the channel, so they are waited for here first. A closed channel has requeued them already
+            if (channel is { IsOpen: true })
+            {
+                foreach (var consumer in consumers.Values)
+                    await consumer.WaitForRunningHandlersAsync();
+            }
+
             consumers.Clear();
             if (channel != null)
                 await channel.DisposeAsync();

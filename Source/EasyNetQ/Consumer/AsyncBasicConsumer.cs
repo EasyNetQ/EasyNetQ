@@ -10,6 +10,7 @@ namespace EasyNetQ.Consumer;
 internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisposable
 {
     private readonly CancellationTokenSource cts = new();
+    private readonly TaskCompletionSource<bool> runningHandlersCompleted = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly IEventBus eventBus;
     private readonly ConsumeDelegate consumeDelegate;
     private readonly IServiceProvider services;
@@ -18,6 +19,7 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
     private readonly bool autoAck;
 
     private volatile bool disposed;
+    private int runningHandlers;
 
     public AsyncBasicConsumer(
         IServiceProvider services,
@@ -68,31 +70,57 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
         CancellationToken cancellationToken = default
     )
     {
-        if (cts.IsCancellationRequested)
-            return;
-
-        if (logger.IsEnabled(LogLevel.Debug))
+        // Counted before checking the cancellation, so that a handler either sees it and returns
+        // or is waited for by WaitForRunningHandlersAsync
+        Interlocked.Increment(ref runningHandlers);
+        try
         {
-            logger.LogDebug(
-                "Message delivered to consumer {ConsumerTag} with deliveryTag {DeliveryTag}",
-                consumerTag,
-                deliveryTag
+            if (cts.IsCancellationRequested)
+                return;
+
+            if (logger.IsEnabled(LogLevel.Debug))
+            {
+                logger.LogDebug(
+                    "Message delivered to consumer {ConsumerTag} with deliveryTag {DeliveryTag}",
+                    consumerTag,
+                    deliveryTag
+                );
+            }
+
+            var messageBody = body;
+            var messageReceivedInfo = new MessageReceivedInfo(
+                consumerTag, deliveryTag, redelivered, exchange, routingKey, queue.Name
             );
+            var messageProperties = new MessageProperties(properties);
+            await eventBus.PublishAsync(new DeliveredMessageEvent(messageReceivedInfo, messageProperties, messageBody));
+
+            var ackStrategy = await consumeDelegate(new ConsumeContext(messageReceivedInfo, messageProperties, messageBody, services, cts.Token)).ConfigureAwait(false);
+
+            // While the consumer is being disposed, its channel is still open and subscribed: a requeued message would
+            // be delivered to it again, and on a quorum queue it would come back after the other unacked messages.
+            // Closing the channel requeues it in order instead
+            if (!autoAck && cts.IsCancellationRequested && ackStrategy == AckStrategies.NackWithRequeueAsync)
+                return;
+
+            if (!autoAck)
+            {
+                var ackResult = await AckAsync(ackStrategy, messageReceivedInfo, cancellationToken);
+                await eventBus.PublishAsync(new AckEvent(messageReceivedInfo, messageProperties, messageBody, ackResult));
+            }
         }
-
-        var messageBody = body;
-        var messageReceivedInfo = new MessageReceivedInfo(
-            consumerTag, deliveryTag, redelivered, exchange, routingKey, queue.Name
-        );
-        var messageProperties = new MessageProperties(properties);
-        await eventBus.PublishAsync(new DeliveredMessageEvent(messageReceivedInfo, messageProperties, messageBody));
-
-        var ackStrategy = await consumeDelegate(new ConsumeContext(messageReceivedInfo, messageProperties, messageBody, services, cts.Token)).ConfigureAwait(false);
-        if (!autoAck)
+        finally
         {
-            var ackResult = await AckAsync(ackStrategy, messageReceivedInfo, cancellationToken);
-            await eventBus.PublishAsync(new AckEvent(messageReceivedInfo, messageProperties, messageBody, ackResult));
+            if (Interlocked.Decrement(ref runningHandlers) == 0 && cts.IsCancellationRequested)
+                runningHandlersCompleted.TrySetResult(true);
         }
+    }
+
+    /// <summary>
+    ///     Once the consumer is disposed, waits for the handlers that are still running
+    /// </summary>
+    public Task WaitForRunningHandlersAsync()
+    {
+        return Volatile.Read(ref runningHandlers) == 0 ? Task.CompletedTask : runningHandlersCompleted.Task;
     }
 
     /// <inheritdoc />
