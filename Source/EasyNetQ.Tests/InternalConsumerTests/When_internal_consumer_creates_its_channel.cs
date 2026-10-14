@@ -93,7 +93,7 @@ public sealed class When_internal_consumer_creates_its_channel : IAsyncLifetime
                         "consumerTag",
                         false,
                         new Dictionary<string, object>(),
-                        _ => new ValueTask<AckStrategyAsync>(AckStrategies.AckAsync)
+                        null
                     )
                 }
             },

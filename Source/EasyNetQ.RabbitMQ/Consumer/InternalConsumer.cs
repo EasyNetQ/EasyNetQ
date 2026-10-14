@@ -156,7 +156,7 @@ public class InternalConsumer : IInternalConsumer
             {
                 try
                 {
-                    channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
+                    channel = await connection.CreateChannelAsync(CreateConsumerChannelOptions(), cancellationToken);
                     channel.ChannelShutdownAsync += OnChannelShutdownAsync;
                     await channel.BasicQosAsync(0, configuration.PrefetchCount, false, cancellationToken);
                 }
@@ -294,19 +294,6 @@ public class InternalConsumer : IInternalConsumer
             foreach (var consumer in consumers.Values)
             {
                 consumer.ConsumerCancelled -= AsyncBasicConsumerOnConsumerCancelled;
-                foreach (var consumerTag in consumer.ConsumerTags)
-                {
-                    try
-                    {
-                        if (channel != null)
-                            await channel.BasicCancelAsync(consumerTag);
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.FailedToDisposeConsumer(ex, consumerTag);
-                    }
-                }
-
                 await consumer.DisposeAsync();
             }
 
@@ -369,6 +356,19 @@ public class InternalConsumer : IInternalConsumer
         {
             await CancelledAsync.Invoke(this, new InternalConsumerCancelledEventArgs(cancelled, active));
         }
+    }
+
+    private CreateChannelOptions CreateConsumerChannelOptions()
+    {
+        // Passing no options keeps the connection-wide concurrency: the CreateChannelOptions constructor defaults it to 1, not null.
+        // A consumer channel never publishes, so publisher confirmations stay disabled as they are without options.
+        if (configuration.ConsumerDispatcherConcurrency == null) return null;
+
+        return new CreateChannelOptions(
+            publisherConfirmationsEnabled: false,
+            publisherConfirmationTrackingEnabled: false,
+            consumerDispatchConcurrency: configuration.ConsumerDispatcherConcurrency
+        );
     }
 
     private static bool IsChannelClosedWithSoftError([NotNullWhen(true)] IChannel? channel)

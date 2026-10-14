@@ -465,6 +465,7 @@ public static partial class AdvancedBusExtensions
         public bool? IsExclusive { get; private set; }
         public ushort? PrefetchCount { get; private set; }
         public IDictionary<string, object>? Arguments { get; private set; }
+        public ushort? ConsumerDispatcherConcurrency { get; private set; }
 
         public ISimpleConsumeConfiguration WithAutoAck()
         {

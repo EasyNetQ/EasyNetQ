@@ -79,6 +79,7 @@ internal class ResponderConfiguration : IResponderConfiguration
 
     public ushort PrefetchCount { get; private set; }
     public string? QueueName { get; private set; }
+    public ushort? ConsumerDispatcherConcurrency { get; private set; }
     public string? QueueType { get; private set; }
     public bool Durable { get; private set; } = true;
 

@@ -174,3 +174,6 @@ public interface IConsumeConfiguration
         in Queue queue, Action<IHandlerRegistration> register, Action<IPerQueueConsumeConfiguration> configure
     );
 }
+
+
+

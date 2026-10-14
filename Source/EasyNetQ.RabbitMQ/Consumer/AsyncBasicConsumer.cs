@@ -12,6 +12,7 @@ namespace EasyNetQ.Consumer;
 internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisposable
 {
     private readonly CancellationTokenSource cts = new();
+    private readonly TaskCompletionSource<bool> runningHandlersCompleted = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly IEventBus eventBus;
     private readonly ConsumerContext consumerContext;
     private readonly PipelineStep<ConsumeContext> pipeline;
@@ -20,6 +21,7 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
     private readonly bool autoAck;
 
     private volatile bool disposed;
+    private int runningHandlers;
 
     public AsyncBasicConsumer(
         ILogger<InternalConsumer> logger,
@@ -66,12 +68,23 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
         CancellationToken cancellationToken = default
     )
     {
-        if (cts.IsCancellationRequested)
-            return;
-
+        // Counted before checking the cancellation, so that a handler either sees it and returns
+        // or is waited for by WaitForRunningHandlersAsync
+        Interlocked.Increment(ref runningHandlers);
         var context = consumerContext.RentMessageContext();
         try
         {
+            if (cts.IsCancellationRequested)
+                return;
+
+            if (logger.IsEnabled(LogLevel.Debug))
+            {
+                logger.LogDebug(
+                    "Message delivered to consumer {ConsumerTag} with deliveryTag {DeliveryTag}",
+                    consumerTag,
+                    deliveryTag
+                );
+            }
             context.ReceivedInfo = new MessageReceivedInfo(consumerTag, deliveryTag, redelivered, exchange, routingKey, queue.Name);
             context.Properties = BasicPropertiesMapper.FromBasicProperties(properties);
             context.Body = body;
@@ -79,13 +92,31 @@ internal sealed class AsyncBasicConsumer : AsyncDefaultBasicConsumer, IAsyncDisp
 
             await pipeline(context).ConfigureAwait(false);
 
+            // While the consumer is being disposed, its channel is still open and subscribed: a requeued message would
+            // be delivered to it again, and on a quorum queue it would come back after the other unacked messages.
+            // Closing the channel requeues it in order instead
+            if (!autoAck && cts.IsCancellationRequested && context.Ack == AckDecision.NackRequeue)
+                return;
+
             if (!autoAck)
+            {
                 await ApplyAckAsync(context.Ack, context.ReceivedInfo, cancellationToken).ConfigureAwait(false);
+            }
         }
         finally
         {
             consumerContext.ReturnMessageContext(context);
+            if (Interlocked.Decrement(ref runningHandlers) == 0 && cts.IsCancellationRequested)
+                runningHandlersCompleted.TrySetResult(true);
         }
+    }
+
+    /// <summary>
+    ///     Once the consumer is disposed, waits for the handlers that are still running
+    /// </summary>
+    public Task WaitForRunningHandlersAsync()
+    {
+        return Volatile.Read(ref runningHandlers) == 0 ? Task.CompletedTask : runningHandlersCompleted.Task;
     }
 
     /// <inheritdoc />

@@ -73,7 +73,7 @@ public sealed class When_consumer_dispatcher_concurrency_is_zero : IAsyncLifetim
     {
         await using var consumer = await mockBuilder.Bus.Advanced.ConsumeAsync(
             new Queue("my_queue"),
-            x => x.Add<MyMessage>((_, _, _) => Task.FromResult(AckStrategies.AckAsync)),
+            x => x.Add<MyMessage>((_, _, _) => Task.CompletedTask),
             c => c.WithConsumerDispatcherConcurrency(0)
         );
 
