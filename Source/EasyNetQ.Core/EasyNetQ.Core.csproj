@@ -19,8 +19,8 @@
   </ItemGroup>
   <!-- The source generator ships inside this package as an analyzer (with buildTransitive/EasyNetQ.Core.props for its
        InterceptorsNamespaces opt-in), so every consumer of EasyNetQ gets [MessageType] and the generated registrations.
-       The reference only orders the build (Visual Studio packs on build too); its UndefineProperties match
-       EasyNetQ.SourceReference.props, so both resolve to the same project instance instead of building it twice. -->
+       The reference orders the build; pack builds it as well, since inside Visual Studio MSBuild skips references.
+       Both drop the properties EasyNetQ.SourceReference.props drops, so all resolve to one instance, built once. -->
   <ItemGroup>
     <ProjectReference Include="..\EasyNetQ.Generators\EasyNetQ.Generators.csproj"
                       ReferenceOutputAssembly="false"
@@ -29,12 +29,14 @@
     <None Include="buildTransitive/EasyNetQ.Core.props" Pack="true" PackagePath="build/;buildTransitive/" />
   </ItemGroup>
   <Target Name="_EasyNetQPackGenerator" BeforeTargets="_GetPackageFiles">
-    <MSBuild Projects="..\EasyNetQ.Generators\EasyNetQ.Generators.csproj" Targets="GetTargetPath"
-             Properties="Configuration=$(Configuration)">
+    <PropertyGroup>
+      <_EasyNetQGeneratorTarget>Build</_EasyNetQGeneratorTarget>
+      <_EasyNetQGeneratorTarget Condition="'$(NoBuild)' == 'true'">GetTargetPath</_EasyNetQGeneratorTarget>
+    </PropertyGroup>
+    <MSBuild Projects="..\EasyNetQ.Generators\EasyNetQ.Generators.csproj" Targets="$(_EasyNetQGeneratorTarget)"
+             RemoveProperties="TargetFramework;PublishAot;RuntimeIdentifier;SelfContained;NativeLib">
       <Output TaskParameter="TargetOutputs" ItemName="_EasyNetQGeneratorAssembly" />
     </MSBuild>
-    <Error Condition="!Exists('@(_EasyNetQGeneratorAssembly)')"
-           Text="EasyNetQ.Generators is not built ($(Configuration))." />
     <ItemGroup>
       <None Include="@(_EasyNetQGeneratorAssembly)" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     </ItemGroup>
