@@ -11,7 +11,7 @@ EasyNetQ/
 │   ├── EasyNetQ/                    # Core library (netstandard2.0;net8.0;net9.0;net10.0)
 │   ├── EasyNetQ.Serialization.NewtonsoftJson/  # Optional Newtonsoft.Json serializer
 │   ├── EasyNetQ.Hosepipe/           # CLI tool for dead-letter message replay
-│   ├── EasyNetQ.Tests/              # Unit tests (xUnit, net8.0)
+│   ├── EasyNetQ.Tests/              # Unit tests (xUnit v3, net10.0)
 │   ├── EasyNetQ.Serialization.Tests/
 │   ├── EasyNetQ.IntegrationTests/   # Docker-based RabbitMQ integration tests
 │   ├── EasyNetQ.ApprovalTests/      # Public API surface snapshot tests
@@ -53,7 +53,12 @@ dotnet format --verify-no-changes --severity warn Source/EasyNetQ.slnx
 - **Accessibility**: Always explicit (`public`, `private`, etc.)
 - **Readonly**: Enforce `readonly` on fields where possible
 - **Naming**: PascalCase for public members, camelCase for private fields (no underscore prefix), `I` prefix for interfaces
-- **Null guards**: The core `EasyNetQ` project uses Fody NullGuard for automatic null checks
+- **Nullable**: `<Nullable>enable</Nullable>` is on solution-wide (warnings, not errors); no Fody/NullGuard
+- **Nullability is a contract, not a warning fix**: a member is `?` only when `null` is a valid state (optional value
+  absent, field not yet set, "no result"). Decide per instance; if it is never null, keep it non-nullable and fix the
+  cause instead: assign in the constructor, default to an empty value, `[MemberNotNullWhen]`/`[NotNullWhen]`, or throw on
+  invalid input (e.g. a wire message missing a required property). No `!`, `#pragma` or `<NoWarn>` to silence nullable
+  warnings, unless the compiler cannot see an invariant that does hold. Tests included.
 - **XML docs**: Generated for all public APIs (`GenerateDocumentationFile=true`)
 
 ## Architecture
@@ -75,12 +80,12 @@ dotnet format --verify-no-changes --severity warn Source/EasyNetQ.slnx
 
 ## Testing Conventions
 
-- **Framework**: xUnit 2.x + FluentAssertions + NSubstitute
+- **Framework**: xUnit v3 + AwesomeAssertions (FluentAssertions-compatible API) + NSubstitute
 - **Naming**: Classes `When_<scenario>`, methods `Should_<expected>`
 - **MockBuilder**: Central test helper in `EasyNetQ.Tests/Mocking/MockBuilder.cs` wires DI with substituted RabbitMQ infrastructure
 - **Integration tests**: Use Docker (RabbitMQ container via `docker.dotnet`)
 - **Approval tests**: `PublicApiGenerator` + `Shouldly` to snapshot public API surface
-- **Global usings**: Test projects use `GlobalUsings.cs` importing xUnit, FluentAssertions, NSubstitute
+- **Global usings**: Test projects use `GlobalUsings.cs` importing xUnit, AwesomeAssertions, NSubstitute
 
 ## CI/CD
 
@@ -88,4 +93,10 @@ dotnet format --verify-no-changes --severity warn Source/EasyNetQ.slnx
 - Runs on: push to `master`/`N.x`, PRs to `master`/`develop`, version tags
 - Steps: restore → format check → build → test (unit + serialization + hosepipe + integration + approval)
 - Publish: tag push triggers `dotnet pack` + `dotnet nuget push` to nuget.org
-- .NET SDK: 8.x in CI
+- .NET SDK: 10.x in CI (pinned via `global.json`); test/example projects target net10.0
+
+## Commit & PR style
+
+- Terse. State what changed and why it matters; nothing else.
+- No adverbs. No filler.
+- v9 requirements and guidelines live in `docs/v9-requirements.md`; update that file when direction changes.

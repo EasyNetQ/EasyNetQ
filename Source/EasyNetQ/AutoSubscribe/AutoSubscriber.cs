@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using EasyNetQ.Internals;
 using System.Reflection;
 using System.Security.Cryptography;
@@ -11,8 +12,8 @@ namespace EasyNetQ.AutoSubscribe;
 /// </summary>
 public class AutoSubscriber
 {
-    private static readonly MethodInfo AutoSubscribeAsyncConsumerMethodInfo = typeof(AutoSubscriber).GetMethod(nameof(AutoSubscribeAsyncConsumerAsync), BindingFlags.Instance | BindingFlags.NonPublic)!;
-    private static readonly MethodInfo AutoSubscribeConsumerMethodInfo = typeof(AutoSubscriber).GetMethod(nameof(AutoSubscribeConsumerAsync), BindingFlags.Instance | BindingFlags.NonPublic)!;
+    private static readonly MethodInfo AutoSubscribeAsyncConsumerMethodInfo = typeof(AutoSubscriber).GetMethod(nameof(SubscribeAsyncConsumerAsync), BindingFlags.Instance | BindingFlags.NonPublic)!;
+    private static readonly MethodInfo AutoSubscribeConsumerMethodInfo = typeof(AutoSubscriber).GetMethod(nameof(SubscribeConsumerAsync), BindingFlags.Instance | BindingFlags.NonPublic)!;
 
     protected readonly IBus Bus;
 
@@ -67,6 +68,8 @@ public class AutoSubscriber
     /// </summary>
     /// <param name="consumerTypes">The types to register as consumers.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
+    [RequiresUnreferencedCode(Compat.ReflectionAutoSubscriber)]
+    [RequiresDynamicCode(Compat.ReflectionAutoSubscriber)]
     public virtual async Task<IAsyncDisposable> SubscribeAsync(Type[] consumerTypes, CancellationToken cancellationToken = default)
     {
         var subscriptions = new List<IAsyncDisposable>();
@@ -87,6 +90,33 @@ public class AutoSubscriber
                 .Invoke(this, [subscriberConsumerInfo, cancellationToken])!;
 
             subscriptions.Add(await awaitableSubscriptionResult.ConfigureAwait(false));
+        }
+
+        subscriptions.Reverse();
+        return new AutoSubscribeDisposable(subscriptions);
+    }
+
+    /// <summary>
+    /// Subscribes consumers described at compile time (the EasyNetQ source generator emits them, see
+    /// <see cref="IAutoSubscriberConsumerSource"/>): trim- and Native-AOT-safe. Subscription ids, topics and
+    /// subscription configuration follow the same rules as <see cref="SubscribeAsync(Type[], CancellationToken)"/>.
+    /// </summary>
+    /// <param name="consumers">The consumers to subscribe.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    public virtual async Task<IAsyncDisposable> SubscribeAsync(IEnumerable<AutoSubscriberConsumer> consumers, CancellationToken cancellationToken = default)
+    {
+        var subscriptions = new List<IAsyncDisposable>();
+        try
+        {
+            // async consumers first, as the reflection path does
+            foreach (var consumer in consumers.OrderBy(c => c.Info.InterfaceType.IsConstructedGenericType && c.Info.InterfaceType.GetGenericTypeDefinition() == typeof(IConsume<>)))
+                subscriptions.Add(await consumer.SubscribeAsync(this, cancellationToken).ConfigureAwait(false));
+        }
+        catch
+        {
+            subscriptions.Reverse();
+            await new AutoSubscribeDisposable(subscriptions).DisposeAsync().ConfigureAwait(false);
+            throw;
         }
 
         subscriptions.Reverse();
@@ -121,7 +151,7 @@ public class AutoSubscriber
         return string.Concat(SubscriptionIdPrefix, ":", r.ToString());
     }
 
-    private Task<SubscriptionResult> AutoSubscribeAsyncConsumerAsync<TMessage, TConsumerAsync>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken)
+    internal Task<SubscriptionResult> SubscribeAsyncConsumerAsync<TMessage, TConsumerAsync>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken)
         where TMessage : class
         where TConsumerAsync : class, IConsumeAsync<TMessage>
     {
@@ -137,7 +167,7 @@ public class AutoSubscriber
         );
     }
 
-    private Task<SubscriptionResult> AutoSubscribeConsumerAsync<TMessage, TConsumer>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken)
+    internal Task<SubscriptionResult> SubscribeConsumerAsync<TMessage, TConsumer>(AutoSubscriberConsumerInfo subscriptionInfo, CancellationToken cancellationToken)
         where TMessage : class
         where TConsumer : class, IConsume<TMessage>
     {
@@ -167,12 +197,12 @@ public class AutoSubscriber
 
     private static Action<ISubscriptionConfiguration> TopicAttributeInfo(AutoSubscriberConsumerInfo subscriptionInfo)
     {
-        var topics = GetTopAttributeValues(subscriptionInfo);
+        var topics = subscriptionInfo.Topics;
 
-        return topics.Length != 0 ? GenerateConfigurationFromTopics(topics) : configuration => configuration.WithTopic(DefaultTopicName ?? string.Empty);
+        return topics.Count != 0 ? GenerateConfigurationFromTopics(topics) : configuration => configuration.WithTopic(DefaultTopicName ?? string.Empty);
     }
 
-    private static Action<ISubscriptionConfiguration> GenerateConfigurationFromTopics(string[] topics)
+    private static Action<ISubscriptionConfiguration> GenerateConfigurationFromTopics(IReadOnlyList<string> topics)
     {
         return configuration =>
         {
@@ -183,18 +213,9 @@ public class AutoSubscriber
         };
     }
 
-    private static string[] GetTopAttributeValues(AutoSubscriberConsumerInfo subscriptionInfo)
-    {
-        var consumeMethod = subscriptionInfo.ConsumeMethod;
-        return consumeMethod.GetCustomAttributes(typeof(ForTopicAttribute), true)
-            .OfType<ForTopicAttribute>()
-            .Select(a => a.Topic)
-            .ToArray();
-    }
-
     private static Action<ISubscriptionConfiguration> AutoSubscriberConsumerInfo(AutoSubscriberConsumerInfo subscriptionInfo)
     {
-        var configSettings = GetSubscriptionConfigurationAttributeValue(subscriptionInfo);
+        var configSettings = subscriptionInfo.SubscriptionConfiguration;
         if (configSettings == null)
         {
             return _ => { };
@@ -216,21 +237,13 @@ public class AutoSubscriber
         };
     }
 
-    private static SubscriptionConfigurationAttribute GetSubscriptionConfigurationAttributeValue(AutoSubscriberConsumerInfo subscriptionInfo)
-    {
-        var customAttributes = subscriptionInfo.ConsumeMethod.GetCustomAttributes(typeof(SubscriptionConfigurationAttribute), true);
-        return customAttributes
-            .OfType<SubscriptionConfigurationAttribute>()
-            .FirstOrDefault();
-    }
+    /// <summary>
+    /// The consumer's <see cref="AutoSubscriberConsumerAttribute"/>; its SubscriptionId overrides <see cref="GenerateSubscriptionId"/>.
+    /// </summary>
+    protected virtual AutoSubscriberConsumerAttribute? GetSubscriptionAttribute(AutoSubscriberConsumerInfo consumerInfo)
+        => consumerInfo.SubscriptionAttribute;
 
-    protected virtual AutoSubscriberConsumerAttribute GetSubscriptionAttribute(AutoSubscriberConsumerInfo consumerInfo)
-    {
-        return consumerInfo.ConsumeMethod
-            .GetCustomAttributes(typeof(AutoSubscriberConsumerAttribute), true)
-            .SingleOrDefault() as AutoSubscriberConsumerAttribute;
-    }
-
+    [RequiresUnreferencedCode(Compat.ReflectionAutoSubscriber)]
     protected virtual IEnumerable<AutoSubscriberConsumerInfo> GetSubscriberConsumerInfos(IEnumerable<Type> types, Type interfaceType)
     {
         return types.Where(t => t.GetTypeInfo().IsClass && !t.GetTypeInfo().IsAbstract)

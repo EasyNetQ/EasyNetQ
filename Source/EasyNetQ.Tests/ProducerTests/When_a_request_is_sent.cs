@@ -7,22 +7,25 @@ namespace EasyNetQ.Tests.ProducerTests;
 
 public class When_a_request_is_sent : IAsyncLifetime
 {
-    private MockBuilder mockBuilder;
-    private TestResponseMessage responseMessage;
+    private readonly string correlationId = Guid.NewGuid().ToString();
+    private readonly MockBuilder mockBuilder;
+    private TestResponseMessage? responseMessage;
 
-    public async ValueTask InitializeAsync()
+    public When_a_request_is_sent()
     {
-        var correlationId = Guid.NewGuid().ToString();
         mockBuilder = new MockBuilder(
             c => c.AddSingleton<ICorrelationIdGenerationStrategy>(
                 _ => new StaticCorrelationIdGenerationStrategy(correlationId)
             )
         );
+    }
 
+    public async ValueTask InitializeAsync()
+    {
         using var waiter = new CountdownEvent(2);
 
 #pragma warning disable IDISP004
-        mockBuilder.EventBus.Subscribe((PublishedMessageEvent _) => Task.FromResult(waiter.Signal()));
+        mockBuilder.Published += () => waiter.Signal();
         mockBuilder.EventBus.Subscribe((StartConsumingSucceededEvent _) => Task.FromResult(waiter.Signal()));
 #pragma warning restore IDISP004
 
@@ -68,7 +71,7 @@ public class When_a_request_is_sent : IAsyncLifetime
             Arg.Is(ExchangeType.Direct),
             Arg.Is(true),
             Arg.Is(false),
-            Arg.Any<IDictionary<string, object>>(),
+            Arg.Any<IDictionary<string, object?>>(),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()
         );
@@ -81,7 +84,7 @@ public class When_a_request_is_sent : IAsyncLifetime
             Arg.Is(false),
             Arg.Is(true),
             Arg.Is(true),
-            Arg.Any<IDictionary<string, object>>(),
+            Arg.Any<IDictionary<string, object?>>(),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()
         );
@@ -103,6 +106,6 @@ public class When_a_request_is_sent : IAsyncLifetime
     [Fact]
     public void Should_return_the_response()
     {
-        responseMessage.Text.Should().Be("Hello World");
+        responseMessage!.Text.Should().Be("Hello World");
     }
 }

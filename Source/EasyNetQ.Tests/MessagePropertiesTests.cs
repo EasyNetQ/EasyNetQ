@@ -8,7 +8,7 @@ public class MessagePropertiesTests
         const string replyTo = "reply to";
 
         var originalProperties = new BasicProperties { ReplyTo = replyTo };
-        var properties = new MessageProperties(originalProperties);
+        var properties = BasicPropertiesMapper.FromBasicProperties(originalProperties);
 
         properties.ReplyTo.Should().Be(replyTo);
     }

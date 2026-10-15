@@ -39,7 +39,7 @@ public class When_a_polymorphic_message_is_sent : IAsyncLifetime
             Arg.Is(ExchangeType.Topic),
             Arg.Is(true),
             Arg.Is(false),
-            Arg.Any<IDictionary<string, object>>(),
+            Arg.Any<IDictionary<string, object?>>(),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()
         );
@@ -70,6 +70,6 @@ public interface IMyMessageInterface
 
 public class MyImplementation : IMyMessageInterface
 {
-    public string Text { get; set; }
-    public string NotInInterface { get; set; }
+    public string Text { get; set; } = "";
+    public string NotInInterface { get; set; } = "";
 }

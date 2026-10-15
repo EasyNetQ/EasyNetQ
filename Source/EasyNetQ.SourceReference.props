@@ -1,0 +1,28 @@
+<Project>
+  <!--
+    Consume EasyNetQ from source (e.g. a git submodule) instead of a package:
+      <Import Project="path/to/EasyNetQ/Source/EasyNetQ.SourceReference.props" />
+    Wires what the package does for you: project references to $(EasyNetQSourcePackages) (default EasyNetQ, which
+    carries AddEasyNetQ; add EasyNetQ.Transport.InMemory for tests), the source generator as an
+    analyzer, and the interceptors namespace. Set EasyNetQSourcePackages before the import.
+  -->
+  <PropertyGroup>
+    <EasyNetQSourcePackages Condition="'$(EasyNetQSourcePackages)' == ''">EasyNetQ</EasyNetQSourcePackages>
+    <InterceptorsNamespaces>$(InterceptorsNamespaces);EasyNetQ.Generated</InterceptorsNamespaces>
+    <!-- a solution build unsets Configuration for references outside the solution, which every EasyNetQ project is;
+         keep the consumer's, so a project is not built as Debug and Release side by side (Directory.Build.targets
+         does the same for EasyNetQ's own references). In a solution, every project that references EasyNetQ (also
+         only through another project) imports this file for that reason; a project built on its own needs not. -->
+    <ShouldUnsetParentConfigurationAndPlatform>false</ShouldUnsetParentConfigurationAndPlatform>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <_EasyNetQSourcePackage Include="$(EasyNetQSourcePackages)" />
+    <!-- plain references: the same global properties whether a project reaches EasyNetQ directly or transitively -->
+    <ProjectReference Include="@(_EasyNetQSourcePackage->'$(MSBuildThisFileDirectory)%(Identity)/%(Identity).csproj')" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)EasyNetQ.Generators/EasyNetQ.Generators.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false"
+                      UndefineProperties="PublishAot;RuntimeIdentifier;SelfContained;NativeLib" />
+  </ItemGroup>
+</Project>

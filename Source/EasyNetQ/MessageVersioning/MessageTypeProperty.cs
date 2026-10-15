@@ -1,3 +1,5 @@
+using EasyNetQ.Internals;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace EasyNetQ.MessageVersioning;
@@ -11,6 +13,7 @@ public class MessageTypeProperty
 
     private readonly ITypeNameSerializer typeNameSerializer;
 
+    [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = Compat.Annotated)]
     private MessageTypeProperty(ITypeNameSerializer typeNameSerializer, Type messageType)
     {
         this.typeNameSerializer = typeNameSerializer;
@@ -25,7 +28,7 @@ public class MessageTypeProperty
         alternativeTypes.RemoveAt(0);
     }
 
-    private MessageTypeProperty(ITypeNameSerializer typeNameSerializer, string firstAlternativeMessageType, string alternativeTypesHeader)
+    private MessageTypeProperty(ITypeNameSerializer typeNameSerializer, string firstAlternativeMessageType, string? alternativeTypesHeader)
     {
         this.typeNameSerializer = typeNameSerializer;
         this.firstAlternativeMessageType = firstAlternativeMessageType;
@@ -50,11 +53,11 @@ public class MessageTypeProperty
     public Type GetMessageType()
     {
         if (TryDeserializeType(firstAlternativeMessageType, out var messageType))
-            return messageType!;
+            return messageType;
 
         foreach (var alternativeType in alternativeTypes)
             if (TryDeserializeType(alternativeType, out messageType))
-                return messageType!;
+                return messageType;
 
         throw new EasyNetQException(
             "Cannot find declared message type {0} or any of the specified alternative types {1}", firstAlternativeMessageType,
@@ -70,7 +73,7 @@ public class MessageTypeProperty
         if (messageType == null)
             throw new EasyNetQException("Type is empty");
 
-        if (!messageProperties.HeadersPresent || !messageProperties.Headers!.ContainsKey(AlternativeMessageTypesHeaderKey))
+        if (!messageProperties.HeadersPresent || !messageProperties.Headers.ContainsKey(AlternativeMessageTypesHeaderKey))
             return new MessageTypeProperty(typeNameSerializer, messageType, null);
 
         if (messageProperties.Headers[AlternativeMessageTypesHeaderKey] is not byte[] rawHeader)
@@ -83,7 +86,7 @@ public class MessageTypeProperty
         return new MessageTypeProperty(typeNameSerializer, messageType, alternativeTypesHeader);
     }
 
-    private bool TryDeserializeType(string typeString, out Type messageType)
+    private bool TryDeserializeType(string typeString, [NotNullWhen(true)] out Type? messageType)
     {
         try
         {

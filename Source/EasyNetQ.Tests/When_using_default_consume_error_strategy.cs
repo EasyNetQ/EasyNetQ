@@ -1,3 +1,4 @@
+using EasyNetQ.Pipeline;
 using System.Text;
 using EasyNetQ.Consumer;
 using EasyNetQ.Tests.Mocking;
@@ -10,7 +11,7 @@ public class When_using_default_consume_error_strategy
 {
     public When_using_default_consume_error_strategy()
     {
-        customConventions = new Conventions(new DefaultTypeNameSerializer())
+        customConventions = new Conventions(new DefaultTypeNameSerializer(), new MessageTypeRegistry(new DefaultTypeNameSerializer()))
         {
             ErrorQueueNamingConvention = _ => "CustomEasyNetQErrorQueueName",
             ErrorExchangeNamingConvention = info => "CustomErrorExchangePrefixName." + info.RoutingKey,
@@ -22,7 +23,7 @@ public class When_using_default_consume_error_strategy
         const string originalMessage = "";
         var originalMessageBody = Encoding.UTF8.GetBytes(originalMessage);
 
-        consumerExecutionContext = new ConsumeContext(
+        consumerExecutionContext = TestContexts.Consume(
             new MessageReceivedInfo("consumerTag", 0, false, "originalExchange", "originalRoutingKey", "queue"),
             new MessageProperties
             {
@@ -30,8 +31,7 @@ public class When_using_default_consume_error_strategy
                 AppId = string.Empty
             },
             originalMessageBody,
-            Substitute.For<IServiceProvider>(),
-            CancellationToken.None
+            Substitute.For<IServiceProvider>()
         );
     }
 
@@ -45,7 +45,7 @@ public class When_using_default_consume_error_strategy
 
         var cancelAckStrategy = await mockBuilder.ConsumeErrorStrategy.HandleCancelledAsync(consumerExecutionContext, CancellationToken.None);
 
-        Assert.Same(AckStrategies.NackWithRequeueAsync, cancelAckStrategy);
+        Assert.Equal(AckDecision.NackRequeue, cancelAckStrategy);
     }
 
     [Fact]
@@ -55,7 +55,7 @@ public class When_using_default_consume_error_strategy
 
         var errorAckStrategy = await mockBuilder.ConsumeErrorStrategy.HandleErrorAsync(consumerExecutionContext, new Exception(), CancellationToken.None);
 
-        Assert.Same(AckStrategies.AckAsync, errorAckStrategy);
+        Assert.Equal(AckDecision.Ack, errorAckStrategy);
 
         await mockBuilder.Channels[0].Received().ExchangeDeclareAsync("CustomErrorExchangePrefixName.originalRoutingKey", ExchangeType.Topic, true, cancellationToken: CancellationToken.None);
         await mockBuilder.Channels[0].Received().QueueDeclareAsync(
@@ -63,7 +63,7 @@ public class When_using_default_consume_error_strategy
             true,
             false,
             false,
-            Arg.Is<IDictionary<string, object>>(x => x.ContainsKey(Argument.QueueType) && x[Argument.QueueType].Equals(QueueType.Quorum)),
+            Arg.Is<IDictionary<string, object?>>(x => x.ContainsKey(Argument.QueueType) && x[Argument.QueueType]!.Equals(QueueType.Quorum)),
             cancellationToken: CancellationToken.None
         );
         await mockBuilder.Channels[0].Received().QueueBindAsync(
@@ -93,7 +93,7 @@ public class When_using_default_consume_error_strategy
 
         var errorAckStrategy = await mockBuilder.ConsumeErrorStrategy.HandleErrorAsync(consumerExecutionContext, new Exception(), CancellationToken.None);
 
-        Assert.Same(AckStrategies.AckAsync, errorAckStrategy);
+        Assert.Equal(AckDecision.Ack, errorAckStrategy);
 
         await mockBuilder.Channels[0].Received().ExchangeDeclareAsync("CustomErrorExchangePrefixName.originalRoutingKey", ExchangeType.Topic, true, cancellationToken: CancellationToken.None);
         await mockBuilder.Channels[0].Received().QueueDeclareAsync(
@@ -101,7 +101,7 @@ public class When_using_default_consume_error_strategy
             true,
             Arg.Is(false),
             Arg.Is(false),
-            Arg.Is<IDictionary<string, object>>(x => x.ContainsKey(Argument.QueueType) && x[Argument.QueueType].Equals(QueueType.Quorum)),
+            Arg.Is<IDictionary<string, object?>>(x => x.ContainsKey(Argument.QueueType) && x[Argument.QueueType]!.Equals(QueueType.Quorum)),
             Arg.Any<bool>(),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()
