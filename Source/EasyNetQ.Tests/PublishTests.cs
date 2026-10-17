@@ -57,11 +57,11 @@ public class When_publish_is_called : IAsyncLifetime
                      && x.Type == "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"
                      && x.DeliveryMode == (DeliveryModes)2
             ),
-            Arg.Is<ReadOnlyMemory<byte>>(
-                x => x.ToArray().SequenceEqual(Encoding.UTF8.GetBytes("{\"Text\":\"Hiya!\"}"))
-            ),
+            Arg.Any<ReadOnlyMemory<byte>>(),
             Arg.Any<CancellationToken>()
         );
+        mockBuilder.PublishedMessages.Should().ContainSingle()
+            .Which.Body.Should().Equal(Encoding.UTF8.GetBytes("{\"Text\":\"Hiya!\"}"));
     }
 
     [Fact]

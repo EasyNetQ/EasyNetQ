@@ -53,13 +53,11 @@ public class When_a_polymorphic_message_is_sent : IAsyncLifetime
             Arg.Is(""),
             Arg.Is(false),
             Arg.Is<RabbitMQ.Client.BasicProperties>(x => x.Type == implementationTypeName),
-            Arg.Is<ReadOnlyMemory<byte>>(
-                x => x.ToArray().SequenceEqual(
-                    Encoding.UTF8.GetBytes("{\"Text\":\"Hello Polymorphs!\",\"NotInInterface\":\"Hi\"}")
-                )
-            ),
+            Arg.Any<ReadOnlyMemory<byte>>(),
             Arg.Any<CancellationToken>()
         );
+        mockBuilder.PublishedMessages.Should().ContainSingle()
+            .Which.Body.Should().Equal(Encoding.UTF8.GetBytes("{\"Text\":\"Hello Polymorphs!\",\"NotInInterface\":\"Hi\"}"));
     }
 }
 
