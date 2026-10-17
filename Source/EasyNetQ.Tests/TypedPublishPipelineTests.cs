@@ -49,9 +49,10 @@ public class TypedPublishPipelineTests
             Arg.Is("the.routing.key"),
             Arg.Is(false),
             Arg.Is<RabbitMQ.Client.BasicProperties>(x => x.Type == "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
-            Arg.Is<ReadOnlyMemory<byte>>(x => x.ToArray().SequenceEqual(expectedBody)),
+            Arg.Any<ReadOnlyMemory<byte>>(),
             Arg.Any<CancellationToken>()
         );
+        mockBuilder.PublishedMessages.Should().ContainSingle().Which.Body.Should().Equal(expectedBody);
     }
 
     [Fact]
