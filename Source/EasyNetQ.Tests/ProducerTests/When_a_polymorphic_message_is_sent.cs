@@ -1,5 +1,6 @@
 using System.Text;
 using EasyNetQ.Tests.Mocking;
+using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
 
 namespace EasyNetQ.Tests.ProducerTests;
@@ -9,11 +10,13 @@ public class When_a_polymorphic_message_is_sent : IAsyncLifetime
     private readonly MockBuilder mockBuilder;
     private const string interfaceTypeName = "EasyNetQ.Tests.ProducerTests.IMyMessageInterface, EasyNetQ.Tests";
     private const string implementationTypeName = "EasyNetQ.Tests.ProducerTests.MyImplementation, EasyNetQ.Tests";
+    private const string correlationId = "abc123";
 
     public When_a_polymorphic_message_is_sent()
     {
-        mockBuilder = new MockBuilder();
-
+        mockBuilder = new MockBuilder(x =>
+            x.AddSingleton<ICorrelationIdGenerationStrategy>(new StaticCorrelationIdGenerationStrategy(correlationId))
+        );
     }
 
     public async ValueTask InitializeAsync()
@@ -39,26 +42,28 @@ public class When_a_polymorphic_message_is_sent : IAsyncLifetime
             Arg.Is(ExchangeType.Topic),
             Arg.Is(true),
             Arg.Is(false),
-            Arg.Any<IDictionary<string, object>>(),
+            Arg.Any<IDictionary<string, object?>>(),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()
         );
     }
 
     [Fact]
-    public async Task Should_publish_to_correct_exchange()
+    public void Should_publish_to_correct_exchange()
     {
-        await mockBuilder.Channels[1].Received().BasicPublishAsync(
-            Arg.Is(interfaceTypeName),
-            Arg.Is(""),
-            Arg.Is(false),
-            Arg.Is<RabbitMQ.Client.BasicProperties>(x => x.Type == implementationTypeName),
-            Arg.Is<ReadOnlyMemory<byte>>(
-                x => x.ToArray().SequenceEqual(
-                    Encoding.UTF8.GetBytes("{\"Text\":\"Hello Polymorphs!\",\"NotInInterface\":\"Hi\"}")
-                )
-            ),
-            Arg.Any<CancellationToken>()
+        mockBuilder.PublishedOn(mockBuilder.Channels[1]).Should().ContainSingle().Which.Should().BeEquivalentTo(
+            new PublishedMessage(
+                interfaceTypeName,
+                "",
+                false,
+                new RabbitMQ.Client.BasicProperties
+                {
+                    CorrelationId = correlationId,
+                    Type = implementationTypeName,
+                    DeliveryMode = DeliveryModes.Persistent
+                },
+                Encoding.UTF8.GetBytes("{\"Text\":\"Hello Polymorphs!\",\"NotInInterface\":\"Hi\"}")
+            )
         );
     }
 }
@@ -70,6 +75,6 @@ public interface IMyMessageInterface
 
 public class MyImplementation : IMyMessageInterface
 {
-    public string Text { get; set; }
-    public string NotInInterface { get; set; }
+    public string Text { get; set; } = "";
+    public string NotInInterface { get; set; } = "";
 }

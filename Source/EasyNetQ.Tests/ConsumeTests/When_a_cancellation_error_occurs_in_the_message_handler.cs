@@ -1,17 +1,22 @@
-using EasyNetQ.Consumer;
+using EasyNetQ.Pipeline;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 
 public class When_a_cancellation_error_occurs_in_the_message_handler : ConsumerTestBase
 {
-    private Exception exception;
+    private Exception? exception;
 
     protected override async Task InitializeAsyncCore()
     {
         exception = new OperationCanceledException("I've had a bad day :(");
 
-        ConsumeErrorStrategy.HandleErrorAsync(default, exception)
-            .ReturnsForAnyArgs(new ValueTask<AckStrategyAsync>(AckStrategies.AckAsync));
+        ConsumeErrorStrategy.HandleErrorAsync(Arg.Any<ConsumeContext>(), exception)
+            .ReturnsForAnyArgs(i =>
+            {
+                // the context is pooled; keep this instance alive so Received() can inspect it after the delivery
+                ((ConsumeContext)i[0]).Detach();
+                return new ValueTask<AckDecision>(AckDecision.Ack);
+            });
 
 #pragma warning disable IDISP004
         await StartConsumerAsync((_, _, _, _) => throw exception);
@@ -27,7 +32,7 @@ public class When_a_cancellation_error_occurs_in_the_message_handler : ConsumerT
                                            args.ReceivedInfo.DeliveryTag == DeliverTag &&
                                            args.ReceivedInfo.Exchange == "the_exchange" &&
                                            args.Body.ToArray().SequenceEqual(OriginalBody)),
-            Arg.Is<Exception>(e => e == exception), cancellationToken: CancellationToken.None
+            Arg.Is<Exception>(e => e == exception), Arg.Any<CancellationToken>()
         );
     }
 

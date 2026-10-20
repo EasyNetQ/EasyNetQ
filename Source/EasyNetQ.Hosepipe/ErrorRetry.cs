@@ -26,7 +26,8 @@ public class ErrorRetry : IErrorRetry
 
         await foreach (var rawErrorMessage in rawErrorMessages)
         {
-            var error = (Error)serializer.BytesToMessage(typeof(Error), errorMessageSerializer.Deserialize(rawErrorMessage.Body));
+            var error = serializer.BytesToMessage(typeof(Error), errorMessageSerializer.Deserialize(rawErrorMessage.Body)) as Error
+                ?? throw new EasyNetQException("Error message body is empty");
             var properties = new BasicProperties();
             error.BasicProperties.CopyTo(properties);
             var body = errorMessageSerializer.Deserialize(error.Message).AsMemory();

@@ -7,10 +7,10 @@ namespace EasyNetQ.Tests.ConsumeTests;
 public class When_a_consumer_has_multiple_handlers : IAsyncLifetime
 {
     private readonly MockBuilder mockBuilder;
-    private IAnimal animalResult;
+    private IAnimal? animalResult;
 
-    private MyMessage myMessageResult;
-    private MyOtherMessage myOtherMessageResult;
+    private MyMessage? myMessageResult;
+    private MyOtherMessage? myOtherMessageResult;
 
     public When_a_consumer_has_multiple_handlers()
     {

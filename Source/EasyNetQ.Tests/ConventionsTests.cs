@@ -10,7 +10,7 @@ public class When_using_default_conventions
     public When_using_default_conventions()
     {
         typeNameSerializer = new DefaultTypeNameSerializer();
-        conventions = new Conventions(typeNameSerializer);
+        conventions = new Conventions(typeNameSerializer, new MessageTypeRegistry(typeNameSerializer));
     }
 
     private readonly Conventions conventions;
@@ -84,7 +84,7 @@ public class When_using_QueueAttribute
     public When_using_QueueAttribute()
     {
         typeNameSerializer = new DefaultTypeNameSerializer();
-        conventions = new Conventions(typeNameSerializer);
+        conventions = new Conventions(typeNameSerializer, new MessageTypeRegistry(typeNameSerializer));
     }
 
     [Theory]
@@ -150,16 +150,18 @@ public class When_publishing_a_message : IAsyncLifetime
     public When_publishing_a_message()
     {
         typeNameSerializer = new DefaultTypeNameSerializer();
-        var customConventions = new Conventions(typeNameSerializer)
+        var customConventions = new Conventions(typeNameSerializer, new MessageTypeRegistry(typeNameSerializer))
         {
             ExchangeNamingConvention = _ => "CustomExchangeNamingConvention",
             QueueNamingConvention = (_, _) => "CustomQueueNamingConvention",
             TopicNamingConvention = _ => "CustomTopicNamingConvention"
         };
 
-        mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(customConventions));
-
+        mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(customConventions)
+            .AddSingleton<ICorrelationIdGenerationStrategy>(new StaticCorrelationIdGenerationStrategy(correlationId)));
     }
+
+    private const string correlationId = "abc123";
 
     public async ValueTask InitializeAsync() => await mockBuilder.PubSub.PublishAsync(new TestMessage());
 
@@ -172,15 +174,21 @@ public class When_publishing_a_message : IAsyncLifetime
     private readonly ITypeNameSerializer typeNameSerializer;
 
     [Fact]
-    public async Task Should_use_exchange_name_from_conventions_as_the_exchange_to_publish_to()
+    public void Should_use_exchange_name_from_conventions_as_the_exchange_to_publish_to()
     {
-        await mockBuilder.Channels[1].Received().BasicPublishAsync(
-            Arg.Is("CustomExchangeNamingConvention"),
-            Arg.Any<string>(),
-            Arg.Is(false),
-            Arg.Any<RabbitMQ.Client.BasicProperties>(),
-            Arg.Any<ReadOnlyMemory<byte>>(),
-            Arg.Any<CancellationToken>()
+        mockBuilder.PublishedOn(mockBuilder.Channels[1]).Should().ContainSingle().Which.Should().BeEquivalentTo(
+            new PublishedMessage(
+                "CustomExchangeNamingConvention",
+                "CustomTopicNamingConvention",
+                false,
+                new RabbitMQ.Client.BasicProperties
+                {
+                    CorrelationId = correlationId,
+                    Type = "EasyNetQ.Tests.TestMessage, EasyNetQ.Tests",
+                    DeliveryMode = DeliveryModes.Persistent
+                },
+                "{}"u8.ToArray()
+            )
         );
     }
 
@@ -192,7 +200,7 @@ public class When_publishing_a_message : IAsyncLifetime
             Arg.Is(ExchangeType.Topic),
             Arg.Is(true),
             Arg.Is(false),
-            Arg.Is((IDictionary<string, object>)null),
+            Arg.Is((IDictionary<string, object?>?)null),
             Arg.Any<bool>(),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()
@@ -200,15 +208,21 @@ public class When_publishing_a_message : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Should_use_topic_name_from_conventions_as_the_topic_to_publish_to()
+    public void Should_use_topic_name_from_conventions_as_the_topic_to_publish_to()
     {
-        await mockBuilder.Channels[1].Received().BasicPublishAsync(
-            Arg.Any<string>(),
-            Arg.Is("CustomTopicNamingConvention"),
-            Arg.Is(false),
-            Arg.Any<RabbitMQ.Client.BasicProperties>(),
-            Arg.Any<ReadOnlyMemory<byte>>(),
-            Arg.Any<CancellationToken>()
+        mockBuilder.PublishedOn(mockBuilder.Channels[1]).Should().ContainSingle().Which.Should().BeEquivalentTo(
+            new PublishedMessage(
+                "CustomExchangeNamingConvention",
+                "CustomTopicNamingConvention",
+                false,
+                new RabbitMQ.Client.BasicProperties
+                {
+                    CorrelationId = correlationId,
+                    Type = "EasyNetQ.Tests.TestMessage, EasyNetQ.Tests",
+                    DeliveryMode = DeliveryModes.Persistent
+                },
+                "{}"u8.ToArray()
+            )
         );
     }
 }
@@ -217,7 +231,7 @@ public class When_registering_response_handler : IAsyncLifetime
 {
     public When_registering_response_handler()
     {
-        var customConventions = new Conventions(new DefaultTypeNameSerializer())
+        var customConventions = new Conventions(new DefaultTypeNameSerializer(), new MessageTypeRegistry(new DefaultTypeNameSerializer()))
         {
             RpcRequestExchangeNamingConvention = _ => "CustomRpcExchangeName",
             RpcRoutingKeyNamingConvention = _ => "CustomRpcRoutingKeyName"
@@ -242,7 +256,7 @@ public class When_registering_response_handler : IAsyncLifetime
             Arg.Is("CustomRpcRoutingKeyName"),
             Arg.Is("CustomRpcExchangeName"),
             Arg.Is("CustomRpcRoutingKeyName"),
-            Arg.Is((IDictionary<string, object>)null),
+            Arg.Is((IDictionary<string, object?>?)null),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()
         );
@@ -256,7 +270,7 @@ public class When_registering_response_handler : IAsyncLifetime
             Arg.Is(ExchangeType.Direct),
             Arg.Is(true),
             Arg.Is(false),
-            Arg.Is((IDictionary<string, object>)null),
+            Arg.Is((IDictionary<string, object?>?)null),
             Arg.Any<bool>(),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()

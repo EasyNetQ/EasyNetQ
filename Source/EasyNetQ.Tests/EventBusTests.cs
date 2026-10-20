@@ -96,11 +96,11 @@ public class EventBusTests
     {
         Event1? eventFromSubscription = null;
 
-        IDisposable subscription = null;
+        IDisposable? subscription = null;
 
         subscription = eventBus.Subscribe((Event1 @event) =>
         {
-            subscription.Dispose();
+            subscription!.Dispose();
             eventFromSubscription = @event;
             return Task.CompletedTask;
         });

@@ -6,8 +6,8 @@ namespace EasyNetQ.Tests.ConsumeTests;
 public class When_a_message_is_received : IAsyncLifetime
 {
     private readonly MockBuilder mockBuilder;
-    private MyMessage deliveredMyMessage;
-    private MyOtherMessage deliveredMyOtherMessage;
+    private MyMessage? deliveredMyMessage;
+    private MyOtherMessage? deliveredMyOtherMessage;
 
     public When_a_message_is_received()
     {

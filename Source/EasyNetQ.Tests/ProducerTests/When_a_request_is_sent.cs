@@ -7,22 +7,25 @@ namespace EasyNetQ.Tests.ProducerTests;
 
 public class When_a_request_is_sent : IAsyncLifetime
 {
-    private MockBuilder mockBuilder;
-    private TestResponseMessage responseMessage;
+    private readonly string correlationId = Guid.NewGuid().ToString();
+    private readonly MockBuilder mockBuilder;
+    private TestResponseMessage? responseMessage;
 
-    public async ValueTask InitializeAsync()
+    public When_a_request_is_sent()
     {
-        var correlationId = Guid.NewGuid().ToString();
         mockBuilder = new MockBuilder(
             c => c.AddSingleton<ICorrelationIdGenerationStrategy>(
                 _ => new StaticCorrelationIdGenerationStrategy(correlationId)
             )
         );
+    }
 
+    public async ValueTask InitializeAsync()
+    {
         using var waiter = new CountdownEvent(2);
 
 #pragma warning disable IDISP004
-        mockBuilder.EventBus.Subscribe((PublishedMessageEvent _) => Task.FromResult(waiter.Signal()));
+        mockBuilder.Published += () => waiter.Signal();
         mockBuilder.EventBus.Subscribe((StartConsumingSucceededEvent _) => Task.FromResult(waiter.Signal()));
 #pragma warning restore IDISP004
 
@@ -68,7 +71,7 @@ public class When_a_request_is_sent : IAsyncLifetime
             Arg.Is(ExchangeType.Direct),
             Arg.Is(true),
             Arg.Is(false),
-            Arg.Any<IDictionary<string, object>>(),
+            Arg.Any<IDictionary<string, object?>>(),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()
         );
@@ -81,28 +84,36 @@ public class When_a_request_is_sent : IAsyncLifetime
             Arg.Is(false),
             Arg.Is(true),
             Arg.Is(true),
-            Arg.Any<IDictionary<string, object>>(),
+            Arg.Any<IDictionary<string, object?>>(),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()
         );
     }
 
     [Fact]
-    public async Task Should_publish_request_message()
+    public void Should_publish_request_message()
     {
-        await mockBuilder.Channels[3].Received().BasicPublishAsync(
-            Arg.Is("easy_net_q_rpc"),
-            Arg.Is("EasyNetQ.Tests.TestRequestMessage, EasyNetQ.Tests"),
-            Arg.Is(false),
-            Arg.Any<RabbitMQ.Client.BasicProperties>(),
-            Arg.Any<ReadOnlyMemory<byte>>(),
-            Arg.Any<CancellationToken>()
+        mockBuilder.PublishedOn(mockBuilder.Channels[3]).Should().ContainSingle().Which.Should().BeEquivalentTo(
+            new PublishedMessage(
+                "easy_net_q_rpc",
+                "EasyNetQ.Tests.TestRequestMessage, EasyNetQ.Tests",
+                false,
+                new RabbitMQ.Client.BasicProperties
+                {
+                    CorrelationId = correlationId,
+                    ReplyTo = mockBuilder.ConsumerQueueNames.Single(),
+                    Expiration = "10000",
+                    Type = "EasyNetQ.Tests.TestRequestMessage, EasyNetQ.Tests",
+                    DeliveryMode = DeliveryModes.Persistent
+                },
+                "{}"u8.ToArray()
+            )
         );
     }
 
     [Fact]
     public void Should_return_the_response()
     {
-        responseMessage.Text.Should().Be("Hello World");
+        responseMessage!.Text.Should().Be("Hello World");
     }
 }

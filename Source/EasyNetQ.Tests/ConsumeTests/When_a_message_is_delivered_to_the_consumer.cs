@@ -7,7 +7,7 @@ public class When_a_message_is_delivered_to_the_consumer : ConsumerTestBase
     protected override async Task InitializeAsyncCore()
     {
 #pragma warning disable IDISP004
-        await StartConsumerAsync((_, _, _, _) => AckStrategies.AckAsync);
+        await StartConsumerAsync((_, _, _, _) => AckDecision.Ack);
 #pragma warning restore IDISP004
         await DeliverMessageAsync();
     }
@@ -27,7 +27,7 @@ public class When_a_message_is_delivered_to_the_consumer : ConsumerTestBase
     [Fact]
     public void Should_deliver_the_message_properties()
     {
-        DeliveredMessageProperties.Type.Should().BeSameAs(OriginalProperties.Type);
+        DeliveredMessageProperties.Type.Should().BeSameAs(OriginalProperties!.Type);
     }
 
     [Fact]

@@ -53,7 +53,7 @@ public sealed class ModelCleanupTests : IAsyncLifetime
         using var waiter = new CountdownEvent(2);
 
 #pragma warning disable IDISP004
-        mockBuilder.EventBus.Subscribe((PublishedMessageEvent _) => Task.FromResult(waiter.Signal()));
+        mockBuilder.Published += () => waiter.Signal();
         mockBuilder.EventBus.Subscribe((StartConsumingSucceededEvent _) => Task.FromResult(waiter.Signal()));
 #pragma warning restore IDISP004
 
@@ -81,7 +81,7 @@ public sealed class ModelCleanupTests : IAsyncLifetime
 #pragma warning disable IDISP004
         mockBuilder.EventBus.Subscribe((StartConsumingSucceededEvent _) => Task.FromResult(waiter.Signal()));
 
-        await bus.Rpc.RespondAsync<TestRequestMessage, TestResponseMessage>(_ => (TestResponseMessage)null, cancellationToken: CancellationToken.None);
+        await bus.Rpc.RespondAsync<TestRequestMessage, TestResponseMessage?>(_ => (TestResponseMessage?)null, cancellationToken: CancellationToken.None);
 #pragma warning restore IDISP004
         if (!waiter.Wait(5000, CancellationToken.None))
             throw new TimeoutException();
