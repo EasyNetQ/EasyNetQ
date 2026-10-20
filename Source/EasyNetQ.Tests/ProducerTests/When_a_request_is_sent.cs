@@ -91,15 +91,23 @@ public class When_a_request_is_sent : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Should_publish_request_message()
+    public void Should_publish_request_message()
     {
-        await mockBuilder.Channels[3].Received().BasicPublishAsync(
-            Arg.Is("easy_net_q_rpc"),
-            Arg.Is("EasyNetQ.Tests.TestRequestMessage, EasyNetQ.Tests"),
-            Arg.Is(false),
-            Arg.Any<RabbitMQ.Client.BasicProperties>(),
-            Arg.Any<ReadOnlyMemory<byte>>(),
-            Arg.Any<CancellationToken>()
+        mockBuilder.PublishedOn(mockBuilder.Channels[3]).Should().ContainSingle().Which.Should().BeEquivalentTo(
+            new PublishedMessage(
+                "easy_net_q_rpc",
+                "EasyNetQ.Tests.TestRequestMessage, EasyNetQ.Tests",
+                false,
+                new RabbitMQ.Client.BasicProperties
+                {
+                    CorrelationId = correlationId,
+                    ReplyTo = mockBuilder.ConsumerQueueNames.Single(),
+                    Expiration = "10000",
+                    Type = "EasyNetQ.Tests.TestRequestMessage, EasyNetQ.Tests",
+                    DeliveryMode = DeliveryModes.Persistent
+                },
+                "{}"u8.ToArray()
+            )
         );
     }
 

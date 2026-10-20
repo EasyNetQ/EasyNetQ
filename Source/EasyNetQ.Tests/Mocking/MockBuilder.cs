@@ -17,7 +17,7 @@ public sealed class MockBuilder : IAsyncDisposable
     private readonly IConnection connection = Substitute.For<IConnection>();
     private readonly IConnectionFactory connectionFactory = Substitute.For<IConnectionFactory>();
     private readonly List<AsyncDefaultBasicConsumer> consumers = new();
-    private readonly List<PublishedMessage> publishedMessages = new();
+    private readonly Dictionary<IChannel, PublishRecorder> publishRecorders = new();
 
     public MockBuilder() : this(_ => { })
     {
@@ -48,19 +48,13 @@ public sealed class MockBuilder : IAsyncDisposable
             {
                 channel = channelPool.Pop();
                 channels.Add(channel);
+                publishRecorders.Add(channel, new PublishRecorder(channel));
             }
             channel.IsOpen.Returns(true);
             channel.When(x => x.BasicPublishAsync(
                     Arg.Any<string>(), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<RabbitMQ.Client.BasicProperties>(), Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>()
                 ))
-                .Do(call =>
-                {
-                    // the body is a pooled buffer returned once the publish completes; recorded calls only keep a view of it
-                    var message = new PublishedMessage(call.ArgAt<string>(0), call.ArgAt<string>(1), call.ArgAt<ReadOnlyMemory<byte>>(4).ToArray());
-                    lock (publishedMessages)
-                        publishedMessages.Add(message);
-                    Published?.Invoke();
-                });
+                .Do(_ => Published?.Invoke());
             channel.BasicConsumeAsync(Arg.Any<string>(), false, Arg.Any<string>(), true, false, Arg.Any<IDictionary<string, object?>>(), Arg.Any<IAsyncBasicConsumer>(), default)
                 .ReturnsForAnyArgs(async consumeInvocation =>
                 {
@@ -116,15 +110,12 @@ public sealed class MockBuilder : IAsyncDisposable
     public List<AsyncDefaultBasicConsumer> Consumers => consumers;
 
     /// <summary>
-    ///     Every publish with its body copied at call time; assert bodies here, not through <c>Received()</c>
+    ///     Every publish on the channel, arguments copied at call time; assert publishes here, not through <c>Received()</c>
     /// </summary>
-    public IReadOnlyList<PublishedMessage> PublishedMessages
+    public IReadOnlyList<PublishedMessage> PublishedOn(IChannel channel)
     {
-        get
-        {
-            lock (publishedMessages)
-                return publishedMessages.ToArray();
-        }
+        lock (channels)
+            return publishRecorders[channel].Messages;
     }
 
     public IChannel NextModel => channelPool.Peek();
@@ -165,5 +156,3 @@ public sealed class MockBuilder : IAsyncDisposable
         }
     }
 }
-
-public sealed record PublishedMessage(string Exchange, string RoutingKey, byte[] Body);

@@ -157,9 +157,11 @@ public class When_publishing_a_message : IAsyncLifetime
             TopicNamingConvention = _ => "CustomTopicNamingConvention"
         };
 
-        mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(customConventions));
-
+        mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(customConventions)
+            .AddSingleton<ICorrelationIdGenerationStrategy>(new StaticCorrelationIdGenerationStrategy(correlationId)));
     }
+
+    private const string correlationId = "abc123";
 
     public async ValueTask InitializeAsync() => await mockBuilder.PubSub.PublishAsync(new TestMessage());
 
@@ -172,15 +174,21 @@ public class When_publishing_a_message : IAsyncLifetime
     private readonly ITypeNameSerializer typeNameSerializer;
 
     [Fact]
-    public async Task Should_use_exchange_name_from_conventions_as_the_exchange_to_publish_to()
+    public void Should_use_exchange_name_from_conventions_as_the_exchange_to_publish_to()
     {
-        await mockBuilder.Channels[1].Received().BasicPublishAsync(
-            Arg.Is("CustomExchangeNamingConvention"),
-            Arg.Any<string>(),
-            Arg.Is(false),
-            Arg.Any<RabbitMQ.Client.BasicProperties>(),
-            Arg.Any<ReadOnlyMemory<byte>>(),
-            Arg.Any<CancellationToken>()
+        mockBuilder.PublishedOn(mockBuilder.Channels[1]).Should().ContainSingle().Which.Should().BeEquivalentTo(
+            new PublishedMessage(
+                "CustomExchangeNamingConvention",
+                "CustomTopicNamingConvention",
+                false,
+                new RabbitMQ.Client.BasicProperties
+                {
+                    CorrelationId = correlationId,
+                    Type = "EasyNetQ.Tests.TestMessage, EasyNetQ.Tests",
+                    DeliveryMode = DeliveryModes.Persistent
+                },
+                "{}"u8.ToArray()
+            )
         );
     }
 
@@ -200,15 +208,21 @@ public class When_publishing_a_message : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Should_use_topic_name_from_conventions_as_the_topic_to_publish_to()
+    public void Should_use_topic_name_from_conventions_as_the_topic_to_publish_to()
     {
-        await mockBuilder.Channels[1].Received().BasicPublishAsync(
-            Arg.Any<string>(),
-            Arg.Is("CustomTopicNamingConvention"),
-            Arg.Is(false),
-            Arg.Any<RabbitMQ.Client.BasicProperties>(),
-            Arg.Any<ReadOnlyMemory<byte>>(),
-            Arg.Any<CancellationToken>()
+        mockBuilder.PublishedOn(mockBuilder.Channels[1]).Should().ContainSingle().Which.Should().BeEquivalentTo(
+            new PublishedMessage(
+                "CustomExchangeNamingConvention",
+                "CustomTopicNamingConvention",
+                false,
+                new RabbitMQ.Client.BasicProperties
+                {
+                    CorrelationId = correlationId,
+                    Type = "EasyNetQ.Tests.TestMessage, EasyNetQ.Tests",
+                    DeliveryMode = DeliveryModes.Persistent
+                },
+                "{}"u8.ToArray()
+            )
         );
     }
 }

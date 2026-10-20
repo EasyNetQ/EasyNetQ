@@ -1,4 +1,5 @@
 using EasyNetQ.Pipeline;
+using EasyNetQ.SystemMessages;
 using System.Text;
 using EasyNetQ.Consumer;
 using EasyNetQ.Tests.Mocking;
@@ -53,7 +54,10 @@ public class When_using_default_consume_error_strategy
     {
         await using var mockBuilder = new MockBuilder(x => x.AddSingleton<IConventions>(customConventions));
 
-        var errorAckStrategy = await mockBuilder.ConsumeErrorStrategy.HandleErrorAsync(consumerExecutionContext, new Exception(), CancellationToken.None);
+        var exception = new Exception();
+        var handledFrom = DateTime.UtcNow;
+        var errorAckStrategy = await mockBuilder.ConsumeErrorStrategy.HandleErrorAsync(consumerExecutionContext, exception, CancellationToken.None);
+        var handledTo = DateTime.UtcNow;
 
         Assert.Equal(AckDecision.Ack, errorAckStrategy);
 
@@ -73,14 +77,7 @@ public class When_using_default_consume_error_strategy
             null, cancellationToken: CancellationToken.None
         );
 
-        await mockBuilder.Channels[0].Received().BasicPublishAsync(
-            "CustomErrorExchangePrefixName.originalRoutingKey",
-            "originalRoutingKey",
-            false,
-            Arg.Any<RabbitMQ.Client.BasicProperties>(),
-            Arg.Any<ReadOnlyMemory<byte>>(),
-            Arg.Any<CancellationToken>()
-        );
+        ShouldPublishError(mockBuilder, exception, handledFrom, handledTo);
     }
 
     [Fact]
@@ -91,7 +88,10 @@ public class When_using_default_consume_error_strategy
                 .AddSingleton(_ => new ConnectionConfiguration { PublisherConfirms = true })
         );
 
-        var errorAckStrategy = await mockBuilder.ConsumeErrorStrategy.HandleErrorAsync(consumerExecutionContext, new Exception(), CancellationToken.None);
+        var exception = new Exception();
+        var handledFrom = DateTime.UtcNow;
+        var errorAckStrategy = await mockBuilder.ConsumeErrorStrategy.HandleErrorAsync(consumerExecutionContext, exception, CancellationToken.None);
+        var handledTo = DateTime.UtcNow;
 
         Assert.Equal(AckDecision.Ack, errorAckStrategy);
 
@@ -113,13 +113,39 @@ public class When_using_default_consume_error_strategy
             null, cancellationToken: CancellationToken.None
         );
 
-        await mockBuilder.Channels[0].Received().BasicPublishAsync(
-            "CustomErrorExchangePrefixName.originalRoutingKey",
-            "originalRoutingKey",
-            false,
-            Arg.Any<RabbitMQ.Client.BasicProperties>(),
-            Arg.Any<ReadOnlyMemory<byte>>(),
-            Arg.Any<CancellationToken>()
+        ShouldPublishError(mockBuilder, exception, handledFrom, handledTo);
+    }
+
+    private static void ShouldPublishError(MockBuilder mockBuilder, Exception exception, DateTime handledFrom, DateTime handledTo)
+    {
+        var published = mockBuilder.PublishedOn(mockBuilder.Channels[0]).Should().ContainSingle().Which;
+        published.Should().BeEquivalentTo(
+            new PublishedMessage(
+                "CustomErrorExchangePrefixName.originalRoutingKey",
+                "originalRoutingKey",
+                false,
+                new RabbitMQ.Client.BasicProperties
+                {
+                    Type = "EasyNetQ.SystemMessages.Error, EasyNetQ.RabbitMQ",
+                    DeliveryMode = DeliveryModes.Persistent
+                },
+                []
+            ),
+            o => o.Excluding(m => m.Body)
+        );
+
+        var error = mockBuilder.Serializer.BytesToMessage(typeof(Error), published.Body).Should().BeOfType<Error>().Which;
+        error.DateTime.Should().BeOnOrAfter(handledFrom).And.BeOnOrBefore(handledTo);
+        error.Should().BeEquivalentTo(
+            new Error(
+                "originalRoutingKey",
+                "originalExchange",
+                "queue",
+                exception.ToString(),
+                "",
+                error.DateTime,
+                new MessageProperties { CorrelationId = string.Empty, AppId = string.Empty }
+            )
         );
     }
 }

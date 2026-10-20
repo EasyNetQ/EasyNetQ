@@ -3,10 +3,14 @@ using EasyNetQ.Consumer;
 using EasyNetQ.Persistent;
 using EasyNetQ.Pipeline;
 using EasyNetQ.Producer;
+using EasyNetQ.Serialization.SystemTextJson;
+using EasyNetQ.SystemMessages;
+using EasyNetQ.Tests.Mocking;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Exceptions;
 using System.Text;
+using System.Text.Json;
 
 namespace EasyNetQ.Tests.ConsumeTests;
 
@@ -20,17 +24,18 @@ public class DefaultConsumerErrorStrategyTests
 #pragma warning disable IDISP004
         connection.CreateChannelAsync(Arg.Any<CreateChannelOptions>(), Arg.Any<CancellationToken>()).Returns(channel);
 #pragma warning restore IDISP004
+        var publishes = new PublishRecorder(channel);
         var strategy = CreateConsumerErrorStrategy(connection, configurePublisherConfirm: true);
 
+        var exception = new Exception("I just threw!");
+        var handledFrom = DateTime.UtcNow;
         var ackDecision = await strategy.HandleErrorAsync(
-            CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!"), TestContext.Current.CancellationToken
+            CreateConsumerExecutionContext(CreateOriginalMessage()), exception, TestContext.Current.CancellationToken
         );
+        var handledTo = DateTime.UtcNow;
 
         Assert.Equal(AckDecision.Ack, ackDecision);
-        await channel.Received().BasicPublishAsync(
-            Arg.Any<string>(), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<RabbitMQ.Client.BasicProperties>(),
-            Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>()
-        );
+        ShouldPublishError(publishes, exception, handledFrom, handledTo);
     }
 
     [Fact]
@@ -64,17 +69,18 @@ public class DefaultConsumerErrorStrategyTests
 #pragma warning disable IDISP004
         connection.CreateChannelAsync(Arg.Any<CreateChannelOptions>(), Arg.Any<CancellationToken>()).Returns(channel);
 #pragma warning restore IDISP004
+        var publishes = new PublishRecorder(channel);
         var strategy = CreateConsumerErrorStrategy(connection);
 
+        var exception = new Exception("I just threw!");
+        var handledFrom = DateTime.UtcNow;
         var ackDecision = await strategy.HandleErrorAsync(
-            CreateConsumerExecutionContext(CreateOriginalMessage()), new Exception("I just threw!"), TestContext.Current.CancellationToken
+            CreateConsumerExecutionContext(CreateOriginalMessage()), exception, TestContext.Current.CancellationToken
         );
+        var handledTo = DateTime.UtcNow;
 
         Assert.Equal(AckDecision.Ack, ackDecision);
-        await channel.Received().BasicPublishAsync(
-            Arg.Any<string>(), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<RabbitMQ.Client.BasicProperties>(),
-            Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>()
-        );
+        ShouldPublishError(publishes, exception, handledFrom, handledTo);
     }
 
     [Fact]
@@ -176,6 +182,40 @@ public class DefaultConsumerErrorStrategyTests
         boundExchange.Should().Be("app.errors");
     }
 
+    private static void ShouldPublishError(PublishRecorder publishes, Exception exception, DateTime handledFrom, DateTime handledTo)
+    {
+        var published = publishes.Messages.Should().ContainSingle().Which;
+        published.Should().BeEquivalentTo(
+            new PublishedMessage(
+                "ErrorExchange_originalRoutingKey",
+                "originalRoutingKey",
+                false,
+                new RabbitMQ.Client.BasicProperties
+                {
+                    Type = "EasyNetQ.SystemMessages.Error, EasyNetQ.RabbitMQ",
+                    DeliveryMode = DeliveryModes.Persistent
+                },
+                []
+            ),
+            o => o.Excluding(m => m.Body)
+        );
+
+        var error = JsonSerializer.Deserialize<Error>(published.Body, SystemTextJsonMessageSerializer.CreateDefaultOptions())
+            .Should().BeOfType<Error>().Which;
+        error.DateTime.Should().BeOnOrAfter(handledFrom).And.BeOnOrBefore(handledTo);
+        error.Should().BeEquivalentTo(
+            new Error(
+                "originalRoutingKey",
+                "orginalExchange",
+                "queue",
+                exception.ToString(),
+                "{ Text:\"Hello World\"}",
+                error.DateTime,
+                new MessageProperties { CorrelationId = "123", AppId = "456" }
+            )
+        );
+    }
+
     private static DefaultConsumeErrorStrategy CreateConsumerErrorStrategy(
         IConsumerConnection connectionMock,
         bool configurePublisherConfirm = false,
@@ -193,10 +233,10 @@ public class DefaultConsumerErrorStrategyTests
         return new DefaultConsumeErrorStrategy(
             logger ?? Substitute.For<ILogger<DefaultConsumeErrorStrategy>>(),
             channelDispatcher,
-            Substitute.For<IMessageSerializer>(),
+            new SystemTextJsonMessageSerializer(),
             new MessageTypeRegistry(new DefaultTypeNameSerializer()),
-            Substitute.For<IConventions>(),
-            Substitute.For<IErrorMessageSerializer>(),
+            new Conventions(new DefaultTypeNameSerializer(), new MessageTypeRegistry(new DefaultTypeNameSerializer())),
+            new DefaultErrorMessageSerializer(),
             new ConnectionConfiguration { PublisherConfirms = configurePublisherConfirm },
             options ?? new ConsumeErrorOptions()
         );
