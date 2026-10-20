@@ -11,6 +11,8 @@ namespace EasyNetQ.Tests;
 /// </summary>
 public class TypedPublishPipelineTests
 {
+    private const string correlationId = "abc123";
+
     [DeliveryMode(isPersistent: false)]
     private sealed class TransientMessage
     {
@@ -32,7 +34,7 @@ public class TypedPublishPipelineTests
             return next(context);
         });
 
-        await using var mockBuilder = new MockBuilder(x => x.AddSingleton(pipelineBuilder));
+        await using var mockBuilder = new MockBuilder(x => x.AddSingleton(pipelineBuilder).AddSingleton<ICorrelationIdGenerationStrategy>(new StaticCorrelationIdGenerationStrategy(correlationId)));
 
         var message = new MyMessage { Text = "Hiya!" };
         await mockBuilder.Bus.Advanced.PublishAsync(
@@ -44,52 +46,62 @@ public class TypedPublishPipelineTests
         descriptorSeen!.Type.Should().Be<MyMessage>();
         bodyLengthSeen.Should().Be(0, "the probe runs before SerializeStep");
 
-        await mockBuilder.PublishChannel.Received().BasicPublishAsync(
-            Arg.Is("the.exchange"),
-            Arg.Is("the.routing.key"),
-            Arg.Is(false),
-            Arg.Is<RabbitMQ.Client.BasicProperties>(x => x.Type == "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
-            Arg.Is<ReadOnlyMemory<byte>>(x => x.ToArray().SequenceEqual(expectedBody)),
-            Arg.Any<CancellationToken>()
+        mockBuilder.PublishedOn(mockBuilder.PublishChannel).Should().ContainSingle().Which.Should().BeEquivalentTo(
+            new PublishedMessage(
+                "the.exchange",
+                "the.routing.key",
+                false,
+                new RabbitMQ.Client.BasicProperties { CorrelationId = correlationId, Type = "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests" },
+                expectedBody
+            )
         );
     }
 
     [Fact]
     public async Task Should_stamp_delivery_mode_declared_by_the_message_type()
     {
-        await using var mockBuilder = new MockBuilder();
+        await using var mockBuilder = new MockBuilder(x => x.AddSingleton<ICorrelationIdGenerationStrategy>(new StaticCorrelationIdGenerationStrategy(correlationId)));
 
         await mockBuilder.Bus.Advanced.PublishAsync(
             "the.exchange", "rk", null, null, MessageProperties.Empty, new TransientMessage { Text = "t" }, CancellationToken.None
         );
 
-        await mockBuilder.PublishChannel.Received().BasicPublishAsync(
-            Arg.Is("the.exchange"),
-            Arg.Is("rk"),
-            Arg.Is(false),
-            Arg.Is<RabbitMQ.Client.BasicProperties>(x => x.DeliveryMode == DeliveryModes.Transient),
-            Arg.Any<ReadOnlyMemory<byte>>(),
-            Arg.Any<CancellationToken>()
+        mockBuilder.PublishedOn(mockBuilder.PublishChannel).Should().ContainSingle().Which.Should().BeEquivalentTo(
+            new PublishedMessage(
+                "the.exchange",
+                "rk",
+                false,
+                new RabbitMQ.Client.BasicProperties
+                {
+                    CorrelationId = correlationId,
+                    Type = "EasyNetQ.Tests.TypedPublishPipelineTests+TransientMessage, EasyNetQ.Tests",
+                    DeliveryMode = DeliveryModes.Transient
+                },
+                "{\"Text\":\"t\"}"u8.ToArray()
+            )
         );
     }
 
     [Fact]
     public async Task Should_not_stamp_delivery_mode_for_undeclared_types_on_direct_publishes()
     {
-        await using var mockBuilder = new MockBuilder();
+        await using var mockBuilder = new MockBuilder(x => x.AddSingleton<ICorrelationIdGenerationStrategy>(new StaticCorrelationIdGenerationStrategy(correlationId)));
 
         await mockBuilder.Bus.Advanced.PublishAsync(
             "the.exchange", "rk", null, null, MessageProperties.Empty, new MyMessage { Text = "t" }, CancellationToken.None
         );
 
-        await mockBuilder.PublishChannel.Received().BasicPublishAsync(
-            Arg.Any<string>(),
-            Arg.Any<string>(),
-            Arg.Any<bool>(),
-            Arg.Is<RabbitMQ.Client.BasicProperties>(x => x.DeliveryMode == default),
-            Arg.Any<ReadOnlyMemory<byte>>(),
-            Arg.Any<CancellationToken>()
+        var published = mockBuilder.PublishedOn(mockBuilder.PublishChannel).Should().ContainSingle().Which;
+        published.Should().BeEquivalentTo(
+            new PublishedMessage(
+                "the.exchange",
+                "rk",
+                false,
+                new RabbitMQ.Client.BasicProperties { CorrelationId = correlationId, Type = "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests" },
+                "{\"Text\":\"t\"}"u8.ToArray()
+            )
         );
+        published.Properties.IsDeliveryModePresent().Should().BeFalse();
     }
 
     public static TheoryData<string> ByteBufferBodies => ["byte[]", "Memory<byte>", "ArraySegment<byte>", "ReadOnlyMemory<byte>"];
@@ -114,13 +126,8 @@ public class TypedPublishPipelineTests
         };
         await publish;
 
-        await mockBuilder.PublishChannel.Received().BasicPublishAsync(
-            Arg.Is("x"),
-            Arg.Is("rk"),
-            Arg.Is(false),
-            Arg.Is<RabbitMQ.Client.BasicProperties>(x => x.Type == "foreign.type.v1"),
-            Arg.Is<ReadOnlyMemory<byte>>(x => x.ToArray().SequenceEqual(bytes)),
-            Arg.Any<CancellationToken>()
+        mockBuilder.PublishedOn(mockBuilder.PublishChannel).Should().ContainSingle().Which.Should().BeEquivalentTo(
+            new PublishedMessage("x", "rk", false, new RabbitMQ.Client.BasicProperties { Type = "foreign.type.v1" }, bytes)
         );
     }
 }

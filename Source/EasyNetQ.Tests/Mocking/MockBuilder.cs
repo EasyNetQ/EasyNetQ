@@ -17,6 +17,7 @@ public sealed class MockBuilder : IAsyncDisposable
     private readonly IConnection connection = Substitute.For<IConnection>();
     private readonly IConnectionFactory connectionFactory = Substitute.For<IConnectionFactory>();
     private readonly List<AsyncDefaultBasicConsumer> consumers = new();
+    private readonly Dictionary<IChannel, PublishRecorder> publishRecorders = new();
 
     public MockBuilder() : this(_ => { })
     {
@@ -47,6 +48,7 @@ public sealed class MockBuilder : IAsyncDisposable
             {
                 channel = channelPool.Pop();
                 channels.Add(channel);
+                publishRecorders.Add(channel, new PublishRecorder(channel));
             }
             channel.IsOpen.Returns(true);
             channel.When(x => x.BasicPublishAsync(
@@ -106,6 +108,15 @@ public sealed class MockBuilder : IAsyncDisposable
     }
 
     public List<AsyncDefaultBasicConsumer> Consumers => consumers;
+
+    /// <summary>
+    ///     Every publish on the channel, arguments copied at call time; assert publishes here, not through <c>Received()</c>
+    /// </summary>
+    public IReadOnlyList<PublishedMessage> PublishedOn(IChannel channel)
+    {
+        lock (channels)
+            return publishRecorders[channel].Messages;
+    }
 
     public IChannel NextModel => channelPool.Peek();
 
