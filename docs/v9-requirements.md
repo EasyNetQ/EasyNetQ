@@ -36,6 +36,9 @@ Working document for the v9 rewrite. Edit as decisions change; the phase plan de
   spans, EasyNetQ adds the semantic layer.
 - Full RabbitMQ.Client 7.x alignment: do not build what the client already does (confirms tracking, recovery,
   callbacks, options).
+- Every RabbitMQ.Client option is reachable through EasyNetQ; each has a sensible default, so the simple path
+  needs no configuration. Settings apply at the scope the client applies them (e.g. prefetch per consumer,
+  dispatch concurrency per channel), never widened to a shared max.
 
 ## Delivery
 

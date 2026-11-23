@@ -58,6 +58,20 @@ public sealed class RabbitMqConsumerBuilder : ConsumerBuilder<RabbitMqConsumerBu
     }
 
     /// <summary>
+    ///     Number of handlers the consumer channel runs at once; defaults to the connection's
+    ///     <c>consumerDispatcherConcurrency</c> (1). Above 1, messages are no longer handled in order, and
+    ///     <see cref="ConsumerBuilder{TSelf}.PrefetchCount" /> caps the effective concurrency
+    /// </summary>
+    public RabbitMqConsumerBuilder ConsumerDispatcherConcurrency(ushort concurrency)
+    {
+        if (concurrency == 0)
+            throw new ArgumentOutOfRangeException(nameof(concurrency), concurrency, "Must be greater than zero");
+
+        Definition.ConfigureContext += context => context.ConsumerDispatcherConcurrency = concurrency;
+        return this;
+    }
+
+    /// <summary>
     ///     basic.consume argument
     /// </summary>
     public RabbitMqConsumerBuilder ConsumerArgument(string name, object value)

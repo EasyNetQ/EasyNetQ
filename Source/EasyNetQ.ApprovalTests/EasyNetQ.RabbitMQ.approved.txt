@@ -471,6 +471,7 @@ namespace EasyNetQ.Configuration
         public RabbitMqConsumerBuilder(EasyNetQ.Configuration.ConsumerDefinition definition) { }
         public EasyNetQ.Configuration.RabbitMqConsumerBuilder Bind(string exchange, string routingKey, System.Action<EasyNetQ.Configuration.RabbitMqExchangeBuilder> configure) { }
         public EasyNetQ.Configuration.RabbitMqConsumerBuilder ConsumerArgument(string name, object value) { }
+        public EasyNetQ.Configuration.RabbitMqConsumerBuilder ConsumerDispatcherConcurrency(ushort concurrency) { }
         public EasyNetQ.Configuration.RabbitMqConsumerBuilder ConsumerTag(string consumerTag) { }
         public EasyNetQ.Configuration.RabbitMqConsumerBuilder ExclusiveConsumer() { }
         public EasyNetQ.Configuration.RabbitMqConsumerBuilder Queue(string name, System.Action<EasyNetQ.Configuration.RabbitMqQueueBuilder> configure) { }
@@ -640,11 +641,13 @@ namespace EasyNetQ.Consumer
     public class PerQueueConsumerConfiguration
     {
         public PerQueueConsumerConfiguration(bool autoAck, string consumerTag, bool isExclusive, System.Collections.Generic.IDictionary<string, object>? arguments, EasyNetQ.Pipeline.ConsumerContext context) { }
+        public PerQueueConsumerConfiguration(bool autoAck, string consumerTag, bool isExclusive, System.Collections.Generic.IDictionary<string, object>? arguments, EasyNetQ.Pipeline.ConsumerContext context, ushort? prefetchCount) { }
         public System.Collections.Generic.IDictionary<string, object>? Arguments { get; }
         public bool AutoAck { get; }
         public string ConsumerTag { get; }
         public EasyNetQ.Pipeline.ConsumerContext Context { get; }
         public bool IsExclusive { get; }
+        public ushort? PrefetchCount { get; }
     }
 }
 namespace EasyNetQ.Events
