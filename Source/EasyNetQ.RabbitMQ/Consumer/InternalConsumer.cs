@@ -110,6 +110,7 @@ public class InternalConsumer : IInternalConsumer
 
     private volatile bool disposed;
     private IChannel? channel;
+    private ushort? channelPrefetchCount;
 
     /// <summary>
     ///     Creates InternalConsumer
@@ -158,7 +159,7 @@ public class InternalConsumer : IInternalConsumer
                 {
                     channel = await connection.CreateChannelAsync(CreateConsumerChannelOptions(), cancellationToken);
                     channel.ChannelShutdownAsync += OnChannelShutdownAsync;
-                    await channel.BasicQosAsync(0, configuration.PrefetchCount, false, cancellationToken);
+                    channelPrefetchCount = null;
                 }
                 catch (Exception exception)
                 {
@@ -205,6 +206,14 @@ public class InternalConsumer : IInternalConsumer
                         eventBus,
                         perQueueConfiguration.Context
                     );
+                    // Non-global qos applies to consumers started after it, so each queue keeps its own prefetch on the shared channel
+                    var prefetchCount = perQueueConfiguration.PrefetchCount ?? configuration.PrefetchCount;
+                    if (channelPrefetchCount != prefetchCount)
+                    {
+                        await channel.BasicQosAsync(0, prefetchCount, false, cancellationToken);
+                        channelPrefetchCount = prefetchCount;
+                    }
+
                     var arguments = perQueueConfiguration.Arguments.ToAmqpTable() ?? new Dictionary<string, object?>();
                     consumer.ConsumerCancelled += AsyncBasicConsumerOnConsumerCancelled;
                     var consumerTag = await channel.BasicConsumeAsync(

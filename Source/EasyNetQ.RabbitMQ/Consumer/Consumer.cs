@@ -40,6 +40,20 @@ public class PerQueueConsumerConfiguration
         bool isExclusive,
         IDictionary<string, object>? arguments,
         ConsumerContext context
+    ) : this(autoAck, consumerTag, isExclusive, arguments, context, null)
+    {
+    }
+
+    /// <summary>
+    ///     Creates PerQueueConsumerConfiguration
+    /// </summary>
+    public PerQueueConsumerConfiguration(
+        bool autoAck,
+        string consumerTag,
+        bool isExclusive,
+        IDictionary<string, object>? arguments,
+        ConsumerContext context,
+        ushort? prefetchCount
     )
     {
         AutoAck = autoAck;
@@ -47,7 +61,13 @@ public class PerQueueConsumerConfiguration
         IsExclusive = isExclusive;
         Arguments = arguments;
         Context = context;
+        PrefetchCount = prefetchCount;
     }
+
+    /// <summary>
+    ///     Prefetch of this queue's consumer; null uses <see cref="ConsumerConfiguration.PrefetchCount" />
+    /// </summary>
+    public ushort? PrefetchCount { get; }
 
     /// <summary>
     ///     Indicates whether a consumer auto-acks messages
@@ -105,7 +125,7 @@ public class ConsumerConfiguration
     }
 
     /// <summary>
-    ///     PrefetchCount for the consumer
+    ///     Prefetch of each queue's consumer that sets no <see cref="PerQueueConsumerConfiguration.PrefetchCount" />
     /// </summary>
     public ushort PrefetchCount { get; }
 
