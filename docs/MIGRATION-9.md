@@ -1,8 +1,8 @@
 # EasyNetQ 9.0: release notes, design direction and migration guide
 
-9.0 is in pre-release (`9.0.0-alpha.1` on nuget.org). This document tracks the v9 branches and changes until 9.0
-ships. Sections: [Highlights](#highlights), [Design direction](#design-direction), [Performance](#performance),
-[Upgrading from 8.x](#upgrade-in-five-steps), [What v9 adds](#what-v9-adds-in-detail),
+9.0 is in beta (`9.0.0-beta.1` on nuget.org) and is the main line on `master`; 8.x gets bug fixes on the `8.x`
+branch. This document tracks the changes until 9.0 ships. Sections: [Highlights](#highlights),
+[Design direction](#design-direction), [Performance](#performance), [Upgrading from 8.x](#upgrade-in-five-steps), [What v9 adds](#what-v9-adds-in-detail),
 [Known gaps before 9.0](#known-gaps-before-90).
 
 ## Highlights
@@ -84,9 +84,9 @@ changed behavior. Everything new in v9 is opt-in.
 2. **Update the packages.** Every EasyNetQ package moves to the same 9.x version:
 
    ```xml
-   <PackageReference Include="EasyNetQ" Version="9.0.0-alpha.1" />
+   <PackageReference Include="EasyNetQ" Version="9.0.0-beta.1" />
    <!-- only if you used it in 8.x -->
-   <PackageReference Include="EasyNetQ.Serialization.NewtonsoftJson" Version="9.0.0-alpha.1" />
+   <PackageReference Include="EasyNetQ.Serialization.NewtonsoftJson" Version="9.0.0-beta.1" />
    ```
 
    `EasyNetQ` now bundles `EasyNetQ.Core` (transport-agnostic) and `EasyNetQ.RabbitMQ`; keep referencing `EasyNetQ`.
