@@ -22,7 +22,7 @@ branch. This document tracks the changes until 9.0 ships. Sections: [Highlights]
 - **Observability**: OpenTelemetry `ActivitySource` and `Meter` named `EasyNetQ`.
 - **New package `EasyNetQ.AspNetCore.SignalR`**: a SignalR scale-out backplane over EasyNetQ instead of Redis.
 - **Packages**: `EasyNetQ` becomes a bundle over `EasyNetQ.Core` and `EasyNetQ.RabbitMQ`; targets
-  `netstandard2.0`, `net10.0`.
+  `netstandard2.0`, `net10.0`, `net11.0`.
 
 ## Design direction
 
@@ -452,7 +452,7 @@ For a git submodule instead of packages, import
 
 # Platform notes
 
-- Target frameworks: `netstandard2.0`, `net10.0`.
+- Target frameworks: `netstandard2.0`, `net10.0`, `net11.0`.
 - .NET Framework 4.7.2+ works through `netstandard2.0` from SDK-style projects. Those binaries skip pooled async
   builders on the publish/consume path; `net10.0`+ is unaffected.
 - `IsAotCompatible` is set for Core, RabbitMQ, InMemory and the bundle (net10.0+ assets).

@@ -18,7 +18,7 @@ public class BuildInInterceptorsTests
     [Fact]
     public void ShouldEncryptAndDecrypt()
     {
-        var interceptor = new TripleDESInterceptor(Convert.FromBase64String("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"), Convert.FromBase64String("aaaaaaaaaaa="));
+        var interceptor = new TripleDESInterceptor(Convert.FromBase64String("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"), Convert.FromBase64String("aaaaaaaaaaY="));
         var body = "haha"u8.ToArray();
         var outgoingMessage = new ProducedMessage(MessageProperties.Empty, body);
         var message = interceptor.OnProduce(outgoingMessage);

@@ -8,10 +8,10 @@ EasyNetQ is a .NET client API for RabbitMQ. It provides a high-level abstraction
 EasyNetQ/
 ├── Assets/                          # Package icon, strong-name key (EasyNetQ.snk)
 ├── Source/
-│   ├── EasyNetQ/                    # Core library (netstandard2.0;net8.0;net9.0;net10.0)
+│   ├── EasyNetQ/                    # Bundle package (netstandard2.0;net10.0;net11.0)
 │   ├── EasyNetQ.Serialization.NewtonsoftJson/  # Optional Newtonsoft.Json serializer
 │   ├── EasyNetQ.Hosepipe/           # CLI tool for dead-letter message replay
-│   ├── EasyNetQ.Tests/              # Unit tests (xUnit v3, net10.0)
+│   ├── EasyNetQ.Tests/              # Unit tests (xUnit v3, net10.0;net11.0)
 │   ├── EasyNetQ.Serialization.Tests/
 │   ├── EasyNetQ.IntegrationTests/   # Docker-based RabbitMQ integration tests
 │   ├── EasyNetQ.ApprovalTests/      # Public API surface snapshot tests
@@ -90,10 +90,10 @@ dotnet format --verify-no-changes --severity warn Source/EasyNetQ.slnx
 ## CI/CD
 
 - GitHub Actions (`.github/workflows/ci.yml`)
-- Runs on: push to `master`/`N.x`, PRs to `master`/`develop`, version tags
+- Runs on: push to `master`/`N.x`, PRs to `master`/`develop`/`N.x`, version tags
 - Steps: restore → format check → build → test (unit + serialization + hosepipe + integration + approval)
 - Publish: tag push triggers `dotnet pack` + `dotnet nuget push` to nuget.org
-- .NET SDK: 10.x in CI (pinned via `global.json`); test/example projects target net10.0
+- .NET SDK: 11.x in CI (pinned via `global.json`), plus the 10.0 runtime; packages target netstandard2.0;net10.0;net11.0; unit and approval tests run on net10.0 and net11.0; package consumer AOT check runs on both
 
 ## Commit & PR style
 
