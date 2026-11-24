@@ -42,10 +42,10 @@ public class When_a_queue_is_declared : IAsyncLifetime
             Arg.Is(false),
             Arg.Is(true),
             Arg.Is(true),
-            Arg.Is<IDictionary<string, object>>(
-                args => (int)args[Argument.MessageTtl] == 1000 &&
-                        (int)args[Argument.Expires] == 2000 &&
-                        (byte)args[Argument.MaxPriority] == 10
+            Arg.Is<IDictionary<string, object?>>(
+                args => (int)args[Argument.MessageTtl]! == 1000 &&
+                        (int)args[Argument.Expires]! == 2000 &&
+                        (byte)args[Argument.MaxPriority]! == 10
             ),
             Arg.Any<bool>(),
             Arg.Any<bool>(),
@@ -102,12 +102,12 @@ public class When_a_queue_is_declared_With_NonEmptyDeadLetterExchange : IAsyncLi
             Arg.Is(false),
             Arg.Is(true),
             Arg.Is(true),
-            Arg.Is<IDictionary<string, object>>(
-                args => (int)args[Argument.MessageTtl] == 1000 &&
-                        (int)args[Argument.Expires] == 2000 &&
-                        (byte)args[Argument.MaxPriority] == 10 &&
-                        (string)args[Argument.DeadLetterExchange] == "my_exchange" &&
-                        (string)args[Argument.DeadLetterRoutingKey] == "my_routing_key"
+            Arg.Is<IDictionary<string, object?>>(
+                args => (int)args[Argument.MessageTtl]! == 1000 &&
+                        (int)args[Argument.Expires]! == 2000 &&
+                        (byte)args[Argument.MaxPriority]! == 10 &&
+                        (string)args[Argument.DeadLetterExchange]! == "my_exchange" &&
+                        (string)args[Argument.DeadLetterRoutingKey]! == "my_routing_key"
             ),
             Arg.Any<bool>(),
             Arg.Any<bool>(),
@@ -163,12 +163,12 @@ public class When_a_queue_is_declared_With_EmptyDeadLetterExchange : IAsyncLifet
             Arg.Is(false),
             Arg.Is(true),
             Arg.Is(true),
-            Arg.Is<IDictionary<string, object>>(
-                args => (int)args[Argument.MessageTtl] == 1000 &&
-                        (int)args[Argument.Expires] == 2000 &&
-                        (byte)args[Argument.MaxPriority] == 10 &&
-                        (string)args[Argument.DeadLetterExchange] == "" &&
-                        (string)args[Argument.DeadLetterRoutingKey] == "my_queue2"
+            Arg.Is<IDictionary<string, object?>>(
+                args => (int)args[Argument.MessageTtl]! == 1000 &&
+                        (int)args[Argument.Expires]! == 2000 &&
+                        (byte)args[Argument.MaxPriority]! == 10 &&
+                        (string)args[Argument.DeadLetterExchange]! == "" &&
+                        (string)args[Argument.DeadLetterRoutingKey]! == "my_queue2"
             ),
             Arg.Any<bool>(),
             Arg.Any<bool>(),
@@ -204,7 +204,7 @@ public class When_a_queue_is_deleted : IAsyncLifetime
     [Fact]
     public async Task Should_delete_the_queue()
     {
-        await mockBuilder.Channels[0].Received().QueueDeleteAsync("my_queue", false, false, cancellationToken: CancellationToken.None);
+        await mockBuilder.Channels[0].Received().QueueDeleteAsync("my_queue", false, false, cancellationToken: Arg.Any<CancellationToken>());
     }
 }
 
@@ -229,7 +229,7 @@ public class When_a_queue_is_deleted_with_name : IAsyncLifetime
     [Fact]
     public async Task Should_delete_the_queue()
     {
-        await mockBuilder.Channels[0].Received().QueueDeleteAsync("my_queue", false, false, cancellationToken: CancellationToken.None);
+        await mockBuilder.Channels[0].Received().QueueDeleteAsync("my_queue", false, false, cancellationToken: Arg.Any<CancellationToken>());
     }
 }
 
@@ -269,7 +269,7 @@ public class When_an_exchange_is_declared : IAsyncLifetime
             Arg.Is(ExchangeType.Direct),
             Arg.Is(false),
             Arg.Is(true),
-            Arg.Is<IDictionary<string, object>>(c => (string)c["alternate-exchange"] == "my.alternate.exchange"),
+            Arg.Is<IDictionary<string, object?>>(c => (string)c["alternate-exchange"]! == "my.alternate.exchange"),
             Arg.Any<bool>(),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()
@@ -306,7 +306,7 @@ public class When_an_exchange_is_declared_passively : IAsyncLifetime
     public async Task Should_passively_declare_exchange()
     {
         mockBuilder.Channels.Count.Should().Be(1);
-        await mockBuilder.Channels[0].Received().ExchangeDeclarePassiveAsync(Arg.Is("my_exchange"), cancellationToken: CancellationToken.None);
+        await mockBuilder.Channels[0].Received().ExchangeDeclarePassiveAsync(Arg.Is("my_exchange"), cancellationToken: Arg.Any<CancellationToken>());
     }
 }
 
@@ -335,7 +335,7 @@ public class When_an_exchange_is_deleted : IAsyncLifetime
     [Fact]
     public async Task Should_delete_the_queue()
     {
-        await mockBuilder.Channels[0].Received().ExchangeDeleteAsync("my_exchange", false, cancellationToken: CancellationToken.None);
+        await mockBuilder.Channels[0].Received().ExchangeDeleteAsync("my_exchange", false, cancellationToken: Arg.Any<CancellationToken>());
     }
 }
 
@@ -380,7 +380,7 @@ public class When_a_queue_is_bound_to_an_exchange : IAsyncLifetime
             Arg.Is("my_queue"),
             Arg.Is("my_exchange"),
             Arg.Is("my_routing_key"),
-            Arg.Is((IDictionary<string, object>)null),
+            Arg.Is((IDictionary<string, object?>?)null),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()
         );
@@ -419,7 +419,7 @@ public class When_a_queue_is_bound_to_an_exchange_with_headers : IAsyncLifetime
         binding.Should().NotBeNull();
         binding.RoutingKey.Should().Be("my_routing_key");
         binding.Source.Name.Should().Be("my_exchange");
-        binding.Arguments["header1"].Should().Be("value1");
+        binding.Arguments!["header1"].Should().Be("value1");
         binding.Destination.Should().BeAssignableTo<Queue>();
         binding.Destination.Name.Should().Be("my_queue");
     }
@@ -427,13 +427,13 @@ public class When_a_queue_is_bound_to_an_exchange_with_headers : IAsyncLifetime
     [Fact]
     public async Task Should_declare_a_binding()
     {
-        var expectedHeaders = new Dictionary<string, object> { ["header1"] = "value1" };
+        var expectedHeaders = new Dictionary<string, object?> { ["header1"] = "value1" };
 
         await mockBuilder.Channels[0].Received().QueueBindAsync(
             Arg.Is("my_queue"),
             Arg.Is("my_exchange"),
             Arg.Is("my_routing_key"),
-            Arg.Is<Dictionary<string, object>>(x => x.SequenceEqual(expectedHeaders)),
+            Arg.Is<Dictionary<string, object?>>(x => x.SequenceEqual(expectedHeaders)),
             Arg.Any<bool>(),
             Arg.Any<CancellationToken>()
         );
@@ -469,6 +469,6 @@ public class When_a_queue_is_unbound_from_an_exchange : IAsyncLifetime
     [Fact]
     public async Task Should_unbind_the_exchange()
     {
-        await mockBuilder.Channels[0].Received().QueueUnbindAsync("my_queue", "my_exchange", "my_routing_key", null, cancellationToken: CancellationToken.None);
+        await mockBuilder.Channels[0].Received().QueueUnbindAsync("my_queue", "my_exchange", "my_routing_key", null, cancellationToken: Arg.Any<CancellationToken>());
     }
 }

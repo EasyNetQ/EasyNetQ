@@ -13,13 +13,19 @@ public class When_an_action_is_performed_and_channel_reopens
         {
             new object[]
             {
-                new NotSupportedException("Pipelining of requests forbidden")
+                new AlreadyClosedException(
+                    new ShutdownEventArgs(
+                        ShutdownInitiator.Library, AmqpErrorCodes.InternalErrors, "Unexpected Exception"
+                    )
+                )
             },
+
+            // a later action on the connection the deprecated-feature denial closed: wait for the recovery
             new object[]
             {
                 new AlreadyClosedException(
                     new ShutdownEventArgs(
-                        ShutdownInitiator.Library, AmqpErrorCodes.InternalErrors, "Unexpected Exception"
+                        ShutdownInitiator.Peer, AmqpErrorCodes.InternalErrors, "Feature `transient_nonexcl_queues` is deprecated."
                     )
                 )
             }
@@ -54,6 +60,18 @@ public class When_an_action_is_performed_and_channel_reopens
             {
                 new OperationInterruptedException(
                     new ShutdownEventArgs(ShutdownInitiator.Peer, AmqpErrorCodes.ResourceLocked, "")
+                )
+            },
+
+            // RabbitMQ 4 denying a deprecated feature, e.g. a transient non-exclusive queue.declare
+            new object[]
+            {
+                new OperationInterruptedException(
+                    new ShutdownEventArgs(
+                        ShutdownInitiator.Peer,
+                        AmqpErrorCodes.InternalErrors,
+                        "Feature `transient_nonexcl_queues` is deprecated.\nBy default, this feature is not permitted anymore."
+                    )
                 )
             }
         };

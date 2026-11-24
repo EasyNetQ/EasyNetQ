@@ -1,0 +1,7 @@
+<Project>
+  <!-- The source generator shipped in this package emits interceptors into EasyNetQ.Generated.{Assembly};
+       the compiler only accepts them when the consuming project opts that namespace in. -->
+  <PropertyGroup>
+    <InterceptorsNamespaces>$(InterceptorsNamespaces);EasyNetQ.Generated</InterceptorsNamespaces>
+  </PropertyGroup>
+</Project>

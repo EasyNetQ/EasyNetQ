@@ -32,8 +32,15 @@ public class When_a_consumer_is_cancelled_via_soft_error : IAsyncLifetime
         // A channel-level error closes the channel, so the broker never sends Basic.Cancel:
         // the consumer learns about it through the channel shutdown notification.
         await mockBuilder.Consumers[0].HandleChannelShutdownAsync(mockBuilder.Consumers[0].Channel, closeReason);
-        // Wait for a periodic consumer restart
-        await Task.Delay(TimeSpan.FromSeconds(10));
+        // The channel's shutdown notification triggers an immediate event-driven restart (the 60s timer is
+        // only a safety net)
+        mockBuilder.Consumers[0].Channel.ChannelShutdownAsync += Raise.Event<AsyncEventHandler<ShutdownEventArgs>>(
+            mockBuilder.Consumers[0].Channel, closeReason
+        );
+
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        while (mockBuilder.Consumers.Count < 2)
+            await Task.Delay(50, cts.Token);
     }
 
     public async ValueTask DisposeAsync()

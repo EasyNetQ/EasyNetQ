@@ -13,7 +13,7 @@ public class When_publish_and_subscribe_with_custom_prefetch_count : IDisposable
     public When_publish_and_subscribe_with_custom_prefetch_count(RabbitMQFixture rmqFixture)
     {
         var serviceCollection = new ServiceCollection();
-        serviceCollection.AddEasyNetQ($"host={rmqFixture.Host};prefetchCount=2;timeout=-1");
+        serviceCollection.AddEasyNetQ($"host={rmqFixture.Host};prefetchCount=2;consumerDispatcherConcurrency=2;timeout=-1");
 
         serviceProvider = serviceCollection.BuildServiceProvider();
         bus = serviceProvider.GetRequiredService<IBus>();

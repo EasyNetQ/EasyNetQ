@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using EasyNetQ.Internals;
 
 namespace EasyNetQ.MessageVersioning;
@@ -6,19 +7,23 @@ namespace EasyNetQ.MessageVersioning;
 public class VersionedMessageSerializationStrategy : IMessageSerializationStrategy
 {
     private readonly ITypeNameSerializer typeNameSerializer;
-    private readonly ISerializer serializer;
+    private readonly IMessageTypeRegistry registry;
+    private readonly IMessageSerializer serializer;
     private readonly ICorrelationIdGenerationStrategy correlationIdGenerator;
 
     /// <summary>
     ///     Creates VersionedMessageSerializationStrategy
     /// </summary>
+    [RequiresUnreferencedCode(Compat.ReflectionApi)]
     public VersionedMessageSerializationStrategy(
         ITypeNameSerializer typeNameSerializer,
-        ISerializer serializer,
+        IMessageTypeRegistry registry,
+        IMessageSerializer serializer,
         ICorrelationIdGenerationStrategy correlationIdGenerator
     )
     {
         this.typeNameSerializer = typeNameSerializer;
+        this.registry = registry;
         this.serializer = serializer;
         this.correlationIdGenerator = correlationIdGenerator;
     }
@@ -26,9 +31,10 @@ public class VersionedMessageSerializationStrategy : IMessageSerializationStrate
     /// <inheritdoc />
     public SerializedMessage SerializeMessage(IMessage message)
     {
-        var messageBody = message.GetBody() is null
+        var body = message.GetBody();
+        var messageBody = body is null
             ? EmptyMemoryOwner.Instance
-            : serializer.MessageToBytes(message.MessageType, message.GetBody()!);
+            : registry.GetOrAdd(message.MessageType).SerializeBody(serializer, body);
         var messageTypeProperty = MessageTypeProperty.CreateForMessageType(message.MessageType, typeNameSerializer);
         var messageProperties = message.Properties;
         messageProperties = messageTypeProperty.AppendTo(messageProperties);
@@ -38,12 +44,18 @@ public class VersionedMessageSerializationStrategy : IMessageSerializationStrate
     }
 
     /// <inheritdoc />
+    public SerializedMessage SerializeMessage<T>(T body, in MessageProperties properties)
+        // versioning always derives the type stack from the runtime type, so the enveloped path is the only path
+        => SerializeMessage(new Message<T>(body!, properties));
+
+    /// <inheritdoc />
     public IMessage DeserializeMessage(in MessageProperties properties, in ReadOnlyMemory<byte> body)
     {
         var messageTypeProperty = MessageTypeProperty.ExtractFromProperties(properties, typeNameSerializer);
         var messageType = messageTypeProperty.GetMessageType();
-        var messageBody = body.IsEmpty ? null : serializer.BytesToMessage(messageType, body);
+        var descriptor = registry.GetOrAdd(messageType);
+        var messageBody = body.IsEmpty ? null : descriptor.DeserializeBody(serializer, body);
         messageTypeProperty.AppendTo(properties);
-        return MessageFactory.CreateInstance(messageType, messageBody, properties);
+        return descriptor.CreateMessage(messageBody, properties);
     }
 }

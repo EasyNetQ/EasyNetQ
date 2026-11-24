@@ -52,12 +52,12 @@ public sealed class NewtonsoftJsonSerializer : ISerializer
     }
 
     /// <inheritdoc />
-    public object BytesToMessage(Type messageType, in ReadOnlyMemory<byte> bytes)
+    public object? BytesToMessage(Type messageType, in ReadOnlyMemory<byte> bytes)
     {
         using var memoryStream = new ReadOnlyMemoryStream(bytes);
         using var streamReader = new StreamReader(memoryStream, Encoding, false, DefaultBufferSize, true);
         using var reader = new Newtonsoft.Json.JsonTextReader(streamReader) { ArrayPool = JsonSerializerArrayPool<char>.Instance };
-        return jsonSerializer.Deserialize(reader, messageType)!;
+        return jsonSerializer.Deserialize(reader, messageType);
     }
 
     private sealed class JsonSerializerArrayPool<T> : Newtonsoft.Json.IArrayPool<T>
@@ -66,7 +66,7 @@ public sealed class NewtonsoftJsonSerializer : ISerializer
 
         public T[] Rent(int minimumLength) => ArrayPool<T>.Shared.Rent(minimumLength);
 
-        public void Return(T[] array)
+        public void Return(T[]? array)
         {
             if (array == null) return;
 

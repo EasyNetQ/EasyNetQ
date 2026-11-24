@@ -8,7 +8,7 @@ public class When_auto_subscribing_with_subscription_configuration_action : IDis
 {
     private readonly IBus bus;
     private readonly ServiceProvider serviceProvider;
-    private Action<ISubscriptionConfiguration> capturedAction;
+    private Action<ISubscriptionConfiguration>? capturedAction;
     private readonly IPubSub pubSub;
     private bool disposed;
     readonly AutoSubscriber autoSubscriber;
@@ -60,7 +60,7 @@ public class When_auto_subscribing_with_subscription_configuration_action : IDis
     {
         var subscriptionConfiguration = new SubscriptionConfiguration(1);
 
-        capturedAction(subscriptionConfiguration);
+        capturedAction!(subscriptionConfiguration);
 
         subscriptionConfiguration.AutoDelete.Should().BeTrue();
         subscriptionConfiguration.PrefetchCount.Should().Be(10);

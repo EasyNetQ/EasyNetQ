@@ -21,6 +21,15 @@ Initial development was sponsored by travel industry experts [15below](http://15
 * **[Discussions](https://github.com/EasyNetQ/EasyNetQ/discussions)**
 * **[~Old Discussion Group~](https://groups.google.com/group/easynetq)**
 
+## Versions
+
+| Line | Branch | Status | Docs |
+|------|--------|--------|------|
+| 9.x | `master` | Beta (`9.0.0-beta.1`), main line for new work | [Release notes and migration guide](docs/MIGRATION-9.md) |
+| 8.x | [`8.x`](https://github.com/EasyNetQ/EasyNetQ/tree/8.x) | Stable (`8.1.x`), maintenance: bug fixes only | [Wiki](https://github.com/EasyNetQ/EasyNetQ/wiki/Introduction) |
+
+Target 8.x fixes at the `8.x` branch; everything else at `master`.
+
 Goals:
 
 ### Important Update
@@ -75,7 +84,7 @@ RPC server...
 
 ## Getting started
 
-Just open EasyNetQ.sln in your preferred IDE or code editor and build. All the required dependencies for the solution file to build the software are included.
+Just open Source/EasyNetQ.slnx in your preferred IDE or code editor and build. All the required dependencies for the solution file to build the software are included.
 
 ## Contributors
 

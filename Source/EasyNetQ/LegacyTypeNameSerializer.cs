@@ -1,3 +1,5 @@
+using EasyNetQ.Internals;
+using System.Diagnostics.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Reflection;
 
@@ -8,7 +10,16 @@ public class LegacyTypeNameSerializer : ITypeNameSerializer
 {
     private readonly ConcurrentDictionary<string, Type> deserializedTypes = new();
 
+    /// <summary>
+    ///     Creates the serializer
+    /// </summary>
+    [RequiresUnreferencedCode(Compat.ReflectionApi)]
+    public LegacyTypeNameSerializer()
+    {
+    }
+
     /// <inheritdoc />
+    [UnconditionalSuppressMessage("Trimming", "IL2057", Justification = Compat.Annotated)]
     public Type Deserialize(string typeName)
     {
         return deserializedTypes.GetOrAdd(typeName, t =>

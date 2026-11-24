@@ -1,9 +1,11 @@
+using EasyNetQ.Pipeline;
 using System.Threading.Tasks;
 using EasyNetQ.ChannelDispatcher;
 using EasyNetQ.Consumer;
 using EasyNetQ.Events;
 using EasyNetQ.Persistent;
 using EasyNetQ.Producer;
+using EasyNetQ.Transport;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 
@@ -39,20 +41,28 @@ public class AdvancedBusEventHandlersTests : IDisposable
 
         eventBus = new EventBus(Substitute.For<ILogger<EventBus>>());
 
+        var transport = Substitute.For<ITransport>();
+        var transportConnection = Substitute.For<ITransportConnection>();
+        var transportChannel = Substitute.For<ITransportChannel>();
+        transportChannel.Topology.Returns(Substitute.For<ITopology>());
+        transportConnection.OpenChannelAsync(Arg.Any<ChannelContext>(), Arg.Any<CancellationToken>())
+            .Returns(new ValueTask<ITransportChannel>(transportChannel));
+        transport.ConnectAsync(Arg.Any<ConnectionContext>(), Arg.Any<CancellationToken>())
+            .Returns(new ValueTask<ITransportConnection>(transportConnection));
+
         advancedBus = new RabbitAdvancedBus(
             Substitute.For<ILogger<RabbitAdvancedBus>>(),
             Substitute.For<IProducerConnection>(),
             Substitute.For<IConsumerConnection>(),
-            Substitute.For<IConsumerFactory>(),
-            Substitute.For<IPersistentChannelDispatcher>(),
-            Substitute.For<IPublishConfirmationListener>(),
+            transport,
             eventBus,
             Substitute.For<IHandlerCollectionFactory>(),
             Substitute.For<ConnectionConfiguration>(),
-            new ProducePipelineBuilder(),
-            new ConsumePipelineBuilder(),
+            new PipelineBuilder<PublishContext>(),
+            new PipelineBuilder<ConsumeContext>(),
             Substitute.For<IServiceProvider>(),
             Substitute.For<IMessageSerializationStrategy>(),
+            Substitute.For<IMessageSerializer>(),
             Substitute.For<IPullingConsumerFactory>(),
             advancedBusEventHandlers
         );
@@ -67,13 +77,13 @@ public class AdvancedBusEventHandlersTests : IDisposable
     private bool connectedCalled;
     private bool disconnectedCalled;
     private bool blockedCalled;
-    private BlockedEventArgs blockedEventArgs;
+    private BlockedEventArgs? blockedEventArgs;
     private bool unBlockedCalled;
     private bool messageReturnedCalled;
-    private MessageReturnedEventArgs messageReturnedEventArgs;
+    private MessageReturnedEventArgs? messageReturnedEventArgs;
     private readonly RabbitAdvancedBus advancedBus;
-    private ConnectedEventArgs connectedEventArgs;
-    private DisconnectedEventArgs disconnectedEventArgs;
+    private ConnectedEventArgs? connectedEventArgs;
+    private DisconnectedEventArgs? disconnectedEventArgs;
 
     [Fact]
     public async Task AdvancedBusEventHandlers_Blocked_handler_is_called()
@@ -91,7 +101,7 @@ public class AdvancedBusEventHandlersTests : IDisposable
     {
         await eventBus.PublishAsync(new ConnectionRecoveredEvent(PersistentConnectionType.Producer, new AmqpTcpEndpoint()));
         connectedCalled.Should().BeTrue();
-        connectedEventArgs.Hostname.Should().Be("localhost");
+        connectedEventArgs!.Hostname.Should().Be("localhost");
         connectedEventArgs.Port.Should().Be(5672);
     }
 
@@ -100,7 +110,7 @@ public class AdvancedBusEventHandlersTests : IDisposable
     {
         await eventBus.PublishAsync(new ConnectionCreatedEvent(PersistentConnectionType.Producer, new AmqpTcpEndpoint()));
         connectedCalled.Should().BeTrue();
-        connectedEventArgs.Hostname.Should().Be("localhost");
+        connectedEventArgs!.Hostname.Should().Be("localhost");
         connectedEventArgs.Port.Should().Be(5672);
     }
 

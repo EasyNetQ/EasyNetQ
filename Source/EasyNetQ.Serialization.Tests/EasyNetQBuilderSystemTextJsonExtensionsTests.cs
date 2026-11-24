@@ -6,27 +6,47 @@ namespace EasyNetQ.Serialization.Tests;
 
 public class EasyNetQBuilderSystemTextJsonExtensionsTests
 {
-    [Theory]
-    [MemberData(nameof(GetSerializerRegisterActions))]
-    public void Should_register_serializer(Action<IEasyNetQBuilder> register, Type serializerType)
+    [Fact]
+    public void UseNewtonsoftJson_should_register_legacy_serializer()
     {
         var serviceCollection = new ServiceCollection();
         var easyNetQBuilder = new EasyNetQBuilder(serviceCollection);
 
-        register(easyNetQBuilder);
+        easyNetQBuilder.UseNewtonsoftJson();
 
         using var serviceProvider = serviceCollection.BuildServiceProvider();
-        var registeredServiceDescriptor = serviceProvider.GetService<ISerializer>();
-
-        Assert.NotNull(registeredServiceDescriptor);
-        Assert.Equal(serializerType, registeredServiceDescriptor.GetType());
+        serviceProvider.GetService<ISerializer>().Should().BeOfType<NewtonsoftJsonSerializer>();
     }
 
-    public static IEnumerable<object[]> GetSerializerRegisterActions()
+    [Fact]
+    public void UseSystemTextJson_should_register_message_serializer()
     {
-        yield return [GetRegisterAction(x => x.UseNewtonsoftJson()), typeof(NewtonsoftJsonSerializer)];
-        yield return [GetRegisterAction(x => x.UseSystemTextJson()), typeof(SystemTextJsonSerializer)];
+        var serviceCollection = new ServiceCollection();
+        var easyNetQBuilder = new EasyNetQBuilder(serviceCollection);
+
+        easyNetQBuilder.UseSystemTextJson();
+
+        using var serviceProvider = serviceCollection.BuildServiceProvider();
+        serviceProvider.GetService<IMessageSerializer>().Should().BeOfType<SystemTextJsonMessageSerializer>();
     }
 
-    private static Action<IEasyNetQBuilder> GetRegisterAction(Action<IEasyNetQBuilder> action) => action;
+    [Fact]
+    public void A_registered_legacy_serializer_should_be_wrapped_by_the_default_message_serializer_registration()
+    {
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddEasyNetQ("host=localhost").UseNewtonsoftJson();
+
+        using var serviceProvider = serviceCollection.BuildServiceProvider();
+        serviceProvider.GetService<IMessageSerializer>().Should().BeOfType<EasyNetQ.Serialization.LegacyMessageSerializerAdapter>();
+    }
+
+    [Fact]
+    public void The_default_message_serializer_should_be_system_text_json()
+    {
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddEasyNetQ("host=localhost");
+
+        using var serviceProvider = serviceCollection.BuildServiceProvider();
+        serviceProvider.GetService<IMessageSerializer>().Should().BeOfType<SystemTextJsonMessageSerializer>();
+    }
 }

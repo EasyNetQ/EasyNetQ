@@ -2,5 +2,5 @@ namespace EasyNetQ.Tests.ProducerTests.Very.Long.Namespace.Certainly.Longer.Than
 
 public class MessageWithVeryVEryVEryLongNameThatWillMostCertainlyBreakAmqpsSilly255CharacterNameLimitThatIsAlmostCertainToBeReachedWithGenericTypes
 {
-    public string Text { get; set; }
+    public string Text { get; set; } = "";
 }

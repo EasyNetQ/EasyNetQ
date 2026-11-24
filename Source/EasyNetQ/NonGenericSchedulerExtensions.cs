@@ -1,17 +1,12 @@
-using System.Collections.Concurrent;
-using System.Linq.Expressions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace EasyNetQ;
-
-using NonGenericFuturePublishDelegate = Func<IScheduler, object, Type, TimeSpan, Action<IFuturePublishConfiguration>, CancellationToken, Task>;
 
 /// <summary>
 ///     Various non-generic extensions for <see cref="IScheduler"/>
 /// </summary>
 public static class NonGenericSchedulerExtensions
 {
-    private static readonly ConcurrentDictionary<Type, NonGenericFuturePublishDelegate> FuturePublishDelegates = new();
-
     /// <summary>
     /// Schedule a message to be published at some time in the future
     /// </summary>
@@ -20,6 +15,7 @@ public static class NonGenericSchedulerExtensions
     /// <param name="messageType">The message type</param>
     /// <param name="delay">The delay for message to publish in future</param>
     /// <param name="cancellationToken">The cancellation token</param>
+    [RequiresDynamicCode(NonGenericBridge.RequiresDynamicCodeMessage)]
     public static Task FuturePublishAsync(
         this IScheduler scheduler,
         object message,
@@ -39,6 +35,7 @@ public static class NonGenericSchedulerExtensions
     ///     Fluent configuration e.g. x => x.WithTopic("*.brighton").WithPriority(2)
     /// </param>
     /// <param name="cancellationToken">The cancellation token</param>
+    [RequiresDynamicCode(NonGenericBridge.RequiresDynamicCodeMessage)]
     public static Task FuturePublishAsync(
         this IScheduler scheduler,
         object message,
@@ -46,40 +43,5 @@ public static class NonGenericSchedulerExtensions
         TimeSpan delay,
         Action<IFuturePublishConfiguration> configure,
         CancellationToken cancellationToken = default
-    )
-    {
-        var futurePublishDelegate = FuturePublishDelegates.GetOrAdd(messageType, t =>
-        {
-            var futurePublishMethodInfo = typeof(IScheduler).GetMethod("FuturePublishAsync");
-            if (futurePublishMethodInfo == null)
-                throw new MissingMethodException(nameof(IScheduler), "FuturePublishAsync");
-
-            var genericFuturePublishMethodInfo = futurePublishMethodInfo.MakeGenericMethod(t);
-            var schedulerParameter = Expression.Parameter(typeof(IScheduler), "scheduler");
-            var messageParameter = Expression.Parameter(typeof(object), "message");
-            var messageTypeParameter = Expression.Parameter(typeof(Type), "messageType");
-            var delayParameter = Expression.Parameter(typeof(TimeSpan), "delay");
-            var configureParameter = Expression.Parameter(typeof(Action<IFuturePublishConfiguration>), "configure");
-            var cancellationTokenParameter = Expression.Parameter(typeof(CancellationToken), "cancellationToken");
-            var genericFuturePublishMethodCallExpression = Expression.Call(
-                schedulerParameter,
-                genericFuturePublishMethodInfo,
-                Expression.Convert(messageParameter, t),
-                delayParameter,
-                configureParameter,
-                cancellationTokenParameter
-            );
-            var lambda = Expression.Lambda<NonGenericFuturePublishDelegate>(
-                genericFuturePublishMethodCallExpression,
-                schedulerParameter,
-                messageParameter,
-                messageTypeParameter,
-                delayParameter,
-                configureParameter,
-                cancellationTokenParameter
-            );
-            return lambda.Compile();
-        });
-        return futurePublishDelegate(scheduler, message, messageType, delay, configure, cancellationToken);
-    }
+    ) => NonGenericBridge.Get(messageType).FuturePublishViaAsync(scheduler, message, delay, configure, cancellationToken);
 }

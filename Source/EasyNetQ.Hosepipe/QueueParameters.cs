@@ -7,7 +7,7 @@ public class QueueParameters
     public string VHost { get; set; } = "/";
     public string Username { get; set; } = "guest";
     public string Password { get; set; } = "guest";
-    public string QueueName { get; set; }
+    public string QueueName { get; set; } = string.Empty;
     public bool Purge { get; set; } = false;
     public int NumberOfMessagesToRetrieve { get; set; } = 1000;
     public string MessagesOutputDirectory { get; set; } = Directory.GetCurrentDirectory();

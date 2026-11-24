@@ -17,6 +17,7 @@ public sealed class MockBuilder : IAsyncDisposable
     private readonly IConnection connection = Substitute.For<IConnection>();
     private readonly IConnectionFactory connectionFactory = Substitute.For<IConnectionFactory>();
     private readonly List<AsyncDefaultBasicConsumer> consumers = new();
+    private readonly Dictionary<IChannel, PublishRecorder> publishRecorders = new();
 
     public MockBuilder() : this(_ => { })
     {
@@ -41,10 +42,20 @@ public sealed class MockBuilder : IAsyncDisposable
         connection.Endpoint.Returns(new AmqpTcpEndpoint("localhost"));
         connection.CreateChannelAsync(default, default).ReturnsForAnyArgs(async _ =>
         {
-            var channel = channelPool.Pop();
-            channels.Add(channel);
+            // channels can be created concurrently (publish, topology, consume); keep pool and list consistent
+            IChannel channel;
+            lock (channels)
+            {
+                channel = channelPool.Pop();
+                channels.Add(channel);
+                publishRecorders.Add(channel, new PublishRecorder(channel));
+            }
             channel.IsOpen.Returns(true);
-            channel.BasicConsumeAsync(Arg.Any<string>(), false, Arg.Any<string>(), true, false, Arg.Any<IDictionary<string, object>>(), Arg.Any<IAsyncBasicConsumer>(), default)
+            channel.When(x => x.BasicPublishAsync(
+                    Arg.Any<string>(), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<RabbitMQ.Client.BasicProperties>(), Arg.Any<ReadOnlyMemory<byte>>(), Arg.Any<CancellationToken>()
+                ))
+                .Do(_ => Published?.Invoke());
+            channel.BasicConsumeAsync(Arg.Any<string>(), false, Arg.Any<string>(), true, false, Arg.Any<IDictionary<string, object?>>(), Arg.Any<IAsyncBasicConsumer>(), default)
                 .ReturnsForAnyArgs(async consumeInvocation =>
                 {
                     var queueName = (string)consumeInvocation[0];
@@ -56,7 +67,7 @@ public sealed class MockBuilder : IAsyncDisposable
                     consumers.Add(consumer);
                     return string.Empty;
                 });
-            channel.QueueDeclareAsync(null, true, false, false, null, default)
+            channel.QueueDeclareAsync(Arg.Any<string>(), true, false, false, null, default)
                 .ReturnsForAnyArgs(async queueDeclareInvocation =>
                {
                    var queueName = (string)queueDeclareInvocation[0];
@@ -84,9 +95,32 @@ public sealed class MockBuilder : IAsyncDisposable
 
     public List<IChannel> Channels => channels;
 
+    /// <summary>
+    ///     The one channel that published, whatever order channels were created in
+    /// </summary>
+    public IChannel PublishChannel
+    {
+        get
+        {
+            lock (channels)
+                return channels.Single(c => c.ReceivedCalls().Any(call => call.GetMethodInfo().Name == nameof(IChannel.BasicPublishAsync)));
+        }
+    }
+
     public List<AsyncDefaultBasicConsumer> Consumers => consumers;
 
+    /// <summary>
+    ///     Every publish on the channel, arguments copied at call time; assert publishes here, not through <c>Received()</c>
+    /// </summary>
+    public IReadOnlyList<PublishedMessage> PublishedOn(IChannel channel)
+    {
+        lock (channels)
+            return publishRecorders[channel].Messages;
+    }
+
     public IChannel NextModel => channelPool.Peek();
+
+    public IServiceProvider ServiceProvider => serviceProvider;
 
     public IPubSub PubSub => serviceProvider.GetRequiredService<IPubSub>();
 
@@ -110,6 +144,9 @@ public sealed class MockBuilder : IAsyncDisposable
     public IConsumeErrorStrategy ConsumeErrorStrategy => serviceProvider.GetRequiredService<IConsumeErrorStrategy>();
 
     public List<string> ConsumerQueueNames { get; } = new();
+
+    /// <summary>Raised whenever a message is published on any channel (replaces the removed per-message PublishedMessageEvent)</summary>
+    public event Action? Published;
 
     public async ValueTask DisposeAsync()
     {

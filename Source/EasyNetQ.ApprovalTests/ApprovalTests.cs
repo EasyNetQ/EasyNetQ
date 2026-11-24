@@ -5,9 +5,11 @@ namespace EasyNetQ.Approval.Tests;
 public class ApprovalTests
 {
     [Theory]
-    [InlineData(typeof(RabbitBus))]
+    [InlineData(typeof(Pipeline.PropertyBag))] // EasyNetQ.Core
+    [InlineData(typeof(RabbitBus))] // EasyNetQ.RabbitMQ
+    [InlineData(typeof(AutoSubscribe.AutoSubscriber))] // EasyNetQ (bundle)
     [InlineData(typeof(Serialization.NewtonsoftJson.NewtonsoftJsonSerializer))]
-    [InlineData(typeof(Serialization.SystemTextJson.SystemTextJsonSerializer))]
+    [InlineData(typeof(AspNetCore.SignalR.EasyNetQBackplaneOptions))]
     public void Public_api_should_not_be_changed_unintentionally(Type type)
     {
         var publicApi = type?.Assembly.GeneratePublicApi(new ApiGeneratorOptions
@@ -18,6 +20,6 @@ public class ApprovalTests
         });
         Assert.NotNull(publicApi);
 
-        publicApi.ShouldMatchApproved(options => options.WithFilenameGenerator((_, _, fileType, fileExtension) => $"{type.Assembly.GetName().Name}.{fileType}.{fileExtension}"));
+        publicApi.ShouldMatchApproved(options => options.WithFilenameGenerator((_, _, fileType, fileExtension) => $"{type!.Assembly.GetName().Name}.{fileType}.{fileExtension}"));
     }
 }

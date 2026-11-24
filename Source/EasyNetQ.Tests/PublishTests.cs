@@ -34,9 +34,7 @@ public class When_publish_is_called : IAsyncLifetime
     private void WaitForMessageToPublish()
     {
         using var autoResetEvent = new AutoResetEvent(false);
-#pragma warning disable IDISP004
-        mockBuilder.EventBus.Subscribe((PublishedMessageEvent _) => Task.FromResult(autoResetEvent.Set()));
-#pragma warning restore IDISP004
+        mockBuilder.Published += () => autoResetEvent.Set();
         autoResetEvent.WaitOne(1000);
     }
 
@@ -48,21 +46,21 @@ public class When_publish_is_called : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Should_call_basic_publish()
+    public void Should_call_basic_publish()
     {
-        await mockBuilder.Channels[1].Received().BasicPublishAsync(
-            Arg.Is("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
-            Arg.Is(""),
-            Arg.Is(false),
-            Arg.Is<RabbitMQ.Client.BasicProperties>(
-                x => x.CorrelationId == correlationId
-                     && x.Type == "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"
-                     && x.DeliveryMode == (DeliveryModes)2
-            ),
-            Arg.Is<ReadOnlyMemory<byte>>(
-                x => x.ToArray().SequenceEqual(Encoding.UTF8.GetBytes("{\"Text\":\"Hiya!\"}"))
-            ),
-            Arg.Any<CancellationToken>()
+        mockBuilder.PublishedOn(mockBuilder.Channels[1]).Should().ContainSingle().Which.Should().BeEquivalentTo(
+            new PublishedMessage(
+                "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests",
+                "",
+                false,
+                new RabbitMQ.Client.BasicProperties
+                {
+                    CorrelationId = correlationId,
+                    Type = "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests",
+                    DeliveryMode = DeliveryModes.Persistent
+                },
+                Encoding.UTF8.GetBytes("{\"Text\":\"Hiya!\"}")
+            )
         );
     }
 
@@ -74,7 +72,7 @@ public class When_publish_is_called : IAsyncLifetime
             Arg.Is(ExchangeType.Topic),
             Arg.Is(true),
             Arg.Is(false),
-            Arg.Is((IDictionary<string, object>)null),
+            Arg.Is((IDictionary<string, object?>?)null),
             cancellationToken: Arg.Any<CancellationToken>()
         );
     }
@@ -84,9 +82,13 @@ public class When_publish_with_topic_is_called : IAsyncLifetime
 {
     private readonly MockBuilder mockBuilder;
 
+    private const string correlationId = "abc123";
+
     public When_publish_with_topic_is_called()
     {
-        mockBuilder = new MockBuilder();
+        mockBuilder = new MockBuilder(x =>
+            x.AddSingleton<ICorrelationIdGenerationStrategy>(new StaticCorrelationIdGenerationStrategy(correlationId))
+        );
     }
 
     public async ValueTask InitializeAsync()
@@ -104,22 +106,26 @@ public class When_publish_with_topic_is_called : IAsyncLifetime
     private void WaitForMessageToPublish()
     {
         using var autoResetEvent = new AutoResetEvent(false);
-#pragma warning disable IDISP004
-        mockBuilder.EventBus.Subscribe((PublishedMessageEvent _) => Task.FromResult(autoResetEvent.Set()));
-#pragma warning restore IDISP004
+        mockBuilder.Published += () => autoResetEvent.Set();
         autoResetEvent.WaitOne(1000);
     }
 
     [Fact]
-    public async Task Should_call_basic_publish_with_correct_routing_key()
+    public void Should_call_basic_publish_with_correct_routing_key()
     {
-        await mockBuilder.Channels[1].Received().BasicPublishAsync(
-            Arg.Is("EasyNetQ.Tests.MyMessage, EasyNetQ.Tests"),
-            Arg.Is("X.A"),
-            Arg.Is(false),
-            Arg.Any<RabbitMQ.Client.BasicProperties>(),
-            Arg.Any<ReadOnlyMemory<byte>>(),
-            Arg.Any<CancellationToken>()
+        mockBuilder.PublishedOn(mockBuilder.Channels[1]).Should().ContainSingle().Which.Should().BeEquivalentTo(
+            new PublishedMessage(
+                "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests",
+                "X.A",
+                false,
+                new RabbitMQ.Client.BasicProperties
+                {
+                    CorrelationId = correlationId,
+                    Type = "EasyNetQ.Tests.MyMessage, EasyNetQ.Tests",
+                    DeliveryMode = DeliveryModes.Persistent
+                },
+                Encoding.UTF8.GetBytes("{\"Text\":\"Hiya!\"}")
+            )
         );
     }
 }

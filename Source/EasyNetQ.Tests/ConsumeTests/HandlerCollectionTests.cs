@@ -11,7 +11,7 @@ public class HandlerCollectionTests
 
     public HandlerCollectionTests()
     {
-        handlerCollection = new HandlerCollection();
+        handlerCollection = new HandlerCollection(new MessageTypeRegistry(new DefaultTypeNameSerializer()));
         handlerCollection.Add<MyMessage>((_, _) => myMessageHandlerExecuted = true);
         handlerCollection.Add<IAnimal>((_, _) => animalHandlerExecuted = true);
     }

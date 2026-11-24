@@ -14,7 +14,7 @@ public class When_a_consumer_is_disposed_while_handling_a_message : ConsumerTest
             handlerStarted.Set();
             // Ignores the cancellation token, so it only completes once released
             releaseHandler.Wait();
-            return AckStrategies.AckAsync;
+            return AckDecision.Ack;
         });
 
         var deliverTask = DeliverMessageAsync();

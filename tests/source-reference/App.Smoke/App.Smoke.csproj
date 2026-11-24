@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Reaches EasyNetQ only through App and does not import the props: built on its own, the way a consuming app's
+       CI builds its test project, it must not build an EasyNetQ project a second time. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../App/App.csproj" />
+  </ItemGroup>
+</Project>

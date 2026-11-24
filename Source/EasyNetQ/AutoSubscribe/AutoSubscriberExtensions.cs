@@ -1,3 +1,5 @@
+using EasyNetQ.Internals;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace EasyNetQ.AutoSubscribe;
@@ -13,6 +15,8 @@ public static class AutoSubscriberExtensions
     /// <param name="autoSubscriber">The autoSubscriber instance.</param>
     /// <param name="assemblies">The assemblies to scan for consumers.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
+    [RequiresUnreferencedCode(Compat.ReflectionAutoSubscriber)]
+    [RequiresDynamicCode(Compat.ReflectionAutoSubscriber)]
     public static Task<IAsyncDisposable> SubscribeAsync(this AutoSubscriber autoSubscriber, Assembly[] assemblies, CancellationToken cancellationToken = default)
     {
         return autoSubscriber.SubscribeAsync(assemblies.SelectMany(a => a.GetTypes()).ToArray(), cancellationToken);
