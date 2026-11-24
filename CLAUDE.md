@@ -34,10 +34,10 @@ dotnet restore Source/EasyNetQ.slnx
 dotnet build Source/EasyNetQ.slnx --configuration Release
 
 # Run unit tests
-dotnet test Source/EasyNetQ.Tests --configuration Release
+dotnet test --project Source/EasyNetQ.Tests --configuration Release
 
 # Run all tests (integration tests require Docker)
-dotnet test Source/EasyNetQ.slnx --configuration Release
+dotnet test --solution Source/EasyNetQ.slnx --configuration Release
 
 # Check formatting (CI enforces this)
 dotnet format --verify-no-changes --severity warn Source/EasyNetQ.slnx
@@ -80,7 +80,7 @@ dotnet format --verify-no-changes --severity warn Source/EasyNetQ.slnx
 
 ## Testing Conventions
 
-- **Framework**: xUnit v3 + AwesomeAssertions (FluentAssertions-compatible API) + NSubstitute
+- **Framework**: xUnit v3 (4.x, Microsoft Testing Platform runner via `global.json`) + AwesomeAssertions (FluentAssertions-compatible API) + NSubstitute
 - **Naming**: Classes `When_<scenario>`, methods `Should_<expected>`
 - **MockBuilder**: Central test helper in `EasyNetQ.Tests/Mocking/MockBuilder.cs` wires DI with substituted RabbitMQ infrastructure
 - **Integration tests**: Use Docker (RabbitMQ container via `docker.dotnet`)

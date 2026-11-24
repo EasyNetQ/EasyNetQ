@@ -10,7 +10,8 @@ Working document for the v9 rewrite. Edit as decisions change; the phase plan de
 4. High-level methods stay compatible; every feature is a fine-grained pipeline step.
 5. RabbitMQ isolated into a transport library.
 6. No reflection in core.
-7. Roslyn source generators for discovery/wiring.
+7. Roslyn source generators for discovery/wiring. Minimum Roslyn 5.0 (.NET SDK 10.0.100, the LTS); pinned via
+   `EasyNetQGeneratorRoslynVersion`, independent of the Roslyn the tests use.
 8. Minimal allocations.
 9. AOT as the last phase.
 10. Benchmark every phase.
