@@ -2,8 +2,8 @@
 
 9.0 is in beta (`9.0.0-beta.1` on nuget.org) and is the main line on `master`; 8.x gets bug fixes on the `8.x`
 branch. This document tracks the changes until 9.0 ships. Sections: [Highlights](#highlights),
-[Design direction](#design-direction), [Performance](#performance), [Upgrading from 8.x](#upgrade-in-five-steps), [What v9 adds](#what-v9-adds-in-detail),
-[Known gaps before 9.0](#known-gaps-before-90).
+[Design direction](#design-direction), [Performance](#performance), [Upgrading from 8.x](#upgrade-in-five-steps),
+[What v9 adds](#what-v9-adds-in-detail), [Known gaps before 9.0](#known-gaps-before-90).
 
 ## Highlights
 
