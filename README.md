@@ -21,6 +21,10 @@ Initial development was sponsored by travel industry experts [15below](http://15
 * **[Discussions](https://github.com/EasyNetQ/EasyNetQ/discussions)**
 * **[~Old Discussion Group~](https://groups.google.com/group/easynetq)**
 
+> **8.x is in maintenance.** This branch takes bug fixes for 8.1.x only. New work happens on 9.x in
+> [`master`](https://github.com/EasyNetQ/EasyNetQ/tree/master); see the
+> [9.0 migration guide](https://github.com/EasyNetQ/EasyNetQ/blob/master/docs/MIGRATION-9.md).
+
 Goals:
 
 ### Important Update

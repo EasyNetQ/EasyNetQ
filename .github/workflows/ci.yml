@@ -10,6 +10,7 @@ on:
     branches:
       - master
       - develop
+      - '[0-9]+.x'
 
 permissions:
   contents: read
