@@ -79,8 +79,9 @@ changed behavior. Everything new in v9 is opt-in.
 
 ## Upgrade in five steps
 
-1. **Check the toolchain.** An SDK-style project and **.NET SDK 9.0.300 or later** (the source generator targets
-   Roslyn 4.14). `packages.config` projects cannot run the generator: stay on 8.x there.
+1. **Check the toolchain.** An SDK-style project and **.NET SDK 10.0.100 or later** (the source generator targets
+   Roslyn 5.0, as shipped with Visual Studio 2026). `packages.config` projects cannot run the generator: stay on 8.x
+   there.
 2. **Update the packages.** Every EasyNetQ package moves to the same 9.x version:
 
    ```xml
