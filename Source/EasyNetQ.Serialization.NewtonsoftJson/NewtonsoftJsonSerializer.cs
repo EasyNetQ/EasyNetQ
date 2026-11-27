@@ -54,7 +54,7 @@ public sealed class NewtonsoftJsonSerializer : ISerializer
     /// <inheritdoc />
     public object? BytesToMessage(Type messageType, in ReadOnlyMemory<byte> bytes)
     {
-        using var memoryStream = new ReadOnlyMemoryStream(bytes);
+        using var memoryStream = new EasyNetQ.Internals.ReadOnlyMemoryStream(bytes);
         using var streamReader = new StreamReader(memoryStream, Encoding, false, DefaultBufferSize, true);
         using var reader = new Newtonsoft.Json.JsonTextReader(streamReader) { ArrayPool = JsonSerializerArrayPool<char>.Instance };
         return jsonSerializer.Deserialize(reader, messageType);

@@ -4,7 +4,8 @@
        published packages carry everything a consumer needs, the source generator included. -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net10.0</TargetFramework>
+    <ConsumerTargetFramework Condition="'$(ConsumerTargetFramework)' == ''">net10.0</ConsumerTargetFramework>
+    <TargetFramework>$(ConsumerTargetFramework)</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PublishAot>true</PublishAot>

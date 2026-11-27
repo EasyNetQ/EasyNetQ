@@ -32,9 +32,10 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Setup .NET (global.json)
+    - name: Setup .NET (global.json SDK + 10.0 runtime)
       uses: actions/setup-dotnet@v6
       with:
+        dotnet-version: '10.0.x'
         global-json-file: global.json
 
     - name: Install dependencies
@@ -111,9 +112,10 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Setup .NET (global.json)
+    - name: Setup .NET (global.json SDK + 10.0 runtime)
       uses: actions/setup-dotnet@v6
       with:
+        dotnet-version: '10.0.x'
         global-json-file: global.json
 
     - name: Backplane tests
@@ -132,9 +134,10 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Setup .NET (global.json)
+    - name: Setup .NET (global.json SDK + 10.0 runtime)
       uses: actions/setup-dotnet@v6
       with:
+        dotnet-version: '10.0.x'
         global-json-file: global.json
 
     - name: Publish with PublishAot
@@ -182,18 +185,23 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Setup .NET (global.json)
+    - name: Setup .NET (global.json SDK + 10.0 runtime)
       uses: actions/setup-dotnet@v6
       with:
+        dotnet-version: '10.0.x'
         global-json-file: global.json
 
     - name: Build the consumer fixture
       run: tests/source-reference/check.sh
 
   package-consumer:
-    name: Package consumer (Native AOT against the packed packages)
+    name: Package consumer (Native AOT against the packed packages, ${{ matrix.framework }})
     if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        framework: [ net10.0, net11.0 ]
     timeout-minutes: 25
     services:
       rabbitmq:
@@ -211,13 +219,14 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Setup .NET (global.json)
+    - name: Setup .NET (global.json SDK + 10.0 runtime)
       uses: actions/setup-dotnet@v6
       with:
+        dotnet-version: '10.0.x'
         global-json-file: global.json
 
     - name: Pack, publish AOT against the packages, run
-      run: tests/package-consumer/check.sh "host=localhost;port=5674;username=guest;password=guest"
+      run: tests/package-consumer/check.sh "host=localhost;port=5674;username=guest;password=guest" ${{ matrix.framework }}
 
   soak:
     name: Feature soak (RabbitMQ 4, short mode)
@@ -252,9 +261,10 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Setup .NET (global.json)
+    - name: Setup .NET (global.json SDK + 10.0 runtime)
       uses: actions/setup-dotnet@v6
       with:
+        dotnet-version: '10.0.x'
         global-json-file: global.json
 
     - name: Enable rabbitmq_delayed_message_exchange
@@ -285,10 +295,12 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Setup .NET (8.x runtime + global.json SDK)
+    - name: Setup .NET (global.json SDK + 8.x and 10.0 runtimes)
       uses: actions/setup-dotnet@v6
       with:
-        dotnet-version: '8.x'
+        dotnet-version: |
+          8.x
+          10.0.x
         global-json-file: global.json
 
     - name: Run benchmarks (short job)

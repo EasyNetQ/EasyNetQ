@@ -2,7 +2,7 @@
 # Pack EasyNetQ, then Native AOT publish the AOT smoke sample against the packed packages (not project references)
 # and run it against a broker. Fails on any trim/AOT warning or when the sample's checks fail; a missing source
 # generator shows up as a runtime failure, since reflection fallbacks are off under AOT.
-# Usage: check.sh [connectionString]   (default: $EASYNETQ_CONNECTION or host=localhost)
+# Usage: check.sh [connectionString] [targetFramework]   (defaults: $EASYNETQ_CONNECTION or host=localhost; net10.0)
 set -euo pipefail
 cd "$(dirname "$0")"
 version=9.0.0-local.$(date +%s)
@@ -22,7 +22,8 @@ grep -q "analyzers/dotnet/cs/EasyNetQ.Generators.dll" <<<"$listing" \
 readme=$(unzip -p "packages/EasyNetQ.AspNetCore.SignalR.$version.nupkg" README.md | head -1)
 grep -qi "signalr" <<<"$readme" || { echo "EasyNetQ.AspNetCore.SignalR ships the repository README, not its own"; exit 1; }
 
-dotnet publish PackageConsumer.csproj -c Release -r "$rid" -p:EasyNetQVersion="$version" -o out -nologo \
+dotnet publish PackageConsumer.csproj -c Release -r "$rid" -p:EasyNetQVersion="$version" \
+  -p:ConsumerTargetFramework="${2:-net10.0}" -o out -nologo \
   --packages "$PWD/obj/nuget" 2>&1 | tee publish.log
 warnings=$(grep -cE 'warning IL[23][0-9]{3}' publish.log || true)
 echo "trim/AOT warnings: $warnings"
